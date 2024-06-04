@@ -8,6 +8,8 @@ const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "gener
 const ClasseStateManager = require("../states/models/classe");
 const ClasseModel = require("../models/cle/classe");
 import YoungModel from "../models/young";
+const { ObjectId } = require("mongoose").Types;
+
 
 describe("ClasseService", () => {
   it("should return a pdf", async () => {
@@ -24,116 +26,248 @@ describe("ClasseService", () => {
   });
 });
 
-describe("ClasseStateManager", () => {
-  describe("withdraw", () => {
+describe("ClasseStateManager.withdraw function", () => {
+  const classId = new ObjectId();
+  const fromUser = { userId: "user123" };
+  const options = { YoungModel: YoungModel }; // Mocked YoungModel
 
-    it("should throw an error if YoungModel is not provided", async () => {
-      await expect(ClasseStateManager.withdraw("classId", null, { YoungModel: null })).rejects.toThrow("YoungModel is required");
-    });
+  const saveMock = jest.fn().mockImplementation(() => {
+    return { status: "WITHDRAWN" }; // Simulating the saved state after withdrawal
+  });
 
-    it("should throw an error if class is not found", async () => {
-      const mockFindById = jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(null);
+  const saveStudentMock = jest.fn().mockImplementation(() => {
+    return { status: "ABANDONED" }; // Simulating the saved state after updating student status
+  });
 
-      await expect(ClasseStateManager.withdraw("classId", null, { YoungModel })).rejects.toThrow("Classe not found");
+  it("should throw an error if YoungModel is not provided", async () => {
+    await expect(ClasseStateManager.withdraw(classId, fromUser, {})).rejects.toThrow("YoungModel is required");
+  });
 
-      expect(mockFindById).toHaveBeenCalledWith("classId");
-      mockFindById.mockRestore();
-    });
+  it("should throw an error if class is not found", async () => {
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(null);
 
-    it("should throw an error if class is already withdrawn", async () => {
-      const mockFindById = jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce({ status: "withdrawn" });
+    await expect(ClasseStateManager.withdraw(classId, fromUser, options)).rejects.toThrow("Classe not found");
+  });
 
-      await expect(ClasseStateManager.withdraw("classId",null, { YoungModel })).rejects.toThrow("Classe already withdrawn");
+  it("should throw an error if class is already withdrawn", async () => {
+    const mockedClasse = {
+      _id: classId,
+      status: "WITHDRAWN",
+    };
 
-      expect(mockFindById).toHaveBeenCalledWith("classId");
-      mockFindById.mockRestore();
-    });
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
 
-    it("should withdraw the class and update associated students", async () => {
-      const classId = "classId";
-      const fakeClass = { _id: classId, status: "pending" };
-      const fakeStudents = [
-        { _id: "studentId1", status: "in_progress" },
-        { _id: "studentId2", status: "waiting_correction" },
-      ];
-      const mockFindById = jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(fakeClass);
-      const mockFind = jest.spyOn(YoungModel, "find").mockResolvedValueOnce(fakeStudents);
-      const mockSave = jest.spyOn(YoungModel.prototype, "save").mockImplementation(() => Promise.resolve());
+    await expect(ClasseStateManager.withdraw(classId, fromUser, options)).rejects.toThrow("Classe already withdrawn");
+  });
 
-      const result = await ClasseStateManager.withdraw(classId, { YoungModel });
+  it("should withdraw a class and update the status of associated students", async () => {
+    const mockedClasse = {
+      _id: classId,
+      status: "IN_PROGRESS", // Assuming the class is in progress
+      save: saveMock,
+      set: jest.fn(function(data) {
+        Object.assign(this, data);
+      }),
+    };
 
-      expect(mockFindById).toHaveBeenCalledWith(classId);
-      expect(result._id).toBe(classId);
-      expect(result.status).toBe("withdrawn");
-      expect(mockFind).toHaveBeenCalledWith({
-        classeId: classId,
-        status: { $in: ["in_progress", "waiting_correction", "waiting_validation", "validated"] },
+    const mockedYoungs = [
+      {
+        _id: "student1",
+        status: "IN_PROGRESS", // Assuming student is in progress
+        save: saveStudentMock,
+        set: jest.fn(function(data) {
+          Object.assign(this, data);
+        }),
+      },
+      {
+        _id: "student2",
+        status: "WAITING_CORRECTION", // Assuming student is waiting for correction
+        save: saveStudentMock,
+        set: jest.fn(function(data) {
+          Object.assign(this, data);
+        }),
+      },
+      // Add more mocked students as needed
+    ];
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
+    jest.spyOn(YoungModel, "find").mockResolvedValueOnce(mockedYoungs);
+
+    const withdrawnClasse = await ClasseStateManager.withdraw(classId, fromUser, options);
+
+    // Assert that classe status is updated to withdrawn
+    expect(saveMock).toHaveBeenCalledWith({ fromUser });
+    // Assert that each student's status is updated to abandoned
+    mockedYoungs.forEach(mockedYoung => {
+      expect(mockedYoung.set).toHaveBeenCalledWith({
+        status: "ABANDONED",
+        lastStatusAt: expect.any(Number),
+        withdrawnMessage: "classe désistée",
+        withdrawnReason: "other",
       });
-      expect(mockSave).toHaveBeenCalledTimes(fakeStudents.length);
-      expect(result).toEqual(fakeClass);
-
-      mockFindById.mockRestore();
-      mockFind.mockRestore();
-      mockSave.mockRestore();
+      expect(mockedYoung.save).toHaveBeenCalledWith({ fromUser });
     });
+    // Assert the returned classe object
+    expect(withdrawnClasse.status).toEqual("WITHDRAWN");
   });
 });
 
+
 describe("deleteClasse function", () => {
-  it("should delete a classe and update the status of associated students", async () => {
-    const mockedClasse = { 
-      _id: "classId",
-      deletedAt: null,
+  const classId = new ObjectId();
+  const mockedFromUser = { userId: "user123" };
+
+  const saveMock = jest.fn().mockImplementation(() => {
+    return { deletedAt: Date.now() };
+  });
+
+  const saveStudentMock = jest.fn().mockImplementation(() => {
+    return { status: "ABANDONNED" };
+  });
+
+  it("should throw an error if class is not found", async () => {
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(null);
+
+    await expect(deleteClasse(classId, mockedFromUser)).rejects.toThrow("Classe not found");
+  });
+
+  it("should throw an error if class is already deleted", async () => {
+    const mockedClasse = {
+      _id: classId,
+      deletedAt: Date.now(),
       cohesionCenterId: null,
       sessionId: null,
       ligneId: null,
     };
 
-    const mockedStudents = [
-      { _id: "student1", status: "validated" },
-      { _id: "student2", status: "in_progress" },
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
+
+    await expect(deleteClasse(classId, mockedFromUser)).rejects.toThrow("Classe already deleted");
+  });
+
+  it("should throw an error if class is already linked to a cohesion center", async () => {
+    const mockedClasse = {
+      _id: classId,
+      deletedAt: null,
+      cohesionCenterId: new ObjectId(), // Assuming cohesionCenterId is set
+      sessionId: null,
+      ligneId: null,
+    };
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
+
+    await expect(deleteClasse(classId, mockedFromUser)).rejects.toThrow("Classe already linked to a cohesion center");
+  });
+
+  it("should throw an error if class is already linked to a session", async () => {
+    const mockedClasse = {
+      _id: classId,
+      deletedAt: null,
+      cohesionCenterId: null,
+      sessionId: new ObjectId(), // Assuming sessionId is set
+      ligneId: null,
+    };
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
+
+    await expect(deleteClasse(classId, mockedFromUser)).rejects.toThrow("Classe already linked to a session");
+  });
+
+  it("should throw an error if class is already linked to a bus line", async () => {
+    const mockedClasse = {
+      _id: classId,
+      deletedAt: null,
+      cohesionCenterId: null,
+      sessionId: null,
+      ligneId: new ObjectId(), // Assuming ligneId is set
+    };
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
+
+    await expect(deleteClasse(classId, mockedFromUser)).rejects.toThrow("Classe already linked to a bus line");
+  });
+
+   it("should throw an error if there are validated students", async () => {
+    const mockedClasse = { 
+      _id: classId,
+      deletedAt: null,
+      cohesionCenterId: null,
+      sessionId: null,
+      ligneId: null,
+      save: saveMock,
+      set: jest.fn(function(data) {
+        Object.assign(this, data);
+      })
+    };
+    const mockedYoungs = [
+      {
+        _id: "student1",
+        status: "VALIDATED",
+        save: saveStudentMock,
+        set: jest.fn(function(data) {
+          Object.assign(this, data);
+        })
+      },
+      {
+        _id: "student2",
+        status: "IN_PROGRESS",
+        save: saveStudentMock,
+        set: jest.fn(function(data) {
+          Object.assign(this, data);
+        })
+      },
     ];
 
-    const mockedFromUser = { userId: "user123" };
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
+    jest.spyOn(YoungModel, "find").mockResolvedValueOnce(mockedYoungs);
 
-    const findByIdMock = jest.fn().mockResolvedValueOnce(mockedClasse);
-    const findMock = jest.fn().mockResolvedValueOnce(mockedStudents);
-    const saveMock = jest.fn().mockImplementation((fromUser) => {
-      return { ...mockedClasse, deletedAt: Date.now() };
-    });
+    await expect(deleteClasse(classId, mockedFromUser)).rejects.toThrow("Classe has validated students");
 
-    const saveStudentMock = jest.fn().mockImplementation((fromUser) => {
-      return { ...mockedStudents[0], status: "abandoned" };
-    });
-
-    jest.mock("../models/cle/classe", () => ({
-      findById: findByIdMock,
-    }));
-
-    jest.mock("../models/young", () => ({
-      find: findMock,
-    }));
-
-    const deletedClasse = await deleteClasse("classId", mockedFromUser);
-
-    expect(findByIdMock).toHaveBeenCalledTimes(1);
-    expect(findByIdMock).toHaveBeenCalledWith("classId");
-
-    expect(findMock).toHaveBeenCalledTimes(1);
-    expect(findMock).toHaveBeenCalledWith({
-      classeId: "classId",
-      status: {
-        $in: ["in_progress", "waiting_correction", "waiting_validation", "validated"]
-      }
-    });
-
-    expect(saveMock).toHaveBeenCalledTimes(1);
-    expect(saveMock).toHaveBeenCalledWith(mockedFromUser);
-
-    expect(saveStudentMock).toHaveBeenCalledTimes(2);
-    expect(saveStudentMock).toHaveBeenCalledWith(mockedFromUser);
-
-    // Additional assertions if necessary
-    expect(deletedClasse.deletedAt).toBeTruthy();
+    expect(mockedClasse.set).not.toHaveBeenCalled();
+    expect(saveMock).not.toHaveBeenCalled();
+    expect(saveStudentMock).not.toHaveBeenCalled();
   });
+
+  it("should delete a classe and update the status of associated students", async () => {
+    const mockedClasse = { 
+      _id: classId,
+      deletedAt: null,
+      cohesionCenterId: null,
+      sessionId: null,
+      ligneId: null,
+      save: saveMock,
+      set: jest.fn(function(data) {
+        Object.assign(this, data);
+      })
+    };
+    const mockedYoungs = [
+      {
+        _id: "student2",
+        status: "IN_PROGRESS",
+        save: saveStudentMock,
+        set: jest.fn(function(data) {
+          Object.assign(this, data);
+        })
+      },
+    ];
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
+    jest.spyOn(YoungModel, "find").mockResolvedValueOnce(mockedYoungs);
+
+    const deletedClasse = await deleteClasse(classId, mockedFromUser);
+
+    expect(mockedClasse.set).toHaveBeenCalledWith({ deletedAt: expect.any(Number) });
+    expect(saveMock).toHaveBeenCalled();
+    expect(saveStudentMock).toHaveBeenCalled();
+    mockedYoungs.forEach(mockedYoung => {
+      expect(mockedYoung.set).toHaveBeenCalledWith({
+        lastStatusAt: expect.any(Number),
+        status: "ABANDONED", // Update the expected status value
+        withdrawnMessage: "classe désistée",
+        withdrawnReason: "other"
+      });
+    });
+    expect(deletedClasse.deletedAt).toBeDefined();
+  });
+
 });

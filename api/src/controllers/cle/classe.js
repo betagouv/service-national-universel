@@ -260,8 +260,8 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { errorId, value: id } = validateId(req.params.id);
-    const { errorType, value: type } = Joi.string().valid("delete", "withdraw").required().validate(req.query.type);
+    const { error: errorId, value: id } = validateId(req.params.id);
+    const { error: errorType, value: type } = Joi.string().valid("delete", "withdraw").required().validate(req.query.type);
     if (errorId) {
       capture(errorId);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
