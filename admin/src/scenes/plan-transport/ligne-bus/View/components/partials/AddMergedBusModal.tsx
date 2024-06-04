@@ -79,7 +79,7 @@ export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
       footer={
         <div className="flex items-center justify-between gap-6">
           <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => onClose()} />
-          <Button disabled={isPending || mergedBusId.length !== 9} onClick={handleSubmit} title="Confirmer" className="flex-1" />
+          <Button disabled={isPending || mergedBusId.length < 8} onClick={handleSubmit} title="Confirmer" className="flex-1" />
         </div>
       }
     />
