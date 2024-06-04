@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen, canEditSanitaryEmailContact, patternEmailAcademy, validateEmailAcademique } from "snu-lib";
+import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen } from "snu-lib";
 import ModalConfirmDelete from "../ModalConfirmDelete";
 import { capture } from "@/sentry";
-import { canCreateOrUpdateCohesionCenter } from "@/utils";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
 import Pencil from "@/assets/icons/Pencil";
@@ -49,8 +48,6 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const cohort = cohorts.find((cohort) => cohort.name === selectedCohort) || cohorts[0];
   const session = sessions.find((session) => session.cohort === selectedCohort) || sessions[0];
   const setSession = (newSession: Session) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
-
-  console.log(cohort);
 
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState<Session | null>(null);
@@ -132,8 +129,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     } else {
       setValues({
         ...values,
-        dateStart: session?.dateStart || cohort?.dateStart || new Date().toDateString(),
-        dateEnd: session?.dateEnd || cohort?.dateEnd || new Date().toDateString(),
+        dateStart: session?.dateStart || cohort?.dateStart.toDateString() || new Date().toDateString(),
+        dateEnd: session?.dateEnd || cohort?.dateEnd.toDateString() || new Date().toDateString(),
       });
     }
   };
