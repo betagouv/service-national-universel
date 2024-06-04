@@ -1,8 +1,5 @@
 import { BusTeamDto } from "snu-lib/src/dto";
 
-import { validateLigneDeBusTeam } from "./ligneDeBusValidator";
-import { updateTeamByLigneDeBusNames } from "./ligneDeBusService";
-
 import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
@@ -43,7 +40,8 @@ import { capture } from "../../sentry";
 import { sendTemplate } from "../../sendinblue";
 import { UserRequest } from "../../controllers/request";
 
-import { getInfoBus } from "./ligneDeBusService";
+import { validateLigneDeBusTeam } from "./ligneDeBusValidator";
+import { getInfoBus, updateTeamByLigneDeBusIds } from "./ligneDeBusService";
 
 const router = express.Router();
 
@@ -200,15 +198,11 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
       back: value.back,
     };
 
-    if (ligne.mergedBusIds?.length > 0) {
-      await updateTeamByLigneDeBusNames(ligne.mergedBusIds, value);
-    }
-
-    const memberToDelete = ligne.team.id(value.idTeam);
-    if (!memberToDelete) {
+    const memberToUpdate = ligne.team.id(value.idTeam);
+    if (!memberToUpdate) {
       ligne.team.push(NewMember);
     } else {
-      memberToDelete.set({
+      memberToUpdate.set({
         role: value.role,
         lastName: value.firstName,
         firstName: value.firstName,
@@ -220,6 +214,14 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
       });
     }
     await ligne.save({ fromUser: req.user });
+
+    if (ligne.mergedBusIds?.length) {
+      await updateTeamByLigneDeBusIds(
+        ligne.mergedBusIds.filter(({ busId }) => busId !== ligne.busId),
+        ligne.cohort,
+        ligne.team,
+      );
+    }
 
     const infoBus = await getInfoBus(ligne);
 

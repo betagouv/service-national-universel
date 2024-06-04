@@ -2,8 +2,6 @@ import { BusTeamDto } from "snu-lib/src/dto";
 import { BusDocument } from "../../models/PlanDeTransport/ligneBus.type";
 import { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } from "../../models";
 
-// import { mapBusTeamDtoToBusTeamModel } from "@/planDeTransport/ligneDeBus/busTeam/busTeamMapper";
-
 export async function getInfoBus(line: BusDocument) {
   const ligneToBus = await LigneToPointModel.find({ lineId: line._id });
 
@@ -44,9 +42,11 @@ export async function syncMergedBus({ ligneBus, busIdsToUpdate, newMergedBusIds 
   }
 }
 
-export const updateTeamByLigneDeBusNames = async (ligneDeBusNames: string[], busTeamDto: BusTeamDto) => {
-  console.log("updateTeamByLigneDeBusNames", ligneDeBusNames, JSON.stringify(busTeamDto));
-  const ligneBus = await LigneBusModel.find({ busId: { $in: ligneDeBusNames } });
-  // const team = mapBusTeamDtoToBusTeamModel(busTeamDto);
-  console.log("ligneBus", ligneBus);
+export const updateTeamByLigneDeBusIds = async (busIds: string[], cohort: string, busTeamDto: BusTeamDto) => {
+  return await LigneBusModel.updateMany(
+    { busId: { $in: busIds }, cohort: cohort, deletedAt: { $exists: false } },
+    {
+      team: busTeamDto,
+    },
+  );
 };
