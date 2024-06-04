@@ -52,7 +52,8 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
       if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const bypassFilter =
-        (user?.role === ROLES.ADMIN && req.get("origin") === config.ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
+        (user?.role === ROLES.ADMIN && req.get("origin") === config.ADMIN_URL) ||
+        ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
       const sessions = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user?.role)
         ? await getFilteredSessionsForCLE()
         : bypassFilter
@@ -92,11 +93,7 @@ router.get("/isInscriptionOpen", async (req, res) => {
   const { sessionName } = value;
 
   try {
-    let data = false;
-    if (sessionName) {
-      const cohort = await CohortModel.findOne({ name: sessionName });
-      data = cohort?.isInscriptionOpen || data;
-    } else data = await isInscriptionOpen();
+    const data = await isInscriptionOpen(sessionName);
 
     return res.send({
       ok: true,

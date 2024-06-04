@@ -12,5 +12,20 @@ const isReInscriptionOpenOnSomeCohorts = async (): Promise<Boolean> => {
   return cohorts.some((cohort) => cohort.isReInscriptionOpen);
 };
 
-export const isInscriptionOpen = async (): Promise<Boolean> => isInscriptionOpenOnSomeCohorts();
-export const isReInscriptionOpen = async (): Promise<Boolean> => isReInscriptionOpenOnSomeCohorts();
+export const isInscriptionOpen = async (cohortName: String | undefined): Promise<Boolean> => {
+  if (cohortName) {
+    const cohort = await CohortModel.findOne({ name: cohortName });
+    if (!cohort) return false;
+    return cohort.isInscriptionOpen;
+  }
+  return isInscriptionOpenOnSomeCohorts();
+};
+
+export const isReInscriptionOpen = async (cohortName: String | undefined): Promise<Boolean> => {
+  if (cohortName) {
+    const cohort = await CohortModel.findOne({ name: cohortName });
+    if (!cohort) return false;
+    return cohort.isReInscriptionOpen;
+  }
+  return isReInscriptionOpenOnSomeCohorts();
+};
