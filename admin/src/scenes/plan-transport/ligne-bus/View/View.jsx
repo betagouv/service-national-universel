@@ -250,7 +250,7 @@ export default function View(props) {
                 <BusTeam
                   key={value._id}
                   bus={data}
-                  setBus={setData}
+                  onBusChange={setData}
                   title="Encadrant"
                   role="supervisor"
                   idTeam={value._id}
@@ -260,9 +260,9 @@ export default function View(props) {
                 />
               ))
           ) : (
-            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
+            <BusTeam bus={data} onBusChange={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
           )}
-          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} cohort={cohort} /> : null}
+          {addOpen && <BusTeam bus={data} onBusChange={setData} title="Encadrant" role={"supervisor"} onAddOpenChange={setAddOpen} cohort={cohort} />}
 
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">

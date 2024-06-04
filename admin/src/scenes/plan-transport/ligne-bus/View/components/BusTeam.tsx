@@ -136,7 +136,8 @@ export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddO
     try {
       setIsLoading(true);
       //delete data
-      const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/teamDelete`, data);
+      const busTeamDto = mapBusTeamViewToDto(data);
+      const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/teamDelete`, busTeamDto);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
         return setIsLoading(false);

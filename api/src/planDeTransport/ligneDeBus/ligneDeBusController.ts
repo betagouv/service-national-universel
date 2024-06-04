@@ -41,7 +41,8 @@ import { sendTemplate } from "../../sendinblue";
 import { UserRequest } from "../../controllers/request";
 
 import { validateLigneDeBusTeam } from "./ligneDeBusValidator";
-import { getInfoBus, updateTeamByLigneDeBusIds } from "./ligneDeBusService";
+import { getInfoBus, updateTeamByLigneDeBusIds, removeTeamByLigneDeBusIds } from "./ligneDeBusService";
+import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 
 const router = express.Router();
 
@@ -187,40 +188,26 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
       if (!canEditLigneBusTeam(req.user) && !isTeamLeaderOrSupervisorEditable(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const NewMember = {
-      role: value.role,
-      lastName: value.lastName,
-      firstName: value.firstName,
-      birthdate: value.birthdate,
-      phone: value.phone,
-      mail: value.mail,
-      forth: value.forth,
-      back: value.back,
-    };
+    const memberData = mapBusTeamToUpdate(value);
 
-    const memberToUpdate = ligne.team.id(value.idTeam);
+    let memberId = value.idTeam;
+    const memberToUpdate = ligne.team.id(memberId);
     if (!memberToUpdate) {
-      ligne.team.push(NewMember);
+      memberId = ObjectId().toString();
+      ligne.team.push({ _id: memberId, ...memberData });
     } else {
-      memberToUpdate.set({
-        role: value.role,
-        lastName: value.firstName,
-        firstName: value.firstName,
-        birthdate: value.birthdate,
-        phone: value.phone,
-        mail: value.mail,
-        forth: value.forth,
-        back: value.back,
-      });
+      memberToUpdate.set(memberData);
     }
     await ligne.save({ fromUser: req.user });
 
+    // mise à jour des lignes de bus fusionnées
     if (ligne.mergedBusIds?.length) {
-      await updateTeamByLigneDeBusIds(
-        ligne.mergedBusIds.filter(({ busId }) => busId !== ligne.busId),
-        ligne.cohort,
-        ligne.team,
-      );
+      await updateTeamByLigneDeBusIds({
+        busIds: ligne.mergedBusIds.filter((busId) => busId !== ligne.busId),
+        cohort: ligne.cohort,
+        busTeamDto: { _id: memberId, ...value },
+        fromUser: req.user,
+      });
     }
 
     const infoBus = await getInfoBus(ligne);
@@ -236,23 +223,12 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
 
 router.put("/:id/teamDelete", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      idTeam: Joi.string().required(),
-      role: Joi.string().required(),
-      lastname: Joi.string().required(),
-      firstname: Joi.string().required(),
-      birthdate: Joi.date().required(),
-      phone: Joi.string().required(),
-      mail: Joi.string().required(),
-      forth: Joi.boolean().required(),
-      back: Joi.boolean().required(),
-    }).validate({ ...req.params, ...req.body });
+    const { error, value } = validateLigneDeBusTeam({ ...req.params, ...req.body });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const ligne = await LigneBusModel.findById(value.id);
+    const ligne = await LigneBusModel.findById(req.params.id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const cohort = await CohortModel.find({ name: ligne.cohort });
     if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -265,6 +241,16 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
 
     const memberToDelete = ligne.team.id(value.idTeam);
     if (!memberToDelete) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // mise à jour des lignes de bus fusionnées
+    if (ligne.mergedBusIds?.length) {
+      await removeTeamByLigneDeBusIds({
+        busIds: ligne.mergedBusIds.filter((busId) => busId !== ligne.busId),
+        cohort: ligne.cohort,
+        idTeam: value.idTeam,
+        fromUser: req.user,
+      });
+    }
 
     await memberToDelete.remove();
     await ligne.save({ fromUser: req.user });

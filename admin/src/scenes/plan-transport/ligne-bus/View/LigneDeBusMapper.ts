@@ -3,6 +3,7 @@ import { BusTeamView } from "@/scenes/plan-transport/ligne-bus/View/components/B
 
 export const mapBusTeamViewToDto = (busTeam: BusTeamView): BusTeamUpdateDto => {
   return {
+    idTeam: busTeam.idTeam,
     role: busTeam.role as BusTeamRole,
     lastName: busTeam.lastname,
     firstName: busTeam.firstname,

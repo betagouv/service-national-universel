@@ -1,6 +1,7 @@
 import type { Document } from "mongoose";
 
 export type BusDocument = IBus & Document;
+export type BusTeamDocument = BusTeam & Document;
 
 export interface IBus {
   cohort: string;
