@@ -21,7 +21,7 @@ import { ClasseDto } from "snu-lib/src/dto/classeDto";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
-import GeneralInfos from "./components/GeneralInfos";
+import GeneralInfos from "./components/generalInfo";
 import ReferentInfos from "./components/ReferentInfos";
 import SejourInfos from "./components/SejourInfos";
 import StatsInfos from "./components/StatsInfos";
