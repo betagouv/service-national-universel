@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
-import { BsSend, BsTrash3 } from "react-icons/bs";
+import { BsSend } from "react-icons/bs";
 import { useParams, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
