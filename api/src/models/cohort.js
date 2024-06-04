@@ -84,8 +84,8 @@ const Schema = new mongoose.Schema({
   inscriptionEndDate: { type: Date, required: true },
   instructionEndDate: { type: Date, required: true },
   inscriptionModificationEndDate: { type: Date },
-  reInscriptionStartDate: { type: Date },
-  reInscriptionEndDate: { type: Date },
+  reInscriptionStartDate: { type: Date || null },
+  reInscriptionEndDate: { type: Date || null },
 
   buffer: {
     type: Number,
@@ -320,6 +320,12 @@ Schema.virtual("fromUser").set(function (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
     this._user = { _id, role, department, region, email, firstName, lastName, model };
   }
+});
+
+Schema.virtual("isInstructionOpen").get(function () {
+  const end = this.instructionEndDate;
+  if (!end || isAfter(new Date(), end)) return false;
+  return true;
 });
 
 Schema.virtual("isInscriptionOpen").get(function () {

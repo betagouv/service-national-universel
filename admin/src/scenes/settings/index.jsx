@@ -78,6 +78,11 @@ export default function Settings() {
   }, []);
 
   useEffect(() => {
+    if (!showSpecificDatesReInscription && (data.reInscriptionStartDate || data.reInscriptionEndDate))
+      setData({ ...data, reInscriptionEndDate: null, reInscriptionStartDate: null });
+  }, [showSpecificDatesReInscription]);
+
+  useEffect(() => {
     if (!cohort) return;
     setIsLoading(true);
     getCohort();
@@ -85,8 +90,10 @@ export default function Settings() {
 
   useEffect(() => {
     if (!mounted) return;
-    if (data.reInscriptionStartDate || data.reInscriptionEndDate) setShowSpecificDatesReInscription(true);
     setNoChange(false);
+    if (!showSpecificDatesReInscription && (data.reInscriptionStartDate || data.reInscriptionEndDate)) {
+      setShowSpecificDatesReInscription(true);
+    }
   }, [data]);
 
   const onSubmit = async () => {
@@ -335,6 +342,7 @@ export default function Settings() {
                           placeholder="Date et heure"
                           value={data.reInscriptionEndDate || data.inscriptionEndDate}
                           error={error.reInscriptionEndDate}
+                          // onChange={(e) => {}}
                           onChange={(e) => setData({ ...data, reInscriptionEndDate: e })}
                           readOnly={readOnly}
                           disabled={isLoading || !data.inscriptionEndDate}
