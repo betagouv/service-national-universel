@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { Link } from "react-router-dom";
 import { capture } from "@/sentry";
 import { isCle, transportDatesToString, youngCanChangeSession, getDepartureDate, getReturnDate } from "snu-lib";
 import { getCohort } from "../../../../utils/cohorts";
