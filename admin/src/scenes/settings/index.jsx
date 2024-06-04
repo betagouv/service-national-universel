@@ -78,11 +78,6 @@ export default function Settings() {
   }, []);
 
   useEffect(() => {
-    if (!showSpecificDatesReInscription && (data.reInscriptionStartDate || data.reInscriptionEndDate))
-      setData({ ...data, reInscriptionEndDate: null, reInscriptionStartDate: null });
-  }, [showSpecificDatesReInscription]);
-
-  useEffect(() => {
     if (!cohort) return;
     setIsLoading(true);
     getCohort();
@@ -320,7 +315,10 @@ export default function Settings() {
                       label="Dates spécifiques"
                       disabled={isLoading || readOnly}
                       value={showSpecificDatesReInscription}
-                      onChange={(v) => setShowSpecificDatesReInscription(v)}
+                      onChange={(v) => {
+                        if (v == false) setData({ ...data, reInscriptionEndDate: null, reInscriptionStartDate: null });
+                        setShowSpecificDatesReInscription(v);
+                      }}
                     />
                     {showSpecificDatesReInscription && (
                       <>
