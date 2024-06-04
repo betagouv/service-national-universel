@@ -28,19 +28,22 @@ import StatsInfos from "./components/StatsInfos";
 import DeleteButton from "./components/DeleteButton";
 import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleInvite from "./components/modale/ModaleInvite";
+import ModaleCohort from "./components/modale/modaleCohort";
 import { InfoBus, TStatus, Rights } from "./components/types";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
-  const [modaleInvite, setModaleInvite] = useState(false);
+  const [showModaleInvite, setShowModaleInvite] = useState(false);
   const [showModaleWithdraw, setShowModaleWithdraw] = useState(false);
+  const [showModaleCohort, setShowModaleCohort] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
   const [edit, setEdit] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [oldClasseCohort, setOldClasseCohort] = useState();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
   const [isConvocationDownloading, handleConvocationDownload] = usePendingAction() as [boolean, any];
 
@@ -69,6 +72,7 @@ export default function View() {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
       setClasse(classe);
+      setOldClasseCohort(classe.cohort);
       if (classe?.ligneId) {
         //Bus
         const { ok: ok1, code: code1, data: ligne } = await api.get(`/ligne-de-bus/${classe.ligneId}`);
@@ -116,30 +120,41 @@ export default function View() {
     getClasse();
   }, [id, edit, editStay]);
 
+  const checkInfo = () => {
+    setErrors({});
+    interface Errors {
+      cohort?: string;
+      name?: string;
+      coloration?: string;
+      totalSeats?: string;
+      filiere?: string;
+      grade?: string;
+    }
+
+    const errors: Errors = {};
+    if (classe?.cohort !== oldClasseCohort && classe.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
+    if (!classe?.name) errors.name = "Ce champ est obligatoire";
+    if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
+    if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
+    if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
+    if (!classe?.grade) errors.grade = "Ce champ est obligatoire";
+
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
+      setIsLoading(false);
+      return;
+    }
+    if (classe?.cohort !== oldClasseCohort) {
+      setShowModaleCohort(true);
+    } else {
+      sendInfo();
+    }
+  };
+
   const sendInfo = async () => {
     try {
+      setShowModaleCohort(false);
       setIsLoading(true);
-      setErrors({});
-      interface Errors {
-        name?: string;
-        coloration?: string;
-        totalSeats?: string;
-        filiere?: string;
-        grade?: string;
-      }
-
-      const errors: Errors = {};
-      if (!classe?.name) errors.name = "Ce champ est obligatoire";
-      if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
-      if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
-      if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
-      if (!classe?.grade) errors.grade = "Ce champ est obligatoire";
-
-      if (Object.keys(errors).length > 0) {
-        setErrors(errors);
-        setIsLoading(false);
-        return;
-      }
 
       const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}`, classe);
 
@@ -167,7 +182,6 @@ export default function View() {
   const onWithdraw = async () => {
     try {
       setIsLoading(true);
-      //delete data
       const { ok, code } = await api.remove(`/cle/classe/${classe?._id}?type=withdraw`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
@@ -218,7 +232,7 @@ export default function View() {
     if (classe?.status && ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && IS_INSCRIPTION_OPEN_CLE) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
-        <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" className="mr-2" onClick={() => setModaleInvite(true)} />,
+        <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" className="mr-2" onClick={() => setShowModaleInvite(true)} />,
       );
     }
     if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) {
@@ -305,7 +319,8 @@ export default function View() {
       {classe?.status !== STATUS_CLASSE.DRAFT && <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />}
 
       <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
-      <ModaleInvite isOpen={modaleInvite} onClose={() => setModaleInvite(false)} url={url} />
+      <ModaleInvite isOpen={showModaleInvite} onClose={() => setShowModaleInvite(false)} url={url} />
+      <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />
     </Page>
   );
 }
