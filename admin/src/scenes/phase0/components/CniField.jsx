@@ -101,7 +101,7 @@ export function CniField({
                   <HiOutlineInformationCircle size={20} className="ml-2 text-gray-900" data-tip data-for={"CNI-tooltip"} />
                   <ReactTooltip id={"CNI-tooltip"} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md">
                     <div className={"w-[275px] list-outside !px-1 !py-2 text-left text-xs font-normal text-gray-600 "}>
-                      {"La date de péremption de la CNI est dépassée, pensez à vérifier qu’il n’y ait pas d’erreur de saisie (non bloquant pour la validation du dossier)."}
+                      La date de péremption de la CNI est dépassée, pensez à vérifier qu’il n’y ait pas d’erreur de saisie (non bloquant pour la validation du dossier).
                     </div>
                   </ReactTooltip>
                 </>
