@@ -17,7 +17,7 @@ const Withdrawal = ({ young }) => {
 
   return (
     <>
-      <button type="button" onClick={handleWithdrawal} className="flex appearance-none items-center gap-2 p-2 rounded-md text-sm bg-red-600 text-white">
+      <button type="button" onClick={handleWithdrawal} className="w-full justify-center md:w-fit flex appearance-none items-center gap-2 py-2 px-4 rounded-md text-sm bg-red-600 text-white">
         {getWithdrawalButtonLabel()}
       </button>
       <WithdrawalModal isOpen={isWithdrawalModalOpen} onCancel={handleCancelWithdrawal} young={young} />
