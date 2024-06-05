@@ -5,6 +5,8 @@ export type CohortDto = {
   dateEnd: Date;
   inscriptionStartDate: Date;
   inscriptionEndDate: Date;
+  reInscriptionStartDate: Date | null;
+  reInscriptionEndDate: Date | null;
   inscriptionModificationEndDate?: Date;
   instructionEndDate: Date;
   sessionEditionOpenForReferentRegion?: boolean;
