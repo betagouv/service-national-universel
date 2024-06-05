@@ -11,6 +11,7 @@ afterAll(dbClose);
 
 describe("DELETE /cle/classe/:id", () => {
   it("should return 400 when id is invalid", async () => {
+    console.log("test");
     const res = await request(getAppHelper()).delete("/cle/classe/invalidId?type=delete");
     expect(res.status).toBe(400);
   });
