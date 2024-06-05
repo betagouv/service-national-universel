@@ -147,10 +147,20 @@ const formatDateForPostGre = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-export const getZonedDate = (date, timeZone = "Europe/Paris") => {
+const getZonedDate = (date, timeZone = "Europe/Paris") => {
   const zonedDate = toZonedTime(new Date(date), timeZone);
   return zonedDate;
 };
+
+const getDateTimeByTimeZoneOffset = (timeZoneOffset = null) => {
+  let now = Date.now();
+  if (timeZoneOffset) {
+    const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC
+    // Adjust server's time for user's timezone
+    now = new Date().getTime() - userTimezoneOffsetInMilliseconds;
+  }
+  return new Date(now);
+}
 
 export {
   MONTHS,
@@ -166,6 +176,8 @@ export {
   formatStringDateWithDayTimezoneUTC,
   dateForDatePicker,
   getAge,
+  getDateTimeByTimeZoneOffset,
+  getZonedDate,
   formatLongDateUTCWithoutTime,
   isIsoDate,
   calculateAge,
