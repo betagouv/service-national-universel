@@ -64,6 +64,9 @@ export default function DetailTable({ rows, className, loading, isNational, onGo
     }
   };
 
+  //console.log("const", isUserAuthorizedToExportData);
+  //console.log("condition", (!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER);
+
   return (
     <Box className={className}>
       <BoxHeader title="Schéma de répartition">

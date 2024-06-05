@@ -25,6 +25,11 @@ type TStatus =
   | "secondary"
   | "primary";
 
+enum EPosition {
+  Left = "left",
+  Right = "right",
+}
+
 type OwnProps = {
   title: string;
   optionsGroup: Array<{
@@ -39,8 +44,7 @@ type OwnProps = {
   disabled?: boolean;
   icon?: React.ReactNode;
   buttonClassName?: string;
-  position?: "left" | "right";
-  tooltip?: string;
+  position?: EPosition;
 };
 
 export default function DropdownButton({
@@ -53,8 +57,7 @@ export default function DropdownButton({
   disabled = false,
   icon,
   buttonClassName = "",
-  position = "left",
-  tooltip,
+  position = EPosition.Left,
 }: OwnProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -118,7 +121,6 @@ export default function DropdownButton({
               e.preventDefault();
               setOpen((open) => !open);
             }}
-            tooltip={tooltip}
           />
         )}
 
@@ -158,10 +160,10 @@ const getDivClass = ({
   position,
 }: {
   open?: boolean;
-  position: "left" | "right";
+  position: EPosition;
 }) => {
   const baseClass = `absolute top-[45px] min-w-[250px] rounded-lg bg-white transition ${
-    position === "left" ? "left-0" : "right-0"
+    position === EPosition.Left ? "left-0" : "right-0"
   } border-3 z-50 overflow-hidden shadow-md border border-gray-100`;
   if (open) {
     return classNames(baseClass, "block");
