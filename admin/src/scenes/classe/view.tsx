@@ -293,7 +293,7 @@ export default function View() {
         cohorts={cohorts}
         user={user}
         onCancel={handleCancel}
-        onSendInfo={sendInfo}
+        onCheckInfo={checkInfo}
         setShowModaleWithdraw={setShowModaleWithdraw}
         isLoading={isLoading}
       />
