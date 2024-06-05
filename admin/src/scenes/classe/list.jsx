@@ -125,13 +125,8 @@ export default function List() {
           ),
           [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
             <div className="flex gap-2 items-center">
-              <Button
-                title="Exporter le SR"
-                onClick={() => exportData({ type: "schema-de-repartition" })}
-                loading={exportLoading}
-                disabled={!isCohortSelected}
-                tooltip="Vous devez selectionner une cohort pour pouvoir exporter le SR"
-              />
+              <Label title="" tooltip={!isCohortSelected ? "Vous devez selectionner une cohort pour pouvoir exporter le SR" : undefined} />
+              <Button title="Exporter le SR" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} disabled={!isCohortSelected} />
             </div>
           ),
         ].filter(Boolean)}
