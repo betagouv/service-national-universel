@@ -155,6 +155,7 @@ export default function StepEligibilite() {
       birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
       grade: data.scolarity,
       zip: data.zip,
+      isReInscription: !!data.isReInscription,
     });
 
     if (!ok) {

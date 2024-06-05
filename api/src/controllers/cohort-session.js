@@ -52,7 +52,8 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
       if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const bypassFilter =
-        (user?.role === ROLES.ADMIN && req.get("origin") === config.ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
+        (user?.role === ROLES.ADMIN && req.get("origin") === config.ADMIN_URL) ||
+        ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
       const sessions = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user?.role)
         ? await getFilteredSessionsForCLE()
         : bypassFilter

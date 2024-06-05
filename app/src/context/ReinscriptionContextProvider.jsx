@@ -14,6 +14,7 @@ const defaultState = (young) => {
     cohort: "",
     zip: young.zip,
     frenchNationality: young.frenchNationality,
+    isReInscription: true,
   };
 };
 
