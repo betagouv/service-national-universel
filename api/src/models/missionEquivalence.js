@@ -116,15 +116,17 @@ const Schema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = function () {
-  this.message && (this.message = starify(this.message));
-  this.address && (this.address = generateAddress());
-  this.contactEmail && (this.contactEmail = generateRandomEmail());
-  this.contactFullName && (this.contactFullName = generateRandomName() + generateRandomName());
-  this.structureName && (this.structureName = generateRandomName());
-  this.files && (this.files = []);
-  return this;
+function anonymize(item) {
+  item.message && (item.message = starify(item.message));
+  item.address && (item.address = generateAddress());
+  item.contactEmail && (item.contactEmail = generateRandomEmail());
+  item.contactFullName && (item.contactFullName = generateRandomName() + generateRandomName());
+  item.structureName && (item.structureName = generateRandomName());
+  item.files && (item.files = []);
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
@@ -152,3 +154,4 @@ Schema.plugin(patchHistory, {
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

@@ -175,11 +175,13 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = function () {
-  this.code2022 && (this.code2022 = "02022");
-  this.code && (this.code = "00000");
-  return this;
+function anonymize(item) {
+  item.code2022 && (item.code2022 = "02022");
+  item.code && (item.code = "00000");
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
@@ -209,3 +211,4 @@ Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

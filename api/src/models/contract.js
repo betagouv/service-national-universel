@@ -107,42 +107,44 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = function () {
-  this.tutorFirstName && (this.tutorFirstName = starify(this.tutorFirstName));
-  this.tutorLastName && (this.tutorLastName = starify(this.tutorLastName));
-  this.tutorEmail && (this.tutorEmail = "*******@*******.***");
-  this.youngFirstName && (this.youngFirstName = starify(this.youngFirstName));
-  this.youngLastName && (this.youngLastName = starify(this.youngLastName));
-  this.youngBirthdate && (this.youngBirthdate = generateBirthdate());
-  this.youngEmail && (this.youngEmail = "*******@*******.***");
-  this.youngPhone && (this.youngPhone = generateNewPhoneNumber());
-  this.youngAddress && (this.youngAddress = starify(this.youngAddress));
-  this.parent1FirstName && (this.parent1FirstName = starify(this.parent1FirstName));
-  this.parent1LastName && (this.parent1LastName = starify(this.parent1LastName));
-  this.parent1Email && (this.parent1Email = "*******@*******.***");
-  this.parent1Adress && (this.parent1Adress = starify(this.parent1Adress));
-  this.parent1Phone && (this.parent1Phone = generateNewPhoneNumber());
-  this.parent2FirstName && (this.parent2FirstName = starify(this.parent2FirstName));
-  this.parent2LastName && (this.parent2LastName = starify(this.parent2LastName));
-  this.parent2Email && (this.parent2Email = "*******@*******.***");
-  this.parent2Adress && (this.parent2Adress = starify(this.parent2Adress));
-  this.parent2Phone && (this.parent2Phone = generateNewPhoneNumber());
-  this.missionName && (this.missionName = starify(this.missionName));
-  this.missionAdress && (this.missionAdress = starify(this.missionAdress));
-  this.missionZip && (this.missionZip = starify(this.missionZip));
-  this.missionObjective && (this.missionObjective = starify(this.missionObjective));
-  this.missionAction && (this.missionAction = starify(this.missionAction));
-  this.missionFrequence && (this.missionFrequence = starify(this.missionFrequence));
-  this.missionDuration && (this.missionDuration = starify(this.missionDuration));
-  this.projectManagerFirstName && (this.projectManagerFirstName = starify(this.projectManagerFirstName));
-  this.projectManagerLastName && (this.projectManagerLastName = starify(this.projectManagerLastName));
-  this.projectManagerEmail && (this.projectManagerEmail = "*******@*******.***");
-  this.structureName && (this.structureName = starify(this.structureName));
-  this.structureManagerEmail && (this.structureManagerEmail = "*******@*******.***");
-  this.structureManagerFirstName && (this.structureManagerFirstName = starify(this.structureManagerFirstName));
-  this.structureManagerLastName && (this.structureManagerLastName = starify(this.structureManagerLastName));
-  return this;
+function anonymize(item) {
+  item.tutorFirstName && (item.tutorFirstName = starify(item.tutorFirstName));
+  item.tutorLastName && (item.tutorLastName = starify(item.tutorLastName));
+  item.tutorEmail && (item.tutorEmail = "*******@*******.***");
+  item.youngFirstName && (item.youngFirstName = starify(item.youngFirstName));
+  item.youngLastName && (item.youngLastName = starify(item.youngLastName));
+  item.youngBirthdate && (item.youngBirthdate = generateBirthdate());
+  item.youngEmail && (item.youngEmail = "*******@*******.***");
+  item.youngPhone && (item.youngPhone = generateNewPhoneNumber());
+  item.youngAddress && (item.youngAddress = starify(item.youngAddress));
+  item.parent1FirstName && (item.parent1FirstName = starify(item.parent1FirstName));
+  item.parent1LastName && (item.parent1LastName = starify(item.parent1LastName));
+  item.parent1Email && (item.parent1Email = "*******@*******.***");
+  item.parent1Adress && (item.parent1Adress = starify(item.parent1Adress));
+  item.parent1Phone && (item.parent1Phone = generateNewPhoneNumber());
+  item.parent2FirstName && (item.parent2FirstName = starify(item.parent2FirstName));
+  item.parent2LastName && (item.parent2LastName = starify(item.parent2LastName));
+  item.parent2Email && (item.parent2Email = "*******@*******.***");
+  item.parent2Adress && (item.parent2Adress = starify(item.parent2Adress));
+  item.parent2Phone && (item.parent2Phone = generateNewPhoneNumber());
+  item.missionName && (item.missionName = starify(item.missionName));
+  item.missionAdress && (item.missionAdress = starify(item.missionAdress));
+  item.missionZip && (item.missionZip = starify(item.missionZip));
+  item.missionObjective && (item.missionObjective = starify(item.missionObjective));
+  item.missionAction && (item.missionAction = starify(item.missionAction));
+  item.missionFrequence && (item.missionFrequence = starify(item.missionFrequence));
+  item.missionDuration && (item.missionDuration = starify(item.missionDuration));
+  item.projectManagerFirstName && (item.projectManagerFirstName = starify(item.projectManagerFirstName));
+  item.projectManagerLastName && (item.projectManagerLastName = starify(item.projectManagerLastName));
+  item.projectManagerEmail && (item.projectManagerEmail = "*******@*******.***");
+  item.structureName && (item.structureName = starify(item.structureName));
+  item.structureManagerEmail && (item.structureManagerEmail = "*******@*******.***");
+  item.structureManagerFirstName && (item.structureManagerFirstName = starify(item.structureManagerFirstName));
+  item.structureManagerLastName && (item.structureManagerLastName = starify(item.structureManagerLastName));
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
@@ -172,3 +174,4 @@ Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

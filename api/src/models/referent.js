@@ -270,14 +270,16 @@ Schema.methods.comparePassword = async function (p) {
   return bcrypt.compare(p, user.password || "");
 };
 
-Schema.methods.anonymise = function () {
-  this.phone && (this.phone = generateNewPhoneNumber());
-  this.mobile && (this.mobile = generateNewPhoneNumber());
-  this.email && (this.email = generateRandomEmail());
-  this.firstName && (this.firstName = generateRandomName());
-  this.lastName && (this.lastName = generateRandomName());
-  return this;
+function anonymize(item) {
+  item.phone && (item.phone = generateNewPhoneNumber());
+  item.mobile && (item.mobile = generateNewPhoneNumber());
+  item.email && (item.email = generateRandomEmail());
+  item.firstName && (item.firstName = generateRandomName());
+  item.lastName && (item.lastName = generateRandomName());
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 //Sync with Sendinblue
 Schema.post("save", function (doc) {
@@ -359,3 +361,4 @@ Schema.set("toJSON", { virtuals: true });
 const OBJ = mongoose.model(MODELNAME, Schema);
 
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

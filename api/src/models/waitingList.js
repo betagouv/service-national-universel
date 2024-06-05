@@ -27,11 +27,14 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = function () {
-  this.mail && (this.mail = generateRandomEmail());
-  this.birthdateAt && (this.birthdateAt = generateBirthdate());
-  return this;
+function anonymize(item) {
+  item.mail && (item.mail = generateRandomEmail());
+  item.birthdateAt && (item.birthdateAt = generateBirthdate());
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

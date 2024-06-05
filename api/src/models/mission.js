@@ -331,20 +331,22 @@ const Schema = new mongoose.Schema({
   },
 });
 
-Schema.methods.anonymise = function () {
-  this.name && (this.name = `Mission ${generateRandomName()}`);
-  this.description && (this.description = starify(this.description));
-  this.address && (this.address = generateAddress());
-  this.actions && (this.actions = "action Test");
-  this.structureName && (this.structureName = starify(this.structureName));
-  this.tutorName && (this.tutorName = starify(this.tutorName));
-  this.actions && (this.actions = starify(this.actions));
-  this.justifications && (this.justifications = starify(this.justifications));
-  this.contraintes && (this.contraintes = starify(this.contraintes));
-  this.frequence && (this.frequence = starify(this.frequence));
-  this.jvaRawData && (this.jvaRawData = undefined);
-  return this;
+function anonymize(item) {
+  item.name && (item.name = `Mission ${generateRandomName()}`);
+  item.description && (item.description = starify(item.description));
+  item.address && (item.address = generateAddress());
+  item.actions && (item.actions = "action Test");
+  item.structureName && (item.structureName = starify(item.structureName));
+  item.tutorName && (item.tutorName = starify(item.tutorName));
+  item.actions && (item.actions = starify(item.actions));
+  item.justifications && (item.justifications = starify(item.justifications));
+  item.contraintes && (item.contraintes = starify(item.contraintes));
+  item.frequence && (item.frequence = starify(item.frequence));
+  item.jvaRawData && (item.jvaRawData = undefined);
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
@@ -373,3 +375,4 @@ Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jva
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

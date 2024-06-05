@@ -154,15 +154,15 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = function () {
-  this.email && (this.email = generateRandomEmail());
-  this.contactPhone && (this.contactPhone = generateNewPhoneNumber());
-  this.address && (this.address = generateAddress());
-  this.directionName && (this.directionName = generateRandomName());
-  this.contactName && (this.contactName = generateRandomName());
-  this.contactMail && (this.contactMail = generateRandomEmail());
-  this.contacts &&
-    (this.contacts = [
+function anonymize(item) {
+  item.email && (item.email = generateRandomEmail());
+  item.contactPhone && (item.contactPhone = generateNewPhoneNumber());
+  item.address && (item.address = generateAddress());
+  item.directionName && (item.directionName = generateRandomName());
+  item.contactName && (item.contactName = generateRandomName());
+  item.contactMail && (item.contactMail = generateRandomEmail());
+  item.contacts &&
+    (item.contacts = [
       {
         cohort: "New Cohort",
         contactName: "New Contact",
@@ -170,16 +170,18 @@ Schema.methods.anonymise = function () {
         contactMail: generateRandomEmail(),
       },
     ]);
-  this.representantEtat &&
-    (this.representantEtat = {
+  item.representantEtat &&
+    (item.representantEtat = {
       firstName: generateRandomName(),
       lastName: generateRandomName(),
       mobile: generateNewPhoneNumber(),
       email: generateRandomEmail(),
     });
 
-  return this;
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
@@ -209,3 +211,4 @@ Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

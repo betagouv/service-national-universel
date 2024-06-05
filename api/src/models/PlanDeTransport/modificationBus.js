@@ -183,19 +183,21 @@ const Schema = new mongoose.Schema({
   deletedAt: { type: Date },
 });
 
-Schema.methods.anonymise = function () {
-  this.requestMessage && (this.requestMessage = starify(this.requestMessage));
-  this.requestUserName && (this.requestUserName = starify(this.requestUserName));
-  this.statusUserName && (this.statusUserName = starify(this.statusUserName));
-  this.opinionUserName && (this.opinionUserName = starify(this.opinionUserName));
-  this.messages &&
-    (this.messages = this.messages.map((message) => {
+function anonymize(item) {
+  item.requestMessage && (item.requestMessage = starify(item.requestMessage));
+  item.requestUserName && (item.requestUserName = starify(item.requestUserName));
+  item.statusUserName && (item.statusUserName = starify(item.statusUserName));
+  item.opinionUserName && (item.opinionUserName = starify(item.opinionUserName));
+  item.messages &&
+    (item.messages = item.messages.map((message) => {
       message.message = starify(message.message);
       message.userName = starify(message.userName);
       return message;
     }));
-  return this;
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("user").set(function (user) {
   if (user) {
@@ -226,3 +228,4 @@ Schema.plugin(mongooseElastic(esClient), MODELNAME);
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
 module.exports.Schema = Schema;
+module.exports.anonymize = anonymize;

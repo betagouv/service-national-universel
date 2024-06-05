@@ -184,22 +184,24 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = function () {
-  this.zipCenter && (this.zipCenter = starify(this.zipCenter));
-  this.codeCenter && (this.codeCenter = starify(this.codeCenter));
-  this.centerName && (this.centerName = starify(this.centerName));
-  this.cityCenter && (this.cityCenter = starify(this.cityCenter));
-  if (!["VALIDATED", "WAITING_VALIDATION"].includes(this.status)) this.status = "WAITING_VALIDATION";
-  this.team &&
-    (this.team = this.team.map((member) => {
+function anonymize(item) {
+  item.zipCenter && (item.zipCenter = starify(item.zipCenter));
+  item.codeCenter && (item.codeCenter = starify(item.codeCenter));
+  item.centerName && (item.centerName = starify(item.centerName));
+  item.cityCenter && (item.cityCenter = starify(item.cityCenter));
+  if (!["VALIDATED", "WAITING_VALIDATION"].includes(item.status)) item.status = "WAITING_VALIDATION";
+  item.team &&
+    (item.team = item.team.map((member) => {
       member.firstName && (member.firstName = starify(member.firstName));
       member.lastName && (member.lastName = starify(member.lastName));
       member.email && (member.email = starify(member.email));
       member.phone && (member.phone = starify(member.phone));
       return member;
     }));
-  return this;
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("cohesionCenter", {
   ref: "cohesioncenter",
@@ -240,3 +242,4 @@ Schema.index({ cohesionCenterId: 1 });
 const OBJ = mongoose.model(MODELNAME, Schema);
 
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

@@ -235,9 +235,9 @@ const Schema = new mongoose.Schema({
   deletedAt: { type: Date },
 });
 
-Schema.methods.anonymise = function () {
-  this.team &&
-    (this.team = this.team.map((t) => {
+function anonymize(item) {
+  item.team &&
+    (item.team = item.team.map((t) => {
       t.lastName && (t.lastName = generateRandomName());
       t.firstName && (t.firstName = generateRandomName());
       t.birthdate && (t.birthdate = generateBirthdate());
@@ -245,8 +245,10 @@ Schema.methods.anonymise = function () {
       t.phone && (t.phone = generateNewPhoneNumber());
       return t;
     }));
-  return this;
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("user").set(function (user) {
   if (user) {
@@ -279,3 +281,4 @@ Schema.index({ cohort: 1, busId: 1 }, { unique: true });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

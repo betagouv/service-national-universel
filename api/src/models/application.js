@@ -210,22 +210,24 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = function () {
-  this.youngEmail && (this.youngEmail = "*****@*******.***");
-  this.youngFirstName && (this.youngFirstName = starify(this.youngFirstName));
-  this.youngLastName && (this.youngLastName = starify(this.youngLastName));
-  this.youngBirthdateAt && (this.youngBirthdateAt = starify(this.youngBirthdateAt));
-  this.tutorName && (this.tutorName = starify(this.tutorName));
-  this.missionName && (this.missionName = starify(this.missionName));
-  this.contractStatus && (this.contractStatus = this.contractStatus || "DRAFT");
+function anonymize(item) {
+  item.youngEmail && (item.youngEmail = "*****@*******.***");
+  item.youngFirstName && (item.youngFirstName = starify(item.youngFirstName));
+  item.youngLastName && (item.youngLastName = starify(item.youngLastName));
+  item.youngBirthdateAt && (item.youngBirthdateAt = starify(item.youngBirthdateAt));
+  item.tutorName && (item.tutorName = starify(item.tutorName));
+  item.missionName && (item.missionName = starify(item.missionName));
+  item.contractStatus && (item.contractStatus = item.contractStatus || "DRAFT");
 
-  this.contractAvenantFiles && (this.contractAvenantFiles = []);
-  this.justificatifsFiles && (this.justificatifsFiles = []);
-  this.feedBackExperienceFiles && (this.feedBackExperienceFiles = []);
-  this.othersFiles && (this.othersFiles = []);
+  item.contractAvenantFiles && (item.contractAvenantFiles = []);
+  item.justificatifsFiles && (item.justificatifsFiles = []);
+  item.feedBackExperienceFiles && (item.feedBackExperienceFiles = []);
+  item.othersFiles && (item.othersFiles = []);
 
-  return this;
-};
+  return item;
+}
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("user").set(function (user) {
   if (user) {
@@ -254,3 +256,4 @@ Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

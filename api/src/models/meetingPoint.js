@@ -86,11 +86,13 @@ const Schema = new mongoose.Schema({
   deletedAt: { type: Date },
 });
 
-Schema.methods.anonymise = async function () {
-  this.departureAddress && (this.departureAddress = generateAddress());
-  this.centerCode && (this.centerCode = starify(this.centerCode));
-  return this;
+function anonymize(item) {
+  item.departureAddress && (item.departureAddress = generateAddress());
+  item.centerCode && (item.centerCode = starify(item.centerCode));
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("user").set(function (user) {
   if (user) {
@@ -118,3 +120,4 @@ Schema.plugin(patchHistory, {
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
+module.exports.anonymize = anonymize;

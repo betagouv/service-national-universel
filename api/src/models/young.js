@@ -2048,38 +2048,38 @@ Schema.methods.comparePassword = async function (p) {
   return bcrypt.compare(p, user.password || "");
 };
 
-Schema.methods.anonymise = function () {
-  this.email && (this.email = generateRandomEmail());
-  this.newEmail && (this.newEmail = generateRandomEmail());
-  this.parent1Email && (this.parent1Email = generateRandomEmail());
-  this.parent2Email && (this.parent2Email = generateRandomEmail());
-  this.firstName && (this.firstName = generateRandomName());
-  this.lastName && (this.lastName = generateRandomName());
-  this.parent1FirstName && (this.parent1FirstName = generateRandomName());
-  this.parent1LastName && (this.parent1LastName = generateRandomName());
-  this.parent2FirstName && (this.parent2FirstName = generateRandomName());
-  this.parent2LastName && (this.parent2LastName = generateRandomName());
-  this.historic && (this.historic = {});
-  this.phone && (this.phone = generateNewPhoneNumber());
-  this.parent1Phone && (this.parent1Phone = generateNewPhoneNumber());
-  this.parent2Phone && (this.parent2Phone = generateNewPhoneNumber());
-  this.address && (this.address = generateAddress());
-  this.parent1Address && (this.parent1Address = generateAddress());
-  this.parent2Address && (this.parent2Address = generateAddress());
-  this.birthdateAt && (this.birthdateAt = generateBirthdate());
-  this.engagedDescription && (this.engagedDescription = starify(this.engagedDescription));
-  this.motivations && (this.motivations = starify(this.motivations));
-  this.parentConsentmentFilesCompliantInfo && (this.parentConsentmentFilesCompliantInfo = starify(this.parentConsentmentFilesCompliantInfo));
-  this.withdrawnReason && (this.withdrawnReason = starify(this.withdrawnReason));
-  this.withdrawnMessage && (this.withdrawnMessage = starify(this.withdrawnMessage));
-  this.correctionRequests &&
-    (this.correctionRequests = this.correctionRequests?.map((e) => {
+function anonymize(item) {
+  item.email && (item.email = generateRandomEmail());
+  item.newEmail && (item.newEmail = generateRandomEmail());
+  item.parent1Email && (item.parent1Email = generateRandomEmail());
+  item.parent2Email && (item.parent2Email = generateRandomEmail());
+  item.firstName && (item.firstName = generateRandomName());
+  item.lastName && (item.lastName = generateRandomName());
+  item.parent1FirstName && (item.parent1FirstName = generateRandomName());
+  item.parent1LastName && (item.parent1LastName = generateRandomName());
+  item.parent2FirstName && (item.parent2FirstName = generateRandomName());
+  item.parent2LastName && (item.parent2LastName = generateRandomName());
+  item.historic && (item.historic = {});
+  item.phone && (item.phone = generateNewPhoneNumber());
+  item.parent1Phone && (item.parent1Phone = generateNewPhoneNumber());
+  item.parent2Phone && (item.parent2Phone = generateNewPhoneNumber());
+  item.address && (item.address = generateAddress());
+  item.parent1Address && (item.parent1Address = generateAddress());
+  item.parent2Address && (item.parent2Address = generateAddress());
+  item.birthdateAt && (item.birthdateAt = generateBirthdate());
+  item.engagedDescription && (item.engagedDescription = starify(item.engagedDescription));
+  item.motivations && (item.motivations = starify(item.motivations));
+  item.parentConsentmentFilesCompliantInfo && (item.parentConsentmentFilesCompliantInfo = starify(item.parentConsentmentFilesCompliantInfo));
+  item.withdrawnReason && (item.withdrawnReason = starify(item.withdrawnReason));
+  item.withdrawnMessage && (item.withdrawnMessage = starify(item.withdrawnMessage));
+  item.correctionRequests &&
+    (item.correctionRequests = item.correctionRequests?.map((e) => {
       e.message = starify(e.message);
       e.reason = starify(e.reason);
       return e;
     }));
-  this.notes &&
-    (this.notes = this.notes?.map((e) => {
+  item.notes &&
+    (item.notes = item.notes?.map((e) => {
       e.note = starify(e.note);
       if (e.referent) {
         e.referent.firstName = starify(e.referent.firstName);
@@ -2088,30 +2088,32 @@ Schema.methods.anonymise = function () {
       return e;
     }));
 
-  const newLocation = getYoungLocation(this.zip);
-  this.location &&
-    (this.location = {
+  const newLocation = getYoungLocation(item.zip);
+  item.location &&
+    (item.location = {
       lat: newLocation?.latitude || 0,
       lon: newLocation?.longitude || 0,
     });
 
-  this.cniFiles && (this.cniFiles = []);
-  this.highSkilledActivityProofFiles && (this.highSkilledActivityProofFiles = []);
-  this.dataProcessingConsentmentFiles && (this.dataProcessingConsentmentFiles = []);
-  this.parentConsentmentFiles && (this.parentConsentmentFiles = []);
-  this.imageRightFiles && (this.imageRightFiles = []);
-  this.autoTestPCRFiles && (this.autoTestPCRFiles = []);
-  this.rulesFiles && (this.rulesFiles = []);
-  this.militaryPreparationFilesIdentity && (this.militaryPreparationFilesIdentity = []);
-  this.militaryPreparationFilesCensus && (this.militaryPreparationFilesCensus = []);
-  this.militaryPreparationFilesAuthorization && (this.militaryPreparationFilesAuthorization = []);
-  this.militaryPreparationFilesCertificate && (this.militaryPreparationFilesCertificate = []);
-  this.militaryPreparationCorrectionMessage && (this.militaryPreparationCorrectionMessage = starify(this.militaryPreparationCorrectionMessage));
+  item.cniFiles && (item.cniFiles = []);
+  item.highSkilledActivityProofFiles && (item.highSkilledActivityProofFiles = []);
+  item.dataProcessingConsentmentFiles && (item.dataProcessingConsentmentFiles = []);
+  item.parentConsentmentFiles && (item.parentConsentmentFiles = []);
+  item.imageRightFiles && (item.imageRightFiles = []);
+  item.autoTestPCRFiles && (item.autoTestPCRFiles = []);
+  item.rulesFiles && (item.rulesFiles = []);
+  item.militaryPreparationFilesIdentity && (item.militaryPreparationFilesIdentity = []);
+  item.militaryPreparationFilesCensus && (item.militaryPreparationFilesCensus = []);
+  item.militaryPreparationFilesAuthorization && (item.militaryPreparationFilesAuthorization = []);
+  item.militaryPreparationFilesCertificate && (item.militaryPreparationFilesCertificate = []);
+  item.militaryPreparationCorrectionMessage && (item.militaryPreparationCorrectionMessage = starify(item.militaryPreparationCorrectionMessage));
 
-  this.files && (this.files = undefined);
+  item.files && (item.files = undefined);
 
-  return this;
+  return item;
 };
+
+Schema.methods.anonymise = function() { return anonymize(this); };
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
@@ -2204,3 +2206,4 @@ Schema.index({ classeId: -1 });
 const OBJ = mongoose.model(MODELNAME, Schema);
 
 module.exports = OBJ;
+module.exports.anonymize = anonymize;
