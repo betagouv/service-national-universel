@@ -89,7 +89,7 @@ export function CniField({
         )}
         onMouseEnter={() => setMouseIn(true)}
         onMouseLeave={() => setMouseIn(false)}>
-        <div className={classNames("flex", "w-full", { "justify-between": !isDatePassed })}>
+        <div className={cx("flex", "w-full", { "justify-between": !isDatePassed })}>
           <div className="w-2/10">
             <UploadedFileIcon />
           </div>
