@@ -15,6 +15,7 @@ const {
   canUpdateClasse,
   canUpdateClasseStay,
   canViewClasse,
+  canWithdrawClasse,
   canDeleteClasse,
 } = require("snu-lib");
 const { validateId } = require("../../utils/validator");
@@ -28,6 +29,7 @@ const YoungModel = require("../../models/young");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 const StateManager = require("../../states");
 const emailsEmitter = require("../../emails");
+const { deleteClasse } = require("../../classe/classe.service");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -144,11 +146,33 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     classe.set({ ...value, sessionId: classe.sessionId || null });
 
     if (canUpdateClasseStay(req.user)) {
-      classe.set({
-        sessionId: value.sessionId,
-        cohesionCenterId: value.cohesionCenterId,
-        pointDeRassemblementId: value.pointDeRassemblementId,
-      });
+      if (oldCohort !== value.cohort && !classe.ligneId) {
+        const youngs = await YoungModel.find({ classeId: classe._id });
+        await Promise.all(
+          youngs.map((y) => {
+            y.set({
+              cohort: value.cohort,
+              sessionPhase1Id: undefined,
+              cohesionCenterId: undefined,
+              meetingPointId: undefined,
+            });
+            return y.save({ fromUser: req.user });
+          }),
+        );
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
+
+        classe.set({
+          sessionId: undefined,
+          cohesionCenterId: undefined,
+          pointDeRassemblementId: undefined,
+        });
+      } else {
+        classe.set({
+          sessionId: value.sessionId,
+          cohesionCenterId: value.cohesionCenterId,
+          pointDeRassemblementId: value.pointDeRassemblementId,
+        });
+      }
     }
 
     classe = await classe.save({ fromUser: req.user });
@@ -236,23 +260,39 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
-      capture(error);
+    const { error: errorId, value: id } = validateId(req.params.id);
+    const { error: errorType, value: type } = Joi.string().valid("delete", "withdraw").required().validate(req.query.type);
+    if (errorId) {
+      capture(errorId);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    if (errorType) {
+      capture(errorType);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canDeleteClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (type === "withdraw" && !canWithdrawClasse(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (type === "delete" && !canDeleteClasse(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await StateManager.Classe.withdraw(id, req.user, { YoungModel });
+    if (type === "delete") {
+      await deleteClasse(id, req.user);
+    } else if (type === "withdraw") {
+      await StateManager.Classe.withdraw(id, req.user, { YoungModel });
+    } else {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: error });
   }
 });
 

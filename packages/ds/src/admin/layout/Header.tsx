@@ -8,7 +8,7 @@ type OwnProps = {
   classNameDivTitle?: string;
   breadcrumb?: Array<{
     title: string | React.ReactNode;
-    to: string;
+    to?: string;
   }>;
   titleComponent?: React.ReactNode;
   children?: React.ReactNode;
