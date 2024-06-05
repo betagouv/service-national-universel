@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [".env"],
   "pipeline": {
     "build": {
       "outputs": [".dist/**", "!.dist/cache/**"]
