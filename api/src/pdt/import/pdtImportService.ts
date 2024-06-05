@@ -40,6 +40,7 @@ export const validatePdtFile = async (
   const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
   let maxPdrOnLine = 0;
 
+  // Toutes les colonnes définies ici sont obligatoires
   const errors: PdtErrors = {
     "NUMERO DE LIGNE": [],
     "DATE DE TRANSPORT ALLER": [],
@@ -229,15 +230,35 @@ export const validatePdtFile = async (
       errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
     }
     if (line["LIGNES FUSIONNÉES"]) {
-      const mergedLines = line["LIGNES FUSIONNÉES"].split(",");
+      const currentBusId = line["NUMERO DE LIGNE"];
+      const mergedLines = line["LIGNES FUSIONNÉES"].replaceAll(" ", "").split(",");
       if (mergedLines.length > 5) {
         errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
       }
-      for (const mergedLine of mergedLines) {
+      // la ligne courante doit être présente dans les lignes fusionnées
+      if (!line["LIGNES FUSIONNÉES"]?.includes(currentBusId)) {
+        errors["LIGNES FUSIONNÉES"].push({
+          line: index,
+          error: PDT_IMPORT_ERRORS.MISSING_MERGED_LINE_ID,
+          extra: currentBusId,
+        });
+      }
+      // on verifie la cohérence des lignes marquées comme fusionnées
+      for (const mergedLine of mergedLines.filter((b) => b !== currentBusId)) {
         let found = false;
-        for (const [i, line] of lines.entries()) {
-          if (line["NUMERO DE LIGNE"] === mergedLine) {
+        for (const [mi, mline] of lines.entries()) {
+          if (mline["NUMERO DE LIGNE"] === mergedLine) {
             found = true;
+            // la ligne cible doit aussi contenir les lignes fusionnées de la ligne courante
+            for (const subBusId of mergedLines.filter((b) => b !== mergedLine)) {
+              if (!mline["LIGNES FUSIONNÉES"]?.includes(subBusId)) {
+                errors["LIGNES FUSIONNÉES"].push({
+                  line: mi + FIRST_LINE_NUMBER_IN_EXCEL,
+                  error: PDT_IMPORT_ERRORS.MISSING_MERGED_LINE_ID,
+                  extra: subBusId,
+                });
+              }
+            }
             break;
           }
         }
