@@ -88,6 +88,9 @@ router.get("/:id/schema-repartition", passport.authenticate("referent", { sessio
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.use("/", require("../sessionPhase1/sessionPhase1Controller"));
+
 router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
