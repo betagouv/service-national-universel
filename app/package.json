@@ -30,7 +30,6 @@
     "typescript": "^5.4.5",
     "vite": "^4.5.3"
   },
-  "packageManager": "npm@10.8.1",
   "dependencies": {
     "@codegouvfr/react-dsfr": "^1.9.2",
     "@headlessui/react": "^1.7.18",

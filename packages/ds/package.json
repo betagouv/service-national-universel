@@ -17,7 +17,6 @@
   },
   "author": "",
   "license": "ISC",
-  "packageManager": "npm@10.8.1",
   "exports": {
     ".": "./dist/common/index.js",
     "./tailwind.config": "./dist/tailwind.config.js",

@@ -13,7 +13,6 @@
   },
   "author": "",
   "license": "ISC",
-  "packageManager": "npm@10.8.1",
   "dependencies": {
     "@sentry/integrations": "^7.64.0",
     "@sentry/node": "^7.61.0",
