@@ -112,7 +112,7 @@ export function CniField({
                 <HiInformationCircle size={30} className="text-indigo-500 mr-2" />
                 <p className="text-indigo-700">
                   Date de validité dépassée (non bloquant pour la validation du dossier).{" "}
-                  <a href=" https://support.snu.gouv.fr/base-de-connaissance/instruction-des-dossiers-par-les-referents" className="underline">
+                  <a href=" https://support.snu.gouv.fr/base-de-connaissance/instruction-des-dossiers-par-les-referents" className="underline" target="_blank">
                     Plus d’infos
                   </a>
                 </p>
