@@ -1,11 +1,16 @@
+import { COHORT_TYPE } from "snu-lib";
 import { COHORTS_ACTIONS } from "./actions";
-import { CohortDto } from "snu-lib/src/dto/cohortDto";
 
 const initialState = [];
 
 export type CohortState = {
   // TODO: use API route response
-  Cohorts: CohortDto[];
+  Cohorts: {
+    name: string;
+    dateStart: string;
+    dateEnd: string;
+    type: (typeof COHORT_TYPE)[keyof typeof COHORT_TYPE];
+  }[];
 };
 
 const reducer = (oldState = initialState, action) => {

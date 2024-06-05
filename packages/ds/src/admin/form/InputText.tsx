@@ -6,8 +6,7 @@ import { ErrorIcon, ErrorMessage, getFormBaseClass } from "./InputBase";
 type OwnProps = {
   name: string;
   value: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
   label?: string;
   placeholder?: string;
@@ -21,7 +20,6 @@ export default function InputText({
   name,
   value,
   onChange,
-  type = "text",
   className,
   label,
   placeholder,
@@ -67,7 +65,7 @@ export default function InputText({
             </label>
           )}
           <input
-            type={type}
+            type="text"
             name={name}
             id={name}
             className={getInputClass({ label })}
@@ -75,7 +73,7 @@ export default function InputText({
             disabled={disabled}
             value={value}
             readOnly={readOnly}
-            onChange={(e) => onChange?.(e)}
+            onChange={(e) => onChange(e)}
           />
         </div>
         {isErrorActive && <ErrorIcon />}

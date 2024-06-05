@@ -1,6 +1,5 @@
 import React from "react";
 import ReactLoading from "react-loading";
-import ReactTooltip, { TooltipProps } from "react-tooltip";
 
 type Ttype =
   | "primary"
@@ -19,9 +18,6 @@ type OwnProps = {
   disabled?: boolean;
   loading?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  tooltip?: string;
-  tooltipProps?: TooltipProps;
-  tooltipClassName?: string;
 };
 
 export default function Button({
@@ -33,12 +29,8 @@ export default function Button({
   disabled = false,
   loading = false,
   onClick,
-  tooltip,
-  tooltipProps,
-  tooltipClassName,
 }: OwnProps) {
   const styles = getStyles({ type });
-  const tooltipId = `tooltip-${title}`;
 
   return (
     <button
@@ -50,29 +42,7 @@ export default function Button({
       } ${disabled || loading ? styles.disabled : styles.base} ${className}`}
       disabled={disabled || loading}
       onClick={onClick}
-      data-tip
-      data-for={tooltipId}
     >
-      {tooltip && disabled === true && (
-        <ReactTooltip
-          id={tooltipId}
-          type="light"
-          place="top"
-          effect="solid"
-          className="custom-tooltip-radius !opacity-100 !shadow-md "
-          {...(tooltipProps || {})}
-        >
-          <div
-            className={
-              "w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600 " +
-              tooltipClassName
-            }
-          >
-            {tooltip}
-          </div>
-        </ReactTooltip>
-      )}
-
       {loading ? (
         <ReactLoading
           type="spin"
