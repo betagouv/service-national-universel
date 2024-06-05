@@ -4,17 +4,8 @@ const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
 
 async function getFilteredSessions(young, timeZoneOffset = null) {
-  const sessions2023 = await CohortModel.find({});
+  const sessions2023 = await CohortModel.find();
   const region = getRegionForEligibility(young);
-
-  let now = Date.now();
-
-  if (timeZoneOffset) {
-    const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC
-    // Adjust server's time for user's timezone
-    const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;
-    now = new Date(adjustedTimeForUser);
-  }
 
   const currentCohortYear = young.cohort ? new Date(sessions2023.find((c) => c.name === young.cohort)?.dateStart)?.getFullYear() : undefined;
 
@@ -26,12 +17,10 @@ async function getFilteredSessions(young, timeZoneOffset = null) {
       session.eligibility?.schoolLevels.includes(young.grade) &&
       session.eligibility?.bornAfter <= young.birthdateAt &&
       session.eligibility?.bornBefore.setTime(session.eligibility?.bornBefore.getTime() + 11 * 60 * 60 * 1000) >= young.birthdateAt &&
-      !!session.inscriptionStartDate &&
-      session.inscriptionStartDate <= now &&
-      ((session.inscriptionEndDate && session.inscriptionEndDate > now) ||
-        ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.instructionEndDate && session.instructionEndDate > now)),
+      (session.getIsInscriptionOpen(timeZoneOffset) ||
+        (session.getIsReInscriptionOpen(timeZoneOffset) && young.isReInscription) ||
+        (session.getIsInstructionOpen(timeZoneOffset) && [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status))),
   );
-
   for (let session of sessions) {
     session.isEligible = true;
   }
