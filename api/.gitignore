@@ -8,3 +8,4 @@
 /public/images/convocation/
 /dist
 tsconfig.tsbuildinfo
+!/maintenance/scripts
