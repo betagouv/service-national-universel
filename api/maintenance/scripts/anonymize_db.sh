@@ -43,7 +43,7 @@ then
     remove_dump_dir="false"
 else
     echo "Dump directory not found. Generating dump from source database URI"
-    dump_dir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
+    dump_dir=$(uuidgen)
     remove_dump_dir="true"
 
     mongodump --quiet --gzip --out=$dump_dir $src_db_uri
@@ -51,8 +51,30 @@ fi
 
 db_name=$(ls -l1 $dump_dir | head -n 1)
 
+
+echo "Drop collections"
+
+drop_collections_filename=$(uuidgen)
+cat > $drop_collections_filename <<EOF
+_patches
+emails
+EOF
+
 ls -l1 $dump_dir/$db_name/*.bson.gz \
-| grep --invert-match _patches.bson.gz \
+| grep --file="$drop_collections_filename" \
+| while read filename
+do
+    collection=$(basename $filename ".bson.gz")
+    echo "Dropping $collection"
+    echo "" \
+    | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
+done
+
+
+echo "Import collections"
+
+ls -l1 $dump_dir/$db_name/*.bson.gz \
+| grep --invert-match --file="$drop_collections_filename" \
 | while read filename
 do
     collection=$(basename $filename ".bson.gz")
@@ -64,6 +86,8 @@ do
     | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
 done
 
+
+rm $drop_collections_filename
 if [[ $remove_dump_dir == "true" ]]
 then
     echo "Remove $dump_dir"
