@@ -263,7 +263,7 @@ describe("deleteClasse function", () => {
       expect(mockedYoung.set).toHaveBeenCalledWith({
         lastStatusAt: expect.any(Number),
         status: "ABANDONED", // Update the expected status value
-        withdrawnMessage: "classe désistée",
+        withdrawnMessage: "classe supprimée",
         withdrawnReason: "other"
       });
     });
