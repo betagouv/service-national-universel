@@ -6,7 +6,7 @@ import CorrectedRequest from "./CorrectedRequest";
 import { HiDotsVertical, HiOutlineInformationCircle, HiInformationCircle } from "react-icons/hi";
 import ReactTooltip from "react-tooltip";
 import { isBefore } from "date-fns";
-import classNames from "classnames";
+import cx from "classnames";
 import { CniModal } from "./CniModal";
 
 export function CniField({
@@ -72,7 +72,7 @@ export function CniField({
   return (
     <>
       <div
-        className={classNames(
+        className={cx(
           "mb-[15px]",
           "flex",
           "items-center",
@@ -93,7 +93,7 @@ export function CniField({
           <div className="w-2/10">
             <UploadedFileIcon />
           </div>
-          <div className={classNames("text-sm", "leading-5", "font-medium", "w-7/10", { flex: !isDatePassed, "items-center": !isDatePassed })}>
+          <div className={cx("text-sm", "leading-5", "font-medium", "w-7/10", { flex: !isDatePassed, "items-center": !isDatePassed })}>
             <div className="flex ml-2">
               <p>Pièce d'identité</p>
               {isDatePassed && (
@@ -126,12 +126,12 @@ export function CniField({
               </div>
             )}
             <button
-              className={classNames("rounded-full", "p-2.5", {
+              className={cx("rounded-full", "p-2.5", {
                 "bg-indigo-100": isDatePassed,
                 "bg-gray-100": !isDatePassed,
               })}
               onClick={() => setCniModalOpened(true)}>
-              <HiDotsVertical size={16} className={classNames({ "text-indigo-500": isDatePassed, "text-gray-500": !isDatePassed })} />
+              <HiDotsVertical size={16} className={cx({ "text-indigo-500": isDatePassed, "text-gray-500": !isDatePassed })} />
             </button>
           </div>
         </div>
