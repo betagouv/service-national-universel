@@ -136,7 +136,8 @@ jobs:
 
           done < containers.txt
 
-          while read env_name
+          uniq containers.txt \
+          | while read env_name
           do
             echo "Deleting environment $env_name"
             cp -R custom $env_name
