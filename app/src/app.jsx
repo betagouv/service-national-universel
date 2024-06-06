@@ -149,7 +149,7 @@ const OptionalLogIn = () => {
       }
     }
     fetchData();
-  }, []);
+  }, []); //eslint-disable-line
 
   if (loading) return <Loader />;
   if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
@@ -289,17 +289,6 @@ const Espace = () => {
         {shouldDisplayMaintenanceNotice && (
           <Notice>Maintenance planifiée jeudi 18 avril de 20h à minuit&nbsp;: vous ne serez pas en mesure d'accéder aux plateformes pendant cette période.</Notice>
         )}
-
-        {/* TODO: Add notice system from admin */}
-        {young.cohort === "Juin 2024 - 2" ? (
-          <Notice>
-            <p className="font-semibold mb-2 md:mb-0">Votre affectation vous sera communiquée prochainement</p>
-            <p>
-              Nous vous contacterons au plus vite pour vous communiquer votre lieu d’affectation. Toutes les équipes du Service National Universel sont mobilisées pour vous
-              accueillir dans les meilleures conditions.
-            </p>
-          </Notice>
-        ) : null}
 
         <Switch>
           <SentryRoute exact path="/" component={Home} />
