@@ -10,12 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [
-          {name: api, lifetime: "2 month" },
-          {name: app, lifetime: "2 month" },
-          {name: admin, lifetime: "2 month" },
-          {name: antivirus, lifetime: "1 year" },
-        ]
+        app:
+          [
+            { name: api, lifetime: "2 month" },
+            { name: app, lifetime: "2 month" },
+            { name: admin, lifetime: "2 month" },
+            { name: antivirus, lifetime: "1 year" },
+          ]
 
     steps:
       - name: Git checkout
@@ -54,7 +55,6 @@ jobs:
       region: fr-par
       registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
     steps:
-
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
 
@@ -89,56 +89,62 @@ jobs:
           PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
           project_id: 1b29c5d9-9723-400a-aa8b-0c85ae3567f7
         working-directory: terraform/environments/ci
-        continue-on-error: true
         run: |
           # Get all CI container namespaces
           # the grep excludes snu-ci namespace
-          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
-            "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/namespaces?project_id=${{env.project_id}}" \
-            | jq -r '.namespaces[]|"\(.id) \(.name)"' \
-            | grep --invert-match 0a155c15-a392-42a6-9f3c-90a84de2ccee \
-            > namespaces.txt
-          while read namespace
-          do
-            namespace_id=$(echo "$namespace" | cut -d " " -f 1)
-            env_name=$(echo "$namespace" | cut -d " " -f 2 | cut -c5-) # remove "snu-"
-            echo $env_name
-
-            # Get containers
-            # [27:] truncates "rg.fr-par.scw.cloud/snu-ci/"
+          namespace_id=$(
             curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
-              "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/containers?namespace_id=$namespace_id" \
-              | jq -r '.containers[].registry_image[27:]' \
-              > containers.txt
+              "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/namespaces?project_id=${{env.project_id}}&name=snu-custom" \
+            | jq -r '.namespaces[].id'
+          )
 
-            while read container
-            do
-              app_name=$(echo "$container" | cut -d ":" -f 1)
-              image_tag=$(echo "$container" | cut -d ":" -f 2)
-              image_id=$(cat images.txt | grep $app_name | cut -d " " -f 1)
+          # Get containers
+          # [27:] truncates "rg.fr-par.scw.cloud/snu-ci/"
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/containers?namespace_id=$namespace_id" \
+            | jq -r '.containers[]|"\(.name) \(.registry_image[27:])"' \
+            > containers.txt
 
-              tag_exists=$(
-                curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
-                  "https://api.scaleway.com/registry/v1/regions/${{ env.region }}/images/$image_id/tags?name=$image_tag" \
-                | jq -r ".total_count"
-              )
-              if [[ $tag_exists == 0 ]]
-              then
-                echo "Image $app_name:$image_tag does not exist for environment $env_name. Deleting it"
-                cp -R custom $env_name
-                cd $env_name
-                rm imports.tf
-                sed -i".bak" "s|###___ENV_NAME___###|$env_name|g" main.tf
-                terraform init
-                terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy \
-                  -var="api_image_tag=latest" \
-                  -var="admin_image_tag=latest" \
-                  -var="app_image_tag=latest" || true
-                cd ..
-                break
-              fi
-              echo "Image $app_name:$image_tag exists for environment $env_name. Skipping deletion"
+          touch env_names.txt
 
-            done < containers.txt
+          cat containers.txt \
+          | while read container
+          do
+            name=$(echo "$container" | cut -d " " -f 1)
+            registry=$(echo "$container" | cut -d " " -f 2)
 
-          done < namespaces.txt
+            app_name=$(echo "$registry" | cut -d ":" -f 1)
+            image_tag=$(echo "$registry" | cut -d ":" -f 2)
+            image_id=$(cat images.txt | grep $app_name | cut -d " " -f 1)
+
+            env_name=$(echo $name | sed 's/^\(.*\)-.*$/\1/')
+
+            tag_exists=$(
+              curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+                "https://api.scaleway.com/registry/v1/regions/${{ env.region }}/images/$image_id/tags?name=$image_tag" \
+              | jq -r ".total_count"
+            )
+            if [[ $tag_exists == 0 ]]
+            then
+              echo "Image $app_name:$image_tag does not exist for environment $env_name."
+              echo $env_name >> env_names.txt
+            else
+              echo "Image $app_name:$image_tag exists for environment $env_name."
+            fi
+
+          done
+
+          uniq env_names.txt \
+          | while read env_name
+          do
+            echo "Deleting environment $env_name"
+            cp -R custom $env_name
+            cd $env_name
+            sed -i".bak" "s|###___ENV_NAME___###|$env_name|g" main.tf
+            terraform init
+            terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy \
+              -var="api_image_tag=latest" \
+              -var="admin_image_tag=latest" \
+              -var="app_image_tag=latest" || true
+            cd ..
+          done
