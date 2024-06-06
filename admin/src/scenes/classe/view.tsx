@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
-import { BsSend } from "react-icons/bs";
 import { useParams, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
@@ -27,15 +26,14 @@ import SejourInfos from "./components/SejourInfos";
 import StatsInfos from "./components/StatsInfos";
 import DeleteButton from "./components/DeleteButton";
 import ModaleWithdraw from "./components/modale/ModaleWithdraw";
-import ModaleInvite from "./components/modale/ModaleInvite";
 import ModaleCohort from "./components/modale/modaleCohort";
+import ButtonInvite from "./components/ButtonInvite";
 import { InfoBus, TStatus, Rights } from "./components/types";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
-  const [showModaleInvite, setShowModaleInvite] = useState(false);
   const [showModaleWithdraw, setShowModaleWithdraw] = useState(false);
   const [showModaleCohort, setShowModaleCohort] = useState(false);
   const { id } = useParams<{ id: string }>();
@@ -232,7 +230,7 @@ export default function View() {
     if (classe?.status && ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && IS_INSCRIPTION_OPEN_CLE) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
-        <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" className="mr-2" onClick={() => setShowModaleInvite(true)} />,
+        <ButtonInvite key="invite" url={url} />,
       );
     }
     if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) {
@@ -319,7 +317,6 @@ export default function View() {
       {classe?.status !== STATUS_CLASSE.DRAFT && <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />}
 
       <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
-      <ModaleInvite isOpen={showModaleInvite} onClose={() => setShowModaleInvite(false)} url={url} />
       <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />
     </Page>
   );
