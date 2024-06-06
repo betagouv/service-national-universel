@@ -381,10 +381,10 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
       if (young.source === YOUNG_SOURCE.CLE) {
         return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate: 0, isDatePassed, young }));
       } else {
-        //const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
-        //if (!res.ok) throw new Error(res);
-        //const fillingRate = res.data;
-        return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate: 200, isDatePassed: true, young }));
+        const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
+        if (!res.ok) throw new Error(res);
+        const fillingRate = res.data;
+        return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate, isDatePassed, young }));
       }
     } catch (e) {
       capture(e);
