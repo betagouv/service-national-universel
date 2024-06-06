@@ -237,14 +237,19 @@ router.post("/ticket/form", async (req, res) => {
   try {
     let author;
 
+    const checkRole = async (role, email, findObject) => {
+      const existing = await findObject.findOne({ email: email.toLowerCase() });
+      return existing ? `${role} exterior` : "unknown";
+    };
+
     if (req.body.role === "young" || req.body.role === "parent") {
       author = req.body.role;
-      const existingYoung = await YoungObject.findOne({ email: req.body.email.toLowerCase() });
-      if (existingYoung) {
-        req.body.role = "young exterior";
-      } else {
-        req.body.role = "unknown";
-      }
+      req.body.role = await checkRole("young", req.body.email, YoungObject);
+    }
+
+    if (req.body.role === "admin" || req.body.role === "admin exterior") {
+      author = req.body.role;
+      req.body.role = await checkRole("admin", req.body.email, ReferentObject);
     }
 
     const obj = {
