@@ -137,7 +137,7 @@ export default function Index() {
 
   //si la periode de modification est finie
   if (!inscriptionModificationOpenForYoungs(cohort) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
-    return <Redirect to={{ pathname: "/" }} />;
+    return <InscriptionClosed young={young} isCLE={isCLE} />;
   }
 
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION) {
