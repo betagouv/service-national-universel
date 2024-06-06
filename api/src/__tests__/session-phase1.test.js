@@ -1,17 +1,22 @@
 const request = require("supertest");
-const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
-const { getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");
+const mongoose = require("mongoose");
+
+const { ROLES } = require("snu-lib");
+
+const { LigneBusModel } = require("../models");
 
 const getAppHelper = require("./helpers/app");
 const { createSessionPhase1, notExistingSessionPhase1Id } = require("./helpers/sessionPhase1");
 const { createSessionWithCohesionCenter } = require("./helpers/cohesionCenter");
-
 const { dbConnect, dbClose } = require("./helpers/db");
-const { ROLES } = require("snu-lib");
-const getNewReferentFixture = require("./fixtures/referent");
 const { createReferentHelper } = require("./helpers/referent");
-const getNewCohortFixture = require("./fixtures/cohort");
 const { createCohortHelper } = require("./helpers/cohort");
+
+const { getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");
+const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
+const getNewReferentFixture = require("./fixtures/referent");
+const getNewCohortFixture = require("./fixtures/cohort");
+const getNewLigneBusFixture = require("./fixtures/PlanDeTransport/ligneBus");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -127,6 +132,16 @@ describe("Session Phase 1", () => {
         .delete("/session-phase1/" + sessionPhase1._id)
         .send();
       console.log(res.body);
+      expect(res.status).toBe(403);
+    });
+    it("should return 403 when buses are associated with the session", async () => {
+      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture({ cohesionCenterId: mongoose.Types.ObjectId() }));
+      await LigneBusModel.create(getNewLigneBusFixture({ sessionId: sessionPhase1._id, centerId: sessionPhase1.cohesionCenterId, cohort: sessionPhase1.cohort }));
+
+      const res = await request(getAppHelper())
+        .delete("/session-phase1/" + sessionPhase1._id)
+        .send();
+
       expect(res.status).toBe(403);
     });
   });
