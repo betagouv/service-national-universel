@@ -58,6 +58,18 @@ drop_collections_filename=$(uuidgen)
 cat > $drop_collections_filename <<EOF
 _patches
 emails
+alertesmessage
+events
+tags
+sessionphase1tokens
+knowledgebases
+snutags
+stats-young-centers
+support_tags
+support_users
+templates
+tickets
+zammadtickets
 EOF
 
 ls -l1 $dump_dir/$db_name/*.bson.gz \
