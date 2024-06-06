@@ -30,6 +30,5 @@ env_name=$(../../../.github/scripts/get_custom_env_name.sh $branch_name)
 
 cp -R custom $env_name
 cd $env_name
-rm -f imports.tf
 sed -I".bak" "s|###___ENV_NAME___###|$env_name|g" main.tf
 terraform init
