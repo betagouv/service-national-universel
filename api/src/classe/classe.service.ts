@@ -36,7 +36,7 @@ export const deleteClasse = async (_id: string, fromUser: object) => {
       s.set({
         status: YOUNG_STATUS.ABANDONED,
         lastStatusAt: Date.now(),
-        withdrawnMessage: "classe désistée",
+        withdrawnMessage: "classe supprimée",
         withdrawnReason: "other",
       });
       return s.save({ fromUser });

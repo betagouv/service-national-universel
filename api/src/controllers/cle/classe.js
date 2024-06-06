@@ -133,7 +133,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
-
     let youngs;
     if (classe.cohort !== value.cohort) {
       youngs = await YoungModel.find({ classeId: classe._id });
@@ -146,6 +145,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     classe.set({ ...value, sessionId: classe.sessionId || null });
 
     if (canUpdateClasseStay(req.user)) {
+      if (oldCohort !== value.cohort && classe.ligneId) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
       if (oldCohort !== value.cohort && !classe.ligneId) {
         classe.set({
           sessionId: undefined,
