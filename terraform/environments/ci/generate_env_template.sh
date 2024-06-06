@@ -8,8 +8,7 @@ fi
 
 set -e
 
-if [[ $1 == "" ]]
-then
+if [[ $1 == "" ]]; then
     echo "You must specify the branch name"
     exit 1
 fi
@@ -18,8 +17,7 @@ cd $(dirname $0)
 
 branch_name=$1
 
-if [[ -d $branch_name ]]
-then
+if [[ -d $branch_name ]]; then
     echo "Directory $branch_name already exists. aborting !"
     exit 1
 fi

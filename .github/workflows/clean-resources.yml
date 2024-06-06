@@ -10,12 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [
-          {name: api, lifetime: "2 month" },
-          {name: app, lifetime: "2 month" },
-          {name: admin, lifetime: "2 month" },
-          {name: antivirus, lifetime: "1 year" },
-        ]
+        app:
+          [
+            { name: api, lifetime: "2 month" },
+            { name: app, lifetime: "2 month" },
+            { name: admin, lifetime: "2 month" },
+            { name: antivirus, lifetime: "1 year" },
+          ]
 
     steps:
       - name: Git checkout
@@ -54,7 +55,6 @@ jobs:
       region: fr-par
       registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
     steps:
-
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
 
