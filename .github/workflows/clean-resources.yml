@@ -98,9 +98,6 @@ jobs:
             | jq -r '.namespaces[].id'
           )
 
-          env_name=$(echo "$namespace" | cut -d " " -f 2 | cut -c5-) # remove "snu-"
-          echo $env_name
-
           # Get containers
           # [27:] truncates "rg.fr-par.scw.cloud/snu-ci/"
           curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
@@ -110,7 +107,8 @@ jobs:
 
           touch env_names.txt
 
-          while read container
+          cat containers.txt \
+          | while read container
           do
             name=$(echo "$container" | cut -d " " -f 1)
             registry=$(echo "$container" | cut -d " " -f 2)
@@ -134,9 +132,9 @@ jobs:
               echo "Image $app_name:$image_tag exists for environment $env_name."
             fi
 
-          done < containers.txt
+          done
 
-          uniq containers.txt \
+          uniq env_names.txt \
           | while read env_name
           do
             echo "Deleting environment $env_name"
@@ -149,4 +147,4 @@ jobs:
               -var="admin_image_tag=latest" \
               -var="app_image_tag=latest" || true
             cd ..
-          done < env_names.txt
+          done
