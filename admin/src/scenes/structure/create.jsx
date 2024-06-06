@@ -5,14 +5,14 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-
-import AddressInput from "../../components/addressInput";
+import { useDebounce } from "@uidotdev/usehooks";
+import { AddressForm } from "@snu/ds/common";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import MultiSelect from "../../components/Multiselect";
 import api from "../../services/api";
-import { ENABLE_PM, legalStatus, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
+import { useAddress, ENABLE_PM, legalStatus, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import validator from "validator";
 
@@ -21,6 +21,10 @@ export default function Create() {
   const history = useHistory();
   const [networks, setNetworks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
 
   const redirect = new URLSearchParams(window.location.search).get("redirect");
 
@@ -405,13 +409,17 @@ export default function Create() {
               <Col md={12}>
                 <Wrapper>
                   <BoxTitle>Lieu de la structure</BoxTitle>
-                  <AddressInput
-                    keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
-                    values={values}
-                    handleChange={handleChange}
-                    errors={errors}
-                    touched={touched}
-                    validateField={validateField}
+                  <AddressForm
+                    data={{ address: values.address, zip: values.zip, city: values.city }}
+                    updateData={(address) => {
+                      for (const [key, value] of Object.entries(address)) {
+                        console.log(`${key}: ${value}`);
+                        handleChange({ target: { value, name: key } });
+                      }
+                    }}
+                    query={query}
+                    setQuery={setQuery}
+                    options={results}
                   />
                   <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                 </Wrapper>
