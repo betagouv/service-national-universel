@@ -5,10 +5,12 @@ import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
 import validator from "validator";
 
+import { useDebounce } from "@uidotdev/usehooks";
+import { AddressForm } from "@snu/ds/common";
+
 import Field from "@/components/ui/forms/Field";
 import Toggle from "@/components/Toggle";
-import { ENABLE_PM, MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, ROLES, SENDINBLUE_TEMPLATES, translate } from "@/utils";
-import VerifyAddress from "../phase0/components/VerifyAddress";
+import { useAddress, ENABLE_PM, MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, ROLES, SENDINBLUE_TEMPLATES, translate } from "@/utils";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ModalConfirm from "@/components/modals/ModalConfirm";
@@ -35,6 +37,10 @@ export default function Create(props) {
   const { user } = useSelector((state) => state.Auth);
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const [structure, setStructure] = useState(null);
+
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
 
   const [newTutor, setNewTutor] = useState({ firstName: "", lastName: "", email: "", phone: "" });
 
@@ -102,7 +108,6 @@ export default function Create(props) {
     valuesToCheck.map((val) => {
       if (!values[val]) error[val] = baseError;
     });
-    if (!values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
     //check duration only if specified
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
     if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
@@ -113,7 +118,7 @@ export default function Create(props) {
     setErrors(error);
 
     if (Object.keys(error).length > 0) {
-      if (values.name && values.tutorId && values.structureId && values.addressVerified) setModalConfirmation(true);
+      if (values.name && values.tutorId && values.structureId) setModalConfirmation(true);
       return setLoading(false);
     }
     createMission();
@@ -139,19 +144,6 @@ export default function Create(props) {
       setLoading(false);
       return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission");
     }
-  };
-
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setValues({
-      ...values,
-      addressVerified: true,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      address: isConfirmed ? suggestion.address : values.address,
-      zip: isConfirmed ? suggestion.zip : values.zip,
-      city: isConfirmed ? suggestion.city : values.city,
-    });
   };
 
   const formatOptions = [
@@ -296,47 +288,13 @@ export default function Create(props) {
                 </div>
                 <div>
                   <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Lieu où se déroule la mission</div>
-                  <div className="mb-2 text-xs font-medium">Adresse</div>
-                  <Field
-                    label="Adresse"
-                    name="address"
-                    onChange={(address) => {
-                      setValues({ ...values, address, addressVerified: false });
-                    }}
-                    value={values.address}
-                    error={errors?.address}
+                  <AddressForm
+                    data={{ address: values.address, zip: values.zip, city: values.city }}
+                    updateData={(address) => setValues({ ...values, ...address, addressVerified: true })}
+                    query={query}
+                    setQuery={setQuery}
+                    options={results}
                   />
-                  <div className="my-4 flex flex-row justify-between gap-3">
-                    <Field
-                      label="Code postal"
-                      className="w-[50%]"
-                      name="zip"
-                      onChange={(zip) => setValues({ ...values, zip, addressVerified: false })}
-                      value={values.zip}
-                      error={errors?.zip}
-                    />
-                    <Field
-                      label="Ville"
-                      name="city"
-                      className="w-[50%]"
-                      onChange={(city) => setValues({ ...values, city, addressVerified: false })}
-                      value={values.city}
-                      error={errors?.city}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2 ">
-                    <VerifyAddress
-                      address={values.address}
-                      zip={values.zip}
-                      city={values.city}
-                      onSuccess={onVerifyAddress(true)}
-                      onFail={onVerifyAddress()}
-                      isVerified={values.addressVerified === true}
-                      buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
-                      verifyText="Pour vérifier  l'adresse vous devez remplir les champs adresse, code postal et ville."
-                    />
-                    {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
-                  </div>
                 </div>
                 <div>
                   <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Tuteur de la mission</div>
