@@ -189,6 +189,9 @@ jobs:
         shell: bash
         working-directory: ${{ env.custom_directory }}
         run: |
+          # Sleep because status can still be an error if the previous deployement failed
+          sleep 10s
+
           failure=false
           while read name
           do

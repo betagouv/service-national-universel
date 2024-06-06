@@ -28,8 +28,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^7.14.0",
     "@godaddy/terminus": "^4.12.1",
-    "@scaleway/sdk": "^1.38.1",
-    "@selego/mongoose-elastic": "^1.6.0",
+    "@selego/mongoose-elastic": "^1.7.1",
     "@sentry/integrations": "^7.58.1",
     "@sentry/node": "^7.92.0",
     "@sentry/profiling-node": "^1.2.1",
@@ -68,6 +67,7 @@
     "sanitize-html": "^2.12.1",
     "sib-api-v3-sdk": "^8.5.0",
     "snu-lib": "*",
+    "sync-request-curl": "^3.0.0",
     "uuid": "^9.0.0",
     "validator": "^13.7.0"
   },
