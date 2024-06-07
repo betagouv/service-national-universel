@@ -38,7 +38,7 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-RUN apk --no-cache add bash mongodb-tools jq curl
+RUN apk --no-cache add bash mongodb-tools jq curl util-linux
 
 RUN addgroup --system --gid 1001 expressjs
 RUN adduser --system --uid 1001 expressjs
