@@ -35,30 +35,10 @@ fi
 set -o pipefail
 set -e
 
-
-if [[ -d $source ]]
-then
-    echo "Dump directory found"
-    dump_dir=$source
-    remove_dump_dir="false"
-else
-    echo "Dump directory not found. Generating dump from source database URI"
-    dump_dir=$(uuidgen)
-    remove_dump_dir="true"
-
-    mongodump --quiet --gzip --out=$dump_dir $src_db_uri
-fi
-
-db_name=$(ls -l1 $dump_dir | head -n 1)
-
-
-echo "Drop collections"
-
 drop_collections_filename=$(uuidgen)
 cat > $drop_collections_filename <<EOF
-_patches
 emails
-alertesmessage
+alertemessages
 events
 tags
 sessionphase1tokens
@@ -70,27 +50,79 @@ support_users
 templates
 tickets
 zammadtickets
+alerte_message_patches
+application_patches
+classe_patches
+cohesioncenter_patches
+cohort_patches
+contract_patches
+departmentservice_patches
+etablissement_patches
+filter_patches
+importplandetransport_patches
+inscriptiongoal_patches
+knowledgebase_patches
+lignebus_patches
+lignetopoint_patches
+meetingpoint_patches
+mission_patches
+missionapi_patches
+missionequivalence_patches
+modificationbus_patches
+plandetransport_patches
+pointderassemblement_patches
+program_patches
+referent_patches
+schemaderepartition_patches
+schoolramses_patches
+sessionphase1_patches
+sessionphase1token_patches
+snutag_patches
+structure_patches
+tablederepartition_patches
+tag_patches
+ticket_patches
+young_patches
 EOF
 
-ls -l1 $dump_dir/$db_name/*.bson.gz \
-| grep --file="$drop_collections_filename" \
-| while read filename
+
+if [[ -d $source ]]
+then
+    echo "Dump directory found"
+    dump_dir=$source
+    remove_dump_dir="false"
+else
+    echo "Dump directory not found. Generating dump from source database URI"
+    dump_dir=$(uuidgen)
+    remove_dump_dir="true"
+
+    mongodump --quiet --gzip $(cat $drop_collections_filename | sed 's/\(.*\)/--excludeCollection=\1/g' | tr '\n' ' ') --out=$dump_dir $src_db_uri
+fi
+
+db_name=$(ls -l1 $dump_dir | head -n 1)
+
+
+echo "Drop collections"
+
+cat $drop_collections_filename \
+| while read collection
 do
-    collection=$(basename $filename ".bson.gz")
     echo "Dropping $collection"
+    continue # TOTO: Remove
     echo "" \
-    | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
+    | mongoimport --drop --collection="$collection" $dst_db_uri
 done
 
 
 echo "Import collections"
 
 ls -l1 $dump_dir/$db_name/*.bson.gz \
-| grep --invert-match --file="$drop_collections_filename" \
+| grep --invert-match --word-regexp --file="$drop_collections_filename" \
 | while read filename
 do
     collection=$(basename $filename ".bson.gz")
     echo "Importing $collection"
+    continue # TOTO: Remove
     cat $filename \
     | gunzip \
     | bsondump \
