@@ -133,7 +133,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
-
     let youngs;
     if (classe.cohort !== value.cohort) {
       youngs = await YoungModel.find({ classeId: classe._id });
@@ -146,7 +145,16 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     classe.set({ ...value, sessionId: classe.sessionId || null });
 
     if (canUpdateClasseStay(req.user)) {
+      if (oldCohort !== value.cohort && classe.ligneId) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
       if (oldCohort !== value.cohort && !classe.ligneId) {
+        classe.set({
+          sessionId: undefined,
+          cohesionCenterId: undefined,
+          pointDeRassemblementId: undefined,
+        });
+
         const youngs = await YoungModel.find({ classeId: classe._id });
         await Promise.all(
           youngs.map((y) => {
@@ -160,12 +168,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           }),
         );
         emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
-
-        classe.set({
-          sessionId: undefined,
-          cohesionCenterId: undefined,
-          pointDeRassemblementId: undefined,
-        });
       } else {
         classe.set({
           sessionId: value.sessionId,
@@ -177,16 +179,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     classe = await classe.save({ fromUser: req.user });
     classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
-
-    if (oldCohort !== classe.cohort) {
-      await Promise.all(
-        youngs.map((y) => {
-          y.set({ cohort: classe.cohort });
-          return y.save({ fromUser: req.user });
-        }),
-      );
-      emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
-    }
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
 
