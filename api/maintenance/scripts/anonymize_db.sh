@@ -108,7 +108,7 @@ cat $drop_collections_filename \
 | while read collection
 do
     echo "Dropping $collection"
-    continue # TOTO: Remove
+    continue # TODO: Remove
     echo "" \
     | mongoimport --drop --collection="$collection" $dst_db_uri
 done
@@ -122,7 +122,7 @@ ls -l1 $dump_dir/$db_name/*.bson.gz \
 do
     collection=$(basename $filename ".bson.gz")
     echo "Importing $collection"
-    continue # TOTO: Remove
+    continue # TODO: Remove
     cat $filename \
     | gunzip \
     | bsondump \
