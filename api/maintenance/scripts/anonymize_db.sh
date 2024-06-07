@@ -117,7 +117,7 @@ done
 echo "Import collections"
 
 ls -l1 $dump_dir/$db_name/*.bson.gz \
-| grep --invert-match --word-regexp --file="$drop_collections_filename" \
+| grep -vwf "$drop_collections_filename" \
 | while read filename
 do
     collection=$(basename $filename ".bson.gz")
