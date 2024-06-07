@@ -99,7 +99,7 @@ else
     mongodump --gzip $(cat $drop_collections_filename | sed 's/\(.*\)/--excludeCollection=\1/g' | tr '\n' ' ') --out=$dump_dir $source
 fi
 
-db_name=$(ls -l1 $dump_dir | head -n 1)
+db_name=$(ls -1 $dump_dir | head -n 1)
 
 
 echo "Drop collections"
@@ -116,7 +116,7 @@ done
 
 echo "Import collections"
 
-ls -l1 $dump_dir/$db_name/*.bson.gz \
+ls -1 $dump_dir/$db_name/*.bson.gz \
 | grep -vwf "$drop_collections_filename" \
 | while read filename
 do
