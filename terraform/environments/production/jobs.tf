@@ -1,4 +1,4 @@
-resource scaleway_job_definition main {
+resource scaleway_job_definition anonymize_db {
   project_id  = scaleway_account_project.main.id
   name = "anonymize_db"
   description = "Dump source database, then reimport anonymized collections in destination database"
