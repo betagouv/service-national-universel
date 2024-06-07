@@ -10,7 +10,7 @@ resource scaleway_job_definition main {
 
   env = {
     "NODE_ENV"       = "production"
-    "SCW_PROJECT_ID" = local.project_id
-    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+    "SCW_PROJECT_ID" = local.secrets.SCW_PROJECT_ID_TASK
+    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY_TASK
   }
 }
