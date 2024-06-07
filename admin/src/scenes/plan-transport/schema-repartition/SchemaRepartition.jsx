@@ -267,13 +267,13 @@ export default function SchemaRepartition({ region, department }) {
                   onExportDetail={handleExportDetail}
                   region={region}
                   department={department}
-                  cohort={cohort}
+                  cohortName={cohort?.name}
                   groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
                   summary={summary}
                   onChange={loadSchemaData}
                   user={user}
                 />
-                <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
+                <SchemaDepartmentDetail department={department} cohortName={cohort?.name} departmentData={data} />
               </>
             ) : (
               <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={handleExportDetail} cohort={cohort} user={user} />
