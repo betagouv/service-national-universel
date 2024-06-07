@@ -96,7 +96,7 @@ else
     dump_dir=$(uuidgen)
     remove_dump_dir="true"
 
-    mongodump --quiet --gzip $(cat $drop_collections_filename | sed 's/\(.*\)/--excludeCollection=\1/g' | tr '\n' ' ') --out=$dump_dir $src_db_uri
+    mongodump --quiet --gzip $(cat $drop_collections_filename | sed 's/\(.*\)/--excludeCollection=\1/g' | tr '\n' ' ') --out=$dump_dir $source
 fi
 
 db_name=$(ls -l1 $dump_dir | head -n 1)
