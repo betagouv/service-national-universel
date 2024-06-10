@@ -108,7 +108,6 @@ cat $drop_collections_filename \
 | while read collection
 do
     echo "Dropping $collection"
-    continue # TODO: Remove
     echo "" \
     | mongoimport --drop --collection="$collection" $dst_db_uri
 done
@@ -122,11 +121,10 @@ ls -1 $dump_dir/$db_name/*.bson.gz \
 do
     collection=$(basename $filename ".bson.gz")
     echo "Importing $collection"
-    continue # TODO: Remove
     cat $filename \
     | gunzip \
     | bsondump \
-    | node "$(dirname $0)/utils/anonymize_collection.js" \
+    | node "$(dirname $0)/utils/anonymize_collection.js" "$collection" \
     | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
 done
 

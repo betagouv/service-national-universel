@@ -1,9 +1,8 @@
 
-const readline = require('node:readline/promises');
-const { stdin: input, stdout: output, stdin } = require('node:process');
+const readline = require('node:readline');
 const { EJSON } =  require('bson');
 
-MODELS_PATH = `${__dirname}/../../api/src/models`
+MODELS_PATH = `${__dirname}/../../../src/models`
 
 ANONYMIZABLE_COLLECTIONS = {
   "applications": `${MODELS_PATH}/application`,
@@ -22,24 +21,28 @@ ANONYMIZABLE_COLLECTIONS = {
   "modificationbuses": `${MODELS_PATH}/modificationBus`,
 }
 
-if (process.argv.length != 2) {
-  console.error(`Usage: ${process.argv[0]} <collection_name>`);
+
+const args = process.argv.slice(2);
+if (args.length != 1) {
+  console.error("Usage: node anonymize_collection.js <collection_name>");
   process.exit(1);
 }
 
-collection_name = process.argv[1];
+collection_name = args[0];
 
-async function anonymizeCollectionStream(anonymize) {
-  const rl = readline.createInterface({ input, output });
+function anonymizeCollectionStream(anonymize) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+  });
 
-  for await (const input of rl) {
+  rl.on("line", (line) => {
     const relaxed = false;
-    const parsed = EJSON.parse(input, { relaxed });
-    const anonymized = anonymize(parsed)
-    const output = EJSON.stringify(anonymized, { relaxed })
-
-    console.log(output)
-  }
+    const parsed = EJSON.parse(line, { relaxed });
+    const anonymized = anonymize(parsed);
+    const json = EJSON.stringify(anonymized, { relaxed });
+    // process a line at a time
+    console.log(json)
+  });
 }
 
 if (collection_name in ANONYMIZABLE_COLLECTIONS) {
