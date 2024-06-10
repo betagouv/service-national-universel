@@ -38,7 +38,7 @@ resource "scaleway_registry_namespace" "main" {
   is_public   = false
 }
 
-# Application user
+# Deploy application user
 resource "scaleway_iam_application" "main" {
   name        = "snu-deploy-production"
   description = "Application allowed to deploy apps in 'production'"
@@ -71,6 +71,26 @@ resource "scaleway_iam_policy" "deploy" {
     project_ids = [local.ci_project_id]
     permission_set_names = [
       "ContainerRegistryReadOnly",
+    ]
+  }
+}
+
+# GetSecret application user
+resource "scaleway_iam_application" "get_secret" {
+  name        = "snu-get-secret-production"
+  description = "Application allowed to retrieve secrets in 'production'"
+}
+
+# GetSecret policy
+resource "scaleway_iam_policy" "get_secret" {
+  name           = "snu-get-secret-production-policy"
+  description    = "Allow to retrieve secrets in 'production'"
+  application_id = scaleway_iam_application.get_secret.id
+  rule {
+    project_ids = [scaleway_account_project.main.id]
+    permission_set_names = [
+      "SecretManagerReadOnly",
+      "SecretManagerSecretAccess",
     ]
   }
 }

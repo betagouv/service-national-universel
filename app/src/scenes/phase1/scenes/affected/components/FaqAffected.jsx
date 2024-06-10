@@ -27,7 +27,7 @@ const FaqAffected = ({ className }) => {
               des affaires à apporter en cliquant sur “Lire plus”.
             </p>
           }
-          readMoreLink="https://support.snu.gouv.fr/base-de-connaissance/dans-ma-valise-materiel-trousseau-copie-copie"
+          readMoreLink="https://support.snu.gouv.fr/base-de-connaissance/dans-ma-valise-materiel-trousseau-4"
         />
 
         <a

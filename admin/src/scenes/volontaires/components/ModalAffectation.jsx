@@ -153,7 +153,15 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
           }
         });
         setDataPdr(result.data.map((el) => el.meetingPoint));
-        setDataLigneToPoint(result.data);
+        let newData = result.data;
+
+        newData.map((d) => {
+          const ligneId = d.ligneBus._id;
+          d.meetingPoint.lineId = ligneId;
+          return d;
+        });
+
+        setDataLigneToPoint(newData);
       } else {
         setError("Impossible de récupérer la liste des points de rassemblement. Veuillez réessayer dans quelques instants.");
       }
@@ -305,16 +313,18 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
                       ) : (
                         <>
                           {dataPdr.slice(LIST_PAGE_LIMIT * currentPage, LIST_PAGE_LIMIT * currentPage + LIST_PAGE_LIMIT).map((hit) => (
-                            <HitPdr
-                              key={hit._id}
-                              hit={hit}
-                              data={dataLigneToPoint.filter((e) => e.meetingPoint._id === hit._id)[0]}
-                              young={young}
-                              onSend={() => {
-                                setStep(3);
-                                setSelectedPdr({ pdr: hit, data: dataLigneToPoint.filter((e) => e.meetingPoint._id === hit._id)[0] });
-                              }}
-                            />
+                            <>
+                              <HitPdr
+                                key={hit._id}
+                                hit={hit}
+                                data={dataLigneToPoint.filter((e) => e.meetingPoint.lineId === hit.lineId)[0]}
+                                young={young}
+                                onSend={() => {
+                                  setStep(3);
+                                  setSelectedPdr({ pdr: hit, data: dataLigneToPoint.filter((e) => e.meetingPoint.lineId === hit.lineId)[0] });
+                                }}
+                              />
+                            </>
                           ))}
                           <div className="flex flex-row gap-4 self-end absolute bottom-[3.75rem]">
                             {currentPage > 0 && (
