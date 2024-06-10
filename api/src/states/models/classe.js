@@ -37,11 +37,10 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   const studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION);
   const studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION);
   const studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
-  const studentAbandoned = students.filter((student) => student.status === YOUNG_STATUS.ABANDONED);
-  const studentNotAutorized = students.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED);
-  const studentWithdrawn = students.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN);
 
-  const seatsTaken = studentInProgress.length + studentWaiting.length + studentValidated.length + studentNotAutorized.length + studentWithdrawn.length;
+  const seatsInProgress = studentInProgress.length + studentWaiting.length + studentValidated.length;
+
+  const seatsTaken = studentValidated.length;
   classe.set({ seatsTaken });
 
   // Created
@@ -51,21 +50,20 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   }
 
   // Inscription in progress
-  if (classe.status != STATUS_CLASSE.INSCRIPTION_IN_PROGRESS && classe.totalSeats > seatsTaken) {
+  if (classe.status != STATUS_CLASSE.INSCRIPTION_IN_PROGRESS && classe.totalSeats > seatsInProgress) {
     classe.set({ status: STATUS_CLASSE.INSCRIPTION_IN_PROGRESS });
     return await classe.save({ fromUser });
   }
 
   // Inscription to check
-  if (classe.status != STATUS_CLASSE.INSCRIPTION_TO_CHECK && classe.totalSeats <= seatsTaken && (studentInProgress.length > 0 || studentWaiting.length > 0)) {
+  if (classe.status != STATUS_CLASSE.INSCRIPTION_TO_CHECK && classe.totalSeats <= seatsInProgress && studentInProgress.length === 0 && studentWaiting.length > 0) {
     classe.set({ status: STATUS_CLASSE.INSCRIPTION_TO_CHECK });
     return await classe.save({ fromUser });
   }
 
   // Validated
-  const seatsValidated = studentValidated.length + studentNotAutorized.length + studentWithdrawn.length;
-  if (classe.status != STATUS_CLASSE.VALIDATED && classe.totalSeats <= seatsValidated) {
-    classe.set({ seatsTaken: seatsValidated, status: STATUS_CLASSE.VALIDATED });
+  if (classe.status != STATUS_CLASSE.VALIDATED && classe.totalSeats <= seatsTaken) {
+    classe.set({ seatsTaken: seatsTaken, status: STATUS_CLASSE.VALIDATED });
     classe = await classe.save({ fromUser });
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VALIDATED, classe);
