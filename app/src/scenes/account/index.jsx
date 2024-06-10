@@ -15,10 +15,11 @@ import AccountWithdrawnPage from "./scenes/withdrawn";
 import Tabs from "../../components/nav/Tabs";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import useAuth from "@/services/useAuth";
+import { youngCanWithdraw } from "snu-lib";
 
 const Account = () => {
   useDocumentTitle("Mon profil");
-  const { isCLE } = useAuth();
+  const { isCLE, young } = useAuth();
 
   const ACCOUNT_PAGES = {
     general: {
@@ -41,10 +42,12 @@ const Account = () => {
       title: "Situations particulières",
       key: "/account/special-situations",
     },
-    "withdranw": {
-      title: "Se désister",
-      key: "/account/withdrawn",
-    },
+    ...(youngCanWithdraw(young) && {
+      withdrawn: {
+        title: "Se désister",
+        key: "/account/withdrawn",
+      },
+    }),
   };
   const device = useDevice();
   const { pathname } = useLocation();

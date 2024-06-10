@@ -13,7 +13,7 @@ const AccountWithdrawnPage = () => {
         <h2 className="m-0 mb-1 text-lg font-medium leading-6 text-gray-900">Ma participation au SNU</h2>
         <div className="md:ml-[15%]">
           <FormDescription>Vous ne souhaitez plus participer au SNU ?</FormDescription>
-          {youngCanWithdraw(young) ? <Withdrawal young={young} /> : null}
+          <Withdrawal young={young} />
         </div>
       </div>
     </div>
