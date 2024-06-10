@@ -10,7 +10,7 @@ exports.handler = async () => {
     const processContacts = async (Model, type) => {
       const cursor = Model.find({ updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } }).cursor();
       let updatedLength = 0;
-      let batchCount = 0;
+      // let batchCount = 0;
       let contactsWithAttributes = [];
 
       while (true) {
@@ -28,8 +28,8 @@ exports.handler = async () => {
           if (!response.ok) {
             slack.error({ title: `Fail sync ${type} contacts to SNUpport`, text: JSON.stringify(response.code) });
           }
-          batchCount += contactsWithAttributes.length;
-          console.log(`Processed batch ${batchCount} (${updatedLength} ${type} contacts)`);
+          // batchCount += contactsWithAttributes.length;
+          // console.log(`Processed batch ${batchCount} (${updatedLength} ${type} contacts)`);
           contactsWithAttributes = [];
         }
       }
@@ -39,8 +39,8 @@ exports.handler = async () => {
         if (!response.ok) {
           slack.error({ title: `Fail sync ${type} contacts to SNUpport`, text: JSON.stringify(response.code) });
         }
-        batchCount += contactsWithAttributes.length;
-        console.log(`Processed batch ${batchCount} (${updatedLength} ${type} contacts)`);
+        // batchCount += contactsWithAttributes.length;
+        // console.log(`Processed batch ${batchCount} (${updatedLength} ${type} contacts)`);
       }
 
       slack.success({ title: `Successfully synced ${type} contacts to SNUpport` });
