@@ -19,6 +19,9 @@ const { initDB } = require("../mongo");
     case "syncContactSupport":
       await require("./syncContactSupport").handler();
       break;
+    case "computeGoalsInscription":
+      await require("./computeGoalsInscription").handler();
+      break;
     case "patch/structure":
       await require("./patch/structure").manualHandler("2023-11-08", "2023-11-09");
       break;
