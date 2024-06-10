@@ -135,7 +135,7 @@ resource "scaleway_container" "antivirus" {
   cpu_limit       = 256
   memory_limit    = 4096
   min_scale       = 1
-  max_scale       = 20
+  max_scale       = 5
   timeout         = 60
   max_concurrency = 50
   privacy         = "private"
