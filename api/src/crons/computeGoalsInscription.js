@@ -7,34 +7,32 @@ const { departmentList } = require("./utils");
 const arr = departmentList;
 
 const getCount = async ({ department }) => {
-  const res = {};
-  const cursor = await Young.find({ department, status: { $in: ["VALIDATED"] }, cohort: /2024/ }).cursor();
-  await cursor.eachAsync(async function (young) {
-    res[young.cohort] = (res[young.cohort] || 0) + 1;
-  });
-  return res;
+  const res = await Young.aggregate([{ $match: { department, status: { $in: ["VALIDATED"] }, cohort: /2024/ } }, { $group: { _id: "$cohort", count: { $sum: 1 } } }]);
+
+  return res.reduce((acc, { _id, count }) => ({ ...acc, [_id]: count }), {});
 };
+
 const getGoalAndComputeFillingRates = async ({ department, values }) => {
-  if (values && Object.keys(values).length > 0) {
-    const cursor = await inscriptionGoal.find({ department, cohort: /2024/ }).cursor();
-    await cursor.eachAsync(async function (inscriptionGoal) {
-      if (inscriptionGoal.max) {
-        const fillingRate = ((values[inscriptionGoal.cohort] || 0) / (inscriptionGoal.max || 0)) * 100;
-        inscriptionGoal.set({ fillingRate });
-        // console.log({ department, cohort: inscriptionGoal.cohort, fillingRate });
-        await inscriptionGoal.save();
+  const goals = await inscriptionGoal.find({ department, cohort: /2024/ });
+  await Promise.all(
+    goals.map(async (goal) => {
+      if (goal.max) {
+        const fillingRate = ((values[goal.cohort] || 0) / (goal.max || 0)) * 100;
+        goal.set({ fillingRate });
+        await goal.save();
       }
-    });
-  }
+    }),
+  );
 };
 
 exports.handler = async () => {
   try {
-    for (let i = 0; i < arr.length; i++) {
-      const department = arr[i];
-      const values = await getCount({ department });
-      await getGoalAndComputeFillingRates({ department, values });
-    }
+    await Promise.all(
+      arr.map(async (department) => {
+        const values = await getCount({ department });
+        await getGoalAndComputeFillingRates({ department, values });
+      }),
+    );
     await slack.success({ title: "computeGoalsInscription", text: "Le traitement s'est terminé avec succès." });
   } catch (e) {
     capture(e);
