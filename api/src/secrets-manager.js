@@ -11,6 +11,9 @@ function getSecrets(secretKey, projectId, secretName, revision = "latest_enabled
   };
 
   const response = request("GET", url, { headers });
+  if (response.statusCode !== 200) {
+    throw new Error(`Failed to get secrets from secret manager. Status code: ${response.statusCode}`);
+  }
 
   const body = response.body.toString();
 
