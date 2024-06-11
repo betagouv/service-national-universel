@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link } from "react-router-dom";
 import { capture } from "@/sentry";
 import { isCle, transportDatesToString, youngCanChangeSession, getDepartureDate, getReturnDate } from "snu-lib";
 import { getCohort } from "../../../../utils/cohorts";
@@ -17,13 +15,10 @@ import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
 import { areAllStepsDone } from "./utils/steps.utils";
-import { RiInformationFill } from "react-icons/ri";
 import useAuth from "@/services/useAuth";
-import plausibleEvent from "@/services/plausible";
 
 export default function Affected() {
-  const young = useSelector((state) => state.Auth.young);
-  const { isCLE } = useAuth();
+  const { young } = useAuth();
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
   const [session, setSession] = useState();
@@ -53,10 +48,6 @@ export default function Affected() {
       }
     })();
   }, [young]);
-
-  function handleClick() {
-    plausibleEvent("CLE affecte - desistement");
-  }
 
   if (areAllStepsDone(young)) {
     window.scrollTo(0, 0);
@@ -108,20 +99,6 @@ export default function Affected() {
                 <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} data={data} />
               </div>
             </div>
-
-            {isCLE && (
-              <>
-                <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2">
-                  <div>
-                    <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
-                    <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
-                  </div>
-                  <Link to="account/withdrawn?desistement=1" className="text-blue-600 underline underline-offset-2" onClick={handleClick}>
-                    Se désister du SNU.
-                  </Link>
-                </div>
-              </>
-            )}
           </div>
         )}
 
