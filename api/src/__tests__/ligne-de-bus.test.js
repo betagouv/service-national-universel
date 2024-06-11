@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const { ObjectId } = require("mongoose").Types;
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const CohesionCenterModel = require("../models/cohesionCenter");
@@ -15,6 +15,9 @@ const getNewYoungFixture = require("./fixtures/young");
 const { createPointDeRassemblementWithBus } = require("./helpers/PlanDeTransport/pointDeRassemblement");
 const getNewLigneBusFixture = require("./fixtures/PlanDeTransport/ligneBus");
 const getNewPointDeRassemblementFixture = require("./fixtures/PlanDeTransport/pointDeRassemblement");
+const { default: getBusTeamFixture } = require("./fixtures/busTeam");
+const { ROLES } = require("snu-lib");
+const getNewCohortFixture = require("./fixtures/cohort");
 
 beforeAll(dbConnect);
 
@@ -281,7 +284,7 @@ describe("LigneDeBus", () => {
         }),
       );
       const pdr1 = await PointDeRassemblementModel.create({
-        _id: mongoose.Types.ObjectId(),
+        _id: ObjectId(),
         name: "PDR 1",
         region: "Île-de-France",
         department: "Paris",
@@ -296,7 +299,7 @@ describe("LigneDeBus", () => {
       });
 
       const pdr2 = await PointDeRassemblementModel.create({
-        _id: mongoose.Types.ObjectId(),
+        _id: ObjectId(),
         name: "PDR 2",
         region: "Île-de-France",
         department: "Paris",
@@ -343,7 +346,7 @@ describe("LigneDeBus", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = user;
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${mongoose.Types.ObjectId()}/availablePDR`);
+      const res = await request(getAppHelper()).get(`/ligne-de-bus/${ObjectId()}/availablePDR`);
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -387,7 +390,7 @@ describe("LigneDeBus", () => {
         throw new Error("test error");
       });
 
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${mongoose.Types.ObjectId()}/availablePDR`);
+      const res = await request(getAppHelper()).get(`/ligne-de-bus/${ObjectId()}/availablePDR`);
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -444,7 +447,7 @@ describe("LigneDeBus", () => {
         throw new Error("test error");
       });
 
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${mongoose.Types.ObjectId()}/ligne-to-points`);
+      const res = await request(getAppHelper()).get(`/ligne-de-bus/${ObjectId()}/ligne-to-points`);
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -507,7 +510,7 @@ describe("LigneDeBus", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = user;
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${mongoose.Types.ObjectId()}/data-for-check`);
+      const res = await request(getAppHelper()).get(`/ligne-de-bus/${ObjectId()}/data-for-check`);
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -518,7 +521,7 @@ describe("LigneDeBus", () => {
       mockModelMethodWithError(LigneBusModel, "find");
       let res;
       try {
-        res = await request(getAppHelper()).get(`/ligne-de-bus/${mongoose.Types.ObjectId()}/data-for-check`).send();
+        res = await request(getAppHelper()).get(`/ligne-de-bus/${ObjectId()}/data-for-check`).send();
       } catch (error) {
         console.error(error);
       }
@@ -711,6 +714,102 @@ describe("LigneDeBus", () => {
       jest.spyOn(LigneBusModel, "findById").mockRestore();
 
       passport.user = previous;
+    });
+  });
+  describe("PUT /:id/team", () => {
+    afterEach(async () => {
+      await LigneBusModel.deleteMany();
+      await CohortModel.deleteMany();
+    });
+    it("should return 400 for invalid body", async () => {
+      const res = await request(getAppHelper(ROLES.ADMIN)).put(`/ligne-de-bus/${ObjectId()}/team`).send({ invalid: "data" });
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 404 if ligne not found", async () => {
+      const res = await request(getAppHelper(ROLES.ADMIN)).put(`/ligne-de-bus/${ObjectId()}/team`).send(getBusTeamFixture());
+      expect(res.status).toBe(404);
+    });
+
+    it("should return 404 if cohort not found", async () => {
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ cohort: "2020" }));
+      const res = await request(getAppHelper(ROLES.ADMIN)).put(`/ligne-de-bus/${ligneBus._id}/team`).send(getBusTeamFixture());
+      expect(res.status).toBe(404);
+    });
+
+    it("should return 403 if user role is unauthorized", async () => {
+      const cohort = await CohortModel.create(getNewCohortFixture({ name: "Février 2023 - C" }));
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ cohort: cohort.name }));
+      let res = await request(getAppHelper(ROLES.VISITOR)).put(`/ligne-de-bus/${ligneBus._id}/team`).send(getBusTeamFixture());
+      expect(res.status).toBe(403);
+      res = await request(getAppHelper(ROLES.TRANSPORTER)).put(`/ligne-de-bus/${ligneBus._id}/team`).send(getBusTeamFixture());
+      expect(res.status).toBe(403);
+    });
+
+    it("should return 200 and update team info (add)", async () => {
+      const cohort = await CohortModel.create(getNewCohortFixture({ name: "Février 2023 - C" }));
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ busId: "A", cohort: cohort.name, mergedBusIds: ["A", "B"] }));
+      await LigneBusModel.create(getNewLigneBusFixture({ busId: "B", cohort: cohort.name, mergedBusIds: ["A", "B"] }));
+      const res = await request(getAppHelper(ROLES.ADMIN)).put(`/ligne-de-bus/${ligneBus._id}/team`).send(getBusTeamFixture());
+      expect(res.status).toBe(200);
+      expect(res.body.data.team.length).toEqual(1);
+      const mergedLine = await LigneBusModel.findOne({ busId: "B", cohort: cohort.name });
+      expect(mergedLine.team.length).toEqual(1);
+      expect(mergedLine.team[0].firstName).toEqual(res.body.data.team[0].firstName);
+    });
+
+    it("should return 200 and update team info (edit)", async () => {
+      const cohort = await CohortModel.create(getNewCohortFixture({ name: "Février 2023 - C" }));
+      const team = getBusTeamFixture({ _id: ObjectId() });
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ busId: "A", cohort: cohort.name, team: [team], mergedBusIds: ["A", "B"] }));
+      await LigneBusModel.create(getNewLigneBusFixture({ busId: "B", cohort: cohort.name, mergedBusIds: ["A", "B"] }));
+      const res = await request(getAppHelper(ROLES.ADMIN))
+        .put(`/ligne-de-bus/${ligneBus._id}/team`)
+        .send({ ...team, idTeam: team._id, firstName: "newFirstName" });
+      expect(res.status).toBe(200);
+      expect(res.body.data.team[0].firstName).toEqual("newFirstName");
+      expect(`${res.body.data.team[0]._id}`).toEqual(`${team._id}`);
+      const mergedLine = await LigneBusModel.findOne({ busId: "B", cohort: cohort.name });
+      expect(mergedLine.team.length).toEqual(1);
+      expect(mergedLine.team[0].firstName).toEqual(res.body.data.team[0].firstName);
+    });
+  });
+
+  describe("PUT /:id/teamDelete", () => {
+    it("should return 400 for invalid params", async () => {
+      const res = await request(getAppHelper(ROLES.ADMIN)).put(`/ligne-de-bus/${ObjectId()}/teamDelete`).send({ invalid: "data" });
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 404 if ligne or team member not found", async () => {
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
+      let res = await request(getAppHelper(ROLES.ADMIN)).put(`/ligne-de-bus/${ligneBus._id}/teamDelete`).send(getBusTeamFixture());
+      expect(res.status).toBe(404);
+      res = await request(getAppHelper(ROLES.ADMIN)).put(`/ligne-de-bus/${ObjectId()}/teamDelete`).send(getBusTeamFixture());
+      expect(res.status).toBe(404);
+    });
+
+    it("should return 403 if user role is unauthorized", async () => {
+      const cohort = await CohortModel.create(getNewCohortFixture({ name: "Février 2023 - C" }));
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ cohort: cohort.name }));
+      let res = await request(getAppHelper(ROLES.VISITOR)).put(`/ligne-de-bus/${ligneBus._id}/teamDelete`).send(getBusTeamFixture());
+      expect(res.status).toBe(403);
+      res = await request(getAppHelper(ROLES.TRANSPORTER)).put(`/ligne-de-bus/${ligneBus._id}/teamDelete`).send(getBusTeamFixture());
+      expect(res.status).toBe(403);
+    });
+
+    it("should return 200 and delete team member", async () => {
+      const cohort = await CohortModel.create(getNewCohortFixture({ name: "Février 2023 - C" }));
+      const team = getBusTeamFixture({ _id: ObjectId() });
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ busId: "A", cohort: cohort.name, team: [team], mergedBusIds: ["A", "B"] }));
+      await LigneBusModel.create(getNewLigneBusFixture({ busId: "B", cohort: cohort.name, mergedBusIds: ["A", "B"] }));
+      const res = await request(getAppHelper(ROLES.ADMIN))
+        .put(`/ligne-de-bus/${ligneBus._id}/teamDelete`)
+        .send({ ...team, idTeam: team._id });
+      expect(res.status).toBe(200);
+      expect(res.body.data.team.length).toEqual(0);
+      const mergedLine = await LigneBusModel.findOne({ busId: "B", cohort: cohort.name });
+      expect(mergedLine.team.length).toEqual(0);
     });
   });
 });

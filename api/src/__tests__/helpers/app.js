@@ -14,6 +14,9 @@ function getAppHelper(role) {
   injectRoutes(app);
 
   if (role) {
+    if (!passport.user) {
+      passport.user = { _id: "123" };
+    }
     passport.user.role = role;
   }
   return app;

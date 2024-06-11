@@ -4,7 +4,7 @@ import request from "supertest";
 import { dbConnect, dbClose } from "../__tests__/helpers/db";
 import getAppHelper from "../__tests__/helpers/app";
 import getNewLigneBusFixture from "../__tests__/fixtures/PlanDeTransport/ligneBus";
-import { LigneBusModel, PlanTransportModel } from "../models";
+import { LigneBusModel } from "../models";
 import { BusDocument } from "../models/PlanDeTransport/ligneBus.type";
 
 beforeAll(dbConnect);
@@ -13,7 +13,7 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const pdtFindOne = jest.spyOn(PlanTransportModel, "findOne");
+const busFindOne = jest.spyOn(LigneBusModel, "findOne");
 
 describe("pdtController", () => {
   it("should return ligne de bus from pdt for cohort", async () => {
@@ -23,7 +23,7 @@ describe("pdtController", () => {
     passport.user = user;
     const ligneBus = (await LigneBusModel.create(getNewLigneBusFixture())) as BusDocument;
 
-    pdtFindOne.mockResolvedValue({ _id: ligneBus._id });
+    busFindOne.mockResolvedValue({ _id: ligneBus._id });
 
     const res = await request(getAppHelper()).get(`/plan-de-transport/${ligneBus.cohort}/ligne-de-bus/${ligneBus.busId}`);
     expect(res.status).toBe(200);

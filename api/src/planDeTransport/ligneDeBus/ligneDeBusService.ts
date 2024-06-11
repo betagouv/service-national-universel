@@ -2,6 +2,7 @@ import { BusTeamDto } from "snu-lib/src/dto";
 import { BusDocument } from "../../models/PlanDeTransport/ligneBus.type";
 import { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
+import { ClientSession } from "mongoose";
 
 export const findLigneDeBusByBusIds = async (busIds: string[], cohort: string) => {
   return await LigneBusModel.find({ busId: { $in: busIds }, cohort, deletedAt: { $exists: false } });
@@ -34,7 +35,17 @@ export async function getInfoBus(line: BusDocument) {
   return { ...line._doc, meetingsPointsDetail, centerDetail, mergedBusDetails };
 }
 
-export async function syncMergedBus({ ligneBus, busIdsToUpdate, newMergedBusIds }: { ligneBus: BusDocument; busIdsToUpdate: string[]; newMergedBusIds: string[] }) {
+export async function syncMergedBus({
+  ligneBus,
+  busIdsToUpdate,
+  newMergedBusIds,
+  transaction,
+}: {
+  ligneBus: BusDocument;
+  busIdsToUpdate: string[];
+  newMergedBusIds: string[];
+  transaction?: ClientSession | null;
+}) {
   for (const mergedBusId of busIdsToUpdate) {
     let ligneBusToUpdate = ligneBus;
     if (mergedBusId !== ligneBus.busId) {
@@ -42,7 +53,7 @@ export async function syncMergedBus({ ligneBus, busIdsToUpdate, newMergedBusIds 
     }
     if (ligneBusToUpdate) {
       ligneBusToUpdate.set({ mergedBusIds: newMergedBusIds });
-      await ligneBusToUpdate.save();
+      await ligneBusToUpdate.save({ session: transaction });
     }
   }
 }

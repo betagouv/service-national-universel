@@ -33,12 +33,22 @@ interface Props {
   cohort: string;
 }
 
+type BusError = {
+  totalCapacity?: string;
+  youngCapacity?: string;
+  followerCapacity?: string;
+  busId?: string;
+  departuredDate?: string;
+  returnDate?: string;
+  travelTime?: string;
+};
+
 export default function Info({ bus, onBusChange, dataForCheck, nbYoung, cohort }: Props) {
   const user = useSelector((state: AuthState) => state.Auth.user);
 
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState<Props["bus"]>({});
+  const [errors, setErrors] = React.useState<BusError>({});
   const [data, setData] = React.useState({
     busId: bus.busId || "",
     departuredDate: bus.departuredDate || "",
@@ -70,7 +80,7 @@ export default function Info({ bus, onBusChange, dataForCheck, nbYoung, cohort }
     try {
       setIsLoading(true);
       setErrors({});
-      const errors: Props["bus"] = {};
+      const errors: BusError = {};
       if (!data.busId) errors.busId = "Ce champ est obligatoire";
       if (!data.departuredDate) errors.departuredDate = "Ce champ est obligatoire";
       if (!data.returnDate) errors.returnDate = "Ce champ est obligatoire";

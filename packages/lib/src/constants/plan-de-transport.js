@@ -7,7 +7,6 @@ const PDT_IMPORT_ERRORS = {
   BAD_PDR_ID: "BAD_PDR_ID",
   BAD_PDR_DEPARTEMENT: "BAD_PDR_DEPARTEMENT",
   BAD_MERGED_LINE_ID: "BAD_MERGED_LINE_ID",
-  MISSING_MERGED_LINE_ID: "MISSING_MERGED_LINE_ID",
   SAME_PDR_ON_LINE: "SAME_PDR_ON_LINE",
   LACKING_YOUNG_CAPACITY: "LACKING_YOUNG_CAPACITY",
   MISSING_DATA: "MISSING_DATA",
@@ -28,7 +27,6 @@ const PDT_IMPORT_ERRORS_TRANSLATION = {
   BAD_PDR_ID: { text: "ID du PDR %s non existant.", tooltip: "Les ID des PDR sont transmis dans le schéma de répartition." },
   BAD_PDR_DEPARTEMENT: { text: "Erreur sur le département du PDR %s.", tooltip: "Le département du fichier ne correspond pas au département du PDR en base de données." },
   BAD_MERGED_LINE_ID: { text: "Numéro de ligne fusionnée %s inconnue", tooltip: "Les lignes fusionnées doivent être présentes dans le fichier." },
-  MISSING_MERGED_LINE_ID: { text: "Numéro de ligne fusionnée %s manquante", tooltip: "La colonne doit comprendre toutes les lignes fusionnées associées." },
   SAME_PDR_ON_LINE: { text: "Un même PDR %s apparaît plusieurs fois sur la ligne.", tooltip: "Un PDR ne peut appraître qu'une seule fois sur une même ligne." },
   LACKING_YOUNG_CAPACITY: {
     text: "La somme de la capacité volontaires des lignes est inférieure à la somme des volontaires du schéma de répartition affecté dans le centre",

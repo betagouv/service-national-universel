@@ -6,10 +6,11 @@ import { canEditLigneBusGeneralInfo } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 
-import { LigneBusModel, PlanTransportModel } from "../../models";
+import { LigneBusModel } from "../../models";
 // eslint-disable-next-line import/extensions
 import { BusDocument } from "../../models/PlanDeTransport/ligneBus.type";
 import { UserRequest } from "../../controllers/request";
+import { validateId, idSchema } from "../../utils/validator";
 
 import { getInfoBus, syncMergedBus } from "./ligneDeBusService";
 
@@ -19,11 +20,9 @@ const router = express.Router({ mergeParams: true });
 router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // check params
-    const { value: params, error: paramsError } = Joi.object({
-      id: Joi.string().required(),
-    }).validate(req.params);
-    // check payload
+    const { value: id, error: paramsError } = validateId(req.params.id);
     if (paramsError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    // check payload
     const { value: payload, error: payloadError } = Joi.object({
       mergedBusId: Joi.string().required(),
     }).validate(req.body, { stripUnknown: true });
@@ -31,7 +30,7 @@ router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { sessio
     // check authorization
     if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    let ligneBus: BusDocument = await LigneBusModel.findById(params.id);
+    let ligneBus: BusDocument = await LigneBusModel.findById(id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     // On ne peut pas s'ajouter soit même
     if (payload.mergedBusId === ligneBus.busId) {
@@ -39,7 +38,7 @@ router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { sessio
     }
 
     // On vérifie que la nouvelle ligne existe dans le PDT courant
-    const newLigneBus = await PlanTransportModel.findOne({ busId: payload.mergedBusId, cohort: ligneBus.cohort });
+    const newLigneBus = await LigneBusModel.findOne({ busId: payload.mergedBusId, cohort: ligneBus.cohort });
     if (!newLigneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // on vérifie qu'elle n'est pas déjà fusionnée
@@ -52,7 +51,7 @@ router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { sessio
     if (!oldMergedBusIds.includes(ligneBus.busId)) {
       oldMergedBusIds.push(ligneBus.busId);
     }
-    const newMergedBusIds = [...oldMergedBusIds, payload.mergedBusId];
+    const newMergedBusIds = [...oldMergedBusIds, payload.mergedBusId].sort();
     await syncMergedBus({ ligneBus, busIdsToUpdate: newMergedBusIds, newMergedBusIds });
 
     const infoBus = await getInfoBus(ligneBus);
@@ -68,7 +67,7 @@ router.delete("/:id/ligne-fusionnee/:mergedBusId", passport.authenticate(["refer
   try {
     // check params
     const { error, value: params } = Joi.object({
-      id: Joi.string().required(),
+      id: idSchema().required(),
       mergedBusId: Joi.string().required(),
     }).validate(req.params);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -86,7 +85,7 @@ router.delete("/:id/ligne-fusionnee/:mergedBusId", passport.authenticate(["refer
     if (!oldMergedBusIds.includes(ligneBus.busId)) {
       oldMergedBusIds.push(ligneBus.busId);
     }
-    let newMergedBusIds = oldMergedBusIds.filter((b) => b !== params.mergedBusId);
+    let newMergedBusIds = oldMergedBusIds.filter((b) => b !== params.mergedBusId).sort();
     if (newMergedBusIds.length === 1) {
       newMergedBusIds = [];
     }
