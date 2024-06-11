@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 
 import { canEditLigneBusGeneralInfo, isBusEditionOpen, translate } from "snu-lib";
-import { BusDto } from "snu-lib/src/dto";
+import { LigneBusDto } from "snu-lib/src/dto";
 import { Button } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -24,7 +24,7 @@ const options = [
 ];
 
 interface Props {
-  bus: BusDto;
+  bus: LigneBusDto;
   onBusChange: (bus: Props["bus"]) => void;
   dataForCheck: {
     youngsCountBus: number;

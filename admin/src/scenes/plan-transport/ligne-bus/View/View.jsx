@@ -23,6 +23,8 @@ import PointDeRassemblement from "./components/PointDeRassemblement";
 import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
 
 export default function View(props) {
+  const user = useSelector((state) => state.Auth.user);
+
   const [data, setData] = React.useState(null);
   const [dataForCheck, setDataForCheck] = React.useState(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
@@ -30,7 +32,6 @@ export default function View(props) {
   const [nbYoung, setNbYoung] = React.useState();
   const [cohort, setCohort] = React.useState();
   const [addOpen, setAddOpen] = React.useState(false);
-  const user = useSelector((state) => state.Auth.user);
   const [isLoading, setIsLoading] = React.useState(false);
 
   const getBus = async () => {
@@ -241,7 +242,7 @@ export default function View(props) {
           </div>
           <Info bus={data} onBusChange={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} cohort={cohort} />
 
-          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen} cohort={cohort} />
+          <BusTeam bus={data} onBusChange={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen} cohort={cohort} />
           {data.team.filter((item) => item.role === "supervisor").length > 0 ? (
             data.team
               .filter((item) => item.role === "supervisor")
@@ -249,19 +250,19 @@ export default function View(props) {
                 <BusTeam
                   key={value._id}
                   bus={data}
-                  setBus={setData}
+                  onBusChange={setData}
                   title="Encadrant"
-                  role={"supervisor"}
+                  role="supervisor"
                   idTeam={value._id}
                   addOpen={addOpen}
-                  setAddOpen={setAddOpen}
+                  onAddOpenChange={setAddOpen}
                   cohort={cohort}
                 />
               ))
           ) : (
-            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
+            <BusTeam bus={data} onBusChange={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
           )}
-          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} cohort={cohort} /> : null}
+          {addOpen && <BusTeam bus={data} onBusChange={setData} title="Encadrant" role={"supervisor"} onAddOpenChange={setAddOpen} cohort={cohort} />}
 
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">
