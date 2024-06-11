@@ -1,6 +1,14 @@
 import { Document } from "mongoose";
-export type ClasseType = IClasse & Document;
+import { IReferent } from "@/models/referentType";
+
+export type ClasseDocument = IClasse & Document;
+
+export type ClasseWithReferentsType = IClasse & {
+  referents: IReferent[];
+};
+
 export interface IClasse {
+  _id: string;
   etablissementId: string;
   referentClasseIds: string[];
   cohort: string;

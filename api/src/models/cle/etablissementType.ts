@@ -3,6 +3,7 @@ import { Document } from "mongoose";
 export type EtablissementDocument = IEtablissement & Document;
 
 export interface IEtablissement {
+  _id: string;
   schoolId: string;
   uai: string;
   name: string;

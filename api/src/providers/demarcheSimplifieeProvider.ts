@@ -1,21 +1,38 @@
 //https://doc.demarches-simplifiees.fr/~gitbook/pdf
 //https://www.demarches-simplifiees.fr/graphql/schema/index.html
 
-import { IClasse } from "@/models/cle/classeType";
-import { IEtablissement } from "@/models/cle/etablissementType";
+import { IAppelAProjetType } from "@/cle/appelAProjetCle/appelAProjetType";
 
-export const fetchClassesAndEtablissementsFromAppelAProjets = (): Promise<{ classes: Partial<IClasse>[]; etablissements: Partial<IEtablissement>[] }> => {
-  return new Promise((resolve, reject) => {});
+export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IAppelAProjetType[]> => {
+  const query = buildDemarcheSimplifieeRequest();
+  const appelAProjetResponse: Response = await fetch("", query);
+  const appelAProjetDto: AppelAProjetDemarcheSimplifieeDto[] = await appelAProjetResponse.json();
+  return mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDto);
 };
 
-const buildDemarcheSimplifieeRequest = () => {};
+const buildDemarcheSimplifieeRequest = () => {
+  return {};
+};
 
-const mapAppelAProjetsClasseToClassesDocuments = (): Promise<Partial<IClasse>[]> => {
-  return new Promise((resolve, reject) => {});
+// TODO : replace when you get the right properties name
+const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDtos: AppelAProjetDemarcheSimplifieeDto[]): IAppelAProjetType[] => {
+  return appelAProjetDtos.map((appelAProjetDto) => {
+    return {
+      etablissement: {
+        email: appelAProjetDto.Email,
+      },
+      classe: {
+        colorationExpected: appelAProjetDto["Quelle est la thématique dominante de votre projet ?"],
+        referent: {
+          firstName: appelAProjetDto["Prénom du référent"],
+        },
+      },
+    } as IAppelAProjetType;
+  });
 };
 
 // TODO : remove when you get the right properties name
-type AppelAProjetDto = {
+type AppelAProjetDemarcheSimplifieeDto = {
   ID: string;
   Email: string;
   FranceConnect: boolean;
