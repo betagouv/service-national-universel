@@ -1,5 +1,3 @@
-import { BusTeamDto } from "snu-lib/src/dto";
-
 import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
@@ -7,6 +5,8 @@ import { Types } from "mongoose";
 const ObjectId = Types.ObjectId;
 import mongoose from "mongoose";
 import config from "config";
+
+import { BusTeamDto } from "snu-lib/src/dto";
 
 import {
   canViewLigneBus,
@@ -994,7 +994,6 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     const uniqueUsersToNotify = [...new Set(referentsToNotify.map((obj) => JSON.stringify(obj)))].map((str) => JSON.parse(str));
 
     // send notification
-    // @ts-expect-error fonction js
     await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_REF, {
       emailTo: uniqueUsersToNotify.map((referent) => ({
         name: `${referent.firstName} ${referent.lastName}`,
@@ -1066,7 +1065,6 @@ function mergeArrayItems(array, subProperty?: string | null | undefined) {
 async function notifyTranporteurs(ligne, type) {
   const usersToNotify = await ReferentModel.find({ role: ROLES.TRANSPORTER });
 
-  // @ts-expect-error fonction js
   await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_TRANSPORTEUR_MODIF, {
     emailTo: usersToNotify.map((referent) => ({
       name: `${referent.firstName} ${referent.lastName}`,

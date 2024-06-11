@@ -6,7 +6,7 @@ import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, CleClasseModel } from "../../models";
 import { ERRORS } from "../../utils";
 
-import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
+import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime, getLinePdrIds, getLinePdrCount } from "./pdtImportUtils";
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
@@ -248,30 +248,12 @@ export const validatePdtFile = async (
       if (mergedLines.length > 5) {
         errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
       }
-      // la ligne courante doit être présente dans les lignes fusionnées
-      if (!line["LIGNES FUSIONNÉES"]?.includes(currentBusId)) {
-        errors["LIGNES FUSIONNÉES"].push({
-          line: index,
-          error: PDT_IMPORT_ERRORS.MISSING_MERGED_LINE_ID,
-          extra: currentBusId,
-        });
-      }
       // on verifie la cohérence des lignes marquées comme fusionnées
       for (const mergedLine of mergedLines.filter((b) => b !== currentBusId)) {
         let found = false;
         for (const [mi, mline] of lines.entries()) {
           if (mline["NUMERO DE LIGNE"] === mergedLine) {
             found = true;
-            // la ligne cible doit aussi contenir les lignes fusionnées de la ligne courante
-            for (const subBusId of mergedLines.filter((b) => b !== mergedLine)) {
-              if (!mline["LIGNES FUSIONNÉES"]?.includes(subBusId)) {
-                errors["LIGNES FUSIONNÉES"].push({
-                  line: mi + FIRST_LINE_NUMBER_IN_EXCEL,
-                  error: PDT_IMPORT_ERRORS.MISSING_MERGED_LINE_ID,
-                  extra: subBusId,
-                });
-              }
-            }
             break;
           }
         }
@@ -441,19 +423,4 @@ export const computeImportSummary = (lines: PdtLine[]) => {
     pdrCount,
     maxPdrOnLine,
   };
-};
-
-const getLinePdrCount = (line) => {
-  return Object.keys(line).filter((e) => e.startsWith("ID PDR")).length;
-};
-
-const getLinePdrIds = (line) => {
-  const countPdr = getLinePdrCount(line);
-  const pdrIds: string[] = [];
-  for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-    if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
-      pdrIds.push(line[`ID PDR ${pdrNumber}`]);
-    }
-  }
-  return pdrIds;
 };

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const customMongo = require("../../mongo");
 const MONGO_URL = "mongodb://localhost:27017/qwer";
 
 let db = null;
@@ -27,7 +28,14 @@ const dbClose = async () => {
   await db.close();
 };
 
+const mockTransaction = () => {
+  jest.spyOn(customMongo, "startSession").mockResolvedValue(null);
+  jest.spyOn(customMongo, "withTransaction").mockImplementation(async (_, callback) => callback());
+  jest.spyOn(customMongo, "endSession").mockResolvedValue(true);
+};
+
 module.exports = {
   dbConnect,
   dbClose,
+  mockTransaction,
 };

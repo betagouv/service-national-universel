@@ -62,8 +62,17 @@ async function startSession() {
   return await mongoose.startSession();
 }
 
+async function withTransaction(session, callback) {
+  return await session.withTransaction(callback);
+}
+
+async function endSession(session) {
+  return await session.endSession();
+}
 module.exports = {
   initDB,
   closeDB,
   startSession,
+  withTransaction,
+  endSession,
 };
