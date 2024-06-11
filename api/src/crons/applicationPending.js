@@ -32,21 +32,15 @@ exports.handler = async () => {
         countApplicationMonth[getMonth(new Date(patches[0].date)) + 1] = (countApplicationMonth[getMonth(new Date(patches[0].date)) + 1] || 0) + 1;
         if (!tutors.includes(tutor.email)) tutors.push(tutor.email);
 
-        try {
-          await sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
-            emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
-            params: {
-              cta: `${config.ADMIN_URL}/volontaire/${application.youngId}`,
-              youngFirstName: application.youngFirstName,
-              youngLastName: application.youngLastName,
-              missionName: application.missionName,
-            },
-          });
-        } catch (e) {
-          capture(e);
-          console.error(`Failed to send email to ${tutor.email}:`, e);
-          throw e;
-        }
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
+          emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
+          params: {
+            cta: `${config.ADMIN_URL}/volontaire/${application.youngId}`,
+            youngFirstName: application.youngFirstName,
+            youngLastName: application.youngLastName,
+            missionName: application.missionName,
+          },
+        });
       }
     });
     slack.info({
