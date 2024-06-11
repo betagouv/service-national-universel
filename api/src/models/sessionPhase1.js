@@ -5,7 +5,7 @@ const { getCohortNames } = require("snu-lib");
 const esClient = require("../es");
 const MODELNAME = "sessionphase1";
 const config = require("config");
-const { starify } = require("../utils/anonymise");
+const anonymize = require("../anonymization/sessionPhase1");
 
 const File = new mongoose.Schema({
   _id: String,
@@ -184,24 +184,9 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-function anonymize(item) {
-  item.zipCenter && (item.zipCenter = starify(item.zipCenter));
-  item.codeCenter && (item.codeCenter = starify(item.codeCenter));
-  item.centerName && (item.centerName = starify(item.centerName));
-  item.cityCenter && (item.cityCenter = starify(item.cityCenter));
-  if (!["VALIDATED", "WAITING_VALIDATION"].includes(item.status)) item.status = "WAITING_VALIDATION";
-  item.team &&
-    (item.team = item.team.map((member) => {
-      member.firstName && (member.firstName = starify(member.firstName));
-      member.lastName && (member.lastName = starify(member.lastName));
-      member.email && (member.email = starify(member.email));
-      member.phone && (member.phone = starify(member.phone));
-      return member;
-    }));
-  return item;
+Schema.methods.anonymise = function () {
+  return anonymize(this);
 };
-
-Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("cohesionCenter", {
   ref: "cohesioncenter",
@@ -242,4 +227,3 @@ Schema.index({ cohesionCenterId: 1 });
 const OBJ = mongoose.model(MODELNAME, Schema);
 
 module.exports = OBJ;
-module.exports.anonymize = anonymize;

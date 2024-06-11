@@ -2,8 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 const patchHistory = require("mongoose-patch-history").default;
-
-const { generateAddress, generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+const anonymize = require("../anonymization/departmentService");
 
 const MODELNAME = "departmentservice";
 
@@ -154,34 +153,9 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-function anonymize(item) {
-  item.email && (item.email = generateRandomEmail());
-  item.contactPhone && (item.contactPhone = generateNewPhoneNumber());
-  item.address && (item.address = generateAddress());
-  item.directionName && (item.directionName = generateRandomName());
-  item.contactName && (item.contactName = generateRandomName());
-  item.contactMail && (item.contactMail = generateRandomEmail());
-  item.contacts &&
-    (item.contacts = [
-      {
-        cohort: "New Cohort",
-        contactName: "New Contact",
-        contactPhone: generateNewPhoneNumber(),
-        contactMail: generateRandomEmail(),
-      },
-    ]);
-  item.representantEtat &&
-    (item.representantEtat = {
-      firstName: generateRandomName(),
-      lastName: generateRandomName(),
-      mobile: generateNewPhoneNumber(),
-      email: generateRandomEmail(),
-    });
-
-  return item;
+Schema.methods.anonymise = function () {
+  return anonymize(this);
 };
-
-Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
@@ -211,4 +185,3 @@ Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
-module.exports.anonymize = anonymize;

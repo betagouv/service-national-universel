@@ -109,7 +109,7 @@ cat $drop_collections_filename \
 do
     echo "Dropping $collection"
     echo "" \
-    | mongoimport --drop --collection="$collection" $dst_db_uri
+    | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
 done
 
 

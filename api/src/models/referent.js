@@ -4,7 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
-const { generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+const anonymize = require("../anonymization/referent");
 
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
 
@@ -270,16 +270,9 @@ Schema.methods.comparePassword = async function (p) {
   return bcrypt.compare(p, user.password || "");
 };
 
-function anonymize(item) {
-  item.phone && (item.phone = generateNewPhoneNumber());
-  item.mobile && (item.mobile = generateNewPhoneNumber());
-  item.email && (item.email = generateRandomEmail());
-  item.firstName && (item.firstName = generateRandomName());
-  item.lastName && (item.lastName = generateRandomName());
-  return item;
+Schema.methods.anonymise = function () {
+  return anonymize(this);
 };
-
-Schema.methods.anonymise = function() { return anonymize(this); };
 
 //Sync with Sendinblue
 Schema.post("save", function (doc) {
@@ -361,4 +354,3 @@ Schema.set("toJSON", { virtuals: true });
 const OBJ = mongoose.model(MODELNAME, Schema);
 
 module.exports = OBJ;
-module.exports.anonymize = anonymize;

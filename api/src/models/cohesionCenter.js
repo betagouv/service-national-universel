@@ -3,6 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "cohesioncenter";
+const anonymize = require("../anonymization/cohesionCenter");
 
 const Schema = new mongoose.Schema({
   name: {
@@ -175,13 +176,9 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-function anonymize(item) {
-  item.code2022 && (item.code2022 = "02022");
-  item.code && (item.code = "00000");
-  return item;
+Schema.methods.anonymise = function () {
+  return anonymize(this);
 };
-
-Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
@@ -211,4 +208,3 @@ Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
-module.exports.anonymize = anonymize;

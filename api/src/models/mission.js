@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "mission";
-const { generateAddress, generateRandomName, starify } = require("../utils/anonymise");
+const anonymize = require("../anonymization/mission");
 
 const Schema = new mongoose.Schema({
   sqlId: {
@@ -331,22 +331,9 @@ const Schema = new mongoose.Schema({
   },
 });
 
-function anonymize(item) {
-  item.name && (item.name = `Mission ${generateRandomName()}`);
-  item.description && (item.description = starify(item.description));
-  item.address && (item.address = generateAddress());
-  item.actions && (item.actions = "action Test");
-  item.structureName && (item.structureName = starify(item.structureName));
-  item.tutorName && (item.tutorName = starify(item.tutorName));
-  item.actions && (item.actions = starify(item.actions));
-  item.justifications && (item.justifications = starify(item.justifications));
-  item.contraintes && (item.contraintes = starify(item.contraintes));
-  item.frequence && (item.frequence = starify(item.frequence));
-  item.jvaRawData && (item.jvaRawData = undefined);
-  return item;
+Schema.methods.anonymise = function () {
+  return anonymize(this);
 };
-
-Schema.methods.anonymise = function() { return anonymize(this); };
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
@@ -375,4 +362,3 @@ Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jva
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
-module.exports.anonymize = anonymize;

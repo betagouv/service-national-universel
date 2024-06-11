@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 const patchHistory = require("mongoose-patch-history").default;
-const { starify } = require("../utils/anonymise");
+const anonymize = require("../anonymization/application");
 
 const MODELNAME = "application";
 
@@ -210,24 +210,9 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-function anonymize(item) {
-  item.youngEmail && (item.youngEmail = "*****@*******.***");
-  item.youngFirstName && (item.youngFirstName = starify(item.youngFirstName));
-  item.youngLastName && (item.youngLastName = starify(item.youngLastName));
-  item.youngBirthdateAt && (item.youngBirthdateAt = starify(item.youngBirthdateAt));
-  item.tutorName && (item.tutorName = starify(item.tutorName));
-  item.missionName && (item.missionName = starify(item.missionName));
-  item.contractStatus && (item.contractStatus = item.contractStatus || "DRAFT");
-
-  item.contractAvenantFiles && (item.contractAvenantFiles = []);
-  item.justificatifsFiles && (item.justificatifsFiles = []);
-  item.feedBackExperienceFiles && (item.feedBackExperienceFiles = []);
-  item.othersFiles && (item.othersFiles = []);
-
-  return item;
-}
-
-Schema.methods.anonymise = function() { return anonymize(this); };
+Schema.methods.anonymise = function () {
+  return anonymize(this);
+};
 
 Schema.virtual("user").set(function (user) {
   if (user) {
@@ -256,4 +241,3 @@ Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
-module.exports.anonymize = anonymize;
