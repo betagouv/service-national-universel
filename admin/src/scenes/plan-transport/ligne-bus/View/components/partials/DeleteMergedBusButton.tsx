@@ -5,21 +5,23 @@ import { useMutation } from "@tanstack/react-query";
 
 import { HiOutlineTrash } from "react-icons/hi";
 
-import { Bus, RouteResponse } from "@/types";
+import { LigneBusDto } from "snu-lib/src/dto";
+
+import { RouteResponse } from "@/types";
 import API from "@/services/api";
 import { ModalConfirmation } from "@snu/ds/admin";
 
 interface Props {
-  onBusChange: (bus: Bus) => void;
-  bus: Bus;
-  mergedBus: Pick<Bus, "_id" | "busId" | "totalCapacity" | "youngCapacity" | "youngSeatsTaken">;
+  onBusChange: (bus: LigneBusDto) => void;
+  bus: LigneBusDto;
+  mergedBus: Pick<LigneBusDto, "_id" | "busId" | "totalCapacity" | "youngCapacity" | "youngSeatsTaken">;
 }
 
 export default function DeleteMergedBusButton({ bus, mergedBus, onBusChange }: Props) {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async ({ mergedBusId }: { mergedBusId: string }): Promise<RouteResponse<Bus>> => {
+    mutationFn: async ({ mergedBusId }: { mergedBusId: string }): Promise<RouteResponse<LigneBusDto>> => {
       const response = await API.remove(`/ligne-de-bus/${bus._id}/ligne-fusionnee/${mergedBusId}`);
       if (!response.ok) {
         throw Error(response.code);

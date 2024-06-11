@@ -1,6 +1,11 @@
+import { BusTeamDto } from "snu-lib/src/dto";
 import { BusDocument } from "../../models/PlanDeTransport/ligneBus.type";
+import { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } from "../../models";
+import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 
-const { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } = require("../../models");
+export const findLigneDeBusByBusIds = async (busIds: string[], cohort: string) => {
+  return await LigneBusModel.find({ busId: { $in: busIds }, cohort, deletedAt: { $exists: false } });
+};
 
 export async function getInfoBus(line: BusDocument) {
   const ligneToBus = await LigneToPointModel.find({ lineId: line._id });
@@ -16,7 +21,7 @@ export async function getInfoBus(line: BusDocument) {
 
   let mergedBusDetails = [];
   if (line.mergedBusIds && line.mergedBusIds.length > 0) {
-    mergedBusDetails = (await LigneBusModel.find({ busId: { $in: line.mergedBusIds }, cohort: line.cohort, deletedAt: { $exists: false } })).map((b) => ({
+    mergedBusDetails = (await findLigneDeBusByBusIds(line.mergedBusIds, line.cohort)).map((b: BusDocument) => ({
       _id: b._id,
       busId: b.busId,
       totalCapacity: b.totalCapacity,
@@ -41,3 +46,28 @@ export async function syncMergedBus({ ligneBus, busIdsToUpdate, newMergedBusIds 
     }
   }
 }
+
+export const updateTeamByLigneDeBusIds = async ({ busIds, cohort, busTeamDto, fromUser }: { busIds: string[]; cohort: string; busTeamDto: BusTeamDto; fromUser }) => {
+  const lignesDeBus = await findLigneDeBusByBusIds(busIds, cohort);
+  const memberData = mapBusTeamToUpdate(busTeamDto);
+  for (const ligne of lignesDeBus) {
+    const memberToUpdate = ligne.team.id(busTeamDto.idTeam);
+    if (!memberToUpdate) {
+      ligne.team.push({ _id: busTeamDto._id, ...memberData });
+    } else {
+      memberToUpdate.set(memberData);
+    }
+    await ligne.save({ fromUser });
+  }
+};
+
+export const removeTeamByLigneDeBusIds = async ({ busIds, cohort, idTeam, fromUser }: { busIds: string[]; cohort: string; idTeam: string; fromUser }) => {
+  const lignesDeBus = await findLigneDeBusByBusIds(busIds, cohort);
+  for (const ligne of lignesDeBus) {
+    const memberToDelete = ligne.team.id(idTeam);
+    if (memberToDelete) {
+      memberToDelete.remove();
+      await ligne.save({ fromUser });
+    }
+  }
+};

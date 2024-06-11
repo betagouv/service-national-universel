@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 
 import { HiOutlineEye, HiOutlinePlusCircle } from "react-icons/hi";
 
-import { Bus } from "@/types";
+import { LigneBusDto } from "snu-lib/src/dto";
+
 import AddMergedBusModal from "./AddMergedBusModal";
 import DeleteMergedBusButton from "./DeleteMergedBusButton";
 
 interface Props {
-  bus: Bus;
+  bus: LigneBusDto;
   readonly?: boolean;
   onBusChange: (bus: Props["bus"]) => void;
 }
