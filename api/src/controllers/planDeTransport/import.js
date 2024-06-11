@@ -20,9 +20,9 @@ const CohorteModel = require("../../models/cohort");
 const scanFile = require("../../utils/virusScanner");
 const { getMimeFromFile } = require("../../utils/file");
 
-const { validatePdtFile, computeImportSummary } = require("../../pdt/import/pdtImportService");
-const { formatTime } = require("../../pdt/import/pdtImportUtils");
-const { syncMergedBus } = require("../../pdt/ligneDeBus/ligneDeBusService");
+const { validatePdtFile, computeImportSummary } = require("../../planDeTransport/import/pdtImportService");
+const { formatTime } = require("../../planDeTransport/import/pdtImportUtils");
+const { syncMergedBus } = require("../../planDeTransport/ligneDeBus/ligneDeBusService");
 const { startSession } = require("../../mongo");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.

@@ -1,6 +1,7 @@
 import type { Document } from "mongoose";
 
 export type BusDocument = IBus & Document;
+export type BusTeamDocument = BusTeam & Document;
 
 export interface IBus {
   cohort: string;
@@ -30,6 +31,7 @@ export interface IBus {
 }
 
 export interface BusTeam {
+  _id?: string;
   role?: string;
   lastName?: string;
   firstName?: string;
