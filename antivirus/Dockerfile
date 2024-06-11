@@ -7,9 +7,9 @@ WORKDIR /build
 COPY . .
 
 RUN --mount=type=cache,target=/build/.npm/cache \
-    npx turbo prune --scope=$APP_NAME --out-dir ./out && \
-    cd out && \
-    npm install && \
+    npx turbo@^1.1.13 prune --scope=$APP_NAME --out-dir ./out &&
+    cd out &&
+    npm install &&
     rm -rf node_modules/.cache .npm/cache
 
 FROM node:18.20-alpine as antivirus
@@ -21,14 +21,14 @@ ENV HOST 0.0.0.0
 
 WORKDIR /service-national-universel
 
-RUN apk update && \
-    apk add clamav clamav-libunrar && \
+RUN apk update &&
+    apk add clamav clamav-libunrar &&
     freshclam
 
 COPY --chown=node:node --from=build /build/out .
 
-RUN echo "TCPSocket 3310" > /etc/clamav/clamd.conf
-RUN echo "TCPAddr 127.0.0.1" >> /etc/clamav/clamd.conf
+RUN echo "TCPSocket 3310" >/etc/clamav/clamd.conf
+RUN echo "TCPAddr 127.0.0.1" >>/etc/clamav/clamd.conf
 
 RUN chmod +x /service-national-universel/antivirus/start.sh
 
