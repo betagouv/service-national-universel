@@ -54,7 +54,7 @@ resource "scaleway_container" "api" {
   min_scale       = 4
   max_scale       = 20
   timeout         = 60
-  max_concurrency = 50
+  max_concurrency = 25
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
