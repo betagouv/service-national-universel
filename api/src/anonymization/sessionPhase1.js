@@ -1,10 +1,10 @@
 const { starify } = require("../utils/anonymise");
 
 function anonymize(item) {
-  item.zipCenter && (item.zipCenter = starify(item.zipCenter));
-  item.codeCenter && (item.codeCenter = starify(item.codeCenter));
-  item.centerName && (item.centerName = starify(item.centerName));
-  item.cityCenter && (item.cityCenter = starify(item.cityCenter));
+  item.zipCentre && (item.zipCentre = starify(item.zipCentre));
+  item.codeCentre && (item.codeCentre = starify(item.codeCentre));
+  item.nameCentre && (item.nameCentre = starify(item.nameCentre));
+  item.cityCentre && (item.cityCentre = starify(item.cityCentre));
   if (!["VALIDATED", "WAITING_VALIDATION"].includes(item.status)) item.status = "WAITING_VALIDATION";
   item.team &&
     (item.team = item.team.map((member) => {
