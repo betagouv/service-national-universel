@@ -78,11 +78,24 @@ export const validatePdtFile = async (
   const expectedColumns = Object.keys(errors);
   const missingColumns = expectedColumns.filter((e) => !columns.includes(e));
 
+  //check if all columns are present
   if (missingColumns.length) {
     missingColumns.forEach((e) => {
       errors[e].push({ line: 1, error: PDT_IMPORT_ERRORS.MISSING_COLUMN });
     });
     console.log("errors", errors);
+    return { ok: false, code: ERRORS.INVALID_BODY, errors };
+  }
+
+  //check if there are unexpected columns
+  columns.forEach((column) => {
+    if (!expectedColumns.includes(column)) {
+      errors[column] = errors[column] || [];
+      errors[column].push({ line: 1, error: PDT_IMPORT_ERRORS.UNEXPECTED_COLUMN });
+    }
+  });
+
+  if (Object.values(errors).some((error) => error.length > 0)) {
     return { ok: false, code: ERRORS.INVALID_BODY, errors };
   }
 

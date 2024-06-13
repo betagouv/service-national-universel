@@ -15,6 +15,7 @@ const PDT_IMPORT_ERRORS = {
   UNKNOWN_TRANSPORT_TYPE: "UNKNOWN_TRANSPORT_TYPE",
   CENTER_WITHOUT_SESSION: "CENTER_WITHOUT_SESSION",
   MISSING_COLUMN: "MISSING_COLUMN",
+  UNEXPECTED_COLUMN: "UNEXPECTED_COLUMN",
 };
 
 const PDT_IMPORT_ERRORS_TRANSLATION = {
@@ -37,6 +38,7 @@ const PDT_IMPORT_ERRORS_TRANSLATION = {
   UNKNOWN_TRANSPORT_TYPE: { text: "Type de transport inconnu : %s", tooltip: "Le type de transport peut être : bus, train ou avion." },
   CENTER_WITHOUT_SESSION: { text: "Le centre %s n'a pas de session sur ce séjour", tooltip: "Demandez à un modérateur de créer la session sur le centre." },
   MISSING_COLUMN: { text: "Colonne manquante ou mal orthographiée", tooltip: "Veuillez vérifier que la colonne est présente / bien orthographiée dans le fichier." },
+  UNEXPECTED_COLUMN: { text: "Colonne inattendue", tooltip: "Veuillez vérifier que la colonne n'est pas en trop dans le fichier." },
 };
 
 const centersInJulyClosingEarly = [

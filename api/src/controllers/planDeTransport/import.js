@@ -117,7 +117,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     const newLines = [];
     const promises = [];
     for (const line of importData.lines) {
-      promises.push(PlanTransportModel.findOne({ cohort: importData.cohort, busId: line["NUMERO DE LIGNE"] }));
+      promises.push(LigneBusModel.findOne({ cohort: importData.cohort, busId: line["NUMERO DE LIGNE"] }));
     }
     const oldLines = await Promise.all(promises);
     for (let i = 0; i < oldLines.length; i++) {
