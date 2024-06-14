@@ -1,13 +1,26 @@
-//https://doc.demarches-simplifiees.fr/~gitbook/pdf
-//https://www.demarches-simplifiees.fr/graphql/schema/index.html
-
+const fetch = require("node-fetch");
 import { IAppelAProjetType } from "@/cle/appelAProjetCle/appelAProjetType";
+import { buildDemarcheSimplifieeBody } from "@/providers/demarcheSimplifiee/demarcheSimplifieeQueryBuilder";
+const config = require("config");
+const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
 export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IAppelAProjetType[]> => {
-  const query = buildDemarcheSimplifieeRequest();
-  const appelAProjetResponse: Response = await fetch("", query);
-  const appelAProjetDto: AppelAProjetDemarcheSimplifieeDto[] = await appelAProjetResponse.json();
-  return mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDto);
+  const body = buildDemarcheSimplifieeBody(91716);
+  const appelAProjetResponse: Response = await fetch(DEMARCHE_SIMPLIFIEE_API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: config.API_DEMARCHE_SIMPLIFIEE_TOKEN },
+    body: JSON.stringify(body),
+  });
+  try {
+    const appelAProjetDto: AppelAProjetDemarcheSimplifieeDto[] = await appelAProjetResponse.json();
+    // TODO map
+    //@ts-ignore
+    return appelAProjetDto?.data?.demarche?.dossiers?.nodes as IAppelAProjetType[];
+  } catch (e) {
+    console.error(e);
+  }
+  return [];
+  // return mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDto);
 };
 
 const buildDemarcheSimplifieeRequest = () => {

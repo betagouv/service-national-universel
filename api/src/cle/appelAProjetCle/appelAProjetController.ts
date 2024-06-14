@@ -1,6 +1,7 @@
-import express, { Response } from "express";
 import passport from "passport";
+import express, { Response } from "express";
 import { UserRequest } from "@/controllers/request";
+import { syncAppelAProjet } from "@/cle/appelAProjetCle/appelAProjetService";
 
 const router = express.Router();
 router.post(
@@ -12,7 +13,8 @@ router.post(
 
   async (req: UserRequest, res: Response) => {
     try {
-      //
+      const appelAProjet = await syncAppelAProjet();
+      res.status(200).send({ ok: true, data: appelAProjet });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
@@ -36,3 +38,4 @@ router.post(
     }
   },
 );
+module.exports = router;

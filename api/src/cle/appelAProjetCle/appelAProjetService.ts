@@ -1,11 +1,11 @@
-import { getClassesAndEtablissementsFromAppelAProjets } from "@/providers/demarcheSimplifieeProvider";
+import { getClassesAndEtablissementsFromAppelAProjets } from "@/providers/demarcheSimplifiee/demarcheSimplifieeProvider";
 import { IReferent } from "@/models/referentType";
 import { IEtablissement } from "@/models/cle/etablissementType";
 import { IClasse } from "@/models/cle/classeType";
 
 export const syncAppelAProjet = async () => {
   const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
-
+  console.log("appelAProjets", appelAProjets);
   const referentsToCreate: IReferent[] = [];
   const referentsToLog: IReferent[] = [];
   const etablissementsToCreate: IEtablissement[] = [];
@@ -23,4 +23,5 @@ export const syncAppelAProjet = async () => {
     // if classe exists, update it
     // if not, create classe
   }
+  return appelAProjets;
 };

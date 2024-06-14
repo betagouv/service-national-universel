@@ -146,6 +146,7 @@ async function runAPI() {
   app.use("/young-edition", require("./controllers/young-edition"));
   app.use("/SNUpport", require("./controllers/SNUpport"));
   app.use("/classe", require("./classe/classe.controller"));
+  app.use("/cle/appel-a-projet", require("./cle/appelAProjetCle/appelAProjetController"));
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));
