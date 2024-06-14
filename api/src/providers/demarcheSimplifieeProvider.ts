@@ -22,9 +22,9 @@ const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDtos: Ap
         email: appelAProjetDto.Email,
       },
       classe: {
-        colorationExpected: appelAProjetDto["Quelle est la thématique dominante de votre projet ?"],
+        coloration: appelAProjetDto["Quelle est la thématique dominante de votre projet ?"],
         referent: {
-          firstName: appelAProjetDto["Prénom du référent"],
+          prenom: appelAProjetDto["Prénom du référent"],
         },
       },
     } as IAppelAProjetType;

@@ -7,8 +7,11 @@ export const syncAppelAProjet = async () => {
   const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
 
   const referentsToCreate: IReferent[] = [];
+  const referentsToLog: IReferent[] = [];
   const etablissementsToCreate: IEtablissement[] = [];
+  const etablissementsToUpdate: IEtablissement[] = [];
   const classesToCreate: IClasse[] = [];
+  const classesToUpdate: IClasse[] = [];
   for (const appelAProjet of appelAProjets) {
     // if referent exists, update it
     // if not, create referent

@@ -6,28 +6,28 @@ export type IAppelAProjetType = {
 export type IAppelAProjetEtablissement = {
   uai?: string;
   email: string;
-  name?: string;
-  department?: string;
+  nom?: string;
+  departement?: string;
   region?: string;
-  zip?: string;
-  city?: string;
+  codePostal?: string;
+  commune?: string;
   type?: string;
-  sector?: string;
+  secteur?: string;
 };
 
 export type IAppelAprojetClasse = {
-  colorationExpected: string;
-  numberOfStudentsExpected: number;
+  coloration: string;
+  nombreElevesPrevus: number;
   type: string;
-  quarterExpected: string;
-  dateConstraint: string;
-  level: string;
-  status: string;
+  trimestre: string;
+  contraintesDates: string;
+  niveau: string;
+  statut: string;
   referent: IAppelAProjetReferent;
 };
 
 export type IAppelAProjetReferent = {
-  firstName: string;
-  lastName: string;
+  prenom: string;
+  nom: string;
   email: string;
 };
