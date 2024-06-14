@@ -1,4 +1,4 @@
-import { formatDateFRTimezoneUTC, getZonedDate } from "./date";
+import { formatDateFRTimezoneUTC, getZonedDate, isNowBetweenDates } from "./date";
 
 describe("dates", () => {
   it("should return zoned date", () => {
@@ -17,5 +17,32 @@ describe("dates", () => {
     expect(date).toBe("03/06/2024");
     date = formatDateFRTimezoneUTC("2024-06-03T18:00:00.000+00:00");
     expect(date).toBe("03/06/2024");
+  });
+  it("should return true when calling isNowBetweenDates", () => {
+    const from = new Date();
+    const to = new Date();
+    from.setDate(from.getDate() - 1);
+    to.setDate(to.getDate() + 1);
+    expect(isNowBetweenDates(from.toISOString(), to.toISOString())).toBe(true);
+  });
+  it("should return false when calling isNowBetweenDates", () => {
+    const from = new Date();
+    const to = new Date();
+    from.setDate(from.getDate() - 2);
+    to.setDate(to.getDate() - 1);
+    expect(isNowBetweenDates(from.toISOString(), to.toISOString())).toBe(false);
+  });
+  it("should return true when calling isNowBetweenDates with 'to' and 'from' undefined", () => {
+    expect(isNowBetweenDates(undefined, undefined)).toBe(true);
+  });
+  it("should return true when calling isNowBetweenDates with 'from' equals undefined", () => {
+    const to = new Date();
+    to.setDate(to.getDate() + 1);
+    expect(isNowBetweenDates(undefined, to.toISOString())).toBe(true);
+  });
+  it("should return true when calling isNowBetweenDates with 'to' equals undefined", () => {
+    const from = new Date();
+    from.setDate(from.getDate() - 1);
+    expect(isNowBetweenDates(from.toISOString(), undefined)).toBe(true);
   });
 });

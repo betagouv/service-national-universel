@@ -108,14 +108,31 @@ const Schema = new mongoose.Schema({
   },
 
   // CLE
+  // CLE - update by referents
   cleUpdateCohortForReferentRegion: { type: Boolean, default: false, required: false },
+  cleUpdateCohortForReferentRegionDate: { from: { type: Date }, to: { type: Date } },
+  cleUpdateCohortForReferentDepartment: { type: Boolean, default: false, required: false },
+  cleUpdateCohortForReferentDepartmentDate: { from: { type: Date }, to: { type: Date } },
+  // CLE - display cohorts
   cleDisplayCohortsForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForAdminCLEDate: { from: { type: Date }, to: { type: Date } },
   cleDisplayCohortsForReferentClasse: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForReferentClasseDate: { from: { type: Date }, to: { type: Date } },
+  // CLE - update centers
   cleUpdateCentersForReferentRegion: { type: Boolean, default: false, required: false },
+  cleUpdateCentersForReferentRegionDate: { from: { type: Date }, to: { type: Date } },
+  cleUpdateCentersForReferentDepartment: { type: Boolean, default: false, required: false },
+  cleUpdateCentersForReferentDepartmentDate: { from: { type: Date }, to: { type: Date } },
+  // CLE - display centers
   cleDisplayCentersForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayCentersForAdminCLEDate: { from: { type: Date }, to: { type: Date } },
   cleDisplayCentersForReferentClasse: { type: Boolean, default: false, required: false },
+  cleDisplayCentersForReferentClasseDate: { from: { type: Date }, to: { type: Date } },
+  // CLE - PDR
   cleDisplayPDRForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayPDRForAdminCLEDate: { from: { type: Date }, to: { type: Date } },
   cleDisplayPDRForReferentClasse: { type: Boolean, default: false, required: false },
+  cleDisplayPDRForReferentClasseDate: { from: { type: Date }, to: { type: Date } },
 
   validationDate: {
     type: Date,

@@ -1,4 +1,5 @@
 export type CohortDto = {
+  snuId: string;
   name: string;
   type: string;
   dateStart: Date;
@@ -27,20 +28,32 @@ export type CohortDto = {
   manualAffectionOpenForReferentDepartment?: boolean;
   pdrChoiceLimitDate?: Date | null;
   cleUpdateCohortForReferentRegion?: boolean;
+  cleUpdateCohortForReferentDepartment?: boolean;
   cleDisplayCohortsForAdminCLE?: boolean;
+  cleDisplayCohortsForAdminCLEDate?: ToFromDate;
   cleDisplayCohortsForReferentClasse?: boolean;
+  cleDisplayCohortsForReferentClasseDate?: ToFromDate;
   cleUpdateCentersForReferentRegion?: boolean;
+  cleUpdateCentersForReferentDepartment?: boolean;
   cleDisplayCentersForAdminCLE?: boolean;
   cleDisplayCentersForReferentClasse?: boolean;
   cleDisplayPDRForAdminCLE?: boolean;
   cleDisplayPDRForReferentClasse?: boolean;
+  cleUpdateCohortForReferentRegionDate?: ToFromDate;
+  cleUpdateCohortForReferentDepartmentDate?: ToFromDate;
+  cleUpdateCentersForReferentRegionDate?: ToFromDate;
+  cleUpdateCentersForReferentDepartmentDate?: ToFromDate;
+  cleDisplayCentersForAdminCLEDate?: ToFromDate;
+  cleDisplayCentersForReferentClasseDate?: ToFromDate;
+  cleDisplayPDRForAdminCLEDate?: ToFromDate;
+  cleDisplayPDRForReferentClasseDate?: ToFromDate;
   busListAvailability?: boolean;
   youngCheckinForHeadOfCenter?: boolean;
   youngCheckinForAdmin?: boolean;
   youngCheckinForRegionReferent?: boolean;
   youngCheckinForDepartmentReferent?: boolean;
   daysToValidate?: number | null;
-  uselessInformation?: object | null;
+  uselessInformation?: Record<string, any> | null;
   validationDate?: Date | null;
   validationDateForTerminaleGrade?: Date | null;
   daysToValidateForTerminalGrade?: number | null;
@@ -51,4 +64,9 @@ export type CohortDto = {
   } | null;
 };
 
-export type UpdateCohortDto = Omit<CohortDto, "name" | "type">;
+export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId">;
+
+type ToFromDate = {
+  from: string | null;
+  to: string | null;
+};

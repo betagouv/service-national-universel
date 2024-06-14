@@ -162,6 +162,12 @@ const getDateTimeByTimeZoneOffset = (timeZoneOffset = null) => {
   return new Date(now);
 }
 
+const isNowBetweenDates = (from, to) => {
+    if (!from && !to) return true;
+    const now = new Date().toISOString();
+    return (from <= now && now <= to) || (!from && now <= to) || (from <= now && !to);
+};
+
 export {
   MONTHS,
   formatDay,
@@ -182,4 +188,5 @@ export {
   isIsoDate,
   calculateAge,
   formatDateForPostGre,
+    isNowBetweenDates
 };
