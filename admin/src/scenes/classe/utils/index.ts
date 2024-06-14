@@ -1,6 +1,7 @@
 import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE } from "snu-lib";
 import { ReferentRoleDto, CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
+import { User } from "@/types";
 
 export const statusClassForBadge = (status) => {
   let statusClasse;
@@ -36,7 +37,7 @@ export const statusClassForBadge = (status) => {
   return statusClasse;
 };
 
-export function getRights(user: ReferentRoleDto, classe, cohort: CohortDto) {
+export function getRights(user: User, classe, cohort: CohortDto | undefined) {
   if (!user || !classe || !cohort) return {};
   return {
     canEdit:
@@ -52,7 +53,7 @@ export function getRights(user: ReferentRoleDto, classe, cohort: CohortDto) {
   };
 }
 
-const showCohort = (cohort: CohortDto | undefined, user: ReferentRoleDto | undefined): boolean => {
+const showCohort = (cohort: CohortDto | undefined, user: User | undefined): boolean => {
   if (!user || !cohort) return false;
   let showCohort = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role);
   if (!showCohort && user?.role === ROLES.ADMINISTRATEUR_CLE) {
@@ -65,7 +66,7 @@ const showCohort = (cohort: CohortDto | undefined, user: ReferentRoleDto | undef
   return showCohort;
 };
 
-const showCenter = (cohort: CohortDto | undefined, user: ReferentRoleDto | undefined): boolean => {
+const showCenter = (cohort: CohortDto | undefined, user: User | undefined): boolean => {
   if (!user || !cohort) return false;
   let showCenter = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role);
   if (!showCenter && user?.role === ROLES.ADMINISTRATEUR_CLE) {
@@ -78,7 +79,7 @@ const showCenter = (cohort: CohortDto | undefined, user: ReferentRoleDto | undef
   return showCenter;
 };
 
-const showPdr = (cohort: CohortDto | undefined, user: ReferentRoleDto | undefined): boolean => {
+const showPdr = (cohort: CohortDto | undefined, user: User | undefined): boolean => {
   if (!user || !cohort) return false;
   let showPdr = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role);
   if (!showPdr && user?.role === ROLES.ADMINISTRATEUR_CLE) {
