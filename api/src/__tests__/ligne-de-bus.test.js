@@ -126,7 +126,7 @@ describe("Meeting point", () => {
         youngCapacity: 10,
         returnDate: new Date(),
         departuredDate: new Date(),
-        busId: "bus_id",
+        busId: "bus_id_1",
         cohort,
       });
       await LigneBusModel.create({
@@ -141,7 +141,7 @@ describe("Meeting point", () => {
         youngCapacity: 10,
         returnDate: new Date(),
         departuredDate: new Date(),
-        busId: "bus_id",
+        busId: "bus_id_2",
         cohort,
       });
 

@@ -275,6 +275,7 @@ Schema.plugin(patchHistory, {
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 Schema.index({ cohort: 1 });
+Schema.index({ cohort: 1, busId: 1 }, { unique: true });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
