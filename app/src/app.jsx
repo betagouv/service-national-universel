@@ -149,7 +149,7 @@ const OptionalLogIn = () => {
       }
     }
     fetchData();
-  }, []);
+  }, []); //eslint-disable-line
 
   if (loading) return <Loader />;
   if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
@@ -289,6 +289,7 @@ const Espace = () => {
         {shouldDisplayMaintenanceNotice && (
           <Notice>Maintenance planifiée jeudi 18 avril de 20h à minuit&nbsp;: vous ne serez pas en mesure d'accéder aux plateformes pendant cette période.</Notice>
         )}
+
         <Switch>
           <SentryRoute exact path="/" component={Home} />
           <SentryRoute path="/account" component={Account} />

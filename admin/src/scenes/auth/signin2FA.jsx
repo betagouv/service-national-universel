@@ -110,8 +110,7 @@ export default function Signin() {
 
                 <label className="text-sm text-brand-black/80 mt-2">
                   <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} className="mr-2" />
-                  <strong>Faire confiance à ce navigateur :</strong> la double authentification vous sera demandée à nouveau dans un délai d’un mois. Ne pas cocher cette case si
-                  vous utilisez un ordinateur partagé ou public
+                  Ne plus avoir à saisir de code pendant 1 mois (Ne pas cocher si cet ordinateur est partagé ou public).
                 </label>
 
                 <div className="flex justify-end">

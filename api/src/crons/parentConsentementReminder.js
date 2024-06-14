@@ -1,5 +1,6 @@
 const { capture } = require("../sentry");
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
@@ -8,9 +9,12 @@ const config = require("config");
 exports.handler = async () => {
   try {
     let countNotice = 0;
-    const now = Date.now();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const cohorts = await CohortModel.find({ name: { $regex: `${currentYear}`, $options: "i" } });
+    const cohortNames = cohorts.map((cohort) => cohort.name);
     const cursor = await YoungModel.find({
-      cohort: /2023/,
+      cohort: { $in: cohortNames },
       status: { $in: ["IN_PROGRESS", "REINSCRIPTION"] },
       parent1AllowSNU: { $exists: false },
       inscriptionDoneDate: { $exists: true, $lt: lessDays(now, 7), $gte: lessDays(now, 8) },

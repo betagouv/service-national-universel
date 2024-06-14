@@ -54,7 +54,7 @@ resource "scaleway_container" "api" {
   min_scale       = 4
   max_scale       = 20
   timeout         = 60
-  max_concurrency = 50
+  max_concurrency = 25
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
@@ -64,7 +64,6 @@ resource "scaleway_container" "api" {
   }
 
   secret_environment_variables = {
-    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }
@@ -84,7 +83,7 @@ resource "scaleway_container" "admin" {
   cpu_limit       = 256
   memory_limit    = 256
   min_scale       = 1
-  max_scale       = 1
+  max_scale       = 20
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"
@@ -110,7 +109,7 @@ resource "scaleway_container" "app" {
   cpu_limit       = 256
   memory_limit    = 256
   min_scale       = 1
-  max_scale       = 1
+  max_scale       = 20
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"
@@ -172,7 +171,6 @@ resource "scaleway_container" "crons" {
   }
 
   secret_environment_variables = {
-    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }

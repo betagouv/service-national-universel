@@ -75,7 +75,7 @@ resource "scaleway_container" "api" {
   cpu_limit       = 768
   memory_limit    = 1024
   min_scale       = 1
-  max_scale       = 1
+  max_scale       = 3
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"
@@ -83,11 +83,10 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "NODE_ENV"    = "staging"
+    "NODE_ENV"       = "staging"
   }
 
   secret_environment_variables = {
-    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }
@@ -107,7 +106,7 @@ resource "scaleway_container" "admin" {
   cpu_limit       = 256
   memory_limit    = 256
   min_scale       = 1
-  max_scale       = 1
+  max_scale       = 2
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"
@@ -133,7 +132,7 @@ resource "scaleway_container" "app" {
   cpu_limit       = 256
   memory_limit    = 256
   min_scale       = 1
-  max_scale       = 1
+  max_scale       = 2
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"

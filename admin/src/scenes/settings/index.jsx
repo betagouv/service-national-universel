@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { BiLoaderAlt } from "react-icons/bi";
-
+import { isAfter } from "date-fns";
 import { isSuperAdmin, ROLES, COHORT_TYPE } from "snu-lib";
 import { Container } from "@snu/ds/admin";
 
@@ -44,6 +44,7 @@ export default function Settings() {
     ...settings,
     ...uselessSettings,
   });
+  const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(false);
 
   const getCohort = async () => {
     try {
@@ -86,6 +87,9 @@ export default function Settings() {
   useEffect(() => {
     if (!mounted) return;
     setNoChange(false);
+    if (!showSpecificDatesReInscription && (data.reInscriptionStartDate || data.reInscriptionEndDate)) {
+      setShowSpecificDatesReInscription(true);
+    }
   }, [data]);
 
   const onSubmit = async () => {
@@ -96,13 +100,17 @@ export default function Settings() {
       if (!data.inscriptionStartDate) err.inscriptionStartDate = "La date d'ouverture des inscriptions est obligatoire";
       if (!data.inscriptionEndDate) err.inscriptionEndDate = "La date de fermeture des inscriptions est obligatoire";
       if (!data.instructionEndDate) err.instructionEndDate = "La date de fermeture des inscriptions est obligatoire";
+
+      if (isAfter(new Date(data.reInscriptionStartDate), new Date(data.reInscriptionEndDate)))
+        err.reInscriptionStartDate = "La date d'ouverture des réinscriptions est antérieure a la date de cloture.";
+      if (isAfter(new Date(data.reInscriptionEndDate), new Date(data.inscriptionEndDate)))
+        err.reInscriptionEndDate = "Les dates de cloture de réinscription ne peuvent pas etre postérieures a celles de réinscription.";
       setError(err);
       if (Object.values(err).length > 0) {
         return toastr.warning("Veuillez corriger les erreurs dans le formulaire");
       }
 
       setIsLoading(true);
-      delete data.name;
       delete data.snuId;
       const { ok, code } = await api.put(`/cohort/${encodeURIComponent(cohort)}`, data);
       if (!ok) {
@@ -299,6 +307,47 @@ export default function Settings() {
                       readOnly={readOnly}
                       disabled={isLoading}
                     />
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-gray-900  text-xs font-medium">Réinscriptions</p>
+                    </div>
+                    <SimpleToggle
+                      label="Dates spécifiques"
+                      disabled={isLoading || readOnly}
+                      value={showSpecificDatesReInscription}
+                      onChange={(v) => {
+                        if (v == false) setData({ ...data, reInscriptionEndDate: null, reInscriptionStartDate: null });
+                        setShowSpecificDatesReInscription(v);
+                      }}
+                    />
+                    {showSpecificDatesReInscription && (
+                      <>
+                        <DatePickerInput
+                          mode="single"
+                          isTime
+                          label="Ouverture"
+                          placeholder="Date et heure"
+                          value={data.reInscriptionStartDate || data.inscriptionStartDate}
+                          error={error.reInscriptionStartDate}
+                          onChange={(e) => setData({ ...data, reInscriptionStartDate: e })}
+                          readOnly={readOnly}
+                          disabled={isLoading}
+                        />
+                        <DatePickerInput
+                          mode="single"
+                          isTime
+                          label="Fermeture"
+                          placeholder="Date et heure"
+                          value={data.reInscriptionEndDate || data.inscriptionEndDate}
+                          error={error.reInscriptionEndDate}
+                          // onChange={(e) => {}}
+                          onChange={(e) => setData({ ...data, reInscriptionEndDate: e })}
+                          readOnly={readOnly}
+                          disabled={isLoading || !data.inscriptionEndDate}
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="flex w-[10%] justify-center items-center">

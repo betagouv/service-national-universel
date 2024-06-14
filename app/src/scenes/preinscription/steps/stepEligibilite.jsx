@@ -10,7 +10,6 @@ import dayjs from "dayjs";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
-import ModalRecap from "../components/ModalRecap";
 import { PaddedContainer } from "@snu/ds/dsfr";
 
 import IconFrance from "../../../assets/IconFrance";
@@ -36,7 +35,6 @@ export default function StepEligibilite() {
   const [error, setError] = React.useState({});
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [confirmationModal, setConfirmationModal] = React.useState({ isOpen: false, onConfirm: null });
 
   const history = useHistory();
 
@@ -108,14 +106,7 @@ export default function StepEligibilite() {
       return;
     }
 
-    if (isLoggedIn) {
-      setConfirmationModal({
-        isOpen: true,
-        onConfirm: onSubmit,
-      });
-    } else {
       onSubmit();
-    }
   };
 
   const onSubmit = async () => {
@@ -155,6 +146,7 @@ export default function StepEligibilite() {
       birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
       grade: data.scolarity,
       zip: data.zip,
+      isReInscription: !!data.isReInscription,
     });
 
     if (!ok) {
@@ -277,21 +269,6 @@ export default function StepEligibilite() {
             </>
           )}
           <SignupButtons onClickNext={onVerify} disabled={loading} />
-          {confirmationModal.isOpen && (
-            <ModalRecap
-              isOpen={confirmationModal?.isOpen}
-              title={"Les informations sont-elles correctes ?"}
-              message={"Ces informations seront utilisées pour déterminer votre éligibilité. Si vous n'êtes pas éligible, vous ne pourrez plus revenir en arrière."}
-              confirmText="Oui, confirmer"
-              cancelText="Non"
-              young={data}
-              onCancel={() => setConfirmationModal({ isOpen: false, onConfirm: null })}
-              onConfirm={async () => {
-                await confirmationModal?.onConfirm();
-                setConfirmationModal({ isOpen: false, onConfirm: null });
-              }}
-            />
-          )}
         </div>
       </DSFRContainer>
     </>

@@ -10,13 +10,7 @@ function classNames(...classes) {
 }
 
 export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, isTime, placeholder, readOnly = false, className }) {
-  const [time, setTime] = useState("00:00");
-
-  useEffect(() => {
-    if (value) {
-      setTime(`${String(dayjs(value).utc().hour()).padStart(2, 0)}:${String(dayjs(value).utc().minute()).padStart(2, 0)}`);
-    }
-  }, [value]);
+  const [time, setTime] = useState(value ? `${String(dayjs(value).utc().hour()).padStart(2, 0)}:${String(dayjs(value).utc().minute()).padStart(2, 0)}` : "00:00");
 
   useEffect(() => {
     handleChange(value);

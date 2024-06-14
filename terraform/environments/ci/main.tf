@@ -67,7 +67,7 @@ resource "scaleway_registry_namespace" "main" {
   is_public   = false
 }
 
-# Application user
+# Deploy application user
 resource "scaleway_iam_application" "main" {
   name        = "snu-deploy-${local.env}"
   description = "Application allowed to deploy apps in '${local.env}'"
@@ -89,6 +89,26 @@ resource "scaleway_iam_policy" "deploy" {
     permission_set_names = [
       "ProjectReadOnly",
       "IAMReadOnly"
+    ]
+  }
+}
+
+# GetSecret application user
+resource "scaleway_iam_application" "get_secret" {
+  name        = "snu-get-secret-${local.env}"
+  description = "Application allowed to retrieve secrets in '${local.env}'"
+}
+
+# GetSecret policy
+resource "scaleway_iam_policy" "get_secret" {
+  name           = "snu-get-secret-${local.env}-policy"
+  description    = "Allow to retrieve secrets in '${local.env}'"
+  application_id = scaleway_iam_application.get_secret.id
+  rule {
+    project_ids = [scaleway_account_project.main.id]
+    permission_set_names = [
+      "SecretManagerReadOnly",
+      "SecretManagerSecretAccess",
     ]
   }
 }
@@ -124,11 +144,10 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "NODE_ENV"    = "ci"
+    "NODE_ENV"       = "ci"
   }
 
   secret_environment_variables = {
-    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }

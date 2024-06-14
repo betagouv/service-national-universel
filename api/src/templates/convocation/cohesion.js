@@ -195,7 +195,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
   doc.font(FONT).text(` est prévu`, { continued: true });
   if (!isLocalTransport(young)) {
     doc.font(FONT_BOLD).text(` le ${dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")}`, { continued: true });
-    doc.font(FONT_BOLD).text(` à ${meetingPoint ? ligneToPoint.returnHour : "11:00"}`, { continued: true });
+    doc.font(FONT_BOLD).text(` à ${meetingPoint && ligneToPoint ? ligneToPoint.returnHour : "11:00"}`, { continued: true });
   }
   doc.font(FONT).text(` au même endroit que le jour du départ en centre.`);
 

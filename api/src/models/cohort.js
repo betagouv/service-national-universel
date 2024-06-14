@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { isAfter, isWithinInterval } = require("date-fns");
-const { COHORT_TYPE, COHORT_TYPE_LIST } = require("snu-lib");
+const { COHORT_TYPE, COHORT_TYPE_LIST, getDateTimeByTimeZoneOffset } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 
 const MODELNAME = "cohort";
@@ -84,6 +84,8 @@ const Schema = new mongoose.Schema({
   inscriptionEndDate: { type: Date, required: true },
   instructionEndDate: { type: Date, required: true },
   inscriptionModificationEndDate: { type: Date },
+  reInscriptionStartDate: { type: Date || null },
+  reInscriptionEndDate: { type: Date || null },
 
   buffer: {
     type: Number,
@@ -337,12 +339,40 @@ Schema.virtual("fromUser").set(function (fromUser) {
   }
 });
 
-Schema.virtual("isInscriptionOpen").get(function () {
-  const now = new Date();
+Schema.methods.getIsInstructionOpen = function (timeZoneOffset) {
+  const now = getDateTimeByTimeZoneOffset(timeZoneOffset);
+  const end = this.instructionEndDate;
+  if (!end || isAfter(now, end)) return false;
+  return true;
+};
+
+Schema.virtual("isInstructionOpen").get(function () {
+  return this.getIsInstructionOpen();
+});
+
+Schema.methods.getIsInscriptionOpen = function (timeZoneOffset) {
+  const now = getDateTimeByTimeZoneOffset(timeZoneOffset);
   const start = this.inscriptionStartDate;
   const end = this.inscriptionEndDate;
   if (!start || !end || isAfter(start, end)) return false;
   return isWithinInterval(now, { start, end });
+};
+
+Schema.virtual("isInscriptionOpen").get(function () {
+  return this.getIsInscriptionOpen();
+});
+
+Schema.methods.getIsReInscriptionOpen = function (timeZoneOffset) {
+  const now = getDateTimeByTimeZoneOffset(timeZoneOffset);
+  const start = this.reInscriptionStartDate;
+  const end = this.reInscriptionEndDate;
+  if (!start || !end) return this.getIsInscriptionOpen(timeZoneOffset);
+  if (isAfter(start, end)) return false;
+  return isWithinInterval(now, { start, end });
+};
+
+Schema.virtual("isReInscriptionOpen").get(function () {
+  return this.getIsReInscriptionOpen();
 });
 
 Schema.pre("save", function (next) {
