@@ -4,7 +4,7 @@ import { youngCanWithdraw, isCle } from "snu-lib";
 import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import { wasYoungExcluded } from "../../utils";
-import Withdrawal from "../account/scenes/general/components/Withdrawal";
+import Withdrawal from "../account/scenes/withdrawn/components/Withdrawal";
 import Engagement from "./components/Engagement";
 
 export default function Phase1NotDone() {
