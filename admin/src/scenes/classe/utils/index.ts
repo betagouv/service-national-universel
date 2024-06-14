@@ -1,5 +1,6 @@
 import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE } from "snu-lib";
 import { ReferentRoleDto, CohortDto } from "snu-lib/src/dto";
+import api from "@/services/api";
 
 export const statusClassForBadge = (status) => {
   let statusClasse;
@@ -87,4 +88,52 @@ const showPdr = (cohort: CohortDto | undefined, user: ReferentRoleDto | undefine
     showPdr = !!cohort.cleDisplayPDRForReferentClasse && isNowBetweenDates(cohort.cleDisplayPDRForReferentClasseDate?.from, cohort.cleDisplayPDRForReferentClasseDate?.to);
   }
   return showPdr;
+};
+
+export const searchSessions = async ({ q, cohort }) => {
+  if (!cohort || cohort === "CLE 23-24") return [];
+
+  const query = {
+    filters: {
+      cohort: [cohort],
+    },
+    page: 0,
+    size: 10,
+  };
+  // @ts-ignore
+  if (q) query.filters.searchbar = [q];
+
+  const { responses } = await api.post(`/elasticsearch/sessionphase1/search?needCohesionCenterInfo=true`, query);
+  return responses[0].hits.hits.map((hit) => {
+    return {
+      value: hit._source,
+      _id: hit._id,
+      label: hit._source.cohesionCenter.name,
+      session: { ...hit._source, _id: hit._id },
+    };
+  });
+};
+
+export const searchPointDeRassemblements = async ({ q, cohort }) => {
+  if (!cohort || cohort === "CLE 23-24") return [];
+
+  const query = {
+    filters: {
+      cohorts: [cohort],
+    },
+    page: 0,
+    size: 10,
+  };
+  // @ts-ignore
+  if (q) query.filters.searchbar = [q];
+
+  const { responses } = await api.post(`/elasticsearch/pointderassemblement/search`, query);
+  return responses[0].hits.hits.map((hit) => {
+    return {
+      value: hit._source,
+      _id: hit._id,
+      label: `${hit._source.name}, ${hit._source.department}`,
+      pointDeRassemblement: { ...hit._source, _id: hit._id },
+    };
+  });
 };
