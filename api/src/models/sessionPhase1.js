@@ -238,6 +238,5 @@ Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["tea
 Schema.index({ cohesionCenterId: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
-if (config.ENVIRONMENT === "production") OBJ.syncIndexes();
 
 module.exports = OBJ;
