@@ -11,13 +11,15 @@ import BackLink from "./components/BackLink";
 import AccountRepresentantsPage from "./scenes/representants";
 import AccountSchoolSituationPage from "./scenes/school-situation";
 import AccountSpecialSituationsPage from "./scenes/special-situations";
+import AccountWithdrawnPage from "./scenes/withdrawn";
 import Tabs from "../../components/nav/Tabs";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import useAuth from "@/services/useAuth";
+import { youngCanWithdraw } from "snu-lib";
 
 const Account = () => {
   useDocumentTitle("Mon profil");
-  const { isCLE } = useAuth();
+  const { isCLE, young } = useAuth();
 
   const ACCOUNT_PAGES = {
     general: {
@@ -40,6 +42,12 @@ const Account = () => {
       title: "Situations particulières",
       key: "/account/special-situations",
     },
+    ...(youngCanWithdraw(young) && {
+      withdrawn: {
+        title: "Se désister",
+        key: "/account/withdrawn",
+      },
+    }),
   };
   const device = useDevice();
   const { pathname } = useLocation();
@@ -90,6 +98,7 @@ const Account = () => {
           <SentryRoute path="/account/representants" component={AccountRepresentantsPage} />
           <SentryRoute path="/account/school-situation" component={AccountSchoolSituationPage} />
           <SentryRoute path="/account/special-situations" component={AccountSpecialSituationsPage} />
+          <SentryRoute path="/account/withdrawn" component={AccountWithdrawnPage} />
         </Switch>
       </div>
     </>
