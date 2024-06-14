@@ -5,7 +5,6 @@ import { IClasse } from "@/models/cle/classeType";
 
 export const syncAppelAProjet = async () => {
   const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
-  console.log("appelAProjets", appelAProjets);
   const referentsToCreate: IReferent[] = [];
   const referentsToLog: IReferent[] = [];
   const etablissementsToCreate: IEtablissement[] = [];

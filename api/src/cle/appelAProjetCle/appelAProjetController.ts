@@ -16,6 +16,7 @@ router.post(
       const appelAProjet = await syncAppelAProjet();
       res.status(200).send({ ok: true, data: appelAProjet });
     } catch (e) {
+      console.error(e);
       res.status(500).json({ error: e.message });
     }
   },

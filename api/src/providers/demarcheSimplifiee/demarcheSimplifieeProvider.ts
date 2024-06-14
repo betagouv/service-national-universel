@@ -6,20 +6,16 @@ const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/gra
 
 export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IAppelAProjetType[]> => {
   const body = buildDemarcheSimplifieeBody(91716);
+
   const appelAProjetResponse: Response = await fetch(DEMARCHE_SIMPLIFIEE_API, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: config.API_DEMARCHE_SIMPLIFIEE_TOKEN },
     body: JSON.stringify(body),
   });
-  try {
-    const appelAProjetDto: AppelAProjetDemarcheSimplifieeDto[] = await appelAProjetResponse.json();
-    // TODO map
-    //@ts-ignore
-    return appelAProjetDto?.data?.demarche?.dossiers?.nodes as IAppelAProjetType[];
-  } catch (e) {
-    console.error(e);
-  }
-  return [];
+  const appelAProjetDto: AppelAProjetDemarcheSimplifieeDto[] = await appelAProjetResponse.json();
+  // TODO map
+  //@ts-ignore
+  return appelAProjetDto?.data?.demarche?.dossiers?.nodes as IAppelAProjetType[];
   // return mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDto);
 };
 
