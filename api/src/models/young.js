@@ -2202,6 +2202,5 @@ Schema.index({ sessionPhase1Id: 1, status: 1 });
 Schema.index({ classeId: -1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
-if (config.ENVIRONMENT === "production") OBJ.syncIndexes();
 
 module.exports = OBJ;

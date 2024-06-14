@@ -22,6 +22,4 @@ const Schema = new mongoose.Schema(
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 
-OBJ.syncIndexes(); // Remove existing index
-
 module.exports = OBJ;
