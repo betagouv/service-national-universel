@@ -32,6 +32,12 @@ if ! [[ -x "$(command -v mongodump)" ]]; then
   exit 1
 fi
 
+# uuidgen
+if ! [[ -x "$(command -v uuidgen)" ]]; then
+  echo 'ERROR: uuidgen is not installed' >&2
+  exit 1
+fi
+
 set -o pipefail
 set -e
 
@@ -101,6 +107,10 @@ fi
 
 db_name=$(ls -1 $dump_dir | head -n 1)
 
+echo "Export existing admin referents"
+admin_users=$(uuidgen)
+mongoexport --quiet --query='{"email":{"$regex":"@beta.gouv.fr|@example.org|@selego.co|@snu.gouv.fr"},"role":"admin"}' --collection=referents $dst_db_uri > $admin_users
+
 
 echo "Drop collections"
 
@@ -128,7 +138,11 @@ do
     | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
 done
 
+echo "Reimport admin referents"
+mongoimport --quiet --collection=referents $dst_db_uri < $admin_users
 
+
+rm $admin_users
 rm $drop_collections_filename
 if [[ $remove_dump_dir == "true" ]]
 then
