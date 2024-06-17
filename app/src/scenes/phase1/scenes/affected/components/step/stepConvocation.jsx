@@ -21,8 +21,10 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
   const dispatch = useDispatch();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [openConvocation, setOpenConvocation] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const downloadConvocation = async () => {
+    setLoading(true);
     try {
       plausibleEvent("Phase1/telechargement convocation");
       await downloadPDF({
@@ -39,6 +41,7 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
       console.log(e);
       toastr.error("Une erreur est survenue lors de l'édition de votre convocation", e.message);
     }
+    setLoading(false);
   };
 
   const handleMail = async () => {
@@ -76,6 +79,7 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
         <div className="w-full md:w-auto mt-1 md:mt-0 flex flex-col md:flex-row-reverse gap-2">
           <button
             onClick={downloadConvocation}
+            disabled={loading}
             className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
               isDone ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}>
