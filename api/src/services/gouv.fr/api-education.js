@@ -1,6 +1,9 @@
 const queryString = require("querystring");
 const { capture } = require("../../sentry");
 
+//TODO : remove
+//https://data.education.gouv.fr/api/explore/v2.1/console
+
 const apiEducation = async ({ filters, page, size }, path, options = {}) => {
   try {
     const type = filters.find((filter) => filter.key === "type")?.value ?? [];

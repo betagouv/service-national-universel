@@ -55,4 +55,5 @@ module.exports = {
   JVA_TOKEN: undefined,
   JVA_API_KEY: undefined,
   REDIS_URL: undefined,
+  API_DEMARCHE_SIMPLIFIEE_TOKEN: undefined,
 };
