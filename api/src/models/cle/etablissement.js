@@ -96,7 +96,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO update with the good type enum
   type: {
     type: [String],
     enum: CLE_TYPE_LIST,
@@ -105,12 +104,38 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO update with the good sector enum
   sector: {
     type: [String],
     enum: CLE_SECTOR_LIST,
     documentation: {
       description: "Secteur de l'établissement",
+    },
+  },
+
+  state: {
+    type: String,
+    required: true,
+    enum: ["active", "inactive"],
+    default: "inactive",
+    documentation: {
+      description: "Etat de l'etablissement, active si au moins un eleves inscrits dans l'année scolaire en cours",
+    },
+  },
+
+  academy: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Académie de l'établissement",
+    },
+  },
+
+  schoolYears: {
+    type: [String],
+    required: true,
+    default: [],
+    documentation: {
+      description: "Liste des années scolaires",
     },
   },
 

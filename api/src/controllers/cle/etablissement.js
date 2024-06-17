@@ -84,6 +84,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       city: Joi.string().required(),
       department: Joi.string().required(),
       region: Joi.string().required(),
+      academy: Joi.string().required(),
+      state: Joi.string().valid("active", "inactive").required(),
+      schoolYears: Joi.array().items(Joi.string()).required(),
       type: Joi.array()
         .items(Joi.string().valid(...CLE_TYPE_LIST))
         .required(),
