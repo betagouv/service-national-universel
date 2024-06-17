@@ -160,6 +160,24 @@
       "options": {
         "cwd": "./pdf"
       }
+    },
+    {
+      "label": "Open coverage",
+      "command": "open coverage/lcov-report/index.html",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./api"
+      }
+    },
+    {
+      "label": "Run&Open coverage",
+      "command": "npm run coverage; open coverage/lcov-report/index.html",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./api"
+      }
     }
   ]
 }
