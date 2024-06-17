@@ -45,6 +45,7 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
   };
 
   const handleMail = async () => {
+    setLoading(true);
     try {
       let template = "cohesion";
       let type = "convocation";
@@ -59,6 +60,7 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
       toastr.error("Erreur lors de l'envoi du document : ", e.message);
       setModal({ isOpen: false, onConfirm: null });
     }
+    setLoading(false);
   };
 
   if (!isEnabled) {
@@ -115,7 +117,15 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
         title="Envoi de document par mail"
         subTitle={`Vous allez recevoir le lien de téléchargement de votre convocation par mail à l'adresse ${young.email}.`}
       />
-      <ConvocationModal isOpen={openConvocation} setIsOpen={setOpenConvocation} center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+      <ConvocationModal
+        isOpen={openConvocation}
+        setIsOpen={setOpenConvocation}
+        loading={loading}
+        center={center}
+        meetingPoint={meetingPoint}
+        departureDate={departureDate}
+        returnDate={returnDate}
+      />
     </StepCard>
   );
 }
