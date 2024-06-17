@@ -2,8 +2,8 @@ import passport from "passport";
 import express, { Response } from "express";
 import { UserRequest } from "../../controllers/request";
 import { syncAppelAProjet } from "./appelAProjetService";
-import { isSuperAdmin } from "snu-lib/src/roles";
 import { ERRORS } from "../../utils";
+import { isSuperAdmin } from "snu-lib";
 
 const router = express.Router();
 router.post(

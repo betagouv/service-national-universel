@@ -1,12 +1,13 @@
+import fetch from "node-fetch";
+import config from "config";
+
 import { IAppelAProjetType } from "../../cle/appelAProjetCle/appelAProjetType";
 import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
 
-const fetch = require("node-fetch");
-
-const config = require("config");
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
 export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IAppelAProjetType[]> => {
+  // TODO get next page by cursor
   const body = buildDemarcheSimplifieeBody(91716);
 
   const appelAProjetResponse: Response = await fetch(DEMARCHE_SIMPLIFIEE_API, {
