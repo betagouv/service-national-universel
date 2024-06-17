@@ -4,5 +4,5 @@ import {
 }
 import {
   to = scaleway_secret.ci
-  id = "fr-par/231e092f-a08e-4391-b1bb-e29a559df818"
+  id = "fr-par/8c015b2d-b99a-4325-9df9-612b82097cda"
 }
