@@ -16,6 +16,7 @@ import {
   TYPE_CLASSE_LIST,
   canUpdateClasse,
   YOUNG_STATUS_PHASE1,
+  canUpdateClasse,
   canUpdateClasseStay,
   canViewClasse,
   canWithdrawClasse,
