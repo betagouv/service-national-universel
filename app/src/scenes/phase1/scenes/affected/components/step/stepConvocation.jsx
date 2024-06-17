@@ -80,7 +80,7 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
           <button
             onClick={downloadConvocation}
             disabled={loading}
-            className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
+            className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center disabled:bg-gray-100 disabled:cursor-wait ${
               isDone ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}>
             <HiOutlineDownload className="h-5 w-5" />
