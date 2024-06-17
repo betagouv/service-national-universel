@@ -139,8 +139,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO maybe add a new filed grade
-
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   deletedAt: { type: Date },
