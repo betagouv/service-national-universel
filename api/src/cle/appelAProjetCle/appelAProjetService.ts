@@ -1,7 +1,7 @@
-import { getClassesAndEtablissementsFromAppelAProjets } from "@/providers/demarcheSimplifiee/demarcheSimplifieeProvider";
-import { IReferent } from "@/models/referentType";
-import { IEtablissement } from "@/models/cle/etablissementType";
-import { IClasse } from "@/models/cle/classeType";
+import { getClassesAndEtablissementsFromAppelAProjets } from "../../providers/demarcheSimplifiee/demarcheSimplifieeProvider";
+import { IReferent } from "../../models/referentType";
+import { IEtablissement } from "../../models/cle/etablissementType";
+import { IClasse } from "../../models/cle/classeType";
 
 export const syncAppelAProjet = async () => {
   const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();

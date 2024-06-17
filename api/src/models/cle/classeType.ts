@@ -1,5 +1,5 @@
 import { Document } from "mongoose";
-import { IReferent } from "@/models/referentType";
+import { IReferent } from "../referentType";
 
 export type ClasseDocument = IClasse & Document;
 

@@ -1,7 +1,9 @@
 import passport from "passport";
 import express, { Response } from "express";
-import { UserRequest } from "@/controllers/request";
-import { syncAppelAProjet } from "@/cle/appelAProjetCle/appelAProjetService";
+import { UserRequest } from "../../controllers/request";
+import { syncAppelAProjet } from "./appelAProjetService";
+import { isSuperAdmin } from "snu-lib/src/roles";
+import { ERRORS } from "../../utils";
 
 const router = express.Router();
 router.post(
@@ -12,6 +14,9 @@ router.post(
   }),
 
   async (req: UserRequest, res: Response) => {
+    if (!isSuperAdmin(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     try {
       const appelAProjet = await syncAppelAProjet();
       res.status(200).send({ ok: true, data: appelAProjet });
@@ -30,6 +35,9 @@ router.post(
   }),
 
   async (req: UserRequest, res: Response) => {
+    if (!isSuperAdmin(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     try {
       // referent
       // etablissement

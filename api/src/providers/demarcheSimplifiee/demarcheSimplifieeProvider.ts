@@ -1,6 +1,8 @@
+import { IAppelAProjetType } from "../../cle/appelAProjetCle/appelAProjetType";
+import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
+
 const fetch = require("node-fetch");
-import { IAppelAProjetType } from "@/cle/appelAProjetCle/appelAProjetType";
-import { buildDemarcheSimplifieeBody } from "@/providers/demarcheSimplifiee/demarcheSimplifieeQueryBuilder";
+
 const config = require("config");
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
