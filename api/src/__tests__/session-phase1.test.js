@@ -102,6 +102,10 @@ describe("Session Phase 1", () => {
   });
 
   describe("DELETE /session-phase1/:id", () => {
+    it("should return 400 when session-phase1 id is invalid", async () => {
+      const res = await request(getAppHelper()).delete("/session-phase1/invalideId").send();
+      expect(res.status).toBe(400);
+    });
     it("should return 404 when session-phase1 is not found", async () => {
       const res = await request(getAppHelper())
         .delete("/session-phase1/" + notExistingSessionPhase1Id)
