@@ -13,6 +13,7 @@ import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-l
 import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
 import { getCohortGroups } from "@/services/cohort.service";
+import { title } from "process";
 
 export default function List() {
   const history = useHistory();
@@ -107,6 +108,8 @@ export default function List() {
     { title: "Niveau", name: "grade", missingLabel: "Non renseigné" },
     { title: "Département", name: "department", missingLabel: "Non renseigné" },
     { title: "Région", name: "region", missingLabel: "Non renseigné" },
+    { title: "Académie", name: "academy", missingLabel: "Non renseigné" },
+    { title: "Année scolaire", name: "schoolYear", missingLabel: "Non renseigné" },
   ].filter(Boolean);
 
   if (classes === null) return null;

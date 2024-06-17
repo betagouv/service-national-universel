@@ -126,7 +126,7 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
         <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
         <div className="flex-1">
           <Label
-            title="Nombre d'élèves"
+            title="Estimation du nombre d'élèves"
             name="totalSeats"
             tooltip="Pour qu'une classe soit considérée comme complète et puisse être validée, 100% des élèves doivent être inscrits (ou désistés). Vous pouvez modifier le nombre d'élèves dans le cas d'un changement d'effectif en cours d'année."
           />

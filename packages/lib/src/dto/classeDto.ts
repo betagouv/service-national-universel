@@ -14,7 +14,14 @@ export type ClasseDto = {
   totalSeats: number;
   seatsTaken: number;
   filiere:string;
-  grade:string;
+  grade:string[];
+  type:string;
+  trimester:string;
+  comments:string;
+  department:string;
+  region:string;
+  academy:string;
+  schoolYear:string;
   cohesionCenterId?: string;
   cohesionCenter?: any;
   sessionId?: string;

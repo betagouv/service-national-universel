@@ -30,6 +30,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "etablissementId.keyword",
       "department.keyword",
       "region.keyword",
+      "academy.keyword",
+      "schoolYear.keyword",
     ];
 
     const sortFields = ["createdAt", "name.keyword"];

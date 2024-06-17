@@ -960,7 +960,8 @@ const CLE_GRADE = {
   "1erePro": GRADES["1erePro"],
   TermGT: GRADES["TermGT"],
   TermPro: GRADES["TermPro"],
-  CAP: "CAP",
+  "1ereCAP": "1ereCAP",
+  "2ndeCAP": "2ndeCAP",
   Autre: "Autre",
 };
 
@@ -982,6 +983,11 @@ const COHORT_TYPE = {
   CLE: "CLE",
 };
 
+const TYPE_CLASSE = {
+  GROUP: "GROUP",
+  FULL: "FULL",
+};
+
 // Version courante du reglement intérieur, au format date, cela permet de vérifier si un jeune doit le revalider avant son départ en séjour.
 const REGLEMENT_INTERIEUR_VERSION = "2024-03-01";
 
@@ -994,6 +1000,7 @@ const YOUNG_SOURCE_LIST = Object.values(YOUNG_SOURCE);
 const COHORT_TYPE_LIST = Object.values(COHORT_TYPE);
 const CLE_COLORATION_LIST = Object.values(CLE_COLORATION);
 const CLE_FILIERE_LIST = Object.values(CLE_FILIERE);
+const TYPE_CLASSE_LIST = Object.values(TYPE_CLASSE);
 
 export {
   YOUNG_STATUS,
@@ -1053,6 +1060,7 @@ export {
   CLE_TYPE_LIST,
   CLE_SECTOR_LIST,
   CLE_GRADE_LIST,
+  TYPE_CLASSE_LIST,
   STATUS_CLASSE_LIST,
   STATUS_PHASE1_CLASSE_LIST,
   YOUNG_SOURCE_LIST,
@@ -1123,6 +1131,7 @@ export default {
   CLE_TYPE_LIST,
   CLE_SECTOR_LIST,
   CLE_GRADE_LIST,
+  TYPE_CLASSE_LIST,
   STATUS_CLASSE_LIST,
   STATUS_PHASE1_CLASSE_LIST,
   YOUNG_SOURCE_LIST,
