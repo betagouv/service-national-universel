@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
-import { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement, isAdmin } from "snu-lib";
+import { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement, isAdmin, departmentToAcademy } from "snu-lib";
 
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
