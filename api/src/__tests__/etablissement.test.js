@@ -85,7 +85,24 @@ describe("PUT /cle/etablissement/:id", () => {
     expect(res.body.data.state).toBe("inactive");
   });
 
-  it("should update classe region and department when etablissement is updated successfully", async () => {
+  it("should update academy when department is updated", async () => {
+    const etablissement = createFixtureEtablissement({ department: "Paris", region: "Ile de france", academy: "Paris" });
+    const validId = (await createEtablissement(etablissement))._id;
+
+    const res = await request(getAppHelper())
+      .put(`/cle/etablissement/${validId}`)
+      .send({
+        ...etablissement,
+        department: "Ardèche",
+        region: "Auvergne-Rhône-Alpes",
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.department).toBe("Ardèche");
+    expect(res.body.data.academy).toBe("Grenoble");
+  });
+
+  it("should update classe region,department,academy when etablissement is updated successfully", async () => {
     const etablissement = createFixtureEtablissement({ department: "Paris", region: "Ile de france" });
     const validId = (await createEtablissement(etablissement))._id;
     const classe = createFixtureClasse({ etablissementId: validId, department: etablissement.department, region: etablissement.region });
@@ -96,14 +113,14 @@ describe("PUT /cle/etablissement/:id", () => {
       .send({
         ...etablissement,
         region: "Bretagne",
-        department: "Ille et Vilaine",
+        department: "Ille-et-Vilaine",
       });
 
     const updatedClasse = await CleClasseModel.findById(classeId);
 
     expect(res.status).toBe(200);
     expect(res.body.data.region).toBe("Bretagne");
-    expect(res.body.data.department).toBe("Ille et Vilaine");
+    expect(res.body.data.department).toBe("Ille-et-Vilaine");
     expect(updatedClasse.region).toBe(res.body.data.region);
     expect(updatedClasse.department).toBe(res.body.data.department);
   });

@@ -2,7 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 const Joi = require("joi");
-const { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement, isAdmin } = require("snu-lib");
+const { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement, isAdmin, departmentToAcademy } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
@@ -96,7 +96,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    
+
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -106,6 +106,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const etablissement = await EtablissementModel.findById(value.id);
     if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (value.department !== etablissement.department) {
+      value.academy = departmentToAcademy[value.department];
+    }
 
     etablissement.set({
       ...value,
