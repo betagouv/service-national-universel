@@ -11,7 +11,7 @@ const apiEducation = async ({ filters, page, size }, path, options = {}) => {
 
     let where = "";
     (filters || []).forEach((filter) => {
-      if (filter.key === "uai") where += `identifiant_de_l_etablissement = "${filter.value}"`;
+      if (filter.key === "uai") where += `identifiant_de_l_etablissement IN ("${filter.value.join('","')}")`;
       if (filter.key === "name") where += `${where.length ? " AND " : ""}nom_etablissement LIKE "${filter.value}"`;
       if (filter.key === "city") where += `${where.length ? " AND " : ""}nom_commune LIKE "${filter.value}"`;
     });

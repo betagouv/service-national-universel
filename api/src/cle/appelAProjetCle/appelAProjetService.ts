@@ -14,14 +14,22 @@ export const syncAppelAProjet = async () => {
   const etablissementsToUpdate: IEtablissement[] = [];
   const classesToCreate: IClasse[] = [];
   const classesToUpdate: IClasse[] = [];
+
+  const uais = appelAProjets.map((appelAProjet) => getUAIfromAAP(appelAProjet));
+
+  const { results: etablissements } = await apiEducation({ filters: [{ key: "uai", value: uais }], page: 0, size: -1 });
+
   for (const appelAProjet of appelAProjets) {
     // if referent exists, update it
     // if not, create referent
     //---------------
-    const etablissementField = appelAProjet.champs.find((champ) => champ.label === "Etablissement, Ville (UAI)");
-    const uai = etablissementField?.stringValue.split(" (")[1]?.replace(")", "");
-    const etablissements = await apiEducation({ filters: [{ uai }], page: 1, size: 1 });
-    const etablissement = etablissements.results[0];
+    const uai = getUAIfromAAP(appelAProjet);
+    if (!uai) {
+      console.error("UAI not found", appelAProjet);
+      continue;
+    }
+    const etablissement = etablissements.find((etablissement) => etablissement.identifiant_de_l_etablissement === uai);
+
     if (!etablissement) {
       console.error("Etablissement not found", uai);
       continue;
@@ -30,8 +38,8 @@ export const syncAppelAProjet = async () => {
     const formattedEtablissement = {
       uai,
       name: etablissement.nom_etablissement,
-      referentEtablissementIds: referentsToLog.filter((referent) => referent.subRole === SUB_ROLES.referent_etablissement).map((referent) => referent.id),
-      coordinateurIds: referentsToLog.filter((referent) => referent.subRole === SUB_ROLES.coordinateur_cle).map((referent) => referent.id),
+      referentEtablissementIds: referentsToLog.filter((user) => user.subRole === SUB_ROLES.referent_etablissement).map((user) => user.id),
+      coordinateurIds: referentsToLog.filter((user) => user.subRole === SUB_ROLES.coordinateur_cle).map((user) => user.id),
       department: etablissement.libelle_departement,
       region: etablissement.libelle_region,
       zip: etablissement.code_postal,
@@ -52,5 +60,14 @@ export const syncAppelAProjet = async () => {
     // if classe exists, update it
     // if not, create classe
   }
+
+  console.log("🚀 ~ syncAppelAProjet ~ etablissementsToUpdate:", etablissementsToUpdate);
+  console.log("🚀 ~ syncAppelAProjet ~ etablissementsToCreate:", etablissementsToCreate);
   return appelAProjets;
 };
+
+// TODO: update or remove when appelAProjet is formated
+function getUAIfromAAP(appelAProjet: any): string {
+  const etablissementField = appelAProjet.champs.find((champ: any) => champ.label === "Etablissement, Ville (UAI)");
+  return etablissementField?.stringValue.split(" (")[1]?.replace(")", "");
+}
