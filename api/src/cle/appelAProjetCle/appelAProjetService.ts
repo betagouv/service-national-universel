@@ -15,7 +15,7 @@ export const syncAppelAProjet = async () => {
   const classesToCreate: IClasse[] = [];
   const classesToUpdate: IClasse[] = [];
 
-  const { results: etablissements } = await apiEducation({
+  const etablissements = await apiEducation({
     filters: [{ key: "uai", value: appelAProjets.map((appelAProjet) => getUAIfromAAP(appelAProjet)) }],
     page: 0,
     size: -1,
@@ -50,8 +50,8 @@ export const syncAppelAProjet = async () => {
       address: etablissement.adresse_1,
       country: "France",
       // TODO: map type and sector to our enums
-      type: etablissement.type_etablissement,
-      sector: etablissement.statut_public_prive,
+      type: [etablissement.type_etablissement],
+      sector: [etablissement.statut_public_prive],
     };
 
     if (await EtablissementModel.exists({ uai })) {
