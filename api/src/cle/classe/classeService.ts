@@ -1,7 +1,7 @@
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/young.service";
 const ClasseModel = require("../../models/cle/classe");
 const YoungModel = require("../../models/young");
-const { YOUNG_STATUS } = require("snu-lib/index");
+const { YOUNG_STATUS } = require("snu-lib");
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);

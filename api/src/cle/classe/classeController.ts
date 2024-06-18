@@ -19,7 +19,7 @@ import {
   canViewClasse,
   canWithdrawClasse,
   canDeleteClasse,
-} from "snu-lib/index";
+} from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
 import { ERRORS, isReferent } from "../../utils";
