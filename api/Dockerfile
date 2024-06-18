@@ -56,4 +56,4 @@ ENV NODE_CONFIG_DIR=./api/config
 
 EXPOSE $PORT
 
-CMD ["node", "api/src/index.js"]
+CMD ["node", "-r", "tsconfig-paths/register", "api/src/index.js"]

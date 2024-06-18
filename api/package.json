@@ -68,6 +68,7 @@
     "sib-api-v3-sdk": "^8.5.0",
     "snu-lib": "*",
     "sync-request-curl": "^3.0.0",
+    "tsconfig-paths": "^4.2.0",
     "uuid": "^9.0.0",
     "validator": "^13.7.0"
   },
