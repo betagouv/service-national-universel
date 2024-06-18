@@ -1,10 +1,16 @@
 import React from "react";
-import { HiInformationCircle, HiExclamationCircle, HiExclamation } from "react-icons/hi";
 import cx from "classnames";
+import { HiInformationCircle, HiExclamationCircle, HiExclamation } from "react-icons/hi";
+// @ts-expect-error CommonJS module
+import Markdown from "react-markdown";
+// @ts-expect-error CommonJS module
+import remarkGfm from "remark-gfm";
+
+import { AlerteMessageDto } from "snu-lib/src/dto/alerteMessageDto";
 
 interface Props {
-  message: string;
-  priority?: "normal" | "important" | "urgent";
+  message?: AlerteMessageDto["content"];
+  priority?: AlerteMessageDto["priority"];
 }
 
 export default function InfoMessage({ message, priority }: Props) {
@@ -37,7 +43,15 @@ export default function InfoMessage({ message, priority }: Props) {
         })}
         size={24}
       />
-      <span>{message}</span>
+      <Markdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          a({ node, ...rest }) {
+            return <a className="underline" {...rest} />;
+          },
+        }}>
+        {message}
+      </Markdown>
     </div>
   );
 }

@@ -1,19 +1,35 @@
 import React from "react";
-import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import Select, { components } from "react-select";
-import { ROLES } from "snu-lib";
-import { translate, formatStringLongDate } from "snu-lib";
-import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { capture } from "../../../sentry";
-import Field from "../../../components/forms/Field";
+import { MdInfoOutline } from "react-icons/md";
 
-export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageList }) {
+import { AlerteMessageDto } from "snu-lib/src/dto/alerteMessageDto";
+import { ROLES, translate, formatStringLongDate } from "snu-lib";
+
+import api from "@/services/api";
+import { capture } from "@/sentry";
+import Field from "@/components/forms/Field";
+import InfoMessage from "@/scenes/dashboardV2/components/ui/InfoMessage";
+
+type ErrorForm = {
+  priority?: string;
+  to_role?: string;
+  content?: string;
+};
+
+interface Props {
+  message?: AlerteMessageDto | null;
+  isNew?: boolean;
+  onIsNewChange?: (value: boolean) => void;
+  onMessagesChange: React.Dispatch<React.SetStateAction<AlerteMessageDto[]>>;
+}
+
+export default function ModalAlerteMess({ message, isNew, onIsNewChange, onMessagesChange }: Props) {
   const [editInfo, setEditInfo] = React.useState(isNew);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState({});
-  const [data, setData] = React.useState(message || {});
+  const [errors, setErrors] = React.useState<ErrorForm>({});
+  const [data, setData] = React.useState<Partial<AlerteMessageDto>>(message || {});
 
   const options = [
     { value: ROLES.ADMIN, label: "Modérateurs" },
@@ -24,7 +40,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
     { value: ROLES.HEAD_CENTER, label: "Chefs de centre" },
   ];
 
-  const customStyles = {
+  const selectCustomStyles = {
     control: (styles) => ({ ...styles, backgroundColor: "white" }),
     option: (styles, { isSelected }) => {
       return {
@@ -56,11 +72,11 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
     );
   };
 
-  const onSubmitInfo = async () => {
+  const handleSubmitInfo = async () => {
     try {
       setIsLoading(true);
       setErrors({});
-      let errors = {};
+      const errors: ErrorForm = {};
 
       if (!data.priority) errors.priority = "Ce champ est obligatoire";
       if (!data.to_role || data.to_role.length === 0) errors.to_role = "Ce champ est obligatoire";
@@ -80,7 +96,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
           toastr.error("Oups, une erreur est survenue lors de la modification du message", translate(code));
           return setIsLoading(false);
         }
-        setMessageList((prevMessageList) => [...prevMessageList, newMessage]);
+        onMessagesChange((prevMessageList) => [...prevMessageList, newMessage]);
       } else {
         const { ok, code, data: changedMessage } = await api.put(`/alerte-message/${data._id}`, data);
 
@@ -88,16 +104,16 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
           toastr.error("Oups, une erreur est survenue lors de la modification du message", translate(code));
           return setIsLoading(false);
         }
-        setData(message);
-        setMessageList((prevMessageList) => prevMessageList.map((message) => (message._id === data._id ? { ...message, ...changedMessage } : message)));
+        setData(message || {});
+        onMessagesChange((prevMessageList) => prevMessageList.map((message) => (message._id === data._id ? { ...message, ...changedMessage } : message)));
       }
       setEditInfo(false);
       setIsLoading(false);
       setErrors({});
-      if (isNew) setIsNew(false);
+      if (isNew) onIsNewChange?.(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification du message");
+      toastr.error("Oups, une erreur est survenue lors de la modification du message", "");
       setIsLoading(false);
     }
   };
@@ -111,12 +127,12 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
         return setIsLoading(false);
       }
-      setMessageList((prevMessageList) => prevMessageList.filter((message) => message._id !== data._id));
+      onMessagesChange((prevMessageList) => prevMessageList.filter((message) => message._id !== data._id));
       setEditInfo(false);
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression");
+      toastr.error("Oups, une erreur est survenue lors de la suppression", "");
       setIsLoading(false);
     }
   };
@@ -139,6 +155,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                   <div className="flex items-center justify-center gap-3">
                     <p className="text-xs  font-medium ">Type de message</p>
                     <MdInfoOutline data-tip data-for="priority" className="h-5 w-5 cursor-pointer text-gray-400" />
+                    {/* @ts-expect-error tooltipRadius exists */}
                     <ReactTooltip id="priority" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                       <p className="w-[200px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Niveau de priorité du message.</p>
                     </ReactTooltip>
@@ -186,6 +203,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Destinataire(s)</p>
                   <MdInfoOutline data-tip data-for="to_role" className="h-5 w-5 cursor-pointer text-gray-400" />
+                  {/* @ts-expect-error tooltipRadius exists */}
                   <ReactTooltip id="to_role" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
                     <p className=" w-[280px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Quel type d'utilisateur voulez-vous informer ?</p>
                   </ReactTooltip>
@@ -211,7 +229,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                     onChange={(options) => {
                       setData({ ...data, to_role: options.map((opt) => opt.value) });
                     }}
-                    styles={customStyles}
+                    styles={selectCustomStyles}
                   />
                 </div>
                 {errors?.to_role && <div className="text-[#EF4444]">{errors?.to_role}</div>}
@@ -220,6 +238,7 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Contenu du message</p>
                   <MdInfoOutline data-tip data-for="content" className="h-5 w-5 cursor-pointer text-gray-400" />
+                  {/* @ts-expect-error tooltipRadius exists */}
                   <ReactTooltip id="content" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
                     <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       Affichage d’un message d’information sur la vue générale du tableaux de bord aux utilisateurs concernés. 500 caractères max.
@@ -229,8 +248,9 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                 <div className="flex w-full gap-4">
                   <Field
                     name="content"
+                    label="content"
                     errors={errors}
-                    className="text-gray-900 h-[122px] w-full"
+                    className="text-gray-900  w-full"
                     placeholder="Précisez en quelques mots"
                     handleChange={(e) => setData({ ...data, content: e.target.value })}
                     value={data?.content}
@@ -239,6 +259,14 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                   />
                 </div>
               </div>
+              {editInfo && (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs  font-medium text-gray-900">Prévisualisation du message</p>
+                  </div>
+                  <InfoMessage message={data?.content} priority={data?.priority} />
+                </div>
+              )}
             </div>
             <div className="flex w-[10%] items-center justify-center">
               <div className="h-[90%] w-[1px] border-r-[1px] border-gray-300"></div>
@@ -255,14 +283,17 @@ export default function ModalAlerteMess({ message, isNew, setIsNew, setMessageLi
                     <button
                       onClick={() => {
                         setEditInfo(false);
-                        setData(message);
-                        if (isNew) setIsNew(false);
+                        setData(message || {});
+                        if (isNew) onIsNewChange?.(false);
                       }}
                       className="border border-gray-300 text-gray-700 text-sm w-[226px] h-10 rounded-lg"
                       disabled={!editInfo || isLoading}>
                       Annuler
                     </button>
-                    <button onClick={onSubmitInfo} className="border border-blue-600 bg-blue-600 text-white text-sm w-[226px] h-10 rounded-lg" disabled={!editInfo || isLoading}>
+                    <button
+                      onClick={handleSubmitInfo}
+                      className="border border-blue-600 bg-blue-600 text-white text-sm w-[226px] h-10 rounded-lg"
+                      disabled={!editInfo || isLoading}>
                       Valider
                     </button>
                   </>

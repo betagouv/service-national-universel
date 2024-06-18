@@ -1,31 +1,34 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import logo from "../../assets/logo-snu.png";
-import Breadcrumbs from "../../components/Breadcrumbs";
-import { capture } from "../../sentry";
-import api from "../../services/api";
 import { AiOutlinePlus } from "react-icons/ai";
-import { translate } from "snu-lib";
-import ModalAlerteMess from "./components/ModalAlerteMess";
-import { ROLES } from "snu-lib";
+
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import logo from "@/assets/logo-snu.png";
+import { AuthState } from "@/redux/auth/reducer";
+
+import { translate, ROLES } from "snu-lib";
+import { AlerteMessageDto } from "snu-lib/src/dto";
+
+import AlerteMessageForm from "./AlerteMessageForm";
 
 export default function Alerte() {
-  const { user } = useSelector((state) => state.Auth);
-  const [data, setData] = useState([]);
+  const { user } = useSelector((state: AuthState) => state.Auth);
+  const [messages, setMessages] = useState<AlerteMessageDto[]>([]);
   const [isNew, setIsNew] = useState(false);
 
   const getMessage = async () => {
     try {
       const { ok, code, data: response } = await api.get(`/alerte-message/all`);
-
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
       }
-      setData(response);
+      setMessages(response.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des messages");
+      toastr.error("Oups, une erreur est survenue lors de la récupération des messages", "");
     }
   };
 
@@ -61,11 +64,9 @@ export default function Alerte() {
             &#8239;Créer un nouveau message
           </button>
         </div>
-        {!data?.length && !isNew ? <p>Aucun message d'alerte n'est paramétré pour le moment.</p> : null}
-        {isNew ? <ModalAlerteMess message={null} isNew={isNew} setIsNew={setIsNew} setMessageList={setData} /> : null}
-        {data?.length
-          ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((hit) => <ModalAlerteMess key={hit._id} message={hit} setMessageList={setData} />)
-          : null}
+        {!messages?.length && !isNew ? <p>Aucun message d'alerte n'est paramétré pour le moment.</p> : null}
+        {isNew ? <AlerteMessageForm message={null} isNew={isNew} onIsNewChange={setIsNew} onMessagesChange={setMessages} /> : null}
+        {messages?.length ? messages.map((msg) => <AlerteMessageForm key={msg._id} message={msg} onMessagesChange={setMessages} />) : null}
       </div>
     </>
   );
