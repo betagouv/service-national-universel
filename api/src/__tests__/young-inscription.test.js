@@ -5,7 +5,7 @@ const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { STEPS2023, YOUNG_STATUS, YOUNG_SITUATIONS } = require("../utils");
 const { START_DATE_SESSION_PHASE1 } = require("snu-lib");
-const { default: faker } = require("@faker-js/faker");
+const { fakerFR: faker } = require("@faker-js/faker");
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -691,8 +691,8 @@ describe("Young", () => {
       passport.user = user;
 
       const profilObj = {
-        firstName: faker.name.firstName().toLowerCase(),
-        lastName: faker.name.lastName().toUpperCase(),
+        firstName: faker.person.firstName().toLowerCase(),
+        lastName: faker.person.lastName().toUpperCase(),
         email: faker.internet.email().toLowerCase(),
         phone: "600000000",
         phoneZone: "FRANCE",
