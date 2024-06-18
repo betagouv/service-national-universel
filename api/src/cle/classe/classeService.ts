@@ -1,7 +1,7 @@
-import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../young/young.service";
-const ClasseModel = require("../models/cle/classe");
-const YoungModel = require("../models/young");
-const { YOUNG_STATUS } = require("snu-lib");
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/young.service";
+const ClasseModel = require("../../models/cle/classe");
+const YoungModel = require("../../models/young");
+const { YOUNG_STATUS } = require("snu-lib/index");
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
@@ -10,7 +10,6 @@ export const generateConvocationsByClasseId = async (classeId: string) => {
 };
 
 export const deleteClasse = async (_id: string, fromUser: object) => {
-
   let classe = await ClasseModel.findById(_id);
   if (!classe) throw new Error("Classe not found");
   if (classe.deletedAt) throw new Error("Classe already deleted");
@@ -45,4 +44,3 @@ export const deleteClasse = async (_id: string, fromUser: object) => {
 
   return classe;
 };
-
