@@ -19,7 +19,7 @@ describe("AlerteMessage Routes", () => {
   describe("GET /all", () => {
     it("should return 200 and all messages for authorized users", async () => {
       await AlerteMessageModel.create(getNewAlerteMessageFixture());
-      const response = await request(getAppHelper()).get("/alerte-message/all");
+      const response = await request(getAppHelper(ROLES.ADMIN)).get("/alerte-message/all");
       expect(response.statusCode).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(response.body.data.length).toEqual(1);
@@ -34,7 +34,7 @@ describe("AlerteMessage Routes", () => {
   describe("GET /:id", () => {
     it("should return 200 and the message for valid ID and authorized users", async () => {
       const message = await AlerteMessageModel.create(getNewAlerteMessageFixture());
-      const response = await request(getAppHelper()).get(`/alerte-message/${message._id}`);
+      const response = await request(getAppHelper(ROLES.ADMIN)).get(`/alerte-message/${message._id}`);
       expect(response.statusCode).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(response.body.data.content).toEqual(getNewAlerteMessageFixture().content);
@@ -46,12 +46,12 @@ describe("AlerteMessage Routes", () => {
       expect(response.body.ok).toBe(false);
     });
     it("should return 400 for invalid ID format", async () => {
-      const response = await request(getAppHelper()).get("/alerte-message/invalid_id");
+      const response = await request(getAppHelper(ROLES.ADMIN)).get("/alerte-message/invalid_id");
       expect(response.statusCode).toBe(400);
       expect(response.body.ok).toBe(false);
     });
     it("should return 404 for non-existing message ID", async () => {
-      const response = await request(getAppHelper()).get("/alerte-message/123456789012345678901234");
+      const response = await request(getAppHelper(ROLES.ADMIN)).get("/alerte-message/123456789012345678901234");
       expect(response.statusCode).toBe(404);
       expect(response.body.ok).toBe(false);
     });
@@ -61,7 +61,7 @@ describe("AlerteMessage Routes", () => {
     it("should return 200 and messages for the user's role", async () => {
       await AlerteMessageModel.create(getNewAlerteMessageFixture({ to_role: ["admin"] }));
       await AlerteMessageModel.create(getNewAlerteMessageFixture({ to_role: ["referent_region"] }));
-      const response = await request(getAppHelper()).get("/alerte-message");
+      const response = await request(getAppHelper(ROLES.ADMIN)).get("/alerte-message");
       expect(response.statusCode).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(response.body.data.length).toEqual(1);
@@ -83,7 +83,7 @@ describe("AlerteMessage Routes", () => {
 
   describe("POST /", () => {
     it("should create a message and return 200 for valid data and authorized users", async () => {
-      const response = await request(getAppHelper())
+      const response = await request(getAppHelper(ROLES.ADMIN))
         .post("/alerte-message")
         .send({ content: "Test message", priority: "important", to_role: ["admin"] });
       expect(response.statusCode).toBe(200);
@@ -98,12 +98,12 @@ describe("AlerteMessage Routes", () => {
       expect(response.body.ok).toBe(false);
     });
     it("should return 400 for invalid data", async () => {
-      const response = await request(getAppHelper()).post("/alerte-message").send({ content: "" });
+      const response = await request(getAppHelper(ROLES.ADMIN)).post("/alerte-message").send({ content: "" });
       expect(response.statusCode).toBe(400);
       expect(response.body.ok).toBe(false);
     });
     it("should return 400 for invalid content length", async () => {
-      const response = await request(getAppHelper())
+      const response = await request(getAppHelper(ROLES.ADMIN))
         .post("/alerte-message")
         .send({ content: "a".repeat(501), priority: "important", to_role: ["admin"] });
       expect(response.statusCode).toBe(400);
@@ -114,7 +114,7 @@ describe("AlerteMessage Routes", () => {
   describe("PUT /:id", () => {
     it("should update a message and return 200 for valid data and authorized users", async () => {
       const message = await AlerteMessageModel.create(getNewAlerteMessageFixture());
-      const response = await request(getAppHelper())
+      const response = await request(getAppHelper(ROLES.ADMIN))
         .put(`/alerte-message/${message._id}`)
         .send({ content: "Updated message", priority: "normal", to_role: ["admin"] });
       expect(response.statusCode).toBe(200);
@@ -131,20 +131,20 @@ describe("AlerteMessage Routes", () => {
     });
     it("should return 400 for invalid data", async () => {
       const message = await AlerteMessageModel.create(getNewAlerteMessageFixture());
-      const response = await request(getAppHelper()).put(`/alerte-message/${message._id}`).send({ content: "" });
+      const response = await request(getAppHelper(ROLES.ADMIN)).put(`/alerte-message/${message._id}`).send({ content: "" });
       expect(response.statusCode).toBe(400);
       expect(response.body.ok).toBe(false);
     });
     it("should return 400 for invalid content length", async () => {
       const message = await AlerteMessageModel.create(getNewAlerteMessageFixture());
-      const response = await request(getAppHelper())
+      const response = await request(getAppHelper(ROLES.ADMIN))
         .put(`/alerte-message/${message._id}`)
         .send({ content: "a".repeat(501) });
       expect(response.statusCode).toBe(400);
       expect(response.body.ok).toBe(false);
     });
     it("should return 404 for non-existing message ID", async () => {
-      const response = await request(getAppHelper())
+      const response = await request(getAppHelper(ROLES.ADMIN))
         .put("/alerte-message/123456789012345678901234")
         .send({ content: "Updated message", priority: "normal", to_role: ["admin"] });
       expect(response.statusCode).toBe(404);
@@ -155,7 +155,7 @@ describe("AlerteMessage Routes", () => {
   describe("DELETE /:id", () => {
     it("should delete a message and return 200 for authorized users", async () => {
       const message = await AlerteMessageModel.create(getNewAlerteMessageFixture());
-      const response = await request(getAppHelper()).delete(`/alerte-message/${message._id}`);
+      const response = await request(getAppHelper(ROLES.ADMIN)).delete(`/alerte-message/${message._id}`);
       expect(response.statusCode).toBe(200);
       expect(response.body.ok).toBe(true);
     });
@@ -166,12 +166,12 @@ describe("AlerteMessage Routes", () => {
       expect(response.body.ok).toBe(false);
     });
     it("should return 400 for invalid ID format", async () => {
-      const response = await request(getAppHelper()).delete("/alerte-message/invalid_id");
+      const response = await request(getAppHelper(ROLES.ADMIN)).delete("/alerte-message/invalid_id");
       expect(response.statusCode).toBe(400);
       expect(response.body.ok).toBe(false);
     });
     it("should return 404 for non-existing message ID", async () => {
-      const response = await request(getAppHelper()).delete("/alerte-message/123456789012345678901234");
+      const response = await request(getAppHelper(ROLES.ADMIN)).delete("/alerte-message/123456789012345678901234");
       expect(response.statusCode).toBe(404);
       expect(response.body.ok).toBe(false);
     });
