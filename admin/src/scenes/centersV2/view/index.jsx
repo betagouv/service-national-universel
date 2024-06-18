@@ -72,8 +72,9 @@ function filterSessions(sessions, user) {
 
 async function populateSessions(sessions) {
   for (let i = 0; i < sessions.length; i++) {
-    const { schema } = await api.get(`/session-phase1/${sessions[i]._id}/schema-repartition`);
-    if (schema?.length === 0 && sessions[i].placesTotal - sessions[i].placesLeft === 0) {
+    const { data: ligneDeBus } = await api.get(`/session-phase1/${sessions[i]._id}/plan-de-transport`);
+    // aucune ligne de bus ne dessert ce centre dans le PDT
+    if (ligneDeBus?.length === 0 && sessions[i].placesTotal - sessions[i].placesLeft === 0) {
       sessions[i].canBeDeleted = true;
     } else {
       sessions[i].canBeDeleted = false;

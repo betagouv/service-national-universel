@@ -1,8 +1,7 @@
-const { faker } = require("@faker-js/faker");
+const { fakerFR: faker } = require("@faker-js/faker");
+const mongoose = require("mongoose");
 
-faker.locale = "fr";
-
-function getNewLigneBusFixture() {
+function getNewLigneBusFixture(object = {}) {
   return {
     busId: faker.lorem.words(),
     youngCapacity: faker.datatype.number({ min: 11, max: 20 }),
@@ -14,6 +13,11 @@ function getNewLigneBusFixture() {
     totalCapacity: faker.datatype.number({ min: 31, max: 40 }),
     returnDate: faker.date.past(),
     departuredDate: faker.date.past(),
+    name: faker.lorem.words(),
+    centerId: mongoose.Types.ObjectId(),
+    sessionId: "session_id",
+    cohort: "Février 2023 - C",
+    ...object,
   };
 }
 

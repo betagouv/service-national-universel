@@ -1,7 +1,5 @@
-const { faker } = require("@faker-js/faker");
+const { fakerFR: faker } = require("@faker-js/faker");
 const { ObjectId } = require("mongoose").Types;
-
-faker.locale = "fr";
 
 function getNewMeetingPointFixture() {
   return {
