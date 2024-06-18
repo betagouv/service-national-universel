@@ -86,7 +86,7 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
               isDone ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}>
             <HiOutlineDownload className="h-5 w-5" />
-            Télécharger
+            {loading ? "Chargement" : "Télécharger"}
           </button>
 
           <button
