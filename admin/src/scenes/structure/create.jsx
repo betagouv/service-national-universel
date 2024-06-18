@@ -421,7 +421,6 @@ export default function Create() {
                     setQuery={setQuery}
                     options={results}
                   />
-                  <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                 </Wrapper>
               </Col>
             </Row>
