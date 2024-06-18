@@ -78,7 +78,6 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    console.log("LAAAAAAA");
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       name: Joi.string().required(),
@@ -99,9 +98,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    console.log("value", value);
     if (error) {
-      console.log("error", error);
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
