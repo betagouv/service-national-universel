@@ -17,6 +17,9 @@ export interface IEtablissement {
   country: string;
   type: string[];
   sector: string[];
+  academy: string;
+  state: string;
+  schoolYears: string[];
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;

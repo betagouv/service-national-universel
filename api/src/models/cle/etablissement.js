@@ -96,7 +96,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO update with the good type enum
   type: {
     type: [String],
     enum: CLE_TYPE_LIST,
@@ -105,7 +104,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO update with the good sector enum
   sector: {
     type: [String],
     enum: CLE_SECTOR_LIST,
@@ -114,7 +112,32 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO maybe add a new filed grade
+  state: {
+    type: String,
+    required: true,
+    enum: ["active", "inactive"],
+    default: "inactive",
+    documentation: {
+      description: "Etat de l'etablissement, active si au moins un eleves inscrits dans l'année scolaire en cours",
+    },
+  },
+
+  academy: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Académie de l'établissement",
+    },
+  },
+
+  schoolYears: {
+    type: [String],
+    required: true,
+    default: [],
+    documentation: {
+      description: "Liste des années scolaires",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -132,7 +155,7 @@ Schema.pre("save", async function (next, params) {
   this.user = params?.fromUser;
   this.updatedAt = Date.now();
 
-  if (this.isModified("department") || this.isModified("region")) {
+  if (!this.isNew && (this.isModified("department") || this.isModified("region") || this.isModified("academy"))) {
     await ClasseModel.updateMany(
       { etablissementId: this._id },
       {
