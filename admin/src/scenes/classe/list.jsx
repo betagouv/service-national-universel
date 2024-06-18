@@ -66,7 +66,7 @@ export default function List() {
         });
       } else {
         res = await api.post(
-          `/classe/export?type=${type}`,
+          `/cle/classe/export?type=${type}`,
           Object.entries(selectedFilters).reduce((e, [key, value]) => {
             return { ...e, [key]: value.filter };
           }, {}),
