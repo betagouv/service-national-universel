@@ -5,7 +5,7 @@ resource scaleway_job_definition anonymize_db {
   cpu_limit = 1024
   memory_limit = 4096
   image_uri = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
-  command = "./api/maintenance/docker/start_anonymize_db.sh"
+  command = "./api/src/scripts/docker/start_anonymize_db.sh"
   timeout = "2h"
 
   env = {

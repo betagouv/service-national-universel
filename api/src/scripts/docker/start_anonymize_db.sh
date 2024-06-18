@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd "$(dirname $0)/../scripts"
+cd "$(dirname $0)/.."
 
 set -o pipefail
 set -e
