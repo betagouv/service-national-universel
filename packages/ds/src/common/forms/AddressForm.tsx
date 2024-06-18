@@ -1,5 +1,6 @@
 import React from "react";
 import Input from "../inputs/Input";
+import Hint from "../ui/Hint";
 import Combobox from "../inputs/Combobox";
 import { RiSearchLine } from "react-icons/ri";
 
@@ -86,15 +87,21 @@ export default function AddressForm({
     );
 
   return (
-    <Combobox
-      label={label}
-      setQuery={setQuery}
-      options={options?.map((o) => ({
-        label: `${o.address ? `${o.address} - ` : ""}${o.zip} ${o.city}`,
-        value: o,
-      }))}
-      value={query}
-      onChange={(option) => updateData(option.value)}
-    />
+    <>
+      <Combobox
+        label={label}
+        setQuery={setQuery}
+        options={options?.map((o) => ({
+          label: `${o.address ? `${o.address} - ` : ""}${o.zip} ${o.city}`,
+          value: o,
+        }))}
+        value={query}
+        onChange={(option) => updateData(option.value)}
+      />
+      <Hint>
+        Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la
+        ville.
+      </Hint>
+    </>
   );
 }
