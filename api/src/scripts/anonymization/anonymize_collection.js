@@ -20,14 +20,6 @@ ANONYMIZABLE_COLLECTIONS = {
   modificationbuses: `${MODULE_PATH}/PlanDeTransport/modificationBus`,
 };
 
-const args = process.argv.slice(2);
-if (args.length != 1) {
-  console.error("Usage: node anonymize_collection.js <collection_name>");
-  process.exit(1);
-}
-
-collection_name = args[0];
-
 function anonymizeCollectionStream(anonymize) {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -43,9 +35,25 @@ function anonymizeCollectionStream(anonymize) {
   });
 }
 
-if (collection_name in ANONYMIZABLE_COLLECTIONS) {
-  const anonymize = require(ANONYMIZABLE_COLLECTIONS[collection_name]);
-  anonymizeCollectionStream(anonymize);
-} else {
-  process.stdin.pipe(process.stdout);
+function anonymizeCollection(collectionName) {
+  if (collection_name in ANONYMIZABLE_COLLECTIONS) {
+    const anonymize = require(ANONYMIZABLE_COLLECTIONS[collection_name]);
+    anonymizeCollectionStream(anonymize);
+  } else {
+    process.stdin.pipe(process.stdout);
+  }
+}
+
+module.exports = anonymizeCollection;
+
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  if (args.length != 1) {
+    console.error("Usage: node anonymize_collection.js <collection_name>");
+    process.exit(1);
+  }
+
+  collection_name = args[0];
+
+  anonymizeCollection(collection_name);
 }

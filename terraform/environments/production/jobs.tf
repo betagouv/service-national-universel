@@ -5,11 +5,11 @@ resource scaleway_job_definition anonymize_db {
   cpu_limit = 1024
   memory_limit = 4096
   image_uri = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
-  command = "./api/src/scripts/docker/start_anonymize_db.sh"
+  command = "./api/src/scripts/anonymization/docker/start_anonymize_db.sh"
   timeout = "2h"
 
   env = {
-    "NODE_ENV"       = "production"
+    "NODE_ENV"       = "staging"
     "SCW_PROJECT_ID" = scaleway_account_project.main.id
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }

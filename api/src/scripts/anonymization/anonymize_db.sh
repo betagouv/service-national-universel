@@ -134,7 +134,7 @@ do
     cat $filename \
     | gunzip \
     | bsondump \
-    | node "$(dirname $0)/utils/anonymize_collection.js" "$collection" \
+    | node "$(dirname $0)/anonymize_collection.js" "$collection" \
     | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
 done
 
