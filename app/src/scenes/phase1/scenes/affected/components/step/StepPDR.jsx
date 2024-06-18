@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -10,11 +9,11 @@ import { getMeetingHour, getReturnHour, isCle } from "snu-lib";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, pdrChoiceExpired, pdrChoiceLimitDate } from "../../utils/steps.utils";
 import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
+import useAuth from "@/services/useAuth";
 
 export default function StepPDR({ data: { center, session, meetingPoint, departureDate, returnDate } }) {
   const index = 1;
-  const young = useSelector((state) => state.Auth.young);
-
+  const { young } = useAuth();
   const [open, setOpen] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState([]);
 
@@ -72,11 +71,13 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
               </div>
             </div>
           </div>
-          <div>
-            <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
-              Modifier
-            </button>
-          </div>
+          {young.cohort !== "Juillet 2024" ?? (
+            <div>
+              <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
+                Modifier
+              </button>
+            </div>
+          )}
         </div>
         <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired(young.cohort)} />
       </StepCard>
@@ -101,11 +102,13 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
               </div>
             </div>
           </div>
-          <div>
-            <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
-              Modifier
-            </button>
-          </div>
+          {young.cohort !== "Juillet 2024" ?? (
+            <div>
+              <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
+                Modifier
+              </button>
+            </div>
+          )}
         </div>
         <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired(young.cohort)} />
       </StepCard>
