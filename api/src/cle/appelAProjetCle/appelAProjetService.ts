@@ -4,7 +4,7 @@ import { IEtablissement } from "../../models/cle/etablissementType";
 import { IClasse } from "../../models/cle/classeType";
 import EtablissementModel from "../../models/cle/etablissement";
 import { apiEducation } from "../../services/gouv.fr/api-education";
-import { SUB_ROLES } from "snu-lib";
+import { etablissementMapper } from "../etablissement/etablissementMapper";
 
 export const syncAppelAProjet = async () => {
   const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
@@ -12,6 +12,7 @@ export const syncAppelAProjet = async () => {
   const referentsToLog: IReferent[] = [];
   const etablissementsToCreate: IEtablissement[] = [];
   const etablissementsToUpdate: IEtablissement[] = [];
+  const etablissementsErrors: { id: string; uai?: string; error: string }[] = [];
   const classesToCreate: IClasse[] = [];
   const classesToUpdate: IClasse[] = [];
 
@@ -28,31 +29,24 @@ export const syncAppelAProjet = async () => {
     const uai = getUAIfromAAP(appelAProjet);
     if (!uai) {
       // @ts-ignore
-      console.error("UAI not found", appelAProjet.id);
+      etablissementsErrors.push({ id: appelAProjet.id, error: "UAI not found" });
+      continue;
+    }
+
+    if ([...etablissementsToCreate, ...etablissementsToUpdate].map((etablissement) => etablissement.uai).includes(uai)) {
+      // @ts-ignore
+      etablissementsErrors.push({ id: appelAProjet.id, uai, error: "Etablissement already processed" });
       continue;
     }
 
     const etablissement = etablissements.find((etablissement) => etablissement.identifiant_de_l_etablissement === uai);
     if (!etablissement) {
-      console.error("Etablissement not found", uai);
+      // @ts-ignore
+      etablissementsErrors.push({ id: appelAProjet.id, uai, error: "Etablissement not found" });
       continue;
     }
 
-    const formattedEtablissement = {
-      uai,
-      name: etablissement.nom_etablissement,
-      referentEtablissementIds: referentsToLog.filter((user) => user.subRole === SUB_ROLES.referent_etablissement).map((user) => user.id),
-      coordinateurIds: referentsToLog.filter((user) => user.subRole === SUB_ROLES.coordinateur_cle).map((user) => user.id),
-      department: etablissement.libelle_departement,
-      region: etablissement.libelle_region,
-      zip: etablissement.code_postal,
-      city: etablissement.nom_commune,
-      address: etablissement.adresse_1,
-      country: "France",
-      // TODO: map type and sector to our enums
-      type: [etablissement.type_etablissement],
-      sector: [etablissement.statut_public_prive],
-    };
+    const formattedEtablissement = etablissementMapper(etablissement, referentsToCreate);
 
     if (await EtablissementModel.exists({ uai })) {
       etablissementsToUpdate.push(formattedEtablissement);
@@ -64,8 +58,10 @@ export const syncAppelAProjet = async () => {
     // if not, create classe
   }
 
+  // TODO: csv export
   console.log("🚀 ~ syncAppelAProjet ~ etablissementsToUpdate:", etablissementsToUpdate);
   console.log("🚀 ~ syncAppelAProjet ~ etablissementsToCreate:", etablissementsToCreate);
+  console.log("🚀 ~ syncAppelAProjet ~ etablissementsErrors:", etablissementsErrors);
   return appelAProjets;
 };
 

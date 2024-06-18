@@ -1,4 +1,5 @@
-//https://data.education.gouv.fr/api/explore/v2.1/console
+// https://data.education.gouv.fr/api/explore/v2.1/console
+
 import { capture } from "../../sentry";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 
