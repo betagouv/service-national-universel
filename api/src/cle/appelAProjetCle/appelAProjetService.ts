@@ -15,9 +15,11 @@ export const syncAppelAProjet = async () => {
   const classesToCreate: IClasse[] = [];
   const classesToUpdate: IClasse[] = [];
 
-  const uais = appelAProjets.map((appelAProjet) => getUAIfromAAP(appelAProjet));
-
-  const { results: etablissements } = await apiEducation({ filters: [{ key: "uai", value: uais }], page: 0, size: -1 });
+  const { results: etablissements } = await apiEducation({
+    filters: [{ key: "uai", value: appelAProjets.map((appelAProjet) => getUAIfromAAP(appelAProjet)) }],
+    page: 0,
+    size: -1,
+  });
 
   for (const appelAProjet of appelAProjets) {
     // if referent exists, update it
@@ -25,11 +27,12 @@ export const syncAppelAProjet = async () => {
     //---------------
     const uai = getUAIfromAAP(appelAProjet);
     if (!uai) {
-      console.error("UAI not found", appelAProjet);
+      // @ts-ignore
+      console.error("UAI not found", appelAProjet.id);
       continue;
     }
-    const etablissement = etablissements.find((etablissement) => etablissement.identifiant_de_l_etablissement === uai);
 
+    const etablissement = etablissements.find((etablissement) => etablissement.identifiant_de_l_etablissement === uai);
     if (!etablissement) {
       console.error("Etablissement not found", uai);
       continue;
@@ -66,8 +69,8 @@ export const syncAppelAProjet = async () => {
   return appelAProjets;
 };
 
-// TODO: update or remove when appelAProjet is formated
+// TODO: update or remove when appelAProjet mapping is done
 function getUAIfromAAP(appelAProjet: any): string {
-  const etablissementField = appelAProjet.champs.find((champ: any) => champ.label === "Etablissement, Ville (UAI)");
-  return etablissementField?.stringValue.split(" (")[1]?.replace(")", "");
+  const field = appelAProjet.champs.find((champ: { label: string; stringValue: string }) => champ.label === "Etablissement, Ville (UAI)");
+  return field?.stringValue.split(" (")[1]?.replace(")", "");
 }
