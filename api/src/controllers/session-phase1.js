@@ -6,6 +6,8 @@ const crypto = require("crypto");
 const datefns = require("date-fns");
 const { fr } = require("date-fns/locale");
 const fileUpload = require("express-fileupload");
+const fs = require("fs");
+const mongoose = require("mongoose");
 
 const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
 const { generateBatchDroitImage } = require("../templates/droitImage/droitImage");
@@ -19,6 +21,8 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
+const SessionPhase1 = require("../models/sessionPhase1");
+
 const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
 const {
   ROLES,
@@ -41,11 +45,9 @@ const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/se
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
 const config = require("config");
-const SessionPhase1 = require("../models/sessionPhase1");
-const fs = require("fs");
-const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const scanFile = require("../utils/virusScanner");
+
 const { getMimeFromFile } = require("../utils/file");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -88,6 +90,9 @@ router.get("/:id/schema-repartition", passport.authenticate("referent", { sessio
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.use("/", require("../sessionPhase1/sessionPhase1Controller"));
+
 router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -289,9 +294,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
     if (sessionPhase1.placesTotal !== sessionPhase1.placesLeft || youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    // check if a schema is linked to the session
-    const schema = await schemaRepartitionModel.find({ sessionId: sessionPhase1._id });
-    if (schema.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // Check for existing Plan de Transport
+    const lignesDeBus = await LigneBusModel.find({ cohort: sessionPhase1.cohort, centerId: sessionPhase1.cohesionCenterId }).select({ _id: 1 });
+    if (lignesDeBus.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // delete cohort in cohesion center
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
