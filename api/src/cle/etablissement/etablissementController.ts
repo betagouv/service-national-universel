@@ -96,6 +96,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
