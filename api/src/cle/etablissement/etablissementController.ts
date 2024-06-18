@@ -10,7 +10,6 @@ import EtablissementModel from "../../models/cle/etablissement";
 import ClasseModel from "../../models/cle/classe";
 import ReferentModel from "../../models/referent";
 import { UserRequest } from "../../controllers/request";
-
 const router = express.Router();
 
 router.get("/from-user", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
