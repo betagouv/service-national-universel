@@ -155,13 +155,16 @@ Schema.pre("save", async function (next, params) {
   this.user = params?.fromUser;
   this.updatedAt = Date.now();
   if (!this.isNew && (this.isModified("department") || this.isModified("region"))) {
-    await ClasseModel.updateMany(
-      { etablissementId: this._id },
-      {
-        department: this.department,
-        region: this.region,
-      },
-    );
+    const classes = await ClasseModel.find({ etablissementId: this._id });
+    if (classes.length > 0) {
+      await ClasseModel.updateMany(
+        { etablissementId: this._id },
+        {
+          department: this.department,
+          region: this.region,
+        },
+      );
+    }
   }
 
   next();

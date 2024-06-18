@@ -89,10 +89,6 @@ describe("PUT /cle/etablissement/:id", () => {
     const etablissement = createFixtureEtablissement({ department: "Paris", region: "Ile de france", academy: "Paris" });
     const validId = (await createEtablissement(etablissement))._id;
 
-    //we need to create classe or it won't work
-    const classe = createFixtureClasse({ etablissementId: validId, department: etablissement.department, region: etablissement.region });
-    await createClasse(classe);
-
     const res = await request(getAppHelper())
       .put(`/cle/etablissement/${validId}`)
       .send({
