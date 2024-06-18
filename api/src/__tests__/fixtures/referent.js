@@ -1,18 +1,16 @@
-const { faker } = require("@faker-js/faker");
+const { fakerFR: faker } = require("@faker-js/faker");
 const { ROLES } = require("snu-lib");
-
-faker.locale = "fr";
 
 function getNewReferentFixture() {
   return {
-    firstName: faker.name.firstName(),
-    lastName: faker.name.lastName(),
+    firstName: faker.person.firstName(),
+    lastName: faker.person.lastName(),
     email: faker.internet.email().toLowerCase(),
     password: faker.internet.password(),
-    region: faker.address.state(),
-    department: [faker.address.state()],
-    phone: faker.phone.phoneNumber(),
-    mobile: faker.phone.phoneNumber(),
+    region: faker.location.state(),
+    department: [faker.location.state()],
+    phone: faker.phone.number(),
+    mobile: faker.phone.number(),
     role: ROLES.ADMIN,
     acceptCGU: "true",
   };

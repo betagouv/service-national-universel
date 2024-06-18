@@ -1,7 +1,5 @@
-const { faker } = require("@faker-js/faker");
+const { fakerFR: faker } = require("@faker-js/faker");
 const mongoose = require("mongoose");
-
-faker.locale = "fr";
 
 function getNewLigneBusFixture(object = {}) {
   return {

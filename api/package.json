@@ -72,7 +72,7 @@
     "validator": "^13.7.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^6.1.2",
+    "@faker-js/faker": "^8.4.1",
     "@jest/test-sequencer": "^29.7.0",
     "@types/adm-zip": "^0.5.5",
     "@types/jest": "^29.5.12",

@@ -1,26 +1,25 @@
-const { faker } = require("@faker-js/faker");
+const { fakerFR: faker } = require("@faker-js/faker");
 const { ObjectId } = require("mongoose").Types;
-faker.locale = "fr";
 
 function getNewApplicationFixture() {
   return {
     sqlId: faker.datatype.uuid(),
     youngId: ObjectId(),
-    youngFirstName: faker.name.firstName(),
-    youngLastName: faker.name.lastName(),
+    youngFirstName: faker.person.firstName(),
+    youngLastName: faker.person.lastName(),
     youngEmail: faker.internet.email(),
     youngBirthdateAt: faker.date.past(),
-    youngCity: faker.address.city(),
-    youngDepartment: faker.address.city(),
+    youngCity: faker.location.city(),
+    youngDepartment: faker.location.city(),
     youngCohort: "2021",
     missionId: ObjectId(),
     missionName: faker.company.catchPhrase(),
-    missionDepartment: faker.address.city(),
-    missionRegion: faker.address.state(),
+    missionDepartment: faker.location.city(),
+    missionRegion: faker.location.state(),
     structureId: ObjectId(),
     tutorId: ObjectId(),
     contractId: ObjectId(),
-    tutorName: faker.name.firstName(),
+    tutorName: faker.person.firstName(),
     priority: "1",
     status: "WAITING_VALIDATION",
   };
