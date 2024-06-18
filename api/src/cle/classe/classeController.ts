@@ -217,6 +217,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         .required(),
       grade: Joi.array()
         .items(Joi.string().valid(...CLE_GRADE_LIST))
+        .max(3)
         .required(),
       sessionId: Joi.string().allow(null),
       cohesionCenterId: Joi.string().allow(null),
