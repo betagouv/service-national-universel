@@ -49,8 +49,8 @@ function getNewContractFixture() {
     structureManagerLastName: faker.person.lastName(),
     structureManagerRole: faker.helpers.arrayElement(["Tuteur de mission", "chef de centre"]),
     structureManagerEmail: faker.internet.email(),
-    structureSiret: faker.company.companyName(),
-    structureName: faker.company.companyName(),
+    structureSiret: faker.company.name(),
+    structureName: faker.company.name(),
     tutorFirstName: faker.person.firstName(),
     tutorLastName: faker.person.lastName(),
   };

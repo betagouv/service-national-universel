@@ -1,4 +1,4 @@
-const { faker } = require("@faker-js/faker");
+const { fakerFR: faker } = require("@faker-js/faker");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
