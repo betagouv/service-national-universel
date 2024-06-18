@@ -1,12 +1,12 @@
-const mongoose = require("mongoose");
+const { ObjectId } = require("mongoose").Types;
 
 function createFixtureEtablissement(fields = {}) {
   const etablissement = {
-    referentEtablissementIds: [new mongoose.Types.ObjectId().toString()],
-    coordinateurIds: [new mongoose.Types.ObjectId().toString()],
+    referentEtablissementIds: [ObjectId()],
+    coordinateurIds: [ObjectId()],
     type: ["Lycée Général et Technologique"],
     sector: ["Statut public"],
-    schoolId: new mongoose.Types.ObjectId().toString(),
+    schoolId: "634025469bc0ed3c32912815",
     uai: "0352992M",
     name: "Antenne CFA EN Jean-Jaurès Rennes",
     address: "56 Rue du Général Leclerc",
@@ -17,7 +17,7 @@ function createFixtureEtablissement(fields = {}) {
     country: "France",
     academy: "Limoges",
     schoolYears: ["2023-2024"],
-    state: "inactive",
+    state: "active",
     ...fields,
   };
   return etablissement;
