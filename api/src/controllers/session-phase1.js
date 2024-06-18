@@ -3,6 +3,12 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
+const datefns = require("date-fns");
+const { fr } = require("date-fns/locale");
+const fileUpload = require("express-fileupload");
+const fs = require("fs");
+const mongoose = require("mongoose");
+
 const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
 const { generateBatchDroitImage } = require("../templates/droitImage/droitImage");
 const { capture } = require("../sentry");
@@ -15,6 +21,8 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
+const SessionPhase1 = require("../models/sessionPhase1");
+
 const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
 const {
   ROLES,
@@ -36,16 +44,11 @@ const {
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL } = require("../config");
-const datefns = require("date-fns");
-const { fr } = require("date-fns/locale");
-const fileUpload = require("express-fileupload");
-const SessionPhase1 = require("../models/sessionPhase1");
-const FileType = require("file-type");
-const fs = require("fs");
-const mongoose = require("mongoose");
+const config = require("config");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const scanFile = require("../utils/virusScanner");
+
+const { getMimeFromFile } = require("../utils/file");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -87,6 +90,9 @@ router.get("/:id/schema-repartition", passport.authenticate("referent", { sessio
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.use("/", require("../sessionPhase1/sessionPhase1Controller"));
+
 router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -265,7 +271,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
     const cohort = await CohortModel.findOne({ name: session.cohort });
     generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
-
   } catch (error) {
     console.log("error", error);
     capture(error);
@@ -289,9 +294,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
     if (sessionPhase1.placesTotal !== sessionPhase1.placesLeft || youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    // check if a schema is linked to the session
-    const schema = await schemaRepartitionModel.find({ sessionId: sessionPhase1._id });
-    if (schema.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // Check for existing Plan de Transport
+    const lignesDeBus = await LigneBusModel.find({ cohort: sessionPhase1.cohort, centerId: sessionPhase1.cohesionCenterId }).select({ _id: 1 });
+    if (lignesDeBus.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // delete cohort in cohesion center
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
@@ -337,7 +342,7 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
     for (const email of value.emails) {
       await sendTemplate(SENDINBLUE_TEMPLATES.SHARE_SESSION_PHASE1, {
         emailTo: [{ email: email }],
-        params: { link: `${ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort.toLowerCase() },
+        params: { link: `${config.ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort.toLowerCase() },
       });
     }
 
@@ -541,8 +546,8 @@ router.post(
       const file = files[0];
 
       const { name, tempFilePath, mimetype, size } = file;
-      const filetype = await FileType.fromFile(tempFilePath);
-      const mimeFromMagicNumbers = filetype ? filetype.mime : "application/pdf";
+      const filetype = await getMimeFromFile(tempFilePath);
+      const mimeFromMagicNumbers = filetype || "application/pdf";
       const validTypes = ["image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
@@ -747,7 +752,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
         fileName: key === "time-schedule" ? "l'emploi du temps" : key === "pedago-project" ? "le projet pédagogique" : null,
         date: date ? datefns.format(date, "dd MMMM yyyy", { locale: fr }) : "?",
         cohesioncenter: session.nameCentre,
-        cta: `${ADMIN_URL}/centre/${session.cohesionCenterId}?sessionId=${session._id}`,
+        cta: `${config.ADMIN_URL}/centre/${session.cohesionCenterId}?sessionId=${session._id}`,
       },
     });
 

@@ -11,7 +11,7 @@ const ReferentObject = require("../models/referent");
 const StructureObject = require("../models/structure");
 const { ERRORS, isYoung, isReferent } = require("../utils");
 const { sendTemplate } = require("../sendinblue");
-const { APP_URL } = require("../config");
+const config = require("config");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
@@ -181,7 +181,7 @@ async function sendContractEmail(contract, options) {
       toName: options.name,
       youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
       missionName: contract.missionName,
-      cta: `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
+      cta: `${config.APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
     };
     const emailTo = [{ name: options.name, email: options.email }];
     if (options?.cc?.length) {
@@ -408,7 +408,7 @@ router.post("/token/:token", async (req, res) => {
         emailTo,
         params: {
           missionName: data.missionName,
-          cta: `${APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signe&utm_source=notifauto&utm_medium=mail+183+telecharger`,
+          cta: `${config.APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signe&utm_source=notifauto&utm_medium=mail+183+telecharger`,
         },
       });
     }

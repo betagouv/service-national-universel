@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
-const mongooseElastic = require("@selego/mongoose-elastic");
-const esClient = require("../es");
+const { isAfter, isWithinInterval } = require("date-fns");
+const { COHORT_TYPE, COHORT_TYPE_LIST, getDateTimeByTimeZoneOffset } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
-const { COHORT_TYPE, COHORT_TYPE_LIST } = require("snu-lib");
 
 const MODELNAME = "cohort";
 
@@ -85,6 +84,8 @@ const Schema = new mongoose.Schema({
   inscriptionEndDate: { type: Date, required: true },
   instructionEndDate: { type: Date, required: true },
   inscriptionModificationEndDate: { type: Date },
+  reInscriptionStartDate: { type: Date || null },
+  reInscriptionEndDate: { type: Date || null },
 
   buffer: {
     type: Number,
@@ -107,14 +108,31 @@ const Schema = new mongoose.Schema({
   },
 
   // CLE
+  // CLE - update by referents
   cleUpdateCohortForReferentRegion: { type: Boolean, default: false, required: false },
+  cleUpdateCohortForReferentRegionDate: { from: { type: Date }, to: { type: Date } },
+  cleUpdateCohortForReferentDepartment: { type: Boolean, default: false, required: false },
+  cleUpdateCohortForReferentDepartmentDate: { from: { type: Date }, to: { type: Date } },
+  // CLE - display cohorts
   cleDisplayCohortsForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForAdminCLEDate: { from: { type: Date }, to: { type: Date } },
   cleDisplayCohortsForReferentClasse: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForReferentClasseDate: { from: { type: Date }, to: { type: Date } },
+  // CLE - update centers
   cleUpdateCentersForReferentRegion: { type: Boolean, default: false, required: false },
+  cleUpdateCentersForReferentRegionDate: { from: { type: Date }, to: { type: Date } },
+  cleUpdateCentersForReferentDepartment: { type: Boolean, default: false, required: false },
+  cleUpdateCentersForReferentDepartmentDate: { from: { type: Date }, to: { type: Date } },
+  // CLE - display centers
   cleDisplayCentersForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayCentersForAdminCLEDate: { from: { type: Date }, to: { type: Date } },
   cleDisplayCentersForReferentClasse: { type: Boolean, default: false, required: false },
+  cleDisplayCentersForReferentClasseDate: { from: { type: Date }, to: { type: Date } },
+  // CLE - PDR
   cleDisplayPDRForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayPDRForAdminCLEDate: { from: { type: Date }, to: { type: Date } },
   cleDisplayPDRForReferentClasse: { type: Boolean, default: false, required: false },
+  cleDisplayPDRForReferentClasseDate: { from: { type: Date }, to: { type: Date } },
 
   validationDate: {
     type: Date,
@@ -211,6 +229,30 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  informationsConvoyage: {
+    editionOpenForReferentRegion: {
+      type: Boolean,
+      default: true,
+      documentation: {
+        description: "Ouverture ou fermeture de l'édition des informations de convoyage pour les référents régionaux",
+      },
+    },
+    editionOpenForReferentDepartment: {
+      type: Boolean,
+      default: true,
+      documentation: {
+        description: "Ouverture ou fermeture de l'édition des informations de convoyage pour les référents départementaux",
+      },
+    },
+    editionOpenForHeadOfCenter: {
+      type: Boolean,
+      default: true,
+      documentation: {
+        description: "Ouverture ou fermeture de l'édition des informations de convoyage pour les chefs de centre",
+      },
+    },
+  },
+
   repartitionSchemaCreateAndEditGroupAvailability: {
     type: Boolean,
     documentation: {
@@ -297,6 +339,42 @@ Schema.virtual("fromUser").set(function (fromUser) {
   }
 });
 
+Schema.methods.getIsInstructionOpen = function (timeZoneOffset) {
+  const now = getDateTimeByTimeZoneOffset(timeZoneOffset);
+  const end = this.instructionEndDate;
+  if (!end || isAfter(now, end)) return false;
+  return true;
+};
+
+Schema.virtual("isInstructionOpen").get(function () {
+  return this.getIsInstructionOpen();
+});
+
+Schema.methods.getIsInscriptionOpen = function (timeZoneOffset) {
+  const now = getDateTimeByTimeZoneOffset(timeZoneOffset);
+  const start = this.inscriptionStartDate;
+  const end = this.inscriptionEndDate;
+  if (!start || !end || isAfter(start, end)) return false;
+  return isWithinInterval(now, { start, end });
+};
+
+Schema.virtual("isInscriptionOpen").get(function () {
+  return this.getIsInscriptionOpen();
+});
+
+Schema.methods.getIsReInscriptionOpen = function (timeZoneOffset) {
+  const now = getDateTimeByTimeZoneOffset(timeZoneOffset);
+  const start = this.reInscriptionStartDate;
+  const end = this.reInscriptionEndDate;
+  if (!start || !end) return this.getIsInscriptionOpen(timeZoneOffset);
+  if (isAfter(start, end)) return false;
+  return isWithinInterval(now, { start, end });
+};
+
+Schema.virtual("isReInscriptionOpen").get(function () {
+  return this.getIsReInscriptionOpen();
+});
+
 Schema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
@@ -312,8 +390,6 @@ Schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

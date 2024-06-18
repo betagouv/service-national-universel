@@ -8,8 +8,7 @@ import dayjs from "@/utils/dayjs.utils";
 import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
 import { BsDownload } from "react-icons/bs";
 import { IoFlashOutline } from "react-icons/io5";
-import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs } from "snu-lib";
-import { ERRORS } from "snu-lib/errors";
+import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs, ERRORS } from "snu-lib";
 import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
@@ -22,6 +21,7 @@ import { ROLES, canDeleteReferent, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
 import { signinAs } from "@/utils/signinAs";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -166,6 +166,7 @@ export default function List() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
+              intermediateFilters={[getCohortGroups("cohorts")]}
             />
             <SortOption
               sortOptions={[

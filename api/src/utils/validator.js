@@ -313,6 +313,7 @@ const sessionPhase1Keys = {
   placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
   dateStart: Joi.date().allow(null),
   dateEnd: Joi.date().allow(null),
+  sanitaryContactEmail: Joi.string().allow(null, ""),
 };
 
 function validateSessionPhase1(session) {

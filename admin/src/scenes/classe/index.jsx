@@ -6,6 +6,8 @@ import { SentryRoute } from "../../sentry";
 import Create from "./create";
 import List from "./list";
 import View from "./view";
+import { toastr } from "react-redux-toastr";
+import NotFound from "@/components/layout/NotFound";
 
 export default function Index() {
   useDocumentTitle("Classes");
@@ -13,7 +15,17 @@ export default function Index() {
   return (
     <Switch>
       <SentryRoute path="/classes/create" component={Create} />
-      <SentryRoute path="/classes/:id" component={View} />
+      <SentryRoute
+        path="/classes/:id"
+        render={({ match }) => {
+          const { id } = match.params;
+          if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+            toastr.error("Identifiant invalide : " + id);
+            return <SentryRoute component={NotFound} />;
+          }
+          return <SentryRoute component={View} />;
+        }}
+      />
       <SentryRoute path="/classes" component={List} />
     </Switch>
   );

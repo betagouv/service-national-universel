@@ -1,6 +1,6 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { ENVIRONMENT, IMAGES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
+const config = require("config");
 const dayjs = require("dayjs");
 require("dayjs/locale/fr");
 
@@ -12,7 +12,8 @@ const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const DepartmentServiceModel = require("../../models/departmentService");
 const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
-const { formatStringDate, formatStringDateTimezoneUTC, regionsListDROMS, transportDatesToString } = require("snu-lib");
+const { formatStringDate, formatStringDateTimezoneUTC, transportDatesToString, YOUNG_STATUS, FUNCTIONAL_ERRORS } = require("snu-lib");
+const { capture } = require("../../sentry");
 
 const FONT = "Marianne";
 const FONT_BOLD = `${FONT}-Bold`;
@@ -23,7 +24,7 @@ const LIST_INDENT = 15;
 const MARGIN = 50;
 
 function isLocalTransport(young) {
-  return young.transportInfoGivenByLocal === "true" && young.source !== "CLE";
+  return young.transportInfoGivenByLocal === "true";
 }
 
 const getMeetingAddress = (young, meetingPoint, center) => {
@@ -34,9 +35,6 @@ const getMeetingAddress = (young, meetingPoint, center) => {
 };
 
 async function fetchDataForYoung(young) {
-  if (!["AFFECTED", "DONE", "NOT_DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
-  if (!young.sessionPhase1Id || (!isLocalTransport(young) && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.source !== "CLE"))
-    throw `young ${young.id} unauthorized`;
   const session = await SessionPhase1.findById(young.sessionPhase1Id);
   if (!session) throw `session ${young.sessionPhase1Id} not found for young ${young._id}`;
   const center = await CohesionCenterModel.findById(session.cohesionCenterId);
@@ -46,8 +44,11 @@ async function fetchDataForYoung(young) {
   cohort.dateStart.setMinutes(cohort.dateStart.getMinutes() - cohort.dateStart.getTimezoneOffset());
   cohort.dateEnd.setMinutes(cohort.dateEnd.getMinutes() - cohort.dateEnd.getTimezoneOffset());
 
-  const service = await DepartmentServiceModel.findOne({ department: young.department });
-  if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
+  let service = null;
+  if (young.source !== "CLE") {
+    service = await DepartmentServiceModel.findOne({ department: young.department });
+    if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
+  }
 
   let meetingPoint = null;
   let ligneToPoint = null;
@@ -81,8 +82,8 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
 
   doc.font(FONT).fillColor(FILL_COLOR).fontSize(9);
 
-  if (ENVIRONMENT !== "testing") {
-    doc.image(path.join(IMAGES_ROOTDIR, getTemplate(young)), 0, 0, {
+  if (config.ENVIRONMENT !== "test") {
+    doc.image(path.join(config.IMAGES_ROOTDIR, getTemplate(young)), 0, 0, {
       fit: [page.width, page.height],
       align: "center",
       valign: "center",
@@ -137,7 +138,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
     doc.font(FONT).text("Le ", MARGIN + 100, undefined, { continued: true });
     doc.font(FONT_BOLD).text(dayjs(departureDate).locale("fr-FR").format("dddd DD MMMM YYYY"));
     doc.font(FONT).text("A ", { continued: true });
-    doc.font(FONT_BOLD).text(meetingPoint ? ligneToPoint.meetingHour : "16:00");
+    doc.font(FONT_BOLD).text(meetingPoint && ligneToPoint?.meetingHour ? ligneToPoint.meetingHour : "16:00");
     doc.font(FONT).text("Au ", { continued: true });
     doc.font(FONT_BOLD).text(getMeetingAddress(young, meetingPoint, center));
     if (ligneBus) {
@@ -194,9 +195,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
   doc.font(FONT).text(` est prévu`, { continued: true });
   if (!isLocalTransport(young)) {
     doc.font(FONT_BOLD).text(` le ${dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")}`, { continued: true });
-    if (young.source !== "CLE") {
-      doc.font(FONT_BOLD).text(` à ${meetingPoint ? ligneToPoint.returnHour : "11:00"}`, { continued: true });
-    }
+    doc.font(FONT_BOLD).text(` à ${meetingPoint && ligneToPoint ? ligneToPoint.returnHour : "11:00"}`, { continued: true });
   }
   doc.font(FONT).text(` au même endroit que le jour du départ en centre.`);
 
@@ -234,14 +233,15 @@ function initDocument(options = {}) {
     ...options,
   });
 
-  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
-  doc.registerFont(FONT_ITALIC, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
+  doc.registerFont(FONT, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
+  doc.registerFont(FONT_BOLD, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
+  doc.registerFont(FONT_ITALIC, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
 
   return doc;
 }
 
 async function generateCohesion(outStream, young) {
+  controlYoungCoherence(young);
   const data = await fetchDataForYoung(young);
   const random = Math.random();
   console.time("RENDERING " + random);
@@ -255,19 +255,35 @@ async function generateCohesion(outStream, young) {
 async function generateBatchCohesion(outStream, youngs) {
   const random = Math.random();
   console.time("RENDERING " + random);
+  const validatedYoungsWithSession = youngs.filter((young) => young.status === YOUNG_STATUS.VALIDATED && young.sessionPhase1Id);
   const doc = initDocument({ autoFirstPage: false });
   doc.pipe(outStream);
-  for (const young of youngs) {
+  let commonYoungData = await getYoungCommonData(validatedYoungsWithSession);
+  for (const young of validatedYoungsWithSession) {
     try {
-      const data = await fetchDataForYoung(young);
+      controlYoungCoherence(young);
       doc.addPage();
-      render(doc, { young, ...data });
-    } catch (e) {
-      console.log(e);
+      render(doc, { young, ...commonYoungData });
+    } catch (error) {
+      capture(error);
     }
   }
   doc.end();
   console.timeEnd("RENDERING " + random);
+}
+
+function controlYoungCoherence(young) {
+  if (!["AFFECTED", "DONE", "NOT_DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
+  if (!young.sessionPhase1Id || (!isLocalTransport(young) && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.source !== "CLE"))
+    capture(`young ${young.id} unauthorized`);
+}
+
+async function getYoungCommonData(youngs) {
+  if (!youngs || youngs.length === 0) {
+    throw FUNCTIONAL_ERRORS.NO_YOUNG_IN_EXPECTED_STATUS;
+  }
+
+  return await fetchDataForYoung(youngs[0]);
 }
 
 module.exports = { generateCohesion, generateBatchCohesion };

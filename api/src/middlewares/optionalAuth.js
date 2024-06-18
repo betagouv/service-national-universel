@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const config = require("../config");
+const config = require("config");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
 const { getToken } = require("../passport");
@@ -11,7 +11,7 @@ const optionalAuth = async (req, _, next) => {
     const token = getToken(req);
     let user;
     if (token) {
-      const jwtPayload = await jwt.verify(token, config.secret);
+      const jwtPayload = await jwt.verify(token, config.JWT_SECRET);
       const { error, value } = Joi.object({ __v: Joi.string().required(), _id: Joi.string().required(), passwordChangedAt: Joi.string(), lastLogoutAt: Joi.date() }).validate({
         ...jwtPayload,
       });

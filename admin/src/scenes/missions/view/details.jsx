@@ -3,14 +3,13 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
-
+import { useSelector } from "react-redux";
 import validator from "validator";
 
 import { useAddress, MISSION_STATUS } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 import { useDebounce } from "@uidotdev/usehooks";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
-import InfoCircleMission from "@/assets/icons/InfoCircleMission";
 
 import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES, ENABLE_PM } from "@/utils";
 import MissionView from "./wrapper";
@@ -27,7 +26,6 @@ import { adminURL } from "../../../config";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
-import { useSelector } from "react-redux";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -278,18 +276,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
           </div>
         ) : null}
         {mission.status === MISSION_STATUS.WAITING_VALIDATION ? (
-          <InfoMessage
-            bg="bg-blue-700"
-            Icon={InfoCircleMission}
-            message="La mission est en attente de validation. Son contenu va être vérifié par un référent SNU du département dans lequel se déroulera la mission dans les jours à venir."
-          />
+          <InfoMessage message="La mission est en attente de validation. Son contenu va être vérifié par un référent SNU du département dans lequel se déroulera la mission dans les jours à venir." />
         ) : null}
         {mission.status === MISSION_STATUS.DRAFT ? (
-          <InfoMessage
-            bg="bg-blue-700"
-            Icon={InfoCircleMission}
-            message='Si la mission reste au statut brouillon celle-ci ne sera pas étudiée et par conséquent le volontaire ne pourra pas y candidater. Pensez à modifier son statut en la passant "En attente de validation". (bouton en haut à droite de votre écran)'
-          />
+          <InfoMessage message='Si la mission reste au statut brouillon celle-ci ne sera pas étudiée et par conséquent le volontaire ne pourra pas y candidater. Pensez à modifier son statut en la passant "En attente de validation". (bouton en haut à droite de votre écran)' />
         ) : null}
         <div className="mb-8 rounded-xl bg-white pt-2 mt-8">
           <div className="flex flex-col rounded-xl bg-white px-8 pb-12">

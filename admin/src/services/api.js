@@ -2,8 +2,7 @@ import fetchRetry from "fetch-retry";
 
 import { capture } from "../sentry";
 import { apiURL } from "../config";
-import { createFormDataForFileUpload } from "snu-lib";
-import { ERRORS } from "snu-lib/errors";
+import { createFormDataForFileUpload, ERRORS } from "snu-lib";
 
 let fetch = window.fetch;
 
@@ -50,7 +49,7 @@ class api {
           console.log("Fetch request was manually reloaded, ignoring error.");
           resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
-          capture(e, { extras: { path: "CHECK TOKEN", token: this.token } });
+          capture(e, { extra: { path: "CHECK TOKEN", token: this.token } });
           reject(e);
         }
       }

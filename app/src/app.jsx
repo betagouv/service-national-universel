@@ -121,7 +121,7 @@ const OptionalLogIn = () => {
       }
     }
     fetchData();
-  }, []);
+  }, []); //eslint-disable-line
 
   if (loading) return <Loader />;
   if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;

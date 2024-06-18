@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { ImQuotesLeft } from "react-icons/im";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import ModalConfirm from "@/components/modals/ModalConfirm";
 
 import { YOUNG_SOURCE } from "snu-lib";
+
+import ModalConfirm from "@/components/modals/ModalConfirm";
 import dayjs from "@/utils/dayjs.utils";
-import { AiOutlineExclamationCircle } from "react-icons/ai";
 import ExternalLink from "@/assets/icons/ExternalLink";
 import Refresh from "@/assets/icons/Refresh";
 import { adminURL } from "@/config";
@@ -14,6 +14,7 @@ import { capture } from "@/sentry";
 import api from "@/services/api";
 import { getCohortByName } from "@/services/cohort.service";
 import { YOUNG_STATUS_PHASE1, canAssignManually, translate, youngCheckinField } from "@/utils";
+
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import ModalAffectations from "../components/ModalAffectation";
@@ -112,8 +113,7 @@ export default function Phase1(props) {
       <div className="p-[30px]">
         {meetingPoint?.bus?.delayedForth === "true" || meetingPoint?.bus?.delayedBack === "true" ? (
           <InfoMessage
-            bg="bg-[#B45309]"
-            Icon={AiOutlineExclamationCircle}
+            priority="important"
             message={`Le départ de la ligne de bus de ce jeune est retardé ${
               meetingPoint?.bus?.delayedForth === "true" && meetingPoint?.bus?.delayedBack === "true"
                 ? "à l'Aller et au Retour"
@@ -214,6 +214,7 @@ export default function Phase1(props) {
                     ) : (
                       <>
                         <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement. Voici le(s) point(s) de rassemblement proposé(s) :</div>
+
                         <PDRpropose young={young} center={cohesionCenter} modalAffectations={modalAffectations} setModalAffectation={setModalAffectation}></PDRpropose>
                       </>
                     )}

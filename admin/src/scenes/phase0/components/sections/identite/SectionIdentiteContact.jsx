@@ -1,7 +1,6 @@
 import React from "react";
 
-import { PHONE_ZONES } from "snu-lib/phone-number";
-import { translate } from "snu-lib";
+import { PHONE_ZONES, translate } from "snu-lib";
 
 import { getCorrectionRequest } from "../../../utils";
 

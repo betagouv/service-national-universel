@@ -1,6 +1,4 @@
 const mongoose = require("mongoose");
-const mongooseElastic = require("@selego/mongoose-elastic");
-const esClient = require("../es");
 
 const MODELNAME = "school";
 
@@ -22,10 +20,6 @@ const Schema = new mongoose.Schema(
   { timestamps: true },
 );
 
-Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["apiAdressObject", "csvObject"] }), MODELNAME);
-
 const OBJ = mongoose.model(MODELNAME, Schema);
-
-OBJ.syncIndexes(); // Remove existing index
 
 module.exports = OBJ;

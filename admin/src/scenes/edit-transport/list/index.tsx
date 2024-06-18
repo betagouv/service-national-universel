@@ -8,7 +8,7 @@ import { ROLES, translate } from "snu-lib";
 import { BusLine, Young } from "@/types";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { CohortState } from "@/redux/cohorts";
+import { CohortState } from "@/redux/cohorts/reducer";
 import { AuthState } from "@/redux/auth/reducer";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -87,7 +87,7 @@ export default function List() {
 const ReactiveList = ({ cohort }) => {
   const history = useHistory();
 
-  const [lines, setLines] = useState([]);
+  const [lines, setLines] = useState<{ _id: string }[]>([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({ page: 0 });
   const [youngs, setYoungs] = useState<Young[]>();
@@ -139,6 +139,7 @@ const ReactiveList = ({ cohort }) => {
       <div className="flex items-center justify-between bg-white px-4 pt-2">
         <div className="flex items-center justify-center gap-2">
           <Filters
+            // @ts-expect-error update Filters types
             defaultUrlParam={`cohort=${cohort}`}
             pageId={pageId}
             route="/elasticsearch/lignebus/search"
@@ -178,6 +179,7 @@ const ReactiveList = ({ cohort }) => {
         setParamData={setParamData}
         currentEntryOnPage={lines?.length}
         size={size}
+        // @ts-expect-error update ResultTable types
         setSize={setSize}
         render={
           <div className="overflow-x-scroll w-full mt-2">

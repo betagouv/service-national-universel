@@ -37,7 +37,7 @@ export function AgreementModal({ isOpen, setIsOpen, departureDate, returnDate })
         <div className="w-full p-4">
           <h1 className="pb-1 text-center text-xl text-gray-900">Confirmez votre participation au séjour</h1>
           <p className="pb-4 text-center text-base text-gray-500">Vous devez confirmer votre participation au séjour avant votre départ.</p>
-          <div className="mb-2 flex flex-shrink flex-col flex-wrap justify-center gap-6 p-2 md:justify-start lg:flex-row">
+          <div className="mb-2 flex flex-shrink flex-col flex-wrap justify-center gap-6 p-2 lg:flex-row">
             <div className="flex flex-col rounded-2xl border-[1px] border-blue-600 py-5 px-5 shadow-sm w-80">
               <h1 className="pb-4 text-xl font-bold leading-7">Je confirme</h1>
               <div className="text-sm text-gray-600">
@@ -55,19 +55,21 @@ export function AgreementModal({ isOpen, setIsOpen, departureDate, returnDate })
                 Valider
               </button>
             </div>
-            {!isCle(young) && (
-              <div className="flex flex-col rounded-2xl border-[1px] border-gray-100 py-5 px-5 shadow-sm w-80">
-                <h1 className="pb-4 text-xl font-bold leading-7">J&apos;ai changé d&apos;avis</h1>
-                <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({transportDatesToString(departureDate, returnDate)})</p>
-                <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">
-                  Changer de séjour &gt;
-                </Link>
-                <p className="pb-3 text-sm text-gray-600">Je ne souhaite plus participer au SNU</p>
-                <Link to="account/general?desistement=1" className="whitespace-nowrap text-sm text-blue-600 hover:underline hover:underline-offset-2">
-                  Me désister &gt;
-                </Link>
-              </div>
-            )}
+            <div className="flex flex-col rounded-2xl border-[1px] border-gray-100 py-5 px-5 shadow-sm w-80">
+              <h1 className="pb-4 text-xl font-bold leading-7">J&apos;ai changé d&apos;avis</h1>
+              {!isCle(young) && (
+                <>
+                  <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({transportDatesToString(departureDate, returnDate)})</p>
+                  <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">
+                    Changer de séjour &gt;
+                  </Link>
+                </>
+              )}
+              <p className="pb-3 text-sm text-gray-600">Je ne souhaite plus participer au SNU</p>
+              <Link to="account/withdrawn?desistement=1" className="whitespace-nowrap text-sm text-blue-600 hover:underline hover:underline-offset-2">
+                Me désister &gt;
+              </Link>
+            </div>
           </div>
         </div>
       </ModalContainer>

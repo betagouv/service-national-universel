@@ -8,11 +8,11 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const mime = require("mime-types");
 const fs = require("fs");
-const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const redis = require("redis");
+
 const { decrypt, encrypt } = require("../../cryptoUtils");
-const config = require("../../config");
+const config = require("config");
 const { capture } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
@@ -31,13 +31,13 @@ const {
   isYoung,
   isReferent,
   updatePlacesSessionPhase1,
-  translateFileStatusPhase1,
   getCcOfYoung,
   getFile,
   autoValidationSessionPhase1Young,
   deleteFile,
   updateSeatsTakenInBusLine,
 } = require("../../utils");
+const { getMimeFromFile, getMimeFromBuffer } = require("../../utils/file");
 const { sendTemplate, unsync } = require("../../sendinblue");
 const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
@@ -60,9 +60,9 @@ const {
   YOUNG_SOURCE,
   youngCanChangeSession,
   youngCanWithdraw,
+  translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
 } = require("snu-lib");
-const { APP_URL } = require("../../config");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
@@ -96,7 +96,7 @@ router.post("/signup_verify", async (req, res) => {
 
     const young = await YoungObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     return res.status(200).send({ ok: true, token, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
@@ -132,7 +132,7 @@ router.post("/signup_invite", async (req, res) => {
     young.set({ invitationToken: "" });
     young.set({ invitationExpires: null });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
     await young.save({ fromUser: req.user });
@@ -188,7 +188,7 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype } = currentFile;
-        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
@@ -458,7 +458,7 @@ router.put("/accept-ri", passport.authenticate("young", { session: false, failWi
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
       params: {
-        cta: `${APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
+        cta: `${config.APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
         youngFirstName: young.firstName,
         youngName: young.lastName,
       },
@@ -726,7 +726,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       scope: `openid given_name family_name email`,
       redirect_uri: `${config.APP_URL}/${value.callback}`,
       response_type: "code",
-      client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
+      client_id: config.FRANCE_CONNECT_CLIENT_ID,
       state: crypto.randomBytes(20).toString("hex"),
       nonce: crypto.randomBytes(20).toString("hex"),
       acr_values: "eidas1",
@@ -742,7 +742,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 
     await redisClient.disconnect();
 
-    const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
+    const url = `${config.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
     return res.status(200).send({ ok: true, data: { url } });
   } catch (error) {
     capture(error);
@@ -764,12 +764,12 @@ router.post("/france-connect/user-info", async (req, res) => {
     const body = {
       grant_type: "authorization_code",
       redirect_uri: `${config.APP_URL}/${value.callback}`,
-      client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
-      client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
+      client_id: config.FRANCE_CONNECT_CLIENT_ID,
+      client_secret: config.FRANCE_CONNECT_CLIENT_SECRET,
       code: value.code,
     };
 
-    const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
+    const tokenResponse = await fetch(`${config.FRANCE_CONNECT_URL}/token`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: queryString.stringify(body),
@@ -800,7 +800,7 @@ router.post("/france-connect/user-info", async (req, res) => {
     }
 
     // … then get user info.
-    const userInfoResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/userinfo`, {
+    const userInfoResponse = await fetch(`${config.FRANCE_CONNECT_URL}/userinfo`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token["access_token"]}` },
     });
@@ -815,7 +815,6 @@ router.post("/france-connect/user-info", async (req, res) => {
 });
 
 // Delete one user (only admin can delete user)
-// And apparently referent in same geography as well (see canDeleteYoung())
 router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -826,7 +825,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const fieldToKeep = [
       "_id",
@@ -1188,8 +1187,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
 
     let mimeFromFile = null;
     try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
+      mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {
       capture(e);
     }

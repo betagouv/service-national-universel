@@ -1,7 +1,6 @@
 const express = require("express");
 const passport = require("passport");
 const fileUpload = require("express-fileupload");
-const FileType = require("file-type");
 const fs = require("fs");
 const Joi = require("joi");
 const { v4: uuid } = require("uuid");
@@ -13,7 +12,7 @@ const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } = require("../cookie-options
 const { capture } = require("../sentry");
 const SNUpport = require("../SNUpport");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
-const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
+const config = require("config");
 const { sendTemplate } = require("../sendinblue");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
@@ -23,6 +22,7 @@ const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
 const optionalAuth = require("../middlewares/optionalAuth");
 const scanFile = require("../utils/virusScanner");
+const { getMimeFromFile } = require("../utils/file");
 
 const router = express.Router();
 
@@ -237,14 +237,19 @@ router.post("/ticket/form", async (req, res) => {
   try {
     let author;
 
+    const checkRole = async (role, email, findObject) => {
+      const existing = await findObject.findOne({ email: email.toLowerCase() });
+      return existing ? `${role} exterior` : "unknown";
+    };
+
     if (req.body.role === "young" || req.body.role === "parent") {
       author = req.body.role;
-      const existingYoung = await YoungObject.findOne({ email: req.body.email.toLowerCase() });
-      if (existingYoung) {
-        req.body.role = "young exterior";
-      } else {
-        req.body.role = "unknown";
-      }
+      req.body.role = await checkRole("young", req.body.email, YoungObject);
+    }
+
+    if (req.body.role === "admin" || req.body.role === "admin exterior") {
+      author = req.body.role;
+      req.body.role = await checkRole("admin", req.body.email, ReferentObject);
     }
 
     const obj = {
@@ -441,7 +446,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         currentFile = currentFile[currentFile.length - 1];
       }
       const { name, tempFilePath, mimetype } = currentFile;
-      const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+      const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
       const validTypes = [
         "image/jpeg",
         "image/png",
@@ -461,7 +466,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
 
       const data = fs.readFileSync(tempFilePath);
       const path = getS3Path(name);
-      const encryptedBuffer = encrypt(data, FILE_ENCRYPTION_SECRET_SUPPORT);
+      const encryptedBuffer = encrypt(data, config.FILE_ENCRYPTION_SECRET_SUPPORT);
       const response = await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG);
       responseData.push({ name, url: response.Location, path: response.key });
       fs.unlinkSync(tempFilePath);
@@ -478,7 +483,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
 router.get("/s3file/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const file = await getFile(`message/${req.params.id}`, SUPPORT_BUCKET_CONFIG);
-    const buffer = decrypt(file.Body, FILE_ENCRYPTION_SECRET_SUPPORT);
+    const buffer = decrypt(file.Body, config.FILE_ENCRYPTION_SECRET_SUPPORT);
     return res.status(200).send({ ok: true, data: buffer });
   } catch (error) {
     capture(error);
@@ -506,7 +511,7 @@ const notifyReferent = async (ticket, message) => {
     sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: `${referent.email}` }],
       params: {
-        cta: `${ADMIN_URL}/boite-de-reception`,
+        cta: `${config.ADMIN_URL}/boite-de-reception`,
         message,
         from: `${ticketCreator.firstName} ${ticketCreator.lastName}`,
       },

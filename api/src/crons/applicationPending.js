@@ -4,7 +4,7 @@ const Referent = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { ADMIN_URL } = require("../config");
+const config = require("config");
 const { differenceInDays, getMonth } = require("date-fns");
 
 exports.handler = async () => {
@@ -32,10 +32,10 @@ exports.handler = async () => {
         countApplicationMonth[getMonth(new Date(patches[0].date)) + 1] = (countApplicationMonth[getMonth(new Date(patches[0].date)) + 1] || 0) + 1;
         if (!tutors.includes(tutor.email)) tutors.push(tutor.email);
 
-        sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
           emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
           params: {
-            cta: `${ADMIN_URL}/volontaire/${application.youngId}`,
+            cta: `${config.ADMIN_URL}/volontaire/${application.youngId}`,
             youngFirstName: application.youngFirstName,
             youngLastName: application.youngLastName,
             missionName: application.missionName,

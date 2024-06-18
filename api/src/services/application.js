@@ -5,7 +5,7 @@ const CohortModel = require("../models/cohort");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
-const { APP_URL } = require("../config");
+const config = require("config");
 const { getCcOfYoung } = require("../utils");
 const { getTutorName } = require("./mission");
 const { capture } = require("../sentry");
@@ -80,7 +80,7 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
       },
     });
     for (let application of applications) {
-      let cta = `${APP_URL}/phase2`;
+      let cta = `${config.APP_URL}/phase2`;
       let statusComment = "";
       let sendinblueTemplate = "";
       switch (mission.status) {
@@ -90,7 +90,7 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
         case MISSION_STATUS.CANCEL:
           statusComment = "La mission a été annulée.";
           sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_CANCEL;
-          cta = `${APP_URL}/phase2?utm_campaign=transactionnel+mig+annulee&utm_source=notifauto&utm_medium=mail+261+acceder`;
+          cta = `${config.APP_URL}/phase2?utm_campaign=transactionnel+mig+annulee&utm_source=notifauto&utm_medium=mail+261+acceder`;
           break;
         case MISSION_STATUS.ARCHIVED:
           statusComment = "La mission a été archivée.";
@@ -133,6 +133,14 @@ const getAuthorizationToApply = async (mission, young) => {
 
   if (!canApplyToPhase2(young, cohort)) {
     refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
+  }
+
+  if (mission.placesLeft === 0) {
+    refusalMessages.push("La mission est déjà complète.");
+  }
+
+  if (mission.visibility === "HIDDEN") {
+    refusalMessages.push("La structure a fermé les candidatures pour cette mission.");
   }
 
   const applicationsCount = await ApplicationModel.countDocuments({

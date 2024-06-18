@@ -4,7 +4,7 @@ const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const { ROLES } = require("snu-lib");
 const { getToken } = require("../passport");
-const config = require("../config");
+const config = require("config");
 const { serializeYoung, serializeReferent } = require("../utils/serializer");
 const { ERRORS } = require("../utils");
 
@@ -41,7 +41,7 @@ router.get("/token", async (req, res) => {
 
     let jwtPayload;
     try {
-      jwtPayload = await jwt.verify(token, config.secret);
+      jwtPayload = await jwt.verify(token, config.JWT_SECRET);
     } catch (error) {
       return res.status(401).send({ ok: false, user: { restriction: "public" } });
     }

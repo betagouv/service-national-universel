@@ -10,7 +10,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
-import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
+import { concatPhoneNumberWithZone } from "snu-lib";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { SignupButtons } from "@snu/ds/dsfr";
 

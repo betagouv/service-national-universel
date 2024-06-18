@@ -1,4 +1,4 @@
-import { ERRORS } from "snu-lib/errors";
+import { ERRORS } from "snu-lib";
 import api from "./api";
 import { download, translate } from "snu-lib";
 

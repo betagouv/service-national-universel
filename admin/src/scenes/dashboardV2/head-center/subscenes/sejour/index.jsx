@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import queryString from "query-string";
 import { useSelector } from "react-redux";
 import { HiOutlineChartSquareBar } from "react-icons/hi";
@@ -12,28 +12,25 @@ import BoxWithPercentage from "../../../components/sejour/BoxWithPercentage";
 import Details from "@/scenes/dashboardV2/components/inscription/Details";
 import Presences from "../../../components/sejour/Presences";
 import StatusPhase1 from "../../../components/sejour/StatusPhase1";
+import { useAsync } from "react-use";
 
 export default function Index() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
-  const cohort = sessionPhase1.cohort;
-  const sessionId = sessionPhase1._id;
-  const centerId = sessionPhase1.cohesionCenterId;
+  const cohort = sessionPhase1?.cohort;
+  const sessionId = sessionPhase1?._id;
+  const centerId = sessionPhase1?.cohesionCenterId;
 
   const selectedFilters = {
     cohort: [cohort],
   };
-  const [data, setData] = useState({});
 
-  useEffect(() => {
-    queryCenter();
-  }, []);
-
-  const queryCenter = async () => {
-    const { resultYoung } = await api.post("/elasticsearch/dashboard/sejour/head-center", {
+  const { value: data } = useAsync(async () => {
+    const response = await api.post("/elasticsearch/dashboard/sejour/head-center", {
       filters: Object.fromEntries(Object.entries(selectedFilters)),
     });
-    setData(resultYoung);
-  };
+    return response.resultYoung;
+  }, []);
+
   return (
     <Page>
       <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} />

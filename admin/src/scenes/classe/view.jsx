@@ -22,8 +22,9 @@ import {
   translateStatusClasse,
   COHORT_TYPE,
   IS_INSCRIPTION_OPEN_CLE,
+  formatDateFRTimezoneUTC,
 } from "snu-lib";
-import { FUNCTIONAL_ERRORS } from "snu-lib/functionalErrors";
+import { FUNCTIONAL_ERRORS } from "snu-lib";
 import { useSelector } from "react-redux";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
@@ -98,10 +99,10 @@ export default function View() {
         setInfoBus({
           busId: ligne.busId,
           departureDate: dayjs(ligne.departuredDate).format("dddd D MMMM YYYY"),
-          meetingHour: meetingPoint.meetingHour,
-          departureHour: meetingPoint.departureHour,
+          meetingHour: meetingPoint?.meetingHour,
+          departureHour: meetingPoint?.departureHour,
           returnDate: dayjs(ligne.returnDate).format("dddd D MMMM YYYY"),
-          returnHour: meetingPoint.returnHour,
+          returnHour: meetingPoint?.returnHour,
         });
       }
 
@@ -268,10 +269,10 @@ export default function View() {
                   <p className="text-left text-sm  text-gray-800">Dates</p>
                   <div className="flex items-center">
                     <p className="text-left text-xs text-gray-500 flex-1">
-                      Début : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateStart).format("DD/MM/YYYY") : ""}</strong>
+                      Début : <strong>{formatDateFRTimezoneUTC(cohorts?.find((c) => c.name === classe?.cohort)?.dateStart)}</strong>
                     </p>
                     <p className="text-left text-xs text-gray-500 flex-1">
-                      Fin : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateEnd).format("DD/MM/YYYY") : ""}</strong>
+                      Fin : <strong>{formatDateFRTimezoneUTC(cohorts?.find((c) => c.name === classe?.cohort)?.dateEnd)}</strong>
                     </p>
                   </div>
                 </div>
@@ -354,7 +355,8 @@ export default function View() {
                 </Link>
               </>
             )}
-            {edit && user.role === ROLES.ADMINISTRATEUR_CLE ? (
+
+            {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? (
               <div className="flex items-center justify-end mt-6">
                 <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={() => setModalDelete(true)}>
                   <BsTrash3 className="mr-2" />
@@ -380,7 +382,6 @@ export default function View() {
           </div>
         </Container>
       )}
-
       {(rights.showCenter || rights.showPDR) && (
         <Container
           title="Séjour"

@@ -1,7 +1,7 @@
 // API doc: https://www.notion.so/jeveuxaider/API-x-SNU-MIG-b6fd11bcb6ff485ca1d42ae175af8411?pvs=4
 
 const { APPLICATION_STATUS } = require("snu-lib");
-const config = require("../../config");
+const config = require("config");
 const { capture } = require("../../sentry");
 
 const statusMap = {

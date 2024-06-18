@@ -30,6 +30,10 @@ jobs:
           - name: admin
             tag: ${{inputs.admin_image_tag}}
             remote: CLEVER_CLOUD_GIT_REMOTE_ADMIN_DOCKER
+          # crons use the same docker image as api
+          - name: api
+            tag: ${{inputs.api_image_tag}}
+            remote: CLEVER_CLOUD_GIT_REMOTE_CRONS_DOCKER
 
     steps:
       - name: Create SSH key

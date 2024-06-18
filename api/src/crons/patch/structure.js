@@ -5,7 +5,7 @@ const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const StructureModel = require("../../models/structure");
 const StructurePatchModel = require("./models/structurePatch");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -51,7 +51,7 @@ async function createLog(patch, actualStructure, event, value) {
   //   (Array.isArray(structure?.types) ? structure?.types[0] : structure?.types) || (Array.isArray(actualStructure?.types) ? actualStructure?.types[0] : actualStructure?.types),
   // );
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/structure`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/structure`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -96,7 +96,7 @@ const rebuildStruct = (structInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(StructurePatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -114,7 +114,7 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./structure').manualHandler('2023-08-17', '2023-08-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(StructurePatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 

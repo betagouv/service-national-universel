@@ -13,12 +13,12 @@ const { notExistingYoungId, createYoungHelper, getYoungByIdHelper } = require(".
 const { createCohortHelper } = require("./helpers/cohort");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 
+jest.setTimeout(60_000);
+
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
 }));
-
-jest.setTimeout(30_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
 // @ts-expect-error lib non ts
@@ -18,7 +18,7 @@ import Pencil from "@/assets/icons/Pencil";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import api from "@/services/api";
 
-import VerifyAddress from "../../phase0/components/VerifyAddress";
+import { Center } from "@/types";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import { Title } from "../components/commons";
@@ -26,20 +26,7 @@ import Field from "../components/Field";
 import Toggle from "../components/Toggle";
 import Select from "../components/Select";
 
-type CenterInformationsError = {
-  name?: string;
-  address?: string;
-  city?: string;
-  zip?: string;
-  addressVerified?: string;
-  placesTotal?: string;
-  code2022?: string;
-  typology?: string;
-  domain?: string;
-  academy?: string;
-  centerDesignation?: string;
-  complement?: string;
-};
+type Error = { [key: string]: string };
 
 const optionsTypology = [
   { label: "Public / État", value: "PUBLIC_ETAT" },
@@ -57,7 +44,7 @@ const optionsDomain = [
   { label: "", value: "" },
 ];
 
-export default function Details({ center, setCenter, sessions }) {
+export default function Details({ center, setCenter, sessions, setSessions }) {
   const history = useHistory();
 
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -69,31 +56,14 @@ export default function Details({ center, setCenter, sessions }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
-  const [errors, setErrors] = React.useState<CenterInformationsError>({});
-  const [data, setData] = useState(null);
+  const [errors, setErrors] = React.useState<Error>({});
+  const [data, setData] = useState<Center>({ ...center, academy: departmentToAcademy[center.department], pmr: center?.pmr ? center.pmr : "false" });
   useDocumentTitle(`Fiche du centre - ${center?.name}`);
 
-  useEffect(() => {
-    setData({ ...center, pmr: center?.pmr ? center.pmr : "false" });
-  }, [center]);
-
-  const onVerifyAddress = (isConfirmed?) => (suggestion) => {
-    setData({
-      ...data,
-      addressVerified: true,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      address: isConfirmed ? suggestion.address : data.address,
-      zip: isConfirmed ? suggestion.zip : data.zip,
-      city: isConfirmed ? suggestion.city : data.city,
-      academy: departmentToAcademy[suggestion.department],
-    });
-  };
   const onSubmit = async () => {
     try {
       setIsLoading(true);
-      const error: CenterInformationsError = {};
+      const error: Error = {};
       if (!data?.name) {
         error.name = "Le nom est obligatoire";
       }
@@ -106,10 +76,7 @@ export default function Details({ center, setCenter, sessions }) {
       if (!data?.zip) {
         error.zip = "Le code postal est obligatoire";
       }
-      if (!data?.addressVerified) {
-        error.addressVerified = "L'adresse n'a pas été vérifiée";
-      }
-      if (!data?.placesTotal || isNaN(data?.placesTotal)) {
+      if (!data?.placesTotal || isNaN(data?.placesTotal as number)) {
         error.placesTotal = "Le nombre de places est incorrect";
       }
       if (!data?.code2022) {
@@ -117,10 +84,10 @@ export default function Details({ center, setCenter, sessions }) {
       }
       if (!data?.typology) error.typology = "La typologie est obligatoire";
       if (!data?.domain) error.domain = "Le domaine est obligatoire";
-      if (!data?.academy) error.academy = "Veuillez vérifier l'adresse du centre";
+      data.academy = departmentToAcademy[data.department];
 
       // check session
-      const canUpdateSession = sessions.filter((s) => s.placesTotal > data.placesTotal).length === 0;
+      const canUpdateSession = sessions.filter((s) => s.placesTotal > (data?.placesTotal || 0)).length === 0;
       if (!canUpdateSession) {
         error.placesTotal = "La capacité maximale est inférieur à la capacité de l'une des sessions";
       }
@@ -150,10 +117,10 @@ export default function Details({ center, setCenter, sessions }) {
       setIsLoading(false);
     }
   };
-  const onDelete = async () => {
+  const handleDelete = async () => {
     try {
       setIsLoading(true);
-      const { ok, code } = await api.remove(`/cohesion-center/${data._id}`);
+      const { ok, code } = await api.remove(`/cohesion-center/${data?._id}`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression du centre", code);
         return setIsLoading(false);
@@ -166,18 +133,18 @@ export default function Details({ center, setCenter, sessions }) {
       setIsLoading(false);
     }
   };
+
+  const handleSuccess = async (newSession) => {
+    setCenter({ ...center, cohorts: [...center.cohorts, newSession.cohort] });
+    setSessions([...sessions, newSession]);
+    history.push(`?cohorte=${newSession.cohort}`);
+  };
+
   if (!data) return <></>;
   return (
     <div className="m-8 flex flex-col gap-6">
       {/*TODO : SET Centre par défaut + cohorte disponible ?*/}
-      <ModalRattacherCentre
-        editable={false}
-        defaultCentre={center}
-        isOpen={modalVisible}
-        onSucess={(newCohort) => setCenter({ ...center, cohorts: [...center.cohorts, newCohort] })}
-        onCancel={() => setModalVisible(false)}
-        user={user}
-      />
+      <ModalRattacherCentre editable={false} defaultCentre={center} isOpen={modalVisible} onSuccess={handleSuccess} onCancel={() => setModalVisible(false)} user={user} />
       <ModalConfirmDelete
         isOpen={modalDelete.isOpen}
         title={modalDelete.title}
@@ -185,7 +152,7 @@ export default function Details({ center, setCenter, sessions }) {
         onCancel={() => setModalDelete({ isOpen: false })}
         onDelete={() => {
           setModalDelete({ isOpen: false });
-          modalDelete.onDelete();
+          modalDelete.onDelete?.();
         }}
       />
       <div className="flex items-center justify-between">
@@ -206,7 +173,7 @@ export default function Details({ center, setCenter, sessions }) {
                     isOpen: true,
                     title: "Supprimer le centre",
                     message: "Êtes-vous sûr de vouloir supprimer ce centre?",
-                    onDelete: onDelete,
+                    onDelete: handleDelete,
                   })
                 }
                 disabled={isLoading || sessions.length !== 0}>
@@ -264,7 +231,7 @@ export default function Details({ center, setCenter, sessions }) {
           <div className="flex w-[45%] flex-col gap-4 ">
             <div className="flex flex-col gap-2">
               <div className="text-xs font-medium leading-4 text-gray-900">Nom du centre</div>
-              <Field readOnly={!editInfo} label="Nom du centre" onChange={(e) => setData({ ...data, name: e.target.value })} value={data.name} error={errors?.name} />
+              <Field readOnly={!editInfo} label="Nom du centre" onChange={(e) => setData({ ...data, name: e.target.value })} value={data.name || ""} error={errors?.name} />
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -283,44 +250,27 @@ export default function Details({ center, setCenter, sessions }) {
 
               <AddressForm
                 readOnly={!editInfo}
-                data={{ address: data.address, zip: data.zip, city: data.city }}
-                updateData={(address) => setData({ ...data, ...address })}
+                data={{
+                  address: data.address,
+                  zip: data.zip,
+                  city: data.city,
+                  department: data.department,
+                  region: data.region,
+                }}
+                updateData={(newData) => setData({ ...data, ...newData, academy: departmentToAcademy[newData.department] })}
                 query={query}
                 setQuery={setQuery}
                 options={results}
               />
 
-              {data.addressVerified && (
+              {data.address && (
                 <>
                   <div className="flex items-center gap-3">
-                    <Field readOnly={!editInfo} label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} disabled={true} />
-                    <Field readOnly={!editInfo} label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
+                    <Field label="Département" value={data.department} disabled onChange={() => {}} />
+                    <Field label="Région" value={data.region} disabled onChange={() => {}} />
                   </div>
-                  <Field
-                    readOnly={!editInfo}
-                    label="Académie"
-                    onChange={(e) => setData({ ...data, academy: e.target.value })}
-                    value={"Académie de " + data.academy}
-                    disabled={true}
-                    error={errors?.academy}
-                  />
+                  <Field label="Académie" value={"Académie de " + data.academy} disabled onChange={() => {}} />
                 </>
-              )}
-              {editInfo && (
-                <div className="flex flex-col gap-2 ">
-                  <VerifyAddress
-                    address={data.address}
-                    zip={data.zip}
-                    city={data.city}
-                    onSuccess={onVerifyAddress(true)}
-                    onFail={onVerifyAddress()}
-                    isVerified={data.addressVerified === true}
-                    buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
-                    verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse, code postal et ville."
-                    verifyButtonText="Vérifier l'adresse du centre"
-                  />
-                  {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
-                </div>
               )}
             </div>
           </div>
@@ -360,7 +310,7 @@ export default function Details({ center, setCenter, sessions }) {
                   readOnly={!editInfo}
                   label="Précisez le gestionnaire ou propriétaire"
                   onChange={(e) => setData({ ...data, complement: e.target.value })}
-                  value={data.complement}
+                  value={data.complement || ""}
                   error={errors?.complement}
                 />
               </div>
@@ -368,8 +318,8 @@ export default function Details({ center, setCenter, sessions }) {
                 <Field
                   readOnly={!editInfo}
                   label="Capacité maximale d'accueil"
-                  onChange={(e) => setData({ ...data, placesTotal: e.target.value })}
-                  value={data.placesTotal}
+                  onChange={(e) => setData({ ...data, placesTotal: parseInt(e.target.value) })}
+                  value={(data.placesTotal || "").toString()}
                   error={errors?.placesTotal}
                   tooltips={
                     "C’est la capacité d’hébergement maximale du centre, qui dépend du bâti. Elle doit être supérieure ou égale au nombre de places ouvertes sur un séjour donné"
@@ -381,7 +331,7 @@ export default function Details({ center, setCenter, sessions }) {
                   readOnly={!editInfo}
                   label="Désignation du centre"
                   onChange={(e) => setData({ ...data, centerDesignation: e.target.value })}
-                  value={data.centerDesignation}
+                  value={data.centerDesignation || ""}
                   error={errors?.centerDesignation}
                   disabled={user.role !== "admin" && editInfo}
                 />
@@ -391,7 +341,7 @@ export default function Details({ center, setCenter, sessions }) {
                   readOnly={!editInfo}
                   label="Code du centre"
                   onChange={(e) => setData({ ...data, code2022: e.target.value })}
-                  value={data.code2022}
+                  value={data.code2022 || ""}
                   error={errors?.code2022}
                 />
               </div>

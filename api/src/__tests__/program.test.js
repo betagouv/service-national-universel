@@ -18,7 +18,6 @@ const { createReferentHelper } = require("./helpers/referent");
 
 jest.mock("passport");
 const passport = require("passport");
-jest.setTimeout(10_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);

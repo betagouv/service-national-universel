@@ -69,6 +69,10 @@ export default function ChangeSejour() {
           toastr.error("Il n'y a pas de département pour ce jeune");
           throw new Error("Department is undefined");
         }
+        if (newSejour === "à venir") {
+          setmodalConfirmControlOk(true);
+          return;
+        }
         const res = await api.get(`/inscription-goal/${newSejour}/department/${young.department}/reached`);
         if (!res.ok) throw new Error(res);
         const isGoalReached = res.data;
@@ -162,7 +166,7 @@ export default function ChangeSejour() {
                         </DropdownMenu>
                       </UncontrolledDropdown>
                       <a
-                        href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1"
+                        href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"
                         style={{ color: "#5145cc" }}
                         target="_blank"
                         rel="noreferrer">

@@ -9,7 +9,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import { BsShieldLock } from "react-icons/bs";
-import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
+import { isValidRedirectUrl } from "snu-lib";
 import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
 import { DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";

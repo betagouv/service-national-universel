@@ -1,73 +1,89 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import * as FileSaver from "file-saver";
-import { ROLES, translate } from "snu-lib";
-import dayjs from "@/utils/dayjs.utils";
+import { useSelector } from "react-redux";
+import { HiOutlineChartSquareBar, HiOutlineCalendar } from "react-icons/hi";
+import plausibleEvent from "@/services/plausible";
 
-import { Title } from "../plan-transport/components/commons";
-import Select from "../plan-transport/components/Select";
-import api from "../../services/api";
-import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { translate } from "snu-lib";
+import dayjs from "dayjs";
+import api from "@/services/api";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+import { Page, Header, ModalConfirmation } from "@snu/ds/admin";
+import SelectCohort from "@/components/cohorts/SelectCohort";
 
 import ExportBox from "./components/ExportBox";
-import { useSelector } from "react-redux";
-import { getCohortSelectOptions } from "@/services/cohort.service";
+import DatePicker from "./components/DatePicker";
 
 const exportDateKeys = ["cohesionCenters", "youngsBeforeSession", "youngsAfterSession"];
 
 const DSNJExport = () => {
-  const user = useSelector((state) => state.Auth.user);
   const cohortList = useSelector((state) => state.Cohorts);
-  const [cohortId, setCohortId] = useState(null);
-  const [cohorts, setCohorts] = useState([]);
-  const [cohortOptions, setCohortOptions] = useState([]);
+
+  const [currentCohort, setCurrentCohort] = useState(cohortList[0]);
+
   const [isLDownloadingByKey, setDownloadingByKey] = useState({});
+  const [isModalConfirmOpenByKey, setIsModalConfirmOpenByKey] = useState({});
+  const [isDatePickerOpenByKey, setIsDatePickerOpenByKey] = useState({});
+  const [currentKey, setCurrentKey] = useState(exportDateKeys[0]);
+  const [newExportDate, setNewExportDate] = useState();
+
   useDocumentTitle("Export DSNJ");
+  const todayPlusOneDay = dayjs().add(1, "day").toDate();
+  const threeMonthsAfterCohortDateEnd = dayjs(currentCohort.dateEnd).add(3, "month").toDate();
 
-  useEffect(() => {
-    getCohorts();
-  }, []);
-
-  const getCohorts = async () => {
-    const cohorts = cohortList.map(({ snuId, dateEnd, dsnjExportDates }) => {
-      const cohesionCentersAvailableUntil = dsnjExportDates?.cohesionCenters ? new Date(dsnjExportDates.cohesionCenters) : undefined;
-      cohesionCentersAvailableUntil?.setMonth(cohesionCentersAvailableUntil.getMonth() + 1);
-      const youngsBeforeSessionAvailableUntil = dsnjExportDates?.youngsBeforeSession ? new Date(dsnjExportDates.youngsBeforeSession) : undefined;
-      youngsBeforeSessionAvailableUntil?.setMonth(youngsBeforeSessionAvailableUntil.getMonth() + 1);
-      const youngsAfterSessionAvailableUntil = dsnjExportDates?.youngsAfterSession ? new Date(dsnjExportDates.youngsAfterSession) : undefined;
-      youngsAfterSessionAvailableUntil?.setMonth(youngsAfterSessionAvailableUntil.getMonth() + 1);
-
-      return {
-        id: snuId,
-        dsnjExportDates: dsnjExportDates || {},
-        cohesionCentersAvailableUntil,
-        youngsBeforeSessionAvailableUntil,
-        youngsAfterSessionAvailableUntil,
-      };
-    });
-    setCohorts(cohorts);
-    //@todo: do not use snuId in queries
-    const formattedCohortOptions = getCohortSelectOptions(cohortList.map((c) => ({ ...c, name: c.snuId })));
-    setCohortOptions(formattedCohortOptions);
-    setCohortId(formattedCohortOptions[0].value);
+  const getExportAvailableUntilDate = (date) => {
+    if (!date) return null;
+    return dayjs(date).add(1, "month").toDate();
   };
 
-  const updateExportDate = (key) => async (date) => {
-    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${cohortId}/export/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
+  const translateKey = (key) => {
+    switch (key) {
+      case "cohesionCenters":
+        return "centres";
+      case "youngsBeforeSession":
+        return "volontaires affectés et sur liste complémentaire";
+      case "youngsAfterSession":
+        return "volontaires après le séjour";
+      default:
+        return key;
+    }
+  };
+
+  const generateText = (key, date) => {
+    const isNewExport = currentCohort?.dsnjExportDates?.[key] === undefined;
+    const translatedKey = translateKey(isNewExport ? key : currentKey);
+    const formattedDate = dayjs(isNewExport ? date : newExportDate).format("DD/MM/YYYY");
+
+    return (
+      <p className={!isNewExport && "text-red-600 text-left mt-4"}>
+        {isNewExport ? (
+          <>
+            Vous vous apprêtez à rendre disponible à la DSNJ l'export des <span className="font-bold">{translatedKey}</span> le <span className="font-bold">{formattedDate}</span>.
+          </>
+        ) : (
+          <>
+            <span className="font-bold">Attention : </span>un nouvel export des <span className="font-bold">{translatedKey}</span> sera généré le{" "}
+            <span className="font-bold">{formattedDate}</span> avec les informations mises à jour. L’ancien export ne sera plus téléchargeable par la DSNJ :{" "}
+            <span className="underline">pensez à les prévenir qu’ils doivent à nouveau télécharger cet export !</span>
+          </>
+        )}
+      </p>
+    );
+  };
+
+  const handleUpdateDate = async (key, date) => {
+    setIsModalConfirmOpenByKey({ ...isModalConfirmOpenByKey, [key]: false });
+    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${currentCohort._id}/export/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
     if (!ok) return toastr.error("Une erreur est survenue lors de l'enregistrement de la date d'export", translate(code));
-    const updatedCohorts = cohorts.map((currentCohort) => {
-      if (currentCohort.id === updatedCohort.snuId) {
-        return { ...currentCohort, dsnjExportDates: updatedCohort.dsnjExportDates };
-      }
-      return currentCohort;
-    });
-    setCohorts(updatedCohorts);
+    setCurrentCohort(updatedCohort);
   };
 
-  const download = (key) => async () => {
+  const handleDownload = async (key) => {
+    plausibleEvent(`Export/DSNJ - Exporter ${key}`);
     try {
       setDownloadingByKey({ ...isLDownloadingByKey, [key]: true });
-      const file = await api.get(`/cohort/${cohortId}/export/${key}`);
+      const file = await api.get(`/cohort/${currentCohort._id}/export/${key}`);
       FileSaver.saveAs(new Blob([new Uint8Array(file.data.data)], { type: file.mimeType }), file.fileName);
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", "");
@@ -76,45 +92,83 @@ const DSNJExport = () => {
     }
   };
 
-  const cohort = cohorts.find((current) => current.id === cohortId);
+  const handleChangeDate = (key, date) => {
+    setIsModalConfirmOpenByKey({ ...isModalConfirmOpenByKey, [key]: true });
+    setNewExportDate(date);
+  };
+  const handleClick = (key) => {
+    setIsDatePickerOpenByKey({ ...isDatePickerOpenByKey, [key]: true });
+    setCurrentKey(key);
+  };
 
   return (
     <>
-      <div className="flex w-full flex-col p-8 ">
-        <div className="flex items-center justify-between py-8">
-          <Title>Données sur les centres et les volontaires (accès DSNJ)</Title>
-          <Select options={cohortOptions} value={cohortId} onChange={setCohortId} />
-        </div>
+      <Page>
+        <Header
+          title="Données centres & volontaires (DSNJ)"
+          breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Séjours" }, { title: "Export DSNJ" }]}
+          actions={
+            <SelectCohort
+              cohort={currentCohort.name}
+              onChange={(cohort) => {
+                setCurrentCohort(cohortList.find((c) => c.name === cohort));
+              }}
+            />
+          }
+        />
         <div className="flex gap-4">
           <ExportBox
-            editable={user.role === ROLES.ADMIN}
             title="Liste des centres"
-            availableFrom={cohort?.dsnjExportDates?.cohesionCenters ? new Date(cohort?.dsnjExportDates.cohesionCenters) : undefined}
-            availableUntil={cohort?.cohesionCentersAvailableUntil}
-            onChangeDate={updateExportDate(exportDateKeys[0])}
-            onDownload={download(exportDateKeys[0])}
+            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[0]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[0]])}
+            onClick={() => handleClick(exportDateKeys[0])}
+            onDownload={() => handleDownload(exportDateKeys[0])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[0]]}
           />
           <ExportBox
-            editable={user.role === ROLES.ADMIN}
             title="Liste des volontaires affectés et sur liste complémentaire"
-            availableFrom={cohort?.dsnjExportDates?.youngsBeforeSession ? new Date(cohort?.dsnjExportDates.youngsBeforeSession) : undefined}
-            availableUntil={cohort?.youngsBeforeSessionAvailableUntil}
-            onChangeDate={updateExportDate(exportDateKeys[1])}
-            onDownload={download(exportDateKeys[1])}
+            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[1]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[1]])}
+            onClick={() => handleClick(exportDateKeys[1])}
+            onDownload={() => handleDownload(exportDateKeys[1])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[1]]}
           />
           <ExportBox
-            editable={user.role === ROLES.ADMIN}
             title="Liste des volontaires après le séjour"
-            availableFrom={cohort?.dsnjExportDates?.youngsAfterSession ? new Date(cohort?.dsnjExportDates.youngsAfterSession) : undefined}
-            availableUntil={cohort?.youngsAfterSessionAvailableUntil}
-            onChangeDate={updateExportDate(exportDateKeys[2])}
-            onDownload={download(exportDateKeys[2])}
+            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[2]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[2]])}
+            onClick={() => handleClick(exportDateKeys[2])}
+            onDownload={() => handleDownload(exportDateKeys[2])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[2]]}
           />
         </div>
-      </div>
+        <DatePicker
+          dateKey={currentKey}
+          onChangeDate={(key, date) => handleChangeDate(key, date)}
+          isOpen={isDatePickerOpenByKey[currentKey]}
+          onClose={() => setIsDatePickerOpenByKey({ ...isDatePickerOpenByKey, [currentKey]: false })}
+          minDate={todayPlusOneDay}
+          maxDate={threeMonthsAfterCohortDateEnd}
+        />
+        <ModalConfirmation
+          isOpen={!!isModalConfirmOpenByKey[currentKey]}
+          onClose={() => {
+            setIsModalConfirmOpenByKey({ ...isModalConfirmOpenByKey, [currentKey]: false });
+          }}
+          className="md:max-w-[700px]"
+          icon={
+            <div className="bg-gray-100 rounded-full p-2.5">
+              <HiOutlineCalendar size={24} />
+            </div>
+          }
+          title="Modification de la date de mise à disponibilité de l’export DSNJ"
+          text={generateText(currentKey, newExportDate)}
+          actions={[
+            { title: "Annuler", isCancel: true },
+            { title: "Valider", onClick: () => handleUpdateDate(currentKey, newExportDate) },
+          ]}
+        />
+      </Page>
     </>
   );
 };

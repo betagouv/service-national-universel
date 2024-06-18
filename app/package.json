@@ -7,17 +7,15 @@
     "mobile": "vite --host 0.0.0.0",
     "mobile:open": "vite --host",
     "start": "vite",
-    "install": "node src/build-only-on-clevercloud.js",
     "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build",
-    "build:staging": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode staging",
-    "build:dev": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode development",
     "preview": "vite preview",
     "postinstall": "npm run copy:dsfr",
     "copy:dsfr": "copy-dsfr-to-public",
-    "clean": "rm -fr node_modules .turbo build .swc",
-    "lint": "eslint src --ext .js,.jsx",
-    "lint:fix": "eslint src --ext .js --fix",
-    "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
+    "check-types": "tsc -p tsconfig.ci.json --emitDeclarationOnly",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src --ext .js,.ts --fix",
+    "lint:report": "eslint src --ext .js,.ts --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
+    "clean": "rm -fr node_modules .turbo build .swc"
   },
   "devDependencies": {
     "@swc/plugin-styled-components": "1.5.111",

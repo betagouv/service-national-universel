@@ -1,5 +1,5 @@
 import React from "react";
-import { isPhoneZoneKnown, PHONE_ZONES } from "snu-lib/phone-number";
+import { isPhoneZoneKnown, PHONE_ZONES } from "snu-lib";
 
 const InputPhone = ({ value = "", onChange = () => {}, zoneValue = "", onChangeZone = () => {}, placeholder = "", className = "" }) => {
   if (zoneValue) {

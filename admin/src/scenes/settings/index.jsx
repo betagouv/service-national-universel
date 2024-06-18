@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { BiLoaderAlt } from "react-icons/bi";
-
+import { isAfter } from "date-fns";
 import { isSuperAdmin, ROLES, COHORT_TYPE } from "snu-lib";
 import { Container } from "@snu/ds/admin";
 
@@ -25,6 +25,8 @@ import NumberInput from "@/components/ui/forms/NumberInput";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
 import { settings, uselessSettings } from "./utils";
+import { InformationsConvoyage } from "@/scenes/settings/InformationsConvoyage";
+import { CleSettings } from "@/scenes/settings/CleSettings";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
@@ -42,6 +44,7 @@ export default function Settings() {
     ...settings,
     ...uselessSettings,
   });
+  const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(false);
 
   const getCohort = async () => {
     try {
@@ -84,6 +87,9 @@ export default function Settings() {
   useEffect(() => {
     if (!mounted) return;
     setNoChange(false);
+    if (!showSpecificDatesReInscription && (data.reInscriptionStartDate || data.reInscriptionEndDate)) {
+      setShowSpecificDatesReInscription(true);
+    }
   }, [data]);
 
   const onSubmit = async () => {
@@ -94,13 +100,17 @@ export default function Settings() {
       if (!data.inscriptionStartDate) err.inscriptionStartDate = "La date d'ouverture des inscriptions est obligatoire";
       if (!data.inscriptionEndDate) err.inscriptionEndDate = "La date de fermeture des inscriptions est obligatoire";
       if (!data.instructionEndDate) err.instructionEndDate = "La date de fermeture des inscriptions est obligatoire";
+
+      if (isAfter(new Date(data.reInscriptionStartDate), new Date(data.reInscriptionEndDate)))
+        err.reInscriptionStartDate = "La date d'ouverture des réinscriptions est antérieure a la date de cloture.";
+      if (isAfter(new Date(data.reInscriptionEndDate), new Date(data.inscriptionEndDate)))
+        err.reInscriptionEndDate = "Les dates de cloture de réinscription ne peuvent pas etre postérieures a celles de réinscription.";
       setError(err);
       if (Object.values(err).length > 0) {
         return toastr.warning("Veuillez corriger les erreurs dans le formulaire");
       }
 
       setIsLoading(true);
-      delete data.name;
       delete data.snuId;
       const { ok, code } = await api.put(`/cohort/${encodeURIComponent(cohort)}`, data);
       if (!ok) {
@@ -298,6 +308,47 @@ export default function Settings() {
                       disabled={isLoading}
                     />
                   </div>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-gray-900  text-xs font-medium">Réinscriptions</p>
+                    </div>
+                    <SimpleToggle
+                      label="Dates spécifiques"
+                      disabled={isLoading || readOnly}
+                      value={showSpecificDatesReInscription}
+                      onChange={(v) => {
+                        if (v == false) setData({ ...data, reInscriptionEndDate: null, reInscriptionStartDate: null });
+                        setShowSpecificDatesReInscription(v);
+                      }}
+                    />
+                    {showSpecificDatesReInscription && (
+                      <>
+                        <DatePickerInput
+                          mode="single"
+                          isTime
+                          label="Ouverture"
+                          placeholder="Date et heure"
+                          value={data.reInscriptionStartDate || data.inscriptionStartDate}
+                          error={error.reInscriptionStartDate}
+                          onChange={(e) => setData({ ...data, reInscriptionStartDate: e })}
+                          readOnly={readOnly}
+                          disabled={isLoading}
+                        />
+                        <DatePickerInput
+                          mode="single"
+                          isTime
+                          label="Fermeture"
+                          placeholder="Date et heure"
+                          value={data.reInscriptionEndDate || data.inscriptionEndDate}
+                          error={error.reInscriptionEndDate}
+                          // onChange={(e) => {}}
+                          onChange={(e) => setData({ ...data, reInscriptionEndDate: e })}
+                          readOnly={readOnly}
+                          disabled={isLoading || !data.inscriptionEndDate}
+                        />
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="flex w-[10%] justify-center items-center">
                   <div className="w-[1px] h-[90%] border-r-[1px] border-gray-200"></div>
@@ -432,67 +483,16 @@ export default function Settings() {
                       onChange={() => setData({ ...data, pdrEditionOpenForTransporter: !data.pdrEditionOpenForTransporter })}
                     />
                   </div>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Création de groupe et modification du schéma de répartition</p>
-                      <MdInfoOutline data-tip data-for="création_groupe" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="création_groupe" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Ouverture ou fermeture pour les utilisateurs de la possibilité de créer et modifier des groupes sur le schéma de répartition.
-                        </p>
-                      </ReactTooltip>
-                    </div>
-                    <ToggleDate
-                      label="Référents régionaux"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      value={data.repartitionSchemaCreateAndEditGroupAvailability}
-                      onChange={() => setData({ ...data, repartitionSchemaCreateAndEditGroupAvailability: !data.repartitionSchemaCreateAndEditGroupAvailability })}
-                      range={{
-                        from: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityFrom || undefined,
-                        to: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityTo || undefined,
-                      }}
-                      onChangeRange={(range) => {
-                        setData({
-                          ...data,
-                          uselessInformation: {
-                            ...data.uselessInformation,
-                            repartitionSchemaCreateAndEditGroupAvailabilityFrom: range?.from,
-                            repartitionSchemaCreateAndEditGroupAvailabilityTo: range?.to,
-                          },
-                        });
-                      }}
-                    />
-                  </div>
+                  <InformationsConvoyage
+                    disabled={isLoading || readOnly}
+                    informationsConvoyageData={data?.informationsConvoyage}
+                    handleChange={(informationsConvoyage) => setData({ ...data, informationsConvoyage: informationsConvoyage })}
+                  />
                 </div>
                 <div className="flex w-[10%] items-center justify-center">
                   <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
                 </div>
                 <div className="flex w-[45%] flex-col gap-4">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Accès au schéma de répartition </p>
-                      <MdInfoOutline data-tip data-for="acces_schema" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="acces_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Autoriser ou bloquer l’accès à la consultation du schéma de répartition.
-                        </p>
-                      </ReactTooltip>
-                    </div>
-                    <SimpleToggle
-                      label="Référents régionaux"
-                      disabled={isLoading || readOnly}
-                      value={data.schemaAccessForReferentRegion}
-                      onChange={() => setData({ ...data, schemaAccessForReferentRegion: !data.schemaAccessForReferentRegion })}
-                    />
-                    <SimpleToggle
-                      label="Référents départementaux"
-                      disabled={isLoading || readOnly}
-                      value={data.schemaAccessForReferentDepartment}
-                      onChange={() => setData({ ...data, schemaAccessForReferentDepartment: !data.schemaAccessForReferentDepartment })}
-                    />
-                  </div>
-
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Téléchargement du schéma de répartition</p>
@@ -873,92 +873,7 @@ export default function Settings() {
           </div>
 
           {data.type === COHORT_TYPE.CLE && (
-            <Container title="Classes engagées">
-              <div className="flex w-full">
-                <div className="flex w-[45%] flex-col gap-4">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Modification des cohortes </p>
-                    </div>
-                    <SimpleToggle
-                      label="Référent régionaux"
-                      disabled={isLoading || readOnly}
-                      value={data.cleUpdateCohortForReferentRegion}
-                      onChange={() => setData({ ...data, cleUpdateCohortForReferentRegion: !data.cleUpdateCohortForReferentRegion })}
-                    />
-                  </div>
-                  <div className="mt-2 flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Affichage des cohortes </p>
-                    </div>
-                    <SimpleToggle
-                      label="Admin CLE"
-                      disabled={isLoading || readOnly}
-                      value={data.cleDisplayCohortsForAdminCLE}
-                      onChange={() => setData({ ...data, cleDisplayCohortsForAdminCLE: !data.cleDisplayCohortsForAdminCLE })}
-                    />
-                    <SimpleToggle
-                      label="Référents de classe"
-                      disabled={isLoading || readOnly}
-                      value={data.cleDisplayCohortsForReferentClasse}
-                      onChange={() => setData({ ...data, cleDisplayCohortsForReferentClasse: !data.cleDisplayCohortsForReferentClasse })}
-                    />
-                  </div>
-                </div>
-                <div className="flex w-[10%] items-center justify-center">
-                  <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
-                </div>
-                <div className="flex w-[45%] flex-col gap-4">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs  font-medium text-gray-900">Modification des centres </p>
-                      </div>
-                      <SimpleToggle
-                        label="Référent régionaux"
-                        disabled={isLoading || readOnly}
-                        value={data.cleUpdateCentersForReferentRegion}
-                        onChange={() => setData({ ...data, cleUpdateCentersForReferentRegion: !data.cleUpdateCentersForReferentRegion })}
-                      />
-                    </div>
-                    <div className="mt-2 flex flex-col gap-3">
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs  font-medium text-gray-900">Affichage des centres </p>
-                      </div>
-                      <SimpleToggle
-                        label="Admin CLE"
-                        disabled={isLoading || readOnly}
-                        value={data.cleDisplayCentersForAdminCLE}
-                        onChange={() => setData({ ...data, cleDisplayCentersForAdminCLE: !data.cleDisplayCentersForAdminCLE })}
-                      />
-                      <SimpleToggle
-                        label="Référents de classe"
-                        disabled={isLoading || readOnly}
-                        value={data.cleDisplayCentersForReferentClasse}
-                        onChange={() => setData({ ...data, cleDisplayCentersForReferentClasse: !data.cleDisplayCentersForReferentClasse })}
-                      />
-                    </div>
-                    <div className="mt-2 flex flex-col gap-3">
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs  font-medium text-gray-900">Affichage des points de rassemblement </p>
-                      </div>
-                      <SimpleToggle
-                        label="Admin CLE"
-                        disabled={isLoading || readOnly}
-                        value={data.cleDisplayPDRForAdminCLE}
-                        onChange={() => setData({ ...data, cleDisplayPDRForAdminCLE: !data.cleDisplayPDRForAdminCLE })}
-                      />
-                      <SimpleToggle
-                        label="Référents de classe"
-                        disabled={isLoading || readOnly}
-                        value={data.cleDisplayPDRForReferentClasse}
-                        onChange={() => setData({ ...data, cleDisplayPDRForReferentClasse: !data.cleDisplayPDRForReferentClasse })}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Container>
+            <CleSettings cleSettingsData={data} isLoading={isLoading} readOnly={readOnly} onChange={(cleSettingsData) => setData({ ...data, ...cleSettingsData })} />
           )}
 
           {!readOnly && (

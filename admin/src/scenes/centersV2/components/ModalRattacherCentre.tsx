@@ -1,87 +1,80 @@
-import React, { useEffect } from "react";
-import { BsChevronDown, BsSearch } from "react-icons/bs";
+import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
-import { translate, isSessionEditionOpen } from "snu-lib";
-import { Select } from "@snu/ds/admin";
-
-import { CohortState } from "@/redux/cohorts";
+import { translate, isSessionEditionOpen, validateEmailAcademique } from "snu-lib";
+import { InputText, Label, Select } from "@snu/ds/admin";
+import Sejour from "@/scenes/dashboardV2/components/ui/icons/Sejour";
+import { Center, User } from "@/types";
+import { CohortState } from "@/redux/cohorts/reducer";
 import ModalTailwind from "@/components/modals/ModalTailwind";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 
-import Field from "./Field";
+interface Props {
+  isOpen?: boolean;
+  onSuccess: (cohortName?: string) => void;
+  onCancel: () => void;
+  user: User;
+  defaultCentre?: Center | null;
+  editable?: boolean;
+}
 
-export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
+export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user, defaultCentre = null, editable = true }: Props) {
   const history = useHistory();
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
-  const availableCohorts = isOpen ? cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name) : [];
+  const availableCohorts = cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name);
 
-  const refSelect = React.useRef(null);
-  const refInput = React.useRef(null);
-  const refContainer = React.useRef(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (refContainer.current && refContainer.current.contains(event.target)) {
-        editable && setOpen((open) => !open);
-      } else if (refSelect.current && !refSelect.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
-
-  const [listCentre, setListCentre] = React.useState([]);
   const [selectedCohort, setSelectedCohort] = React.useState<string>();
   const [selectedCentre, setSelectedCentre] = React.useState(defaultCentre);
   const [placesTotal, setPlacesTotal] = React.useState("");
-  const [search, setSearch] = React.useState("");
-  const [open, setOpen] = React.useState(false);
-  const [disabled, setDisabled] = React.useState(true);
+  const [email, setEmail] = React.useState("");
+  const [errors, setErrors] = React.useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = React.useState(false);
+  const disabled = !selectedCohort || !selectedCentre || !placesTotal || isLoading;
 
-  useEffect(() => {
-    if (defaultCentre) setSelectedCentre(defaultCentre);
-  }, [defaultCentre]);
+  const fetchCenters = async (q: string) => {
+    const { responses } = await api.post("/elasticsearch/cohesioncenter/not-in-cohort/" + selectedCohort, { filters: { searchbar: [q] } });
+    const options = responses[0].hits.hits.map((hit) => ({ label: hit._source.name, value: hit._id, center: hit._source }));
+    options.push({
+      label: (
+        <div className="p-1 border-t-2 text-center">
+          <p className="mt-2 text-center">Le centre n'est pas dans la liste ?</p>
+          <p className="mt-2 text-blue-600">Créer un centre</p>
+        </div>
+      ),
+      value: "new",
+    });
+    return options;
+  };
 
-  React.useEffect(() => {
-    if (!refInput.current) return;
-    if (open) {
-      refInput.current.focus();
+  const handleChange = (option) => {
+    if (option.value === "new") {
+      history.push(`/centre/nouveau?cohort=${selectedCohort}`);
+      return;
     }
-  }, [open]);
+    setSelectedCentre(option.center);
+  };
 
-  React.useEffect(() => {
-    setDisabled(!selectedCohort || !selectedCentre || placesTotal === "");
-  }, [selectedCentre, selectedCohort, placesTotal]);
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  React.useEffect(() => {
-    if (selectedCohort) {
-      (async () => {
-        const { responses } = await api.post("/elasticsearch/cohesioncenter/not-in-cohort/" + selectedCohort, { filters: { searchbar: [search] } });
-        setListCentre(
-          responses[0].hits.hits.map((hit) => {
-            return { ...hit._source, _id: hit._id };
-          }),
-        );
-      })();
+    if (email && !validateEmailAcademique(email)) {
+      setErrors({ email: "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique." });
+      return;
     }
-  }, [search, selectedCohort]);
+    if (!selectedCentre) {
+      setErrors({ center: "Veuillez sélectionner un centre" });
+      return;
+    }
 
-  const onSubmit = async () => {
     try {
       setIsLoading(true);
-
-      const { ok, code } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
+      const { ok, code, data } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
         cohort: selectedCohort,
         placesTotal,
-        status,
+        email,
       });
 
       if (!ok) {
@@ -91,7 +84,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
       setIsLoading(false);
       toastr.success("La centre a été rattaché au séjour avec succès", "");
       onCancel();
-      if (onSucess) onSucess(selectedCohort);
+      if (onSuccess) onSuccess(data);
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
       setSelectedCohort("");
       setPlacesTotal("");
@@ -103,116 +96,67 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   };
 
   return (
-    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] rounded-lg bg-white shadow-xl">
-      <div className="flex w-full flex-col justify-between p-8">
-        <div className="flex w-full flex-col">
-          <div className="text-center text-xl font-medium leading-7 text-gray-800">Rattacher un centre à un séjour</div>
-          <hr className="my-8" />
-          <div className="text-sm font-medium leading-6 text-gray-800">Choisissez un séjour</div>
-          <div className="flex flex-row flex-wrap gap-2 py-2">
-            <Select
-              className="w-full"
-              placeholder={"Choisissez une cohorte"}
-              options={availableCohorts.map((c) => ({ value: c, label: c }))}
-              isSearchable
-              isClearable
-              closeMenuOnSelect
-              // @ts-expect-error type à revoir dans le DS
-              value={selectedCohort ? { value: selectedCohort, label: selectedCohort } : null}
-              onChange={(options) => {
-                setSelectedCohort(options?.value);
-              }}
-            />
-          </div>
-          {selectedCohort ? (
-            <>
-              <div className="mt-4 text-sm font-medium leading-6 text-gray-500">Sélectionnez un centre</div>
-              <div className="relative">
-                <div
-                  ref={refContainer}
-                  className={`mt-2 flex items-center justify-between rounded-lg bg-white py-2 pl-2 pr-4 ${open ? "border-2 border-blue-500" : "border-[1px] border-gray-300"}`}>
-                  <div className="flex flex-col justify-center">
-                    <div className="text-xs font-normal leading-6 text-gray-500">Choisir un centre</div>
-                    {!selectedCentre ? <div className="h-5 text-sm leading-6 text-gray-800" /> : <div className="text-sm leading-6 text-gray-800">{selectedCentre.name}</div>}
-                  </div>
-                  {editable && <BsChevronDown className={`text-gray-500 ${open ? "rotate-180 transform" : ""}`} />}
-                </div>
-
-                <div
-                  ref={refSelect}
-                  className={`${!open ? "hidden" : ""} ${
-                    listCentre.length > 3 ? "h-[300px] overflow-y-auto" : ""
-                  } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
-                  <div className="sticky top-0 z-10 bg-white pt-3">
-                    <div className="flex flex-row items-center gap-2">
-                      <BsSearch className="text-gray-400" />
-                      <input
-                        ref={refInput}
-                        type="text"
-                        placeholder="Rechercher un centre"
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full text-[13px] leading-3 text-gray-800"
-                      />
-                    </div>
-                    <hr className="my-2" />
-                  </div>
-                  {listCentre.map((centre) => (
-                    <div
-                      key={centre._id}
-                      onClick={() => {
-                        setSelectedCentre(centre);
-                        setOpen(false);
-                      }}
-                      className="flex cursor-pointer flex-col rounded-lg py-1 px-2 hover:bg-gray-50">
-                      <div className="text-sm leading-5 text-gray-900">{centre.name}</div>
-                      <div className="text-sm leading-5 text-gray-500">
-                        {centre.department} • {centre.region}
-                      </div>
-                    </div>
-                  ))}
-                  {listCentre.length === 0 && (
-                    <div className="flex items-center justify-center gap-2 py-2">
-                      <div className="text-xs leading-4 text-gray-900">Aucun centre trouvé</div>
-                    </div>
-                  )}
-                  <hr className="my-2" />
-                  <div className="flex flex-col items-center justify-center gap-2 pb-3">
-                    <div className="text-sm leading-5 text-gray-900">Le centre n’est pas dans la liste ?</div>
-                    <div
-                      className="cursor-pointer rounded-lg py-1 px-2 text-xs leading-4 text-blue-600 hover:bg-blue-50"
-                      onClick={() => history.push(`/centre/nouveau?cohort=${selectedCohort}`)}>
-                      Créer un centre
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {selectedCentre && (
-                <div className="mt-4 text-sm font-medium leading-6">
-                  <Field
-                    label={`Nombre de places ouvertes pour le sejour ${selectedCohort}`}
-                    onChange={(e) => setPlacesTotal(e.target.value)}
-                    value={placesTotal}
-                    tooltips={
-                      "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
-                    }
-                  />
-                </div>
-              )}
-            </>
-          ) : null}
+    <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[42rem] rounded-xl bg-white shadow-xl">
+      <form onSubmit={onSubmit} className="p-8">
+        <div className="mx-auto rounded-full bg-gray-100 w-12 h-12 flex items-center justify-center">
+          <Sejour />
         </div>
-        <div className="mt-4 flex items-center gap-4">
-          <button onClick={onCancel} className="w-1/2 rounded-lg border-[1px] border-gray-300 py-2 hover:shadow-ninaButton ">
+        <h2 className="text-center text-xl font-medium leading-7 text-gray-800 mx-0 my-4">Rattacher un centre à un séjour</h2>
+        <Label title="Séjour" name="cohorte" className="my-3" />
+        <Select
+          placeholder={"Choisissez une cohorte"}
+          options={availableCohorts.map((c) => ({ value: c, label: c }))}
+          isSearchable
+          isClearable
+          closeMenuOnSelect
+          value={selectedCohort ? { value: selectedCohort, label: selectedCohort } : null}
+          onChange={(options) => setSelectedCohort(options?.value)}
+        />
+        {selectedCohort && (
+          <>
+            <Label title="Centre" name="centre" className="my-3" />
+            <Select
+              label="Nom du centre"
+              placeholder="Nom du centre"
+              value={selectedCentre ? { label: selectedCentre.name, value: selectedCentre._id } : null}
+              onChange={handleChange}
+              closeMenuOnSelect
+              isAsync
+              loadOptions={fetchCenters}
+              readOnly={!editable}
+              error={errors.center}
+            />
+          </>
+        )}
+        {selectedCentre && (
+          <>
+            <Label title={`Places ouvertes pour le séjour ${selectedCohort || ""}`} name="placesTotal" className="my-3" />
+            <InputText name="placesTotal" label="Nombre de places ouvertes" onChange={(e) => setPlacesTotal(e.target.value)} value={placesTotal} className="mt-3" />
+          </>
+        )}
+        {selectedCentre?.region === "Provence-Alpes-Côte d'Azur" && selectedCohort === "Juin 2024 - 2" && (
+          <>
+            <Label
+              title="Réception des fiches sanitaires (facultatif)"
+              tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
+              name="email"
+              className="my-3"
+            />
+            <InputText name="email" label="Adresse email académique" onChange={(e) => setEmail(e.target.value)} value={email} error={errors.email} />
+          </>
+        )}
+        <div className="mt-10 flex items-center gap-4">
+          <button type="button" onClick={onCancel} className="w-1/2 rounded-lg border-[1px] border-gray-300 py-2">
             Annuler
           </button>
           <button
-            onClick={onSubmit}
+            type="submit"
             disabled={disabled || isLoading}
-            className="w-1/2 rounded-lg border-[1px] border-blue-600 bg-blue-600 py-2 text-white hover:shadow-ninaButton disabled:cursor-not-allowed disabled:opacity-50">
+            className="w-1/2 rounded-lg border-[1px] border-blue-600 bg-blue-600 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50">
             Créer la session
           </button>
         </div>
-      </div>
+      </form>
     </ModalTailwind>
   );
 }

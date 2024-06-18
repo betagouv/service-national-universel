@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const MONGO_URL = "mongodb://localhost:27017/qwer";
-jest.setTimeout(10_000);
 
 let db = null;
 
@@ -25,7 +24,7 @@ const dbConnect = async () => {
 };
 
 const dbClose = async () => {
-  db.close();
+  await db.close();
 };
 
 module.exports = {

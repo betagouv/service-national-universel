@@ -8,17 +8,15 @@
     "mobile:open": "vite --host 0.0.0.0 --open",
     "tailwind": "npx tailwindcss -i ./src/index.css -o ./src/tailwindcss.css --watch",
     "start": "vite",
-    "install": "node src/build-only-on-clevercloud.js",
     "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build",
-    "build:staging": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode staging",
-    "build:dev": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode development",
     "preview": "vite preview",
     "postinstall": "npm run copy:dsfr",
     "predev": "only-include-used-icons",
     "copy:dsfr": "copy-dsfr-to-public && only-include-used-icons",
-    "lint": "eslint src --ext .js,.jsx",
-    "lint:fix": "eslint src --ext .js --fix",
-    "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
+    "check-types": "tsc -p tsconfig.ci.json --emitDeclarationOnly",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src --ext .js,.ts --fix",
+    "lint:report": "eslint src --ext .js,.ts --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "clean": "rm -fr node_modules .turbo build .swc"
   },
   "dependencies": {
@@ -67,7 +65,7 @@
     "snu-lib": "*",
     "styled-components": "5.3.11",
     "validator": "13.7.0",
-    "xlsx": "0.17.4"
+    "xlsx": "~0.18.5"
   },
   "devDependencies": {
     "@sentry/vite-plugin": "^2.2.0",

@@ -4,7 +4,6 @@ const router = express.Router();
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const mime = require("mime-types");
-const FileType = require("file-type");
 const Joi = require("joi");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
@@ -27,7 +26,7 @@ const StateManager = require("../states");
 const emailsEmitter = require("../emails");
 
 const { getQPV, getDensity } = require("../geo");
-const config = require("../config");
+const config = require("config");
 const { capture } = require("../sentry");
 const { decrypt, encrypt } = require("../cryptoUtils");
 const { sendTemplate } = require("../sendinblue");
@@ -41,7 +40,6 @@ const {
   isYoung,
   inSevenDays,
   FILE_STATUS_PHASE1,
-  translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
@@ -80,14 +78,18 @@ const {
   MILITARY_FILE_KEYS,
   department2region,
   formatPhoneNumberFromPhoneZone,
+  translateFileStatusPhase1,
   canCheckIfRefExist,
   YOUNG_SOURCE,
   YOUNG_SOURCE_LIST,
   APPLICATION_STATUS,
   EQUIVALENCE_STATUS,
+  YOUNG_SITUATIONS,
+  CLE_FILIERE_LIST,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 const scanFile = require("../utils/virusScanner");
+const { getMimeFromBuffer, getMimeFromFile } = require("../utils/file");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -175,7 +177,7 @@ router.post("/signup", async (req, res) => {
     const role = ROLES.RESPONSIBLE; // responsible by default
 
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
     //Create structure
@@ -224,7 +226,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 
     if (!canSigninAs(req.user, user, type)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
     if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
@@ -249,7 +251,7 @@ router.post("/restore_signin", passport.authenticate("referent", { session: fals
 
     let jwtPayload;
     try {
-      jwtPayload = await jwt.verify(value.jwt, config.secret);
+      jwtPayload = await jwt.verify(value.jwt, config.JWT_SECRET);
     } catch (error) {
       return res.status(401).send({ ok: false, user: { restriction: "public" } });
     }
@@ -257,7 +259,7 @@ router.post("/restore_signin", passport.authenticate("referent", { session: fals
     const user = await ReferentModel.findOne({ _id: jwtPayload._id, role: ROLES.ADMIN });
     if (!user) return res.status(401).send({ ok: false, user: { restriction: "public" } });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
@@ -393,7 +395,7 @@ router.post("/signup_verify", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     return res.status(200).send({ ok: true, token, data: serializeReferent(referent, referent) });
   } catch (error) {
     capture(error);
@@ -436,7 +438,7 @@ router.post("/signup_invite", async (req, res) => {
       acceptCGU,
     });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
     await referent.save({ fromUser: req.user });
@@ -637,11 +639,13 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const previousYoung = { ...young.toObject() };
 
     let classe = undefined;
+    let etablissement = undefined;
     if (value.source === YOUNG_SOURCE.CLE) {
-      const [etablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(value.etablissementId), await ClasseModel.findById(value.classeId)]);
-      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
+      const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(value.etablissementId), await ClasseModel.findById(value.classeId)]);
+      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
       if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
       classe = dbClasse;
+      etablissement = dbEtablissement;
     }
 
     let previousEtablissement = undefined;
@@ -710,6 +714,18 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
         correctionRequests: correctionRequestsFiltered,
+        schooled: "true",
+        schoolName: etablissement.name,
+        schoolType: etablissement.type[0],
+        schoolAddress: etablissement.address,
+        schoolZip: etablissement.zip,
+        schoolCity: etablissement.city,
+        schoolDepartment: etablissement.department,
+        schoolRegion: etablissement.region,
+        schoolCountry: etablissement.country,
+        schoolId: undefined,
+        grade: classe.grade,
+        situation: getYoungSituationIfCLE(classe.filiere),
       });
       if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
         young.set({
@@ -806,6 +822,25 @@ const getYoungStatus = (young) => {
     default:
       return YOUNG_STATUS.WAITING_VALIDATION;
   }
+};
+
+const getYoungSituationIfCLE = (filiere) => {
+  if (filiere === CLE_FILIERE_LIST.GENERAL_AND_TECHNOLOGIC) {
+    return YOUNG_SITUATIONS.GENERAL_SCHOOL;
+  }
+  if (filiere === CLE_FILIERE_LIST.PROFESSIONAL) {
+    return YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL;
+  }
+  if (filiere === CLE_FILIERE_LIST.APPRENTICESHIP) {
+    return YOUNG_SITUATIONS.APPRENTICESHIP;
+  }
+  if (filiere === CLE_FILIERE_LIST.ADAPTED) {
+    return YOUNG_SITUATIONS.SPECIALIZED_SCHOOL;
+  }
+  if (filiere === CLE_FILIERE_LIST.MIXED) {
+    return YOUNG_SITUATIONS.GENERAL_SCHOOL;
+  }
+  return null;
 };
 
 router.post("/:tutorId/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -929,8 +964,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
 
     let mimeFromFile = null;
     try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
+      mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {
       capture(e);
     }
@@ -976,8 +1010,7 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
 
     let mimeFromFile = null;
     try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
+      mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {
       capture(e);
     }
@@ -1053,7 +1086,7 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype } = currentFile;
-        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);

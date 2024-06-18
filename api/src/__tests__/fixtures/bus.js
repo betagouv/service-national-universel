@@ -5,8 +5,8 @@ faker.locale = "fr";
 function getNewBusFixture() {
   return {
     idExcel: faker.lorem.words(),
-    capacity: faker.random.number({ min: 11, max: 20 }),
-    placesLeft: faker.random.number({ min: 1, max: 10 }),
+    capacity: faker.datatype.number({ min: 11, max: 20 }),
+    placesLeft: faker.datatype.number({ min: 1, max: 10 }),
   };
 }
 

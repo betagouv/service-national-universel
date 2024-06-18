@@ -14,7 +14,6 @@ const { createYoungHelper } = require("./helpers/young");
 const getNewYoungFixture = require("./fixtures/young");
 const { createPointDeRassemblementWithBus } = require("./helpers/PlanDeTransport/pointDeRassemblement");
 
-jest.setTimeout(100000);
 beforeAll(dbConnect);
 
 const mockModelMethodWithError = (model, method) => {
@@ -127,7 +126,7 @@ describe("Meeting point", () => {
         youngCapacity: 10,
         returnDate: new Date(),
         departuredDate: new Date(),
-        busId: "bus_id",
+        busId: "bus_id_1",
         cohort,
       });
       await LigneBusModel.create({
@@ -142,7 +141,7 @@ describe("Meeting point", () => {
         youngCapacity: 10,
         returnDate: new Date(),
         departuredDate: new Date(),
-        busId: "bus_id",
+        busId: "bus_id_2",
         cohort,
       });
 

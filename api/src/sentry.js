@@ -8,9 +8,8 @@ const {
   Handlers,
   autoDiscoverNodePerformanceMonitoringIntegrations,
 } = require("@sentry/node");
-const { ProfilingIntegration } = require("@sentry/profiling-node");
 
-const { RELEASE, ENVIRONMENT, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("./config");
+const config = require("config");
 
 const regex = /[0-9a-fA-F]{24}/g;
 
@@ -26,11 +25,12 @@ addGlobalEventProcessor((event) => {
 });
 
 function initSentry() {
+  const { ProfilingIntegration } = require("@sentry/profiling-node");
   init({
-    enabled: Boolean(SENTRY_URL),
-    dsn: SENTRY_URL,
+    enabled: Boolean(config.SENTRY_URL),
+    dsn: config.SENTRY_URL,
     environment: "api",
-    release: RELEASE,
+    release: config.RELEASE,
     normalizeDepth: 16,
     integrations: [
       new ExtraErrorData({ depth: 16 }),
@@ -40,8 +40,8 @@ function initSentry() {
       new ProfilingIntegration(),
       ...autoDiscoverNodePerformanceMonitoringIntegrations(),
     ],
-    tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE) || 0.01,
-    profilesSampleRate: Number(SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
+    tracesSampleRate: Number(config.SENTRY_TRACING_SAMPLE_RATE) || 0.01,
+    profilesSampleRate: Number(config.SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
     ignoreErrors: [
       /^No error$/,
       /__show__deepen/,
@@ -72,7 +72,7 @@ function initSentry() {
 }
 
 function initSentryMiddlewares(app) {
-  if (ENVIRONMENT !== "development") {
+  if (config.ENVIRONMENT !== "development") {
     // Evite le spam sentry en local
     initSentry();
   }
@@ -89,32 +89,49 @@ function initSentryMiddlewares(app) {
   };
 }
 
+function _flattenStack(stack) {
+  // Remove new lines and merge spaces to get 1 line log output
+  return stack.replace(/\n/g, " | ").replace(/\s+/g, ' ');
+}
+
+function captureError(err, contexte) {
+  if (err.stack && config.ENABLE_FLATTEN_ERROR_LOG) {
+    console.error("capture", _flattenStack(err.stack));
+  } else {
+    console.error("capture", err);
+  }
+  sentryCaptureException(err, contexte);
+}
+
 function capture(err, contexte) {
-  console.error("capture", err);
   if (!err) {
-    sentryCaptureMessage("Error not defined");
+    const msg = "Error not defined"
+    console.error("capture", msg);
+    sentryCaptureMessage(msg);
     return;
   }
 
   if (err instanceof Error) {
-    sentryCaptureException(err, contexte);
+    captureError(err, contexte);
   } else if (err.error instanceof Error) {
-    sentryCaptureException(err.error, contexte);
+    captureError(err.error, contexte);
   } else if (err.message) {
+    console.error("capture", err.message);
     sentryCaptureMessage(err.message, contexte);
   } else {
-    sentryCaptureMessage("Error not defined well", { extra: { error: err, contexte: contexte } });
+    const msg = "Error not defined well"
+    console.error("capture", msg);
+    sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
 }
 function captureMessage(mess, contexte) {
-  console.error("captureMessage", mess);
-  if (!mess) {
-    sentryCaptureMessage("Message not defined");
-    return;
-  }
-
   if (mess) {
+    console.error("captureMessage", mess);
     sentryCaptureMessage(mess, contexte);
+  } else {
+    const msg = "Message not defined"
+    console.error("captureMessage", msg);
+    sentryCaptureMessage(msg);
   }
 }
 

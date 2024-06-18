@@ -8,7 +8,7 @@ import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
 import { translate, canCreateClasse } from "snu-lib";
 import validator from "validator";
-import { ERRORS } from "snu-lib/errors";
+import { ERRORS } from "snu-lib";
 import Loader from "@/components/Loader";
 import { useSelector } from "react-redux";
 

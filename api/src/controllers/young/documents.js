@@ -11,7 +11,6 @@ const { ERRORS, isYoung, isReferent, getCcOfYoung, uploadFile, deleteFile, getFi
 const { sendTemplate } = require("../../sendinblue");
 const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const fs = require("fs");
-const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
 const { decrypt, encrypt } = require("../../cryptoUtils");
@@ -19,6 +18,7 @@ const { serializeYoung } = require("../../utils/serializer");
 const mime = require("mime-types");
 const scanFile = require("../../utils/virusScanner");
 const { generatePdfIntoStream, generatePdfIntoBuffer } = require("../../utils/pdf-renderer");
+const { getMimeFromFile } = require("../../utils/file");
 
 function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
@@ -218,8 +218,8 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype, size } = currentFile;
-        const filetype = await FileType.fromFile(tempFilePath);
-        const mimeFromMagicNumbers = filetype ? filetype.mime : "application/pdf";
+        const filetype = await getMimeFromFile(tempFilePath);
+        const mimeFromMagicNumbers = filetype || "application/pdf";
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           capture(`File ${name} of user(${req.user.id})is not a valid type: ${mimetype} ${mimeFromMagicNumbers}`);

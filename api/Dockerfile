@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat
 RUN apk update
 # Set working directory
 WORKDIR /app
-RUN npm install --global turbo
+RUN npm install --global turbo@^1.13.3
 COPY . .
 ENV APP_NAME api
 RUN turbo prune $APP_NAME --docker
@@ -50,6 +50,9 @@ LABEL org.opencontainers.image.source="https://github.com/betagouv/service-natio
 ENV APP_NAME api
 ENV PORT 8080
 ENV HOST 0.0.0.0
+ARG RELEASE=""
+ENV RELEASE=${RELEASE}
+ENV NODE_CONFIG_DIR=./api/config
 
 EXPOSE $PORT
 

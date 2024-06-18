@@ -6,18 +6,20 @@ import cx from "classnames";
 
 import { formatCohortPeriod } from "snu-lib";
 import { Select, BadgeNotif } from "@snu/ds/admin";
-import { CohortState } from "@/redux/cohorts";
+import { CohortState } from "@/redux/cohorts/reducer";
 
 interface Props {
-  cohort: string;
+  cohort?: string | null;
   sort?: string;
   withBadge?: boolean;
+  disabled?: boolean;
   className?: string;
   filterFn?: (cohort: CohortState["Cohorts"][0]) => boolean;
   onChange?: (cohortName: string) => void;
+  isSearchable?: boolean;
 }
 
-export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, className }: Props) {
+export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, disabled, className, isSearchable }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
@@ -49,8 +51,9 @@ export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChan
       {isSelectMenuOpen && <FaMagnifyingGlass size={25} className="text-gray-400 mr-3" />}
       <Select
         options={options}
-        value={options.find(({ value }) => value == currentCohortName)}
+        value={options.find(({ value }) => value == currentCohortName) || null}
         defaultValue={currentCohortName}
+        disabled={disabled}
         maxMenuHeight={520}
         className="w-[450px] max-w-[450px]"
         controlCustomStyle={{
@@ -67,11 +70,12 @@ export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChan
           },
         }}
         optionCustomStyle={{ paddingTop: 3, paddingBottom: 3 }}
-        onChange={(e) => onChange(e.value)}
+        onChange={(e) => onChange?.(e.value)}
         closeMenuOnSelect
         onMenuOpen={() => setIsSelectMenuOpen(true)}
         onMenuClose={() => setIsSelectMenuOpen(false)}
-        badge={withBadge && <BadgeNotif count={options.length} />}
+        badge={withBadge ? <BadgeNotif count={options.length} /> : undefined}
+        isSearchable={isSearchable}
       />
     </div>
   );
