@@ -135,7 +135,8 @@ export default function View() {
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
     if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
-    if (!classe?.grade) errors.grade = "Ce champ est obligatoire";
+    if (!classe?.grade.length) errors.grade = "Ce champ est obligatoire";
+    if (classe?.grade && classe?.grade.length > 3) errors.grade = "Une classe ne peut avoir que 3 niveaux maximum";
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);

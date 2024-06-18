@@ -164,10 +164,12 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
             readOnly={!edit}
             placeholder={"Choisissez un niveau"}
             options={gradeOptions}
-            closeMenuOnSelect={true}
-            value={classe?.grade ? { value: classe?.grade, label: translateGrade(classe?.grade) } : null}
+            isMulti={true}
+            isClearable={true}
+            label="Niveau"
+            value={classe?.grade ? classe.grade.map((grade) => ({ value: grade, label: translateGrade(grade) })) : null}
             onChange={(options) => {
-              setClasse({ ...classe, grade: options.value });
+              setClasse({ ...classe, grade: options ? options.map((opt) => opt.value) : [] });
             }}
             error={errors.grade}
           />
