@@ -13,9 +13,9 @@ import {
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
   CLE_GRADE_LIST,
-  TYPE_CLASSE_LIST,
   canUpdateClasse,
   YOUNG_STATUS_PHASE1,
+  CLE_TYPE_LIST
   canUpdateClasse,
   canUpdateClasseStay,
   canViewClasse,
@@ -206,20 +206,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       estimatedSeats: Joi.number().required(),
       totalSeats: Joi.number().required(),
       cohort: Joi.string().required(),
-      type: Joi.string()
-        .valid(...TYPE_CLASSE_LIST)
-        .required(),
-      trimester: Joi.string().valid("T1", "T2", "T3").required(),
-      comments: Joi.string().allow(""),
       coloration: Joi.string()
         .valid(...CLE_COLORATION_LIST)
         .required(),
       filiere: Joi.string()
         .valid(...CLE_FILIERE_LIST)
         .required(),
-      grade: Joi.array()
-        .items(Joi.string().valid(...CLE_GRADE_LIST))
-        .max(3)
+      grade: Joi.string()
+        .valid(...CLE_GRADE_LIST)
         .required(),
       sessionId: Joi.string().allow(null),
       cohesionCenterId: Joi.string().allow(null),
