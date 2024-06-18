@@ -3,8 +3,8 @@ const { ROLES } = require("snu-lib");
 
 function getNewReferentFixture() {
   return {
-    firstName: faker.name.firstName(),
-    lastName: faker.name.lastName(),
+    firstName: faker.person.firstName(),
+    lastName: faker.person.lastName(),
     email: faker.internet.email().toLowerCase(),
     password: faker.internet.password(),
     region: faker.location.state(),

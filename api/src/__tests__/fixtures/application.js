@@ -5,8 +5,8 @@ function getNewApplicationFixture() {
   return {
     sqlId: faker.datatype.uuid(),
     youngId: ObjectId(),
-    youngFirstName: faker.name.firstName(),
-    youngLastName: faker.name.lastName(),
+    youngFirstName: faker.person.firstName(),
+    youngLastName: faker.person.lastName(),
     youngEmail: faker.internet.email(),
     youngBirthdateAt: faker.date.past(),
     youngCity: faker.location.city(),
@@ -19,7 +19,7 @@ function getNewApplicationFixture() {
     structureId: ObjectId(),
     tutorId: ObjectId(),
     contractId: ObjectId(),
-    tutorName: faker.name.firstName(),
+    tutorName: faker.person.firstName(),
     priority: "1",
     status: "WAITING_VALIDATION",
   };
