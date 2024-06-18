@@ -13,7 +13,6 @@ import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-l
 import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
 import { getCohortGroups } from "@/services/cohort.service";
-import { title } from "process";
 
 export default function List() {
   const history = useHistory();
