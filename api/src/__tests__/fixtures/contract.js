@@ -30,7 +30,7 @@ function getNewContractFixture() {
     parent2Department: faker.location.city(),
     parent2Phone: faker.phone.number(),
     parent2Email: faker.internet.email(),
-    missionName: faker.name.findName(),
+    missionName: faker.company.name(),
     missionObjective: faker.lorem.sentence(),
     missionAction: faker.lorem.sentence(),
     missionStartAt: faker.date.past(),

@@ -2,7 +2,7 @@ const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewStructureFixture() {
   return {
-    name: faker.name.findName(),
+    name: faker.company.name(),
     siret: faker.datatype.number().toString(),
     description: faker.lorem.sentences(),
     website: faker.internet.url(),
@@ -12,7 +12,7 @@ function getNewStructureFixture() {
     status: "WAITING_VALIDATION",
     isNetwork: "true",
     networkId: "",
-    networkName: faker.name.findName(),
+    networkName: faker.company.name(),
     legalStatus: "ASSOCIATION",
     associationTypes: [],
     structurePubliqueType: faker.lorem.sentences(),

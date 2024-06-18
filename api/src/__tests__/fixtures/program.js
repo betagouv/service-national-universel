@@ -2,7 +2,7 @@ const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewProgramFixture() {
   return {
-    name: faker.name.findName(),
+    name: faker.company.name(),
     description: faker.lorem.sentences(),
     descriptionFor: faker.lorem.sentences(),
     descriptionMoney: faker.lorem.sentences(),

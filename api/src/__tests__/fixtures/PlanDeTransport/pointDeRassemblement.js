@@ -4,7 +4,7 @@ function getNewPointDeRassemblementFixture() {
   return {
     code: faker.lorem.words(),
     cohorts: ["Février 2023 - C"],
-    name: faker.name.findName(),
+    name: faker.company.name(),
     address: faker.location.streetAddress(),
     zip: faker.location.zipCode(),
     city: faker.location.city(),

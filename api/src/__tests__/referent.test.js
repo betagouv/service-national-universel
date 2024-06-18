@@ -82,7 +82,7 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should update young name", async () => {
-      const { young, modifiedYoung, response } = await createYoungThenUpdate({ name: faker.name.findName() });
+      const { young, modifiedYoung, response } = await createYoungThenUpdate({ name: faker.company.name() });
       expect(response.statusCode).toEqual(200);
       expectYoungToEqual(young, modifiedYoung);
     });

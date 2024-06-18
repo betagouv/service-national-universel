@@ -2,7 +2,7 @@ const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewMissionFixture() {
   return {
-    name: faker.name.findName(),
+    name: faker.company.name(),
     domains: [],
     startAt: faker.date.past().toISOString(),
     endAt: faker.date.past().toISOString(),
@@ -17,7 +17,7 @@ function getNewMissionFixture() {
     justifications: faker.lorem.sentences(),
     contraintes: faker.lorem.sentences(),
     structureId: "",
-    structureName: faker.name.findName(),
+    structureName: faker.company.name(),
     status: "DRAFT",
     tutorId: "",
     tutorName: "",
