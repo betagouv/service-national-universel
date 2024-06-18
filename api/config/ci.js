@@ -11,7 +11,6 @@ const secrets = getSecrets(secretKey, CI_PROJECT_ID, "snu-ci", REVISION);
 
 module.exports = {
   ENVIRONMENT: "ci",
-  RELEASE: process.env.RELEASE,
   API_URL: "https://api.ci.beta-snu.dev",
   APP_URL: "https://moncompte.ci.beta-snu.dev",
   ADMIN_URL: "https://admin.ci.beta-snu.dev",
