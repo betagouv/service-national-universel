@@ -154,8 +154,7 @@ Schema.virtual("user").set(function (user) {
 Schema.pre("save", async function (next, params) {
   this.user = params?.fromUser;
   this.updatedAt = Date.now();
-
-  if (this.isModified("department") || this.isModified("region")) {
+  if (!this.isNew && (this.isModified("department") || this.isModified("region"))) {
     await ClasseModel.updateMany(
       { etablissementId: this._id },
       {

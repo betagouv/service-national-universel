@@ -2,11 +2,13 @@ const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { createEtablissement } = require("./helpers/etablissement");
 const { createFixtureEtablissement } = require("./fixtures/etablissement");
+const { createClasse } = require("./helpers/classe");
+const { createFixtureClasse } = require("./fixtures/classe");
 const { ROLES } = require("snu-lib");
 const passport = require("passport");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { ObjectId } = require("mongoose").Types;
-const { CleEtablissementModel } = require("../models");
+const { CleClasseModel } = require("../models");
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -75,12 +77,34 @@ describe("PUT /cle/etablissement/:id", () => {
       .put(`/cle/etablissement/${validId}`)
       .send({
         ...etablissement,
-        id: validId,
         state: "inactive",
       });
 
     expect(res.status).toBe(200);
     expect(res.body.data.name).toBe(etablissement.name);
     expect(res.body.data.state).toBe("inactive");
+  });
+
+  it("should update classe region and department when etablissement is updated successfully", async () => {
+    const etablissement = createFixtureEtablissement({ department: "Paris", region: "Ile de france" });
+    const validId = (await createEtablissement(etablissement))._id;
+    const classe = createFixtureClasse({ etablissementId: validId, department: etablissement.department, region: etablissement.region });
+    const classeId = (await createClasse(classe))._id;
+
+    const res = await request(getAppHelper())
+      .put(`/cle/etablissement/${validId}`)
+      .send({
+        ...etablissement,
+        region: "Bretagne",
+        department: "Ille et Vilaine",
+      });
+
+    const updatedClasse = await CleClasseModel.findById(classeId);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.region).toBe("Bretagne");
+    expect(res.body.data.department).toBe("Ille et Vilaine");
+    expect(updatedClasse.region).toBe(res.body.data.region);
+    expect(updatedClasse.department).toBe(res.body.data.department);
   });
 });
