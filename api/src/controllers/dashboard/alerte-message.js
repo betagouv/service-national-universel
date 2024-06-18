@@ -46,7 +46,6 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
     if (!canReadAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await AlerteMessageModel.find({ to_role: { $in: [req.user.role] }, deletedAt: { $exists: false } });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: data.map(serializeAlerteMessage) });
   } catch (error) {
     capture(error);
@@ -59,7 +58,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { error, value } = Joi.object({
       priority: Joi.string().required(),
       to_role: Joi.array().items(Joi.string()).required(),
-      content: Joi.string().required(),
+      content: Joi.string().required().max(500),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -69,8 +68,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { priority, to_role, content } = value;
-
-    if (content.length > 500) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const message = await AlerteMessageModel.create({ priority, to_role, content });
 
