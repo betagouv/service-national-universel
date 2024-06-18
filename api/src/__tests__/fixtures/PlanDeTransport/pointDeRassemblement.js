@@ -1,20 +1,19 @@
-const { faker } = require("@faker-js/faker");
-faker.locale = "fr";
+const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewPointDeRassemblementFixture() {
   return {
     code: faker.lorem.words(),
     cohorts: ["Février 2023 - C"],
     name: faker.name.findName(),
-    address: faker.address.streetAddress(),
-    zip: faker.address.zipCode(),
-    city: faker.address.city(),
-    department: faker.address.state(),
-    region: faker.address.state(),
-    country: faker.address.country(),
+    address: faker.location.streetAddress(),
+    zip: faker.location.zipCode(),
+    city: faker.location.city(),
+    department: faker.location.state(),
+    region: faker.location.state(),
+    country: faker.location.country(),
     location: {
-      lat: Number(faker.address.latitude()),
-      lon: Number(faker.address.longitude()),
+      lat: Number(faker.location.latitude()),
+      lon: Number(faker.location.longitude()),
     },
   };
 }

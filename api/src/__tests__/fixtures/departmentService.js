@@ -1,18 +1,16 @@
-const { faker } = require("@faker-js/faker");
-
-faker.locale = "fr";
+const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewDepartmentServiceFixture() {
   return {
-    department: faker.address.state(),
-    region: faker.address.state(),
+    department: faker.location.state(),
+    region: faker.location.state(),
     directionName: faker.name.findName(),
     serviceName: faker.name.findName(),
     serviceNumber: faker.datatype.number().toString(),
-    address: faker.address.streetAddress(),
-    complementAddress: faker.address.streetAddress(),
-    zip: faker.address.zipCode(),
-    city: faker.address.city(),
+    address: faker.location.streetAddress(),
+    complementAddress: faker.location.streetAddress(),
+    zip: faker.location.zipCode(),
+    city: faker.location.city(),
     description: faker.lorem.sentences(),
   };
 }

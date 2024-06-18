@@ -1,6 +1,4 @@
-const { faker } = require("@faker-js/faker");
-
-faker.locale = "fr";
+const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewProgramFixture() {
   return {
@@ -13,8 +11,8 @@ function getNewProgramFixture() {
     imageFile: "",
     imageString: "",
     type: faker.lorem.sentences(),
-    department: faker.address.state(),
-    region: faker.address.state(),
+    department: faker.location.state(),
+    region: faker.location.state(),
     visibility: "",
   };
 }
