@@ -1,5 +1,5 @@
-import { LigneBusModel, ReferentModel, CohesionCenterModel, PointDeRassemblementModel, YoungModel } from "../../models";
-import { serializeReferent, serializeYoung } from "../../utils/serializer";
+import { LigneBusModel, ReferentModel, CohesionCenterModel, PointDeRassemblementModel, YoungModel } from "../../../models";
+import { serializeReferent, serializeYoung } from "../../../utils/serializer";
 
 export const findCohesionCentersForClasses = async (classes) => {
   const cohesionCenterIds = classes.map(({ cohesionCenterId }) => cohesionCenterId).filter(Boolean);

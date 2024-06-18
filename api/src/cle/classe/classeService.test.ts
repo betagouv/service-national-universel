@@ -1,15 +1,14 @@
-import { deleteClasse } from './classe.service';
-const youngService = require("../young/young.service");
-const classService = require("./classe.service");
+import { deleteClasse } from "./classeService";
+const youngService = require("../../young/young.service");
+const classService = require("./classeService");
 
 const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
 const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
 
-const ClasseStateManager = require("../states/models/classe");
-const ClasseModel = require("../models/cle/classe");
-import YoungModel from "../models/young";
+const ClasseStateManager = require("../../states/models/classe");
+const ClasseModel = require("../../models/cle/classe");
+import YoungModel from "../../models/young";
 const { ObjectId } = require("mongoose").Types;
-
 
 describe("ClasseService", () => {
   it("should return a pdf", async () => {
@@ -65,7 +64,7 @@ describe("ClasseStateManager.withdraw function", () => {
       _id: classId,
       status: "IN_PROGRESS", // Assuming the class is in progress
       save: saveMock,
-      set: jest.fn(function(data) {
+      set: jest.fn(function (data) {
         Object.assign(this, data);
       }),
     };
@@ -75,7 +74,7 @@ describe("ClasseStateManager.withdraw function", () => {
         _id: "student1",
         status: "IN_PROGRESS", // Assuming student is in progress
         save: saveStudentMock,
-        set: jest.fn(function(data) {
+        set: jest.fn(function (data) {
           Object.assign(this, data);
         }),
       },
@@ -83,7 +82,7 @@ describe("ClasseStateManager.withdraw function", () => {
         _id: "student2",
         status: "WAITING_CORRECTION", // Assuming student is waiting for correction
         save: saveStudentMock,
-        set: jest.fn(function(data) {
+        set: jest.fn(function (data) {
           Object.assign(this, data);
         }),
       },
@@ -98,7 +97,7 @@ describe("ClasseStateManager.withdraw function", () => {
     // Assert that classe status is updated to withdrawn
     expect(saveMock).toHaveBeenCalledWith({ fromUser });
     // Assert that each student's status is updated to abandoned
-    mockedYoungs.forEach(mockedYoung => {
+    mockedYoungs.forEach((mockedYoung) => {
       expect(mockedYoung.set).toHaveBeenCalledWith({
         status: "ABANDONED",
         lastStatusAt: expect.any(Number),
@@ -111,7 +110,6 @@ describe("ClasseStateManager.withdraw function", () => {
     expect(withdrawnClasse.status).toEqual("WITHDRAWN");
   });
 });
-
 
 describe("deleteClasse function", () => {
   const classId = new ObjectId();
@@ -187,34 +185,34 @@ describe("deleteClasse function", () => {
     await expect(deleteClasse(classId, mockedFromUser)).rejects.toThrow("Classe already linked to a bus line");
   });
 
-   it("should throw an error if there are validated students", async () => {
-    const mockedClasse = { 
+  it("should throw an error if there are validated students", async () => {
+    const mockedClasse = {
       _id: classId,
       deletedAt: null,
       cohesionCenterId: null,
       sessionId: null,
       ligneId: null,
       save: saveMock,
-      set: jest.fn(function(data) {
+      set: jest.fn(function (data) {
         Object.assign(this, data);
-      })
+      }),
     };
     const mockedYoungs = [
       {
         _id: "student1",
         status: "VALIDATED",
         save: saveStudentMock,
-        set: jest.fn(function(data) {
+        set: jest.fn(function (data) {
           Object.assign(this, data);
-        })
+        }),
       },
       {
         _id: "student2",
         status: "IN_PROGRESS",
         save: saveStudentMock,
-        set: jest.fn(function(data) {
+        set: jest.fn(function (data) {
           Object.assign(this, data);
-        })
+        }),
       },
     ];
 
@@ -229,25 +227,25 @@ describe("deleteClasse function", () => {
   });
 
   it("should delete a classe and update the status of associated students", async () => {
-    const mockedClasse = { 
+    const mockedClasse = {
       _id: classId,
       deletedAt: null,
       cohesionCenterId: null,
       sessionId: null,
       ligneId: null,
       save: saveMock,
-      set: jest.fn(function(data) {
+      set: jest.fn(function (data) {
         Object.assign(this, data);
-      })
+      }),
     };
     const mockedYoungs = [
       {
         _id: "student2",
         status: "IN_PROGRESS",
         save: saveStudentMock,
-        set: jest.fn(function(data) {
+        set: jest.fn(function (data) {
           Object.assign(this, data);
-        })
+        }),
       },
     ];
 
@@ -259,15 +257,14 @@ describe("deleteClasse function", () => {
     expect(mockedClasse.set).toHaveBeenCalledWith({ deletedAt: expect.any(Number) });
     expect(saveMock).toHaveBeenCalled();
     expect(saveStudentMock).toHaveBeenCalled();
-    mockedYoungs.forEach(mockedYoung => {
+    mockedYoungs.forEach((mockedYoung) => {
       expect(mockedYoung.set).toHaveBeenCalledWith({
         lastStatusAt: expect.any(Number),
         status: "ABANDONED", // Update the expected status value
         withdrawnMessage: "classe supprimée",
-        withdrawnReason: "other"
+        withdrawnReason: "other",
       });
     });
     expect(deletedClasse.deletedAt).toBeDefined();
   });
-
 });
