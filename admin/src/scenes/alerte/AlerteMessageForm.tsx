@@ -25,7 +25,7 @@ interface Props {
   onMessagesChange: React.Dispatch<React.SetStateAction<AlerteMessageDto[]>>;
 }
 
-export default function ModalAlerteMess({ message, isNew, onIsNewChange, onMessagesChange }: Props) {
+export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMessagesChange }: Props) {
   const [editInfo, setEditInfo] = React.useState(isNew);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errors, setErrors] = React.useState<ErrorForm>({});
