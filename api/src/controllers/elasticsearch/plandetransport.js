@@ -11,25 +11,32 @@ const { ROLES } = require("snu-lib");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Object = require("../../models/sessionPhase1");
 
-const getContextFilters = async (user, queryFilters) => {
+const getContextFilters = async (user, cohort) => {
   let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
 
-  const getCentersAndBusLines = async (params) => {
-    const centers = await SessionPhase1Object.find(params);
+  const getCentersAndBusLines = async ({ region, department, headCenterId }) => {
+    let query = { cohort };
+    if (region) query.region = region;
+    if (department) query.department = { $in: department };
+    if (headCenterId) query.headCenterId = headCenterId;
+
+    const centers = await SessionPhase1Object.find(query);
     if (!centers.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const lignebus = await LigneBusModel.find({ centerId: { $in: centers.map((center) => center.cohesionCenterId) }, cohort: queryFilters.cohort[0] });
+
+    const centerIds = centers.map((center) => center.cohesionCenterId);
+    const lignebus = await LigneBusModel.find({ centerId: { $in: centerIds }, cohort });
     if (!lignebus.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+
     return { centers, lignebus };
   };
 
   let result;
   if (user.role === ROLES.REFERENT_REGION) {
-    result = await getCentersAndBusLines({ region: user.region, cohort: queryFilters.cohort[0] });
+    result = await getCentersAndBusLines({ region: user.region });
   } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
-    const departments = user.department;
-    result = await getCentersAndBusLines({ department: { $in: departments }, cohort: queryFilters.cohort[0] });
+    result = await getCentersAndBusLines({ department: user.department });
   } else if (user.role === ROLES.HEAD_CENTER) {
-    result = await getCentersAndBusLines({ headCenterId: user._id, cohort: queryFilters.cohort[0] });
+    result = await getCentersAndBusLines({ headCenterId: user._id });
   }
 
   if (result.error) return result.error;
