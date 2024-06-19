@@ -358,6 +358,10 @@ const translate = (value) => {
       return "Inscription à vérifier";
     case "CREATED":
       return "Créée";
+    case "active":
+      return "Actif";
+    case "inactive":
+      return "Inactif";
     default:
       return value;
   }

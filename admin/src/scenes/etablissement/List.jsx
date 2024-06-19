@@ -3,7 +3,7 @@ import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { HiOutlineOfficeBuilding, HiChevronDown } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
-import { getDepartmentNumber } from "snu-lib";
+import { getDepartmentNumber, translate } from "snu-lib";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { capture } from "@/sentry";
@@ -26,6 +26,9 @@ export default function List() {
     { title: "Ville", name: "city", missingLabel: "Non renseigné" },
     { title: "Type", name: "type", missingLabel: "Non renseigné" },
     { title: "Secteur", name: "sector", missingLabel: "Non renseigné" },
+    { title: "Académie", name: "academy", missingLabel: "Non renseigné", translate },
+    { title: "Années scolaires", name: "schoolYears", missingLabel: "Non renseigné" },
+    { title: "État", name: "state", missingLabel: "Non renseigné", translate },
   ];
 
   const exportData = async () => {
