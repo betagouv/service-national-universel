@@ -22,7 +22,7 @@ export default function Index() {
   const user = useSelector((state: AuthState) => state.Auth.user);
 
   const { data: messages } = useQuery<AlerteMessageDto[]>({
-    queryKey: ["alerte-messages", "all"],
+    queryKey: ["alerte-messages", "user"],
     queryFn: async () => {
       const { ok, code, data: response } = await api.get(`/alerte-message`);
       if (!ok) {
