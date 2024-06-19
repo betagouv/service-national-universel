@@ -253,6 +253,7 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
                     name="title"
                     label="title"
                     errors={errors}
+                    row={2}
                     className="text-gray-900 w-full"
                     placeholder="Le titre obligatoire du message avec 100 car max"
                     handleChange={(e) => setData({ ...data, title: e.target.value })}
