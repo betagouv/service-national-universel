@@ -48,7 +48,7 @@ export const syncAppelAProjet = async () => {
 
     const formattedEtablissement = etablissementMapper(etablissement, referentsToCreate);
 
-    if (await EtablissementModel.exists({ uai })) {
+    if (await CleEtablissementModel.exists({ uai })) {
       etablissementsToUpdate.push(formattedEtablissement);
     } else {
       etablissementsToCreate.push(formattedEtablissement);
