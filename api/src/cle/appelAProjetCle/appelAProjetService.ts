@@ -5,7 +5,6 @@ import { IClasse } from "../../models/cle/classeType";
 import { CleEtablissementModel } from "../../models";
 import { apiEducation } from "../../services/gouv.fr/api-education";
 import { etablissementMapper } from "../etablissement/etablissementMapper";
-import { generateCSV } from "../../services/csvService";
 
 export const syncAppelAProjet = async () => {
   const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
@@ -59,13 +58,11 @@ export const syncAppelAProjet = async () => {
     // if not, create classe
   }
 
-  // TODO: csv export
-  const etablissementsToCreateCSV = generateCSV(etablissementsToCreate);
-
-  // console.log("🚀 ~ syncAppelAProjet ~ etablissementsToUpdate:", etablissementsToUpdate);
-  // console.log("🚀 ~ syncAppelAProjet ~ etablissementsToCreate:", etablissementsToCreate);
-  // console.log("🚀 ~ syncAppelAProjet ~ etablissementsErrors:", etablissementsErrors);
-  return etablissementsToCreateCSV;
+  return [
+    { name: "etablisementToCreate", data: etablissementsToCreate },
+    { name: "etablisementToUpdate", data: etablissementsToUpdate },
+    { name: "etablisementErrors", data: etablissementsErrors },
+  ];
 };
 
 // TODO: update or remove when appelAProjet mapping is done

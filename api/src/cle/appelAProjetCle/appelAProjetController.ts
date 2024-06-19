@@ -5,6 +5,8 @@ import { syncAppelAProjet } from "./appelAProjetService";
 import { ERRORS } from "../../utils";
 import { isSuperAdmin } from "snu-lib";
 import { capture } from "../../sentry";
+import { generateCSVStream } from "../../services/csvService";
+import archiver from "archiver";
 
 const router = express.Router();
 router.post(
@@ -19,10 +21,19 @@ router.post(
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     try {
-      const appelAProjet = await syncAppelAProjet();
-      res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", 'attachment; filename="etablissements.csv"');
-      appelAProjet.pipe(res);
+      const results: { name: string; data: any[] }[] = await syncAppelAProjet();
+
+      const archive = archiver("zip", { zlib: { level: 9 } });
+      archive.pipe(res);
+
+      for (const { name, data } of results) {
+        const csvStream = generateCSVStream(data);
+        archive.append(csvStream, { name: `${name}.csv` });
+      }
+
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader("Content-Disposition", `attachment; filename=appelAProjet-simulate-${new Date().toISOString()}.zip`);
+      archive.finalize();
     } catch (e) {
       capture(e);
       console.error(e);
