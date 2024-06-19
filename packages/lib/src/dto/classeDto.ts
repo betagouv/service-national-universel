@@ -11,6 +11,7 @@ export type ClasseDto = {
   uniqueKeyAndId: string;
   name: string;
   coloration:string;
+  estimatedSeats: number;
   totalSeats: number;
   seatsTaken: number;
   filiere:string;

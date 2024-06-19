@@ -68,10 +68,19 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  estimatedSeats: {
+    type: Number,
+    required: true,
+    documentation: {
+      description: "Nombre de places estimées de la classe, provient de DS, non modifiable par l'utilisateur",
+    },
+  },
+
   totalSeats: {
     type: Number,
+    required: true,
     documentation: {
-      description: "Nombre de places total de la classe",
+      description: "Nombre de places total de la classe, modifiable par l'utilisateur",
     },
   },
 
