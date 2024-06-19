@@ -1,5 +1,4 @@
-const { faker } = require("@faker-js/faker");
-faker.locale = "fr";
+const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewLigneToPointFixture() {
   return {
