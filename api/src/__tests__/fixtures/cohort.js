@@ -24,7 +24,7 @@ function getNewCohortFixture(object = {}) {
       bornAfter: faker.date.past(),
       bornBefore: faker.date.past(),
     },
-    buffer: faker.datatype.number(),
+    buffer: faker.number.int(),
     event: faker.lorem.words(),
     validationDate: faker.date.past(),
     validationDateForTerminaleGrade: faker.date.past(),
