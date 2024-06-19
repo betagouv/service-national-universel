@@ -10,11 +10,9 @@ import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, pdrChoiceExpired, pdrChoiceLi
 import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
 import useAuth from "@/services/useAuth";
-import useAuth from "@/services/useAuth";
 
 export default function StepPDR({ data: { center, session, meetingPoint, departureDate, returnDate } }) {
   const index = 1;
-  const { young } = useAuth();
   const { young } = useAuth();
   const [open, setOpen] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState([]);
