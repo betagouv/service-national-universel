@@ -439,7 +439,7 @@ export default function EditEquivalence() {
                               setData({ ...data, frequency: { ...data.frequency, duree: option } });
                               setOpenDuree(false);
                             }}
-                            className={`${option === data.frequency?.duree && "bg-gray font-bold"}`}>
+                            className={`${option === data?.frequency?.duree && "bg-gray font-bold"}`}>
                             <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
                               <div>{option}</div>
                               {option === data?.frequency?.duree ? <BsCheck2 /> : null}
