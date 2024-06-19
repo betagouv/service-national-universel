@@ -2,7 +2,7 @@ import { getClassesAndEtablissementsFromAppelAProjets } from "../../providers/de
 import { IReferent } from "../../models/referentType";
 import { IEtablissement } from "../../models/cle/etablissementType";
 import { IClasse } from "../../models/cle/classeType";
-import EtablissementModel from "../../models/cle/etablissement";
+import { CleEtablissementModel } from "../../models";
 import { apiEducation } from "../../services/gouv.fr/api-education";
 import { etablissementMapper } from "../etablissement/etablissementMapper";
 
