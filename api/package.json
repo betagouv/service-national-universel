@@ -14,7 +14,7 @@
     "debug": "DEBUG=express:* nodemon",
     "test": "jest --silent --runInBand --detectOpenHandles --testTimeout=30000",
     "test:debug": "jest --detectOpenHandles --forceExit --testTimeout=30000",
-    "test:unit_test": "jest --silent --runInBand --detectOpenHandles --testTimeout=30000 --testPathIgnorePatterns '__tests__'",
+    "test:unit_test": "jest --runInBand --detectOpenHandles --testTimeout=30000 --testPathIgnorePatterns '__tests__'",
     "coverage": "jest --runInBand --coverage --silent --testTimeout=30000",
     "lint": "eslint src --ext .js,.ts",
     "lint:fix": "eslint src --ext .js,.ts --fix",
