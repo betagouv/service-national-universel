@@ -155,7 +155,7 @@ export default function MissionFilters({ filters, setFilters }) {
         return "N'importe quand";
     }
   };
-  
+
   return (
     <>
       {/* Mobile */}
@@ -331,7 +331,8 @@ export default function MissionFilters({ filters, setFilters }) {
                               id="second-address"
                               name="address"
                               type="radio"
-                              checked={JSON.stringify(filters.location) === JSON.stringify(relativeLocation)}                              onChange={() => setFilters((prev) => ({ ...prev, location: relativeLocation }))}
+                              checked={JSON.stringify(filters.location) === JSON.stringify(relativeLocation)}
+                              onChange={() => setFilters((prev) => ({ ...prev, location: relativeLocation }))}
                               className="hidden"
                             />
                             <label htmlFor="second-address" className="mr-2">
@@ -767,7 +768,7 @@ export default function MissionFilters({ filters, setFilters }) {
                         value={filters.fromDate}
                         onChange={(e) => {
                           e.persist();
-                          setFilters((prev) => ({ ...prev, FROM: e.target.value }));
+                          setFilters((prev) => ({ ...prev, fromDate: e.target.value }));
                         }}
                       />
                     </div>
@@ -780,7 +781,7 @@ export default function MissionFilters({ filters, setFilters }) {
                         value={filters.toDate}
                         onChange={(e) => {
                           e.persist();
-                          setFilters((prev) => ({ ...prev, TO: e.target.value }));
+                          setFilters((prev) => ({ ...prev, toDate: e.target.value }));
                         }}
                       />
                     </div>

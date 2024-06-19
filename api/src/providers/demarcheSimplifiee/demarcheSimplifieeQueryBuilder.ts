@@ -3,18 +3,19 @@ export type DemarcheSimplifieeQueryBuilder = {
   query: string;
   variables: {
     demarcheNumber: number;
+    after: string | null;
   };
 };
 
-export const buildDemarcheSimplifieeBody = (demarcheNumber: number): DemarcheSimplifieeQueryBuilder => {
+export const buildDemarcheSimplifieeBody = (demarcheNumber: number, afterCursor: string | null): DemarcheSimplifieeQueryBuilder => {
   return {
     query: `
-    query getDemarche($demarcheNumber: Int!) {
+    query getDemarche($demarcheNumber: Int!, $after: String) {
   demarche(number: $demarcheNumber) {
     id
     number
     title
-    dossiers {
+    dossiers(after: $after) {
       pageInfo {
         ...PageInfoFragment
       }
@@ -113,7 +114,7 @@ fragment RootChampFragment on Champ {
 }
 `,
 
-    variables: { demarcheNumber: demarcheNumber },
+    variables: { demarcheNumber: demarcheNumber, after: afterCursor },
     operationName: "getDemarche",
   };
 };
