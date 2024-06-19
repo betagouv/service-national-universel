@@ -3,7 +3,7 @@ const { fakerFR: faker } = require("@faker-js/faker");
 function getNewStructureFixture() {
   return {
     name: faker.company.name(),
-    siret: faker.datatype.number().toString(),
+    siret: faker.number.int().toString(),
     description: faker.lorem.sentences(),
     website: faker.internet.url(),
     facebook: faker.internet.url(),
