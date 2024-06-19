@@ -1,6 +1,6 @@
 // virusScanner.js
 const config = require("config");
-const { captureMessage } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const fetch = require("node-fetch");
 const FormData = require("form-data");
 const { createReadStream } = require("fs");
