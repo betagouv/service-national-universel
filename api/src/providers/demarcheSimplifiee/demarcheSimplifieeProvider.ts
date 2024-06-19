@@ -13,7 +13,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IA
   let hasNextPage = true;
   let appelAProjetDemarcheSimplifieeDto: AppelAProjetDemarcheSimplifieeDto = {} as AppelAProjetDemarcheSimplifieeDto;
   let appelsAProjet: IAppelAProjetType[] = [];
-  while (hasNextPage || numberOfCalls > 50) {
+  while (hasNextPage && numberOfCalls < 50) {
     console.time("Demarche_Simplifiee_call_" + numberOfCalls);
     console.log("Current Demarche_Simplifiee_Current_Cursor: ", cursor);
     const body = buildDemarcheSimplifieeBody(91716, cursor);
