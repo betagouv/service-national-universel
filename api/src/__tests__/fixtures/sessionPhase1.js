@@ -1,6 +1,4 @@
-const { faker } = require("@faker-js/faker");
-
-faker.locale = "fr";
+const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewSessionPhase1Fixture(object = {}) {
   const placesLeft = 15;
