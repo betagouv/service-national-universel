@@ -2,7 +2,7 @@
 import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
-import { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement, isAdmin } from "snu-lib";
+import { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement, isAdmin, departmentToAcademy } from "snu-lib";
 
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
@@ -11,7 +11,6 @@ import EtablissementModel from "../../models/cle/etablissement";
 import ClasseModel from "../../models/cle/classe";
 import ReferentModel from "../../models/referent";
 import { UserRequest } from "../../controllers/request";
-
 const router = express.Router();
 
 router.get("/from-user", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
@@ -88,6 +87,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       city: Joi.string().required(),
       department: Joi.string().required(),
       region: Joi.string().required(),
+      academy: Joi.string().required(),
+      state: Joi.string().valid("active", "inactive").required(),
+      schoolYears: Joi.array().items(Joi.string()).required(),
       type: Joi.array()
         .items(Joi.string().valid(...CLE_TYPE_LIST))
         .required(),
@@ -97,7 +99,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -107,6 +108,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const etablissement = await EtablissementModel.findById(value.id);
     if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (value.department !== etablissement.department) {
+      value.academy = departmentToAcademy[value.department];
+    }
 
     etablissement.set({
       ...value,
