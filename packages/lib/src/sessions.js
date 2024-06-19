@@ -30,6 +30,7 @@ const sessions2024CohortNames = [
   "CLE février 2024 Réunion",
   "CLE GE1 2024",
   "CLE GE2 2024",
+  "Toussaint 2024",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
