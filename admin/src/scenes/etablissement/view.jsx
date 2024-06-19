@@ -4,7 +4,7 @@ import { Link, useHistory, useParams } from "react-router-dom";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
-import { AddressForm } from "@snu/ds/common";
+import { AddressForm, Input } from "@snu/ds/common";
 import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding, HiOutlineX } from "react-icons/hi";
 import { MdOutlineContentCopy } from "react-icons/md";
 import InstitutionIcon from "@/components/drawer/icons/Institution";
@@ -356,17 +356,23 @@ export default function View() {
             <Label title="Adresse postale" />
             <AddressForm
               readOnly={!edit}
-              data={{ address: etablissement.address, zip: etablissement.zip, city: etablissement.city }}
+              data={{ address: etablissement.address, zip: etablissement.zip, city: etablissement.city, department: etablissement.department, region: etablissement.region }}
               updateData={(address) => setEtablissement({ ...etablissement, ...address })}
               query={query}
               setQuery={setQuery}
               options={results}
             />
+            <div className="flex gap-4 mt-3">
+              <Input label="Département" value={etablissement.department} disabled className="w-full" />
+              <Input label="Région" value={etablissement.region} disabled className="w-full" />
+            </div>
           </div>
           <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
           <div className="flex-1 shrink-0">
             <Label title="UAI" />
             <InputText className="mb-4" value={etablissement.uai} disabled />
+            <Label title="Académie" />
+            <InputText className="mb-4" value={etablissement.academy} disabled />
             <Label title="Type d’établissement" />
             <Select
               className="mb-4"
