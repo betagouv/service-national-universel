@@ -1,17 +1,19 @@
-const express = require("express");
-const passport = require("passport");
+import express, { Response } from "express";
+import passport from "passport";
+import Joi from "joi";
+import { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement, isAdmin } from "snu-lib";
+
+import { capture } from "../../sentry";
+import { ERRORS } from "../../utils";
+import { validateId } from "../../utils/validator";
+import EtablissementModel from "../../models/cle/etablissement";
+import ClasseModel from "../../models/cle/classe";
+import ReferentModel from "../../models/referent";
+import { UserRequest } from "../../controllers/request";
+
 const router = express.Router();
-const Joi = require("joi");
-const { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement, isAdmin } = require("snu-lib");
 
-const { capture } = require("../../sentry");
-const { ERRORS } = require("../../utils");
-const { validateId } = require("../../utils/validator");
-const EtablissementModel = require("../../models/cle/etablissement");
-const ClasseModel = require("../../models/cle/classe");
-const ReferentModel = require("../../models/referent");
-
-router.get("/from-user", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/from-user", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     if (!canViewEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -44,7 +46,7 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -74,7 +76,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -116,7 +118,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.put("/:id/referents", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/referents", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),

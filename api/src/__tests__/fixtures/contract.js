@@ -38,7 +38,7 @@ function getNewContractFixture() {
     missionAddress: faker.location.streetAddress(),
     missionCity: faker.location.city(),
     missionZip: faker.location.zipCode(),
-    missionDuration: faker.datatype.number().toString(),
+    missionDuration: faker.number.int().toString(),
     missionFrequence: faker.helpers.arrayElement(["une fois par semaine", "deux fois par semaine"]),
     date: faker.date.past(),
     projectManagerFirstName: faker.person.firstName(),
