@@ -2,7 +2,9 @@ export function injectRoutes(app) {
   app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
   app.use("/application", require("./controllers/application"));
   app.use("/bus", require("./controllers/bus"));
-  app.use("/cle", require("./controllers/cle"));
+  app.use("/cle/referent", require("./controllers/cle/referent"));
+  app.use("/cle/referent-signup", require("./controllers/cle/referent-signup"));
+  app.use("/cle/young", require("./controllers/cle/young"));
   app.use("/cohesion-center", require("./controllers/cohesion-center"));
   app.use("/cohort", require("./cohort/cohortController"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
@@ -37,8 +39,7 @@ export function injectRoutes(app) {
   app.use("/young", require("./controllers/young/index"));
   app.use("/young-edition", require("./controllers/young-edition"));
   app.use("/SNUpport", require("./controllers/SNUpport"));
-  app.use("/classe", require("./classe/classe.controller"));
-  app.use("/cle/appel-a-projet", require("./cle/appelAProjetCle/appelAProjetController"));
+  app.use("/cle", require("./cle"));
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));

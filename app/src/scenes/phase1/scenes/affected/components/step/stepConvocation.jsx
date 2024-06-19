@@ -21,8 +21,10 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
   const dispatch = useDispatch();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [openConvocation, setOpenConvocation] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const downloadConvocation = async () => {
+    setLoading(true);
     try {
       plausibleEvent("Phase1/telechargement convocation");
       await downloadPDF({
@@ -39,9 +41,11 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
       console.log(e);
       toastr.error("Une erreur est survenue lors de l'édition de votre convocation", e.message);
     }
+    setLoading(false);
   };
 
   const handleMail = async () => {
+    setLoading(true);
     try {
       let template = "cohesion";
       let type = "convocation";
@@ -56,6 +60,7 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
       toastr.error("Erreur lors de l'envoi du document : ", e.message);
       setModal({ isOpen: false, onConfirm: null });
     }
+    setLoading(false);
   };
 
   if (!isEnabled) {
@@ -76,11 +81,12 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
         <div className="w-full md:w-auto mt-1 md:mt-0 flex flex-col md:flex-row-reverse gap-2">
           <button
             onClick={downloadConvocation}
-            className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
+            disabled={loading}
+            className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center disabled:bg-gray-100 disabled:cursor-wait ${
               isDone ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}>
             <HiOutlineDownload className="h-5 w-5" />
-            Télécharger
+            {loading ? "Chargement" : "Télécharger"}
           </button>
 
           <button
@@ -111,7 +117,15 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
         title="Envoi de document par mail"
         subTitle={`Vous allez recevoir le lien de téléchargement de votre convocation par mail à l'adresse ${young.email}.`}
       />
-      <ConvocationModal isOpen={openConvocation} setIsOpen={setOpenConvocation} center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+      <ConvocationModal
+        isOpen={openConvocation}
+        setIsOpen={setOpenConvocation}
+        loading={loading}
+        center={center}
+        meetingPoint={meetingPoint}
+        departureDate={departureDate}
+        returnDate={returnDate}
+      />
     </StepCard>
   );
 }

@@ -1,6 +1,4 @@
-const { faker } = require("@faker-js/faker");
-
-faker.locale = "fr";
+const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewCohortFixture(object = {}) {
   return {
@@ -26,7 +24,7 @@ function getNewCohortFixture(object = {}) {
       bornAfter: faker.date.past(),
       bornBefore: faker.date.past(),
     },
-    buffer: faker.datatype.number(),
+    buffer: faker.number.int(),
     event: faker.lorem.words(),
     validationDate: faker.date.past(),
     validationDateForTerminaleGrade: faker.date.past(),
