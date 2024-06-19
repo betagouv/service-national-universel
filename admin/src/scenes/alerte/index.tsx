@@ -4,7 +4,6 @@ import { toastr } from "react-redux-toastr";
 import { AiOutlinePlus } from "react-icons/ai";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { capture } from "@/sentry";
 import api from "@/services/api";
 import logo from "@/assets/logo-snu.png";
 import { AuthState } from "@/redux/auth/reducer";
@@ -13,28 +12,24 @@ import { translate, ROLES } from "snu-lib";
 import { AlerteMessageDto } from "snu-lib/src/dto";
 
 import AlerteMessageForm from "./AlerteMessageForm";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Alerte() {
   const { user } = useSelector((state: AuthState) => state.Auth);
-  const [messages, setMessages] = useState<AlerteMessageDto[]>([]);
   const [isNew, setIsNew] = useState(false);
 
-  const getMessage = async () => {
-    try {
+  const { data: messages, refetch } = useQuery<AlerteMessageDto[]>({
+    queryKey: ["alerte-messages", "all"],
+    queryFn: async () => {
       const { ok, code, data: response } = await api.get(`/alerte-message/all`);
       if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
+        throw new Error(translate(code));
       }
-      setMessages(response.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des messages", "");
-    }
-  };
-
-  React.useEffect(() => {
-    getMessage();
-  }, []);
+      return response.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    },
+    enabled: user.role === ROLES.ADMIN,
+  });
 
   if (user.role !== ROLES.ADMIN)
     return (
@@ -65,8 +60,8 @@ export default function Alerte() {
           </button>
         </div>
         {!messages?.length && !isNew ? <p>Aucun message d'alerte n'est paramétré pour le moment.</p> : null}
-        {isNew ? <AlerteMessageForm message={null} isNew={isNew} onIsNewChange={setIsNew} onMessagesChange={setMessages} /> : null}
-        {messages?.length ? messages.map((msg) => <AlerteMessageForm key={msg._id} message={msg} onMessagesChange={setMessages} />) : null}
+        {isNew ? <AlerteMessageForm message={null} isNew={isNew} onIsNewChange={setIsNew} onMessagesChange={refetch} /> : null}
+        {messages?.length ? messages.map((msg) => <AlerteMessageForm key={JSON.stringify(msg)} message={msg} onMessagesChange={refetch} />) : null}
       </div>
     </>
   );

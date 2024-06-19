@@ -1,12 +1,15 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { HiOutlineChartSquareBar } from "react-icons/hi";
+import { useQuery } from "@tanstack/react-query";
 
-import { capture } from "@/sentry";
-import { Page, Header } from "@snu/ds/admin";
-import api from "@/services/api";
 import { ROLES, translate } from "snu-lib";
+import { AlerteMessageDto } from "snu-lib/src/dto";
+import { Page, Header } from "@snu/ds/admin";
+
+import api from "@/services/api";
+import { AuthState } from "@/redux/auth/reducer";
 
 import DashboardContainer from "./DashboardContainer";
 import KeyNumbers from "./KeyNumbers";
@@ -16,26 +19,19 @@ import Objective from "../moderator-ref/subscenes/general/components/Objective";
 import BandeauInfo from "./BandeauInfo";
 
 export default function Index() {
-  const user = useSelector((state) => state.Auth.user);
-  const [message, setMessage] = React.useState([]);
+  const user = useSelector((state: AuthState) => state.Auth.user);
 
-  const getMessage = async () => {
-    try {
+  const { data: messages } = useQuery<AlerteMessageDto[]>({
+    queryKey: ["alerte-messages", "all"],
+    queryFn: async () => {
       const { ok, code, data: response } = await api.get(`/alerte-message`);
-
       if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
+        throw new Error(translate(code));
       }
-      setMessage(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des messages");
-    }
-  };
-
-  useEffect(() => {
-    getMessage();
-  }, []);
+      return response.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    },
+  });
 
   const availableTab = (() => {
     switch (user.role) {
@@ -53,13 +49,11 @@ export default function Index() {
 
   return (
     <Page>
+      {messages?.map((msg) => <InfoMessage key={msg._id} title={msg.title} message={msg.content} priority={msg.priority} className="mb-6" />)}
       {needMoreInfo && <BandeauInfo />}
       <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} classNameDivTitle="h-[38px]" />
       <DashboardContainer active="general" availableTab={availableTab}>
         <div className="flex flex-col gap-8 mb-4">
-          {message?.map((hit) => (
-            <InfoMessage key={hit._id} message={hit.content} priority={hit.priority} />
-          ))}
           <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
           <div className="flex w-full gap-4">
             <Todos user={user} />

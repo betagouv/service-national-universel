@@ -85,7 +85,7 @@ describe("AlerteMessage Routes", () => {
     it("should create a message and return 200 for valid data and authorized users", async () => {
       const response = await request(getAppHelper(ROLES.ADMIN))
         .post("/alerte-message")
-        .send({ content: "Test message", priority: "important", to_role: ["admin"] });
+        .send({ title: "Test title", content: "Test message", priority: "important", to_role: ["admin"] });
       expect(response.statusCode).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(response.body.data.content).toEqual("Test message");
@@ -93,7 +93,7 @@ describe("AlerteMessage Routes", () => {
     it("should return 403 for valid data and unauthorized users", async () => {
       const response = await request(getAppHelper(ROLES.VISITOR))
         .post("/alerte-message")
-        .send({ content: "Test message", priority: "important", to_role: ["admin"] });
+        .send({ title: "Test title", content: "Test message", priority: "important", to_role: ["admin"] });
       expect(response.statusCode).toBe(403);
       expect(response.body.ok).toBe(false);
     });
@@ -116,7 +116,7 @@ describe("AlerteMessage Routes", () => {
       const message = await AlerteMessageModel.create(getNewAlerteMessageFixture());
       const response = await request(getAppHelper(ROLES.ADMIN))
         .put(`/alerte-message/${message._id}`)
-        .send({ content: "Updated message", priority: "normal", to_role: ["admin"] });
+        .send({ title: "Updated title", content: "Updated message", priority: "normal", to_role: ["admin"] });
       expect(response.statusCode).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(response.body.data.content).toEqual("Updated message");
@@ -125,7 +125,7 @@ describe("AlerteMessage Routes", () => {
       const message = await AlerteMessageModel.create(getNewAlerteMessageFixture());
       const response = await request(getAppHelper(ROLES.VISITOR))
         .put(`/alerte-message/${message._id}`)
-        .send({ content: "Updated message", priority: "normal", to_role: ["admin"] });
+        .send({ title: "Updated title", content: "Updated message", priority: "normal", to_role: ["admin"] });
       expect(response.statusCode).toBe(403);
       expect(response.body.ok).toBe(false);
     });
@@ -146,7 +146,7 @@ describe("AlerteMessage Routes", () => {
     it("should return 404 for non-existing message ID", async () => {
       const response = await request(getAppHelper(ROLES.ADMIN))
         .put("/alerte-message/123456789012345678901234")
-        .send({ content: "Updated message", priority: "normal", to_role: ["admin"] });
+        .send({ title: "Updated title", content: "Updated message", priority: "normal", to_role: ["admin"] });
       expect(response.statusCode).toBe(404);
       expect(response.body.ok).toBe(false);
     });

@@ -58,6 +58,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { error, value } = Joi.object({
       priority: Joi.string().required(),
       to_role: Joi.array().items(Joi.string()).required(),
+      title: Joi.string().required().max(100),
       content: Joi.string().required().max(500),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
@@ -67,9 +68,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     }
     if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { priority, to_role, content } = value;
+    const { priority, to_role, title, content } = value;
 
-    const message = await AlerteMessageModel.create({ priority, to_role, content });
+    const message = await AlerteMessageModel.create({ priority, to_role, title, content });
 
     return res.status(200).send({ ok: true, data: serializeAlerteMessage(message) });
   } catch (error) {
@@ -84,6 +85,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       id: Joi.string().required(),
       priority: Joi.string().required(),
       to_role: Joi.array().items(Joi.string()).required(),
+      title: Joi.string().required().max(100),
       content: Joi.string().required().max(500),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
@@ -93,12 +95,12 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     if (!canCreateAlerteMessage(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { priority, to_role, content } = value;
+    const { priority, to_role, title, content } = value;
 
     const message = await AlerteMessageModel.findById(value.id);
     if (!message) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    message.set({ priority: priority, to_role: to_role, content: content });
+    message.set({ priority, to_role, title, content });
     await message.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeAlerteMessage(message) });
   } catch (error) {

@@ -16,13 +16,14 @@ type ErrorForm = {
   priority?: string;
   to_role?: string;
   content?: string;
+  title?: string;
 };
 
 interface Props {
   message?: AlerteMessageDto | null;
   isNew?: boolean;
   onIsNewChange?: (value: boolean) => void;
-  onMessagesChange: React.Dispatch<React.SetStateAction<AlerteMessageDto[]>>;
+  onMessagesChange: () => void;
 }
 
 export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMessagesChange }: Props) {
@@ -80,6 +81,8 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
 
       if (!data.priority) errors.priority = "Ce champ est obligatoire";
       if (!data.to_role || data.to_role.length === 0) errors.to_role = "Ce champ est obligatoire";
+      if (!data.title) errors.title = "Ce champ est obligatoire";
+      if (data.title && data.title.length > 100) errors.content = "Ce champs est limité à 500 caractères";
       if (!data.content) errors.content = "Ce champ est obligatoire";
       if (data.content && data.content.length > 500) errors.content = "Ce champs est limité à 500 caractères";
 
@@ -91,21 +94,21 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
 
       //Save data
       if (!data._id) {
-        const { ok, code, data: newMessage } = await api.post(`/alerte-message`, data);
+        const { ok, code } = await api.post(`/alerte-message`, data);
         if (!ok) {
           toastr.error("Oups, une erreur est survenue lors de la modification du message", translate(code));
           return setIsLoading(false);
         }
-        onMessagesChange((prevMessageList) => [...prevMessageList, newMessage]);
+        onMessagesChange();
       } else {
-        const { ok, code, data: changedMessage } = await api.put(`/alerte-message/${data._id}`, data);
+        const { ok, code } = await api.put(`/alerte-message/${data._id}`, data);
 
         if (!ok) {
           toastr.error("Oups, une erreur est survenue lors de la modification du message", translate(code));
           return setIsLoading(false);
         }
         setData(message || {});
-        onMessagesChange((prevMessageList) => prevMessageList.map((message) => (message._id === data._id ? { ...message, ...changedMessage } : message)));
+        onMessagesChange();
       }
       setEditInfo(false);
       setIsLoading(false);
@@ -127,7 +130,7 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
         return setIsLoading(false);
       }
-      onMessagesChange((prevMessageList) => prevMessageList.filter((message) => message._id !== data._id));
+      onMessagesChange();
       setEditInfo(false);
       setIsLoading(false);
     } catch (e) {
@@ -236,12 +239,37 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
-                  <p className="text-xs  font-medium text-gray-900">Contenu du message</p>
+                  <p className="text-xs font-medium text-gray-900">Titre du message</p>
+                  <MdInfoOutline data-tip data-for="title" className="h-5 w-5 cursor-pointer text-gray-400" />
+                  {/* @ts-expect-error tooltipRadius exists */}
+                  <ReactTooltip id="title" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
+                    <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                      Titre du message d’information sur la vue générale du tableaux de bord aux utilisateurs concernés. 100 caractères max.
+                    </p>
+                  </ReactTooltip>
+                </div>
+                <div className="flex w-full gap-4">
+                  <Field
+                    name="title"
+                    label="title"
+                    errors={errors}
+                    className="text-gray-900 w-full"
+                    placeholder="Le titre obligatoire du message avec 100 car max"
+                    handleChange={(e) => setData({ ...data, title: e.target.value })}
+                    value={data?.title}
+                    readOnly={!editInfo}
+                    type="textarea"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-medium text-gray-900">Contenu du message</p>
                   <MdInfoOutline data-tip data-for="content" className="h-5 w-5 cursor-pointer text-gray-400" />
                   {/* @ts-expect-error tooltipRadius exists */}
                   <ReactTooltip id="content" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
                     <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                      Affichage d’un message d’information sur la vue générale du tableaux de bord aux utilisateurs concernés. 500 caractères max.
+                      Contenu du message d’information sur la vue générale du tableaux de bord aux utilisateurs concernés. 500 caractères max.
                     </p>
                   </ReactTooltip>
                 </div>
@@ -264,7 +292,7 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
                   <div className="flex items-center gap-2">
                     <p className="text-xs  font-medium text-gray-900">Prévisualisation du message</p>
                   </div>
-                  <InfoMessage message={data?.content} priority={data?.priority} />
+                  <InfoMessage title={data?.title} message={data?.content} priority={data?.priority} />
                 </div>
               )}
             </div>
