@@ -366,10 +366,6 @@ const translate = (value) => {
       return "Actif";
     case "inactive":
       return "Inactif";
-    case "GROUP":
-      return "Groupe d'élèves";
-    case "FULL":
-      return "Classe complète";
     default:
       return value;
   }

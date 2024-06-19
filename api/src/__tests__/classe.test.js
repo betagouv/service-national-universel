@@ -79,51 +79,44 @@ describe("PUT /cle/classe/:id", () => {
   });
 
   it("should return 403 when user cannot update classes", async () => {
-    const classeId = new ObjectId();
+    const classe = createFixtureClasse();
+    const validId = (await createClasse(classe))._id;
     passport.user.role = ROLES.RESPONSIBLE;
-    const res = await request(getAppHelper()).put(`/cle/classe/${classeId}`).send({
-      id: classeId,
-      cohort: "CLE mai 2024",
-      coloration: "SPORT",
-      filiere: "Générale et technologique",
-      grade: "4eme",
-      name: "Douze",
-      totalSeats: 4,
-    });
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        name: "New Class",
+      });
     expect(res.status).toBe(403);
     passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 404 when class is not found", async () => {
     const nonExistingId = "104a49ba503555e4d8853003";
-    const res = await request(getAppHelper()).put(`/cle/classe/${nonExistingId}`).send({
-      id: "104a49ba503555e4d8853003",
-      cohort: "CLE mai 2024",
-      coloration: "SPORT",
-      filiere: "Générale et technologique",
-      grade: "4eme",
-      name: "Douze",
-      totalSeats: 4,
-    });
+    const classe = createFixtureClasse();
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${nonExistingId}`)
+      .send({
+        ...classe,
+        name: "New Class",
+      });
     expect(res.status).toBe(404);
   });
 
-  it("should return 403 when changing cohort is not allowed because  young has validate his Phase1", async () => {
+  it("should return 403 when changing cohort is not allowed because young has validate his Phase1", async () => {
     const classe = createFixtureClasse();
     classe.cohort = "2022";
     const validId = (await createClasse(classe))._id;
     const young = getNewYoungFixture({ classeId: validId, statusPhase1: "DONE" });
     await createYoungHelper(young);
 
-    const res = await request(getAppHelper()).put(`/cle/classe/${validId}`).send({
-      id: validId,
-      cohort: "2023",
-      coloration: classe.coloration,
-      filiere: classe.filiere,
-      grade: classe.grade,
-      name: classe.name,
-      totalSeats: classe.totalSeats,
-    });
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        cohort: "2023",
+      });
 
     expect(res.status).toBe(403);
   });
@@ -133,15 +126,12 @@ describe("PUT /cle/classe/:id", () => {
     classe.cohort = "2022";
     const validId = (await createClasse(classe))._id;
 
-    const res = await request(getAppHelper()).put(`/cle/classe/${validId}`).send({
-      id: validId,
-      cohort: "2023",
-      coloration: classe.coloration,
-      filiere: classe.filiere,
-      grade: classe.grade,
-      name: classe.name,
-      totalSeats: classe.totalSeats,
-    });
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        cohort: "2023",
+      });
 
     expect(res.status).toBe(403);
   });
@@ -150,18 +140,15 @@ describe("PUT /cle/classe/:id", () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
 
-    const res = await request(getAppHelper()).put(`/cle/classe/${validId}`).send({
-      id: validId,
-      cohort: "2023",
-      coloration: classe.coloration,
-      filiere: classe.filiere,
-      grade: classe.grade,
-      name: classe.name,
-      totalSeats: classe.totalSeats,
-    });
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        name: "New Class",
+      });
 
     expect(res.status).toBe(200);
-    expect(res.body.data.name).toBe(classe.name);
+    expect(res.body.data.name).toBe("New Class");
   });
 
   it("should return 200 when class cohort is updated and related youngs are updated", async () => {
@@ -171,15 +158,12 @@ describe("PUT /cle/classe/:id", () => {
     const young = getNewYoungFixture({ classeId: validId });
     await createYoungHelper(young);
 
-    const res = await request(getAppHelper()).put(`/cle/classe/${validId}`).send({
-      id: validId,
-      cohort: "CLE juin 2024",
-      coloration: classe.coloration,
-      filiere: classe.filiere,
-      grade: classe.grade,
-      name: classe.name,
-      totalSeats: classe.totalSeats,
-    });
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        cohort: "CLE juin 2024",
+      });
     expect(res.status).toBe(200);
     expect(res.body.data.name).toBe(classe.name);
 
