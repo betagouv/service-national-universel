@@ -13,7 +13,7 @@ import {
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
   CLE_GRADE_LIST,
-  CLE_TYPE_LIST
+  TYPE_CLASSE_LIST,
   canUpdateClasse,
   YOUNG_STATUS_PHASE1,
   canUpdateClasseStay,
