@@ -1,7 +1,8 @@
-import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE } from "snu-lib";
+import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE, SUB_ROLES } from "snu-lib";
 import { ReferentRoleDto, CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { User } from "@/types";
+import { ca } from "date-fns/locale";
 
 export const statusClassForBadge = (status) => {
   let statusClasse;
@@ -50,7 +51,23 @@ export function getRights(user: User, classe, cohort: CohortDto | undefined) {
     showCohort: showCohort(cohort, user),
     showCenter: showCenter(cohort, user),
     showPDR: showPdr(cohort, user),
+    canEditEstimatedSeats: canEditEstimatedSeats(user),
+    canEditTotalSeats: canEditTotalSeats(user),
   };
+}
+
+function canEditEstimatedSeats(user: User) {
+  if (user.role === ROLES.ADMIN) return true;
+  const limitDate = new Date("2024-08-31");
+  const now = new Date();
+  return user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement && now < limitDate;
+}
+
+function canEditTotalSeats(user: User) {
+  if (user.role === ROLES.ADMIN) return true;
+  const limitDate = new Date("2024-09-20");
+  const now = new Date();
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < limitDate;
 }
 
 const showCohort = (cohort: CohortDto | undefined, user: User | undefined): boolean => {

@@ -4,11 +4,13 @@ import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
 import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, translateGrade, translateColoration, formatDateFRTimezoneUTC } from "snu-lib";
+import { TYPE_CLASSE_LIST } from "snu-lib/src/constants/constants";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib/src/dto/cohortDto";
 import { User } from "@/types";
 import { ClasseDto } from "snu-lib/src/dto/classeDto";
 import { Rights } from "./types";
+import Field from "@/components/forms/Field";
 
 type SelectOption = {
   value: string;
@@ -28,9 +30,24 @@ interface Props {
   isLoading: boolean;
   onCancel: () => void;
   onCheckInfo: () => void;
+  validatedYoung: number;
 }
 
-export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors, rights, cohorts, user, setShowModaleWithdraw, isLoading, onCancel, onCheckInfo }: Props) {
+export default function GeneralInfos({
+  classe,
+  setClasse,
+  edit,
+  setEdit,
+  errors,
+  rights,
+  cohorts,
+  user,
+  setShowModaleWithdraw,
+  isLoading,
+  onCancel,
+  onCheckInfo,
+  validatedYoung,
+}: Props) {
   const colorOptions: SelectOption[] = Object.keys(CLE_COLORATION_LIST).map((value) => ({
     value: CLE_COLORATION_LIST[value],
     label: translateColoration(CLE_COLORATION_LIST[value]),
@@ -43,6 +60,15 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
     value: CLE_GRADE_LIST[value],
     label: translateGrade(CLE_GRADE_LIST[value]),
   }));
+  const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
+    value: TYPE_CLASSE_LIST[value],
+    label: translate(TYPE_CLASSE_LIST[value]),
+  }));
+  const trimesterOptions = [
+    { value: "T1", label: "T1" },
+    { value: "T2", label: "T2" },
+    { value: "T3", label: "T3" },
+  ];
 
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
@@ -62,6 +88,84 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
   return (
     <Container title="Informations générales" actions={containerActionList({ edit, setEdit, canEdit: rights.canEdit })}>
       <div className="flex items-stretch justify-stretch">
+        <div className="flex-1">
+          <Label title="Numéro d’identification" name="identification" />
+          <InputText name="identification" className="flex-1 mb-3" value={classe.uniqueKeyAndId} disabled />
+          <Label title="Nom de la classe engagée" name="Class-name" tooltip="Identité du groupe formé." />
+          <InputText
+            name="nameClasse"
+            className="flex-1 mb-3"
+            value={classe.name}
+            onChange={(e) => setClasse({ ...classe, name: e.target.value })}
+            error={errors.name}
+            readOnly={!edit}
+            active={edit}
+          />
+          <Label title="Effectif prévisionnel" name="estimatedSeats" tooltip="Importé de démarche simplifiée et modifiable par le chef d'établissement jusqu'au 31 aout 2024" />
+          <InputText
+            name="estimatedSeats"
+            className="flex-1 mb-3"
+            value={classe.estimatedSeats.toString()}
+            disabled={!rights.canEditEstimatedSeats}
+            onChange={(e) => setClasse({ ...classe, estimatedSeats: Number(e.target.value) })}
+            readOnly={!edit}
+            active={edit}
+            error={errors.estimatedSeats}
+          />
+          <Label title="Effectif ajusté" name="totalSeats" tooltip="Modifiable par le référent de classe et le chef d'établissement jusqu'au 20 septembre" />
+          <InputText
+            name="totalSeats"
+            className="flex-1 mb-3"
+            value={classe.totalSeats.toString()}
+            disabled={!rights.canEditTotalSeats}
+            onChange={(e) => setClasse({ ...classe, totalSeats: Number(e.target.value) })}
+            readOnly={!edit}
+            active={edit}
+            error={errors.totalSeats}
+          />
+          <Label title="Effectif inscrit" name="validatedYoung" tooltip="Non modifiable - calculé sur la base du nombre d'élèves inscrits" />
+          <InputText name="validatedYoung" className="flex-1 mb-3" value={validatedYoung.toString()} disabled />
+          <Label title="Coloration souhaitée" name="coloration" tooltip="Les colorations définitives seront confirmées au moment des affectations." />
+          <Select
+            className="mb-3"
+            isActive={edit}
+            readOnly={!edit}
+            placeholder={"Choisissez une coloration"}
+            options={colorOptions}
+            closeMenuOnSelect={true}
+            value={classe?.coloration ? { value: classe?.coloration, label: translate(classe?.coloration) } : null}
+            onChange={(options) => {
+              setClasse({ ...classe, coloration: options.value });
+            }}
+            error={errors.coloration}
+          />
+          <Label title="Trimestre de préférence pour le séjour" name="trimester" />
+          <Select
+            className="mb-3"
+            isActive={edit}
+            readOnly={!edit}
+            placeholder={"Choisissez un trimestre"}
+            options={trimesterOptions}
+            closeMenuOnSelect={true}
+            value={classe?.trimester ? { value: classe?.trimester, label: classe?.trimester } : null}
+            onChange={(options) => {
+              setClasse({ ...classe, trimester: options.value });
+            }}
+            error={errors.trimester}
+          />
+          <Field
+            name="comments"
+            label="Contraintes spécifiques"
+            errors={errors}
+            className="text-gray-900  w-full mb-3"
+            placeholder="Précisez en quelques mots"
+            handleChange={(e) => setClasse({ ...classe, comments: e.target.value })}
+            value={classe?.comments}
+            readOnly={!edit}
+            type="textarea"
+          />
+        </div>
+        <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
         <div className="flex-1">
           {rights.showCohort && (
             <>
@@ -93,52 +197,19 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
               </div>
             </>
           )}
-          <Label title="Numéro d’identification" name="identification" />
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <InputText name="uniqueKey" className="flex-1" value={classe.uniqueKey} disabled />
-            <InputText name="uniqueId" className="flex-1" value={classe.uniqueId} disabled />
-          </div>
-          <Label title="Nom de la classe engagée" name="Class-name" tooltip="Identité du groupe formé." />
-          <InputText
-            name="nameClasse"
-            className="mb-3"
-            value={classe.name}
-            onChange={(e) => setClasse({ ...classe, name: e.target.value })}
-            error={errors.name}
-            readOnly={!edit}
-            active={edit}
-          />
-          <Label title="Coloration souhaitée" name="coloration" tooltip="Les colorations définitives seront confirmées au moment des affectations." />
+          <Label title="Type de groupe" name="type" />
           <Select
             className="mb-3"
             isActive={edit}
             readOnly={!edit}
-            placeholder={"Choisissez une coloration"}
-            options={colorOptions}
+            placeholder={"Choisissez un type de classe"}
+            options={typeOptions}
             closeMenuOnSelect={true}
-            value={classe?.coloration ? { value: classe?.coloration, label: translate(classe?.coloration) } : null}
+            value={classe?.type ? { value: classe?.type, label: translate(classe?.type) } : null}
             onChange={(options) => {
-              setClasse({ ...classe, coloration: options.value });
+              setClasse({ ...classe, type: options.value });
             }}
-            error={errors.coloration}
-          />
-        </div>
-        <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
-        <div className="flex-1">
-          <Label
-            title="Estimation du nombre d'élèves"
-            name="totalSeats"
-            tooltip="Pour qu'une classe soit considérée comme complète et puisse être validée, 100% des élèves doivent être inscrits (ou désistés). Vous pouvez modifier le nombre d'élèves dans le cas d'un changement d'effectif en cours d'année."
-          />
-          <InputText
-            className="mb-3"
-            name="totalSeats"
-            type="number"
-            value={classe.totalSeats?.toString()}
-            error={errors.totalSeats}
-            onChange={(e) => setClasse({ ...classe, totalSeats: Number(e.target.value) })}
-            readOnly={!edit}
-            active={edit}
+            error={errors.type}
           />
           <Label
             title="Situation scolaire"

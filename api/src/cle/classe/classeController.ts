@@ -202,6 +202,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       name: Joi.string().required(),
+      estimatedSeats: Joi.number().required(),
       totalSeats: Joi.number().required(),
       cohort: Joi.string().required(),
       type: Joi.string()

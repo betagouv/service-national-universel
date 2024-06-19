@@ -127,6 +127,9 @@ export default function View() {
       totalSeats?: string;
       filiere?: string;
       grade?: string;
+      estimatedSeats?: string;
+      trimester?: string;
+      type?: string;
     }
 
     const errors: Errors = {};
@@ -135,7 +138,10 @@ export default function View() {
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
     if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
+    if (!classe?.trimester) errors.trimester = "Ce champ est obligatoire";
+    if (!classe?.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
     if (!classe?.grade.length) errors.grade = "Ce champ est obligatoire";
+    if (!classe?.type) errors.type = "Ce champ est obligatoire";
     if (classe?.grade && classe?.grade.length > 3) errors.grade = "Une classe ne peut avoir que 3 niveaux maximum";
 
     if (Object.keys(errors).length > 0) {
@@ -295,6 +301,7 @@ export default function View() {
         onCheckInfo={checkInfo}
         setShowModaleWithdraw={setShowModaleWithdraw}
         isLoading={isLoading}
+        validatedYoung={totalSeatsTakenExcluding}
       />
 
       {classe.referents?.length > 0 && <ReferentInfos classe={classe} />}

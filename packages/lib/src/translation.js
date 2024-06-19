@@ -358,6 +358,10 @@ const translate = (value) => {
       return "Inscription à vérifier";
     case "CREATED":
       return "Créée";
+    case "GROUP":
+      return "Groupe d'élèves";
+    case "FULL":
+      return "Classe complète";
     default:
       return value;
   }
@@ -790,8 +794,10 @@ const translateGrade = (grade) => {
       return "2nde";
     case "1ere":
       return "1ère";
-    case "1ere CAP":
-      return "1ère CAP";
+    case "1ereCAP":
+      return "1ère année de CAP";
+    case "2ndeCAP":
+      return "2ème année de CAP";
     case "Terminale":
       return "Terminale";
     case "TERM_CAP":

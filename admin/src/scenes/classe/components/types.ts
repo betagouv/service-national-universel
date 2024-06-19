@@ -6,6 +6,8 @@ export type Rights = {
   showCohort: boolean;
   showCenter: boolean;
   showPDR: boolean;
+  canEditEstimatedSeats: boolean;
+  canEditTotalSeats: boolean;
 };
 
 export type InfoBus = {
