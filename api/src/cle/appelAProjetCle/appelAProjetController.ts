@@ -20,7 +20,9 @@ router.post(
     }
     try {
       const appelAProjet = await syncAppelAProjet();
-      res.status(200).send({ ok: true, data: appelAProjet });
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", 'attachment; filename="etablissements.csv"');
+      appelAProjet.pipe(res);
     } catch (e) {
       capture(e);
       console.error(e);

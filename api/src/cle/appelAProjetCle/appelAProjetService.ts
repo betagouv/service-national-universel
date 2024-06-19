@@ -5,6 +5,7 @@ import { IClasse } from "../../models/cle/classeType";
 import { CleEtablissementModel } from "../../models";
 import { apiEducation } from "../../services/gouv.fr/api-education";
 import { etablissementMapper } from "../etablissement/etablissementMapper";
+import { generateCSV } from "../../services/csvService";
 
 export const syncAppelAProjet = async () => {
   const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
@@ -48,7 +49,7 @@ export const syncAppelAProjet = async () => {
 
     const formattedEtablissement = etablissementMapper(etablissement, referentsToCreate);
 
-    if (await EtablissementModel.exists({ uai })) {
+    if (await CleEtablissementModel.exists({ uai })) {
       etablissementsToUpdate.push(formattedEtablissement);
     } else {
       etablissementsToCreate.push(formattedEtablissement);
@@ -59,10 +60,12 @@ export const syncAppelAProjet = async () => {
   }
 
   // TODO: csv export
-  console.log("🚀 ~ syncAppelAProjet ~ etablissementsToUpdate:", etablissementsToUpdate);
-  console.log("🚀 ~ syncAppelAProjet ~ etablissementsToCreate:", etablissementsToCreate);
-  console.log("🚀 ~ syncAppelAProjet ~ etablissementsErrors:", etablissementsErrors);
-  return appelAProjets;
+  const etablissementsToCreateCSV = generateCSV(etablissementsToCreate);
+
+  // console.log("🚀 ~ syncAppelAProjet ~ etablissementsToUpdate:", etablissementsToUpdate);
+  // console.log("🚀 ~ syncAppelAProjet ~ etablissementsToCreate:", etablissementsToCreate);
+  // console.log("🚀 ~ syncAppelAProjet ~ etablissementsErrors:", etablissementsErrors);
+  return etablissementsToCreateCSV;
 };
 
 // TODO: update or remove when appelAProjet mapping is done
