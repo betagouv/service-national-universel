@@ -14,34 +14,30 @@ const SessionPhase1Object = require("../../models/sessionPhase1");
 const getContextFilters = async (user, queryFilters) => {
   let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
 
+  const getCentersAndBusLines = async (params) => {
+    const centers = await SessionPhase1Object.find(params);
+    if (!centers.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const lignebus = await LigneBusModel.find({ centerId: { $in: centers.map((center) => center.cohesionCenterId) }, cohort: queryFilters.cohort[0] });
+    if (!lignebus.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    return { centers, lignebus };
+  };
+
+  let result;
   if (user.role === ROLES.REFERENT_REGION) {
-    const centers = await SessionPhase1Object.find({ region: user.region, cohort: queryFilters.cohort[0] });
-    if (!centers.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const lignebus = await LigneBusModel.find({ centerId: { $in: centers.map((center) => center.cohesionCenterId) }, cohort: queryFilters.cohort[0] });
-    if (!lignebus.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push({ terms: { _id: lignebus.map((e) => e._id) } });
-  }
-
-  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    result = await getCentersAndBusLines({ region: user.region, cohort: queryFilters.cohort[0] });
+  } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
     const departments = user.department;
-    const centers = await SessionPhase1Object.find({ department: { $in: departments }, cohort: queryFilters.cohort[0] });
-    if (!centers.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const lignebus = await LigneBusModel.find({ centerId: { $in: centers.map((center) => center.cohesionCenterId) }, cohort: queryFilters.cohort[0] });
-    if (!lignebus.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push({ terms: { _id: lignebus.map((e) => e._id) } });
+    result = await getCentersAndBusLines({ department: { $in: departments }, cohort: queryFilters.cohort[0] });
+  } else if (user.role === ROLES.HEAD_CENTER) {
+    result = await getCentersAndBusLines({ headCenterId: user._id, cohort: queryFilters.cohort[0] });
   }
 
-  if (user.role === ROLES.HEAD_CENTER) {
-    const centers = await SessionPhase1Object.find({ headCenterId: user._id, cohort: queryFilters.cohort[0] });
-    if (!centers.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort: queryFilters.cohort[0] });
-    if (!lignebus.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push({ terms: { _id: lignebus.map((e) => e._id) } });
-  }
+  if (result.error) return result.error;
+
+  contextFilters.push({ terms: { _id: result.lignebus.map((e) => e._id) } });
 
   return { contextFilters };
 };
-
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
