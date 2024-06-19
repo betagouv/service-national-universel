@@ -16,6 +16,10 @@ function createFixtureClasse(fields = {}) {
     totalSeats: 4,
     department: "Sarthe",
     region: "Pays de la Loire",
+    academy: "Nantes",
+    schoolYear: "2023-2024",
+    type: "FULL",
+    estimatedSeats: 20,
     ...fields,
   };
   return classe;

@@ -104,7 +104,7 @@ describe("PUT /cle/etablissement/:id", () => {
   });
 
   it("should update classe region,department,academy when etablissement is updated successfully", async () => {
-    const etablissement = createFixtureEtablissement({ department: "Paris", region: "Ile de france" });
+    const etablissement = createFixtureEtablissement({ department: "Paris", region: "Ile de france", academy: "Paris" });
     const validId = (await createEtablissement(etablissement))._id;
     const classe = createFixtureClasse({ etablissementId: validId, department: etablissement.department, region: etablissement.region });
     const classeId = (await createClasse(classe))._id;
@@ -124,5 +124,6 @@ describe("PUT /cle/etablissement/:id", () => {
     expect(res.body.data.department).toBe("Ille-et-Vilaine");
     expect(updatedClasse.region).toBe(res.body.data.region);
     expect(updatedClasse.department).toBe(res.body.data.department);
+    expect(res.body.data.academy).toBe(res.body.data.academy);
   });
 });

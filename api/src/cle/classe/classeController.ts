@@ -15,8 +15,7 @@ import {
   CLE_GRADE_LIST,
   canUpdateClasse,
   YOUNG_STATUS_PHASE1,
-  CLE_TYPE_LIST
-  canUpdateClasse,
+  CLE_TYPE_LIST,
   canUpdateClasseStay,
   canViewClasse,
   canWithdrawClasse,
@@ -214,6 +213,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         .required(),
       grade: Joi.string()
         .valid(...CLE_GRADE_LIST)
+        .required(),
+      type: Joi.string()
+        .valid(...CLE_TYPE_LIST)
         .required(),
       sessionId: Joi.string().allow(null),
       cohesionCenterId: Joi.string().allow(null),
