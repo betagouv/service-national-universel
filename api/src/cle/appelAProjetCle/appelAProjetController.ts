@@ -4,6 +4,7 @@ import { UserRequest } from "../../controllers/request";
 import { syncAppelAProjet } from "./appelAProjetService";
 import { ERRORS } from "../../utils";
 import { isSuperAdmin } from "snu-lib";
+import { capture } from "../../sentry";
 
 const router = express.Router();
 router.post(
@@ -21,6 +22,7 @@ router.post(
       const appelAProjet = await syncAppelAProjet();
       res.status(200).send({ ok: true, data: appelAProjet });
     } catch (e) {
+      capture(e);
       console.error(e);
       res.status(500).json({ error: e.message });
     }
@@ -43,6 +45,7 @@ router.post(
       // etablissement
       // classe
     } catch (e) {
+      capture(e);
       res.status(500).json({ error: e.message });
     }
   },
