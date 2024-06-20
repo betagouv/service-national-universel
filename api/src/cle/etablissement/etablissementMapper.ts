@@ -18,5 +18,8 @@ export function etablissementMapper(etablissement: EtablissementProviderDto, ref
     // TODO: map type and sector to our enums
     type: [etablissement.type_etablissement],
     sector: [etablissement.statut_public_prive],
+    academy: etablissement.libelle_academie,
+    state: "inactive",
+    schoolYears: [],
   };
 }
