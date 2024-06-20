@@ -11,11 +11,16 @@ function createFixtureClasse(fields = {}) {
     uniqueKeyAndId: "0720033V_1212",
     coloration: "SPORT",
     filiere: "Générale et technologique",
-    grade: "4eme",
+    grade: ["4eme"],
     name: "Douze",
     totalSeats: 4,
     department: "Sarthe",
     region: "Pays de la Loire",
+    academy: "Nantes",
+    schoolYear: "2023-2024",
+    type: "FULL",
+    estimatedSeats: 20,
+    trimester: "T1",
     ...fields,
   };
   return classe;

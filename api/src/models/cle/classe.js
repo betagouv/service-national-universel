@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
-const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST } = require("snu-lib");
+const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST, TYPE_CLASSE_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "classe";
 
@@ -59,7 +59,7 @@ const Schema = new mongoose.Schema({
       description: "Nom de la classe",
     },
   },
-  //TODO update enum
+
   coloration: {
     type: String,
     enum: CLE_COLORATION_LIST,
@@ -68,10 +68,19 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  estimatedSeats: {
+    type: Number,
+    required: true,
+    documentation: {
+      description: "Nombre de places estimées de la classe, provient de DS, non modifiable par l'utilisateur",
+    },
+  },
+
   totalSeats: {
     type: Number,
+    required: true,
     documentation: {
-      description: "Nombre de places total de la classe",
+      description: "Nombre de places total de la classe, modifiable par l'utilisateur",
     },
   },
 
@@ -83,7 +92,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO update with the good filiere enum
   filiere: {
     type: String,
     enum: CLE_FILIERE_LIST,
@@ -93,7 +101,7 @@ const Schema = new mongoose.Schema({
   },
 
   grade: {
-    type: String,
+    type: [String],
     enum: CLE_GRADE_LIST,
     documentation: {
       description: "Niveau de la classe",
@@ -148,6 +156,7 @@ const Schema = new mongoose.Schema({
 
   department: {
     type: String,
+    required: true,
     documentation: {
       description: "Département de la classe",
     },
@@ -155,8 +164,49 @@ const Schema = new mongoose.Schema({
 
   region: {
     type: String,
+    required: true,
     documentation: {
       description: "Région de la classe",
+    },
+  },
+
+  academy: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Académie de la classe",
+    },
+  },
+
+  schoolYear: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Année scolaire de la classe",
+    },
+  },
+
+  comments: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Commentaires de la classe",
+    },
+  },
+
+  trimester: {
+    type: String,
+    enum: ["T1", "T2", "T3"],
+    documentation: {
+      description: "Trimestre de préférence pour partir en séjour",
+    },
+  },
+
+  type: {
+    type: String,
+    enum: TYPE_CLASSE_LIST,
+    documentation: {
+      description: "Type de la classe, une classe complète ou une groupe d'élèves",
     },
   },
 

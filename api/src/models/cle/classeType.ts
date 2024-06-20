@@ -17,6 +17,7 @@ export interface IClasse {
   uniqueKeyAndId: string;
   name?: string;
   coloration?: string;
+  estimatedSeats?: number;
   totalSeats?: number;
   seatsTaken: number;
   filiere?: string;
@@ -29,6 +30,11 @@ export interface IClasse {
   statusPhase1: string;
   department?: string;
   region?: string;
+  academy?: string;
+  schoolYear?: string;
+  trimester?: string;
+  comments?: string;
+  type?: string;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
