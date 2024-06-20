@@ -251,7 +251,6 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
                 <div className="flex w-full gap-4">
                   <Field
                     name="title"
-                    label="titre"
                     errors={errors}
                     row={2}
                     className="text-gray-900 w-full"
@@ -277,7 +276,6 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
                 <div className="flex w-full gap-4">
                   <Field
                     name="content"
-                    label="contenu"
                     errors={errors}
                     className="text-gray-900  w-full"
                     placeholder="Précisez en quelques mots"
