@@ -73,8 +73,8 @@ export const syncAppelAProjet = async () => {
   }
 
   return [
-    { name: "etablisementToCreate", data: etablissementsToCreate },
-    { name: "etablisementToUpdate", data: etablissementsToUpdate },
-    { name: "etablisementErrors", data: etablissementsErrors },
+    { name: "etablissementsToCreate", data: etablissementsToCreate },
+    { name: "etablissementsToUpdate", data: etablissementsToUpdate },
+    { name: "etablissementsErrors", data: etablissementsErrors },
   ];
 };

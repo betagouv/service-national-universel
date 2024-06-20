@@ -27,8 +27,8 @@ router.post(
       archive.pipe(res);
 
       for (const { name, data } of results) {
-        const csvStream = generateCSVStream(data);
-        archive.append(csvStream, { name: `${name}.csv` });
+        const stream = generateCSVStream(data);
+        archive.append(stream, { name: `${name}.csv` });
       }
 
       res.setHeader("Content-Type", "application/zip");
