@@ -107,9 +107,10 @@ export async function exportLigneBus(user, cohort) {
     });
     if (!ok || !ligneBus?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
+    const filteredLine = filterBusLinesByRole(ligneBus, user);
     let result = {};
 
-    for (const ligne of ligneBus) {
+    for (const ligne of filteredLine) {
       if (!ligne.youngs.length) continue;
       if (!result[ligne.busId]) {
         result[ligne.busId] = {};
