@@ -2,6 +2,9 @@ const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { createClasse } = require("./helpers/classe");
 const { createFixtureClasse } = require("./fixtures/classe");
+const { createFixtureEtablissement } = require("./fixtures/etablissement");
+const { createEtablissement } = require("./helpers/etablissement");
+const EtablissementModel = require("../models/cle/etablissement");
 const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper } = require("./helpers/young");
 const { ROLES } = require("snu-lib");
@@ -102,6 +105,57 @@ describe("PUT /cle/classe/:id", () => {
         name: "New Class",
       });
     expect(res.status).toBe(404);
+  });
+
+  it("should return 403 when REFERENT_CLASSE tries to update a class they don't manage", async () => {
+    const classe = createFixtureClasse();
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.REFERENT_CLASSE;
+    passport.user._id = new ObjectId();
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        name: "New Class",
+      });
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 404 when the associated etablissement does not exist", async () => {
+    const userId = new ObjectId();
+    const classe = createFixtureClasse({ etablissementId: new ObjectId() });
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
+    passport.user._id = userId;
+    jest.spyOn(EtablissementModel, "findById").mockResolvedValueOnce(null);
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        name: "Updated Class",
+      });
+    expect(res.status).toBe(404);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 403 when ADMINISTRATEUR_CLE is both referent and coordinateur", async () => {
+    const userId = new ObjectId();
+    const etablissement = createFixtureEtablissement({ referentEtablissementIds: [userId], coordinateurIds: [userId] });
+    const etablissementId = (await createEtablissement(etablissement))._id;
+    const classe = createFixtureClasse({ etablissementId: etablissementId });
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
+    passport.user._id = userId;
+    jest.spyOn(EtablissementModel, "findById").mockResolvedValueOnce(etablissement);
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        name: "Updated Class",
+      });
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 403 when changing cohort is not allowed because young has validate his Phase1", async () => {

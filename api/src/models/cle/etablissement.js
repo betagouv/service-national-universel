@@ -162,6 +162,7 @@ Schema.pre("save", async function (next, params) {
         {
           department: this.department,
           region: this.region,
+          academy: this.academy,
         },
       );
     }
