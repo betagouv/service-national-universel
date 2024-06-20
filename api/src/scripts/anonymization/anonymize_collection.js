@@ -36,8 +36,8 @@ function anonymizeCollectionStream(anonymize) {
 }
 
 function anonymizeCollection(collectionName) {
-  if (collection_name in ANONYMIZABLE_COLLECTIONS) {
-    const anonymize = require(ANONYMIZABLE_COLLECTIONS[collection_name]);
+  if (collectionName in ANONYMIZABLE_COLLECTIONS) {
+    const anonymize = require(ANONYMIZABLE_COLLECTIONS[collectionName]);
     anonymizeCollectionStream(anonymize);
   } else {
     process.stdin.pipe(process.stdout);
@@ -53,7 +53,7 @@ if (require.main === module) {
     process.exit(1);
   }
 
-  collection_name = args[0];
+  collectionName = args[0];
 
-  anonymizeCollection(collection_name);
+  anonymizeCollection(collectionName);
 }
