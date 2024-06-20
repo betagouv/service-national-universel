@@ -1,6 +1,6 @@
 // virusScanner.js
 const config = require("config");
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const fetch = require("node-fetch");
 const FormData = require("form-data");
 const { createReadStream } = require("fs");
@@ -33,7 +33,7 @@ async function scanFile(tempFilePath, name, userId = "anonymous") {
     const { infected } = await response.json();
 
     if (infected) {
-      capture(`File ${name} of user(${userId}) is infected`);
+      captureMessage(`File ${name} of user(${userId}) is infected`);
     }
 
     return { infected };
