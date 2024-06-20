@@ -5,6 +5,7 @@ import { syncAppelAProjet } from "./appelAProjetService";
 import { ERRORS } from "../../utils";
 import { isSuperAdmin } from "snu-lib";
 import { capture } from "../../sentry";
+import Joi from "joi";
 
 const router = express.Router();
 router.post(
@@ -19,7 +20,15 @@ router.post(
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     try {
-      const appelAProjet = await syncAppelAProjet();
+      const { error, value } = Joi.object({
+        schoolYear: Joi.string().required(),
+      }).validate(req.body);
+
+      if (error) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_REQUEST });
+      }
+
+      const appelAProjet = await syncAppelAProjet(value.schoolYear);
       res.status(200).send({ ok: true, data: appelAProjet });
     } catch (e) {
       capture(e);
