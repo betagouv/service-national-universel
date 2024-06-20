@@ -1,37 +1,6 @@
-import { getUaiFromString, mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet } from "./demarcheSimplifieeProvider";
-import { DemarcheSimplifieeDto } from "./demarcheSimplifieeDto";
+import { DemarcheSimplifieeDto } from "../../../providers/demarcheSimplifiee/demarcheSimplifieeDto";
 
-describe("demarcheSimplifieeProvider", () => {
-  it("should split the input string correctly", () => {
-    const input = "Lycée, Ville (UAI42)";
-    const expectedOutput = "UAI42";
-
-    const result = getUaiFromString(input);
-
-    expect(result).toEqual(expectedOutput);
-  });
-
-  it("should return the right data", () => {
-    const mockAppelAProjetDto = getMockAppelAProjetDto();
-    const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto);
-
-    const expectedAppelAProjet = [
-      {
-        etablissement: { uai: "SOME_UAI", email: "mail@etablissement.fr" },
-        classe: {
-          referent: { nom: "NOM_REFERENT", prenom: "PRENOM_REFERENT", email: "email@referent.fr" },
-          nom: "SNU 2024 2025",
-          nombreElevesPrevus: "42",
-          coloration: "Résilience et prévention des risques",
-          trimestre: "Au 3ème trimestre (séjour réalisé en avril, mai ou juin 2025).",
-        },
-      },
-    ];
-    expect(result).toEqual(expectedAppelAProjet);
-  });
-});
-
-const getMockAppelAProjetDto = (): DemarcheSimplifieeDto => ({
+export const getMockAppelAProjetDto = (hasNextPage: boolean): DemarcheSimplifieeDto => ({
   data: {
     demarche: {
       id: "id",
@@ -40,7 +9,7 @@ const getMockAppelAProjetDto = (): DemarcheSimplifieeDto => ({
       dossiers: {
         pageInfo: {
           hasPreviousPage: true,
-          hasNextPage: true,
+          hasNextPage: hasNextPage,
           startCursor: "startCursor",
           endCursor: "endCursor",
         },
