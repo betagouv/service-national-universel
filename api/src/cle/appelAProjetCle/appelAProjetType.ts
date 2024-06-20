@@ -19,7 +19,7 @@ export type IAppelAProjetEtablissement = {
 
 export type IAppelAprojetClasse = {
   nom?: string;
-  coloration?: (typeof CLE_COLORATION_LIST)[keyof typeof CLE_COLORATION_LIST];
+  coloration?: string;
   nombreElevesPrevus?: string;
   type?: string;
   trimestre?: string;

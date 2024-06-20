@@ -72,7 +72,7 @@ export const syncAppelAProjet = async () => {
     //---------------
     // if classe exists do nothing
     // if not, create classe
-    const uniqueClasseId = buildUniqueClasseId(formattedEtablissement, appelAProjet.classe);
+    const uniqueClasseId = buildUniqueClasseId(formattedEtablissement, mapClasseFromAppelAProjetToClasse(appelAProjet.classe));
   }
 
   return [
