@@ -11,6 +11,40 @@ const { ROLES } = require("snu-lib");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Object = require("../../models/sessionPhase1");
 
+const getContextFilters = async (user, cohort) => {
+  let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
+
+  const getCentersAndBusLines = async ({ region, department, headCenterId }) => {
+    let query = { cohort };
+    if (region) query.region = region;
+    if (department) query.department = { $in: department };
+    if (headCenterId) query.headCenterId = headCenterId;
+
+    const centers = await SessionPhase1Object.find(query);
+    if (!centers.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+
+    const centerIds = centers.map((center) => center.cohesionCenterId);
+    const lignebus = await LigneBusModel.find({ centerId: { $in: centerIds }, cohort });
+    if (!lignebus.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+
+    return { centers, lignebus };
+  };
+
+  let result;
+  if (user.role === ROLES.REFERENT_REGION) {
+    result = await getCentersAndBusLines({ region: user.region });
+  } else if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    result = await getCentersAndBusLines({ department: user.department });
+  } else if (user.role === ROLES.HEAD_CENTER) {
+    result = await getCentersAndBusLines({ headCenterId: user._id });
+  }
+
+  if (result.error) return result.error;
+
+  contextFilters.push({ terms: { _id: result.lignebus.map((e) => e._id) } });
+
+  return { contextFilters };
+};
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
@@ -47,16 +81,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
-    let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
-
-    // A head center can only see bus line rattached to his center.
-    if (user.role === ROLES.HEAD_CENTER) {
-      const centers = await SessionPhase1Object.find({ headCenterId: user._id, cohort: queryFilters.cohort[0] });
-      if (!centers.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort: queryFilters.cohort[0] });
-      if (!lignebus.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      contextFilters.push({ terms: { _id: lignebus.map((e) => e._id) } });
-    }
+    const { contextFilters, error: contextError } = await getContextFilters(user, queryFilters);
+    if (contextError) return res.status(contextError.status).send(contextError.body);
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
@@ -83,6 +109,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       contextFilters,
       size,
     });
+
     if (req.params.action === "export") {
       const response = await allRecords("plandetransport", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: response });
