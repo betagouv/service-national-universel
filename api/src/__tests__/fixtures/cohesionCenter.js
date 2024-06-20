@@ -1,6 +1,4 @@
-const { faker } = require("@faker-js/faker");
-
-faker.locale = "fr";
+const { fakerFR: faker } = require("@faker-js/faker");
 
 function getNewCohesionCenterFixture() {
   const placesLeft = 15;
@@ -9,11 +7,11 @@ function getNewCohesionCenterFixture() {
     code: faker.lorem.word(),
     departmentCode: "55",
     address: faker.lorem.word(),
-    zip: faker.address.zipCode(),
-    city: faker.address.city(),
-    department: faker.address.state(),
-    region: faker.address.state(),
-    country: faker.address.country(),
+    zip: faker.location.zipCode(),
+    city: faker.location.city(),
+    department: faker.location.state(),
+    region: faker.location.state(),
+    country: faker.location.country(),
     placesTotal: placesLeft,
     placesLeft: placesLeft,
     outfitDelivered: faker.lorem.word(),
@@ -34,14 +32,14 @@ function getNewCohesionCenterFixtureV2() {
     name: faker.lorem.word(),
     code2022: faker.lorem.word(),
     address: faker.lorem.word(),
-    city: faker.address.city(),
-    zip: faker.address.zipCode(),
-    department: faker.address.state(),
-    region: faker.address.state(),
+    city: faker.location.city(),
+    zip: faker.location.zipCode(),
+    department: faker.location.state(),
+    region: faker.location.state(),
     addressVerified: true,
     placesTotal: "20",
     pmr: false,
-    academy: faker.address.city(),
+    academy: faker.location.city(),
     typology: "PUBLIC_ETAT",
     domain: "ETABLISSEMENT",
     complement: faker.lorem.word(),

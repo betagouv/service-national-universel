@@ -1,3 +1,4 @@
+import { UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
@@ -606,7 +607,7 @@ function canViewStructureChildren(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
-function canDownloadYoungDocuments(actor, target, type = null) {
+function canDownloadYoungDocuments(actor: UserDto, target: UserDto, type?: string) {
   if (type === "certificate" || type === "convocation") {
     return [
       ROLES.REFERENT_DEPARTMENT,
@@ -729,7 +730,7 @@ function canSearchInElasticSearch(actor, index) {
   } else if (index === "lignebus") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
   } else if (index === "classe") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE,ROLES.TRANSPORTER].includes(actor.role);
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "youngCle") {
     return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
   } else if (index === "etablissement") {

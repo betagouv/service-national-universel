@@ -14,7 +14,7 @@
     "debug": "DEBUG=express:* nodemon",
     "test": "jest --silent --runInBand --detectOpenHandles --testTimeout=30000",
     "test:debug": "jest --detectOpenHandles --forceExit --testTimeout=30000",
-    "test:unit_test": "jest --silent --runInBand --detectOpenHandles --testTimeout=30000 --testPathIgnorePatterns '__tests__'",
+    "test:unit_test": "jest --runInBand --detectOpenHandles --testTimeout=30000 --testPathIgnorePatterns '__tests__'",
     "coverage": "jest --runInBand --coverage --silent --testTimeout=30000",
     "lint": "eslint src --ext .js,.ts",
     "lint:fix": "eslint src --ext .js,.ts --fix",
@@ -48,6 +48,7 @@
     "express-fileupload": "^1.4.0",
     "file-type": "^16.5.3",
     "forcedomain": "^2.2.11",
+    "form-data": "^4.0.0",
     "helmet": "^4.5.0",
     "joi": "^17.7.0",
     "jsonwebtoken": "^9.0.1",
@@ -73,7 +74,7 @@
     "validator": "^13.7.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^6.1.2",
+    "@faker-js/faker": "^8.4.1",
     "@jest/test-sequencer": "^29.7.0",
     "@types/adm-zip": "^0.5.5",
     "@types/jest": "^29.5.12",

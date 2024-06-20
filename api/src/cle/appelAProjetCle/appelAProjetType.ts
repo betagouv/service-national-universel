@@ -4,8 +4,8 @@ export type IAppelAProjetType = {
 };
 
 export type IAppelAProjetEtablissement = {
-  uai?: string;
-  email: string;
+  uai?: string | null;
+  email?: string;
   nom?: string;
   departement?: string;
   region?: string;
@@ -16,18 +16,19 @@ export type IAppelAProjetEtablissement = {
 };
 
 export type IAppelAprojetClasse = {
-  coloration: string;
-  nombreElevesPrevus: number;
-  type: string;
-  trimestre: string;
-  contraintesDates: string;
-  niveau: string;
-  statut: string;
+  nom?: string;
+  coloration?: string;
+  nombreElevesPrevus?: string;
+  type?: string;
+  trimestre?: string;
+  contraintesDates?: string;
+  niveau?: string;
+  statut?: string;
   referent: IAppelAProjetReferent;
 };
 
 export type IAppelAProjetReferent = {
-  prenom: string;
-  nom: string;
-  email: string;
+  prenom?: string;
+  nom?: string;
+  email?: string;
 };

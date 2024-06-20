@@ -1,16 +1,18 @@
-const express = require("express");
+import express, { Response } from "express";
+import Joi from "joi";
+import passport from "passport";
+
+import { ROLES, isSuperAdmin } from "snu-lib";
+
+import CohortModel from "../models/cohort";
+import SessionPhase1Model from "../models/sessionPhase1";
+import { capture } from "../sentry";
+import { ERRORS, getFile, deleteFile } from "../utils";
+import { decrypt } from "../cryptoUtils";
+import { validateCohortDto } from "./cohortValidator";
+import { UserRequest } from "../controllers/request";
+
 const router = express.Router({ mergeParams: true });
-const Joi = require("joi");
-const passport = require("passport");
-
-const { ROLES, isSuperAdmin } = require("snu-lib");
-
-const CohortModel = require("../models/cohort");
-const SessionPhase1Model = require("../models/sessionPhase1");
-const { capture } = require("../sentry");
-const { ERRORS, getFile, deleteFile } = require("../utils");
-const { decrypt } = require("../cryptoUtils");
-const { validateCohortDto } = require("./cohortValidator");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
@@ -19,7 +21,7 @@ const exportDateKeys = [EXPORT_COHESION_CENTERS, EXPORT_YOUNGS_BEFORE_SESSION, E
 
 const xlsxMimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: exportDateKeyError, value: exportDateKey } = Joi.string()
       .valid(...exportDateKeys)
@@ -93,7 +95,7 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
   }
 });
 
-router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       type: Joi.string(),
@@ -114,7 +116,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
   }
 });
 
-router.get("/:cohort", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/:cohort", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -133,7 +135,7 @@ router.get("/:cohort", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
-router.get("/bysession/:sessionId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/bysession/:sessionId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       sessionId: Joi.string().required(),
@@ -160,7 +162,7 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
   }
 });
 
-router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req, res) => {
+router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req: UserRequest, res: Response) => {
   try {
     const { error: exportDateKeyError, value: exportKey } = Joi.string()
       .valid(...exportDateKeys)
@@ -210,7 +212,7 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       fileName = `DSNJ - Fichier volontaire avec validation-${cohort.snuId}-${formattedDate}.xlsx`;
     }
 
-    const decryptedBuffer = decrypt(file.Body);
+    const decryptedBuffer = decrypt(file.Body) as any;
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
@@ -224,7 +226,7 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
   }
 });
 
-router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }), async (req, res) => {
+router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
   try {
     const { error: idError, value: cohortName } = Joi.string().required().validate(req.params.cohort, { stripUnknown: true });
     if (idError) {
@@ -254,9 +256,9 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     });
 
     cohort.set({
+      ...body,
       dateStart: formatDateTimeZone(body.dateStart),
       dateEnd: formatDateTimeZone(body.dateEnd),
-      ...body,
     });
 
     if (body.pdrChoiceLimitDate) cohort.pdrChoiceLimitDate = formatDateTimeZone(body.pdrChoiceLimitDate);

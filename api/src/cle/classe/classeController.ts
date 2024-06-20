@@ -1,37 +1,137 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const Joi = require("joi");
-const {
+import passport from "passport";
+import express, { Response } from "express";
+import Joi from "joi";
+
+import {
+  ROLES,
+  canDownloadYoungDocuments,
+  YOUNG_STATUS,
+  STATUS_CLASSE,
+  canCreateClasse,
+  STATUS_PHASE1_CLASSE,
+  SENDINBLUE_TEMPLATES,
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
   CLE_GRADE_LIST,
-  ROLES,
-  STATUS_CLASSE,
-  STATUS_PHASE1_CLASSE,
-  YOUNG_STATUS_PHASE1,
-  SENDINBLUE_TEMPLATES,
-  canCreateClasse,
   canUpdateClasse,
+  YOUNG_STATUS_PHASE1,
   canUpdateClasseStay,
   canViewClasse,
   canWithdrawClasse,
   canDeleteClasse,
-} = require("snu-lib");
-const { validateId } = require("../../utils/validator");
-const { ERRORS } = require("../../utils");
-const { capture, captureMessage } = require("../../sentry");
-const EtablissementModel = require("../../models/cle/etablissement");
-const ClasseModel = require("../../models/cle/classe");
-const CohortModel = require("../../models/cohort");
-const ReferentModel = require("../../models/referent");
-const YoungModel = require("../../models/young");
-const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
-const StateManager = require("../../states");
-const emailsEmitter = require("../../emails");
-const { deleteClasse } = require("../../classe/classe.service");
+} from "snu-lib";
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+import { capture, captureMessage } from "../../sentry";
+import { ERRORS, isReferent } from "../../utils";
+import { CleClasseModel } from "../../models";
+
+import { UserRequest } from "../../controllers/request";
+
+import { deleteClasse, generateConvocationsByClasseId } from "./classeService";
+import { findCohesionCentersForClasses, findPdrsForClasses, getYoungsGroupByClasses, findLigneInfoForClasses, findReferentInfoForClasses } from "./export/classeExportService";
+import ClasseModel from "../../models/cle/classe";
+import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
+import CohortModel from "../../models/cohort";
+import emailsEmitter from "../../emails";
+import EtablissementModel from "../../models/cle/etablissement";
+import YoungModel from "../../models/young";
+import StateManager from "../../states";
+import { validateId } from "../../utils/validator";
+import ReferentModel from "../../models/referent";
+
+const router = express.Router();
+router.post(
+  "/:id/convocations",
+  passport.authenticate(["young", "referent"], {
+    session: false,
+    failWithError: true,
+  }),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      // @ts-ignore
+      if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, null, "convocation")) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      const { id } = value;
+      const convocations = await generateConvocationsByClasseId(id);
+      res.set({
+        "content-length": convocations.length,
+        "content-disposition": `inline; filename="convocations.pdf"`,
+        "content-type": "application/pdf",
+        "cache-control": "public, max-age=1",
+      });
+      res.send(convocations);
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
+
+router.post(
+  "/export",
+  passport.authenticate(["young", "referent"], {
+    session: false,
+    failWithError: true,
+  }),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error, value } = Joi.object({ cohort: Joi.array().min(1).items(Joi.string()).required() })
+        .unknown()
+        .validate(req.body, { stripUnknown: true });
+      if (error) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const allClasses = await CleClasseModel.find({
+        cohort: value.cohort,
+        status: { $in: [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.INSCRIPTION_TO_CHECK, STATUS_CLASSE.VALIDATED] },
+      })
+        .populate({
+          path: "etablissement",
+        })
+        .lean();
+
+      // uniquement les classes de la région du référent
+      const classes = allClasses.filter((classe) => req.user.role !== ROLES.REFERENT_REGION || classe.etablissement?.region === req.user.region);
+
+      const centres = await findCohesionCentersForClasses(classes);
+      const pdrs = await findPdrsForClasses(classes);
+      const youngs = await getYoungsGroupByClasses(classes);
+      const lignesBus = await findLigneInfoForClasses(classes);
+      const referents = await findReferentInfoForClasses(classes);
+
+      for (let classe of classes) {
+        // populate
+        classe.cohesionCenter = centres?.find((e) => classe.cohesionCenterId === e._id.toString());
+        classe.pointDeRassemblement = pdrs?.find((e) => classe.pointDeRassemblementId === e._id.toString());
+        classe.ligne = lignesBus.find((e) => classe.ligneId === e._id.toString());
+        classe.referentClasse = referents?.filter((e) => classe.referentClasseIds.includes(e._id.toString()));
+
+        // calcul des effectifs
+        const classeYoungs = youngs[classe._id];
+        classe.studentInProgress = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length || 0;
+        classe.studentWaiting = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length || 0;
+        classe.studentValidated = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length || 0;
+        classe.studentAbandoned = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length || 0;
+        classe.studentNotAutorized = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length || 0;
+        classe.studentWithdrawn = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length || 0;
+      }
+      res.send({ ok: true, data: classes });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
+
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       // Classe
@@ -62,6 +162,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const previousClasse = await ClasseModel.findOne({ uniqueKey: value.uniqueKey, uniqueId: value.uniqueId, etablissementId: value.etablissementId });
     if (previousClasse) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
+    // @ts-ignore
     const referent = await findOrCreateReferent(value.referent, { etablissement: value.etablissement, role: ROLES.REFERENT_CLASSE });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
     if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
@@ -95,7 +196,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -216,7 +317,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/from-etablissement/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/from-etablissement/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
@@ -250,7 +351,7 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error: errorId, value: id } = validateId(req.params.id);
     const { error: errorType, value: type } = Joi.string().valid("delete", "withdraw").required().validate(req.query.type);
