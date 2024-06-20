@@ -95,6 +95,8 @@ async function reindexESAllModels() {
       PlanDeTransportModel,
       EmailModel,
       CohortModel,
+      ClasseModel,
+      EtablissementModel,
     ];
 
     const populates = {

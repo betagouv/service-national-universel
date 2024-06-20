@@ -136,12 +136,16 @@ ls -1 $dump_dir/$db_name/*.bson.gz \
 | while read filename
 do
     collection=$(basename $filename ".bson.gz")
+    json_file=$dump_dir/$db_name/$collection.json
     echo "Importing $collection"
     cat $filename \
     | gunzip \
-    | bsondump \
-    | node "$(dirname $0)/anonymize_collection.js" "$collection" \
+    | bsondump > $json_file
+
+    node "$(dirname $0)/anonymize_collection.js" "$collection" < $json_file \
     | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
+
+    rm $json_file
 done
 
 echo "Reimport admin referents"
