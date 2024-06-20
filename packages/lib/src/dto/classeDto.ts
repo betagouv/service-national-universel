@@ -9,7 +9,7 @@ export type ClasseDto = {
   uniqueKey: string;
   uniqueId: string;
   uniqueKeyAndId: string;
-  name?: string;
+  name: string;
   coloration?: string;
   estimatedSeats: number;
   totalSeats: number;

@@ -22,7 +22,7 @@ describe("demarcheSimplifieeProvider", () => {
           referent: { nom: "NOM_REFERENT", prenom: "PRENOM_REFERENT", email: "email@referent.fr" },
           nom: "SNU 2024 2025",
           nombreElevesPrevus: "42",
-          coloration: "Résilience et prévention des risques",
+          coloration: "RESILIENCE",
           trimestre: "Au 3ème trimestre (séjour réalisé en avril, mai ou juin 2025).",
         },
       },
