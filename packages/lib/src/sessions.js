@@ -152,7 +152,7 @@ const COHESION_STAY_END = {
   "CLE juin 2024 Martinique": new Date("06/07/2024"),
   "CLE GE1 2024": new Date("05/04/2024"),
   "CLE GE2 2024": new Date("06/28/2024"),
-  "Toussaint 2024": new Date("11/02/2024"),
+  "Toussaint 2024": new Date("10/31/2024"),
 };
 
 // @todo: to be removed after adding old cohorts in bd
