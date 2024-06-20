@@ -1,6 +1,6 @@
-import { AppelAProjetDemarcheSimplifieeDto } from "../../../providers/demarcheSimplifiee/appelAProjetDemarcheSimplifieeDto";
+import { DemarcheSimplifieeDto } from "../../../providers/demarcheSimplifiee/demarcheSimplifieeDto";
 
-export const getMockAppelAProjetDto = (hasNextPage: boolean): AppelAProjetDemarcheSimplifieeDto => ({
+export const getMockAppelAProjetDto = (hasNextPage: boolean): DemarcheSimplifieeDto => ({
   data: {
     demarche: {
       id: "id",

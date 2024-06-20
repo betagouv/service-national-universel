@@ -1,5 +1,5 @@
 import { getUaiFromString, mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet } from "./demarcheSimplifieeProvider";
-import { AppelAProjetDemarcheSimplifieeDto } from "./appelAProjetDemarcheSimplifieeDto";
+import { DemarcheSimplifieeDto } from "./demarcheSimplifieeDto";
 
 describe("demarcheSimplifieeProvider", () => {
   it("should split the input string correctly", () => {
@@ -31,7 +31,7 @@ describe("demarcheSimplifieeProvider", () => {
   });
 });
 
-const getMockAppelAProjetDto = (): AppelAProjetDemarcheSimplifieeDto => ({
+const getMockAppelAProjetDto = (): DemarcheSimplifieeDto => ({
   data: {
     demarche: {
       id: "id",

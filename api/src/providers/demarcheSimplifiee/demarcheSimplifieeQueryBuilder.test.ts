@@ -3,7 +3,7 @@ import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
 describe("buildDemarcheSimplifieeBody", () => {
   it("should return a valid DemarcheSimplifieeQueryBuilder object", () => {
     const demarcheNumber = 123;
-    const result = buildDemarcheSimplifieeBody(demarcheNumber, "");
+    const result = buildDemarcheSimplifieeBody(demarcheNumber, "", null);
     expect(result).toHaveProperty("operationName", "getDemarche");
     expect(result).toHaveProperty("query");
     expect(result).toHaveProperty("variables");

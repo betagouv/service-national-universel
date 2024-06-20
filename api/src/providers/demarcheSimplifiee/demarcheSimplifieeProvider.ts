@@ -3,7 +3,7 @@ import config from "config";
 
 import { IAppelAprojetClasse, IAppelAProjetEtablissement, IAppelAProjetType } from "../../cle/appelAProjetCle/appelAProjetType";
 import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
-import { AppelAProjetDemarcheSimplifieeDto } from "./appelAProjetDemarcheSimplifieeDto";
+import { DemarcheSimplifieeDto, DossierState } from "./demarcheSimplifieeDto";
 
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
@@ -11,12 +11,12 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IA
   let cursor = "";
   let numberOfCalls = 0;
   let hasNextPage = true;
-  let appelAProjetDemarcheSimplifieeDto: AppelAProjetDemarcheSimplifieeDto = {} as AppelAProjetDemarcheSimplifieeDto;
+  let appelAProjetDemarcheSimplifieeDto: DemarcheSimplifieeDto = {} as DemarcheSimplifieeDto;
   let appelsAProjet: IAppelAProjetType[] = [];
   while (hasNextPage && numberOfCalls < 50) {
     console.time("Demarche_Simplifiee_call_" + numberOfCalls);
     console.log("Current Demarche_Simplifiee_Current_Cursor: ", cursor);
-    const body = buildDemarcheSimplifieeBody(91716, cursor);
+    const body = buildDemarcheSimplifieeBody(91716, cursor, DossierState.ACCEPTE);
     const demarcheSimplifieeAppelAProjetResponse: Response = await fetch(DEMARCHE_SIMPLIFIEE_API, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: config.API_DEMARCHE_SIMPLIFIEE_TOKEN },
@@ -34,7 +34,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IA
   return appelsAProjet;
 };
 
-export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: AppelAProjetDemarcheSimplifieeDto): IAppelAProjetType[] => {
+export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: DemarcheSimplifieeDto): IAppelAProjetType[] => {
   return appelAProjetDto.data.demarche.dossiers.nodes.map((formulaire) => {
     const etablissement: IAppelAProjetEtablissement = {};
     const classe: IAppelAprojetClasse = { referent: {} };
