@@ -6,7 +6,7 @@ import { CleEtablissementModel } from "../../models";
 import { apiEducation } from "../../services/gouv.fr/api-education";
 import { etablissementMapper } from "../etablissement/etablissementMapper";
 
-export const syncAppelAProjet = async () => {
+export const syncAppelAProjet = async (schoolYear: string) => {
   const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
   const referentsToCreate: IReferent[] = [];
   const referentsToLog: IReferent[] = [];
@@ -60,11 +60,13 @@ export const syncAppelAProjet = async () => {
 
     const formattedEtablissement = etablissementMapper(etablissement, referentsToCreate);
 
-    // TODO: handle schoolYears array
+    const currentEtablissement = await CleEtablissementModel.findOne({ uai });
 
-    if (await CleEtablissementModel.exists({ uai })) {
+    if (currentEtablissement) {
+      formattedEtablissement.schoolYears = [...currentEtablissement.schoolYears, schoolYear];
       etablissementsToUpdate.push(formattedEtablissement);
     } else {
+      formattedEtablissement.schoolYears = [schoolYear];
       etablissementsToCreate.push(formattedEtablissement);
     }
     //---------------
