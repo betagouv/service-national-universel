@@ -9,7 +9,7 @@ describe("formatParams", () => {
   it("should handle single string filter value correctly", () => {
     const filters = [{ key: "uai", value: "12345" }];
     const result = formatParams(filters, 0, 5);
-    expect(result).toContain("identifiant_de_l_etablissement%3D12345");
+    expect(result).toContain("identifiant_de_l_etablissement%3D%2212345%22");
     expect(result).toContain("limit=5");
     expect(result).toContain("offset=0");
   });
@@ -29,7 +29,7 @@ describe("formatParams", () => {
       { key: "city", value: "Some City" },
     ];
     const result = formatParams(filters, 1, 10);
-    expect(result).toContain("identifiant_de_l_etablissement%3D12345");
+    expect(result).toContain("identifiant_de_l_etablissement%3D%2212345%22");
     expect(result).toContain("nom_etablissement+LIKE+%22Some+School%22");
     expect(result).toContain("nom_commune+LIKE+%22Some+City");
     expect(result).toContain("limit=10");

@@ -12,12 +12,14 @@ export const syncAppelAProjet = async () => {
   const referentsToLog: IReferent[] = [];
   const etablissementsToCreate: IEtablissement[] = [];
   const etablissementsToUpdate: IEtablissement[] = [];
-  const etablissementsErrors: { id: string; uai?: string; error: string }[] = [];
+  const etablissementsErrors: { error: string; uai?: string | null; email?: string | null }[] = [];
   const classesToCreate: IClasse[] = [];
   const classesToUpdate: IClasse[] = [];
 
+  const uais = [...new Set(appelAProjets.map((AAP) => AAP.etablissement?.uai).filter(Boolean))];
+
   const etablissements = await apiEducation({
-    filters: [{ key: "uai", value: appelAProjets.map((appelAProjet) => getUAIfromAAP(appelAProjet)) }],
+    filters: [{ key: "uai", value: uais }],
     page: 0,
     size: -1,
   });
@@ -26,27 +28,39 @@ export const syncAppelAProjet = async () => {
     // if referent exists, update it
     // if not, create referent
     //---------------
-    const uai = getUAIfromAAP(appelAProjet);
+    const uai = appelAProjet.etablissement?.uai;
     if (!uai) {
-      // @ts-ignore
-      etablissementsErrors.push({ id: appelAProjet.id, error: "UAI not found" });
+      etablissementsErrors.push({
+        error: "No UAI provided",
+        uai: null,
+        email: appelAProjet.etablissement.email,
+      });
       continue;
     }
 
     if ([...etablissementsToCreate, ...etablissementsToUpdate].map((etablissement) => etablissement.uai).includes(uai)) {
-      // @ts-ignore
-      etablissementsErrors.push({ id: appelAProjet.id, uai, error: "Etablissement already processed" });
+      etablissementsErrors.push({
+        error: "UAI already processed",
+        uai: appelAProjet.etablissement.uai,
+        email: appelAProjet.etablissement.email,
+      });
       continue;
     }
 
     const etablissement = etablissements.find((etablissement) => etablissement.identifiant_de_l_etablissement === uai);
+
     if (!etablissement) {
-      // @ts-ignore
-      etablissementsErrors.push({ id: appelAProjet.id, uai, error: "Etablissement not found" });
+      etablissementsErrors.push({
+        error: "Etablissement not found",
+        uai: appelAProjet.etablissement.uai,
+        email: appelAProjet.etablissement.email,
+      });
       continue;
     }
 
     const formattedEtablissement = etablissementMapper(etablissement, referentsToCreate);
+
+    // TODO: handle schoolYears array
 
     if (await CleEtablissementModel.exists({ uai })) {
       etablissementsToUpdate.push(formattedEtablissement);

@@ -3,7 +3,7 @@
 import { capture } from "../../sentry";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 
-const baseUrl = "https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-annuaire-education/records";
+const baseUrl = "https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-annuaire-education/exports/json";
 
 export const apiEducation = async ({ filters, page, size }, options = { headers: {} }) => {
   try {
@@ -16,15 +16,13 @@ export const apiEducation = async ({ filters, page, size }, options = { headers:
       method: "GET",
     });
 
-    const data: { error?: string; results: EtablissementProviderDto[] } = await res.json();
+    if (!res.ok) {
+      throw new Error(`Failed to fetch data: ${res.statusText}`);
+    }
 
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    if (!data.results) {
-      throw new Error("No result found");
-    }
-    return data.results;
+    const data: EtablissementProviderDto[] = await res.json();
+
+    return data;
   } catch (e) {
     capture(e);
     return [];
@@ -42,7 +40,7 @@ export function formatParams(filters: { key: string; value: string | string[] }[
       if (Array.isArray(filter.value)) {
         where += `identifiant_de_l_etablissement IN ("${filter.value.join('","')}")`;
       } else {
-        where += `identifiant_de_l_etablissement=${filter.value}`;
+        where += `identifiant_de_l_etablissement="${filter.value}"`;
       }
     }
     if (filter.key === "name") where += `${where.length ? " AND " : ""}nom_etablissement LIKE "${filter.value}"`;
