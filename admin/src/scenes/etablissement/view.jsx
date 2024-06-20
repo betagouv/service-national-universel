@@ -2,21 +2,23 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { useDebounce } from "@uidotdev/usehooks";
+import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding, HiOutlineX } from "react-icons/hi";
+import { IoAdd } from "react-icons/io5";
+import { toastr } from "react-redux-toastr";
+import validator from "validator";
+import { MdOutlineContentCopy } from "react-icons/md";
+
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
 import { AddressForm, Input } from "@snu/ds/common";
-import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding, HiOutlineX } from "react-icons/hi";
-import { MdOutlineContentCopy } from "react-icons/md";
 import InstitutionIcon from "@/components/drawer/icons/Institution";
-import { useAddress, CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, translate } from "snu-lib";
+import { useAddress, CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, translate, ERRORS } from "snu-lib";
 import api from "@/services/api";
-import { IoAdd } from "react-icons/io5";
 import { capture } from "@/sentry";
-import { toastr } from "react-redux-toastr";
 import { copyToClipboard } from "@/utils";
-import validator from "validator";
-import { ERRORS } from "snu-lib";
 import Loader from "@/components/Loader";
+
+import Contract from "@/components/Contract";
 
 export default function View() {
   const user = useSelector((state) => state.Auth.user);
@@ -290,7 +292,7 @@ export default function View() {
           ),
         ]}
       />
-      <Container
+      {/* <Container
         title="Contacts"
         actions={[
           [ROLES.ADMIN].includes(user.role) && (
@@ -347,7 +349,7 @@ export default function View() {
             </div>
           ))}
         </div>
-      </Container>
+      </Container> */}
       <Container title="Informations générales" actions={actionList}>
         <div className="flex items-stretch justify-between">
           <div className="flex-1 shrink-0">
