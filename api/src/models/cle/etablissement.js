@@ -9,7 +9,7 @@ const ClasseModel = require("./classe");
 const Schema = new mongoose.Schema({
   schoolId: {
     type: String,
-    required: true,
+    required: false,
     documentation: {
       description: "School Ramses rataché à l'établissement",
     },

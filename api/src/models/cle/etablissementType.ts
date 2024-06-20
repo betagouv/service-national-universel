@@ -3,8 +3,8 @@ import { Document } from "mongoose";
 export type EtablissementDocument = IEtablissement & Document;
 
 export interface IEtablissement {
-  _id: string;
-  schoolId: string;
+  _id?: string;
+  schoolId?: string;
   uai: string;
   name: string;
   referentEtablissementIds: string[];
@@ -20,7 +20,7 @@ export interface IEtablissement {
   academy: string;
   state: string;
   schoolYears: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
   deletedAt?: Date;
 }
