@@ -9,7 +9,6 @@ resource scaleway_job_definition main {
   timeout = "2h"
 
   env = {
-    "NODE_ENV"       = "staging"
     "SCW_PROJECT_ID" = local.secrets.SCW_PROJECT_ID_TASK
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY_TASK
   }

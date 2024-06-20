@@ -10,4 +10,4 @@ dest_db_uri=$(../get_secrets.sh snu-staging | jq -r ".MONGO_URL")
 
 ./anonymize_db.sh $src_db_uri $dest_db_uri
 
-node ../reindex_es_all_models/index.js
+NODE_ENV=staging node ../reindex_es_all_models/index.js

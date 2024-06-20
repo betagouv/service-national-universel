@@ -9,7 +9,6 @@ resource scaleway_job_definition anonymize_db {
   timeout = "2h"
 
   env = {
-    "NODE_ENV"       = "staging"
     "SCW_PROJECT_ID" = scaleway_account_project.main.id
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
