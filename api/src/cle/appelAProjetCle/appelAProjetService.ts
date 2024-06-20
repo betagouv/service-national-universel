@@ -72,9 +72,9 @@ export const syncAppelAProjet = async () => {
     // if not, create classe
   }
 
-  return [
-    { name: "etablissementsToCreate", data: etablissementsToCreate },
-    { name: "etablissementsToUpdate", data: etablissementsToUpdate },
-    { name: "etablissementsErrors", data: etablissementsErrors },
-  ];
+  // TODO: csv export
+  console.log("🚀 ~ syncAppelAProjet ~ etablissementsToUpdate:", etablissementsToUpdate.length);
+  console.log("🚀 ~ syncAppelAProjet ~ etablissementsToCreate:", etablissementsToCreate.length);
+  console.log("🚀 ~ syncAppelAProjet ~ etablissementsErrors:", etablissementsErrors.length);
+  return appelAProjets;
 };
