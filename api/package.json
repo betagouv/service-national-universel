@@ -76,7 +76,6 @@
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
     "@jest/test-sequencer": "^29.7.0",
-    "@types/adm-zip": "^0.5.5",
     "@types/jest": "^29.5.12",
     "@types/pdfkit": "^0.13.4",
     "csv-parser": "^3.0.0",
