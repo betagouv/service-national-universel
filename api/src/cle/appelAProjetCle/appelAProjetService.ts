@@ -78,9 +78,3 @@ export const syncAppelAProjet = async () => {
     { name: "etablisementErrors", data: etablissementsErrors },
   ];
 };
-
-// TODO: update or remove when appelAProjet mapping is done
-function getUAIfromAAP(appelAProjet: any): string {
-  const field = appelAProjet.champs.find((champ: { label: string; stringValue: string }) => champ.label === "Etablissement, Ville (UAI)");
-  return field?.stringValue.split(" (")[1]?.replace(")", "");
-}

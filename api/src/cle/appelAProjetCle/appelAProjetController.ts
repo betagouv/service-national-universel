@@ -5,7 +5,7 @@ import { syncAppelAProjet } from "./appelAProjetService";
 import { ERRORS } from "../../utils";
 import { isSuperAdmin } from "snu-lib";
 import { capture } from "../../sentry";
-import { generateCSVStream } from "../../services/csvService";
+import { generateCSVStream } from "../../services/fileService";
 import archiver from "archiver";
 
 const router = express.Router();
