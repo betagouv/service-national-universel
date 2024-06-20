@@ -92,7 +92,7 @@ router.post(
 
 // Importe un plan de transport vérifié et enregistré dans importplandetransport.
 router.post("/:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  const tx = await startSession();
+  const mongoSession = await startSession();
   try {
     const { error, value } = Joi.object({
       importId: Joi.string().required(),
@@ -102,7 +102,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { importId } = value;
-    await tx.withTransaction(async () => {
+    await mongoSession.withTransaction(async () => {
       const importData = await ImportPlanTransportModel.findById(importId);
       if (!importData) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -159,14 +159,14 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"].split(",") : [],
         };
         const newBusLine = new LigneBusModel(busLineData);
-        const busLine = await newBusLine.save({ session: tx });
+        const busLine = await newBusLine.save({ session: mongoSession });
 
         // Mise à jour des lignes fusionnées existantes
         for (const mergedBusId of busLineData.mergedBusIds) {
           const oldMergeLine = await LigneBusModel.findOne({ busId: mergedBusId });
           if (oldMergeLine) {
             oldMergeLine.set({ mergedBusIds: busLineData.mergedBusIds });
-            await oldMergeLine.save({ session: tx });
+            await oldMergeLine.save({ session: mongoSession });
           }
         }
 
@@ -216,7 +216,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
         for (const lineToPoint of lineToPointWithCorrespondance) {
           const newLineToPoint = new LigneToPointModel(lineToPoint);
-          await newLineToPoint.save({ session: tx });
+          await newLineToPoint.save({ session: mongoSession });
         }
 
         // * Update slave PlanTransport
@@ -241,7 +241,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           const classe = await ClasseModel.findById(busLine.classeId);
           if (!classe) return res.status(404).send({ ok: false, code: `La classe (ID: ${busLine.classeId}) n'existe pas. Vérifiez les données.` });
           classe.set({ ligneId: busLine._id });
-          await classe.save();
+          await classe.save({ session: mongoSession });
         }
 
         await PlanTransportModel.create(
@@ -272,7 +272,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               classeId: busLine.classeId ? busLine.classeId : undefined,
             },
           ],
-          { session: tx },
+          { session: mongoSession },
         );
         // * End update slave PlanTransport
       }
@@ -284,7 +284,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   } finally {
-    await tx.endSession();
+    await mongoSession.endSession();
   }
 });
 
