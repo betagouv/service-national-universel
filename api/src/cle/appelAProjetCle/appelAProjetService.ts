@@ -5,6 +5,9 @@ import { IClasse } from "../../models/cle/classeType";
 import { CleEtablissementModel } from "../../models";
 import { apiEducation } from "../../services/gouv.fr/api-education";
 import { etablissementMapper } from "../etablissement/etablissementMapper";
+import { buildUniqueClasseId } from "../classe/classeService";
+import { ClasseDto } from "snu-lib/src/dto";
+import { IAppelAprojetClasse } from "./appelAProjetType";
 
 export const syncAppelAProjet = async () => {
   const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
@@ -14,7 +17,6 @@ export const syncAppelAProjet = async () => {
   const etablissementsToUpdate: IEtablissement[] = [];
   const etablissementsErrors: { error: string; uai?: string | null; email?: string | null }[] = [];
   const classesToCreate: IClasse[] = [];
-  const classesToUpdate: IClasse[] = [];
 
   const uais = [...new Set(appelAProjets.map((AAP) => AAP.etablissement?.uai).filter(Boolean))];
 
@@ -68,8 +70,9 @@ export const syncAppelAProjet = async () => {
       etablissementsToCreate.push(formattedEtablissement);
     }
     //---------------
-    // if classe exists, update it
+    // if classe exists do nothing
     // if not, create classe
+    const uniqueClasseId = buildUniqueClasseId(formattedEtablissement, appelAProjet.classe);
   }
 
   return [
@@ -77,4 +80,11 @@ export const syncAppelAProjet = async () => {
     { name: "etablissementsToUpdate", data: etablissementsToUpdate },
     { name: "etablissementsErrors", data: etablissementsErrors },
   ];
+};
+
+const mapClasseFromAppelAProjetToClasse = (classeFromAppelAProjet: IAppelAprojetClasse): Partial<ClasseDto> => {
+  return {
+    name: classeFromAppelAProjet.nom,
+    coloration: classeFromAppelAProjet.coloration,
+  };
 };

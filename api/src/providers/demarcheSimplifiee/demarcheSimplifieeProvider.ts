@@ -4,6 +4,7 @@ import config from "config";
 import { IAppelAprojetClasse, IAppelAProjetEtablissement, IAppelAProjetType } from "../../cle/appelAProjetCle/appelAProjetType";
 import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
 import { DemarcheSimplifieeDto, DossierState } from "./demarcheSimplifieeDto";
+import { CLE_COLORATION } from "snu-lib";
 
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
@@ -45,7 +46,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     etablissement.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4Mw==");
 
     classe.nom = champDescriptorValueMap.get("Q2hhbXAtNDA1NDIzMg==");
-    classe.coloration = champDescriptorValueMap.get("Q2hhbXAtNDA1NDI0Mw==");
+    classe.coloration = mapColorationFromAppelAProjetToColoration(champDescriptorValueMap.get("Q2hhbXAtNDA1NDI0Mw=="));
     classe.nombreElevesPrevus = champDescriptorValueMap.get("Q2hhbXAtNDA1NDEzNA==");
     classe.trimestre = champDescriptorValueMap.get("Q2hhbXAtNDA1NDQyMw==");
 
@@ -67,4 +68,20 @@ export const splitEtablissementCommuneUai = (champ: string) => {
 export const getUaiFromString = (value: string) => {
   var match = value.match(/\(([^)]+)\)/);
   return match ? match[1] : null;
+};
+
+const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: string | undefined): string | undefined => {
+  switch (colorationFromAppelAProjet) {
+    case "Environnement":
+      return CLE_COLORATION.ENVIRONMENT;
+    case "Défense et mémoire":
+      return CLE_COLORATION.DEFENSE;
+    case "Résilience et prévention des risques":
+      return CLE_COLORATION.RESILIENCE;
+    case "Sport et Jeux Olympiques et Paralympiques":
+      return CLE_COLORATION.SPORT;
+    default:
+      console.log("No matching coloration for : ", colorationFromAppelAProjet);
+      return undefined;
+  }
 };

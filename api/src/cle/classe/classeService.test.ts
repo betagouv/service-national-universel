@@ -1,4 +1,4 @@
-import { deleteClasse } from "./classeService";
+import { buildUniqueClasseId, deleteClasse } from "./classeService";
 const youngService = require("../../young/young.service");
 const classService = require("./classeService");
 
@@ -338,3 +338,29 @@ describe('canEditTotalSeats', () => {
   });
 });
 
+describe("buildUniqueClasseId", () => {
+    it("should return the correct unique classe ID", () => {
+        const etablissement = {
+            region: "Ile-de-France",
+            zip: "75001",
+            academy: "Paris",
+        };
+        const classe = {
+            name: "une classe",
+            coloration: "SPORT",
+        };
+        const expectedId = "ILEP075-1Y684M";
+        expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+    });
+
+    it("should handle missing inputs gracefully and return NO_UID", () => {
+        const etablissement = {
+            region: "Ile-de-France",
+            zip: "75001",
+            academy: "Paris",
+        };
+        const classe = {};
+        const expectedId = "ILEP075-NO_UID";
+        expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+    });
+});

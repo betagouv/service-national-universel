@@ -1,3 +1,5 @@
+import { CLE_COLORATION_LIST } from "snu-lib";
+
 export type IAppelAProjetType = {
   etablissement: IAppelAProjetEtablissement;
   classe: IAppelAprojetClasse;
@@ -17,7 +19,7 @@ export type IAppelAProjetEtablissement = {
 
 export type IAppelAprojetClasse = {
   nom?: string;
-  coloration?: string;
+  coloration?: (typeof CLE_COLORATION_LIST)[keyof typeof CLE_COLORATION_LIST];
   nombreElevesPrevus?: string;
   type?: string;
   trimestre?: string;
