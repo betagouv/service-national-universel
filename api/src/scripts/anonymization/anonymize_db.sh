@@ -25,6 +25,12 @@ then
     exit 1
 fi
 
+if [[ $(echo $dst_db_uri | grep production) ]]
+then
+    echo "The destination database URI contains the pattern 'production'. Aborting ..."
+    exit 1
+fi
+
 # requirements
 # mongoDB database tools
 if ! [[ -x "$(command -v mongodump)" ]]; then
