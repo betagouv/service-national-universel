@@ -30,7 +30,7 @@ then
     revision="latest_enabled"
 fi
 
-# git
+# base64
 if ! [[ -x "$(command -v base64)" ]]; then
   echo 'ERROR: base64 is not installed' >&2
   exit 1
@@ -77,5 +77,5 @@ curl -sX GET \
     -H "X-Auth-Token: $SCW_SECRET_KEY" \
     "https://api.scaleway.com/secret-manager/v1beta1/regions/$region/secrets-by-path/versions/$revision/access?project_id=$project_id&secret_name=$secret_name" \
 | jq -er '.data' \
-| base64 --decode \
+| base64 -d \
 | jq

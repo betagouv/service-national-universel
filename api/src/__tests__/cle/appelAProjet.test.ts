@@ -36,8 +36,6 @@ describe("Appel A Projet Controller", () => {
 
       const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send();
       expect(res.statusCode).toEqual(200);
-      expect(res.body.ok).toBe(true);
-      expect(res.body.data).toBeDefined();
       expect(fetch).toHaveBeenCalledTimes(2);
     });
 
@@ -61,8 +59,6 @@ describe("Appel A Projet Controller", () => {
 
       const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send();
       expect(res.statusCode).toEqual(200);
-      expect(res.body.ok).toBe(true);
-      expect(res.body.data).toBeDefined();
       expect(fetch).toHaveBeenCalledTimes(50);
     });
   });

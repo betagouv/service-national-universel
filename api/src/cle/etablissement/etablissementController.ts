@@ -1,3 +1,4 @@
+
 import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
@@ -74,6 +75,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {

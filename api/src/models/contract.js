@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "contract";
-const { generateBirthdate, generateNewPhoneNumber, starify } = require("../utils/anonymise");
+const anonymize = require("../anonymization/contract");
 
 const Schema = new mongoose.Schema({
   youngId: { type: String },
@@ -108,40 +108,7 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.tutorFirstName && (this.tutorFirstName = starify(this.tutorFirstName));
-  this.tutorLastName && (this.tutorLastName = starify(this.tutorLastName));
-  this.tutorEmail && (this.tutorEmail = "*******@*******.***");
-  this.youngFirstName && (this.youngFirstName = starify(this.youngFirstName));
-  this.youngLastName && (this.youngLastName = starify(this.youngLastName));
-  this.youngBirthdate && (this.youngBirthdate = generateBirthdate());
-  this.youngEmail && (this.youngEmail = "*******@*******.***");
-  this.youngPhone && (this.youngPhone = generateNewPhoneNumber());
-  this.youngAddress && (this.youngAddress = starify(this.youngAddress));
-  this.parent1FirstName && (this.parent1FirstName = starify(this.parent1FirstName));
-  this.parent1LastName && (this.parent1LastName = starify(this.parent1LastName));
-  this.parent1Email && (this.parent1Email = "*******@*******.***");
-  this.parent1Adress && (this.parent1Adress = starify(this.parent1Adress));
-  this.parent1Phone && (this.parent1Phone = generateNewPhoneNumber());
-  this.parent2FirstName && (this.parent2FirstName = starify(this.parent2FirstName));
-  this.parent2LastName && (this.parent2LastName = starify(this.parent2LastName));
-  this.parent2Email && (this.parent2Email = "*******@*******.***");
-  this.parent2Adress && (this.parent2Adress = starify(this.parent2Adress));
-  this.parent2Phone && (this.parent2Phone = generateNewPhoneNumber());
-  this.missionName && (this.missionName = starify(this.missionName));
-  this.missionAdress && (this.missionAdress = starify(this.missionAdress));
-  this.missionZip && (this.missionZip = starify(this.missionZip));
-  this.missionObjective && (this.missionObjective = starify(this.missionObjective));
-  this.missionAction && (this.missionAction = starify(this.missionAction));
-  this.missionFrequence && (this.missionFrequence = starify(this.missionFrequence));
-  this.missionDuration && (this.missionDuration = starify(this.missionDuration));
-  this.projectManagerFirstName && (this.projectManagerFirstName = starify(this.projectManagerFirstName));
-  this.projectManagerLastName && (this.projectManagerLastName = starify(this.projectManagerLastName));
-  this.projectManagerEmail && (this.projectManagerEmail = "*******@*******.***");
-  this.structureName && (this.structureName = starify(this.structureName));
-  this.structureManagerEmail && (this.structureManagerEmail = "*******@*******.***");
-  this.structureManagerFirstName && (this.structureManagerFirstName = starify(this.structureManagerFirstName));
-  this.structureManagerLastName && (this.structureManagerLastName = starify(this.structureManagerLastName));
-  return this;
+  return anonymize(this);
 };
 
 Schema.virtual("fromUser").set(function (fromUser) {

@@ -1,7 +1,13 @@
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/young.service";
 import ClasseModel from "../../models/cle/classe";
 import YoungModel from "../../models/young";
-import { YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS, ROLES, SUB_ROLES,LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib";
+
+type User = {
+  role: (typeof ROLES)[keyof typeof ROLES];
+  structureId?: string;
+  subRole?: string;
+};
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
@@ -44,3 +50,15 @@ export const deleteClasse = async (_id: string, fromUser: object) => {
 
   return classe;
 };
+
+export function canEditEstimatedSeats(user: User) {
+  if (user.role === ROLES.ADMIN) return true;
+  const now = new Date();
+  return user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement && now < LIMIT_DATE_ADMIN_CLE;
+}
+
+export function canEditTotalSeats(user: User) {
+  if (user.role === ROLES.ADMIN) return true;
+  const now = new Date();
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_REF_CLASSE;
+}
