@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { useDebounce } from "@uidotdev/usehooks";
-import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding, HiOutlineX } from "react-icons/hi";
+import { HiPlus, HiOutlinePencil, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { IoAdd } from "react-icons/io5";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
-import { MdOutlineContentCopy } from "react-icons/md";
 
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
@@ -15,75 +14,26 @@ import InstitutionIcon from "@/components/drawer/icons/Institution";
 import { useAddress, CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, translate, ERRORS } from "snu-lib";
 import api from "@/services/api";
 import { capture } from "@/sentry";
-import { copyToClipboard } from "@/utils";
 import Loader from "@/components/Loader";
 
-import Contract from "@/components/Contract";
+import Contact from "./components/Contact";
+import GeneralInfos from "./components/GeneralInfos";
 
 export default function View() {
   const user = useSelector((state) => state.Auth.user);
   const { id } = useParams();
-  const [edit, setEdit] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({});
   const [classeId, setClasseId] = useState("");
   const [etablissement, setEtablissement] = useState({});
   const [newCoordinator, setNewCoordinator] = useState({});
   const [contacts, setContacts] = useState([]);
   const [contactsToUpdate, setContactsToUpdate] = useState([]);
-  const [copied, setCopied] = useState([]);
-  const typeOptions = Object.keys(CLE_TYPE_LIST).map((value) => ({
-    value: CLE_TYPE_LIST[value],
-    label: CLE_TYPE_LIST[value],
-  }));
-  const sectorOptions = Object.keys(CLE_SECTOR_LIST).map((value) => ({
-    value: CLE_SECTOR_LIST[value],
-    label: CLE_SECTOR_LIST[value],
-  }));
   const [modalChef, setModalChef] = useState(false);
   const [modalClassReferent, setModalClassReferent] = useState(false);
   const [modalCoordinator, setModalCoordinator] = useState(false);
   const [modalAddCoordinator, setModalAddCoordinator] = useState(false);
-  const [modalChangeContacts, setModalChangeContacts] = useState(false);
-  const [query, setQuery] = useState("");
 
-  const debouncedQuery = useDebounce(query, 300);
-  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
   const history = useHistory();
   const firstLogin = localStorage.getItem("cle_referent_signup_first_time");
-
-  const sendInfo = async () => {
-    try {
-      setIsLoading(true);
-      setErrors({});
-      let errors = {};
-      if (!etablissement.address) errors.address = "Ce champ est obligatoire";
-      if (!etablissement.type || etablissement.type.length === 0) errors.type = "Ce champ est obligatoire";
-      if (!etablissement.sector || etablissement.sector.length === 0) errors.sector = "Ce champ est obligatoire";
-
-      if (Object.keys(errors).length > 0) {
-        setErrors(errors);
-        setIsLoading(false);
-        return;
-      }
-
-      const { ok, code, data: response } = await api.put(`/cle/etablissement/${etablissement._id}`, etablissement);
-
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la modification de l'établissement", translate(code));
-        return setIsLoading(false);
-      }
-      setEtablissement(response);
-      setEdit(!edit);
-      setIsLoading(false);
-      setErrors({});
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification de l'établissement");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const getEtablissement = async () => {
     try {
@@ -141,11 +91,6 @@ export default function View() {
     }
   };
 
-  const cancel = () => {
-    setEdit(!edit);
-    setErrors({});
-  };
-
   const sendInvitation = async () => {
     try {
       setErrors({});
@@ -183,62 +128,9 @@ export default function View() {
     }
   };
 
-  const fetchReferentsEtablissement = async (search) => {
-    const q = {
-      filters: {
-        cohorts: [],
-        department: [],
-        region: [],
-        role: [ROLES.ADMINISTRATEUR_CLE],
-        subRole: [SUB_ROLES.referent_etablissement],
-      },
-      sort: {
-        field: "lastName.keyword",
-        order: "asc",
-      },
-      page: 0,
-      size: 10,
-    };
-    if (search) q.filters.searchbar = [search];
-    const { responses } = await api.post(`/elasticsearch/referent/search`, q);
-    return responses[0].hits.hits.map((hit) => ({
-      value: hit._id,
-      label: `${hit._source.firstName} ${hit._source.lastName}`,
-      referent: { ...hit._source, _id: hit._id },
-    }));
-  };
-
-  const saveContacts = async () => {
-    try {
-      setIsLoading(true);
-      setErrors({});
-      let errors = {};
-      if (!contactsToUpdate.length) errors.contacts = "Veuillez renseigner au moins un contact";
-
-      if (Object.keys(errors).length > 0) {
-        setErrors(errors);
-        setIsLoading(false);
-        return;
-      }
-
-      const { ok, code } = await api.put(`/cle/etablissement/${etablissement._id}/referents`, { referentEtablissementIds: contactsToUpdate.map((c) => c._id) });
-      if (!ok) throw new Error(translate(code));
-
-      await getEtablissement();
-      setModalChangeContacts(false);
-      setIsLoading(false);
-      setErrors({});
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification des contacts de l'établissement");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     getEtablissement();
-  }, [edit]);
+  }, []);
 
   useEffect(() => {
     if (firstLogin) {
@@ -253,17 +145,6 @@ export default function View() {
       }
     }
   }, [user]);
-
-  const actionList = edit
-    ? [
-        <div key="actions-list" className="flex items-center justify-end ml-6">
-          <Button key="cancel" type="cancel" title="Annuler" onClick={cancel} disabled={isLoading} />
-          <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
-        </div>,
-      ]
-    : (user.subRole === SUB_ROLES.referent_etablissement || [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) && [
-        <Button key="change" type="modify" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />,
-      ];
 
   if (!etablissement) return <Loader />;
 
@@ -292,130 +173,16 @@ export default function View() {
           ),
         ]}
       />
-      {/* <Container
-        title="Contacts"
-        actions={[
-          [ROLES.ADMIN].includes(user.role) && (
-            <Button
-              key="update-contacts"
-              type="modify"
-              leftIcon={<HiOutlinePencil size={16} />}
-              title="Modifier"
-              onClick={() => {
-                setContactsToUpdate([...contacts.filter((c) => c.subRole === SUB_ROLES.referent_etablissement)]);
-                setModalChangeContacts(true);
-              }}
-            />
-          ),
-          [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
-            <Link key="list-users" to="/user">
-              <Button type="tertiary" title="Voir mes contacts" />
-            </Link>
-          ),
-        ]}>
-        <div className="flex items-stretch justify-between overflow-y-auto">
-          {contacts.map((contact, index) => (
-            <div key={contact.email} className="flex-1 shrink-0 flex items-stretch justify-between">
-              <div>
-                <Link to={"/user/" + contact._id} className="text-base font-bold text-ds-gray-900 hover:underline hover:text-ds-gray-900">
-                  {contact.firstName} {contact.lastName}
-                </Link>
-                <div className="mb-4 text-ds-gray-500">{translate(contact.subRole)}</div>
-                <div className="flex items-center justify-start mb-2">
-                  <HiOutlinePhone size={20} className="mr-2" />
-                  {contact.phone}
-                </div>
-                <div className="flex items-center justify-start max-w-[290px]">
-                  <div>
-                    <HiOutlineMail size={20} className="mr-2" />
-                  </div>
-                  <p className="truncate">{contact.email}</p>
-                  <div
-                    className="flex items-center justify-center"
-                    onClick={() => {
-                      copyToClipboard(contact.email);
-                      const newCopied = [...copied];
-                      newCopied[index] = true;
-                      setCopied(newCopied);
-                      setTimeout(() => {
-                        setCopied([]);
-                      }, 2000);
-                    }}>
-                    {copied[index] ? <HiCheckCircle className="text-green-500 ml-2" /> : <MdOutlineContentCopy size={20} className="ml-2 text-gray-400 cursor-pointer" />}
-                  </div>
-                </div>
-              </div>
-              {index < contacts.length - 1 && <div className="mx-12 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>}
-            </div>
-          ))}
-        </div>
-      </Container> */}
-      <Container title="Informations générales" actions={actionList}>
-        <div className="flex items-stretch justify-between">
-          <div className="flex-1 shrink-0">
-            <Label title="Nom de l’établissement" />
-            <InputText className="mb-4" value={etablissement.name} disabled />
-            <Label title="Adresse postale" />
-            <AddressForm
-              readOnly={!edit}
-              data={{ address: etablissement.address, zip: etablissement.zip, city: etablissement.city, department: etablissement.department, region: etablissement.region }}
-              updateData={(address) => setEtablissement({ ...etablissement, ...address })}
-              query={query}
-              setQuery={setQuery}
-              options={results}
-            />
-            <div className="flex gap-4 mt-3">
-              <Input label="Département" value={etablissement.department} disabled className="w-full" />
-              <Input label="Région" value={etablissement.region} disabled className="w-full" />
-            </div>
-          </div>
-          <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
-          <div className="flex-1 shrink-0">
-            <Label title="UAI" />
-            <InputText className="mb-4" value={etablissement.uai} disabled />
-            <Label title="Académie" />
-            <InputText className="mb-4" value={etablissement.academy} disabled />
-            <Label title="Type d’établissement" />
-            <Select
-              className="mb-4"
-              readOnly={!edit}
-              isActive={edit}
-              placeholder={"À modifier"}
-              options={typeOptions}
-              closeMenuOnSelect={true}
-              value={etablissement.type?.map((type1) => ({ value: type1, label: typeOptions.find((type2) => type2.value === type1)?.label }))}
-              onChange={(options) => {
-                setEtablissement({ ...etablissement, type: [options.value] });
-              }}
-              error={errors.type}
-            />
-            <Label title="Statut" />
-            <Select
-              className="mb-4"
-              readOnly={!edit}
-              isActive={edit}
-              placeholder={"À modifier"}
-              options={sectorOptions}
-              closeMenuOnSelect={true}
-              value={etablissement.sector?.map((sector1) => ({ value: sector1, label: sectorOptions.find((sector2) => sector2.value === sector1)?.label }))}
-              onChange={(options) => {
-                setEtablissement({ ...etablissement, sector: [options.value] });
-              }}
-              error={errors.sector}
-            />
-            {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-              <div className="flex items-center gap-4">
-                <Link key="list-eta" to={`/classes?etablissementId=${id}`} className="w-full">
-                  <Button title="Voir les classes" className="w-full" type="tertiary" />
-                </Link>
-                <Link key="list-young" to={`/inscription?etablissementId=${id}`} className="w-full">
-                  <Button title="Voir les élèves" className="w-full" type="tertiary" />
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </Container>
+      <Contact
+        contacts={contacts}
+        user={user}
+        onContactsUpdate={setContactsToUpdate}
+        contactsToUpdate={contactsToUpdate}
+        etablissementId={etablissement?._id}
+        getEtablissement={getEtablissement}
+      />
+
+      <GeneralInfos etablissement={etablissement} onUpdateEtab={setEtablissement} user={user} />
 
       {/* First login ADMINISTRATEUR_CLE referent-etablissement */}
       <ModalConfirmation
@@ -513,53 +280,6 @@ export default function View() {
         actions={[
           { title: "Annuler", isCancel: true },
           { title: "Valider", onClick: () => sendInvitation() },
-        ]}
-      />
-      {/* ADMIN - Change contacts */}
-      <ModalConfirmation
-        isOpen={modalChangeContacts}
-        onClose={() => {
-          setModalChangeContacts(false);
-          setErrors({});
-        }}
-        className="md:max-w-[700px]"
-        icon={<ProfilePic />}
-        title="Modifier les référents de l’établissement"
-        text={
-          <div className="mt-6 w-[636px] text-left text-ds-gray-900">
-            {errors.contacts && <div className="text-red-500 mb-2">{errors.contacts}</div>}
-            {contactsToUpdate.map((contact) => (
-              <div key={contact._id.toString()} className="flex items-center justify-between my-3">
-                <div>
-                  <div className="font-bold">
-                    {contact.firstName} {contact.lastName}
-                  </div>
-                  <p>{translate(contact.subRole)}</p>
-                </div>
-                <ProfilePic
-                  size={40}
-                  className="cursor-pointer"
-                  icon={({ size, className }) => <HiOutlineX size={size} className={className} />}
-                  onClick={() => setContactsToUpdate(contactsToUpdate.filter((c) => c._id !== contact._id))}
-                />
-              </div>
-            ))}
-            <Select
-              isAsync
-              className="my-6"
-              placeholder="Ajouter un référent"
-              loadOptions={fetchReferentsEtablissement}
-              isClearable={true}
-              noOptionsMessage={"Aucun référent d'établissement ne correspond à cette recherche"}
-              onChange={({ referent }) => {
-                if (!contactsToUpdate.some((c) => c._id === referent._id)) setContactsToUpdate([...contactsToUpdate, referent]);
-              }}
-            />
-          </div>
-        }
-        actions={[
-          { title: "Annuler", isCancel: true },
-          { title: "Valider", disabled: contactsToUpdate.length === 0, loading: isLoading, onClick: () => saveContacts() },
         ]}
       />
     </Page>

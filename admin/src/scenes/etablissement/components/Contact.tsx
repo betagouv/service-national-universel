@@ -1,36 +1,37 @@
-import React, { useEffect, useState } from "react";
-import { HiOutlinePencil, HiOutlinePhone, HiOutlineMail, HiCheckCircle } from "react-icons/hi";
+import React, { useState } from "react";
+import { HiOutlinePhone, HiOutlineMail, HiCheckCircle } from "react-icons/hi";
 import { MdOutlineContentCopy } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 import { Button, Container } from "@snu/ds/admin";
-import { translate, ROLES, SUB_ROLES } from "snu-lib";
+import { translate, ROLES } from "snu-lib";
 import { copyToClipboard } from "@/utils";
+import { User } from "@/types";
+
+import ButtonModalContact from "./ButtonModalContact";
 
 interface Props {
   contacts: any[];
-  copied: boolean[];
-  user: any;
-  setContactsToUpdate: (contacts: any[]) => void;
-  setModalChangeContacts: (value: boolean) => void;
-  setCopied: (copied: boolean[]) => void;
+  user: User;
+  onContactsUpdate: (contacts: any[]) => void;
+  contactsToUpdate: any[];
+  etablissementId: string;
+  getEtablissement: () => void;
 }
 
-export default function Contact({ contacts, copied, user, setContactsToUpdate, setModalChangeContacts, setCopied }: Props) {
+export default function Contact({ contacts, user, onContactsUpdate, contactsToUpdate, etablissementId, getEtablissement }: Props) {
+  const [copied, setCopied] = useState<boolean[]>([]);
   return (
     <Container
       title="Contacts"
       actions={[
         [ROLES.ADMIN].includes(user.role) && (
-          <Button
-            key="update-contacts"
-            type="modify"
-            leftIcon={<HiOutlinePencil size={16} />}
-            title="Modifier"
-            onClick={() => {
-              setContactsToUpdate([...contacts.filter((c) => c.subRole === SUB_ROLES.referent_etablissement)]);
-              setModalChangeContacts(true);
-            }}
+          <ButtonModalContact
+            contacts={contacts}
+            contactsToUpdate={contactsToUpdate}
+            onContactsUpdate={onContactsUpdate}
+            etablissementId={etablissementId}
+            getEtablissement={getEtablissement}
           />
         ),
         [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (

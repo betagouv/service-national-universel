@@ -127,7 +127,7 @@ router.put("/:id/referents", passport.authenticate("referent", { session: false,
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      referentEtablissementIds: Joi.array().items(Joi.string()).required(),
+      referentEtablissementIds: Joi.array().items(Joi.string()).max(3).required(),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
