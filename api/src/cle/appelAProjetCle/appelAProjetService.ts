@@ -51,7 +51,7 @@ export class AppelAProjetService {
   };
 
   async processReferentEtablissement(appelAProjet: IAppelAProjet, save: boolean) {
-    const referentEtablissement = await ReferentModel.exists({ email: appelAProjet.referentEtablissement.email });
+    const referentEtablissement = await ReferentModel.findOne({ email: appelAProjet.referentEtablissement.email });
     let referentEtablissementId = referentEtablissement.id;
     if (referentEtablissement) {
       this.referentsAlreadyExisting.push(referentEtablissement);
@@ -106,7 +106,7 @@ export class AppelAProjetService {
     const formattedEtablissement = etablissementMapper(etablissementFromAnnuaire, [referentEtablissementId]);
 
     // TODO: handle schoolYears array
-    const foundEtablissement = await CleEtablissementModel.exists({ uai });
+    const foundEtablissement = await CleEtablissementModel.findOne({ uai });
     let savedEtablissement = foundEtablissement;
     if (foundEtablissement) {
       this.etablissementsToUpdate.push(formattedEtablissement);
@@ -123,7 +123,7 @@ export class AppelAProjetService {
   }
 
   async processReferentClasse(appelAProjet: IAppelAProjet, referentEtablissementId, save: boolean) {
-    const referentClasse = await ReferentModel.exists({ email: appelAProjet.referentClasse.email });
+    const referentClasse = await ReferentModel.findOne({ email: appelAProjet.referentClasse.email });
     let referentClasseId = referentEtablissementId;
     if (referentClasse) {
       this.referentsAlreadyExisting.push(referentClasse);
@@ -178,15 +178,15 @@ export class AppelAProjetService {
     };
   };
 
-  saveData = async (referentEtablissementEmail: string, etablissement: IEtablissement, referent: IReferent, classe: Partial<IClasse>) => {
-    const createdReferentEtablissement = await ReferentModel.save({ email: referentEtablissementEmail, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
-    const savedEtablissement = await CleEtablissementModel.save(etablissement);
-    const createdReferent = await ReferentModel.save(referent);
-    const classeToCreate: Partial<IClasse> = {
-      ...classe,
-      etablissementId: savedEtablissement._id,
-      referentClasseIds: [createdReferent._id],
-    };
-    await CleEtablissementModel.save(classeToCreate);
-  };
+  // saveData = async (referentEtablissementEmail: string, etablissement: IEtablissement, referent: IReferent, classe: Partial<IClasse>) => {
+  //   const createdReferentEtablissement = await ReferentModel.save({ email: referentEtablissementEmail, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
+  //   const savedEtablissement = await CleEtablissementModel.save(etablissement);
+  //   const createdReferent = await ReferentModel.save(referent);
+  //   const classeToCreate: Partial<IClasse> = {
+  //     ...classe,
+  //     etablissementId: savedEtablissement._id,
+  //     referentClasseIds: [createdReferent._id],
+  //   };
+  //   await CleEtablissementModel.save(classeToCreate);
+  // };
 }
