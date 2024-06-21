@@ -14,16 +14,22 @@ describe("demarcheSimplifieeProvider", () => {
   it("should return the right data", () => {
     const mockAppelAProjetDto = getMockAppelAProjetDto();
     const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto);
+    console.log(result);
 
     const expectedAppelAProjet = [
       {
-        etablissement: { uai: "SOME_UAI", email: "mail@etablissement.fr" },
+        etablissement: { uai: "SOME_UAI" },
+        referentEtablissement: { email: "mail@etablissement.fr" },
         classe: {
-          referent: { nom: "NOM_REFERENT", prenom: "PRENOM_REFERENT", email: "email@referent.fr" },
-          nom: "SNU 2024 2025",
-          nombreElevesPrevus: "42",
+          name: "SNU 2024 2025",
           coloration: "RESILIENCE",
-          trimestre: "Au 3ème trimestre (séjour réalisé en avril, mai ou juin 2025).",
+          estimatedSeats: 42,
+          trimester: "Au 3ème trimestre (séjour réalisé en avril, mai ou juin 2025).",
+        },
+        referentClasse: {
+          lastName: "NOM_REFERENT",
+          firstName: "PRENOM_REFERENT",
+          email: "email@referent.fr",
         },
       },
     ];
