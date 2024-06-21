@@ -17,7 +17,7 @@ export const syncAppelAProjet = async () => {
   const etablissementsToUpdate: IEtablissement[] = [];
   const etablissementsErrors: { error: string; uai?: string | null; email?: string | null }[] = [];
   const classesToCreate: Partial<IClasse>[] = [];
-  const classesToLog: Record<string, string | undefined>[] = [];
+  const classesAlreadyExisting: Record<string, string | undefined>[] = [];
 
   const uais = [...new Set(appelAProjets.map((AAP) => AAP.etablissement?.uai).filter(Boolean))];
 
@@ -77,9 +77,10 @@ export const syncAppelAProjet = async () => {
       name: appelAProjet.classe.nom || "",
       coloration: appelAProjet.classe.coloration,
     });
-    const classeFound = findClasseByUniqueKeyAndUniqueId(appelAProjet.etablissement?.uai, uniqueClasseId);
+    const classeFound = await findClasseByUniqueKeyAndUniqueId(appelAProjet.etablissement?.uai, uniqueClasseId);
+    console.log(classeFound);
     if (classeFound) {
-      classesToLog.push({
+      classesAlreadyExisting.push({
         "nom de la classe": classeFound?.name,
         "cle de la classe": classeFound?.uniqueKey,
         "id de la classe": classeFound?.uniqueId,
@@ -97,6 +98,8 @@ export const syncAppelAProjet = async () => {
     { name: "etablissementsToCreate", data: etablissementsToCreate },
     { name: "etablissementsToUpdate", data: etablissementsToUpdate },
     { name: "etablissementsErrors", data: etablissementsErrors },
+    { name: "classesAlreadyExisting", data: classesAlreadyExisting },
+    { name: "classesToCreate", data: classesToCreate },
   ];
 };
 

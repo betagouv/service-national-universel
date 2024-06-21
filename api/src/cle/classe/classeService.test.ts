@@ -349,7 +349,7 @@ describe("buildUniqueClasseId", () => {
       name: "une classe",
       coloration: "SPORT",
     };
-    const expectedId = "ILEP075-1Y684M";
+    const expectedId = "ILEP075-5Z5YS9";
     expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
   });
 

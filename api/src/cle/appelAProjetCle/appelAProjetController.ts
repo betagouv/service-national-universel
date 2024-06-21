@@ -30,9 +30,10 @@ router.post(
         const stream = generateCSVStream(data);
         archive.append(stream, { name: `${name}.csv` });
       }
-
+      const fileName = `appelAProjet-simulate-${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}.zip`;
+      console.log(fileName);
       res.setHeader("Content-Type", "application/zip");
-      res.setHeader("Content-Disposition", `attachment; filename=appelAProjet-simulate-${new Date().toISOString()}.zip`);
+      res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
       archive.finalize();
     } catch (e) {
       capture(e);

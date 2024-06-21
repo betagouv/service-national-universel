@@ -12,6 +12,7 @@ type User = {
 import { ClasseDto } from "snu-lib/src/dto";
 import { IEtablissement } from "../../models/cle/etablissementType";
 import { ClasseDocument, IClasse } from "../../models/cle/classeType";
+import { CleClasseModel } from "../../models";
 const crypto = require("crypto");
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
@@ -97,6 +98,6 @@ export const buildUniqueClasseId = (etablissement: Partial<IEtablissement>, clas
   return `${trigrammeRegion}${academy}${departmentNumber}-${subHash}`;
 };
 
-export const findClasseByUniqueKeyAndUniqueId = (uniqueKey: string | undefined | null, uniqueId: string): ClasseDocument | null => {
-  return ClasseModel.find({ uniqueKey, uniqueId });
+export const findClasseByUniqueKeyAndUniqueId = async (uniqueKey: string | undefined | null, uniqueId: string): Promise<ClasseDocument | null> => {
+  return await CleClasseModel.exists({ uniqueKey, uniqueId });
 };
