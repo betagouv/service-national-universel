@@ -5,7 +5,7 @@ import { IClasse } from "../../models/cle/classeType";
 import { CleEtablissementModel } from "../../models";
 import { apiEducation } from "../../services/gouv.fr/api-education";
 import { etablissementMapper } from "../etablissement/etablissementMapper";
-import { buildUniqueClasseId } from "../classe/classeService";
+import { buildUniqueClasseId, createClasse, findClasseByUniqueKeyAndUniqueId } from "../classe/classeService";
 import { ClasseDto } from "snu-lib/src/dto";
 import { IAppelAprojetClasse } from "./appelAProjetType";
 
@@ -16,7 +16,8 @@ export const syncAppelAProjet = async () => {
   const etablissementsToCreate: IEtablissement[] = [];
   const etablissementsToUpdate: IEtablissement[] = [];
   const etablissementsErrors: { error: string; uai?: string | null; email?: string | null }[] = [];
-  const classesToCreate: IClasse[] = [];
+  const classesToCreate: Partial<IClasse>[] = [];
+  const classesToLog: Record<string, string | undefined>[] = [];
 
   const uais = [...new Set(appelAProjets.map((AAP) => AAP.etablissement?.uai).filter(Boolean))];
 
@@ -72,7 +73,24 @@ export const syncAppelAProjet = async () => {
     //---------------
     // if classe exists do nothing
     // if not, create classe
-    const uniqueClasseId = buildUniqueClasseId(formattedEtablissement, mapClasseFromAppelAProjetToClasse(appelAProjet.classe));
+    const uniqueClasseId = buildUniqueClasseId(formattedEtablissement, {
+      name: appelAProjet.classe.nom || "",
+      coloration: appelAProjet.classe.coloration,
+    });
+    const classeFound = findClasseByUniqueKeyAndUniqueId(appelAProjet.etablissement?.uai, uniqueClasseId);
+    if (classeFound) {
+      classesToLog.push({
+        "nom de la classe": classeFound?.name,
+        "cle de la classe": classeFound?.uniqueKey,
+        "id de la classe": classeFound?.uniqueId,
+        "id technique de la classe existante": classeFound?._id,
+        "raison ": "classe existe",
+      });
+    } else {
+      const formattedClasse = mapAppelAProjetToClasse(appelAProjet.classe, formattedEtablissement, uniqueClasseId);
+      // const createdClasse = createClasse(formattedClasse);
+      classesToCreate.push(formattedClasse);
+    }
   }
 
   return [
@@ -82,9 +100,11 @@ export const syncAppelAProjet = async () => {
   ];
 };
 
-const mapClasseFromAppelAProjetToClasse = (classeFromAppelAProjet: IAppelAprojetClasse): Partial<ClasseDto> => {
+const mapAppelAProjetToClasse = (classeFromAppelAProjet: IAppelAprojetClasse, etablissement: IEtablissement, uniqueClasseId: string): Partial<IClasse> => {
   return {
     name: classeFromAppelAProjet.nom,
     coloration: classeFromAppelAProjet.coloration,
+    uniqueId: uniqueClasseId,
+    uniqueKey: etablissement.uai,
   };
 };

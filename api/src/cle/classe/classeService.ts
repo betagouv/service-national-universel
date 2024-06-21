@@ -11,6 +11,7 @@ type User = {
 
 import { ClasseDto } from "snu-lib/src/dto";
 import { IEtablissement } from "../../models/cle/etablissementType";
+import { ClasseDocument, IClasse } from "../../models/cle/classeType";
 const crypto = require("crypto");
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
@@ -67,31 +68,35 @@ export function canEditTotalSeats(user: User) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_REF_CLASSE;
 }
 
-export const createClasse = async (etablissement: Partial<IEtablissement>, classe: Partial<ClasseDto>) => {
+export const createClasse = async (classe: Partial<IClasse>) => {
   return await ClasseModel.create({
     name: classe.name,
     coloration: classe.coloration,
     status: STATUS_CLASSE.CREATED,
     statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
-    uniqueId: buildUniqueClasseId(etablissement, classe),
-    uniqueKey: etablissement.uai,
+    uniqueId: classe.uniqueId,
+    uniqueKey: classe.uniqueKey,
     // cohort: defaultCleCohort.name,
     // uniqueKeyAndId: value.uniqueKey + "_" + value.uniqueId,
     // referentClasseIds: [referent._id],
   });
 };
 
-export const buildUniqueClasseId = (etablissement: Partial<IEtablissement>, classe: Partial<ClasseDto>): string => {
+export const buildUniqueClasseId = (etablissement: Partial<IEtablissement>, classe: Pick<IClasse, "name" | "coloration">): string => {
   const trigrammeRegion = (etablissement.region || "REG")?.substring(0, 3)?.toUpperCase();
   const departmentNumber = `0${(etablissement.zip || "DP")?.substring(0, 2)}`;
   const academy = (etablissement.academy || "A")?.substring(0, 1);
   let hash = crypto
     .createHash("sha256")
-    .update(`${classe?.name}${classe?.coloration}${classe}` || "NAME")
+    .update(`${classe?.name}${classe?.coloration}` || "NAME")
     .digest("base64");
   if (!classe?.name || !classe?.coloration) {
     hash = "NO_UID";
   }
   const subHash = hash?.toString()?.substring(0, 6)?.toUpperCase();
   return `${trigrammeRegion}${academy}${departmentNumber}-${subHash}`;
+};
+
+export const findClasseByUniqueKeyAndUniqueId = (uniqueKey: string | undefined | null, uniqueId: string): ClasseDocument | null => {
+  return ClasseModel.find({ uniqueKey, uniqueId });
 };

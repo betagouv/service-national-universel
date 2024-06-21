@@ -359,7 +359,7 @@ describe("buildUniqueClasseId", () => {
       zip: "75001",
       academy: "Paris",
     };
-    const classe = {};
+    const classe = { name: "", coloration: undefined };
     const expectedId = "ILEP075-NO_UID";
     expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
   });
