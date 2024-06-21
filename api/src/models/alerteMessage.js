@@ -23,6 +23,14 @@ const Schema = new mongoose.Schema({
       description: "Destinateire(s) du message",
     },
   },
+  title: {
+    type: String,
+    maxLength: 100,
+    required: true,
+    documentation: {
+      description: "Titre du message",
+    },
+  },
   content: {
     type: String,
     maxLength: 1000,
