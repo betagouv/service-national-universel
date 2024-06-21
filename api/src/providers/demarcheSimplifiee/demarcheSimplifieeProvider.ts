@@ -1,19 +1,19 @@
 import fetch from "node-fetch";
 import config from "config";
 
-import { IAppelAprojetClasse, IAppelAProjetEtablissement, IAppelAProjetType } from "../../cle/appelAProjetCle/appelAProjetType";
+import { IAppelAProjet } from "../../cle/appelAProjetCle/appelAProjetType";
 import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
 import { DemarcheSimplifieeDto, DossierState } from "./demarcheSimplifieeDto";
 import { CLE_COLORATION } from "snu-lib";
 
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
-export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IAppelAProjetType[]> => {
+export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IAppelAProjet[]> => {
   let cursor = "";
   let numberOfCalls = 0;
   let hasNextPage = true;
   let appelAProjetDemarcheSimplifieeDto: DemarcheSimplifieeDto = {} as DemarcheSimplifieeDto;
-  let appelsAProjet: IAppelAProjetType[] = [];
+  let appelsAProjet: IAppelAProjet[] = [];
   while (hasNextPage && numberOfCalls < 50) {
     console.time("Demarche_Simplifiee_call_" + numberOfCalls);
     console.log("Current Demarche_Simplifiee_Current_Cursor: ", cursor);
@@ -35,28 +35,32 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IA
   return appelsAProjet;
 };
 
-export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: DemarcheSimplifieeDto): IAppelAProjetType[] => {
+export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: DemarcheSimplifieeDto): IAppelAProjet[] => {
   return appelAProjetDto.data.demarche.dossiers.nodes.map((formulaire) => {
-    const etablissement: IAppelAProjetEtablissement = {};
-    const classe: IAppelAprojetClasse = { referent: {} };
+    const etablissement: IAppelAProjet["etablissement"] = {} as IAppelAProjet["etablissement"];
+    const referentEtablissement: IAppelAProjet["referentEtablissement"] = {} as IAppelAProjet["referentEtablissement"];
+    const classe: IAppelAProjet["classe"] = {} as IAppelAProjet["classe"];
+    const referentClasse: IAppelAProjet["referentClasse"] = {} as IAppelAProjet["referentClasse"];
 
     const champDescriptorValueMap = new Map(formulaire.champs.map((champ) => [champ.champDescriptorId, champ.stringValue]));
 
-    etablissement.uai = getUaiFromString(champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw==") || "");
-    etablissement.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4Mw==");
+    etablissement.uai = getUaiFromString(champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw=="));
+    referentEtablissement.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4Mw==") || "";
 
-    classe.nom = champDescriptorValueMap.get("Q2hhbXAtNDA1NDIzMg==");
+    classe.name = champDescriptorValueMap.get("Q2hhbXAtNDA1NDIzMg==");
     classe.coloration = mapColorationFromAppelAProjetToColoration(champDescriptorValueMap.get("Q2hhbXAtNDA1NDI0Mw=="));
-    classe.nombreElevesPrevus = champDescriptorValueMap.get("Q2hhbXAtNDA1NDEzNA==");
-    classe.trimestre = champDescriptorValueMap.get("Q2hhbXAtNDA1NDQyMw==");
+    classe.estimatedSeats = parseInt(champDescriptorValueMap.get("Q2hhbXAtNDA1NDEzNA==") || "0");
+    classe.trimester = champDescriptorValueMap.get("Q2hhbXAtNDA1NDQyMw==");
 
-    classe.referent.nom = champDescriptorValueMap.get("Q2hhbXAtNDA1MTUxNg==");
-    classe.referent.prenom = champDescriptorValueMap.get("Q2hhbXAtNDA1MTUxNw==");
-    classe.referent.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjU4MA==");
+    referentClasse.lastName = champDescriptorValueMap.get("Q2hhbXAtNDA1MTUxNg==") || "";
+    referentClasse.firstName = champDescriptorValueMap.get("Q2hhbXAtNDA1MTUxNw==") || "";
+    referentClasse.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjU4MA==") || "";
 
     return {
       etablissement,
+      referentEtablissement,
       classe,
+      referentClasse,
     };
   });
 };
@@ -65,9 +69,10 @@ export const splitEtablissementCommuneUai = (champ: string) => {
   return champ.split(/, (?=[^(]*\))|, /);
 };
 
-export const getUaiFromString = (value: string) => {
+export const getUaiFromString = (value: string | undefined) => {
+  if (!value) return "";
   var match = value.match(/\(([^)]+)\)/);
-  return match ? match[1] : null;
+  return match ? match[1] : "";
 };
 
 const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: string | undefined): string | undefined => {

@@ -3,7 +3,7 @@ import { IReferent } from "../../models/referentType";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 import { SUB_ROLES } from "snu-lib";
 
-export function etablissementMapper(etablissement: EtablissementProviderDto, referents: IReferent[]): IEtablissement {
+export function etablissementMapper(etablissement: EtablissementProviderDto, referents: Partial<IReferent>[]): IEtablissement {
   return {
     uai: etablissement.identifiant_de_l_etablissement,
     name: etablissement.nom_etablissement,

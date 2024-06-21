@@ -1,7 +1,6 @@
-// https://data.education.gouv.fr/api/explore/v2.1/console
-
 import { capture } from "../../sentry";
-import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
+import { EtablissementProviderDto } from "./etablissementType";
+import fetch from "node-fetch";
 
 const baseUrl = "https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-annuaire-education/exports/json";
 
