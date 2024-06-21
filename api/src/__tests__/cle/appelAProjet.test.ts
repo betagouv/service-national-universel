@@ -4,7 +4,7 @@ import getAppHelper from "../helpers/app";
 import { ROLES } from "snu-lib";
 import { getMockAppelAProjetDto } from "../fixtures/cle/appelAProjet";
 import * as apiEducationModule from "../../services/gouv.fr/api-education";
-import passport = require("passport");
+import passport from "passport";
 import { dbConnect, dbClose } from "../helpers/db";
 
 beforeAll(dbConnect);

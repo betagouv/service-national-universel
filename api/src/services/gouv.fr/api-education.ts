@@ -11,7 +11,6 @@ export const apiEducation = async ({ filters, page, size }, options = { headers:
     const res = await fetch(new URL(baseUrl + "?" + params), {
       ...options,
       headers: { "Content-Type": "application/json", ...options.headers },
-      mode: "cors",
       method: "GET",
     });
 

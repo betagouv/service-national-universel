@@ -1,7 +1,7 @@
 import passport from "passport";
 import express, { Response } from "express";
 import { UserRequest } from "../../controllers/request";
-import { syncAppelAProjet } from "./appelAProjetService";
+import { AppelAProjetService } from "./appelAProjetService";
 import { ERRORS } from "../../utils";
 import { isSuperAdmin } from "snu-lib";
 import { capture } from "../../sentry";
@@ -21,7 +21,7 @@ router.post(
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     try {
-      const results: { name: string; data: any[] }[] = await syncAppelAProjet();
+      const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync();
 
       const archive = archiver("zip", { zlib: { level: 9 } });
       archive.pipe(res);
