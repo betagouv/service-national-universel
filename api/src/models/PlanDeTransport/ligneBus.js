@@ -3,8 +3,9 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
 const { getCohortNames } = require("snu-lib");
+const anonymize = require("../../anonymization/PlanDeTransport/ligneBus");
+
 const MODELNAME = "lignebus";
-const { generateRandomName, generateBirthdate, generateRandomEmail, generateNewPhoneNumber } = require("../../utils/anonymise");
 
 const BusTeam = new mongoose.Schema({
   role: {
@@ -236,16 +237,7 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.team &&
-    (this.team = this.team.map((t) => {
-      t.lastName && (t.lastName = generateRandomName());
-      t.firstName && (t.firstName = generateRandomName());
-      t.birthdate && (t.birthdate = generateBirthdate());
-      t.mail && (t.mail = generateRandomEmail());
-      t.phone && (t.phone = generateNewPhoneNumber());
-      return t;
-    }));
-  return this;
+  return anonymize(this);
 };
 
 Schema.virtual("user").set(function (user) {

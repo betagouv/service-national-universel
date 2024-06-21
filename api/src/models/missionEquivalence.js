@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "missionequivalence";
 const { UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
-const { generateRandomName, generateRandomEmail, generateAddress, starify } = require("../utils/anonymise");
+const anonymize = require("../anonymization/missionEquivalence");
 
 const Schema = new mongoose.Schema({
   youngId: {
@@ -117,13 +117,7 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.message && (this.message = starify(this.message));
-  this.address && (this.address = generateAddress());
-  this.contactEmail && (this.contactEmail = generateRandomEmail());
-  this.contactFullName && (this.contactFullName = generateRandomName() + generateRandomName());
-  this.structureName && (this.structureName = generateRandomName());
-  this.files && (this.files = []);
-  return this;
+  return anonymize(this);
 };
 
 Schema.virtual("fromUser").set(function (fromUser) {
