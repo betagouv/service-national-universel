@@ -9,31 +9,22 @@ import { copyToClipboard } from "@/utils";
 import { User } from "@/types";
 
 import ButtonModalContact from "./ButtonModalContact";
+import { ContactType } from "./types";
 
 interface Props {
-  contacts: any[];
+  contacts: ContactType[];
   user: User;
-  onContactsUpdate: (contacts: any[]) => void;
-  contactsToUpdate: any[];
   etablissementId: string;
   getEtablissement: () => void;
 }
 
-export default function Contact({ contacts, user, onContactsUpdate, contactsToUpdate, etablissementId, getEtablissement }: Props) {
+export default function Contact({ contacts, user, etablissementId, getEtablissement }: Props) {
   const [copied, setCopied] = useState<boolean[]>([]);
   return (
     <Container
       title="Contacts"
       actions={[
-        [ROLES.ADMIN].includes(user.role) && (
-          <ButtonModalContact
-            contacts={contacts}
-            contactsToUpdate={contactsToUpdate}
-            onContactsUpdate={onContactsUpdate}
-            etablissementId={etablissementId}
-            getEtablissement={getEtablissement}
-          />
-        ),
+        [ROLES.ADMIN].includes(user.role) && <ButtonModalContact contacts={contacts} etablissementId={etablissementId} getEtablissement={getEtablissement} />,
         [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
           <Link key="list-users" to="/user">
             <Button type="tertiary" title="Voir mes contacts" />

@@ -8,18 +8,19 @@ import { ROLES, SUB_ROLES, translate } from "snu-lib";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 
+import { ContactType } from "./types";
+
 interface Props {
-  contacts: any[];
-  contactsToUpdate: any[];
-  onContactsUpdate: (contacts: any[]) => void;
+  contacts: ContactType[];
   etablissementId: string;
   getEtablissement: () => void;
 }
 
-export default function ButtonModalContact({ contacts, contactsToUpdate, onContactsUpdate, etablissementId, getEtablissement }: Props) {
+export default function ButtonModalContact({ contacts, etablissementId, getEtablissement }: Props) {
   const [modalChangeContacts, setModalChangeContacts] = useState(false);
   const [errors, setErrors] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [contactsToUpdate, setContactsToUpdate] = useState<ContactType[]>([]);
 
   const saveContacts = async () => {
     try {
@@ -27,9 +28,6 @@ export default function ButtonModalContact({ contacts, contactsToUpdate, onConta
       setErrors("");
       if (!contactsToUpdate.length) {
         setErrors("Veuillez renseigner au moins un contact");
-      }
-      if (contactsToUpdate.length > 3) {
-        setErrors("Vous ne pouvez pas renseigner plus de 3 contacts");
       }
       if (errors) {
         setIsLoading(false);
@@ -58,7 +56,7 @@ export default function ButtonModalContact({ contacts, contactsToUpdate, onConta
         department: [],
         region: [],
         role: [ROLES.ADMINISTRATEUR_CLE],
-        subRole: [SUB_ROLES.referent_etablissement, SUB_ROLES.coordinateur_cle],
+        subRole: [SUB_ROLES.referent_etablissement],
         searchbar: [] as string[],
       },
       sort: {
@@ -77,6 +75,11 @@ export default function ButtonModalContact({ contacts, contactsToUpdate, onConta
     }));
   };
 
+  const getContactToAdd = () => {
+    const contactToAdd = contactsToUpdate.find((c) => c._id === null);
+    return contactToAdd ? { value: contactToAdd._id, label: `${contactToAdd.firstName} ${contactToAdd.lastName}` } : null;
+  };
+
   return (
     <>
       <Button
@@ -85,7 +88,7 @@ export default function ButtonModalContact({ contacts, contactsToUpdate, onConta
         leftIcon={<HiOutlinePencil size={16} />}
         title="Modifier"
         onClick={() => {
-          onContactsUpdate([...contacts.filter((c) => c.subRole === SUB_ROLES.referent_etablissement)]);
+          setContactsToUpdate([...contacts.filter((c) => c.subRole === SUB_ROLES.referent_etablissement)]);
           setModalChangeContacts(true);
         }}
       />
@@ -113,7 +116,7 @@ export default function ButtonModalContact({ contacts, contactsToUpdate, onConta
                   size={40}
                   className="cursor-pointer"
                   icon={({ size, className }) => <HiOutlineX size={size} className={className} />}
-                  onClick={() => onContactsUpdate(contactsToUpdate.filter((c) => c._id !== contact._id))}
+                  onClick={() => setContactsToUpdate(contactsToUpdate.filter((c) => c._id !== contact._id))}
                 />
               </div>
             ))}
@@ -122,11 +125,11 @@ export default function ButtonModalContact({ contacts, contactsToUpdate, onConta
               className="my-6"
               placeholder="Ajouter un référent"
               loadOptions={fetchReferentsEtablissement}
-              value={contactsToUpdate.find((c) => c._id === null)}
+              value={getContactToAdd()}
               isClearable={true}
               noOptionsMessage={"Aucun référent d'établissement ne correspond à cette recherche"}
               onChange={({ referent }) => {
-                if (!contactsToUpdate.some((c) => c._id === referent._id)) onContactsUpdate([...contactsToUpdate, referent]);
+                if (!contactsToUpdate.some((c) => c._id === referent._id)) setContactsToUpdate([...contactsToUpdate, referent]);
               }}
               closeMenuOnSelect={true}
             />

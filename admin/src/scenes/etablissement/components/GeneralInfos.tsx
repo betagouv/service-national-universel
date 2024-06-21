@@ -9,12 +9,13 @@ import { capture } from "@/sentry";
 import { Button, Container, InputText, Label, Select } from "@snu/ds/admin";
 import { AddressForm, Input } from "@snu/ds/common";
 import { ROLES, SUB_ROLES, CLE_TYPE_LIST, CLE_SECTOR_LIST, useAddress, translate } from "snu-lib";
+import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+import { User } from "@/types";
 
 interface Props {
-  etablissement: any;
-  onUpdateEtab: (data: any) => void;
-  user: any;
-  errors: any;
+  etablissement: EtablissementDto;
+  onUpdateEtab: (etablissement: EtablissementDto) => void;
+  user: User;
 }
 
 interface Errors {
