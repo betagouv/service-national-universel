@@ -32,6 +32,7 @@ export default function View() {
 
   const getEtablissement = async () => {
     try {
+      //TODO make one request to get etablissement, contact and classe
       const url = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/cle/etablissement/from-user" : `/cle/etablissement/${id}`;
       const { ok, code, data: response } = await api.get(url);
 
