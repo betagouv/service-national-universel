@@ -265,11 +265,15 @@ export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddO
         <ModalConfirmation
           isOpen={!!showMergedLineConfirmation}
           onClose={() => setShowMergedLineConfirmation(null)}
-          icon={<HiOutlineExclamation size={48} className="text-gray-300" />}
+          icon={
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50">
+              <HiOutlineExclamation className="text-red-600 w-6 h-6" />
+            </div>
+          }
           title="Modifier un chef de file / encadrant"
           text={
             <p>
-              Attention vous souhaitez modifier le chef de file / encadrant Prénom Nom.
+              Attention vous souhaitez modifier le chef de file / encadrant {data.firstname} {data.lastname}
               <br />
               Ces modifications seront automatiquement répercutées sur toutes les autres lignes fusionnées concernées.
             </p>
