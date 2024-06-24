@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const patchHistory = require("mongoose-patch-history").default;
-const { generateAddress, starify } = require("../utils/anonymise");
+const anonymize = require("../anonymization/meetingPoint");
 
 const MODELNAME = "meetingpoint";
 
@@ -86,10 +86,8 @@ const Schema = new mongoose.Schema({
   deletedAt: { type: Date },
 });
 
-Schema.methods.anonymise = async function () {
-  this.departureAddress && (this.departureAddress = generateAddress());
-  this.centerCode && (this.centerCode = starify(this.centerCode));
-  return this;
+Schema.methods.anonymise = function () {
+  return anonymize(this);
 };
 
 Schema.virtual("user").set(function (user) {

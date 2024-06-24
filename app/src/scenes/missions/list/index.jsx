@@ -36,6 +36,10 @@ export default function List() {
     debounce(async (filters, page, size, sort, setData) => {
       try {
         if (!filters.location?.lat || !filters.distance) return;
+        if (filters.period === "CUSTOM") {
+          if (filters.fromDate === "") delete filters.fromDate;
+          if (filters.toDate === "") delete filters.toDate;
+        }
         const res = await api.post("/elasticsearch/mission/young/search", { filters, page, size, sort });
         setData(res.data);
       } catch (e) {

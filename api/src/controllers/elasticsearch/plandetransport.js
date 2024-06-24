@@ -38,10 +38,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "delayedBack.keyword",
     ];
     const sortFields = [];
-
     // Authorization
     if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     // Body params validation
     const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -95,5 +93,4 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
 module.exports = router;

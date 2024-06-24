@@ -4,7 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
-const { generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+const anonymize = require("../anonymization/referent");
 
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
 
@@ -271,12 +271,7 @@ Schema.methods.comparePassword = async function (p) {
 };
 
 Schema.methods.anonymise = function () {
-  this.phone && (this.phone = generateNewPhoneNumber());
-  this.mobile && (this.mobile = generateNewPhoneNumber());
-  this.email && (this.email = generateRandomEmail());
-  this.firstName && (this.firstName = generateRandomName());
-  this.lastName && (this.lastName = generateRandomName());
-  return this;
+  return anonymize(this);
 };
 
 //Sync with Sendinblue

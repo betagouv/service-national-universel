@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "mission";
-const { generateAddress, generateRandomName, starify } = require("../utils/anonymise");
+const anonymize = require("../anonymization/mission");
 
 const Schema = new mongoose.Schema({
   sqlId: {
@@ -332,18 +332,7 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.name && (this.name = `Mission ${generateRandomName()}`);
-  this.description && (this.description = starify(this.description));
-  this.address && (this.address = generateAddress());
-  this.actions && (this.actions = "action Test");
-  this.structureName && (this.structureName = starify(this.structureName));
-  this.tutorName && (this.tutorName = starify(this.tutorName));
-  this.actions && (this.actions = starify(this.actions));
-  this.justifications && (this.justifications = starify(this.justifications));
-  this.contraintes && (this.contraintes = starify(this.contraintes));
-  this.frequence && (this.frequence = starify(this.frequence));
-  this.jvaRawData && (this.jvaRawData = undefined);
-  return this;
+  return anonymize(this);
 };
 
 Schema.virtual("fromUser").set(function (fromUser) {

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HiOutlineEye, HiOutlineClipboardCheck, HiOutlineOfficeBuilding, HiOutlineHand } from "react-icons/hi";
 
-export default function DashboardContainer({ active = "general", availableTab, navChildren, children }) {
+export default function DashboardContainer({ active = "general", availableTab, navChildren = null, children }) {
   return (
     <div className="mb-8 flex w-full flex-col gap-12">
       <div className="border-bottom flex items-center justify-between">

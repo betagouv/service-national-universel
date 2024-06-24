@@ -7,8 +7,10 @@ const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const config = require("config");
 const { capture } = require("../sentry");
+const anonymize = require("../anonymization/young");
+
 const MODELNAME = "young";
-const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
+
 const StateManager = require("../states");
 
 const File = new mongoose.Schema({
@@ -2049,68 +2051,7 @@ Schema.methods.comparePassword = async function (p) {
 };
 
 Schema.methods.anonymise = function () {
-  this.email && (this.email = generateRandomEmail());
-  this.newEmail && (this.newEmail = generateRandomEmail());
-  this.parent1Email && (this.parent1Email = generateRandomEmail());
-  this.parent2Email && (this.parent2Email = generateRandomEmail());
-  this.firstName && (this.firstName = generateRandomName());
-  this.lastName && (this.lastName = generateRandomName());
-  this.parent1FirstName && (this.parent1FirstName = generateRandomName());
-  this.parent1LastName && (this.parent1LastName = generateRandomName());
-  this.parent2FirstName && (this.parent2FirstName = generateRandomName());
-  this.parent2LastName && (this.parent2LastName = generateRandomName());
-  this.historic && (this.historic = {});
-  this.phone && (this.phone = generateNewPhoneNumber());
-  this.parent1Phone && (this.parent1Phone = generateNewPhoneNumber());
-  this.parent2Phone && (this.parent2Phone = generateNewPhoneNumber());
-  this.address && (this.address = generateAddress());
-  this.parent1Address && (this.parent1Address = generateAddress());
-  this.parent2Address && (this.parent2Address = generateAddress());
-  this.birthdateAt && (this.birthdateAt = generateBirthdate());
-  this.engagedDescription && (this.engagedDescription = starify(this.engagedDescription));
-  this.motivations && (this.motivations = starify(this.motivations));
-  this.parentConsentmentFilesCompliantInfo && (this.parentConsentmentFilesCompliantInfo = starify(this.parentConsentmentFilesCompliantInfo));
-  this.withdrawnReason && (this.withdrawnReason = starify(this.withdrawnReason));
-  this.withdrawnMessage && (this.withdrawnMessage = starify(this.withdrawnMessage));
-  this.correctionRequests &&
-    (this.correctionRequests = this.correctionRequests?.map((e) => {
-      e.message = starify(e.message);
-      e.reason = starify(e.reason);
-      return e;
-    }));
-  this.notes &&
-    (this.notes = this.notes?.map((e) => {
-      e.note = starify(e.note);
-      if (e.referent) {
-        e.referent.firstName = starify(e.referent.firstName);
-        e.referent.lastName = starify(e.referent.lastName);
-      }
-      return e;
-    }));
-
-  const newLocation = getYoungLocation(this.zip);
-  this.location &&
-    (this.location = {
-      lat: newLocation?.latitude || 0,
-      lon: newLocation?.longitude || 0,
-    });
-
-  this.cniFiles && (this.cniFiles = []);
-  this.highSkilledActivityProofFiles && (this.highSkilledActivityProofFiles = []);
-  this.dataProcessingConsentmentFiles && (this.dataProcessingConsentmentFiles = []);
-  this.parentConsentmentFiles && (this.parentConsentmentFiles = []);
-  this.imageRightFiles && (this.imageRightFiles = []);
-  this.autoTestPCRFiles && (this.autoTestPCRFiles = []);
-  this.rulesFiles && (this.rulesFiles = []);
-  this.militaryPreparationFilesIdentity && (this.militaryPreparationFilesIdentity = []);
-  this.militaryPreparationFilesCensus && (this.militaryPreparationFilesCensus = []);
-  this.militaryPreparationFilesAuthorization && (this.militaryPreparationFilesAuthorization = []);
-  this.militaryPreparationFilesCertificate && (this.militaryPreparationFilesCertificate = []);
-  this.militaryPreparationCorrectionMessage && (this.militaryPreparationCorrectionMessage = starify(this.militaryPreparationCorrectionMessage));
-
-  this.files && (this.files = undefined);
-
-  return this;
+  return anonymize(this);
 };
 
 //Sync with sendinblue

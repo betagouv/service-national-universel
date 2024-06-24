@@ -3,6 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "cohesioncenter";
+const anonymize = require("../anonymization/cohesionCenter");
 
 const Schema = new mongoose.Schema({
   name: {
@@ -176,9 +177,7 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.code2022 && (this.code2022 = "02022");
-  this.code && (this.code = "00000");
-  return this;
+  return anonymize(this);
 };
 
 Schema.virtual("fromUser").set(function (fromUser) {

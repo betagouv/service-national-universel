@@ -1,0 +1,213 @@
+{
+  "aliases": {},
+  "mappings": {
+    "properties": {
+      "__v": {
+        "type": "long"
+      },
+      "acceptCGU": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "cohesionCenterId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "cohesionCenterName": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "department": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "email": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "firstName": {
+        "type": "text",
+        "fields": {
+          "folded": {
+            "type": "text",
+            "analyzer": "folding"
+          },
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "forgotPasswordResetExpires": {
+        "type": "date"
+      },
+      "forgotPasswordResetToken": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "invitationExpires": {
+        "type": "date"
+      },
+      "invitationToken": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "lastLoginAt": {
+        "type": "date"
+      },
+      "lastName": {
+        "type": "text",
+        "fields": {
+          "folded": {
+            "type": "text",
+            "analyzer": "folding"
+          },
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "loginAttempts": {
+        "type": "long"
+      },
+      "mobile": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "password": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "phone": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "region": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "registredAt": {
+        "type": "date"
+      },
+      "role": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "sessionPhase1Id": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "sqlId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "structureId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "subRole": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
+  "settings": {
+    "index": {
+      "analysis": {
+        "analyzer": {
+          "folding": {
+            "filter": ["lowercase", "asciifolding"],
+            "tokenizer": "standard"
+          }
+        }
+      }
+    }
+  }
+}

@@ -58,7 +58,12 @@ async function closeDB() {
   await db.close();
 }
 
+async function startSession() {
+  return await mongoose.startSession();
+}
+
 module.exports = {
   initDB,
   closeDB,
+  startSession,
 };

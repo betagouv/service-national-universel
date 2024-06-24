@@ -1,0 +1,112 @@
+{
+    "aliases": {},
+    "mappings": {
+        "properties": {
+            "busId": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "centerArrivalTime": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "centerDepartureTime": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "centerId": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "cohort": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "createdAt": {
+                "type": "date"
+            },
+            "departuredDate": {
+                "type": "date"
+            },
+            "followerCapacity": {
+                "type": "long"
+            },
+            "km": {
+                "type": "long"
+            },
+            "lunchBreak": {
+                "type": "boolean"
+            },
+            "lunchBreakReturn": {
+                "type": "boolean"
+            },
+            "meetingPointsIds": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "returnDate": {
+                "type": "date"
+            },
+            "sessionId": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "totalCapacity": {
+                "type": "long"
+            },
+            "travelTime": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "updatedAt": {
+                "type": "date"
+            },
+            "youngCapacity": {
+                "type": "long"
+            },
+            "youngSeatsTaken": {
+                "type": "long"
+            }
+        }
+    }
+}
