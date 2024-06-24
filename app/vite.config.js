@@ -2,14 +2,13 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import path from "path";
-import { visualizer } from "rollup-plugin-visualizer";
 
 // eslint-disable-next-line no-unused-vars
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), "");
-  const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] }), visualizer()];
+  const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
   if (mode !== "development") {
     plugins.push(
       sentryVitePlugin({
