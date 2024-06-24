@@ -1,4 +1,4 @@
-import { STATUS_PHASE1_CLASSE_LIST } from '../constants/constants';
+import { STATUS_PHASE1_CLASSE_LIST } from "../constants/constants";
 export type ClasseDto = {
   _id: string;
   etablissementId: string;
@@ -10,19 +10,19 @@ export type ClasseDto = {
   uniqueId: string;
   uniqueKeyAndId: string;
   name: string;
-  coloration:string;
+  coloration: string;
   estimatedSeats: number;
   totalSeats: number;
   seatsTaken: number;
-  filiere:string;
-  grade:string[];
-  type:string;
-  trimester:string;
-  comments:string;
-  department:string;
-  region:string;
-  academy:string;
-  schoolYear:string;
+  filiere: string;
+  grade: string[];
+  type: string;
+  trimester: string;
+  comments: string;
+  department: string;
+  region: string;
+  academy: string;
+  schoolYear: string;
   cohesionCenterId?: string;
   cohesionCenter?: any;
   sessionId?: string;
@@ -35,4 +35,4 @@ export type ClasseDto = {
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date;
-}
+};
