@@ -39,7 +39,7 @@ export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
       }
       return toastr.error("Une erreur est survenue lors de la vérification de la ligne fusionnée", response.code);
     }
-    if (isSameBusTeam(bus, response.data)) {
+    if (!showWarning && isSameBusTeam(bus, response.data)) {
       return setShowWarning(true);
     }
     mutate(
@@ -50,6 +50,7 @@ export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
         onSuccess: (response) => {
           toastr.success("La ligne fusionnée a bien été ajoutée", "");
           setMergedBusId("");
+          setShowWarning(false);
           onClose(response.data);
         },
         onError: (e: any) => {
