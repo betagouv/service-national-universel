@@ -3,8 +3,9 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
 const { getCohortNames } = require("snu-lib");
+const anonymize = require("../../anonymization/PlanDeTransport/modificationBus");
+
 const MODELNAME = "modificationbus";
-const { starify } = require("../../utils/anonymise");
 
 const Schema = new mongoose.Schema({
   cohort: {
@@ -184,17 +185,7 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.requestMessage && (this.requestMessage = starify(this.requestMessage));
-  this.requestUserName && (this.requestUserName = starify(this.requestUserName));
-  this.statusUserName && (this.statusUserName = starify(this.statusUserName));
-  this.opinionUserName && (this.opinionUserName = starify(this.opinionUserName));
-  this.messages &&
-    (this.messages = this.messages.map((message) => {
-      message.message = starify(message.message);
-      message.userName = starify(message.userName);
-      return message;
-    }));
-  return this;
+  return anonymize(this);
 };
 
 Schema.virtual("user").set(function (user) {

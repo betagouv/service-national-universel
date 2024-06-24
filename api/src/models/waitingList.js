@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { generateRandomEmail, generateBirthdate } = require("../utils/anonymise");
+const anonymize = require("../anonymization/waitingList");
 
 const MODELNAME = "waitinglist";
 
@@ -28,9 +28,7 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.mail && (this.mail = generateRandomEmail());
-  this.birthdateAt && (this.birthdateAt = generateBirthdate());
-  return this;
+  return anonymize(this);
 };
 
 const OBJ = mongoose.model(MODELNAME, Schema);

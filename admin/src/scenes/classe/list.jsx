@@ -107,6 +107,8 @@ export default function List() {
     { title: "Niveau", name: "grade", missingLabel: "Non renseigné" },
     { title: "Département", name: "department", missingLabel: "Non renseigné" },
     { title: "Région", name: "region", missingLabel: "Non renseigné" },
+    { title: "Académie", name: "academy", missingLabel: "Non renseigné" },
+    { title: "Année scolaire", name: "schoolYear", missingLabel: "Non renseigné" },
   ].filter(Boolean);
 
   if (classes === null) return null;
