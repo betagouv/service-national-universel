@@ -67,6 +67,8 @@ export default function Home() {
     }
 
     // Mon inscription est en cours :
+
+    // Je peux me réinscrire :
     if (isReinscriptionOpen && hasAccessToReinscription(young)) {
       return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
     }
