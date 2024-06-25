@@ -4,7 +4,7 @@ import { IEtablissement } from "../../models/cle/etablissementType";
 import { IClasse } from "../../models/cle/classeType";
 import { CleClasseModel, CleEtablissementModel, ReferentModel } from "../../models";
 import { apiEducation } from "../../services/gouv.fr/api-education";
-import { etablissementMapper } from "../etablissement/etablissementMapper";
+import { mapEtablissementFromAnnuaireToEtablissement } from "../etablissement/etablissementMapper";
 import { buildUniqueClasseId, findClasseByUniqueKeyAndUniqueId } from "../classe/classeService";
 import { IAppelAProjet } from "./appelAProjetType";
 import { ROLES, SUB_ROLES, ClasseSchoolYear, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
@@ -104,7 +104,7 @@ export class AppelAProjetService {
       return;
     }
 
-    const formattedEtablissement = etablissementMapper(etablissementFromAnnuaire, [referentEtablissementId]);
+    const formattedEtablissement = mapEtablissementFromAnnuaireToEtablissement(etablissementFromAnnuaire, [referentEtablissementId]);
 
     // TODO: handle schoolYears array
     const foundEtablissement = await CleEtablissementModel.findOne({ uai });
