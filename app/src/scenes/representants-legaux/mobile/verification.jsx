@@ -85,11 +85,7 @@ export default function Verification({ step, parentId }) {
               <p>Veuillez vérifier la validité de ces informations.</p>
               <p>En cas d’erreur, {young.firstName} peut modifier ces informations à partir de son dossier d’inscription.</p>
               <p>
-                <a
-                  href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline hover:underline">
+                <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="">
                   Je vois des informations incorrectes
                 </a>
               </p>
@@ -103,15 +99,13 @@ export default function Verification({ step, parentId }) {
           <>
             <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-8">
               <Check checked={certified} onChange={(e) => setCertified(e)}>
-                Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
-                <a
-                  href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline hover:underline">
-                  cet article
-                </a>{" "}
-                avant de valider.
+                <span>
+                  Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez&nbsp;
+                  <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="">
+                    cet article
+                  </a>
+                  &nbsp;avant de valider.
+                </span>
               </Check>
             </div>
             {error && <div className="my-2 ml-[40px] text-[14px] leading-[19px] text-[#CE0500]">{error}</div>}
