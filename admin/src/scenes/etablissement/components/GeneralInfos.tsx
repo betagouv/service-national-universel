@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+// @ts-expect-error lib non ts
 import { useDebounce } from "@uidotdev/usehooks";
 import { HiOutlinePencil } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
