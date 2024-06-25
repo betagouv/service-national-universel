@@ -15,7 +15,8 @@ export type ClasseDto = {
   totalSeats: number;
   seatsTaken: number;
   filiere:string;
-  grade:string[];
+  grade:string;
+  grades:string[];
   type:string;
   trimester:string;
   comments:string;

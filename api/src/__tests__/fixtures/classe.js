@@ -11,7 +11,7 @@ function createFixtureClasse(fields = {}) {
     uniqueKeyAndId: "0720033V_1212",
     coloration: "SPORT",
     filiere: "Générale et technologique",
-    grade: ["4eme"],
+    grades: ["4eme"],
     name: "Douze",
     totalSeats: 4,
     department: "Sarthe",
