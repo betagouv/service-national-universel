@@ -99,5 +99,5 @@ export const buildUniqueClasseId = (etablissement: Partial<IEtablissement>, clas
 };
 
 export const findClasseByUniqueKeyAndUniqueId = async (uniqueKey: string | undefined | null, uniqueId: string): Promise<ClasseDocument | null> => {
-  return await CleClasseModel.exists({ uniqueKey, uniqueId });
+  return await CleClasseModel.findOne({ uniqueKey, uniqueId });
 };

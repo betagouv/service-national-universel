@@ -1,5 +1,6 @@
 import { IEtablissement } from "../../models/cle/etablissementType";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
+import { CLE_SECTOR, CLE_TYPE } from "snu-lib";
 
 export function etablissementMapper(etablissement: EtablissementProviderDto, referentIds: string[]): IEtablissement {
   return {
@@ -13,11 +14,22 @@ export function etablissementMapper(etablissement: EtablissementProviderDto, ref
     city: etablissement.nom_commune,
     address: etablissement.adresse_1,
     country: "France",
-    // TODO: map type and sector to our enums
-    type: [etablissement.type_etablissement],
-    sector: [etablissement.statut_public_prive],
+    type: [CLE_TYPE.OTHER],
+    sector: [mapStatutToSector(etablissement.statut_public_prive)],
     academy: etablissement.libelle_academie,
     state: "inactive",
     schoolYears: [],
   };
 }
+
+const mapStatutToSector = (statut: string): string => {
+  switch (statut) {
+    case "Public":
+      return CLE_SECTOR.PUBLIC;
+    case "Priv\u00e9":
+      return CLE_SECTOR.PRIVATE;
+    default:
+      console.error(`Unknown statut: ${statut}`);
+      return "";
+  }
+};
