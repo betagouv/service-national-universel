@@ -336,7 +336,7 @@ export default function List() {
   );
 }
 
-const returnSelect = (cohort, selectedFilters, user, data) => {
+const returnSelect = (cohort, selectedFilters, user) => {
   const selectTest = [
     {
       key: "1",
