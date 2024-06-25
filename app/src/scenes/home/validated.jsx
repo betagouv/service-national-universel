@@ -9,7 +9,7 @@ import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import useAuth from "@/services/useAuth";
 import plausibleEvent from "../../services/plausible";
 
-export default function ValidatedV2() {
+export default function Validated() {
   const { young, isCLE } = useAuth();
   const history = useHistory();
 
