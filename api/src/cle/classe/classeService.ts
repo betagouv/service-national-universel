@@ -69,20 +69,6 @@ export function canEditTotalSeats(user: User) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_REF_CLASSE;
 }
 
-export const createClasse = async (classe: Partial<IClasse>) => {
-  return await ClasseModel.create({
-    name: classe.name,
-    coloration: classe.coloration,
-    status: STATUS_CLASSE.CREATED,
-    statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
-    uniqueId: classe.uniqueId,
-    uniqueKey: classe.uniqueKey,
-    // cohort: defaultCleCohort.name,
-    // uniqueKeyAndId: value.uniqueKey + "_" + value.uniqueId,
-    // referentClasseIds: [referent._id],
-  });
-};
-
 export const buildUniqueClasseId = (etablissement: Partial<IEtablissement>, classe: Pick<IClasse, "name" | "coloration">): string => {
   const trigrammeRegion = (etablissement.region || "REG")?.substring(0, 3)?.toUpperCase();
   const departmentNumber = `0${(etablissement.zip || "DP")?.substring(0, 2)}`;
