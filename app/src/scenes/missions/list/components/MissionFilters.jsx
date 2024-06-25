@@ -787,7 +787,7 @@ export default function MissionFilters({ filters, setFilters }) {
                     </div>
                   </div>
                   {filters.fromDate || filters.toDate ? (
-                    <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilters((prev) => ({ ...prev, fromDate: null, toDate: null }))}>
+                    <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilters((prev) => ({ ...prev, fromDate: "", toDate: ""}))}>
                       Effacer
                     </div>
                   ) : null}
