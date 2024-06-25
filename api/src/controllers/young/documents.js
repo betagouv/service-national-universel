@@ -9,7 +9,7 @@ const ContractObject = require("../../models/contract");
 const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, uploadFile, deleteFile, getFile } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
-const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
+const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, COHORT_AVENIR, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
@@ -219,12 +219,12 @@ router.post(
         }
         const { name, tempFilePath, mimetype, size } = currentFile;
         const filetype = await getMimeFromFile(tempFilePath);
-        const mimeFromMagicNumbers = filetype || "application/pdf";
+        const mimeFromContent = filetype || "application/pdf";
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
-        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
-          capture(`File ${name} of user(${req.user.id})is not a valid type: ${mimetype} ${mimeFromMagicNumbers}`);
+        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromContent))) {
+          capture(`File ${name} of user(${req.user.id})is not a valid type: ${mimetype} ${mimeFromContent}`);
           fs.unlinkSync(tempFilePath);
-          return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+          return res.status(400).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
         const scanResult = await scanFile(tempFilePath, name, req.user.id);
@@ -253,7 +253,7 @@ router.post(
 
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
-        const resultingFile = { mimetype: mimeFromMagicNumbers, encoding: "7bit", data: encryptedBuffer };
+        const resultingFile = { mimetype: mimeFromContent, encoding: "7bit", data: encryptedBuffer };
         if (MILITARY_FILE_KEYS.includes(key)) {
           await uploadFile(`app/young/${id}/military-preparation/${key}/${newFile._id}`, resultingFile);
         } else {
@@ -262,12 +262,13 @@ router.post(
         fs.unlinkSync(tempFilePath);
 
         // Add record to young
-
         young.files[key].push(newFile);
         if (key === "cniFiles") {
-          const cohort = await CohortObject.findOne({ name: young.cohort });
           young.latestCNIFileExpirationDate = body.expirationDate;
-          young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
+          if (young.cohort !== COHORT_AVENIR) {
+            const cohort = await CohortObject.findOne({ name: young.cohort });
+            young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
+          }
           young.latestCNIFileCategory = body.category;
         }
       }
