@@ -8,6 +8,9 @@ export type User = {
   role: (typeof ROLES)[keyof typeof ROLES];
   structureId?: string;
   subRole?: string;
+  firstName: string;
+  lastName: string;
+  _id: string;
 };
 
 export type Center = {
