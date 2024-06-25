@@ -1,1 +1,3 @@
-export const COHORT_AVENIR = "à venir";
+export enum COHORTS {
+  AVENIR = "à venir",
+}

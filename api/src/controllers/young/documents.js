@@ -9,7 +9,7 @@ const ContractObject = require("../../models/contract");
 const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, uploadFile, deleteFile, getFile } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
-const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, COHORT_AVENIR, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
+const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, COHORTS, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
@@ -262,10 +262,13 @@ router.post(
         fs.unlinkSync(tempFilePath);
 
         // Add record to young
+        if (!young.files?.[key]) {
+          young.files[key] = [];
+        }
         young.files[key].push(newFile);
         if (key === "cniFiles") {
           young.latestCNIFileExpirationDate = body.expirationDate;
-          if (young.cohort !== COHORT_AVENIR) {
+          if (young.cohort !== COHORTS.AVENIR) {
             const cohort = await CohortObject.findOne({ name: young.cohort });
             young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
           }

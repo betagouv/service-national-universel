@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
 
-const { ROLES, COHORT_AVENIR } = require("snu-lib");
+const { ROLES, COHORTS } = require("snu-lib");
 
 const fileUtils = require("../utils/file");
 
@@ -555,7 +555,7 @@ describe("Young", () => {
     });
 
     it("should send file for the young with cohort avenir", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: COHORT_AVENIR }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: COHORTS.AVENIR }));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
