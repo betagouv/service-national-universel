@@ -13,6 +13,7 @@ export async function resizeImage(file, config = {}) {
   };
   config = { ...defaultConfig, ...config };
   let image = file;
+
   if (image.size > 1000000) {
     image = await readAndCompressImage(file, config);
     image.name = file.name;
@@ -28,6 +29,7 @@ export async function convertImage(file, format = "PNG") {
   }
 
   if (["image/heif", "image/heic"].includes(file.type)) {
+
     try {
       const arrayBuffer = await file.arrayBuffer();
 
