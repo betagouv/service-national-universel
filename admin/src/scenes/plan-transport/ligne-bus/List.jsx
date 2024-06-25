@@ -336,7 +336,7 @@ export default function List() {
   );
 }
 
-const returnSelect = (cohort, selectedFilters, user) => {
+const returnSelect = (cohort, selectedFilters, user, data) => {
   const selectTest = [
     {
       key: "1",
@@ -409,7 +409,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
         [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
           ? {
               action: async () => {
-                await exportLigneBus(selectedFilters);
+                await exportLigneBus(cohort);
               },
               render: (
                 <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 ">

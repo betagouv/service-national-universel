@@ -82,30 +82,10 @@ function getDepartmentsFromBusLine(line) {
   return departments;
 }
 
-function filterBusLinesByRole(lines, user) {
-  const linesWithGeography = lines.map((e) => {
-    return { ...e, regions: getRegionsFromBusLine(e), departments: getDepartmentsFromBusLine(e) };
-  });
-
-  switch (user.role) {
-    case ROLES.ADMIN:
-    case ROLES.TRANSPORTER:
-      return linesWithGeography;
-    case ROLES.REFERENT_DEPARTMENT:
-      return linesWithGeography.filter((line) => user.department.some((dep) => line.departments.includes(dep)));
-    case ROLES.REFERENT_REGION:
-      return linesWithGeography.filter((line) => line.regions.includes(user.region));
-    default:
-      return [];
-  }
-}
-
-export async function exportLigneBus(selectedFilters) {
+export async function exportLigneBus(cohort) {
   try {
     const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true&needCohesionCenterInfo=true&needMeetingPointsInfo=true`, {
-      filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
-        return { ...e, [key]: value.filter };
-      }, {}),
+      filters: { cohort: [cohort] },
     });
     if (!ok || !ligneBus?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
