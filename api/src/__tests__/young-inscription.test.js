@@ -4,7 +4,7 @@ const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { STEPS2023, YOUNG_STATUS, YOUNG_SITUATIONS } = require("../utils");
-const { START_DATE_SESSION_PHASE1 } = require("snu-lib");
+const { START_DATE_SESSION_PHASE1, COHORTS } = require("snu-lib");
 const { fakerFR: faker } = require("@faker-js/faker");
 
 beforeAll(dbConnect);
@@ -542,6 +542,34 @@ describe("Young", () => {
       expect(res.status).toBe(200);
       expect(nextResponseData).toMatchObject({ CNIFileNotValidOnStart: CNIFileNotValidOnStart + "", latestCNIFileExpirationDate: documentObj.date.toISOString() });
       expect(nextUpdatedYoung).toMatchObject({ CNIFileNotValidOnStart: CNIFileNotValidOnStart + "", latestCNIFileExpirationDate: documentObj.date });
+    });
+
+    it("Should return 200 otherwise using 'next' route param (cohort avenir)", async () => {
+      const cniFile = {
+        name: "CNI_TEST.pdf",
+        uploadedAt: new Date().toISOString(),
+        size: 150244,
+        mimetype: "application/pdf",
+        category: "pdf",
+        expirationDate: new Date().toISOString(),
+      };
+
+      const passport = require("passport");
+      const user = await createYoungHelper(getNewYoungFixture({ cohort: COHORTS.AVENIR, files: { cniFiles: [cniFile] } }));
+      passport.user = user;
+
+      const documentObj = {
+        date: new Date(),
+      };
+
+      const CNIFileNotValidOnStart = documentObj.date < START_DATE_SESSION_PHASE1[user.cohort];
+
+      let res = await request(getAppHelper()).put("/young/inscription2023/documents/next").send(documentObj);
+      const nextResponseData = res.body.data;
+      const nextUpdatedYoung = await getYoungByIdHelper(passport.user._id);
+      expect(res.status).toBe(200);
+      expect(nextResponseData).toMatchObject({ latestCNIFileExpirationDate: documentObj.date.toISOString() });
+      expect(nextUpdatedYoung).toMatchObject({ latestCNIFileExpirationDate: documentObj.date });
     });
 
     it("Should return 400 when no body is provided using 'correction' route param", async () => {
