@@ -19,10 +19,11 @@ export class AppelAProjetService {
   classesToCreate: Partial<IClasse>[] = [];
   classesAlreadyExisting: Record<string, string | undefined>[] = [];
 
-  public sync = async (save: boolean = true) => {
+  public sync = async (save: boolean = false) => {
     const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
 
     const uais = [...new Set(appelAProjets.map((AAP) => AAP.etablissement?.uai).filter(Boolean))];
+    console.log("AppelAProjetService.sync() - uais.length: ", uais.length);
     const etablissements = await apiEducation({
       filters: [{ key: "uai", value: uais }],
       page: 0,

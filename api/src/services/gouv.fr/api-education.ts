@@ -7,8 +7,10 @@ const baseUrl = "https://data.education.gouv.fr/api/explore/v2.1/catalog/dataset
 export const apiEducation = async ({ filters, page, size }, options = { headers: {} }) => {
   try {
     const params = formatParams(filters, page, size);
+    const url = new URL(baseUrl + "?" + params);
+    console.log("apiEducation - url: ", url.toString());
 
-    const res = await fetch(new URL(baseUrl + "?" + params), {
+    const res = await fetch(url, {
       ...options,
       headers: { "Content-Type": "application/json", ...options.headers },
       method: "GET",
@@ -20,6 +22,7 @@ export const apiEducation = async ({ filters, page, size }, options = { headers:
 
     const data: EtablissementProviderDto[] = await res.json();
 
+    console.log("apiEducation - response.length: ", data.length);
     return data;
   } catch (e) {
     capture(e);

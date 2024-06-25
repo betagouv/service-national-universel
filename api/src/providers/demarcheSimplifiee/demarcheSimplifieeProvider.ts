@@ -32,6 +32,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IA
     console.timeEnd("Demarche_Simplifiee_call_" + numberOfCalls);
     numberOfCalls++;
   }
+  console.log("getClassesAndEtablissementsFromAppelAProjets - appelsAProjet.length: ", appelsAProjet.length);
   return appelsAProjet;
 };
 
