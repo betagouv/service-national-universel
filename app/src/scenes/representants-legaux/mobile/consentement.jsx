@@ -321,25 +321,24 @@ function ConsentementForm({ young, token, step, parentId }) {
                       Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de <b>{youngFullname}</b>.
                     </Check>
                     <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
-                      M&apos;engage à communiquer la fiche sanitaire de <b>{youngFullname}</b> au responsable du séjour de cohésion (
-                      <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      M&apos;engage à communiquer la fiche sanitaire de&nbsp;<b>{youngFullname}</b> au responsable du séjour de cohésion (
+                      <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} target="blank" className="" onClick={(e) => e.stopPropagation()}>
                         Télécharger la fiche sanitaire ici
                       </a>
                       ).
                     </Check>
                     <Check checked={data.vaccination} onChange={(e) => setData({ ...data, vaccination: e })} className="mt-[24px]" error={errors.vaccination}>
-                      M&apos;engage à ce que <b>{youngFullname}</b> soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP),
-                      et pour les volontaires résidents de Guyane, la fièvre jaune.
+                      M&apos;engage à ce que&nbsp;<b>{youngFullname}</b> à la date du séjour de cohésion, ait satisfait aux obligations vaccinales en vigueur.
                     </Check>
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
                       Reconnais avoir pris connaissance du{" "}
-                      <a href={CDN_BASE_URL + "/file/SNU-reglement-interieur-2024.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      <a href={CDN_BASE_URL + "/file/SNU-reglement-interieur-2024.pdf"} target="blank" className="" onClick={(e) => e.stopPropagation()}>
                         Règlement Intérieur du séjour de cohésion
                       </a>
                       .
                     </Check>
                     <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
-                      Accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
+                      Accepte la collecte et le traitement des données personnelles de&nbsp;<b>{youngFullname}</b>
                     </Check>
                   </div>
                 </div>
@@ -354,7 +353,7 @@ function ConsentementForm({ young, token, step, parentId }) {
                   de communication du ministère à enregistrer, reproduire et représenter l’image ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
                   séparément, sur leurs publications respectives.{" "}
                   {!imageRightsExplanationShown && (
-                    <a className="whitespace-nowrap underline" href="#" onClick={toggleImageRightsExplanationShown}>
+                    <a className="whitespace-nowrap" href="#" onClick={toggleImageRightsExplanationShown}>
                       Lire plus
                     </a>
                   )}
