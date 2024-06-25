@@ -11,7 +11,7 @@ import Phase1NotDone from "./Phase1NotDone";
 import WaitingReinscription from "./WaitingReinscription";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
-import Validated from "./validated";
+import Validated from "./Validated";
 import WaitingCorrection from "./waitingCorrection";
 import WaitingValidation from "./waitingValidation";
 import WaitingList from "./waitingList";
@@ -19,11 +19,9 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
+import useReInscription from "@/services/useReInscription";
 import AvenirCohort from "./AvenirCohort";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, isCohortTooOld } from "snu-lib";
-import { capture } from "@/sentry";
-import { toastr } from "react-redux-toastr";
-import API from "@/services/api";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, isCohortTooOld } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasAccessToPhase2, hasCompletedPhase2 } from "../../utils";
 
@@ -31,29 +29,9 @@ export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
+  const { isReinscriptionOpen, loading: isReinscriptionOpenLoading } = useReInscription();
 
-  const [reinscriptionOpen, setReinscriptionOpen] = useState(false);
-  const [reinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
-
-  const fetchReInscriptionOpen = async () => {
-    try {
-      const { ok, data, code } = await API.get(`/cohort-session/isReInscriptionOpen`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      setReinscriptionOpen(data);
-      setReinscriptionOpenLoading(false);
-    } catch (e) {
-      setReinscriptionOpenLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchReInscriptionOpen();
-  }, []);
-
-  if (reinscriptionOpenLoading) return <Loader />;
+  if (isReinscriptionOpenLoading) return <Loader />;
 
   if (!young) return <Redirect to="/auth" />;
 
@@ -89,9 +67,8 @@ export default function Home() {
     }
 
     // Mon inscription est en cours :
-
-    if (reinscriptionOpen && hasAccessToReinscription(young)) {
-      return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
+    if (isReinscriptionOpen && hasAccessToReinscription(young)) {
+      return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
     }
 
     if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
