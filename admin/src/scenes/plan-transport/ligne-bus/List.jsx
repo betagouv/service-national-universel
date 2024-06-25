@@ -239,7 +239,7 @@ export default function List() {
               type="wired"
               onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
             />,
-            returnSelect(cohort, filterArray, selectedFilters, user),
+            returnSelect(cohort, selectedFilters, user),
           ]}
         />
       )}
@@ -336,7 +336,7 @@ export default function List() {
   );
 }
 
-const returnSelect = (cohort, filterArray, selectedFilters, user) => {
+const returnSelect = (cohort, selectedFilters, user) => {
   const selectTest = [
     {
       key: "1",
@@ -348,7 +348,6 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
               title="Plan de transport"
               exportTitle="Plan_de_transport"
               route="/elasticsearch/plandetransport/export"
-              filters={filterArray}
               selectedFilters={selectedFilters}
               setIsOpen={() => true}
               customCss={{
@@ -410,7 +409,7 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
         [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
           ? {
               action: async () => {
-                await exportLigneBus(user, cohort);
+                await exportLigneBus(selectedFilters);
               },
               render: (
                 <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 ">

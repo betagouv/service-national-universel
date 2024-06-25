@@ -100,10 +100,12 @@ function filterBusLinesByRole(lines, user) {
   }
 }
 
-export async function exportLigneBus(user, cohort) {
+export async function exportLigneBus(selectedFilters) {
   try {
     const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true&needCohesionCenterInfo=true&needMeetingPointsInfo=true`, {
-      filters: { cohort: [cohort] },
+      filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
+        return { ...e, [key]: value.filter };
+      }, {}),
     });
     if (!ok || !ligneBus?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
 
