@@ -1,4 +1,4 @@
-import { STATUS_PHASE1_CLASSE_LIST } from '../constants/constants';
+import { STATUS_PHASE1_CLASSE_LIST } from "../constants/constants";
 export type ClasseDto = {
   _id: string;
   etablissementId: string;
@@ -10,7 +10,7 @@ export type ClasseDto = {
   uniqueId: string;
   uniqueKeyAndId: string;
   name: string;
-  coloration:string;
+  coloration: string;
   estimatedSeats: number;
   totalSeats: number;
   seatsTaken: number;
@@ -36,4 +36,4 @@ export type ClasseDto = {
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date;
-}
+};
