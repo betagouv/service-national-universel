@@ -64,24 +64,6 @@ export const GROUPSTEPS = {
   CONFIRM_DELETE_GROUP: "CONFIRM_DELETE_GROUP",
 };
 
-function getRegionsFromBusLine(line) {
-  let regions = [];
-  regions.push(line.centerRegion);
-  for (const pdr of line.pointDeRassemblements) {
-    regions.push(pdr.region);
-  }
-  return regions;
-}
-
-function getDepartmentsFromBusLine(line) {
-  let departments = [];
-  departments.push(line.centerDepartment);
-  for (const pdr of line.pointDeRassemblements) {
-    departments.push(pdr.department);
-  }
-  return departments;
-}
-
 export async function exportLigneBus(cohort) {
   try {
     const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true&needCohesionCenterInfo=true&needMeetingPointsInfo=true`, {
