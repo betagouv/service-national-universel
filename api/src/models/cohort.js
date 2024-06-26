@@ -2,8 +2,13 @@ const mongoose = require("mongoose");
 const { isAfter, isWithinInterval } = require("date-fns");
 const { COHORT_TYPE, COHORT_TYPE_LIST, getDateTimeByTimeZoneOffset } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
+const ClasseModel = require("./cle/classe");
+const YoungModel = require("./young");
+const { capture } = require("../sentry");
 
 const MODELNAME = "cohort";
+
+const StateManager = require("../states");
 
 const DSNJExportDates = new mongoose.Schema({
   cohesionCenters: Date,
@@ -377,6 +382,20 @@ Schema.virtual("isReInscriptionOpen").get(function () {
 
 Schema.pre("save", function (next) {
   this.updatedAt = Date.now();
+  next();
+});
+
+Schema.pre("save", async function (next, params) {
+  this.user = params?.fromUser;
+  this.updatedAt = Date.now();
+  if (!this.isNew && (this.isModified("inscriptionStartDate") || this.isModified("inscriptionEndDate"))) {
+    const classes = await ClasseModel.find({ cohort: this.name });
+    if (classes.length > 0) {
+      classes.each((classe) => {
+        StateManager.Classe.compute(classe._Id, this.user, YoungModel).catch((error) => capture(error));
+      });
+    }
+  }
   next();
 });
 

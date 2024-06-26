@@ -39,6 +39,7 @@ import YoungModel from "../../models/young";
 import StateManager from "../../states";
 import { validateId } from "../../utils/validator";
 import ReferentModel from "../../models/referent";
+import { get as getPatches } from "../../controllers/patches";
 
 const router = express.Router();
 router.post(
@@ -394,5 +395,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     res.status(500).send({ ok: false, code: error });
   }
 });
+
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await getPatches(req, res, ClasseModel));
 
 module.exports = router;
