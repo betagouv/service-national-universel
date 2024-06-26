@@ -1,5 +1,5 @@
 import { getClassesAndEtablissementsFromAppelAProjets } from "../../providers/demarcheSimplifiee/demarcheSimplifieeProvider";
-import { IReferent } from "../../models/referentType";
+import { IReferent, ReferentMetadata } from "../../models/referentType";
 import { IEtablissement } from "../../models/cle/etablissementType";
 import { IClasse } from "../../models/cle/classeType";
 import { CleClasseModel, CleEtablissementModel, ReferentModel } from "../../models";
@@ -7,7 +7,7 @@ import { apiEducation } from "../../services/gouv.fr/api-education";
 import { mapEtablissementFromAnnuaireToEtablissement } from "../etablissement/etablissementMapper";
 import { buildUniqueClasseId, findClasseByUniqueKeyAndUniqueId } from "../classe/classeService";
 import { IAppelAProjet } from "./appelAProjetType";
-import { ROLES, SUB_ROLES, ClasseSchoolYear, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+import { ClasseSchoolYear, ROLES, STATUS_CLASSE, STATUS_PHASE1_CLASSE, SUB_ROLES, ReferentCreatedBy } from "snu-lib";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 
 export class AppelAProjetService {
@@ -58,13 +58,13 @@ export class AppelAProjetService {
       this.referentsAlreadyExisting.push({ _id: referentEtablissement.id, email: referentEtablissement.email, role: referentEtablissement.role });
     } else {
       if (save) {
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // TODO : check if it should be ADMINISTRATEUR_CLE
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 };
+
         const createdReferent = await ReferentModel.create({
           ...appelAProjet.referentEtablissement,
           role: ROLES.ADMINISTRATEUR_CLE,
           subRole: SUB_ROLES.referent_etablissement,
+          metadata: referentMetadata,
         });
         referentEtablissementId = createdReferent.id;
       }
@@ -132,7 +132,8 @@ export class AppelAProjetService {
     } else {
       this.referentsToCreate.push(appelAProjet.referentClasse);
       if (save) {
-        const createdReferent = await ReferentModel.create({ ...appelAProjet.referentClasse, role: ROLES.REFERENT_CLASSE });
+        const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 };
+        const createdReferent = await ReferentModel.create({ ...appelAProjet.referentClasse, role: ROLES.REFERENT_CLASSE, metadata: referentMetadata });
         referentClasseId = createdReferent.id;
       }
     }
@@ -170,7 +171,7 @@ export class AppelAProjetService {
       region: etablissement.region,
       status: STATUS_CLASSE.CREATED,
       statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
-      totalSeats: 0,
+      totalSeats: classeFromAppelAProjet.estimatedSeats,
       name: classeFromAppelAProjet.name,
       coloration: classeFromAppelAProjet.coloration,
       uniqueId: uniqueClasseId,
@@ -179,7 +180,6 @@ export class AppelAProjetService {
       schoolYear: ClasseSchoolYear.YEAR_2024_2025,
       referentClasseIds: referentClasseIds,
       etablissementId: etablissement._id!,
-      cohort: "test_cohort",
       estimatedSeats: classeFromAppelAProjet.estimatedSeats,
     };
   };

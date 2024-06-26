@@ -4,7 +4,7 @@ import config from "config";
 import { IAppelAProjet } from "../../cle/appelAProjetCle/appelAProjetType";
 import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
 import { DemarcheSimplifieeDto, DossierState } from "./demarcheSimplifieeDto";
-import { CLE_COLORATION } from "snu-lib";
+import { CLE_COLORATION, TYPE_CLASSE } from "snu-lib";
 
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
@@ -52,6 +52,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     classe.coloration = mapColorationFromAppelAProjetToColoration(champDescriptorValueMap.get("Q2hhbXAtNDA1NDI0Mw=="));
     classe.estimatedSeats = parseInt(champDescriptorValueMap.get("Q2hhbXAtNDA1NDEzNA==") || "0");
     classe.trimester = champDescriptorValueMap.get("Q2hhbXAtNDA1NDQyMw==");
+    classe.type = mapClasseTypeFromAppelAProjetToClasseType(champDescriptorValueMap.get("Q2hhbXAtNDA1NDEyNg=="));
 
     referentClasse.lastName = champDescriptorValueMap.get("Q2hhbXAtNDA1MTUxNg==") || "";
     referentClasse.firstName = champDescriptorValueMap.get("Q2hhbXAtNDA1MTUxNw==") || "";
@@ -88,6 +89,18 @@ const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: s
       return CLE_COLORATION.SPORT;
     default:
       console.log("No matching coloration for : ", colorationFromAppelAProjet);
+      return undefined;
+  }
+};
+
+const mapClasseTypeFromAppelAProjetToClasseType = (classeType: string | undefined): string | undefined => {
+  switch (classeType) {
+    case "Un groupe d’élèves issus de plusieurs classes":
+      return TYPE_CLASSE.GROUP;
+    case "Des élèves inscrits dans une seule classe":
+      return TYPE_CLASSE.FULL;
+    default:
+      console.log("No matching classe type for : ", classeType);
       return undefined;
   }
 };

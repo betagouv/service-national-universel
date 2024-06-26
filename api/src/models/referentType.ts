@@ -1,4 +1,5 @@
 import { Document } from "mongoose";
+import { ReferentCreatedBy } from "snu-lib/src/constants/referentConstants";
 
 export type ReferentDocument = IReferent & Document;
 
@@ -40,4 +41,9 @@ export interface IReferent extends Document {
   deletedAt: Date;
   createdAt: Date;
   updatedAt: Date;
+  metadata: ReferentMetadata;
+}
+
+export interface ReferentMetadata {
+  createdBy: ReferentCreatedBy;
 }

@@ -25,6 +25,7 @@ describe("demarcheSimplifieeProvider", () => {
           coloration: "RESILIENCE",
           estimatedSeats: 42,
           trimester: "Au 3ème trimestre (séjour réalisé en avril, mai ou juin 2025).",
+          type: "GROUP",
         },
         referentClasse: {
           lastName: "NOM_REFERENT",
