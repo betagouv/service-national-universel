@@ -2,11 +2,8 @@ import { CohortState } from "@/redux/cohorts/reducer";
 import { Session } from "@/types";
 import dayjs from "dayjs";
 
-export function getNextSession(sessions: Session[], cohorts: CohortState["Cohorts"]) {
-  return sessions
-    .map((session) => ({
-      ...session,
-      dateStart: session.dateStart || cohorts.find((cohort) => cohort.name === session.cohort)?.dateStart,
-    }))
-    .filter((session) => dayjs(session.dateStart).isAfter(dayjs()))[0];
+export function getDefaultSession(sessions: Session[], cohorts: CohortState["Cohorts"]) {
+  const filteredSessions = sessions.filter((session) => dayjs(session.dateStart || cohorts.find((cohort) => cohort.name === session.cohort)?.dateStart).isAfter(dayjs()));
+  if (filteredSessions.length > 0) return filteredSessions[0];
+  return sessions[sessions.length - 1];
 }
