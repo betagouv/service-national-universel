@@ -12,6 +12,7 @@ const { ObjectId } = require("mongoose").Types;
 
 import { canEditEstimatedSeats, canEditTotalSeats } from "./classeService";
 import { ROLES, SUB_ROLES, LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib";
+import { IEtablissement } from "../../models/cle/etablissementType";
 
 describe("ClasseService", () => {
   it("should return a pdf", async () => {
@@ -344,7 +345,7 @@ describe("buildUniqueClasseId", () => {
       region: "Île-de-France",
       zip: "75001",
       academy: "Paris",
-    };
+    } as IEtablissement;
     const classe = {
       name: "une classe",
       coloration: "SPORT",
@@ -358,7 +359,7 @@ describe("buildUniqueClasseId", () => {
       region: "Île-de-France",
       zip: "75001",
       academy: "Paris",
-    };
+    } as IEtablissement;
     const classe = { name: "", coloration: undefined };
     const expectedId = "IDFP075-NO_UID";
     expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);

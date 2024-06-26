@@ -19,6 +19,7 @@ export const mapRegionToTrigramme = (region: string | undefined): string | undef
     case "Hauts-de-France":
       return "HDF";
     case "Île-de-France":
+    case "Ile-de-France":
       return "IDF";
     case "La Réunion":
       return "REU";

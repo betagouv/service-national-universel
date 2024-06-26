@@ -46,6 +46,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     const champDescriptorValueMap = new Map(formulaire.champs.map((champ) => [champ.champDescriptorId, champ.stringValue]));
 
     etablissement.uai = getUaiFromString(champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw=="));
+    etablissement.nameAndCommune = champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw==");
     referentEtablissement.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4Mw==") || "";
 
     classe.name = champDescriptorValueMap.get("Q2hhbXAtNDA1NDIzMg==");
@@ -70,7 +71,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
 export const getUaiFromString = (value: string | undefined) => {
   if (!value) return "";
   var match = value.match(/\(([^)]+)\)/);
-  if (!match || !match?.[1]) {
+  if (!match) {
     console.warn("getUaiFromString() - no UAI found in string: ", value);
   }
   return match ? match[1] : "";
