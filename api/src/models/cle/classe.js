@@ -88,7 +88,7 @@ const Schema = new mongoose.Schema({
     type: Number,
     default: 0,
     documentation: {
-      description: "Nombre de places prises de la classe",
+      description: "Nombre de places prises de la classe = nombre d'élèves statut validé",
     },
   },
 
