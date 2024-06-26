@@ -165,7 +165,7 @@ export default function Phase1(props) {
                 <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
                   <div className="mb-2 text-xs font-medium text-gray-900">Centre de cohésion</div>
                   <div className="mb-4 flex w-full flex-col gap-4">
-                    <Field title="Code centre" value={cohesionCenter.code2022} externalLink={`${adminURL}/centre/${cohesionCenter?._id}`} />
+                    <Field title="Code centre" value={cohesionCenter.code2022} externalLink={`${adminURL}/centre/${cohesionCenter?._id}?cohorte=${young.cohort}`} />
                     <Field title="Nom" value={cohesionCenter.name} />
                     <Field title="Code postal" value={cohesionCenter.zip} />
                     <Field title="Ville" value={cohesionCenter.city} />

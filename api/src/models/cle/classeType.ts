@@ -22,6 +22,7 @@ export interface IClasse {
   seatsTaken: number;
   filiere?: string;
   grade?: string;
+  grades?: string[];
   cohesionCenterId?: string;
   sessionId?: string;
   ligneId?: string;

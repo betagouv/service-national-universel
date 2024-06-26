@@ -20,7 +20,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const filterFields = [
       "cohort.keyword",
       "coloration.keyword",
-      "grade.keyword",
+      "grades.keyword",
       "name.keyword",
       "sector.keyword",
       "status.keyword",

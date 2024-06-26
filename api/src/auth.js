@@ -278,7 +278,7 @@ class Auth {
         classeId: classe._id,
         etablissementId: etablissement._id,
         cohort: classe.cohort,
-        grade: classe.grade,
+        //TODO ajouter le grade de la classe selectionné par le jeune
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
@@ -842,7 +842,9 @@ class Auth {
       user.set({ password: newPassword, passwordChangedAt, loginAttempts: 0 });
       await user.save();
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.JWT_SECRET, {
+        expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
+      });
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
