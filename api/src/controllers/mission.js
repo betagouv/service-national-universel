@@ -314,16 +314,15 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
 
     if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    let data = [];
+    const where = { missionId: id };
     if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
-      data = await ApplicationObject.find({ missionId: id, status: { $ne: "WAITING_ACCEPTATION " } });
-    } else data = await ApplicationObject.find({ missionId: id });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    for (let i = 0; i < data.length; i++) {
-      const application = data[i];
-      const mission = await MissionObject.findById(application.missionId);
-      data[i] = { ...serializeApplication(application), mission };
+      where.status = { $ne: "WAITING_ACCEPTATION " };
     }
+    const applications = await ApplicationObject.find(where).populate({ path: "mission" });
+    const data = applications.map((application) => ({
+      ...serializeApplication(application),
+      mission: serializeMission(application.mission),
+    }));
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

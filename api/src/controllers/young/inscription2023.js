@@ -21,6 +21,7 @@ const {
   isYoungInReinscription,
   isCle,
   REGLEMENT_INTERIEUR_VERSION,
+  COHORTS,
 } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("config");
@@ -484,8 +485,11 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      const cohort = await CohortObject.findOne({ name: young.cohort });
-      const CNIFileNotValidOnStart = value.date < new Date(cohort.dateStart);
+      let CNIFileNotValidOnStart = undefined;
+      if (young.cohort !== COHORTS.AVENIR) {
+        const cohort = await CohortObject.findOne({ name: young.cohort });
+        CNIFileNotValidOnStart = value.date < new Date(cohort.dateStart);
+      }
       young.set({ latestCNIFileExpirationDate: value.date, latestCNIFileCategory: value.latestCNIFileCategory, CNIFileNotValidOnStart });
       if (isYoungInReinscription(young)) {
         young.set({ reinscriptionStep2023: STEPS2023.CONFIRM });

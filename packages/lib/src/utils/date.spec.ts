@@ -1,12 +1,13 @@
+import { format } from "date-fns-tz";
 import { formatDateFRTimezoneUTC, getZonedDate, isNowBetweenDates } from "./date";
 
 describe("dates", () => {
   it("should return zoned date", () => {
     let date = getZonedDate("2024-06-03T00:00:00.000+00:00");
-    expect(date.toISOString()).toBe("2024-06-03T00:00:00.000Z");
+    expect(format(date, "yyyy-MM-dd'T'HH:mm:ss.SSS")).toBe("2024-06-03T02:00:00.000");
 
     date = getZonedDate("2024-05-26T00:00:00.000Z", "America/Martinique");
-    expect(date.toISOString()).toBe("2024-05-25T18:00:00.000Z");
+    expect(format(date, "yyyy-MM-dd'T'HH:mm:ss.SSS")).toBe("2024-05-25T20:00:00.000");
   });
   it("formatDateFRTimezoneUTC", () => {
     let date = formatDateFRTimezoneUTC("2024-06-03T23:00:00.000+00:00");

@@ -1,6 +1,12 @@
 import fetch from "node-fetch";
 
 const request = require("supertest");
+const jwt = require("jsonwebtoken");
+
+const { ROLES, COHORTS } = require("snu-lib");
+
+const fileUtils = require("../utils/file");
+
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
 //application
@@ -13,11 +19,12 @@ const { createMissionHelper } = require("./helpers/mission");
 const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
 
-const { ROLES } = require("snu-lib");
+const { createCohortHelper } = require("./helpers/cohort");
+const getNewCohortFixture = require("./fixtures/cohort");
 
-const jwt = require("jsonwebtoken");
 const { createReferentHelper } = require("./helpers/referent");
 const getNewReferentFixture = require("./fixtures/referent");
+
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
@@ -41,6 +48,9 @@ jest.mock("../cryptoUtils", () => ({
   encrypt: () => Buffer.from("test"),
 }));
 jest.mock("node-fetch");
+jest.mock("../utils/virusScanner", () => jest.fn().mockResolvedValue({ isInfected: false }));
+
+const getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -514,31 +524,63 @@ describe("Young", () => {
 
   describe("POST /young/:youngId/documents/:key", () => {
     it("should send file for the young", async () => {
-      // This test should be improved to check the file is sent (currently no file is sent)
       const young = await createYoungHelper(getNewYoungFixture());
+      await createCohortHelper(
+        getNewCohortFixture({
+          name: young.cohort,
+        }),
+      );
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
 
+      getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
       let res = await request(getAppHelper())
         .post(`/young/${young._id}/documents/cniFiles`)
-        .send({ body: JSON.stringify({ names: ["e"] }) });
+        .field("body", JSON.stringify({ names: ["image.jpeg"], category: "cniNew", expirationDate: "2024-06-25T09:33:21.470Z" }))
+        .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
       expect(res.status).toEqual(200);
-      // expect(res.body.data[0].name).toEqual("e");
       expect(res.body.ok).toEqual(true);
 
       // With military file.
+      getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
       res = await request(getAppHelper())
         .post(`/young/${young._id}/documents/militaryPreparationFilesIdentity`)
-        .send({ body: JSON.stringify({ names: ["e"] }) });
+        .field("body", JSON.stringify({ names: ["image.jpeg"] }))
+        .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
       expect(res.status).toEqual(200);
-      // expect(res.body.data).toEqual(["e"]);
       expect(res.body.ok).toEqual(true);
 
       passport.user = previous;
     });
 
-    it.skip("should not accept invalid body", async () => {
+    it("should send file for the young with cohort avenir", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: COHORTS.AVENIR }));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+      let res = await request(getAppHelper())
+        .post(`/young/${young._id}/documents/cniFiles`)
+        .field("body", JSON.stringify({ names: ["image.jpeg"], category: "cniNew", expirationDate: "2024-06-25T09:33:21.470Z" }))
+        .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
+      expect(res.status).toEqual(200);
+      expect(res.body.ok).toEqual(true);
+
+      // With military file.
+      getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+      res = await request(getAppHelper())
+        .post(`/young/${young._id}/documents/militaryPreparationFilesIdentity`)
+        .field("body", JSON.stringify({ names: ["image.jpeg"] }))
+        .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
+      expect(res.status).toEqual(200);
+      expect(res.body.ok).toEqual(true);
+
+      passport.user = previous;
+    });
+
+    it("should not accept invalid body", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
       const previous = passport.user;
@@ -546,12 +588,12 @@ describe("Young", () => {
 
       const res = await request(getAppHelper())
         .post(`/young/${young._id}/documents/cniFiles`)
-        .send({ body: JSON.stringify({ blablabla: ["e"] }) });
+        .send({ body: JSON.stringify({ expirationDate: null }) });
       expect(res.status).toEqual(400);
       passport.user = previous;
     });
 
-    it("should not accept invalid file name", async () => {
+    it("should not accept invalid param key", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
       const previous = passport.user;
@@ -560,6 +602,19 @@ describe("Young", () => {
       const res = await request(getAppHelper())
         .post(`/young/${young._id}/documents/thisPropertyDoesNotExists`)
         .send({ body: JSON.stringify({ names: ["e"] }) });
+      expect(res.status).toEqual(400);
+      passport.user = previous;
+    });
+
+    it("should not accept invalid file mime", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const res = await request(getAppHelper())
+        .post(`/young/${young._id}/documents/cniFiles`)
+        .field("body", JSON.stringify({ names: ["test.csv"] }))
+        .attach("file", Buffer.from("contenu"), { filename: "test.csv", contentType: "text/csv" });
       expect(res.status).toEqual(400);
       passport.user = previous;
     });
