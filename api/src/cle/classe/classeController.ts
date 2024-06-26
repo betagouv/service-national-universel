@@ -212,9 +212,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       filiere: Joi.string()
         .valid(...CLE_FILIERE_LIST)
         .required(),
-      grade: Joi.array()
+      grades: Joi.array()
         .items(Joi.string().valid(...CLE_GRADE_LIST))
-        .required(),
+        .required(), 
       type: Joi.string()
         .valid(...TYPE_CLASSE_LIST)
         .required(),

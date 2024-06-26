@@ -238,11 +238,11 @@ export default function GeneralInfos({
             isMulti={true}
             isClearable={true}
             label="Niveau"
-            value={classe?.grade ? classe.grade.map((grade) => ({ value: grade, label: translateGrade(grade) })) : null}
+            value={classe?.grades ? classe.grades.map((grade) => ({ value: grade, label: translateGrade(grade) })) : null}
             onChange={(options) => {
-              setClasse({ ...classe, grade: options ? options.map((opt) => opt.value) : [] });
+              setClasse({ ...classe, grades: options ? options.map((opt) => opt.value) : [] });
             }}
-            error={errors.grade}
+            error={errors.grades}
           />
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
             <>

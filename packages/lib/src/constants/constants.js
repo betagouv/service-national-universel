@@ -962,6 +962,7 @@ const CLE_GRADE = {
   TermPro: GRADES["TermPro"],
   "1ereCAP": "1ereCAP",
   "2ndeCAP": "2ndeCAP",
+  CAP: "CAP",
   Autre: "Autre",
 };
 
