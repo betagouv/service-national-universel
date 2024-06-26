@@ -67,13 +67,12 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
   });
 };
 
-export const splitEtablissementCommuneUai = (champ: string) => {
-  return champ.split(/, (?=[^(]*\))|, /);
-};
-
 export const getUaiFromString = (value: string | undefined) => {
   if (!value) return "";
   var match = value.match(/\(([^)]+)\)/);
+  if (!match || !match?.[1]) {
+    console.warn("getUaiFromString() - no UAI found in string: ", value);
+  }
   return match ? match[1] : "";
 };
 
@@ -88,7 +87,7 @@ const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: s
     case "Sport et Jeux Olympiques et Paralympiques":
       return CLE_COLORATION.SPORT;
     default:
-      console.log("mapColorationFromAppelAProjetToColoration() - No matching coloration for : ", colorationFromAppelAProjet);
+      console.warn("mapColorationFromAppelAProjetToColoration() - No matching coloration for : ", colorationFromAppelAProjet);
       return undefined;
   }
 };
@@ -100,7 +99,7 @@ const mapClasseTypeFromAppelAProjetToClasseType = (classeType: string | undefine
     case "Des élèves inscrits dans une seule classe":
       return TYPE_CLASSE.FULL;
     default:
-      console.log("mapClasseTypeFromAppelAProjetToClasseType() -No matching classe type for : ", classeType);
+      console.warn("mapClasseTypeFromAppelAProjetToClasseType() - No matching classe type for : ", classeType);
       return undefined;
   }
 };

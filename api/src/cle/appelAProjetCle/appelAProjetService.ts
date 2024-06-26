@@ -1,6 +1,6 @@
 import { getClassesAndEtablissementsFromAppelAProjets } from "../../providers/demarcheSimplifiee/demarcheSimplifieeProvider";
 import { IReferent, ReferentMetadata } from "../../models/referentType";
-import { IEtablissement } from "../../models/cle/etablissementType";
+import { EtablissementDocument, IEtablissement } from "../../models/cle/etablissementType";
 import { IClasse } from "../../models/cle/classeType";
 import { CleClasseModel, CleEtablissementModel, ReferentModel } from "../../models";
 import { apiEducation } from "../../services/gouv.fr/api-education";
@@ -36,7 +36,7 @@ export class AppelAProjetService {
       if (!savedEtablissement) {
         continue;
       }
-      let referentClasseId = await this.processReferentClasse(appelAProjet, referentEtablissementId, save);
+      let referentClasseId = await this.processReferentClasse(appelAProjet, save);
       await this.processClasses(appelAProjet, savedEtablissement, referentClasseId, save);
     }
     return [
@@ -68,7 +68,7 @@ export class AppelAProjetService {
         });
         referentEtablissementId = createdReferent.id;
       }
-      this.referentsToCreate.push({ ...appelAProjet.referentClasse, id: referentEtablissementId });
+      this.referentsToCreate.push({ ...appelAProjet.referentEtablissement, id: referentEtablissementId });
     }
     return referentEtablissementId;
   }
@@ -79,15 +79,6 @@ export class AppelAProjetService {
       this.etablissementsErrors.push({
         error: "No UAI provided",
         uai: null,
-        email: appelAProjet.referentEtablissement.email,
-      });
-      return;
-    }
-
-    if ([...this.etablissementsToCreate, ...this.etablissementsToUpdate].map((etablissement) => etablissement.uai).includes(uai)) {
-      this.etablissementsErrors.push({
-        error: "UAI already processed",
-        uai: appelAProjet.etablissement.uai,
         email: appelAProjet.referentEtablissement.email,
       });
       return;
@@ -107,41 +98,53 @@ export class AppelAProjetService {
     const formattedEtablissement = mapEtablissementFromAnnuaireToEtablissement(etablissementFromAnnuaire, [referentEtablissementId]);
 
     // TODO: handle schoolYears array
-    const foundEtablissement = await CleEtablissementModel.findOne({ uai });
-    let savedEtablissement;
-    if (foundEtablissement) {
+    const existingEtablissement: EtablissementDocument = await CleEtablissementModel.findOne({ uai });
+    if (existingEtablissement) {
+      if (save) {
+        const referentEtablissementIds = [...new Set([...existingEtablissement.referentEtablissementIds, referentEtablissementId])];
+        existingEtablissement.set({ ...existingEtablissement, ...formattedEtablissement, referentEtablissementIds: referentEtablissementIds });
+        await existingEtablissement.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
+        this.etablissementsToUpdate.push(existingEtablissement.toObject());
+        return existingEtablissement;
+      }
       this.etablissementsToUpdate.push(formattedEtablissement);
-      if (save) {
-        const referentEtablissementIds = [...new Set([...foundEtablissement.referentEtablissementIds, referentEtablissementId])];
-        savedEtablissement = await foundEtablissement.save({ ...foundEtablissement, ...formattedEtablissement, referentEtablissementIds: referentEtablissementIds });
-      }
-    } else {
-      this.etablissementsToCreate.push(formattedEtablissement);
-      if (save) {
-        savedEtablissement = await CleEtablissementModel.create(formattedEtablissement);
-      }
+      return formattedEtablissement;
     }
-    return savedEtablissement || formattedEtablissement;
+
+    let createdEtablissement;
+    if (save) {
+      createdEtablissement = await CleEtablissementModel.create(formattedEtablissement);
+    }
+    this.etablissementsToCreate.push({ ...formattedEtablissement, _id: createdEtablissement?.id });
+
+    return createdEtablissement;
   }
 
-  async processReferentClasse(appelAProjet: IAppelAProjet, referentEtablissementId, save: boolean) {
-    const referentClasse = await ReferentModel.findOne({ email: appelAProjet.referentClasse.email });
-    let referentClasseId = referentEtablissementId;
-    if (referentClasse) {
-      this.referentsAlreadyExisting.push({ _id: referentClasse.id, email: referentClasse.email, role: referentClasse.role });
-    } else {
-      this.referentsToCreate.push(appelAProjet.referentClasse);
-      if (save) {
-        const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 };
-        const createdReferent = await ReferentModel.create({ ...appelAProjet.referentClasse, role: ROLES.REFERENT_CLASSE, metadata: referentMetadata });
-        referentClasseId = createdReferent.id;
+  async processReferentClasse(appelAProjet: IAppelAProjet, save: boolean) {
+    const existingReferentClasse = await ReferentModel.findOne({ email: appelAProjet.referentClasse.email });
+
+    if (existingReferentClasse) {
+      const hasAlreadyBeenProcessed =
+        this.referentsToCreate.some((referent) => referent.email === appelAProjet.referentClasse.email) ||
+        this.referentsAlreadyExisting.some((referent) => referent.email === appelAProjet.referentClasse.email);
+      if (!hasAlreadyBeenProcessed) {
+        this.referentsAlreadyExisting.push({ _id: existingReferentClasse._id, email: existingReferentClasse.email, role: existingReferentClasse.role });
       }
+      return existingReferentClasse._id;
     }
-    return referentClasseId;
+
+    let createdReferent;
+    if (save) {
+      const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 };
+      createdReferent = await ReferentModel.create({ ...appelAProjet.referentClasse, role: ROLES.REFERENT_CLASSE, metadata: referentMetadata });
+    }
+    this.referentsToCreate.push({ ...appelAProjet.referentClasse, _id: createdReferent._id });
+
+    return createdReferent._id;
   }
 
   async processClasses(appelAProjet: IAppelAProjet, savedEtablissement: IEtablissement, referentClasseId, save: boolean) {
-    const uniqueClasseId = buildUniqueClasseId(appelAProjet.etablissement, {
+    const uniqueClasseId = buildUniqueClasseId(savedEtablissement, {
       name: appelAProjet.classe.name || "",
       coloration: appelAProjet.classe.coloration,
     });
@@ -157,10 +160,11 @@ export class AppelAProjetService {
       });
     } else {
       formattedClasse = this.mapAppelAProjetToClasse(appelAProjet.classe, savedEtablissement, uniqueClasseId, [referentClasseId]);
-      this.classesToCreate.push(formattedClasse);
+      let createdClasse;
       if (save) {
-        await CleClasseModel.create(formattedClasse);
+        createdClasse = await CleClasseModel.create(formattedClasse);
       }
+      this.classesToCreate.push({ ...formattedClasse, _id: createdClasse?._id });
     }
   }
 

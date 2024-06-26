@@ -118,6 +118,8 @@ describe("Appel A Projet Controller", () => {
       const etablissementAfterSync = await CleEtablissementModel.findOne({ uai: "UAI_42" });
       const referentClasseAfterSync = await ReferentModel.findOne({ email: "email@referent.fr" });
       const classeAfterSync = await CleClasseModel.findOne({ etablissementId: etablissementAfterSync._id });
+      console.log("!!!!!!!!!!!!!!!!!classeAfterSync");
+      console.log(classeAfterSync);
 
       expect(referentEtablissementAfterSync.email).toEqual("mail@etablissement.fr");
       expect(etablissementAfterSync.uai).toEqual("UAI_42");

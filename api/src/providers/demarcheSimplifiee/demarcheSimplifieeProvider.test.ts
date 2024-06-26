@@ -11,10 +11,21 @@ describe("demarcheSimplifieeProvider", () => {
     expect(result).toEqual(expectedOutput);
   });
 
+  it("should return an empty string and log a warning if no UAI is found", () => {
+    const input = "Lycée, Ville ()";
+    const expectedOutput = "";
+
+    console.warn = jest.fn();
+
+    const result = getUaiFromString(input);
+
+    expect(result).toEqual(expectedOutput);
+    expect(console.warn).toHaveBeenCalledWith("getUaiFromString() - no UAI found in string: ", "Lycée, Ville ()");
+  });
+
   it("should return the right data", () => {
     const mockAppelAProjetDto = getMockAppelAProjetDto();
     const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto);
-    console.log(result);
 
     const expectedAppelAProjet = [
       {

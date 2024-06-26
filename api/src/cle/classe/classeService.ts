@@ -70,7 +70,7 @@ export function canEditTotalSeats(user: User) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_REF_CLASSE;
 }
 
-export const buildUniqueClasseId = (etablissement: Partial<IEtablissement>, classe: Pick<IClasse, "name" | "coloration">): string => {
+export const buildUniqueClasseId = (etablissement: IEtablissement, classe: Pick<IClasse, "name" | "coloration">): string => {
   const trigrammeRegion = mapRegionToTrigramme(etablissement.region) || "REG";
   const departmentNumber = `0${(etablissement.zip || "DP")?.substring(0, 2)}`;
   const academy = (etablissement.academy || "A")?.substring(0, 1);
