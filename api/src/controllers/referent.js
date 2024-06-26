@@ -724,7 +724,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         schoolRegion: etablissement.region,
         schoolCountry: etablissement.country,
         schoolId: undefined,
-        grade: classe.grade,
+        //TODO ajouter le grade de l'eleve deduit de la classe
         situation: getYoungSituationIfCLE(classe.filiere),
       });
       if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {

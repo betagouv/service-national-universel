@@ -104,7 +104,7 @@ export default function List() {
     { title: "Couleur", name: "coloration", missingLabel: "Non renseigné" },
     { title: "Type", name: "type", missingLabel: "Non renseigné" },
     { title: "Secteur", name: "sector", missingLabel: "Non renseigné" },
-    { title: "Niveau", name: "grade", missingLabel: "Non renseigné" },
+    { title: "Niveaux", name: "grades", missingLabel: "Non renseigné" },
     { title: "Département", name: "department", missingLabel: "Non renseigné" },
     { title: "Région", name: "region", missingLabel: "Non renseigné" },
     { title: "Académie", name: "academy", missingLabel: "Non renseigné" },
