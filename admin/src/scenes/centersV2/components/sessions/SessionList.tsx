@@ -42,15 +42,18 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const history = useHistory();
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const user = useSelector((state: AuthState) => state.Auth.user);
-  const selectedCohort = new URLSearchParams(location.search).get("cohorte") || getDefaultSession(sessions, cohorts)?.cohort;
-  const cohort = cohorts.find((cohort) => cohort.name === selectedCohort) || cohorts[0];
-  const session = sessions.find((session) => session.cohort === selectedCohort) || sessions[0];
+
+  const cohortParam = new URLSearchParams(location.search).get("cohorte");
+  const session = cohortParam ? sessions.find((session) => session.cohort === cohortParam) : getDefaultSession(sessions, cohorts);
+  const cohort = cohorts.find((cohort) => cohort.name === session?.cohort);
   const setSession = (newSession: Session) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
 
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState<Session | null>(null);
   const [errors, setErrors] = useState<Errors>({});
   const [showModalDelete, setShowModalDelete] = useState(false);
+
+  if (!session || !cohort) return <div></div>;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -137,7 +140,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
       <form onSubmit={handleSubmit} id="session-form">
         <div className="flex items-center justify-between mb-3">
           <Title>Par séjour</Title>
-          <SelectCohort cohort={selectedCohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} key="selectCohort" />
+          <SelectCohort cohort={session?.cohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} key="selectCohort" />
         </div>
         <Container
           title="Détails"
