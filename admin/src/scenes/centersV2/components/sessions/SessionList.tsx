@@ -25,6 +25,7 @@ import SelectCohort from "@/components/cohorts/SelectCohort";
 import { Title } from "../commons";
 import TimeSchedule from "../TimeSchedule";
 import PedagoProject from "../PedagoProject";
+import { getNextSession } from "@/utils/session";
 
 type Props = {
   center: Center;
@@ -41,7 +42,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const history = useHistory();
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const user = useSelector((state: AuthState) => state.Auth.user);
-  const selectedCohort = new URLSearchParams(location.search).get("cohorte") || sessions[0]?.cohort;
+  const selectedCohort = new URLSearchParams(location.search).get("cohorte") || getNextSession(sessions, cohorts)?.cohort || sessions[sessions.length - 1]?.cohort;
   const cohort = cohorts.find((cohort) => cohort.name === selectedCohort) || cohorts[0];
   const session = sessions.find((session) => session.cohort === selectedCohort) || sessions[0];
   const setSession = (newSession: Session) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
