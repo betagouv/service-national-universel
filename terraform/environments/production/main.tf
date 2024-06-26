@@ -58,6 +58,7 @@ resource "scaleway_iam_policy" "deploy" {
       "SecretManagerReadOnly",
       "SecretManagerSecretAccess",
       "ObservabilityReadOnly",
+      "ServerlessJobsFullAccess",
     ]
   }
   rule {
