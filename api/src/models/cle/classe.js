@@ -24,7 +24,6 @@ const Schema = new mongoose.Schema({
 
   cohort: {
     type: String,
-    required: true,
     documentation: {
       description: "Cohorte de la classe",
     },

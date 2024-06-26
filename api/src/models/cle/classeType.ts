@@ -11,7 +11,7 @@ export interface IClasse {
   _id?: string;
   etablissementId: string;
   referentClasseIds: string[];
-  cohort: string;
+  cohort?: string;
   uniqueKey: string;
   uniqueId?: string;
   uniqueKeyAndId: string;
