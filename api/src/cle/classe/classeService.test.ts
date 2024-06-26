@@ -341,7 +341,7 @@ describe("canEditTotalSeats", () => {
 describe("buildUniqueClasseId", () => {
   it("should return the correct unique classe ID", () => {
     const etablissement = {
-      region: "Ile-de-France",
+      region: "Île-de-France",
       zip: "75001",
       academy: "Paris",
     };
@@ -349,18 +349,18 @@ describe("buildUniqueClasseId", () => {
       name: "une classe",
       coloration: "SPORT",
     };
-    const expectedId = "ILEP075-5Z5YS9";
+    const expectedId = "IDFP075-E73E72";
     expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
   });
 
   it("should handle missing inputs gracefully and return NO_UID", () => {
     const etablissement = {
-      region: "Ile-de-France",
+      region: "Île-de-France",
       zip: "75001",
       academy: "Paris",
     };
     const classe = { name: "", coloration: undefined };
-    const expectedId = "ILEP075-NO_UID";
+    const expectedId = "IDFP075-NO_UID";
     expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
   });
 });

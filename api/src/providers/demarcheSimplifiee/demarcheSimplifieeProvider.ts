@@ -16,7 +16,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IA
   let appelsAProjet: IAppelAProjet[] = [];
   while (hasNextPage && numberOfCalls < 50) {
     console.time("Demarche_Simplifiee_call_" + numberOfCalls);
-    console.log("Current Demarche_Simplifiee_Current_Cursor: ", cursor);
+    console.log("getClassesAndEtablissementsFromAppelAProjets() - Current Demarche_Simplifiee_Current_Cursor: ", cursor);
     const body = buildDemarcheSimplifieeBody(91716, cursor, DossierState.ACCEPTE);
     const demarcheSimplifieeAppelAProjetResponse: Response = await fetch(DEMARCHE_SIMPLIFIEE_API, {
       method: "POST",
@@ -32,7 +32,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IA
     console.timeEnd("Demarche_Simplifiee_call_" + numberOfCalls);
     numberOfCalls++;
   }
-  console.log("getClassesAndEtablissementsFromAppelAProjets - appelsAProjet.length: ", appelsAProjet.length);
+  console.log("getClassesAndEtablissementsFromAppelAProjets() - appelsAProjet.length: ", appelsAProjet.length);
   return appelsAProjet;
 };
 
@@ -88,7 +88,7 @@ const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: s
     case "Sport et Jeux Olympiques et Paralympiques":
       return CLE_COLORATION.SPORT;
     default:
-      console.log("No matching coloration for : ", colorationFromAppelAProjet);
+      console.log("mapColorationFromAppelAProjetToColoration() - No matching coloration for : ", colorationFromAppelAProjet);
       return undefined;
   }
 };
@@ -100,7 +100,7 @@ const mapClasseTypeFromAppelAProjetToClasseType = (classeType: string | undefine
     case "Des élèves inscrits dans une seule classe":
       return TYPE_CLASSE.FULL;
     default:
-      console.log("No matching classe type for : ", classeType);
+      console.log("mapClasseTypeFromAppelAProjetToClasseType() -No matching classe type for : ", classeType);
       return undefined;
   }
 };

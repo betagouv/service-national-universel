@@ -13,6 +13,7 @@ import { ClasseDto } from "snu-lib/src/dto";
 import { IEtablissement } from "../../models/cle/etablissementType";
 import { ClasseDocument, IClasse } from "../../models/cle/classeType";
 import { CleClasseModel } from "../../models";
+import { mapRegionToTrigramme } from "../../services/regionService";
 const crypto = require("crypto");
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
@@ -70,13 +71,13 @@ export function canEditTotalSeats(user: User) {
 }
 
 export const buildUniqueClasseId = (etablissement: Partial<IEtablissement>, classe: Pick<IClasse, "name" | "coloration">): string => {
-  const trigrammeRegion = (etablissement.region || "REG")?.substring(0, 3)?.toUpperCase();
+  const trigrammeRegion = mapRegionToTrigramme(etablissement.region) || "REG";
   const departmentNumber = `0${(etablissement.zip || "DP")?.substring(0, 2)}`;
   const academy = (etablissement.academy || "A")?.substring(0, 1);
   let hash = crypto
     .createHash("sha256")
     .update(`${classe?.name}${classe?.coloration}` || "NAME")
-    .digest("base64");
+    .digest("hex");
   if (!classe?.name || !classe?.coloration) {
     hash = "NO_UID";
   }
