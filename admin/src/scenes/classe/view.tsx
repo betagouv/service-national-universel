@@ -126,7 +126,7 @@ export default function View() {
       coloration?: string;
       totalSeats?: string;
       filiere?: string;
-      grades?: string;
+      grades?: string[];
       estimatedSeats?: string;
       trimester?: string;
       type?: string;
