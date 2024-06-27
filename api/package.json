@@ -21,7 +21,9 @@
     "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "doc": "node ./src/utils/generate-models-documentation.js",
     "clean": "rm -fr node_modules .turbo",
-    "build": "tsc -b ./build.tsconfig.json"
+    "build": "tsc -b ./build.tsconfig.json",
+    "migrate": "migrate-mongo up",
+    "create-migration": "migrate-mongo create"
   },
   "author": "SELEGO",
   "license": "MIT",
@@ -54,6 +56,7 @@
     "joi": "^17.7.0",
     "jsonwebtoken": "^9.0.1",
     "logfmt": "^1.4.0",
+    "migrate-mongo": "^11.0.0",
     "mime-types": "^2.1.35",
     "mongoose": "^5.13.9",
     "mongoose-patch-history": "^2.0.0",
