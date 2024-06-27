@@ -29,10 +29,18 @@ jobs:
         continue-on-error: false
         run: npm run build -w packages/lib
 
-      - name: Lint code
+      - name: Lint lib code
         working-directory: packages/lib
         run: npm run lint
 
-      - name: Test
+      - name: Test lib
         working-directory: packages/lib
         run: npm run test
+
+      - name: Build ds
+        continue-on-error: false
+        run: npm run build -w packages/ds
+
+      - name: Lint ds code
+        working-directory: packages/ds
+        run: npm run lint

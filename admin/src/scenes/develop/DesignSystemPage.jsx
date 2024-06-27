@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, Select, Navbar } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
 import { BsCheck } from "react-icons/bs";
+
 import { InputPhone } from "@snu/ds/admin";
 import { PHONE_ZONES } from "snu-lib";
+
+import api from "@/services/api";
 import ModalExamples from "./components/Modal";
 import ProfilePicExamples from "./components/ProfilePic";
 import Colors from "./components/Colors";
-import api from "@/services/api";
 
 export default function DesignSystemPage() {
   const [values, setValues] = React.useState({
@@ -80,8 +82,7 @@ export default function DesignSystemPage() {
   console.log(valueSelect);
 
   const [StatusTitle, setStatusTitle] = useState("Candidature approuvée");
-  const [StatusSelect, setStatusSelect] = useState("WAITING_LIST");
-  const [SelectClassName, setSelectClassName] = useState("hover:bg-cyan-200");
+  const [StatusSelect, setStatusSelect] = useState("VALIDATED");
 
   const selectTest = [
     {
@@ -145,12 +146,11 @@ export default function DesignSystemPage() {
           key: "1",
           action: () => {
             setStatusTitle("Candidature approuvée");
-            setStatusSelect("WAITING_LIST");
-            setSelectClassName("hover:bg-cyan-200 hover:boder-cyan-500");
+            setStatusSelect("VALIDATED");
           },
           render: (
             <div className="flex items-center gap-4 p-2 px-3">
-              <div className="w-3 h-3 shrink-0 bg-cyan-600 rounded-[50%] mt-0.5" />
+              <div className="w-3 h-3 shrink-0 bg-emerald-600 rounded-[50%] mt-0.5" />
               <div className={`${StatusSelect === "WAITING_LIST" && "font-bold"} text-sm`}>Candidature Approuvée</div>
               {StatusSelect === "WAITING_LIST" && <BsCheck size={20} color="black" className="mt-0.5" />}
             </div>
@@ -161,7 +161,6 @@ export default function DesignSystemPage() {
           action: () => {
             setStatusTitle("Candidature non Retenue");
             setStatusSelect("REFUSED");
-            setSelectClassName("hover:bg-red-200 hover:boder-red-500");
           },
           render: (
             <div className="flex items-center gap-4 p-2 px-3">
@@ -359,7 +358,7 @@ export default function DesignSystemPage() {
             optionsGroup={selectTest2}
           />
           <Badge title={<HiPencil size={16} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
-          <DropdownButton title={StatusTitle} status={StatusSelect} buttonClassName={SelectClassName} mode={"badge"} optionsGroup={selectTestStatus} />
+          <DropdownButton title={StatusTitle} status={StatusSelect} mode={"badge"} optionsGroup={selectTestStatus} />
           <Badge title={"Désisté"} status={"CANCEL"} />
           <Badge title={"Refusée"} status={"REFUSED"} />
           <Badge title={"En attente de validation"} status={"WAITING_VALIDATION"} />
