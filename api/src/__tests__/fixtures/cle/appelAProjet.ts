@@ -103,7 +103,7 @@ export const getMockAppelAProjetDto = (hasNextPage: boolean): DemarcheSimplifiee
                 id: "Q2hhbXAtMzI2MTcwMw==",
                 champDescriptorId: "Q2hhbXAtMzI2MTcwMw==",
                 label: "Etablissement, Ville (UAI)",
-                stringValue: "Un nom de lycée, Grenoble (SOME_UAI)",
+                stringValue: "Un nom de lycée, Grenoble (UAI_42)",
               },
               {
                 id: "Q2hhbXAtNDA5MDU1MA==",

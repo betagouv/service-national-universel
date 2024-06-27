@@ -88,18 +88,6 @@ const formatStringDateTimezoneUTC = (date) => {
   });
 };
 
-const formatStringDateWithDayTimezoneUTC = (date) => {
-  if (!date) return "-";
-  const d = new Date(date);
-  return d.toLocaleDateString("fr-FR", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "UTC",
-  });
-};
-
 function dateForDatePicker(d) {
   return new Date(d).toISOString().split("T")[0];
 }
@@ -119,7 +107,7 @@ function isIsoDate(str) {
   if (!Date.parse(str)) {
     return false;
   }
-  var d = new Date(str);
+  const d = new Date(str);
 
   return d.toISOString() === str;
 }
@@ -128,7 +116,7 @@ function calculateAge(birthDate, otherDate) {
   birthDate = new Date(birthDate);
   otherDate = new Date(otherDate);
 
-  var years = otherDate.getFullYear() - birthDate.getFullYear();
+  let years = otherDate.getFullYear() - birthDate.getFullYear();
 
   if (otherDate.getMonth() < birthDate.getMonth() || (otherDate.getMonth() == birthDate.getMonth() && otherDate.getDate() < birthDate.getDate())) {
     years--;
@@ -148,7 +136,7 @@ const formatDateForPostGre = (date) => {
 };
 
 const getZonedDate = (date, timeZone = "Europe/Paris") => {
-  const zonedDate = toZonedTime(new Date(date), timeZone);
+  const zonedDate = toZonedTime(date, timeZone);
   return zonedDate;
 };
 
@@ -160,12 +148,12 @@ const getDateTimeByTimeZoneOffset = (timeZoneOffset = null) => {
     now = new Date().getTime() - userTimezoneOffsetInMilliseconds;
   }
   return new Date(now);
-}
+};
 
 const isNowBetweenDates = (from, to) => {
-    if (!from && !to) return true;
-    const now = new Date().toISOString();
-    return (from <= now && now <= to) || (!from && now <= to) || (from <= now && !to);
+  if (!from && !to) return true;
+  const now = new Date().toISOString();
+  return (from <= now && now <= to) || (!from && now <= to) || (from <= now && !to);
 };
 
 export {
@@ -179,7 +167,6 @@ export {
   formatStringLongDate,
   formatStringDate,
   formatStringDateTimezoneUTC,
-  formatStringDateWithDayTimezoneUTC,
   dateForDatePicker,
   getAge,
   getDateTimeByTimeZoneOffset,
@@ -188,5 +175,5 @@ export {
   isIsoDate,
   calculateAge,
   formatDateForPostGre,
-    isNowBetweenDates
+  isNowBetweenDates,
 };

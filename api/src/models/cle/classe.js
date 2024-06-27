@@ -24,7 +24,6 @@ const Schema = new mongoose.Schema({
 
   cohort: {
     type: String,
-    required: true,
     documentation: {
       description: "Cohorte de la classe",
     },
@@ -101,6 +100,15 @@ const Schema = new mongoose.Schema({
   },
 
   grade: {
+    //legacy
+    type: String,
+    enum: CLE_GRADE_LIST,
+    documentation: {
+      description: "Niveau de la classe",
+    },
+  },
+
+  grades: {
     type: [String],
     enum: CLE_GRADE_LIST,
     documentation: {

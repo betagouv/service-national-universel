@@ -138,7 +138,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       // Classe
       uniqueKey: Joi.string().required(),
       uniqueId: Joi.string().alphanum().min(0).max(15).allow("").required(),
-      cohort: Joi.string().default("CLE 23-24").required(),
+      cohort: Joi.string().default("CLE 23-24").optional(),
       etablissementId: Joi.string().required(),
       // Referent
       referent: Joi.object({
@@ -204,16 +204,16 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       name: Joi.string().required(),
       estimatedSeats: Joi.number().required(),
       totalSeats: Joi.number().required(),
-      cohort: Joi.string().required(),
+      cohort: Joi.string().optional(),
       coloration: Joi.string()
         .valid(...CLE_COLORATION_LIST)
         .required(),
       filiere: Joi.string()
         .valid(...CLE_FILIERE_LIST)
         .required(),
-      grade: Joi.array()
+      grades: Joi.array()
         .items(Joi.string().valid(...CLE_GRADE_LIST))
-        .required(),
+        .required(), 
       type: Joi.string()
         .valid(...TYPE_CLASSE_LIST)
         .required(),
