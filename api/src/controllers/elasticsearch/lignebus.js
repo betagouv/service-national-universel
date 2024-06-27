@@ -5,7 +5,7 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { buildNdJson, joiElasticSearch, buildRequestBody } = require("./utils");
-const { ES_NO_LIMIT, canSearchLigneBus, canSearchInElasticSearch } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, canSearchLigneBus, canSearchInElasticSearch } = require("snu-lib");
 const { allRecords } = require("../../es/utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
 const { default: isBoolean } = require("validator/lib/isBoolean");
@@ -179,7 +179,7 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
 
     let promise = [];
     if (req.query?.needYoungInfo) {
-      promise.push(populateWithYoungInfo(response));
+      promise.push(populateWithYoungInfo(response, req.user));
     }
     if (req.query?.needCohesionCenterInfo) {
       promise.push(populateWithCohesionCenterInfo(response));
@@ -204,11 +204,19 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
   }
 });
 
-const populateWithYoungInfo = async (ligneBus) => {
+const populateWithYoungInfo = async (ligneBus, user) => {
   const ligneIds = [...new Set(ligneBus.map((item) => item._id).filter(Boolean))];
+  const contextFilters = [{ terms: { "ligneId.keyword": ligneIds } }, { term: { "status.keyword": "VALIDATED" } }];
+  if (user.role === ROLES.REFERENT_REGION) {
+    contextFilters.push({ term: { "region.keyword": user.region } });
+  }
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    contextFilters.push({ terms: { "department.keyword": user.department } });
+  }
+
   const youngs = await allRecords("young", {
     bool: {
-      must: [{ terms: { "ligneId.keyword": ligneIds } }, { term: { "status.keyword": "VALIDATED" } }],
+      must: contextFilters,
       must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
     },
   });
