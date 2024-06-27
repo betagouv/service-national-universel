@@ -151,9 +151,9 @@ function SectionField(field, idx) {
     content = <div className="font-400 text-[16px] text-[#666666]">{field.subtitle}&nbsp;:</div>;
   } else {
     content = (
-      <div className="flex w-full justify-between">
+      <div className="flex flex-col md:flex-row w-full md:justify-between">
         <p className="font-400 text-[16px] text-[#666666]">{field.label}&nbsp;:</p>
-        <p className="font-400 text-right text-[16px] text-[#161616] break-all">{field.value ? field.value : "-"}</p>
+        <p className="font-400 md:text-right text-[16px] text-[#161616] break-all">{field.value ? field.value : "-"}</p>
       </div>
     );
   }
