@@ -13,7 +13,6 @@ const runMigrations = async () => {
     const isLocked = await isChangelogLocked(db);
     if (isLocked) {
       console.error("runMigrations - Changelog is locked. Skipping migrations");
-      await unlockChangelogLock(db);
     }
     if (!isLocked) {
       console.log("runMigrations - Connected to MongoDB");
@@ -69,4 +68,4 @@ const migrateMongoConfiguration = {
   moduleSystem: "commonjs",
 };
 
-module.exports = { runMigrations, migrateMongoConfiguration };
+module.exports = { runMigrations };
