@@ -1,5 +1,5 @@
 import { Document } from "mongoose";
-import { ReferentCreatedBy } from "snu-lib/src/constants/referentConstants";
+import { ReferentCreatedBy } from "snu-lib";
 
 export type ReferentDocument = IReferent & Document;
 
@@ -45,5 +45,5 @@ export interface IReferent extends Document {
 }
 
 export interface ReferentMetadata {
-  createdBy: ReferentCreatedBy;
+  createdBy: typeof ReferentCreatedBy;
 }

@@ -6,8 +6,7 @@ import { CleClasseModel } from "../../models";
 import { ClasseSchoolYear, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 
 export class AppelAProjetClasseService {
-  classesToCreate: Partial<IClasse>[] = [];
-  classesAlreadyExisting: Record<string, string | undefined>[] = [];
+  classes: Partial<IClasse & { operation: "create" | "none" }>[] = [];
 
   async processClasse(appelAProjet: IAppelAProjet, savedEtablissement: IEtablissement, referentClasseId, save: boolean) {
     const uniqueClasseId = buildUniqueClasseId(savedEtablissement, {
@@ -17,20 +16,15 @@ export class AppelAProjetClasseService {
     let formattedClasse: Partial<IClasse>;
     const classeFound = await findClasseByUniqueKeyAndUniqueId(appelAProjet.etablissement?.uai, uniqueClasseId);
     if (classeFound) {
-      this.classesAlreadyExisting.push({
-        "nom de la classe": classeFound?.name,
-        "cle de la classe": classeFound?.uniqueKey,
-        "id de la classe": classeFound?.uniqueId,
-        "id technique de la classe existante": classeFound?._id,
-        "raison ": "classe existe",
-      });
+      this.classes.push({ ...classeFound.toObject({ virtuals: false }), operation: "none" });
     } else {
       formattedClasse = this.mapAppelAProjetToClasse(appelAProjet.classe, savedEtablissement, uniqueClasseId, [referentClasseId]);
       let createdClasse;
       if (save) {
         createdClasse = await CleClasseModel.create(formattedClasse);
+        console.log("AppelAProjetClasseService - processClasse() - created classe : ", createdClasse?._id);
       }
-      this.classesToCreate.push({ ...formattedClasse, _id: createdClasse?._id });
+      this.classes.push({ ...formattedClasse, _id: createdClasse?._id, operation: "create" });
     }
   }
 

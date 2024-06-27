@@ -1,12 +1,12 @@
 import { IAppelAProjet } from "./appelAProjetType";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 import { mapEtablissementFromAnnuaireToEtablissement } from "../etablissement/etablissementMapper";
-import { EtablissementDocument, IEtablissement } from "../../models/cle/etablissementType";
+import { IEtablissement } from "../../models/cle/etablissementType";
 import { CleEtablissementModel } from "../../models";
+import { ReferentCreatedBy } from "snu-lib";
 
 export class AppelAProjetEtablissementService {
-  etablissementsToCreate: IEtablissement[] = [];
-  etablissementsToUpdate: IEtablissement[] = [];
+  etablissements: (IEtablissement & { operation: "create" | "update" })[] = [];
   etablissementsErrors: { error: string; uai?: string | null; email?: string | null; nameAndCommune: string | undefined }[] = [];
 
   async processEtablissement(appelAProjet: IAppelAProjet, etablissements: EtablissementProviderDto[], referentEtablissementId, save: boolean): Promise<IEtablissement | undefined> {
@@ -35,30 +35,31 @@ export class AppelAProjetEtablissementService {
 
     const formattedEtablissement = mapEtablissementFromAnnuaireToEtablissement(etablissementFromAnnuaire, [referentEtablissementId]);
 
-    const existingEtablissement: EtablissementDocument = await CleEtablissementModel.findOne({ uai });
+    const existingEtablissement = await CleEtablissementModel.findOne({ uai });
     if (existingEtablissement) {
-      const hasAlreadyBeenProcessed =
-        this.etablissementsToCreate.some((etablissement) => etablissement.uai === appelAProjet.etablissement.uai) ||
-        this.etablissementsToUpdate.some((etablissement) => etablissement.uai === appelAProjet.etablissement.uai);
+      const hasAlreadyBeenProcessed = this.etablissements.some((etablissement) => etablissement.uai === appelAProjet.etablissement.uai);
       if (hasAlreadyBeenProcessed) {
         return existingEtablissement;
       }
       if (save) {
         const referentEtablissementIds = [...new Set([...existingEtablissement.referentEtablissementIds, referentEtablissementId])];
         existingEtablissement.set({ ...existingEtablissement, ...formattedEtablissement, referentEtablissementIds: referentEtablissementIds });
-        await existingEtablissement.save();
-        this.etablissementsToUpdate.push(existingEtablissement.toObject());
+
+        await existingEtablissement.save({ fromUser: { firstName: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 } });
+        console.log("AppelAProjetEtablissementService - processEtablissement() - updated etablissement : ", existingEtablissement?._id);
+        this.etablissements.push({ ...existingEtablissement.toObject(), operation: "update" });
         return existingEtablissement;
       }
-      this.etablissementsToUpdate.push(formattedEtablissement);
+      this.etablissements.push({ ...formattedEtablissement, operation: "update" });
       return formattedEtablissement;
     }
 
     let createdEtablissement;
     if (save) {
       createdEtablissement = await CleEtablissementModel.create(formattedEtablissement);
+      console.log("AppelAProjetEtablissementService - processEtablissement() - created etablissement : ", createdEtablissement?._id);
     }
-    this.etablissementsToCreate.push({ ...formattedEtablissement, _id: createdEtablissement?.id });
+    this.etablissements.push({ ...formattedEtablissement, _id: createdEtablissement?.id, operation: "create" });
 
     return createdEtablissement;
   }

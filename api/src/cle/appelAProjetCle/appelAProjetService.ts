@@ -31,13 +31,10 @@ export class AppelAProjetService {
     }
 
     return [
-      { name: "etablissementsToCreate", data: appelAProjetEtablissementService.etablissementsToCreate },
-      { name: "etablissementsToUpdate", data: appelAProjetEtablissementService.etablissementsToUpdate },
+      { name: "etablissements", data: appelAProjetEtablissementService.etablissements },
       { name: "etablissementsErrors", data: appelAProjetEtablissementService.etablissementsErrors },
-      { name: "classesAlreadyExisting", data: appelAProjetClasseService.classesAlreadyExisting },
-      { name: "classesToCreate", data: appelAProjetClasseService.classesToCreate },
-      { name: "referentsToCreate", data: appelAProjetReferentService.referentsToCreate },
-      { name: "referentsAlreadyExisting", data: appelAProjetReferentService.referentsAlreadyExisting },
+      { name: "classes", data: appelAProjetClasseService.classes },
+      { name: "referents", data: appelAProjetReferentService.referents },
     ];
   };
 }

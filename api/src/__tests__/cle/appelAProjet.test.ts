@@ -125,5 +125,39 @@ describe("Appel A Projet Controller", () => {
       expect(classeAfterSync.etablissementId).toEqual(etablissementAfterSync._id.toString());
       expect(classeAfterSync.referentClasseIds).toContain(referentClasseAfterSync._id.toString());
     });
+
+    it("should persist data and update existing etablissement", async () => {
+      const mockEtablissement = {
+        uai: "UAI_42",
+        name: "Example School",
+        referentEtablissementIds: ["referentId1", "referentId2"],
+        coordinateurIds: ["coordinateurId1", "coordinateurId2"],
+        department: "Example Department",
+        region: "Example Region",
+        zip: "12345",
+        city: "Example City",
+        country: "France",
+        state: "inactive",
+        academy: "Example Academy",
+        schoolYears: ["2021-2022", "2022-2023"],
+      };
+      await CleEtablissementModel.create(mockEtablissement);
+
+      passport.user.subRole = "god";
+      const responseAppelAProjetMock = Promise.resolve({
+        json: () => {
+          return getMockAppelAProjetDto(false);
+        },
+      });
+
+      fetch.mockImplementation(() => responseAppelAProjetMock);
+      await responseAppelAProjetMock;
+
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send();
+      const etablissementAfterSync = await CleEtablissementModel.findOne({ uai: "UAI_42" });
+
+      expect(etablissementAfterSync.uai).toEqual("UAI_42");
+      expect(etablissementAfterSync.name).toEqual("Lycée Jean Monnet");
+    });
   });
 });
