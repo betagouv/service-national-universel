@@ -7,8 +7,18 @@ const sendinblue = require("../sendinblue");
 const anonymize = require("../anonymization/referent");
 
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
+const { ReferentCreatedBy } = require("snu-lib");
 
 const MODELNAME = "referent";
+
+const referentMetadataSchema = {
+  createdBy: {
+    type: ReferentCreatedBy,
+    documentation: {
+      description: "Par quel workflow a été créé le référent",
+    },
+  },
+};
 
 const Schema = new mongoose.Schema({
   sqlId: {
@@ -243,6 +253,14 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Numéro de portable",
+    },
+  },
+
+  metadata: {
+    type: referentMetadataSchema,
+    default: {},
+    documentation: {
+      description: "Métadonnées d'un référent",
     },
   },
 
