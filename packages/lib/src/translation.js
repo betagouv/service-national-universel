@@ -1,5 +1,3 @@
-import { regionsListDROMS } from "./region-and-departments";
-
 const translate = (value) => {
   switch (value) {
     case "WAITING_REALISATION":
