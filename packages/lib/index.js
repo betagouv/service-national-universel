@@ -24,3 +24,5 @@ export * from "./src/utils/isValidRedirectUrl";
 export * from "./src/dto";
 export * from "./src/plandetransport";
 export * from "./src/cohort";
+export * from "./src/constants/cle/classeConstants";
+export * from "./src/constants/referentConstants";

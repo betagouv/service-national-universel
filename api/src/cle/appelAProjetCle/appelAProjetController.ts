@@ -1,7 +1,7 @@
 import passport from "passport";
 import express, { Response } from "express";
 import { UserRequest } from "../../controllers/request";
-import { syncAppelAProjet } from "./appelAProjetService";
+import { AppelAProjetService } from "./appelAProjetService";
 import { ERRORS } from "../../utils";
 import { isSuperAdmin } from "snu-lib";
 import { capture } from "../../sentry";
@@ -21,18 +21,18 @@ router.post(
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     try {
-      const results: { name: string; data: any[] }[] = await syncAppelAProjet();
+      const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync();
 
       const archive = archiver("zip", { zlib: { level: 9 } });
       archive.pipe(res);
 
       for (const { name, data } of results) {
         const stream = generateCSVStream(data);
-        archive.append(stream, { name: `${name}.csv` });
+        archive.append(stream, { name: `${name}-simulation.csv` });
       }
-
+      const fileName = `appelAProjet-simulate-${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}.zip`;
       res.setHeader("Content-Type", "application/zip");
-      res.setHeader("Content-Disposition", `attachment; filename=appelAProjet-simulate-${new Date().toISOString()}.zip`);
+      res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
       archive.finalize();
     } catch (e) {
       capture(e);
@@ -54,9 +54,19 @@ router.post(
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     try {
-      // referent
-      // etablissement
-      // classe
+      const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync(true);
+
+      const archive = archiver("zip", { zlib: { level: 9 } });
+      archive.pipe(res);
+
+      for (const { name, data } of results) {
+        const stream = generateCSVStream(data);
+        archive.append(stream, { name: `${name}-real.csv` });
+      }
+      const fileName = `appelAProjet-real-${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}.zip`;
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+      archive.finalize();
     } catch (e) {
       capture(e);
       res.status(500).json({ error: e.message });

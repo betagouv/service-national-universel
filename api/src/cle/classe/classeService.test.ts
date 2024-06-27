@@ -1,4 +1,4 @@
-import { deleteClasse } from "./classeService";
+import { buildUniqueClasseId, deleteClasse } from "./classeService";
 const youngService = require("../../young/young.service");
 const classService = require("./classeService");
 
@@ -11,7 +11,8 @@ import YoungModel from "../../models/young";
 const { ObjectId } = require("mongoose").Types;
 
 import { canEditEstimatedSeats, canEditTotalSeats } from "./classeService";
-import { ROLES, SUB_ROLES,LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib";
+import { ROLES, SUB_ROLES, LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib";
+import { IEtablissement } from "../../models/cle/etablissementType";
 
 describe("ClasseService", () => {
   it("should return a pdf", async () => {
@@ -272,51 +273,51 @@ describe("deleteClasse function", () => {
   });
 });
 
-describe('canEditEstimatedSeats', () => {
-    beforeAll(() => {
+describe("canEditEstimatedSeats", () => {
+  beforeAll(() => {
     jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
-  it('should return true if user is ADMIN', () => {
+  it("should return true if user is ADMIN", () => {
     const user = { role: ROLES.ADMIN };
     expect(canEditEstimatedSeats(user)).toBe(true);
   });
 
-  it('should return true if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is before LIMIT_DATE_ADMIN_CLE', () => {
+  it("should return true if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is before LIMIT_DATE_ADMIN_CLE", () => {
     const user = { role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement };
     jest.setSystemTime(new Date(LIMIT_DATE_ADMIN_CLE.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditEstimatedSeats(user)).toBe(true);
   });
 
-  it('should return false if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is after LIMIT_DATE_ADMIN_CLE', () => {
+  it("should return false if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is after LIMIT_DATE_ADMIN_CLE", () => {
     const user = { role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement };
     jest.setSystemTime(new Date(LIMIT_DATE_ADMIN_CLE.getTime() + 24 * 60 * 60 * 1000));
     expect(canEditEstimatedSeats(user)).toBe(false);
   });
 
-  it('should return false if user is not ADMIN and not ADMINISTRATEUR_CLE with referent_etablissement subRole', () => {
+  it("should return false if user is not ADMIN and not ADMINISTRATEUR_CLE with referent_etablissement subRole", () => {
     const user = { role: ROLES.REFERENT_CLASSE, subRole: SUB_ROLES.referent_etablissement };
     expect(canEditEstimatedSeats(user)).toBe(false);
   });
 });
 
-describe('canEditTotalSeats', () => {
-    beforeAll(() => {
+describe("canEditTotalSeats", () => {
+  beforeAll(() => {
     jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
-  it('should return true if user is ADMIN', () => {
+  it("should return true if user is ADMIN", () => {
     const user = { role: ROLES.ADMIN };
     expect(canEditTotalSeats(user)).toBe(true);
   });
 
-  it('should return true if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is before LIMIT_DATE_REF_CLASSE', () => {
+  it("should return true if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is before LIMIT_DATE_REF_CLASSE", () => {
     const user1 = { role: ROLES.ADMINISTRATEUR_CLE };
     const user2 = { role: ROLES.REFERENT_CLASSE };
     jest.setSystemTime(new Date(LIMIT_DATE_REF_CLASSE.getTime() - 24 * 60 * 60 * 1000));
@@ -324,7 +325,7 @@ describe('canEditTotalSeats', () => {
     expect(canEditTotalSeats(user2)).toBe(true);
   });
 
-  it('should return false if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is after LIMIT_DATE_REF_CLASSE', () => {
+  it("should return false if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is after LIMIT_DATE_REF_CLASSE", () => {
     const user1 = { role: ROLES.ADMINISTRATEUR_CLE };
     const user2 = { role: ROLES.REFERENT_CLASSE };
     jest.setSystemTime(new Date(LIMIT_DATE_REF_CLASSE.getTime() + 24 * 60 * 60 * 1000));
@@ -332,9 +333,35 @@ describe('canEditTotalSeats', () => {
     expect(canEditTotalSeats(user2)).toBe(false);
   });
 
-  it('should return false if user is not ADMIN, ADMINISTRATEUR_CLE, or REFERENT_CLASSE', () => {
+  it("should return false if user is not ADMIN, ADMINISTRATEUR_CLE, or REFERENT_CLASSE", () => {
     const user = { role: ROLES.SOME_OTHER_ROLE };
     expect(canEditTotalSeats(user)).toBe(false);
   });
 });
 
+describe("buildUniqueClasseId", () => {
+  it("should return the correct unique classe ID", () => {
+    const etablissement = {
+      region: "Île-de-France",
+      zip: "75001",
+      academy: "Paris",
+    } as IEtablissement;
+    const classe = {
+      name: "une classe",
+      coloration: "SPORT",
+    };
+    const expectedId = "IDFP075-E73E72";
+    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+  });
+
+  it("should handle missing inputs gracefully and return NO_UID", () => {
+    const etablissement = {
+      region: "Île-de-France",
+      zip: "75001",
+      academy: "Paris",
+    } as IEtablissement;
+    const classe = { name: "", coloration: undefined };
+    const expectedId = "IDFP075-NO_UID";
+    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+  });
+});
