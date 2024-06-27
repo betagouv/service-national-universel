@@ -3,7 +3,7 @@ const queryString = require("querystring");
 
 const config = require("config");
 const { capture, captureMessage } = require("./sentry");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } = require("snu-lib");
 const { rateLimiterContactSIB } = require("./rateLimiters");
 
 const SENDER_NAME = "Service National Universel";
@@ -274,17 +274,16 @@ async function sync(obj, type, { force } = { force: false }) {
     if (attributes.TYPE === "YOUNG") {
       if (user.status === YOUNG_STATUS.DELETED) return;
       if (user.parent1Email) {
-        parents.push({ email: user.parent1Email, attributes, listId: [185] });
+        parents.push({ email: user.parent1Email, attributes, listId: [1447] });
       }
       if (user.parent2Email) {
-        parents.push({ email: user.parent2Email, attributes, listId: [185] });
+        parents.push({ email: user.parent2Email, attributes, listId: [1447] });
       }
-      listIds.push(46);
+      listIds.push(1446);
     }
-    if (attributes.TYPE === "REFERENT") listIds.push(47);
-    user.statusPhase1 === "WAITING_ACCEPTATION" && listIds.push(106);
-    ["referent_region", "referent_department"].includes(user.role) && listIds.push(147);
-    user.role === "supervisor" && listIds.push(1049);
+    if (attributes.TYPE === "REFERENT") listIds.push(1448);
+    [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && listIds.push(1243);
+    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && listIds.push(1449);
 
     delete attributes.EMAIL;
     delete attributes.PASSWORD;
