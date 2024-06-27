@@ -1,4 +1,3 @@
-
 import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
@@ -7,6 +6,7 @@ import { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissemen
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
+import { startSession, withTransaction, endSession } from "../../mongo";
 import EtablissementModel from "../../models/cle/etablissement";
 import ClasseModel from "../../models/cle/classe";
 import ReferentModel from "../../models/referent";
@@ -76,8 +76,8 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  const transaction = await startSession();
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -106,26 +106,31 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (!canUpdateEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const etablissement = await EtablissementModel.findById(value.id);
-    if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await withTransaction(transaction, async () => {
+      const etablissement = await EtablissementModel.findById(value.id);
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (value.department !== etablissement.department) {
-      value.academy = departmentToAcademy[value.department];
-    }
+      if (value.department !== etablissement.department) {
+        value.academy = departmentToAcademy[value.department];
+      }
 
-    etablissement.set({
-      ...value,
+      etablissement.set({
+        ...value,
+      });
+      await etablissement.save({ fromUser: req.user, session: transaction });
+
+      return res.status(200).send({ ok: true, data: etablissement });
     });
-    await etablissement.save({ fromUser: req.user });
-
-    return res.status(200).send({ ok: true, data: etablissement });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  } finally {
+    await endSession(transaction);
   }
 });
 
 router.put("/:id/referents", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  const transaction = await startSession();
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -141,18 +146,22 @@ router.put("/:id/referents", passport.authenticate("referent", { session: false,
 
     if (!isAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const etablissement = await EtablissementModel.findById(value.id);
-    if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await withTransaction(transaction, async () => {
+      const etablissement = await EtablissementModel.findById(value.id);
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    etablissement.set({
-      referentEtablissementIds: value.referentEtablissementIds,
+      etablissement.set({
+        referentEtablissementIds: value.referentEtablissementIds,
+      });
+      await etablissement.save({ fromUser: req.user, session: transaction });
+
+      return res.status(200).send({ ok: true, data: etablissement });
     });
-    await etablissement.save({ fromUser: req.user });
-
-    return res.status(200).send({ ok: true, data: etablissement });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  } finally {
+    await endSession(transaction);
   }
 });
 

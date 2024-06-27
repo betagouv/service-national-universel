@@ -8,6 +8,7 @@ const { canSendPlanDeTransport, MIME_TYPES, COHORT_TYPE } = require("snu-lib");
 const fs = require("fs");
 const { parse: parseDate } = require("date-fns");
 const fileUpload = require("express-fileupload");
+
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const PdrModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPlanTransport");
@@ -22,7 +23,7 @@ const { getMimeFromFile } = require("../../utils/file");
 
 const { validatePdtFile, computeImportSummary } = require("../../pdt/import/pdtImportService");
 const { formatTime } = require("../../pdt/import/pdtImportUtils");
-const { startSession } = require("../../mongo");
+const { startSession, withTransaction, endSession } = require("../../mongo");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
 router.post(
@@ -102,7 +103,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { importId } = value;
-    await transaction.withTransaction(async () => {
+    await withTransaction(transaction, async () => {
       const importData = await ImportPlanTransportModel.findById(importId);
       if (!importData) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -284,7 +285,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   } finally {
-    await transaction.endSession();
+    await endSession(transaction);
   }
 });
 
