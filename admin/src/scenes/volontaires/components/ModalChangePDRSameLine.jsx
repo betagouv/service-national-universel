@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { formatStringDateWithDayTimezoneUTC, translate } from "snu-lib";
+import { formatDateFR, getZonedDate, translate } from "snu-lib";
 import LinearIceBerg from "../../../assets/Linear-IceBerg";
 import LinearMap from "../../../assets/Linear-Map";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
@@ -190,13 +190,13 @@ const HitPdr = ({ hit, bus, young, onSend }) => {
           <div className="text-gray-500">
             Départ :{" "}
             <span className=" text-gray-900">
-              {formatStringDateWithDayTimezoneUTC(bus.departuredDate)} {hit.departureHour}
+              {formatDateFR(getZonedDate(bus.departuredDate))} {hit.departureHour}
             </span>
           </div>
           <div className=" text-gray-500">
             Retour :{" "}
             <span className=" text-gray-900">
-              {formatStringDateWithDayTimezoneUTC(bus?.returnDate)} {hit.returnHour}
+              {formatDateFR(getZonedDate(bus?.returnDate))} {hit.returnHour}
             </span>
           </div>
         </div>

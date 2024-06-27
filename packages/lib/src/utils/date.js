@@ -88,18 +88,6 @@ const formatStringDateTimezoneUTC = (date) => {
   });
 };
 
-const formatStringDateWithDayTimezoneUTC = (date) => {
-  if (!date) return "-";
-  const d = new Date(date);
-  return d.toLocaleDateString("fr-FR", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "UTC",
-  });
-};
-
 function dateForDatePicker(d) {
   return new Date(d).toISOString().split("T")[0];
 }
@@ -179,7 +167,6 @@ export {
   formatStringLongDate,
   formatStringDate,
   formatStringDateTimezoneUTC,
-  formatStringDateWithDayTimezoneUTC,
   dateForDatePicker,
   getAge,
   getDateTimeByTimeZoneOffset,
