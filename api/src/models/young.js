@@ -2055,10 +2055,14 @@ Schema.methods.anonymise = function () {
 };
 
 //Sync with sendinblue
-Schema.post("save", function (doc) {
+Schema.post("save", async function (doc) {
   if (doc.source === YOUNG_SOURCE.CLE) {
     // doc.previousStatus !== doc.status is not working in post save hook...
-    StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) }).catch((error) => capture(error));
+    try {
+      await StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) });
+    } catch (e) {
+      capture(e);
+    }
   }
 
   if (config.ENVIRONMENT === "test") return;

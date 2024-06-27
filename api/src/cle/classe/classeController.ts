@@ -93,7 +93,7 @@ router.post(
 
       const allClasses = await CleClasseModel.find({
         cohort: value.cohort,
-        status: { $in: [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.INSCRIPTION_TO_CHECK, STATUS_CLASSE.VALIDATED] },
+        status: { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] },
       })
         .populate({
           path: "etablissement",
@@ -174,7 +174,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     const classe = await ClasseModel.create({
       ...value,
-      status: STATUS_CLASSE.DRAFT,
+      status: STATUS_CLASSE.CREATED,
       statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
       cohort: defaultCleCohort.name,
       uniqueKeyAndId: value.uniqueKey + "_" + value.uniqueId,
@@ -287,8 +287,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     classe = await classe.save({ fromUser: req.user });
     classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
-
-    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
 
     return res.status(200).send({ ok: true, data: classe });
   } catch (error) {

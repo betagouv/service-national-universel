@@ -1,5 +1,4 @@
-const Joi = require("joi");
-const { STATUS_CLASSE, YOUNG_STATUS, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { STATUS_CLASSE, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
 const emailsEmitter = require("../../emails");
@@ -21,15 +20,48 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   const seatsTaken = studentValidated.length;
   classe.set({ seatsTaken });
 
-  //Verified
+  //Verified && ASSIGNED && VALIDATED
   const patches = await classe.patches.find({ ref: classe._id });
-  console.log("LAAAAAAAA", patches);
+  if (!patches) throw new Error("Patches not found");
+  let previousStatus = STATUS_CLASSE.CREATED;
 
-  // Open
+  for (let i = 0; i < patches.length; i++) {
+    const patch = patches[i];
+    const statusChange = patch.ops.find((op) => op.path === "/status");
+
+    if (statusChange) {
+      const newStatus = statusChange.value;
+      previousStatus = statusChange.originalValue;
+
+      if (newStatus === STATUS_CLASSE.ASSIGNED && previousStatus === STATUS_CLASSE.VERIFIED) {
+        classe.status = STATUS_CLASSE.VALIDATED;
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
+
+        break;
+      } else if (newStatus === STATUS_CLASSE.VERIFIED && previousStatus === STATUS_CLASSE.ASSIGNED) {
+        classe.status = STATUS_CLASSE.VALIDATED;
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
+
+        break;
+      } else if (newStatus === STATUS_CLASSE.ASSIGNED || newStatus === STATUS_CLASSE.VERIFIED) {
+        classe.status = newStatus;
+        //TODO : send email to referent depending on the status
+      }
+    }
+  }
+  if (classe.isModified()) {
+    await classe.save();
+  }
+
   const classeCohort = await CohortModel.find({ name: classe.cohort });
   if (!classeCohort) throw new Error("Cohort not found");
-  const isInscriptionOpen = new Date(classeCohort.inscriptionStartDate) < Date.now() && new Date(classeCohort.inscriptionEndDate) > Date.now();
-  if (classe.status !== STATUS_CLASSE.OPEN && isInscriptionOpen) {
+  const now = new Date();
+  const inscriptionStartDate = new Date(classeCohort.inscriptionStartDate);
+  const inscriptionEndDate = new Date(classeCohort.inscriptionEndDate);
+
+  // Open
+  const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
+  if ([STATUS_CLASSE.VALIDATED, STATUS_CLASSE.CLOSED].includes(classe.status) && isInscriptionOpen) {
     classe.set({ status: STATUS_CLASSE.OPEN });
     classe = await classe.save({ fromUser });
     return classe;
@@ -37,7 +69,8 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
 
   // Closed
   const seatsValidated = studentValidated.length;
-  if (classe.status !== STATUS_CLASSE.CLOSED && classe.totalSeats === seatsValidated) {
+  const isInscriptionClosed = now > inscriptionEndDate;
+  if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats === seatsValidated) {
     classe.set({ seatsTaken: seatsValidated, status: STATUS_CLASSE.CLOSED });
     classe = await classe.save({ fromUser });
 

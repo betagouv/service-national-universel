@@ -91,7 +91,7 @@ export default function View() {
 
       //Logical stuff
       setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
-      if (classe.status !== STATUS_CLASSE.DRAFT) {
+      if (![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED, STATUS_CLASSE.ASSIGNED].includes(classe.status)) {
         getStudents(classe._id);
       }
     } catch (e) {
@@ -234,7 +234,7 @@ export default function View() {
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
 
-    if (classe?.status && ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && IS_INSCRIPTION_OPEN_CLE) {
+    if (classe?.status && [STATUS_CLASSE.OPEN].includes(classe.status) && IS_INSCRIPTION_OPEN_CLE) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
         <ButtonInvite key="invite" url={url} />,
@@ -322,7 +322,9 @@ export default function View() {
         />
       )}
 
-      {classe?.status !== STATUS_CLASSE.DRAFT && <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />}
+      {![STATUS_CLASSE.CREATED, STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.VERIFIED].includes(classe?.status) && (
+        <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />
+      )}
 
       <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
       <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />

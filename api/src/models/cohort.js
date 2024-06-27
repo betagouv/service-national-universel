@@ -385,10 +385,10 @@ Schema.pre("save", function (next) {
   next();
 });
 
-Schema.pre("save", async function (next, params) {
+Schema.post("save", async function (next, params) {
   this.user = params?.fromUser;
   this.updatedAt = Date.now();
-  if (!this.isNew && (this.isModified("inscriptionStartDate") || this.isModified("inscriptionEndDate"))) {
+  if (!this.isNew && this.type === COHORT_TYPE.CLE && (this.isModified("inscriptionStartDate") || this.isModified("inscriptionEndDate"))) {
     const classes = await ClasseModel.find({ cohort: this.name });
     if (classes.length > 0) {
       classes.each((classe) => {

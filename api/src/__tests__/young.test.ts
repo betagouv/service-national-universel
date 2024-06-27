@@ -2,8 +2,9 @@ import fetch from "node-fetch";
 
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
+const { ObjectId } = require("mongoose").Types;
 
-const { ROLES, COHORTS } = require("snu-lib");
+const { ROLES, COHORTS, YOUNG_SOURCE } = require("snu-lib");
 
 const fileUtils = require("../utils/file");
 
@@ -18,12 +19,21 @@ const { createMissionHelper } = require("./helpers/mission");
 //young
 const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
-
+const YoungModel = require("../models/young");
+//cohort
 const { createCohortHelper } = require("./helpers/cohort");
 const getNewCohortFixture = require("./fixtures/cohort");
-
+//referent
 const { createReferentHelper } = require("./helpers/referent");
 const getNewReferentFixture = require("./fixtures/referent");
+//classe
+const StateManager = require("../states");
+jest.mock('../states', () => ({
+  Classe: {
+    compute: jest.fn(),
+  },
+}));
+
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -718,4 +728,39 @@ describe("Young", () => {
       passport.user = previous;
     });
   });
+  describe('YoungModel post save hook', () => {
+    const passport = require("passport");
+    const previous = passport.user;
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+  it('should call StateManager.Classe.compute if source is CLE', async () => {
+    const classeId = new ObjectId();
+    passport.user = {
+      _id: new ObjectId(),
+      role: 'admin',
+      department: ['Pays de la Loire'],
+      region: 'Lorraine',
+      email: 'michel17@yahoo.fr',
+      firstName: 'Zoé',
+      lastName: 'Menard',
+      model: 'ReferentPatches',
+    };
+      const youngFixture = getNewYoungFixture({source: YOUNG_SOURCE.CLE, classeId,fromUser:passport.user});
+      const young = await createYoungHelper(youngFixture);
+      const res = await request(getAppHelper())
+      .put(`/referent/young/${young._id}`)
+      .send({
+        status: "VALIDATED",
+      });
+
+    expect(res.status).toBe(200);
+    expect(StateManager.Classe.compute).toHaveBeenCalledWith(
+      young.classeId,
+      passport.user,
+    { YoungModel }
+  );
+      passport.user = previous;
+  });
+});
 });
