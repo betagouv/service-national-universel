@@ -6,7 +6,6 @@ import api from "@/services/api";
 import ReinscriptionContextProvider, { ReinscriptionContext } from "../../context/ReinscriptionContextProvider";
 import { SentryRoute, capture } from "../../sentry";
 
-import { useSelector } from "react-redux";
 import StepEligibilite from "../preinscription/steps/stepEligibilite";
 import StepSejour from "../preinscription/steps/stepSejour";
 import StepConfirm from "../preinscription/steps/stepConfirm";
@@ -17,7 +16,7 @@ import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { hasAccessToReinscription } from "snu-lib";
 import FutureCohort from "../inscription2023/FutureCohort";
 import useAuth from "@/services/useAuth";
-import useReInscription from "@/services/useReInscription";
+import useReInscription from "@/services/useReinscription";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;

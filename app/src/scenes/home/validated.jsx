@@ -30,9 +30,11 @@ export default function Validated() {
                   <Clock />
                 </div>
                 <div className="left-7 ml-2 text-[#738297]">
+                  {/* a viré et remonter le wainting List */}
                   {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST
                     ? "Vous êtes sur liste complémentaire pour le séjour de cohésion"
                     : "Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion."}
+                {/*  */}
                 </div>
               </div>
               <div className="mt-5 flex items-start">

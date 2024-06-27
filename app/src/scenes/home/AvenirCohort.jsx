@@ -4,7 +4,7 @@ import React from "react";
 import useAuth from "@/services/useAuth";
 import Clock from "../../assets/icons/Clock";
 
-export default function FutureCohort() {
+export default function AvenirCohort() {
   const { young } = useAuth();
   const title = "Bonjour ";
   return (
