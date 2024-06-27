@@ -210,6 +210,13 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.virtual("mission", {
+  ref: "mission",
+  localField: "missionId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 Schema.methods.anonymise = function () {
   return anonymize(this);
 };
