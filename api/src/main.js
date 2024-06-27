@@ -20,7 +20,7 @@ const { getAllPdfTemplates } = require("./utils/pdf-renderer");
 const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
-const runMigrations = require("./migration");
+const { runMigrations } = require("./migration");
 
 (async () => {
   await runMigrations();

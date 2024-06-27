@@ -1,6 +1,6 @@
 const migrateMongo = require("migrate-mongo");
-
-const { up, status } = migrateMongo;
+const config = require("config");
+const { up, status, config: migrateMongoConfig } = migrateMongo;
 const { getDb } = require("./mongo");
 
 const CHANGHELOG_LOCK_COLLECTION = "changeloglock";
@@ -8,6 +8,7 @@ const CHANGELOG_LOCK_ID = "changeloglock_id";
 
 const runMigrations = async () => {
   const db = getDb();
+  migrateMongoConfig.set(migrateMongoConfiguration);
   db.on("connected", async () => {
     const isLocked = await isChangelogLocked(db);
     if (isLocked) {
@@ -54,4 +55,18 @@ const doMigrations = async (db) => {
   console.log("runMigrations - Migrations completed:", migrationResult);
 };
 
-module.exports = runMigrations;
+const migrateMongoConfiguration = {
+  mongodb: {
+    url: config.MONGO_URL,
+    options: {
+      useNewUrlParser: true, // removes a deprecation warning when connecting
+      useUnifiedTopology: true, // removes a deprecating warning when connecting
+    },
+  },
+  migrationsDir: config.ENVIRONMENT === "development" ? "migrations" : "api/migrations",
+  changelogCollectionName: "changelog",
+  migrationFileExtension: ".js",
+  moduleSystem: "commonjs",
+};
+
+module.exports = { runMigrations, migrateMongoConfiguration };

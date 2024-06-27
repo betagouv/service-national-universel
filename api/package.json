@@ -22,7 +22,6 @@
     "doc": "node ./src/utils/generate-models-documentation.js",
     "clean": "rm -fr node_modules .turbo",
     "build": "tsc -b ./build.tsconfig.json",
-    "migrate": "migrate-mongo up",
     "create-migration": "migrate-mongo create"
   },
   "author": "SELEGO",
