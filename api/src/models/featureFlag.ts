@@ -30,4 +30,4 @@ const featureFlagSchema = new mongoose.Schema({
 });
 
 const featureFlagDocumentModel = mongoose.model<FeatureFlagDocument>("featureFlag", featureFlagSchema);
-export default featureFlagDocumentModel;
+export { featureFlagDocumentModel };
