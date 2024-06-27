@@ -11,7 +11,10 @@ import { CSSObject } from "@emotion/react";
 
 import useReactSelectTheme from "./theme";
 
-export type SelectOption = { value: string; label: string | ReactElement };
+export type SelectOption = {
+  value: string | number;
+  label: string | ReactElement;
+};
 
 export type SelectProps = {
   // Fix type to allow only string and string[]
@@ -44,12 +47,13 @@ export type SelectProps = {
   noOptionsMessage?: string;
   loadOptions?: (
     inputValue: string,
-    callback: (options: GroupBase<string>[]) => void
+    callback: (options: GroupBase<string>[]) => void,
   ) => void | Promise<GroupBase<string>[]>;
   defaultOptions?:
     | boolean
     | GroupBase<string>[]
     | (() => Promise<GroupBase<string>[]>);
+  size?: "sm" | "lg";
 };
 
 export default function SelectButton(props: SelectProps) {
