@@ -1,7 +1,7 @@
 import request from "supertest";
-import { dbConnect, dbClose } from "../../__tests__/helpers/db";
-import getAppHelper from "../../__tests__/helpers/app";
-import getNewLigneBusFixture from "../../__tests__/fixtures/PlanDeTransport/ligneBus";
+import { dbConnect, dbClose } from "../helpers/db";
+import getAppHelper from "../helpers/app";
+import getNewLigneBusFixture from "../fixtures/PlanDeTransport/ligneBus";
 import { LigneBusModel } from "../../models";
 import mongoose from "mongoose";
 import { ROLES } from "snu-lib";
