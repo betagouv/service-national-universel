@@ -19,7 +19,6 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-// import useReInscription from "@/services/useReinscription";
 import AvenirCohort from "./AvenirCohort";
 import AvenirCohortv2 from "./AvenirCohortV2";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, isCohortTooOld } from "snu-lib";
@@ -32,12 +31,8 @@ export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
-  // const { isReinscriptionOpen, loading: isReinscriptionOpenLoading } = useReInscription();
-  const {
-    data: isReinscriptionOpen,
-    isLoading: isReinscriptionOpenLoading,
-    error,
-  } = useQuery({
+
+  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useQuery({
     queryKey: ["isReInscriptionOpen"],
     queryFn: fetchReInscriptionOpen,
   });
@@ -68,25 +63,28 @@ export default function Home() {
     if (isReinscriptionOpen && hasAccessToReinscription(young)) {
       return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
     }
-
+    // Je n'ai pas validé ma phase 1 et la réinscription n'est pas ouverte (je peux changer de séjour):
     if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
       return <Phase1NotDone />;
     }
 
-    // if (young.cohort === "à venir") {
-    //   return <AvenirCohortv2 />;
+    // je suis sur une cohorte à venir et la réinscription n'est pas ouverte
+    if (young.cohort === "à venir") {
+      return <AvenirCohortv2 />; //moyen de faire encore mieux niveau merge
+    }
+    // if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
+    //   return <AvenirCohort />;
     // }
-    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
-      return <AvenirCohort />;
-    }
-    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
-      return <FutureCohort />;
-    }
+    // if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+    //   return <FutureCohort />;
+    // }
 
     const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
     if (hasWithdrawn) {
       return <Withdrawn />;
     }
+
+    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
 
     if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
