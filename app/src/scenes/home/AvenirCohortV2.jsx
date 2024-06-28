@@ -4,7 +4,6 @@ import Img3 from "../../assets/homePhase2Mobile.png";
 import Img2 from "../../assets/homePhase2Desktop.png";
 import Clock from "../../assets/icons/Clock";
 import { YOUNG_STATUS } from "snu-lib";
-import toast from "react-hot-toast";
 
 const YoungStatusConfig = [
   {
@@ -43,11 +42,6 @@ const AvenirCohort = () => {
   const { young } = useAuth();
 
   const config = YoungStatusConfig.find((conf) => conf.statuses.includes(young.status));
-
-  if (!config) {
-    toast.error("Pas de statuts de jeune trouvé");
-    return null;
-  }
 
   return <MessageComponent title={config.title(young)} message={config.message} />;
 };

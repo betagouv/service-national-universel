@@ -4,14 +4,14 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { getCohortNames, hasAccessToReinscription } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../utils/cohorts";
 import Affected from "./Affected";
-import FutureCohort from "./FutureCohort";
+// import FutureCohort from "./FutureCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
 import WaitingReinscription from "./WaitingReinscription";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
-import Validated from "./validated";
+import WaitingAffectation from "./waitingAffectation";
 import WaitingCorrection from "./waitingCorrection";
 import WaitingValidation from "./waitingValidation";
 import WaitingList from "./waitingList";
@@ -19,7 +19,7 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import AvenirCohort from "./AvenirCohort";
+// import AvenirCohort from "./AvenirCohort";
 import AvenirCohortv2 from "./AvenirCohortV2";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, isCohortTooOld } from "snu-lib";
 import Loader from "@/components/Loader";
@@ -42,7 +42,7 @@ export default function Home() {
   if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
-    // Je ne peux plus participer au SNU :
+    // Je ne peux plus participer au SNU (exclu, refusé) :
     if (wasYoungExcluded(young)) return <Excluded />;
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
@@ -72,20 +72,15 @@ export default function Home() {
     if (young.cohort === "à venir") {
       return <AvenirCohortv2 />; //moyen de faire encore mieux niveau merge
     }
-    // if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
-    //   return <AvenirCohort />;
-    // }
-    // if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
-    //   return <FutureCohort />;
-    // }
 
+    // Je me suis désisté et la reinscription est fermée
     const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
     if (hasWithdrawn) {
       return <Withdrawn />;
     }
 
-    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
-
+    // Ma phase 1 est en cours, soit en cours d'inscription, soit en plein parcours
+    // à voir comment on gère les cohort présente et passé.
     if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
       const isCohortInstructionOpen = new Date() < new Date(cohort.instructionEndDate);
@@ -95,15 +90,20 @@ export default function Home() {
       // Mon inscription est en cours :
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
+      // Je suis en liste complémentaire sur une cohorte
+      if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
+      // Mon dossier est validé, je suis en attente d'affectation ou affecté
       if (young.status === YOUNG_STATUS.VALIDATED) {
         if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+          // Je suis affecté à un centre
           return <Affected />;
         } else {
-          return <Validated />;
+          // Je suis en attente d'affectation à un centre
+          return <WaitingAffectation />;
         }
       }
     }
-
+    //phase 3
     return <Default />;
   };
 
