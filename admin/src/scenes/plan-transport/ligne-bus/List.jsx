@@ -267,8 +267,8 @@ export default function List() {
                   { label: "Nom (Z > A)", field: "busId.keyword", order: "desc" },
                 ]}
                 selectedFilters={selectedFilters}
-                paramData={paramData}
-                setParamData={setParamData}
+                pagination={paramData}
+                onPaginationChange={setParamData}
               />
             </div>
 

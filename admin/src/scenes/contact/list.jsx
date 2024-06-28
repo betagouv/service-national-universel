@@ -231,8 +231,8 @@ export default function List() {
                 { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
               ]}
               selectedFilters={selectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
+              pagination={paramData}
+              onPaginationChange={setParamData}
             />
           </div>
           <div className="mt-2 flex flex-row flex-wrap items-center px-4">

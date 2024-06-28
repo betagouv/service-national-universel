@@ -21,6 +21,7 @@ type OwnProps = {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   className?: string;
+  customStyles?: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
@@ -30,10 +31,11 @@ export default function Badge({
   mode = "default",
   leftIcon,
   rightIcon,
+  customStyles,
   className = "",
   onClick,
 }: OwnProps) {
-  const styles = getStyles({ status, mode });
+  const styles = customStyles || getStyles({ status, mode });
 
   if (mode === "editable") {
     return (
@@ -128,7 +130,7 @@ const getStyles = ({
     case "secondary":
       return cx("text-[#30345B] bg-[#EEEFF5] border-[#B3B5CD]");
     default:
-      return cx("text-gray-600 bg-gray-50 border-gray-200", {
+      return cx("text-gray-600 bg-gray-50 border-gray-300", {
         "hover:border-gray-500": mode === "editable",
       });
   }
