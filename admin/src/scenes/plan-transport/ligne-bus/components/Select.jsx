@@ -7,7 +7,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Select({ options, selected, setSelected, label, readOnly = false, icon }) {
+export default function Select({ options, selected, setSelected, label, readOnly = false, icon = null }) {
   return (
     <div className="w-full">
       <Listbox value={selected} onChange={setSelected}>

@@ -1,6 +1,6 @@
 const { fakerFR: faker } = require("@faker-js/faker");
 
-function getNewPointDeRassemblementFixture() {
+function getNewPointDeRassemblementFixture(object = {}) {
   return {
     code: faker.lorem.words(),
     cohorts: ["Février 2023 - C"],
@@ -15,6 +15,7 @@ function getNewPointDeRassemblementFixture() {
       lat: Number(faker.location.latitude()),
       lon: Number(faker.location.longitude()),
     },
+    ...object,
   };
 }
 

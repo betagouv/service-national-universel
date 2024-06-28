@@ -1,4 +1,6 @@
-import { ROLES, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST } from "snu-lib";
+import { ROLES } from "snu-lib";
+
+export type RouteResponse<T> = { ok: boolean; code?: string; data: T };
 
 export type Young = { _id: string };
 

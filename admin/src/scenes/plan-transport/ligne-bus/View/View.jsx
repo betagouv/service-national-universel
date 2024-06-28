@@ -23,6 +23,8 @@ import PointDeRassemblement from "./components/PointDeRassemblement";
 import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
 
 export default function View(props) {
+  const user = useSelector((state) => state.Auth.user);
+
   const [data, setData] = React.useState(null);
   const [dataForCheck, setDataForCheck] = React.useState(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
@@ -30,7 +32,6 @@ export default function View(props) {
   const [nbYoung, setNbYoung] = React.useState();
   const [cohort, setCohort] = React.useState();
   const [addOpen, setAddOpen] = React.useState(false);
-  const user = useSelector((state) => state.Auth.user);
   const [isLoading, setIsLoading] = React.useState(false);
 
   const getBus = async () => {
@@ -125,7 +126,9 @@ export default function View(props) {
     getBus();
     getDataForCheck();
     getDemandeDeModification();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.match?.params?.id]);
+
   React.useEffect(() => {
     setAddOpen(false);
   }, [data]);
@@ -175,7 +178,7 @@ export default function View(props) {
   return (
     <>
       <div className="flex justify-between mr-8 items-center">
-        <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
+        <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche de la ligne" }]} />
         {canExportLigneBus(user) && data.team.length > 0 ? (
           <SelectAction
             title="Exporter la ligne"
@@ -196,7 +199,7 @@ export default function View(props) {
       <div className="mx-8 mb-8 mt-3 flex flex-col gap-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Title>{data.busId}</Title>
+            <Title>Ligne {data.busId}</Title>
             <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{data.cohort}</div>
           </div>
           <div className="flex items-center gap-2">
@@ -237,9 +240,9 @@ export default function View(props) {
             />
             <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
           </div>
-          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} cohort={cohort} />
+          <Info bus={data} onBusChange={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} cohort={cohort} />
 
-          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen} cohort={cohort} />
+          <BusTeam bus={data} onBusChange={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen} cohort={cohort} />
           {data.team.filter((item) => item.role === "supervisor").length > 0 ? (
             data.team
               .filter((item) => item.role === "supervisor")
@@ -247,19 +250,19 @@ export default function View(props) {
                 <BusTeam
                   key={value._id}
                   bus={data}
-                  setBus={setData}
+                  onBusChange={setData}
                   title="Encadrant"
-                  role={"supervisor"}
+                  role="supervisor"
                   idTeam={value._id}
                   addOpen={addOpen}
-                  setAddOpen={setAddOpen}
+                  onAddOpenChange={setAddOpen}
                   cohort={cohort}
                 />
               ))
           ) : (
-            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
+            <BusTeam bus={data} onBusChange={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
           )}
-          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} cohort={cohort} /> : null}
+          {addOpen && <BusTeam bus={data} onBusChange={setData} title="Encadrant" role={"supervisor"} onAddOpenChange={setAddOpen} cohort={cohort} />}
 
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">
