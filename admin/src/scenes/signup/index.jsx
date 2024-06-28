@@ -12,7 +12,6 @@ import { Header } from "@codegouvfr/react-dsfr/Header";
 import { Footer } from "@codegouvfr/react-dsfr/Footer";
 import { Page, Section, Container } from "@snu/ds/dsfr";
 import LogoSNU from "@/assets/logo-snu.png";
-startReactDsfr({ defaultColorScheme: "light", Link });
 
 import HumanCooperation from "@/assets/icons/HumanCooperation";
 import Role from "./role";
@@ -22,10 +21,13 @@ import Informations from "./informations";
 import Confirmation from "./confirmation";
 import api from "@/services/api";
 import { ROLES } from "snu-lib";
+import Loader from "@/components/Loader";
 
 export default function Index() {
   useDocumentTitle("Creer mon compte");
   useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+  startReactDsfr({ defaultColorScheme: "light", Link });
+
   const history = useHistory();
 
   const [onboardedUser, setOnboardedUser] = useState(null);
