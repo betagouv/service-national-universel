@@ -6,12 +6,13 @@ const { createClasse } = require("./helpers/classe");
 const { createFixtureClasse } = require("./fixtures/classe");
 const { ROLES } = require("snu-lib");
 const passport = require("passport");
-const { dbConnect, dbClose } = require("./helpers/db");
+const { dbConnect, dbClose, mockTransaction } = require("./helpers/db");
 const { ObjectId } = require("mongoose").Types;
 const { CleClasseModel } = require("../models");
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+mockTransaction();
 
 describe("PUT /cle/etablissement/:id", () => {
   it("should return 400 when id is invalid", async () => {

@@ -155,6 +155,7 @@ Schema.pre("save", async function (next, params) {
   this.user = params?.fromUser;
   this.updatedAt = Date.now();
   if (!this.isNew && (this.isModified("department") || this.isModified("region"))) {
+    const transaction = this.$session();
     const classes = await ClasseModel.find({ etablissementId: this._id });
     if (classes.length > 0) {
       await ClasseModel.updateMany(
@@ -164,6 +165,7 @@ Schema.pre("save", async function (next, params) {
           region: this.region,
           academy: this.academy,
         },
+        { session: transaction },
       );
     }
   }
