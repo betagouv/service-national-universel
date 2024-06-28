@@ -8,6 +8,7 @@ import passport from "passport";
 import { dbConnect, dbClose } from "../helpers/db";
 import { getEtablissementsFromAnnuaire } from "../fixtures/providers/annuaireEtablissement";
 import { CleClasseModel, CleEtablissementModel, ReferentModel } from "../../models";
+import * as featureServiceModule from "../../featureFlag/featureFlagService";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -20,6 +21,7 @@ beforeEach(async () => {
   await ReferentModel.deleteMany();
   const apiEductionMock = jest.spyOn(apiEducationModule, "apiEducation");
   apiEductionMock.mockImplementation(() => Promise.resolve(getEtablissementsFromAnnuaire()));
+  jest.spyOn(featureServiceModule, "isFeatureAvailable").mockImplementation(() => Promise.resolve(true));
 });
 
 afterEach(async () => {
