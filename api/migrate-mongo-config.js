@@ -1,8 +1,3 @@
-// Keep this configuration to allow using the migrate-mongo create command
-const migrateMongoConfig = {
-  migrationsDir: "migrations",
-  migrationFileExtension: ".js",
-  moduleSystem: "commonjs",
-};
-
-module.exports = migrateMongoConfig;
+// Keep this configuration to allow using the migrate-mongo command line (in package.json)
+const { migrateMongoConfiguration } = require("./src/migration");
+module.exports = migrateMongoConfiguration;

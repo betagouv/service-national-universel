@@ -1,6 +1,6 @@
 module.exports = {
   async up(db) {
-    await db.collection("changeloglock").insertOne({
+    await db.collection("migrationchangeloglock").insertOne({
       _id: "changeloglock_id",
       locked: false,
       lockedBy: "",

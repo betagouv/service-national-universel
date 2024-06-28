@@ -2,6 +2,7 @@ const migrateMongo = require("migrate-mongo");
 const config = require("config");
 const { up, status, config: migrateMongoConfig } = migrateMongo;
 const { getDb } = require("./mongo");
+const { capture } = require("./sentry");
 
 const CHANGHELOG_LOCK_COLLECTION = "changeloglock";
 const CHANGELOG_LOCK_ID = "changeloglock_id";
@@ -23,6 +24,7 @@ const runMigrations = async () => {
         await doMigrations(db);
       } catch (error) {
         console.error("runMigrations - Migration failed: ", error);
+        capture(error, "Migrations");
       } finally {
         await unlockChangelogLock(db);
       }
@@ -63,9 +65,9 @@ const migrateMongoConfiguration = {
     },
   },
   migrationsDir: config.ENVIRONMENT === "development" ? "migrations" : "api/migrations",
-  changelogCollectionName: "changelog",
+  changelogCollectionName: "migrationchangelog",
   migrationFileExtension: ".js",
   moduleSystem: "commonjs",
 };
 
-module.exports = { runMigrations };
+module.exports = { runMigrations, migrateMongoConfiguration };
