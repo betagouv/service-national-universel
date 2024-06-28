@@ -105,7 +105,9 @@ export default function code() {
           </div>
           <hr className="p-1" />
           <div className="flex justify-end">
-            <Button type="submit">Continuer</Button>
+            <Button disabled={!code} type="submit">
+              Continuer
+            </Button>
           </div>
         </Container>
       </form>

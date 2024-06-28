@@ -62,7 +62,7 @@ export default function Index() {
     [ROLES.REFERENT_CLASSE]: "Compte Responsable Classe engagée",
   };
 
-  if (!onboardedUser) return <div>Chargement...</div>;
+  if (!onboardedUser) return <Loader />;
 
   return (
     <Page>
