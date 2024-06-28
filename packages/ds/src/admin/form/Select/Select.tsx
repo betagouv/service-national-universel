@@ -1,4 +1,5 @@
 import React, { ReactElement, useEffect, useState } from "react";
+import cx from "classnames";
 import Select, {
   components,
   GroupBase,
@@ -161,7 +162,7 @@ export default function SelectButton(props: SelectProps) {
       };
 
   return (
-    <div className={"flex flex-col gap-3 border-0 " + className}>
+    <div className={cx("flex flex-col gap-3 border-0", className)}>
       <div className="relative">
         <label
           className={`absolute top-1 left-3 z-10 text-xs font-normal ${

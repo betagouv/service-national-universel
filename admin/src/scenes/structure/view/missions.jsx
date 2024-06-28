@@ -91,8 +91,8 @@ export default function Mission({ ...props }) {
                 { label: "Nom de la mission (Z > A)", field: "name.keyword", order: "desc" },
               ]}
               selectedFilters={selectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
+              pagination={paramData}
+              onPaginationChange={setParamData}
             />
           </div>
           <div className="mt-2 flex flex-row flex-wrap items-center px-4">
