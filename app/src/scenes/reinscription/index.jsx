@@ -16,7 +16,8 @@ import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { hasAccessToReinscription } from "snu-lib";
 import FutureCohort from "../inscription2023/FutureCohort";
 import useAuth from "@/services/useAuth";
-import useReInscription from "@/services/useReinscription";
+import { fetchReInscriptionOpen } from "../../services/reinscription.service";
+import { useQuery } from "@tanstack/react-query";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -44,7 +45,10 @@ const Step = () => {
 
 export default function ReInscription() {
   const { young } = useAuth();
-  const { isReinscriptionOpen, loading: isReinscriptionOpenLoading } = useReInscription();
+  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useQuery({
+    queryKey: ["isReInscriptionOpen"],
+    queryFn: fetchReInscriptionOpen,
+  });
 
   if (!hasAccessToReinscription(young)) return <Redirect to="/" />;
 

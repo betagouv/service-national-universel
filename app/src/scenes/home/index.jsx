@@ -19,18 +19,28 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import useReInscription from "@/services/useReinscription";
+// import useReInscription from "@/services/useReinscription";
 import AvenirCohort from "./AvenirCohort";
 import AvenirCohortv2 from "./AvenirCohortV2";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, isCohortTooOld } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasAccessToPhase2, hasCompletedPhase2 } from "../../utils";
+import { fetchReInscriptionOpen } from "../../services/reinscription.service";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
-  const { isReinscriptionOpen, loading: isReinscriptionOpenLoading } = useReInscription();
+  // const { isReinscriptionOpen, loading: isReinscriptionOpenLoading } = useReInscription();
+  const {
+    data: isReinscriptionOpen,
+    isLoading: isReinscriptionOpenLoading,
+    error,
+  } = useQuery({
+    queryKey: ["isReInscriptionOpen"],
+    queryFn: fetchReInscriptionOpen,
+  });
 
   if (isReinscriptionOpenLoading) return <Loader />;
 
@@ -54,29 +64,6 @@ export default function Home() {
       return <HomePhase2 />;
     }
 
-    // Mon inscription est complète :
-    // if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
-    // they are in the new cohort, we display the inscription step
-
-    // Du sens ???
-    const isCohortInstructionOpen = new Date() < new Date(cohort.instructionEndDate);
-    if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !isCohortInstructionOpen) {
-      return <InscriptionClosedCLE />;
-    }
-    // Mon inscription est en cours :
-    if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
-    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
-    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
-    if (young.status === YOUNG_STATUS.VALIDATED) {
-      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
-        return <Affected />;
-      } else {
-        // renommer en WAITING_AFFECTATION
-        return <Validated />;
-      }
-    }
-    // }
-
     // Je peux me réinscrire :
     if (isReinscriptionOpen && hasAccessToReinscription(young)) {
       return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
@@ -86,9 +73,9 @@ export default function Home() {
       return <Phase1NotDone />;
     }
 
-    if (young.cohort === "à venir") {
-      return <AvenirCohortv2 />;
-    }
+    // if (young.cohort === "à venir") {
+    //   return <AvenirCohortv2 />;
+    // }
     if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
       return <AvenirCohort />;
     }
@@ -99,6 +86,24 @@ export default function Home() {
     const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
     if (hasWithdrawn) {
       return <Withdrawn />;
+    }
+
+    if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+      // they are in the new cohort, we display the inscription step
+      const isCohortInstructionOpen = new Date() < new Date(cohort.instructionEndDate);
+      if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !isCohortInstructionOpen) {
+        return <InscriptionClosedCLE />;
+      }
+      // Mon inscription est en cours :
+      if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
+      if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
+      if (young.status === YOUNG_STATUS.VALIDATED) {
+        if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+          return <Affected />;
+        } else {
+          return <Validated />;
+        }
+      }
     }
 
     return <Default />;
