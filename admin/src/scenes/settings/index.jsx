@@ -328,7 +328,7 @@ export default function Settings() {
                           isTime
                           label="Ouverture"
                           placeholder="Date et heure"
-                          value={data.reInscriptionStartDate}
+                          value={data.reInscriptionStartDate || data.inscriptionStartDate}
                           error={error.reInscriptionStartDate}
                           onChange={(e) => setData({ ...data, reInscriptionStartDate: e })}
                           readOnly={readOnly}
@@ -339,7 +339,7 @@ export default function Settings() {
                           isTime
                           label="Fermeture"
                           placeholder="Date et heure"
-                          value={data.reInscriptionEndDate}
+                          value={data.reInscriptionEndDate || data.inscriptionEndDate}
                           error={error.reInscriptionEndDate}
                           onChange={(e) => setData({ ...data, reInscriptionEndDate: e })}
                           readOnly={readOnly}
