@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { HiOutlineOfficeBuilding, HiCheck, HiOutlineRefresh } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useParams, useHistory } from "react-router-dom";
@@ -29,7 +29,6 @@ import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleCohort from "./components/modale/modaleCohort";
 import ButtonInvite from "./components/ButtonInvite";
 import { InfoBus, TStatus, Rights } from "./components/types";
-import { status } from "../../../build/src/utils/index";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
@@ -63,6 +62,11 @@ export default function View() {
     (studentStatus[YOUNG_STATUS.WAITING_CORRECTION] || 0) -
     (studentStatus[YOUNG_STATUS.WAITING_VALIDATION] || 0) -
     (studentStatus[YOUNG_STATUS.ABANDONED] || 0);
+
+  const initialTotalSeatsRef = useRef<number>(0);
+  if (classe && initialTotalSeatsRef.current === 0) {
+    initialTotalSeatsRef.current = classe.totalSeats;
+  }
 
   const getClasse = async () => {
     try {
@@ -138,6 +142,7 @@ export default function View() {
     if (!classe?.name) errors.name = "Ce champ est obligatoire";
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
     if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
+    if (classe?.totalSeats && classe.totalSeats > initialTotalSeatsRef.current) errors.totalSeats = "Vous ne pouvez pas augmenter le nombre de places";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
     if (!classe?.trimester) errors.trimester = "Ce champ est obligatoire";
     if (!classe?.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
@@ -173,6 +178,23 @@ export default function View() {
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la classe", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyClasse = async () => {
+    try {
+      setIsLoading(true);
+      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}`, { ...classe, status: STATUS_CLASSE.VERIFIED });
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", translate(code));
+        return setIsLoading(false);
+      }
+      setClasse(data);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", e);
     } finally {
       setIsLoading(false);
     }
@@ -237,7 +259,9 @@ export default function View() {
 
     if (classe?.status === STATUS_CLASSE.CREATED) {
       if (user.role === ROLES.ADMINISTRATEUR_CLE) {
-        actionsList.push(<Button key="verify" title="Déclarer cette classe vérifiée" leftIcon={<HiCheck size={20} />} className="mr-2" onClick={() => console.log("salut")} />);
+        actionsList.push(
+          <Button key="verify" title="Déclarer cette classe vérifiée" leftIcon={<HiCheck size={20} />} className="mr-2" onClick={verifyClasse} disabled={isLoading} />,
+        );
       }
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) {
         actionsList.push(

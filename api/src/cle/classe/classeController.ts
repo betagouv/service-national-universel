@@ -256,7 +256,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       if (youngWithStatusPhase1Done) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    if (value.trimester && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(req.user.role)) {
+    if (classe.trimester !== value.trimester && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -297,7 +297,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     classe = await classe.save({ fromUser: req.user });
-    classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
 
     return res.status(200).send({ ok: true, data: classe });
   } catch (error) {
