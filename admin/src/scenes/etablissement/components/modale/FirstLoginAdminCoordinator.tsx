@@ -5,33 +5,34 @@ import { useHistory } from "react-router-dom";
 import { ProfilePic } from "@snu/ds";
 import { ModalConfirmation } from "@snu/ds/admin";
 import { User } from "@/types";
-import { ROLES, SUB_ROLES } from "snu-lib";
+import { isCoordinateurEtablissement } from "snu-lib";
+import { REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY } from "@/services/cle";
 
 interface Props {
   user: User;
 }
 
+/* First login ADMINISTRATEUR_CLE coordinateur-cle */
 export default function FirstLoginAdminCoordinator({ user }: Props) {
-  const [modalCoordinator, setModalCoordinator] = useState(false);
   const history = useHistory();
-  const firstLogin = localStorage.getItem("cle_referent_signup_first_time");
+
+  const [showModal, setShowModal] = useState(false);
+
+  const firstLogin = localStorage.getItem(REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY);
 
   useEffect(() => {
-    if (firstLogin && user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.coordinateur_cle) {
-      setModalCoordinator(true);
+    if (firstLogin && isCoordinateurEtablissement(user)) {
+      setShowModal(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstLogin]);
-
-  {
-    /* First login ADMINISTRATEUR_CLE coordinateur-cle */
-  }
 
   return (
     <ModalConfirmation
-      isOpen={modalCoordinator}
+      isOpen={showModal}
       onClose={() => {
-        setModalCoordinator(false);
-        localStorage.removeItem("cle_referent_signup_first_time");
+        setShowModal(false);
+        localStorage.removeItem(REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY);
       }}
       className="md:max-w-[700px]"
       icon={<ProfilePic initials={`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`} />}

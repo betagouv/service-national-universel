@@ -27,7 +27,7 @@ export async function getSchools(city) {
   }
 }
 
-export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
+export default function SchoolInFrance({ school, onSelectSchool, errors }) {
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
 
