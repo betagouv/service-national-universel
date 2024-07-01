@@ -4,6 +4,7 @@ const esClient = require("../../es");
 const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST, TYPE_CLASSE_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "classe";
+const EtablissementModel = require("./etablissement");
 
 const Schema = new mongoose.Schema({
   etablissementId: {
