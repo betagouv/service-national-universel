@@ -20,20 +20,21 @@ const { createMissionHelper } = require("./helpers/mission");
 const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
 const YoungModel = require("../models/young");
+const { validateYoung } = require("../utils/validator");
 //cohort
 const { createCohortHelper } = require("./helpers/cohort");
-const getNewCohortFixture = require("./fixtures/cohort");
+const { getNewCohortFixture } = require("./fixtures/cohort");
 //referent
 const { createReferentHelper } = require("./helpers/referent");
 const getNewReferentFixture = require("./fixtures/referent");
 //classe
-const StateManager = require("../states");
-jest.mock('../states', () => ({
-  Classe: {
-    compute: jest.fn(),
-  },
-}));
+const { createClasse } = require("./helpers/classe");
+const { createFixtureClasse } = require("./fixtures/classe");
+const ClasseModel = require("../models/cle/classe");
 
+jest.mock("../utils/validator", () => ({
+  validateYoung: jest.fn(),
+}));
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -50,6 +51,10 @@ jest.mock("../utils", () => ({
   getFile: () => Promise.resolve({ Body: "" }),
   uploadFile: (path, file) => Promise.resolve({ path, file }),
   deleteFile: (path, file) => Promise.resolve({ path, file }),
+}));
+
+jest.mock("../emails", () => ({
+  emit: jest.fn(),
 }));
 
 jest.mock("../cryptoUtils", () => ({
@@ -728,39 +733,25 @@ describe("Young", () => {
       passport.user = previous;
     });
   });
-  describe('YoungModel post save hook', () => {
-    const passport = require("passport");
-    const previous = passport.user;
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-  it('should call StateManager.Classe.compute if source is CLE', async () => {
-    const classeId = new ObjectId();
-    passport.user = {
-      _id: new ObjectId(),
-      role: 'admin',
-      department: ['Pays de la Loire'],
-      region: 'Lorraine',
-      email: 'michel17@yahoo.fr',
-      firstName: 'Zoé',
-      lastName: 'Menard',
-      model: 'ReferentPatches',
-    };
-      const youngFixture = getNewYoungFixture({source: YOUNG_SOURCE.CLE, classeId,fromUser:passport.user});
+  describe("YoungModel post save hook", () => {
+    it("should call StateManager.Classe.compute if source is CLE", async () => {
+      const cohortFixture = getNewCohortFixture({ type: "CLE" });
+      const cohort = await createCohortHelper(cohortFixture);
+      const classe = createFixtureClasse({ seatsTaken: 0, status: "OPEN", cohort: cohort.name });
+      const classeId = (await createClasse(classe))._id;
+      const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId });
       const young = await createYoungHelper(youngFixture);
-      const res = await request(getAppHelper())
-      .put(`/referent/young/${young._id}`)
-      .send({
+      const modifiedYoung = { ...young, status: "VALIDATED" };
+      validateYoung.mockReturnValue({ error: null, value: modifiedYoung });
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}`).send({
         status: "VALIDATED",
       });
 
-    expect(res.status).toBe(200);
-    expect(StateManager.Classe.compute).toHaveBeenCalledWith(
-      young.classeId,
-      passport.user,
-    { YoungModel }
-  );
-      passport.user = previous;
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe("VALIDATED");
+
+      const updatedClasse = await ClasseModel.findById(classeId);
+      expect(updatedClasse.seatsTaken).toBe(1);
+    });
   });
-});
 });

@@ -7,6 +7,7 @@ import {
   canDownloadYoungDocuments,
   YOUNG_STATUS,
   STATUS_CLASSE,
+  STATUS_CLASSE_LIST,
   canCreateClasse,
   STATUS_PHASE1_CLASSE,
   SENDINBLUE_TEMPLATES,
@@ -20,6 +21,7 @@ import {
   canViewClasse,
   canWithdrawClasse,
   canDeleteClasse,
+  canUpdateCohort,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -214,11 +216,12 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         .required(),
       grades: Joi.array()
         .items(Joi.string().valid(...CLE_GRADE_LIST))
-        .required(), 
+        .required(),
       type: Joi.string()
         .valid(...TYPE_CLASSE_LIST)
         .required(),
-      trimester: Joi.string().allow("T1", "T2", "T3").required(),
+      trimester: Joi.string().allow("T1", "T2", "T3"),
+      status: Joi.string().valid(...STATUS_CLASSE_LIST),
       sessionId: Joi.string().allow(null),
       cohesionCenterId: Joi.string().allow(null),
       pointDeRassemblementId: Joi.string().allow(null),
@@ -241,12 +244,20 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
+
     let youngs;
     if (classe.cohort !== value.cohort) {
+      const cohort = await CohortModel.findOne({ name: classe.cohort });
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!canUpdateCohort(cohort, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       youngs = await YoungModel.find({ classeId: classe._id });
       // * Impossible to change cohort if a young has already completed phase1
       const youngWithStatusPhase1Done = youngs.find((y) => y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE);
       if (youngWithStatusPhase1Done) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (value.trimester && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const oldCohort = classe.cohort;

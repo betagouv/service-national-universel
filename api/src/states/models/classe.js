@@ -13,6 +13,10 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   if (!classe) throw new Error("Classe not found");
   if (classe.status === STATUS_CLASSE.WITHDRAWN) return classe;
 
+  // Get cohort
+  const classeCohort = await CohortModel.findOne({ name: classe.cohort });
+  if (!classeCohort) throw new Error("Cohort not found");
+
   // Get students
   const students = await YoungModel.find({ classeId: classe._id }).lean();
   const studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
@@ -20,41 +24,6 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   const seatsTaken = studentValidated.length;
   classe.set({ seatsTaken });
 
-  //Verified && ASSIGNED && VALIDATED
-  const patches = await classe.patches.find({ ref: classe._id });
-  if (!patches) throw new Error("Patches not found");
-  let previousStatus = STATUS_CLASSE.CREATED;
-
-  for (let i = 0; i < patches.length; i++) {
-    const patch = patches[i];
-    const statusChange = patch.ops.find((op) => op.path === "/status");
-
-    if (statusChange) {
-      const newStatus = statusChange.value;
-      previousStatus = statusChange.originalValue;
-
-      if (newStatus === STATUS_CLASSE.ASSIGNED && previousStatus === STATUS_CLASSE.VERIFIED) {
-        classe.status = STATUS_CLASSE.VALIDATED;
-        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
-
-        break;
-      } else if (newStatus === STATUS_CLASSE.VERIFIED && previousStatus === STATUS_CLASSE.ASSIGNED) {
-        classe.status = STATUS_CLASSE.VALIDATED;
-        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
-
-        break;
-      } else if (newStatus === STATUS_CLASSE.ASSIGNED || newStatus === STATUS_CLASSE.VERIFIED) {
-        classe.status = newStatus;
-        //TODO : send email to referent depending on the status
-      }
-    }
-  }
-  if (classe.isModified()) {
-    await classe.save();
-  }
-
-  const classeCohort = await CohortModel.find({ name: classe.cohort });
-  if (!classeCohort) throw new Error("Cohort not found");
   const now = new Date();
   const inscriptionStartDate = new Date(classeCohort.inscriptionStartDate);
   const inscriptionEndDate = new Date(classeCohort.inscriptionEndDate);
@@ -64,6 +33,7 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   if ([STATUS_CLASSE.VALIDATED, STATUS_CLASSE.CLOSED].includes(classe.status) && isInscriptionOpen) {
     classe.set({ status: STATUS_CLASSE.OPEN });
     classe = await classe.save({ fromUser });
+    //TODO : send email to referent
     return classe;
   }
 
@@ -71,7 +41,7 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   const seatsValidated = studentValidated.length;
   const isInscriptionClosed = now > inscriptionEndDate;
   if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats === seatsValidated) {
-    classe.set({ seatsTaken: seatsValidated, status: STATUS_CLASSE.CLOSED });
+    classe.set({ status: STATUS_CLASSE.CLOSED });
     classe = await classe.save({ fromUser });
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VALIDATED, classe);

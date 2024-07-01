@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiOutlineOfficeBuilding, HiCheck, HiOutlineRefresh } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useParams, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -9,7 +9,7 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Button, Badge, DropdownButton } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, IS_INSCRIPTION_OPEN_CLE, FUNCTIONAL_ERRORS } from "snu-lib";
+import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS } from "snu-lib";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
@@ -29,6 +29,7 @@ import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleCohort from "./components/modale/modaleCohort";
 import ButtonInvite from "./components/ButtonInvite";
 import { InfoBus, TStatus, Rights } from "./components/types";
+import { status } from "../../../build/src/utils/index";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
@@ -234,9 +235,26 @@ export default function View() {
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
 
-    if (classe?.status && [STATUS_CLASSE.OPEN].includes(classe.status) && IS_INSCRIPTION_OPEN_CLE) {
+    if (classe?.status === STATUS_CLASSE.CREATED) {
+      if (user.role === ROLES.ADMINISTRATEUR_CLE) {
+        actionsList.push(<Button key="verify" title="Déclarer cette classe vérifiée" leftIcon={<HiCheck size={20} />} className="mr-2" onClick={() => console.log("salut")} />);
+      }
+      if ([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) {
+        actionsList.push(
+          <Button
+            key="reverify"
+            title="Relancer la vérification"
+            type="wired"
+            leftIcon={<HiOutlineRefresh size={20} className="mt-1" />}
+            className="mr-2"
+            onClick={() => console.log("salut")}
+          />,
+        );
+      }
+    }
+    if (classe?.status && [STATUS_CLASSE.OPEN].includes(classe.status)) {
       actionsList.push(
-        <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
+        <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} type="wired" title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
         <ButtonInvite key="invite" url={url} />,
       );
     }

@@ -139,20 +139,24 @@ export default function GeneralInfos({
             }}
             error={errors.coloration}
           />
-          <Label title="Trimestre de préférence pour le séjour" name="trimester" />
-          <Select
-            className="mb-3"
-            isActive={edit}
-            readOnly={!edit}
-            placeholder={"Choisissez un trimestre"}
-            options={trimesterOptions}
-            closeMenuOnSelect={true}
-            value={classe?.trimester ? { value: classe?.trimester, label: classe?.trimester } : null}
-            onChange={(options) => {
-              setClasse({ ...classe, trimester: options.value });
-            }}
-            error={errors.trimester}
-          />
+          {![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
+            <>
+              <Label title="Trimestre de préférence pour le séjour" name="trimester" />
+              <Select
+                className="mb-3"
+                isActive={edit}
+                readOnly={!edit}
+                placeholder={"Choisissez un trimestre"}
+                options={trimesterOptions}
+                closeMenuOnSelect={true}
+                value={classe?.trimester ? { value: classe?.trimester, label: classe?.trimester } : null}
+                onChange={(options) => {
+                  setClasse({ ...classe, trimester: options.value });
+                }}
+                error={errors.trimester}
+              />
+            </>
+          )}
           <Field
             name="comments"
             label="Contraintes spécifiques"
