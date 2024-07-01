@@ -24,7 +24,7 @@
     "build": "tsc -b ./build.tsconfig.json",
     "migrate-status": "migrate-mongo status",
     "migrate-create": "migrate-mongo create",
-    "migrate-down": "migrate-mongo down"
+    "migrate-down": "tsx node_modules/.bin/migrate-mongo down"
   },
   "author": "SELEGO",
   "license": "MIT",
