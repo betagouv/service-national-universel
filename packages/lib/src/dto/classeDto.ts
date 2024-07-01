@@ -5,12 +5,12 @@ export type ClasseDto = {
   etablissement?: any;
   referentClasseIds: string[];
   referents?: any;
-  cohort: string;
+  cohort?: string;
   uniqueKey: string;
   uniqueId: string;
   uniqueKeyAndId: string;
   name: string;
-  coloration: string;
+  coloration?: string;
   estimatedSeats: number;
   totalSeats: number;
   seatsTaken: number;

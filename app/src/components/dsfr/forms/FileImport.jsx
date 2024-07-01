@@ -10,13 +10,13 @@ export default function FileImport({ id, file, setFile, setError = () => {}, onC
 
     let image = e.target.files[0];
 
-    if (!["application/pdf", "image/jpeg", "image/png", "image/jpg", "image.heif", "image.heic"].includes(image.type)) {
+    if (!["application/pdf", "image/jpeg", "image/png", "image/jpg", "image/heif", "image/heic"].includes(image.type)) {
       setError({ message: "Format de fichier non supporté." });
       return;
     }
 
     try {
-      if (["image/heif", "image.heic"].includes(image.type)) {
+      if (["image/heif", "image/heic"].includes(image.type)) {
         image = await convertImage(image, "PNG");
       }
       if (image.size > 1_000_000) {

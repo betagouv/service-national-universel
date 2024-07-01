@@ -1,18 +1,18 @@
-// https://data.education.gouv.fr/api/explore/v2.1/console
-
 import { capture } from "../../sentry";
-import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
+import { EtablissementProviderDto } from "./etablissementType";
+import fetch from "node-fetch";
 
 const baseUrl = "https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-annuaire-education/exports/json";
 
 export const apiEducation = async ({ filters, page, size }, options = { headers: {} }) => {
   try {
     const params = formatParams(filters, page, size);
+    const url = new URL(baseUrl + "?" + params);
+    console.log("apiEducation - url: ", url.toString());
 
-    const res = await fetch(new URL(baseUrl + "?" + params), {
+    const res = await fetch(url, {
       ...options,
       headers: { "Content-Type": "application/json", ...options.headers },
-      mode: "cors",
       method: "GET",
     });
 
@@ -22,6 +22,7 @@ export const apiEducation = async ({ filters, page, size }, options = { headers:
 
     const data: EtablissementProviderDto[] = await res.json();
 
+    console.log("apiEducation - response.length: ", data.length);
     return data;
   } catch (e) {
     capture(e);

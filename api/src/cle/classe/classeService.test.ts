@@ -1,4 +1,4 @@
-import { deleteClasse } from "./classeService";
+import { buildUniqueClasseId, deleteClasse } from "./classeService";
 const youngService = require("../../young/young.service");
 const classService = require("./classeService");
 
@@ -13,6 +13,7 @@ const { ObjectId } = require("mongoose").Types;
 
 import { canEditEstimatedSeats, canEditTotalSeats } from "./classeService";
 import { ROLES, SUB_ROLES, LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE, STATUS_CLASSE } from "snu-lib";
+import { IEtablissement } from "../../models/cle/etablissementType";
 
 describe("ClasseService", () => {
   it("should return a pdf", async () => {
@@ -470,5 +471,31 @@ describe("ClasseStateManager.compute function", () => {
     expect(patchedClasse.set).toHaveBeenCalledWith({ seatsTaken: 0 });
     expect(patchedClasse.set).toHaveBeenCalledWith({ status: STATUS_CLASSE.CLOSED });
     expect(patchedClasse.save).toHaveBeenCalledWith({ fromUser });
+  });
+});
+describe("buildUniqueClasseId", () => {
+  it("should return the correct unique classe ID", () => {
+    const etablissement = {
+      region: "Île-de-France",
+      zip: "75001",
+      academy: "Paris",
+    } as IEtablissement;
+    const classe = {
+      name: "une classe",
+      coloration: "SPORT",
+    };
+    const expectedId = "IDFP075-E73E72";
+    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+  });
+
+  it("should handle missing inputs gracefully and return NO_UID", () => {
+    const etablissement = {
+      region: "Île-de-France",
+      zip: "75001",
+      academy: "Paris",
+    } as IEtablissement;
+    const classe = { name: "", coloration: undefined };
+    const expectedId = "IDFP075-NO_UID";
+    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
   });
 });

@@ -1205,8 +1205,7 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
             <b>
               {young.firstName} {young.lastName}
             </b>{" "}
-            soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
-            jaune.
+            , à la date du séjour de cohésion, ait satisfait aux obligations vaccinales en vigueur.
           </CheckRead>
           <CheckRead name="rulesParent1" onClick={() => handleConsentementChange("rulesParent1")} errors={errors} value={young.rulesParent1 === "true"}>
             Reconnait avoir pris connaissance du Règlement Intérieur du séjour de cohésion.
