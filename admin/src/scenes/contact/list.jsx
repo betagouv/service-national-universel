@@ -3,11 +3,11 @@ import { useSelector } from "react-redux";
 import { Page, Header, Container, Badge, DropdownButton } from "@snu/ds/admin";
 import { formatLongDateFR, getDepartmentNumber, ROLES, translate } from "snu-lib";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
-import AdminIcon from "@/components/drawer/icons/Admin";
 import { BsDownload } from "react-icons/bs";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
-import { IoFlashOutline, IoWarning } from "react-icons/io5";
+import { IoFlashOutline } from "react-icons/io5";
+import { HiOutlineChartSquareBar } from "react-icons/hi";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -159,7 +159,7 @@ export default function List() {
     <Page>
       <Header
         title="Liste de mes contacts"
-        breadcrumb={[{ title: <AdminIcon className="scale-[65%]" /> }, { title: "Mes contacts" }]}
+        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Mes contacts" }]}
         actions={[
           <ExportComponent
             key={0}

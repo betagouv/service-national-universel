@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { HiPlus } from "react-icons/hi";
+import { HiOutlineChartSquareBar, HiPlus } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
 import { Page, Header, Button } from "@snu/ds/admin";
-import InstitutionIcon from "@/components/drawer/icons/Institution";
 import { SUB_ROLES, ROLES, translate } from "snu-lib";
 import api from "@/services/api";
 import { capture } from "@/sentry";
@@ -96,7 +95,7 @@ export default function View() {
     <Page>
       <Header
         title={etablissement.name}
-        breadcrumb={[{ title: <InstitutionIcon className="scale-[65%]" /> }, { title: "Fiche de mon établissement" }]}
+        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Fiche de mon établissement" }]}
         actions={[
           [ROLES.ADMIN].includes(user.role) && (
             <Button

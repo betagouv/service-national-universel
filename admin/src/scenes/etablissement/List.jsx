@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
-import { HiOutlineOfficeBuilding, HiChevronDown } from "react-icons/hi";
+import { HiChevronDown, HiOutlineChartSquareBar } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
 import { getDepartmentNumber, translate } from "snu-lib";
 import * as XLSX from "xlsx";
@@ -50,7 +50,7 @@ export default function List() {
     <Page>
       <Header
         title="Liste des établissements"
-        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Établissements" }]}
+        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Établissements" }]}
         actions={[<Button key="export" rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData()} />]}
       />
       <Container className="!p-0">

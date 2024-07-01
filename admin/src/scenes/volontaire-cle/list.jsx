@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import StudentIcon from "@/components/drawer/icons/Student";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { translate } from "@/utils";
 import { Badge, Button, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
-import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiPlus, HiUsers, HiOutlineOfficeBuilding, HiOutlineChartSquareBar } from "react-icons/hi";
 import { IoFlashOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
@@ -62,7 +61,7 @@ export default function list() {
     <Page>
       <Header
         title="Liste de mes élèves"
-        breadcrumb={[{ title: <StudentIcon className="scale-[65%]" /> }, { title: "Mes élèves" }]}
+        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Mes élèves" }]}
         actions={
           students
             ? [<Button key="export" title="Exporter" type="primary" onClick={() => setIsExportOpen(true)} />]
