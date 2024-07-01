@@ -1,52 +1,56 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
+import validator from "validator";
+import { toastr } from "react-redux-toastr";
+
 import { fr } from "@codegouvfr/react-dsfr";
-import Stepper from "../components/Stepper";
+import Stepper from "./components/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { PasswordInput } from "@codegouvfr/react-dsfr/blocks/PasswordInput";
+
 import { ROLES, SUB_ROLES, translate } from "snu-lib";
-import validator from "validator";
 
 import { Section, Container } from "@snu/ds/dsfr";
-import { toastr } from "react-redux-toastr";
-import api from "@/services/api";
 
-import SchoolInFrance from "./components/SchoolInFrance";
+import api from "@/services/api";
+import { ETABLISSEMENT_LOCAL_STORAGE_KEY } from "@/services/cle";
 import Loader from "@/components/Loader";
 
-export default function informations() {
+import SchoolInFrance from "./components/SchoolInFrance";
+
+export default function InformationsForm() {
   const history = useHistory();
   const { search } = useLocation();
-  const urlParams = new URLSearchParams(window.location.search);
+  const urlParams = new URLSearchParams(search);
   const invitationToken = urlParams.get("token");
+  const reinscription = urlParams.get("reinscription");
 
   const [user, setUser] = useState(null);
 
   const [firstName, setFirstName] = React.useState();
   const [lastName, setLastName] = React.useState();
 
-  const LOCAL_STORAGE_KEY = "cle_inscription_school";
-  const [school, setSchool] = React.useState();
+  const [etablissement, setEtablissement] = React.useState();
 
   const [phone, setPhone] = React.useState();
 
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
 
-  const submit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (password !== confirmPassword) return toastr.error("Les mots de passe ne correspondent pas");
+      if (!reinscription && password !== confirmPassword) return toastr.error("Les mots de passe ne correspondent pas");
       if (!validator.isMobilePhone(phone, "fr-FR")) return toastr.error("Le numéro de téléphone n'est pas valide");
       // stocker dans local storage, pour une création de compte en plusieurs étapes
-      if (school) localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(school));
-      const { ok, data, code, message } = await api.post(`/cle/referent-signup`, {
+      if (etablissement) localStorage.setItem(ETABLISSEMENT_LOCAL_STORAGE_KEY, JSON.stringify(etablissement));
+      const { ok, code, message } = await api.post(`/cle/referent-signup`, {
         firstName,
         lastName,
         phone,
-        password,
-        confirmPassword,
+        password: reinscription ? undefined : password,
+        confirmPassword: reinscription ? undefined : confirmPassword,
         invitationToken,
       });
       if (!ok) {
@@ -81,9 +85,9 @@ export default function informations() {
   }, []);
 
   useEffect(() => {
-    const localStorageEtablissement = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const localStorageEtablissement = localStorage.getItem(ETABLISSEMENT_LOCAL_STORAGE_KEY);
     if (localStorageEtablissement) {
-      setSchool(JSON.parse(localStorageEtablissement));
+      setEtablissement(JSON.parse(localStorageEtablissement));
     }
   }, []);
 
@@ -104,7 +108,7 @@ export default function informations() {
           {/* todo : flag it as required */}
           {/* todo : on reload the state seems broken : there is the city prefilled, but we no school is available in the list */}
           <div className="flex items-center justify-between">Établissement scolaire</div>
-          <SchoolInFrance school={school} onSelectSchool={(s) => setSchool(s)} />
+          <SchoolInFrance school={etablissement} onSelectSchool={(s) => setEtablissement(s)} />
         </div>
       );
     }
@@ -113,8 +117,8 @@ export default function informations() {
 
   return (
     <Section>
-      <Stepper currentStep={4} stepCount={5} title="Création d’un compte : informations" nextTitle="Confirmation" />
-      <form onSubmit={submit}>
+      {!reinscription && <Stepper currentStep={4} stepCount={5} title="Création d’un compte : informations" nextTitle="Confirmation" />}
+      <form onSubmit={handleSubmit}>
         <Container className="flex flex-col gap-8">
           <div className="flex items-start justify-between">
             <h1 className="text-2xl font-bold">Complétez ces informations</h1>
@@ -160,20 +164,25 @@ export default function informations() {
               }}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <div className="w-full">
-              <PasswordInput label="Mot de passe" nativeInputProps={{ value: password, onChange: (e) => setPassword(e.target.value), required: true }} />
+          {!reinscription && (
+            <div className="flex flex-col gap-2">
+              <div className="w-full">
+                <PasswordInput label="Mot de passe" nativeInputProps={{ value: password, onChange: (e) => setPassword(e.target.value), required: true }} />
+              </div>
+              <p className="text-neutral-600 text-sm">Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</p>
+              <div className="w-full">
+                <PasswordInput
+                  label="Confirmer votre mot de passe"
+                  nativeInputProps={{ value: confirmPassword, onChange: (e) => setConfirmPassword(e.target.value), required: true }}
+                />
+              </div>
             </div>
-            <p className="text-neutral-600 text-sm">Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</p>
-            <div className="w-full">
-              <PasswordInput
-                label="Confirmer votre mot de passe"
-                nativeInputProps={{ value: confirmPassword, onChange: (e) => setConfirmPassword(e.target.value), required: true }}
-              />
-            </div>
-          </div>
+          )}
           <hr className="p-1" />
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button type="button" priority="secondary" onClick={() => history.goBack()}>
+              Précédent
+            </Button>
             <Button type="submit">Continuer</Button>
           </div>
         </Container>

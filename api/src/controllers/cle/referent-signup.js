@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES, validateEmailAcademique } = require("snu-lib");
-const mongoose = require("mongoose");
+const { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, validateEmailAcademique, isAdminCle, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
 
 const emailsEmitter = require("../../emails");
 const config = require("config");
@@ -11,7 +10,6 @@ const { capture } = require("../../sentry");
 const { ERRORS, validatePassword } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
-const SchoolRamsesModel = require("../../models/schoolRAMSES");
 const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const { serializeReferent } = require("../../utils/serializer");
@@ -132,7 +130,6 @@ router.post("/confirm-signup", async (req, res) => {
   try {
     const { error, value } = Joi.object({
       invitationToken: Joi.string().required(),
-      schoolId: Joi.string(),
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
@@ -144,55 +141,25 @@ router.post("/confirm-signup", async (req, res) => {
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (referent.role === ROLES.ADMINISTRATEUR_CLE && referent.subRole === SUB_ROLES.referent_etablissement) {
-      if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      if (!value.schoolId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "Une erreur est survenue lors de la création de votre établissement" });
 
-      const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
-      if (!ramsesSchool) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Une erreur est survenue lors de la création de votre établissement" });
-      const body = {
-        schoolId: value.schoolId,
-        uai: ramsesSchool.uai,
-        name: ramsesSchool.fullName,
-        referentEtablissementIds: [referent._id.toString()],
-        address: ramsesSchool.adresse,
-        department: ramsesSchool.departmentName,
-        region: ramsesSchool.region,
-        zip: ramsesSchool.postcode,
-        city: ramsesSchool.city,
-        country: ramsesSchool.country,
-      };
-
-      const etablissement = await EtablissementModel.create([body]);
-      if (!etablissement) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Une erreur est survenue lors de la création de votre établissement" });
-      referent.set({
-        region: ramsesSchool.region,
-        department: ramsesSchool.departmentName,
-        invitationToken: null,
-        invitationExpires: null,
-        acceptCGU: true,
-      });
-      await referent.save({ fromUser: referent });
-    } else {
-      //Check if user is already linked to an etablissement
-      let etablissement;
-      if (referent.role === ROLES.ADMINISTRATEUR_CLE) {
-        etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
-      }
-      if (referent.role === ROLES.REFERENT_CLASSE) {
-        const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
-        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        etablissement = await EtablissementModel.findById(classe.etablissementId);
-      }
-      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Vous n'êtes lié à aucun établissement" });
-
-      referent.set({ invitationToken: null, invitationExpires: null, acceptCGU: true, region: etablissement.region, department: etablissement.department });
-      await referent.save({ fromUser: referent });
+    //Check if user is already linked to an etablissement
+    let etablissement;
+    if (isAdminCle(referent)) {
+      // coordinateur et chef d'établissement
+      etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
+    } else if (isReferentClasse(referent)) {
+      const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      etablissement = await EtablissementModel.findById(classe.etablissementId);
     }
+    if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Vous n'êtes lié à aucun établissement" });
 
-    if (referent.subRole === SUB_ROLES.coordinateur_cle) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_COORDINATEUR, referent);
-    else if (referent.subRole === SUB_ROLES.referent_etablissement) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT, referent);
-    else if (referent.role === ROLES.REFERENT_CLASSE) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_CLASSE, referent);
+    referent.set({ invitationToken: null, invitationExpires: null, acceptCGU: true, region: etablissement.region, department: etablissement.department });
+    await referent.save({ fromUser: referent });
+
+    if (isCoordinateurEtablissement(referent)) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_COORDINATEUR, referent);
+    else if (isChefEtablissement(referent)) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT, referent);
+    else if (isReferentClasse(referent)) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_CLASSE, referent);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -208,7 +175,7 @@ router.post("/", async (req, res) => {
       lastName: Joi.string().required(),
       // todo : check phone format
       phone: Joi.string(),
-      password: Joi.string().required(),
+      password: Joi.string(),
       invitationToken: Joi.string().required(),
     })
       .unknown()
@@ -219,17 +186,20 @@ router.post("/", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    if (!validatePassword(value.password)) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
-
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const isReinscription = !!referent.lastLoginAt;
+    if (!isReinscription && !validatePassword(value.password)) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
+    if (!isReinscription) {
+      referent.set({ password: value.password });
+    }
 
     referent.set({
       firstName: value.firstName,
       lastName: value.lastName,
       phone: value.phone,
       phoneZone: value.phoneZone,
-      password: value.password,
     });
     await referent.save();
 
