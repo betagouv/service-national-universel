@@ -50,6 +50,12 @@ const permissionApp = (y) => {
   return y?.status !== YOUNG_STATUS.REFUSED;
 };
 
+export function hasCompletedPhase2(y) {
+  if ([YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(y.statusPhase2)) {
+    return true;
+  }
+}
+
 export function wasYoungExcluded(y) {
   return y?.departSejourMotif === "Exclusion";
 }
