@@ -58,4 +58,4 @@ ENV NODE_CONFIG_DIR=/app/api/config
 
 EXPOSE $PORT
 
-CMD ["node", "api/src/index.js"]
+CMD ["pm2-runtime", "--no-autorestart", "api/src/index.js"]
