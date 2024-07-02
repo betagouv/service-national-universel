@@ -3,11 +3,7 @@ import useUser from "../../hooks/useUser";
 
 const KnowledgeBasePublicNoAnswer = () => {
   const { restriction } = useUser();
-  const userRole = restriction || "public";
-
-  let url;
-  if (userRole !== null && userRole !== "public" && userRole !== "young") url = adminURL;
-  else url = appURL;
+  const url = ["young", "public"].includes(restriction) ? appURL : adminURL;
 
   return (
     <div className="mb-16 mt-4 flex flex-row items-center justify-start">
