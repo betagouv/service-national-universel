@@ -3,7 +3,7 @@ import { CleEtablissementModel, ReferentModel } from "../../models";
 import { ROLES } from "snu-lib";
 import getAppHelper from "../helpers/app";
 import request from "supertest";
-import { doInviteMultipleChefsEtablissementsToInscription, doInviteChefEtablissementToInscription } from "../../services/cle/referent";
+import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult, InvitationType } from "../../services/cle/referent";
 import passport from "passport";
 
 jest.mock("../../sendinblue", () => ({
@@ -47,7 +47,7 @@ describe("Referent Service", () => {
         uai: "UAI123",
       });
 
-      await doInviteChefEtablissementToInscription(referent.email);
+      await doInviteChefEtablissement(referent.email, {}, InvitationType.INSCRIPTION);
       const updatedReferent = await ReferentModel.findOne({ email: referent.email });
 
       expect(updatedReferent.invitationToken).toBeDefined();
@@ -56,7 +56,7 @@ describe("Referent Service", () => {
     });
 
     it("should throw if the referent email does not exist", async () => {
-      await expect(doInviteChefEtablissementToInscription("nonexistent@mail.com")).rejects.toThrow("Referent not found");
+      await expect(doInviteChefEtablissement("nonexistent@mail.com", {}, InvitationType.INSCRIPTION)).rejects.toThrow("Referent not found");
     });
   });
 
@@ -104,8 +104,26 @@ describe("Referent Service", () => {
 
       const emails = referents.map((referent) => referent.email);
       emails.push("nonexistent@mail.com");
+      const expectedInvitation: InvitationResult[] = [
+        {
+          to: "nonexistent@mail.com",
+          status: "error",
+          details: "Referent not found: nonexistent@mail.com",
+          type: InvitationType.INSCRIPTION,
+        },
+        {
+          to: "chef1@etablissement.fr",
+          status: "ok",
+          type: InvitationType.INSCRIPTION,
+        },
+        {
+          to: "chef2@etablissement.fr",
+          status: "ok",
+          type: InvitationType.INSCRIPTION,
+        },
+      ];
 
-      const result = await doInviteMultipleChefsEtablissementsToInscription(emails);
+      const result = await doInviteMultipleChefsEtablissements(emails, {}, InvitationType.INSCRIPTION);
 
       for (const referent of referents) {
         const updatedReferent = await ReferentModel.findOne({ email: referent.email });
@@ -113,6 +131,7 @@ describe("Referent Service", () => {
         expect(updatedReferent.invitationToken.length).toBeGreaterThanOrEqual(36);
         expect(updatedReferent.invitationExpires).toBeDefined();
       }
+      expect(result).toEqual(expect.arrayContaining(expectedInvitation));
     });
   });
 });
@@ -125,7 +144,7 @@ describe("POST /api/cle/referent/send-invitation-inscription-chef-etablissement"
     passport.user.subRole = null;
     jest.mock("../../services/cle/referent", () => ({
       ...jest.requireActual("../../services/cle/referent"),
-      doInviteMultipleChefsEtablissementsToInscription: jest.fn(() => Promise.resolve()),
+      doInviteMultipleChefsEtablissements: jest.fn(() => Promise.resolve()),
     }));
   });
 

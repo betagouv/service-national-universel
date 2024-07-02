@@ -1,7 +1,7 @@
 import { isSuperAdmin } from "snu-lib";
 import { UserRequest } from "../request";
 import { Response } from "express";
-import { doInviteMultipleChefsEtablissementsToConfirmation, doInviteMultipleChefsEtablissementsToInscription } from "../../services/cle/referent";
+import { doInviteMultipleChefsEtablissements, InvitationType } from "../../services/cle/referent";
 
 const express = require("express");
 const passport = require("passport");
@@ -78,7 +78,7 @@ router.post(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      const referentInvitationSent = await doInviteMultipleChefsEtablissementsToInscription(emails);
+      const referentInvitationSent = await doInviteMultipleChefsEtablissements(emails, req.user, InvitationType.INSCRIPTION);
 
       return res.status(200).send({ ok: true, data: referentInvitationSent });
     } catch (error) {
@@ -104,7 +104,7 @@ router.post(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      const referentInvitationSent = await doInviteMultipleChefsEtablissementsToConfirmation(emails);
+      const referentInvitationSent = await doInviteMultipleChefsEtablissements(emails, req.user, InvitationType.CONFIRMATION);
 
       return res.status(200).send({ ok: true, data: referentInvitationSent });
     } catch (error) {
