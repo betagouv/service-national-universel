@@ -90,7 +90,7 @@ export const doInviteChefEtablissement = async (email: string, user: UserDto, in
 
   let inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte?token=${referent.invitationToken}`;
   if (invitationType === InvitationType.CONFIRMATION) {
-    inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte/confirmation?token=${referent.invitationToken}`;
+    inscriptionUrl = `${config.ADMIN_URL}/verifier-mon-compte?token=${referent.invitationToken}`;
   }
   let templateId = SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE;
   if (invitationType === InvitationType.CONFIRMATION) {
