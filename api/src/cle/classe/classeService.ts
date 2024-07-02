@@ -1,7 +1,7 @@
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/young.service";
 import ClasseModel from "../../models/cle/classe";
 import YoungModel from "../../models/young";
-import { STATUS_CLASSE, STATUS_PHASE1_CLASSE, YOUNG_STATUS, ROLES, SUB_ROLES, LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib";
+import { STATUS_CLASSE, STATUS_PHASE1_CLASSE, YOUNG_STATUS, ROLES, SUB_ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "snu-lib";
 
 type User = {
   role: (typeof ROLES)[keyof typeof ROLES];
@@ -60,13 +60,13 @@ export const deleteClasse = async (_id: string, fromUser: object) => {
 export function canEditEstimatedSeats(user: User) {
   if (user.role === ROLES.ADMIN) return true;
   const now = new Date();
-  return user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement && now < LIMIT_DATE_ADMIN_CLE;
+  return user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement && now < LIMIT_DATE_ESTIMATED_SEATS;
 }
 
 export function canEditTotalSeats(user: User) {
   if (user.role === ROLES.ADMIN) return true;
   const now = new Date();
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_REF_CLASSE;
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_TOTAL_SEATS;
 }
 
 export const buildUniqueClasseId = (etablissement: IEtablissement, classe: Pick<IClasse, "name" | "coloration">): string => {

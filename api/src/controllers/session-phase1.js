@@ -40,6 +40,7 @@ const {
   isSessionEditionOpen,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendImageRightsForSessionPhase1,
+  formatDateTimeZone,
 } = require("snu-lib");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
@@ -791,12 +792,5 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-const formatDateTimeZone = (date) => {
-  //set timezone to UTC
-  let d = new Date(date);
-  d.toISOString();
-  return d;
-};
 
 module.exports = router;

@@ -6,7 +6,7 @@ function createFixtureClasse(fields = {}) {
     uniqueId: "1212",
     uniqueKey: "0720033V",
     etablissementId: "657994fb3562859787f6ff7b",
-    status: "VALIDATED",
+    status: "VERIFIED",
     statusPhase1: "WAITING_AFFECTATION",
     uniqueKeyAndId: "0720033V_1212",
     coloration: "SPORT",

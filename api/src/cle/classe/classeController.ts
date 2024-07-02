@@ -7,6 +7,7 @@ import {
   canDownloadYoungDocuments,
   YOUNG_STATUS,
   STATUS_CLASSE,
+  STATUS_CLASSE_LIST,
   canCreateClasse,
   STATUS_PHASE1_CLASSE,
   SENDINBLUE_TEMPLATES,
@@ -20,6 +21,7 @@ import {
   canViewClasse,
   canWithdrawClasse,
   canDeleteClasse,
+  canUpdateCohort,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -36,7 +38,7 @@ import CohortModel from "../../models/cohort";
 import emailsEmitter from "../../emails";
 import EtablissementModel from "../../models/cle/etablissement";
 import YoungModel from "../../models/young";
-import StateManager from "../../states";
+import ClasseStateManager from "./stateManager";
 import { validateId } from "../../utils/validator";
 import ReferentModel from "../../models/referent";
 
@@ -92,7 +94,7 @@ router.post(
 
       const allClasses = await CleClasseModel.find({
         cohort: value.cohort,
-        status: { $in: [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.INSCRIPTION_TO_CHECK, STATUS_CLASSE.VALIDATED] },
+        status: { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] },
       })
         .populate({
           path: "etablissement",
@@ -173,7 +175,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     const classe = await ClasseModel.create({
       ...value,
-      status: STATUS_CLASSE.DRAFT,
+      status: STATUS_CLASSE.CREATED,
       statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
       cohort: defaultCleCohort.name,
       uniqueKeyAndId: value.uniqueKey + "_" + value.uniqueId,
@@ -217,7 +219,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       type: Joi.string()
         .valid(...TYPE_CLASSE_LIST)
         .required(),
-      trimester: Joi.string().allow("T1", "T2", "T3").required(),
       sessionId: Joi.string().allow(null),
       cohesionCenterId: Joi.string().allow(null),
       pointDeRassemblementId: Joi.string().allow(null),
@@ -240,8 +241,12 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
+
     let youngs;
     if (classe.cohort !== value.cohort) {
+      const cohort = await CohortModel.findOne({ name: value.cohort });
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!canUpdateCohort(cohort, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       youngs = await YoungModel.find({ classeId: classe._id });
       // * Impossible to change cohort if a young has already completed phase1
       const youngWithStatusPhase1Done = youngs.find((y) => y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE);
@@ -285,9 +290,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     classe = await classe.save({ fromUser: req.user });
-    classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
-
-    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
 
     return res.status(200).send({ ok: true, data: classe });
   } catch (error) {
@@ -383,7 +385,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (type === "delete") {
       await deleteClasse(id, req.user);
     } else if (type === "withdraw") {
-      await StateManager.Classe.withdraw(id, req.user, { YoungModel });
+      await ClasseStateManager.withdraw(id, req.user, { YoungModel });
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }

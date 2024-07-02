@@ -22,7 +22,7 @@ const CohesionCenterModel = require("../models/cohesionCenter");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const EtablissementModel = require("../models/cle/etablissement");
 const ClasseModel = require("../models/cle/classe");
-const StateManager = require("../states");
+const ClasseStateManager = require("../cle/classe/stateManager");
 const emailsEmitter = require("../emails");
 
 const { getQPV, getDensity } = require("../geo");
@@ -780,8 +780,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     young.set({ notes: [...(young.notes ?? []), newNote], hasNotes: "true" });
 
     await young.save({ fromUser: req.user });
-    if (previousClasse) await StateManager.Classe.compute(previousClasse._id, req.user, { YoungModel });
-    if (classe) await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
+    if (previousClasse) await ClasseStateManager.compute(previousClasse._id, req.user, { YoungModel });
+    if (classe) await ClasseStateManager.compute(classe._id, req.user, { YoungModel });
 
     // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {

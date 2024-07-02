@@ -6,7 +6,6 @@ async function initDB() {
   if (!config.MONGO_URL) {
     throw new Error("ERROR CONNECTION. MONGO URL EMPTY");
   }
-
   const db = mongoose.connection;
 
   db.on("error", console.error.bind(console, "MONGODB: connection error:"));

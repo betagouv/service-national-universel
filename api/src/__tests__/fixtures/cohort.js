@@ -1,4 +1,5 @@
 const { fakerFR: faker } = require("@faker-js/faker");
+const { COHORT_TYPE } = require("snu-lib");
 
 function getNewCohortFixture(object = {}) {
   return {
@@ -8,6 +9,7 @@ function getNewCohortFixture(object = {}) {
       firstExportDate: faker.date.past(),
       secondExportDate: faker.date.past(),
     },
+    type: COHORT_TYPE.VOLONTAIRE,
     isAssignmentAnnouncementsOpenForYoung: faker.datatype.boolean(),
     manualAffectionOpenForAdmin: faker.datatype.boolean(),
     manualAffectionOpenForReferentRegion: faker.datatype.boolean(),
@@ -41,5 +43,4 @@ function getNewCohortFixture(object = {}) {
     ...object,
   };
 }
-
 module.exports = getNewCohortFixture;

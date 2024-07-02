@@ -101,7 +101,7 @@ export default function GeneralInfos({
             readOnly={!edit}
             active={edit}
           />
-          <Label title="Effectif prévisionnel" name="estimatedSeats" tooltip="Importé de démarche simplifiée et modifiable par le chef d'établissement jusqu'au 31 aout 2024" />
+          <Label title="Effectif prévisionnel" name="estimatedSeats" tooltip="Nombre d'élèves prévisionnel de la classe" />
           <InputText
             name="estimatedSeats"
             className="flex-1 mb-3"
@@ -112,7 +112,7 @@ export default function GeneralInfos({
             active={edit}
             error={errors.estimatedSeats}
           />
-          <Label title="Effectif ajusté" name="totalSeats" tooltip="Modifiable par le référent de classe et le chef d'établissement jusqu'au 20 septembre" />
+          <Label title="Effectif ajusté" name="totalSeats" tooltip="Nombre d'élèves attendu sur la classe. Vous ne pouvez le modifier qu'à la baisse" />
           <InputText
             name="totalSeats"
             className="flex-1 mb-3"
@@ -123,7 +123,7 @@ export default function GeneralInfos({
             active={edit}
             error={errors.totalSeats}
           />
-          <Label title="Effectif inscrit" name="validatedYoung" tooltip="Non modifiable - calculé sur la base du nombre d'élèves inscrits" />
+          <Label title="Effectif inscrit" name="validatedYoung" tooltip="Nombre d'élèves validés inscrit sur la classe" />
           <InputText name="validatedYoung" className="flex-1 mb-3" value={validatedYoung.toString()} disabled />
           <Label title="Coloration souhaitée" name="coloration" tooltip="Les colorations définitives seront confirmées au moment des affectations." />
           <Select
@@ -153,6 +153,7 @@ export default function GeneralInfos({
             }}
             error={errors.trimester}
           />
+
           <Field
             name="comments"
             label="Contraintes spécifiques"

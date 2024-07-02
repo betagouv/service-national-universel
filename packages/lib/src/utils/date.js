@@ -156,6 +156,13 @@ const isNowBetweenDates = (from, to) => {
   return (from <= now && now <= to) || (!from && now <= to) || (from <= now && !to);
 };
 
+const formatDateTimeZone = (date) => {
+  //set timezone to UTC
+  let d = new Date(date);
+  d.toISOString();
+  return d;
+};
+
 export {
   MONTHS,
   formatDay,
@@ -176,4 +183,5 @@ export {
   calculateAge,
   formatDateForPostGre,
   isNowBetweenDates,
+  formatDateTimeZone,
 };

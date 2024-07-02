@@ -15,7 +15,7 @@ export default function ButtonInvite({ url }: Props) {
   const [showModal, setShowModal] = useState(false);
   return (
     <>
-      <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" className="mr-2" onClick={() => setShowModal(true)} />
+      <Button key="invite" leftIcon={<BsSend size={20} className="mt-1" />} title="Inviter des élèves" className="mr-2" onClick={() => setShowModal(true)} />
       <Modal
         isOpen={showModal}
         className="w-[500px]"

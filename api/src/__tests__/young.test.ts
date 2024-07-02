@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
 
-const { ROLES, COHORTS } = require("snu-lib");
+const { ROLES, COHORTS, YOUNG_SOURCE } = require("snu-lib");
 
 const fileUtils = require("../utils/file");
 
@@ -18,12 +18,23 @@ const { createMissionHelper } = require("./helpers/mission");
 //young
 const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
-
+const { validateYoung, validateId, validateParents } = require("../utils/validator");
+//cohort
 const { createCohortHelper } = require("./helpers/cohort");
 const getNewCohortFixture = require("./fixtures/cohort");
-
+//referent
 const { createReferentHelper } = require("./helpers/referent");
 const getNewReferentFixture = require("./fixtures/referent");
+//classe
+const { createClasse } = require("./helpers/classe");
+const { createFixtureClasse } = require("./fixtures/classe");
+const ClasseModel = require("../models/cle/classe");
+
+jest.mock("../utils/validator", () => ({
+  validateYoung: jest.fn(),
+  validateId: jest.fn(),
+  validateParents: jest.fn(),
+}));
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -40,6 +51,10 @@ jest.mock("../utils", () => ({
   getFile: () => Promise.resolve({ Body: "" }),
   uploadFile: (path, file) => Promise.resolve({ path, file }),
   deleteFile: (path, file) => Promise.resolve({ path, file }),
+}));
+
+jest.mock("../emails", () => ({
+  emit: jest.fn(),
 }));
 
 jest.mock("../cryptoUtils", () => ({
@@ -60,6 +75,7 @@ describe("Young", () => {
     it("should soft-delete the young", async () => {
       const youngFixture = getNewYoungFixture();
       const young = await createYoungHelper(youngFixture);
+      validateId.mockReturnValue({ error: null, value: young._id });
       const res = await request(getAppHelper()).put(`/young/${young._id}/soft-delete`);
       expect(res.statusCode).toEqual(200);
       const updatedYoung = res.body.data;
@@ -329,6 +345,23 @@ describe("Young", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
       passport.user = young;
+      const modifiedYoung = {
+        ...young,
+        parent1Status: "mother",
+        parent1FirstName: "foo",
+        parent1LastName: "bar",
+        parent1Email: "foo@bar.com",
+        parent1Phone: "0600000000",
+        parent1PhoneZone: "FRANCE",
+        parent2: true,
+        parent2Status: "father",
+        parent2FirstName: "foo",
+        parent2LastName: "bar",
+        parent2Email: "foo@bar.com",
+        parent2Phone: "0600000000",
+        parent2PhoneZone: "FRANCE",
+      };
+      validateParents.mockReturnValue({ error: null, value: modifiedYoung });
       const response = await request(getAppHelper()).put("/young/account/parents").send({
         parent1Status: "mother",
         parent1FirstName: "foo",
@@ -364,6 +397,7 @@ describe("Young", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
       passport.user = young;
+      validateParents.mockReturnValue({ error: "parent1Status", value: young });
       const response = await request(getAppHelper()).put("/young/account/parents").send({ parent1Status: "" });
       expect(response.statusCode).toEqual(400);
     });
@@ -716,6 +750,31 @@ describe("Young", () => {
       expect(res.status).toBe(403);
 
       passport.user = previous;
+    });
+  });
+  describe("YoungModel post save hook", () => {
+    it("should call StateManager.Classe.compute if source is CLE", async () => {
+      const cohortFixture = getNewCohortFixture({ type: "CLE" });
+      const cohort = await createCohortHelper(cohortFixture);
+      const classe = createFixtureClasse({ seatsTaken: 0, status: "OPEN", cohort: cohort.name });
+      const classeId = (await createClasse(classe))._id;
+      const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId });
+      const young = await createYoungHelper(youngFixture);
+      const modifiedYoung = { ...young, status: "VALIDATED" };
+      validateYoung.mockReturnValue({ error: null, value: modifiedYoung });
+      const passport = require("passport");
+      const previous = passport.user.role;
+      passport.user.role = ROLES.ADMIN;
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}`).send({
+        status: "VALIDATED",
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe("VALIDATED");
+
+      const updatedClasse = await ClasseModel.findById(classeId);
+      expect(updatedClasse.seatsTaken).toBe(1);
+      passport.user.role = previous;
     });
   });
 });
