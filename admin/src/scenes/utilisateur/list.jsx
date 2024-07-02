@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { HiOutlineChartSquareBar } from "react-icons/hi";
+import { HiOutlineHome } from "react-icons/hi";
 
 import dayjs from "@/utils/dayjs.utils";
 import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
@@ -97,7 +97,7 @@ export default function List() {
       <Header
         title={[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Liste de mes contacts" : "Utilisateurs"}
         breadcrumb={[
-          { title: <HiOutlineChartSquareBar size={20} className="hover:text-gray-500" />, to: "/" },
+          { title: <HiOutlineHome size={20} className="hover:text-gray-500" />, to: "/" },
           { title: [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Mes contacts" : "Utilisateurs" },
         ]}
         actions={[
