@@ -138,7 +138,7 @@ resource "scaleway_container" "antivirus" {
   max_scale       = 5
   timeout         = 60
   max_concurrency = 50
-  privacy         = "private"
+  privacy         = "public"
   protocol        = "http1"
   deploy          = true
 

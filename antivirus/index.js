@@ -3,6 +3,8 @@ const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const Joi = require("joi");
 const NodeClam = require("clamscan");
+const authMiddleware = require("./middlewares/authMiddleware");
+const authController = require("./controllers/authController");
 
 const { initSentry, capture } = require("./sentry");
 
@@ -19,6 +21,8 @@ const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   INVALID_PARAMS: "INVALID_PARAMS",
 };
+
+app.use("/auth", authController);
 
 app.get("/", async (req, res) => {
   const d = new Date();
@@ -41,6 +45,7 @@ function validate_request(req) {
 
 app.post(
   "/scan",
+  authMiddleware,
   fileUpload({
     limits: { fileSize: 10 * 1024 * 1024 },
     useTempFiles: true,
@@ -54,6 +59,7 @@ app.post(
       }
 
       const clamscan = await new NodeClam().init(CLAMSCAN_CONFIG);
+
       const { isInfected } = await clamscan.isInfected(files.file.tempFilePath);
 
       if (isInfected) {
