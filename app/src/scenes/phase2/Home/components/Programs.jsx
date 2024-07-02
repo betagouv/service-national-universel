@@ -66,7 +66,7 @@ export function Programs() {
                 <div className="aspect-square rounded-full mx-auto overflow-hidden">
                   <img src={image} alt={program.name} className="h-full w-full object-cover" />
                 </div>
-                <p className="text-center font-bold mt-2 text-sm">{program.name}</p>
+                <p className="text-center font-bold mt-2 text-sm line-clamp-3">{program.name}</p>
               </a>
             </div>
           );
