@@ -3,6 +3,7 @@ import { EtablissementDocument } from "../../models/cle/etablissementType";
 import { randomUUID } from "node:crypto";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { UserDto } from "snu-lib/src/dto";
+import { IReferent } from "../../models/referentType";
 
 const crypto = require("crypto");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
@@ -81,6 +82,29 @@ export const doInviteMultipleChefsEtablissements = async (emails: string[], user
 };
 
 export const doInviteChefEtablissement = async (email: string, user: UserDto, invitationType: InvitationType) => {
+  const referent: IReferent = await generateInvitationTokenAndSaveReferent(email, user);
+
+  const etablissement: EtablissementDocument = await CleEtablissementModel.findOne({ referentEtablissementIds: referent._id });
+  const nbreClasseAValider = await getNumberOfClassesByEtablissement(etablissement);
+  const effectifPrevisionnel = await getEstimatedSeatsByEtablissement(etablissement);
+
+  let inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte?token=${referent.invitationToken}`;
+  if (invitationType === InvitationType.CONFIRMATION) {
+    inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte/confirmation?token=${referent.invitationToken}`;
+  }
+  let templateId = SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE;
+  if (invitationType === InvitationType.CONFIRMATION) {
+    templateId = SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_CONFIRMATION_TEMPLATE;
+  }
+  const toName = `${referent.firstName} ${referent.lastName}`;
+  const name_school = `${etablissement.name}`;
+  return await sendTemplate(templateId, {
+    emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+    params: { cta: inscriptionUrl, toName, name_school, nbreClasseAValider, effectifPrevisionnel },
+  });
+};
+
+async function generateInvitationTokenAndSaveReferent(email: string, user: UserDto) {
   const referent = await ReferentModel.findOne({ email });
   if (!referent) {
     throw new Error("Referent not found: " + email);
@@ -91,19 +115,5 @@ export const doInviteChefEtablissement = async (email: string, user: UserDto, in
     invitationExpires: inSevenDays(),
   });
   await referent.save({ fromUser: user });
-
-  const etablissement: EtablissementDocument = await CleEtablissementModel.findOne({ referentEtablissementIds: referent._id });
-  const nbreClasseAValider = await getNumberOfClassesByEtablissement(etablissement);
-  const effectifPrevisionnel = await getEstimatedSeatsByEtablissement(etablissement);
-
-  let inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte?token=${invitationToken}`;
-  if (invitationType === InvitationType.CONFIRMATION) {
-    inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte/confirmation?token=${invitationToken}`;
-  }
-  const toName = `${referent.firstName} ${referent.lastName}`;
-  const name_school = `${etablissement.name}`;
-  return await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE, {
-    emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { cta: inscriptionUrl, toName, name_school, nbreClasseAValider, effectifPrevisionnel },
-  });
-};
+  return referent;
+}
