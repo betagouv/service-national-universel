@@ -35,14 +35,15 @@ async function scanFile(tempFilePath, name, userId = "anonymous") {
   }
 
   const scan = async () => {
+    const token = await getAccessToken(config.API_ANTIVIRUS_ENDPOINT, config.API_ANTIVIRUS_KEY);
+
     const stream = createReadStream(tempFilePath);
     const url = `${config.API_ANTIVIRUS_ENDPOINT}/scan`;
-    const token = await getAccessToken(config.API_ANTIVIRUS_ENDPOINT, config.API_ANTIVIRUS_KEY);
+
     const formData = new FormData();
     formData.append("file", stream);
 
     const headers = formData.getHeaders();
-    headers["X-Auth-Token"] = config.API_ANTIVIRUS_TOKEN;
     headers["x-access-token"] = token;
 
     const response = await fetch(url, { method: "POST", body: formData, headers });

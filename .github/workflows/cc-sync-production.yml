@@ -63,4 +63,5 @@ jobs:
       api_image_tag: ${{ needs.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ needs.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ needs.prepare.outputs.app_image_tag }}
+      antivirus_image_tag: ${{ needs.prepare.outputs.antivirus_image_tag }}
     secrets: inherit
