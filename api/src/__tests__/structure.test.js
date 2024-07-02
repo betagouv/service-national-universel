@@ -5,7 +5,7 @@ const getNewStructureFixture = require("./fixtures/structure");
 const { createStructureHelper, getStructureByIdHelper, notExistingStructureId, expectStructureToEqual, deleteStructureByIdHelper } = require("./helpers/structure");
 const { createMissionHelper, getMissionByIdHelper, deleteMissionByIdHelper } = require("./helpers/mission");
 const getNewMissionFixture = require("./fixtures/mission");
-const getNewReferentFixture = require("./fixtures/referent");
+const { getNewReferentFixture } = require("./fixtures/referent");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 const { ROLES } = require("snu-lib");
 

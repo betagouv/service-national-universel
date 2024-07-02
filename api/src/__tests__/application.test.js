@@ -1,7 +1,7 @@
 const request = require("supertest");
 const { getNewApplicationFixture } = require("./fixtures/application");
 const getNewMissionFixture = require("./fixtures/mission");
-const getNewReferentFixture = require("./fixtures/referent");
+const { getNewReferentFixture } = require("./fixtures/referent");
 const getNewYoungFixture = require("./fixtures/young");
 const getNewCohortFixture = require("./fixtures/cohort");
 const getAppHelper = require("./helpers/app");

@@ -2,7 +2,7 @@ const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createReferentHelper, deleteReferentByIdHelper } = require("./helpers/referent");
-const getNewReferentFixture = require("./fixtures/referent");
+const { getNewReferentFixture } = require("./fixtures/referent");
 const TableDeRepartitionModel = require("../models/PlanDeTransport/tableDeRepartition");
 
 beforeAll(dbConnect);

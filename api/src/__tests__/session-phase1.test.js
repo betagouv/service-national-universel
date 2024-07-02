@@ -14,7 +14,7 @@ const { createCohortHelper } = require("./helpers/cohort");
 
 const { getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
-const getNewReferentFixture = require("./fixtures/referent");
+const { getNewReferentFixture } = require("./fixtures/referent");
 const getNewCohortFixture = require("./fixtures/cohort");
 const getNewLigneBusFixture = require("./fixtures/PlanDeTransport/ligneBus");
 

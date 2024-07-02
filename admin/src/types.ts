@@ -1,4 +1,4 @@
-import { ROLES, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST } from "snu-lib";
+import { ROLES } from "snu-lib";
 
 export type Young = { _id: string };
 
@@ -10,6 +10,9 @@ export type User = {
   subRole?: string;
   firstName: string;
   lastName: string;
+  phone?: string;
+  email?: string;
+  emailWaitingValidation?: string;
   _id: string;
 };
 

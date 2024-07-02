@@ -88,6 +88,7 @@ export default function App() {
               <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
               <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
               <SentryRoute path="/creer-mon-compte" component={Signup} />
+              <SentryRoute path="/verifier-mon-compte" component={Signup} />
               {/* Authentification accessoire */}
               <SentryRoute path="/auth" component={Auth} />
               {/* Page par default (404 et Home) */}

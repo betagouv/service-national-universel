@@ -23,7 +23,7 @@ const { createCohortHelper } = require("./helpers/cohort");
 const getNewCohortFixture = require("./fixtures/cohort");
 
 const { createReferentHelper } = require("./helpers/referent");
-const getNewReferentFixture = require("./fixtures/referent");
+const { getNewReferentFixture } = require("./fixtures/referent");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
