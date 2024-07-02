@@ -1,5 +1,5 @@
-import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE, SUB_ROLES } from "snu-lib";
-import { LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib/src/constants/constants";
+import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE } from "snu-lib";
+import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "snu-lib/src/constants/constants";
 import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { User } from "@/types";
@@ -12,16 +12,8 @@ export const statusClassForBadge = (status) => {
       statusClasse = "WAITING_LIST";
       break;
 
-    case STATUS_CLASSE.ASSIGNED:
-      statusClasse = "WAITING_VALIDATION";
-      break;
-
     case STATUS_CLASSE.VERIFIED:
       statusClasse = "WAITING_VALIDATION";
-      break;
-
-    case STATUS_CLASSE.VALIDATED:
-      statusClasse = "VALIDATED";
       break;
 
     case STATUS_CLASSE.WITHDRAWN:
@@ -46,7 +38,7 @@ export function getRights(user: User, classe, cohort: CohortDto | undefined) {
   return {
     canEdit:
       ([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN) ||
-      (classe?.status === STATUS_CLASSE.CREATED && user.role === ROLES.ADMINISTRATEUR_CLE),
+      ([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status) && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)),
     canEditCohort: canUpdateCohort(cohort, user),
     canEditCenter: canUpdateCenter(cohort, user),
     canEditPDR: user?.role === ROLES.ADMIN,
@@ -61,13 +53,13 @@ export function getRights(user: User, classe, cohort: CohortDto | undefined) {
 function canEditEstimatedSeats(user: User) {
   if (user.role === ROLES.ADMIN) return true;
   const now = new Date();
-  return user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement && now < LIMIT_DATE_ADMIN_CLE;
+  return user.role === ROLES.ADMINISTRATEUR_CLE && now < LIMIT_DATE_ESTIMATED_SEATS;
 }
 
 function canEditTotalSeats(user: User) {
   if (user.role === ROLES.ADMIN) return true;
   const now = new Date();
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_REF_CLASSE;
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_TOTAL_SEATS;
 }
 
 const showCohort = (cohort: CohortDto | undefined, user: User | undefined): boolean => {

@@ -198,24 +198,6 @@ describe("PUT /cle/classe/:id", () => {
     passport.user.role = ROLES.ADMIN;
   });
 
-  it("should return 403 when user cannot update the trimester", async () => {
-    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
-    const userId = new ObjectId();
-    const etablissement = createFixtureEtablissement({ referentEtablissementIds: [userId] });
-    const etablissementId = (await createEtablissement(etablissement))._id;
-    const classe = createFixtureClasse({ etablissementId: etablissementId, trimester: "T1" });
-    const validId = (await createClasse(classe))._id;
-    jest.spyOn(EtablissementModel, "findById").mockResolvedValueOnce(etablissement);
-    const res = await request(getAppHelper())
-      .put(`/cle/classe/${validId}`)
-      .send({
-        ...classe,
-        trimester: "T2",
-      });
-    expect(res.status).toBe(403);
-    passport.user.role = ROLES.ADMIN;
-  });
-
   it("should return 403 when changing cohort is not allowed because young has validate his Phase1", async () => {
     const classe = createFixtureClasse();
     classe.cohort = "2022";

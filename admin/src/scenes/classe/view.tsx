@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { HiOutlineOfficeBuilding, HiCheck, HiOutlineRefresh } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useParams, useHistory } from "react-router-dom";
@@ -63,11 +63,6 @@ export default function View() {
     (studentStatus[YOUNG_STATUS.WAITING_VALIDATION] || 0) -
     (studentStatus[YOUNG_STATUS.ABANDONED] || 0);
 
-  const initialTotalSeatsRef = useRef<number>(0);
-  if (classe && initialTotalSeatsRef.current === 0) {
-    initialTotalSeatsRef.current = classe.totalSeats;
-  }
-
   const getClasse = async () => {
     try {
       const { ok, code, data: classe } = await api.get(`/cle/classe/${id}`);
@@ -96,7 +91,7 @@ export default function View() {
 
       //Logical stuff
       setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
-      if (![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED, STATUS_CLASSE.ASSIGNED].includes(classe.status)) {
+      if (![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe.status)) {
         getStudents(classe._id);
       }
     } catch (e) {
@@ -142,7 +137,6 @@ export default function View() {
     if (!classe?.name) errors.name = "Ce champ est obligatoire";
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
     if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
-    if (classe?.totalSeats && classe.totalSeats > initialTotalSeatsRef.current) errors.totalSeats = "Vous ne pouvez pas augmenter le nombre de places";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
     if (!classe?.trimester) errors.trimester = "Ce champ est obligatoire";
     if (!classe?.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
@@ -178,23 +172,6 @@ export default function View() {
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la classe", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const verifyClasse = async () => {
-    try {
-      setIsLoading(true);
-      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}`, { ...classe, status: STATUS_CLASSE.VERIFIED });
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", translate(code));
-        return setIsLoading(false);
-      }
-      setClasse(data);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", e);
     } finally {
       setIsLoading(false);
     }
@@ -256,26 +233,6 @@ export default function View() {
 
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
-
-    if (classe?.status === STATUS_CLASSE.CREATED) {
-      if (user.role === ROLES.ADMINISTRATEUR_CLE) {
-        actionsList.push(
-          <Button key="verify" title="Déclarer cette classe vérifiée" leftIcon={<HiCheck size={20} />} className="mr-2" onClick={verifyClasse} disabled={isLoading} />,
-        );
-      }
-      if ([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) {
-        actionsList.push(
-          <Button
-            key="reverify"
-            title="Relancer la vérification"
-            type="wired"
-            leftIcon={<HiOutlineRefresh size={20} className="mt-1" />}
-            className="mr-2"
-            onClick={() => console.log("salut")}
-          />,
-        );
-      }
-    }
     if (classe?.status && [STATUS_CLASSE.OPEN].includes(classe.status)) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} type="wired" title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
@@ -364,7 +321,7 @@ export default function View() {
         />
       )}
 
-      {![STATUS_CLASSE.CREATED, STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.VERIFIED].includes(classe?.status) && (
+      {![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status) && (
         <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />
       )}
 

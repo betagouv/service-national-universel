@@ -12,7 +12,7 @@ import YoungModel from "../../models/young";
 const { ObjectId } = require("mongoose").Types;
 
 import { canEditEstimatedSeats, canEditTotalSeats } from "./classeService";
-import { ROLES, SUB_ROLES, LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE, STATUS_CLASSE } from "snu-lib";
+import { ROLES, SUB_ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE } from "snu-lib";
 import { IEtablissement } from "../../models/cle/etablissementType";
 
 describe("ClasseService", () => {
@@ -287,15 +287,15 @@ describe("canEditEstimatedSeats", () => {
     expect(canEditEstimatedSeats(user)).toBe(true);
   });
 
-  it("should return true if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is before LIMIT_DATE_ADMIN_CLE", () => {
+  it("should return true if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is before LIMIT_DATE_ESTIMATED_SEATS", () => {
     const user = { role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement };
-    jest.setSystemTime(new Date(LIMIT_DATE_ADMIN_CLE.getTime() - 24 * 60 * 60 * 1000));
+    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditEstimatedSeats(user)).toBe(true);
   });
 
-  it("should return false if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is after LIMIT_DATE_ADMIN_CLE", () => {
+  it("should return false if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is after LIMIT_DATE_ESTIMATED_SEATS", () => {
     const user = { role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement };
-    jest.setSystemTime(new Date(LIMIT_DATE_ADMIN_CLE.getTime() + 24 * 60 * 60 * 1000));
+    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() + 24 * 60 * 60 * 1000));
     expect(canEditEstimatedSeats(user)).toBe(false);
   });
 
@@ -318,18 +318,18 @@ describe("canEditTotalSeats", () => {
     expect(canEditTotalSeats(user)).toBe(true);
   });
 
-  it("should return true if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is before LIMIT_DATE_REF_CLASSE", () => {
+  it("should return true if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is before LIMIT_DATE_TOTAL_SEATS", () => {
     const user1 = { role: ROLES.ADMINISTRATEUR_CLE };
     const user2 = { role: ROLES.REFERENT_CLASSE };
-    jest.setSystemTime(new Date(LIMIT_DATE_REF_CLASSE.getTime() - 24 * 60 * 60 * 1000));
+    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user1)).toBe(true);
     expect(canEditTotalSeats(user2)).toBe(true);
   });
 
-  it("should return false if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is after LIMIT_DATE_REF_CLASSE", () => {
+  it("should return false if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is after LIMIT_DATE_TOTAL_SEATS", () => {
     const user1 = { role: ROLES.ADMINISTRATEUR_CLE };
     const user2 = { role: ROLES.REFERENT_CLASSE };
-    jest.setSystemTime(new Date(LIMIT_DATE_REF_CLASSE.getTime() + 24 * 60 * 60 * 1000));
+    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() + 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user1)).toBe(false);
     expect(canEditTotalSeats(user2)).toBe(false);
   });
