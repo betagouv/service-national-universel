@@ -1,13 +1,12 @@
 import { appURL, adminURL } from "../../config";
 import useUser from "../../hooks/useUser";
-import { useEffect, useState } from "react";
+
 const KnowledgeBasePublicNoAnswer = () => {
   const { restriction } = useUser();
-  const [userRole, setUserRole] = useState(restriction || "public");
+  const userRole = restriction || "public";
 
   let url;
-  if (userRole === "young" || userRole === "public") url = appURL;
-  else if (userRole !== null && userRole !== "public" && userRole !== "young") url = adminURL;
+  if (userRole !== null && userRole !== "public" && userRole !== "young") url = adminURL;
   else url = appURL;
 
   return (
