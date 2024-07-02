@@ -12,4 +12,4 @@ else
 fi
 
 
-exec pm2-runtime --no-autorestart api/src/index.js
+exec pm2-runtime api/src/index.js
