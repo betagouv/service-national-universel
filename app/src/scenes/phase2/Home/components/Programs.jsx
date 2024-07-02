@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 import { apiURL } from "@/config";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
@@ -12,10 +11,14 @@ async function fetchPrograms() {
   return data;
 }
 
-export function Programs() {
-  // TODO: put in cellar instead of asset folder
-  const images = import.meta.globEager("../../../../assets/programmes-engagement/*");
+// TODO: put in cellar instead of asset folder: dynamic content should not be in the bundle
+const imagePath = "../../../../assets/programmes-engagement";
+const images = import.meta.globEager("../../../../assets/programmes-engagement/*");
+const getProgramImage = (program) => {
+  return program.imageFile ? program.imageFile : images[`${imagePath}/${program.imageString}`]?.default;
+};
 
+export function Programs() {
   const [open, setOpen] = useState(false);
 
   const { isPending, error, data } = useQuery({
@@ -24,16 +27,11 @@ export function Programs() {
     refetchOnWindowFocus: false,
   });
 
-  if (isPending) {
-    return <Loader />;
-  }
+  if (isPending) return <Loader />;
 
-  if (error) {
-    toastr.error("Une erreur s'est produite lors du chargement des programmes.");
-    return null;
-  }
+  if (error) return <div>Erreur lors du chargement des données.</div>;
 
-  const dataToDisplay = open ? data : data.slice(0, 6);
+  const programs = open ? data : data.slice(0, 6);
 
   return (
     <section className="mt-24 px-4 md:px-24">
@@ -66,55 +64,23 @@ export function Programs() {
         </div>
       </div>
 
-      <div className="mt-12 mx-auto w-96 grid grid-cols-2 gap-x-4 lg:hidden">
-        <div className="">
-          {dataToDisplay.slice(0, dataToDisplay.length / 2).map((program) => {
-            const image = program.imageFile ? program.imageFile : images[`../../../../assets/programmes-engagement/${program.imageString}`]?.default;
-            return (
-              <div key={program.url} className="hover:text-gray-800 h-64 p-1">
-                <a href={program.url} rel="noreferrer" target="_blank">
-                  <div className="aspect-square rounded-full mx-auto overflow-hidden">
-                    <img src={image} alt={program.name} className="h-full w-full object-cover" />
-                  </div>
-                  <p className="text-center font-bold mt-2 text-sm">{program.name}</p>
-                </a>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-32">
-          {dataToDisplay.slice(dataToDisplay.length / 2, dataToDisplay.length).map((program) => {
-            const image = program.imageFile ? program.imageFile : images[`../../../../assets/programmes-engagement/${program.imageString}`]?.default;
-            return (
-              <div key={program.url} className="hover:text-gray-800 h-64 p-1">
-                <a href={program.url} rel="noreferrer" target="_blank">
-                  <div className="aspect-square rounded-full mx-auto overflow-hidden">
-                    <img src={image} alt={program.name} className="h-full w-full object-cover" />
-                  </div>
-                  <p className="text-center font-bold mt-2 text-sm">{program.name}</p>
-                </a>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mt-24 max-w-4xl mx-auto hidden lg:grid grid-cols-3 gap-y-16">
-        {dataToDisplay.map((program) => {
-          const image = program.imageFile ? program.imageFile : images[`../../../../assets/programmes-engagement/${program.imageString}`]?.default;
+      <div className="mt-12 mx-auto w-80 md:w-auto max-w-4xl gap-4 md:gap-x-24 md:gap-y-12 grid grid-cols-2 md:grid-cols-3">
+        {programs.map((program) => {
+          const image = getProgramImage(program);
           return (
-            <a key={program.url} href={program.url} rel="noreferrer" target="_blank" className="hover:text-gray-800">
-              <div className="aspect-square rounded-full mx-auto overflow-hidden w-56">
-                <img src={image} alt={program.name} className="h-full w-full object-cover" />
-              </div>
-              <p className="text-center text-sm font-bold mt-4">{program.name}</p>
-            </a>
+            <div key={program.url} className="h-56 md:h-auto even:top-28 md:even:top-0 relative">
+              <a href={program.url} rel="noreferrer" target="_blank" className="hover:text-gray-800 ">
+                <div className="aspect-square rounded-full mx-auto overflow-hidden">
+                  <img src={image} alt={program.name} className="h-full w-full object-cover" />
+                </div>
+                <p className="text-center font-bold mt-2 text-sm">{program.name}</p>
+              </a>
+            </div>
           );
         })}
       </div>
 
-      <div className="mt-12 text-center">
+      <div className="mt-36 text-center">
         <button onClick={() => setOpen(!open)} className="text-gray-600 text-sm underline underline-offset-2">
           {open ? "Afficher moins" : "Afficher tout"}
         </button>
