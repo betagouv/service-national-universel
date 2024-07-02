@@ -1,7 +1,8 @@
 import { CleEtablissementModel, ReferentModel } from "../../models";
 import { EtablissementDocument } from "../../models/cle/etablissementType";
 import { randomUUID } from "node:crypto";
-import { UserDto } from "snu-lib";
+import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
+import { UserDto } from "snu-lib/src/dto";
 
 const crypto = require("crypto");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
@@ -91,10 +92,10 @@ export const doInviteChefEtablissement = async (email: string, user: UserDto, in
   });
   await referent.save({ fromUser: user });
 
-  // TODO : calculate nbreClasseAValider and effectifPrevisionnel
   const etablissement: EtablissementDocument = await CleEtablissementModel.findOne({ referentEtablissementIds: referent._id });
+  const nbreClasseAValider = await getNumberOfClassesByEtablissement(etablissement);
+  const effectifPrevisionnel = await getEstimatedSeatsByEtablissement(etablissement);
 
-  // Send invite
   let inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte?token=${invitationToken}`;
   if (invitationType === InvitationType.CONFIRMATION) {
     inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte/confirmation?token=${invitationToken}`;
@@ -103,6 +104,6 @@ export const doInviteChefEtablissement = async (email: string, user: UserDto, in
   const name_school = `${etablissement.name}`;
   return await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE, {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { cta: inscriptionUrl, toName, name_school },
+    params: { cta: inscriptionUrl, toName, name_school, nbreClasseAValider, effectifPrevisionnel },
   });
 };

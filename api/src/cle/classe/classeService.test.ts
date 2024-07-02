@@ -1,4 +1,4 @@
-import { buildUniqueClasseId, deleteClasse } from "./classeService";
+import { buildUniqueClasseId, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
 const youngService = require("../../young/young.service");
 const classService = require("./classeService");
 
@@ -12,7 +12,8 @@ const { ObjectId } = require("mongoose").Types;
 
 import { canEditEstimatedSeats, canEditTotalSeats } from "./classeService";
 import { ROLES, SUB_ROLES, LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib";
-import { IEtablissement } from "../../models/cle/etablissementType";
+import { EtablissementDocument, IEtablissement } from "../../models/cle/etablissementType";
+import { CleClasseModel } from "../../models";
 
 describe("ClasseService", () => {
   it("should return a pdf", async () => {
@@ -363,5 +364,20 @@ describe("buildUniqueClasseId", () => {
     const classe = { name: "", coloration: undefined };
     const expectedId = "IDFP075-NO_UID";
     expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+  });
+});
+
+describe("getEffectifPrevisionnelByEtablissement", () => {
+  it("should return the sum of estimatedSeats for all classes of the given etablissement", async () => {
+    const mockEtablissement = { _id: "mockEtablissementId" } as EtablissementDocument;
+    const mockClasses = [{ estimatedSeats: 10 }, { estimatedSeats: 20 }, { estimatedSeats: 30 }];
+    const expectedResult = 60;
+
+    CleClasseModel.find = jest.fn().mockResolvedValue(mockClasses);
+
+    const result = await getEstimatedSeatsByEtablissement(mockEtablissement);
+
+    expect(result).toEqual(expectedResult);
+    expect(CleClasseModel.find).toHaveBeenCalledWith({ etablissementId: mockEtablissement._id });
   });
 });

@@ -1,6 +1,7 @@
 import { dbClose, dbConnect } from "../helpers/db";
-import { CleEtablissementModel, ReferentModel } from "../../models";
+import { CleClasseModel, CleEtablissementModel, ReferentModel } from "../../models";
 import { ROLES } from "snu-lib";
+import { UserDto } from "snu-lib/src/dto";
 import getAppHelper from "../helpers/app";
 import request from "supertest";
 import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult, InvitationType } from "../../services/cle/referent";
@@ -11,6 +12,8 @@ jest.mock("../../sendinblue", () => ({
   sendTemplate: () => Promise.resolve(true),
 }));
 
+const user = {} as UserDto;
+
 describe("Referent Service", () => {
   beforeAll(dbConnect);
   afterAll(dbClose);
@@ -18,11 +21,7 @@ describe("Referent Service", () => {
   beforeEach(async () => {
     await ReferentModel.deleteMany();
     await CleEtablissementModel.deleteMany();
-  });
-
-  afterEach(async () => {
-    await ReferentModel.deleteMany();
-    await CleEtablissementModel.deleteMany();
+    await CleClasseModel.deleteMany();
     jest.clearAllMocks();
   });
 
@@ -35,7 +34,7 @@ describe("Referent Service", () => {
         role: ROLES.ADMINISTRATEUR_CLE,
       });
 
-      await CleEtablissementModel.create({
+      const etablissement = await CleEtablissementModel.create({
         name: "Example School",
         referentEtablissementIds: [referent._id],
         department: "Example Department",
@@ -47,7 +46,26 @@ describe("Referent Service", () => {
         uai: "UAI123",
       });
 
-      await doInviteChefEtablissement(referent.email, {}, InvitationType.INSCRIPTION);
+      await CleClasseModel.create({
+        name: "Mock Class",
+        uniqueKeyAndId: "MOCK123",
+        etablissementId: etablissement._id,
+        cohort: "2022",
+        referentClasseIds: [referent._id],
+        uniqueKey: "UAI_DATE_123",
+        uniqueId: "DATE_1234",
+        estimatedSeats: 30,
+        totalSeats: 30,
+        department: "75",
+        region: "11",
+        academy: "Paris",
+        schoolYear: "2021-2022",
+        status: "CREATED",
+        statusPhase1: "WAITING_AFFECTATION",
+        type: "FULL",
+      });
+
+      await doInviteChefEtablissement(referent.email, user, InvitationType.INSCRIPTION);
       const updatedReferent = await ReferentModel.findOne({ email: referent.email });
 
       expect(updatedReferent.invitationToken).toBeDefined();
@@ -56,7 +74,7 @@ describe("Referent Service", () => {
     });
 
     it("should throw if the referent email does not exist", async () => {
-      await expect(doInviteChefEtablissement("nonexistent@mail.com", {}, InvitationType.INSCRIPTION)).rejects.toThrow("Referent not found");
+      await expect(doInviteChefEtablissement("nonexistent@mail.com", user, InvitationType.INSCRIPTION)).rejects.toThrow("Referent not found");
     });
   });
 
@@ -123,7 +141,7 @@ describe("Referent Service", () => {
         },
       ];
 
-      const result = await doInviteMultipleChefsEtablissements(emails, {}, InvitationType.INSCRIPTION);
+      const result = await doInviteMultipleChefsEtablissements(emails, user, InvitationType.INSCRIPTION);
 
       for (const referent of referents) {
         const updatedReferent = await ReferentModel.findOne({ email: referent.email });
