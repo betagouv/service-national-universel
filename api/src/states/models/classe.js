@@ -30,7 +30,7 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
 
   // Open
   const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
-  if ([STATUS_CLASSE.VALIDATED, STATUS_CLASSE.CLOSED].includes(classe.status) && isInscriptionOpen) {
+  if ([STATUS_CLASSE.VERIFIED, STATUS_CLASSE.CLOSED].includes(classe.status) && isInscriptionOpen) {
     classe.set({ status: STATUS_CLASSE.OPEN });
     classe = await classe.save({ fromUser });
     //TODO : send email to referent

@@ -1,6 +1,5 @@
 const { fakerFR: faker } = require("@faker-js/faker");
 const { departmentList, regionList } = require("snu-lib");
-const { ObjectId } = require("mongoose").Types;
 
 function randomDepartment() {
   const index = Math.floor(Math.random() * departmentList.length);

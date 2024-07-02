@@ -199,8 +199,8 @@ describe("PUT /cle/classe/:id", () => {
   });
 
   it("should return 403 when changing cohort is not allowed because young has validate his Phase1", async () => {
-    const classe = createFixtureClasse();
-    classe.cohort = "2022";
+    const cohort = await createCohortHelper(getNewCohortFixture());
+    const classe = createFixtureClasse({ cohort: cohort.name });
     const validId = (await createClasse(classe))._id;
     const young = getNewYoungFixture({ classeId: validId, statusPhase1: "DONE" });
     await createYoungHelper(young);
@@ -216,8 +216,8 @@ describe("PUT /cle/classe/:id", () => {
   });
 
   it("should return 403 when changing cohort is not allowed because classe has a ligneID", async () => {
-    const classe = createFixtureClasse({ ligneId: "1234" });
-    classe.cohort = "2022";
+    const cohort = await createCohortHelper(getNewCohortFixture());
+    const classe = createFixtureClasse({ ligneId: "1234", cohort: cohort.name });
     const validId = (await createClasse(classe))._id;
 
     const res = await request(getAppHelper())
