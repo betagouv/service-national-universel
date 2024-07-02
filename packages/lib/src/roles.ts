@@ -413,7 +413,7 @@ function canSendTimeScheduleReminderForSessionPhase1(actor) {
 }
 
 function canSendImageRightsForSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function canCreateOrModifyMission(user, mission, structure) {
