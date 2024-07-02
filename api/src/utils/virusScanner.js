@@ -9,12 +9,34 @@ const { ERRORS } = require("./index");
 
 const TIMEOUT_ANTIVIRUS_SERVICE = 20000;
 
+async function getAccessToken(endpoint, apiKey) {
+  const response = await fetch(`${endpoint}/auth/token`, {
+    method: "GET",
+    redirect: "follow",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "User-Agent": "*",
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+    },
+  });
+
+  const data = await response.json();
+  if (data.ok == true && data.token) {
+    return data.token;
+  } else {
+    throw new Error("Couldn't retrieve auth token");
+  }
+}
+
 async function scanFile(tempFilePath, name, userId = "anonymous") {
   if (!config.get("ENABLE_ANTIVIRUS")) {
     return { infected: false };
   }
 
   const scan = async () => {
+    const token = await getAccessToken(config.API_ANTIVIRUS_ENDPOINT, config.API_ANTIVIRUS_KEY);
+
     const stream = createReadStream(tempFilePath);
     const url = `${config.API_ANTIVIRUS_ENDPOINT}/scan`;
 
@@ -22,7 +44,7 @@ async function scanFile(tempFilePath, name, userId = "anonymous") {
     formData.append("file", stream);
 
     const headers = formData.getHeaders();
-    headers["X-Auth-Token"] = config.API_ANTIVIRUS_TOKEN;
+    headers["x-access-token"] = token;
 
     const response = await fetch(url, { method: "POST", body: formData, headers });
 
