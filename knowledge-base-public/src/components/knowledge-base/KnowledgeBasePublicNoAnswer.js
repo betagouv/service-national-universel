@@ -1,9 +1,20 @@
 import { appURL, adminURL } from "../../config";
 import useUser from "../../hooks/useUser";
 
+const adminRole = [
+  "admin",
+  "referent_region",
+  "referent_department",
+  "administrateur_cle_referent_etablissement",
+  "administrateur_cle_coordinateur_cle",
+  "referent_classe",
+  "head_center",
+  "referent",
+  "dsnj",
+];
+
 const KnowledgeBasePublicNoAnswer = () => {
   const { restriction } = useUser();
-  const adminRole = ["admin", "referent_region", "referent_department", "administrateur_cle_referent_etablissement", "administrateur_cle_coordinateur_cle"];
   const url = adminRole.includes(restriction) ? adminURL : appURL;
 
   return (
