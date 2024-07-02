@@ -7,6 +7,8 @@ import { isSuperAdmin } from "snu-lib";
 import { capture } from "../../sentry";
 import { generateCSVStream } from "../../services/fileService";
 import archiver from "archiver";
+import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
+import { FeatureFlagName } from "../../models/featureFlagType";
 
 const router = express.Router();
 router.post(
@@ -19,6 +21,9 @@ router.post(
   async (req: UserRequest, res: Response) => {
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (!(await isFeatureAvailable(FeatureFlagName.SYNC_APPEL_A_PROJET_CLE))) {
+      return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
     }
     try {
       const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync();
@@ -52,6 +57,9 @@ router.post(
   async (req: UserRequest, res: Response) => {
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (!(await isFeatureAvailable(FeatureFlagName.SYNC_APPEL_A_PROJET_CLE))) {
+      return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
     }
     try {
       const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync(true);
