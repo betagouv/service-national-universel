@@ -274,7 +274,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
 
     await cohort.save({ fromUser: req.user });
 
-    if ((oldCohort.inscriptionStartDate !== cohort.inscriptionStartDate || oldCohort.inscriptionEndDate !== cohort.inscriptionEndDate) && cohort.type === COHORT_TYPE.CLE) {
+    if (cohort.type === COHORT_TYPE.CLE && (oldCohort.inscriptionStartDate !== cohort.inscriptionStartDate || oldCohort.inscriptionEndDate !== cohort.inscriptionEndDate)) {
       const classes = await ClasseModel.find({ cohort: cohortName });
       if (classes.length > 0) {
         for (const c of classes) {
