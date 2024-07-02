@@ -10,6 +10,7 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 import api from "@/services/api";
+import Loader from "@/components/Loader";
 
 export default function code() {
   const history = useHistory();
@@ -54,7 +55,7 @@ export default function code() {
     })();
   }, []);
 
-  if (!user) return <div>Chargement...</div>;
+  if (!user) return <Loader />;
 
   return (
     <Section>

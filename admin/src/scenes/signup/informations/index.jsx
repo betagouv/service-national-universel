@@ -13,6 +13,7 @@ import { toastr } from "react-redux-toastr";
 import api from "@/services/api";
 
 import SchoolInFrance from "./components/SchoolInFrance";
+import Loader from "@/components/Loader";
 
 export default function informations() {
   const history = useHistory();
@@ -93,7 +94,7 @@ export default function informations() {
     setPhone(user.phone);
   }, [user]);
 
-  if (!user) return <div>Chargement...</div>;
+  if (!user) return <Loader />;
 
   const renderSchool = () => {
     if (!user) return null;

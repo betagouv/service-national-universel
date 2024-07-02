@@ -7,6 +7,7 @@ import { Section, Container } from "@snu/ds/dsfr";
 import { ROLES, SUB_ROLES, translate } from "snu-lib";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
+import Loader from "@/components/Loader";
 
 export default function role() {
   const history = useHistory();
@@ -74,7 +75,7 @@ export default function role() {
     );
   };
 
-  if (!user) return <div>Chargement...</div>;
+  if (!user) return <Loader />;
 
   return (
     <Section>
