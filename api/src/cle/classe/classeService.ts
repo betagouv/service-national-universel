@@ -9,8 +9,7 @@ type User = {
   subRole?: string;
 };
 
-import { ClasseDto } from "snu-lib/src/dto";
-import { IEtablissement } from "../../models/cle/etablissementType";
+import { EtablissementDocument, IEtablissement } from "../../models/cle/etablissementType";
 import { ClasseDocument, IClasse } from "../../models/cle/classeType";
 import { CleClasseModel } from "../../models";
 import { mapRegionToTrigramme } from "../../services/regionService";
@@ -87,4 +86,13 @@ export const buildUniqueClasseId = (etablissement: IEtablissement, classe: Pick<
 
 export const findClasseByUniqueKeyAndUniqueId = async (uniqueKey: string | undefined | null, uniqueId: string): Promise<ClasseDocument | null> => {
   return await CleClasseModel.findOne({ uniqueKey, uniqueId });
+};
+
+export const getNumberOfClassesByEtablissement = async (etablissement: EtablissementDocument): Promise<number> => {
+  return await CleClasseModel.countDocuments({ etablissementId: etablissement._id });
+};
+
+export const getEstimatedSeatsByEtablissement = async (etablissement: EtablissementDocument): Promise<number> => {
+  const classes = await CleClasseModel.find({ etablissementId: etablissement._id });
+  return classes.reduce((classeNumberAcc: number, classe: ClasseDocument) => classeNumberAcc + classe.estimatedSeats, 0);
 };
