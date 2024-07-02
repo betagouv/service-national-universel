@@ -3,18 +3,14 @@ import useUser from "../../hooks/useUser";
 import { useEffect, useState } from "react";
 const KnowledgeBasePublicNoAnswer = () => {
   const { restriction } = useUser();
-  const [userRole, setUserRole] = useState("public");
+   const [userRole, setUserRole] = useState(restriction || "public");
+
   let url;
   if (userRole === "young" || userRole === "public") {
     url = appURL;
   } else if (userRole !== null && userRole !== "public" && userRole !== "young") {
     url = adminURL;
   }
-  useEffect(() => {
-    if (restriction) {
-      setUserRole(restriction);
-    } else setUserRole(null);
-  }, [restriction]);
 
   return (
     <div className="mb-16 mt-4 flex flex-row items-center justify-start">
