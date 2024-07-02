@@ -244,7 +244,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     let youngs;
     if (classe.cohort !== value.cohort) {
-      const cohort = await CohortModel.findOne({ name: classe.cohort });
+      const cohort = await CohortModel.findOne({ name: value.cohort });
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       if (!canUpdateCohort(cohort, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       youngs = await YoungModel.find({ classeId: classe._id });

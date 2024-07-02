@@ -181,18 +181,18 @@ describe("PUT /cle/classe/:id", () => {
 
   it("should return 403 when user cannot update the cohort", async () => {
     passport.user.role = ROLES.ADMINISTRATEUR_CLE;
-    const cohort = await createCohortHelper(getNewCohortFixture());
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "CLE juin 2024" }));
     const userId = new ObjectId();
     const etablissement = createFixtureEtablissement({ referentEtablissementIds: [userId] });
     const etablissementId = (await createEtablissement(etablissement))._id;
-    const classe = createFixtureClasse({ etablissementId: etablissementId, cohort: cohort.name });
+    const classe = createFixtureClasse({ etablissementId: etablissementId });
     const validId = (await createClasse(classe))._id;
     jest.spyOn(EtablissementModel, "findById").mockResolvedValueOnce(etablissement);
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: "New Cohort",
+        cohort: cohort.name,
       });
     expect(res.status).toBe(403);
     passport.user.role = ROLES.ADMIN;
@@ -200,7 +200,7 @@ describe("PUT /cle/classe/:id", () => {
 
   it("should return 403 when changing cohort is not allowed because young has validate his Phase1", async () => {
     const cohort = await createCohortHelper(getNewCohortFixture());
-    const classe = createFixtureClasse({ cohort: cohort.name });
+    const classe = createFixtureClasse({});
     const validId = (await createClasse(classe))._id;
     const young = getNewYoungFixture({ classeId: validId, statusPhase1: "DONE" });
     await createYoungHelper(young);
@@ -209,7 +209,7 @@ describe("PUT /cle/classe/:id", () => {
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: "2023",
+        cohort: cohort.name,
       });
 
     expect(res.status).toBe(403);
@@ -217,14 +217,14 @@ describe("PUT /cle/classe/:id", () => {
 
   it("should return 403 when changing cohort is not allowed because classe has a ligneID", async () => {
     const cohort = await createCohortHelper(getNewCohortFixture());
-    const classe = createFixtureClasse({ ligneId: "1234", cohort: cohort.name });
+    const classe = createFixtureClasse({ ligneId: "1234" });
     const validId = (await createClasse(classe))._id;
 
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: "2023",
+        cohort: cohort.name,
       });
 
     expect(res.status).toBe(403);
@@ -246,24 +246,24 @@ describe("PUT /cle/classe/:id", () => {
   });
 
   it("should return 200 when class cohort is updated and related youngs are updated", async () => {
-    passport.user.role = ROLES.ADMIN;
-    const classe = createFixtureClasse();
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "CLE juin 2024" }));
+    const classe = createFixtureClasse({});
     const validId = (await createClasse(classe))._id;
-    const young = getNewYoungFixture({ classeId: validId });
+    const young = getNewYoungFixture({ classeId: validId, cohort: "CLE mai 2024" });
     await createYoungHelper(young);
 
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: "CLE juin 2024",
+        cohort: cohort.name,
       });
     expect(res.status).toBe(200);
     expect(res.body.data.name).toBe(classe.name);
 
     const updatedYoungs = await YoungModel.find({ classeId: validId });
     updatedYoungs.forEach((y) => {
-      expect(y.cohort).toBe("CLE juin 2024");
+      expect(y.cohort).toBe(cohort.name);
       expect(y.sessionPhase1Id).toBeUndefined();
       expect(y.cohesionCenterId).toBeUndefined();
       expect(y.meetingPointId).toBeUndefined();
