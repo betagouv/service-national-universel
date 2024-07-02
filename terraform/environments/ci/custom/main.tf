@@ -111,7 +111,6 @@ resource "scaleway_container" "api" {
 
   secret_environment_variables = {
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
-    "PM2_SLACK_URL"  = local.secrets.PM2_SLACK_URL
   }
 }
 

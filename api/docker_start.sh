@@ -1,5 +1,9 @@
 #!/bin/bash
 
+config=$(node -e 'console.log(JSON.stringify(require("config")))')
+
+PM2_SLACK_URL=$(echo $config | jq -r '.PM2_SLACK_URL')
+
 if [[ $PM2_SLACK_URL == "" ]]
 then
   echo "PM2_SLACK_URL is not defined"
