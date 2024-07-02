@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Label, InputText, ModalConfirmation, Select } from "@snu/ds/admin";
-import { HiOutlineChartSquareBar, HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiOutlineHome, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { Link, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
@@ -137,11 +137,7 @@ export default function Create() {
     <Page>
       <Header
         title="Création d’une classe engagée"
-        breadcrumb={[
-          { title: <HiOutlineChartSquareBar size={20} className="hover:text-gray-500" />, to: "/" },
-          { title: "Mes classes", to: "/classes" },
-          { title: "Créer une classe" },
-        ]}
+        breadcrumb={[{ title: <HiOutlineHome size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Mes classes", to: "/classes" }, { title: "Créer une classe" }]}
         actions={actions}
       />
       <Container title="Informations générales">

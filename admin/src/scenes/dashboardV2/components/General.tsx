@@ -1,7 +1,7 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
-import { HiOutlineChartSquareBar } from "react-icons/hi";
+import { HiOutlineHome } from "react-icons/hi";
 import { useQuery } from "@tanstack/react-query";
 
 import { ROLES, translate } from "snu-lib";
@@ -51,7 +51,7 @@ export default function Index() {
     <Page>
       {messages?.map((msg) => <InfoMessage key={msg._id} title={msg.title} message={msg.content} priority={msg.priority} className="mb-6" />)}
       {needMoreInfo && <BandeauInfo />}
-      <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} classNameDivTitle="h-[38px]" />
+      <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineHome size={20} /> }, { title: "Tableau de bord" }]} classNameDivTitle="h-[38px]" />
       <DashboardContainer active="general" availableTab={availableTab}>
         <div className="flex flex-col gap-8 mb-4">
           <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>

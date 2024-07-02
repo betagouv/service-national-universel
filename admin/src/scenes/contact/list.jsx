@@ -7,7 +7,7 @@ import { BsDownload } from "react-icons/bs";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
 import { IoFlashOutline } from "react-icons/io5";
-import { HiOutlineChartSquareBar } from "react-icons/hi";
+import { HiOutlineHome } from "react-icons/hi";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -159,7 +159,7 @@ export default function List() {
     <Page>
       <Header
         title="Liste de mes contacts"
-        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Mes contacts" }]}
+        breadcrumb={[{ title: <HiOutlineHome size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Mes contacts" }]}
         actions={[
           <ExportComponent
             key={0}

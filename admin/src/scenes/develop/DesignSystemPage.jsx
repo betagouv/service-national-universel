@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, Select, Navbar } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
-import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
+import { HiUsers, HiPencil, HiOutlinePencil, HiOutlineHome } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
 import { BsCheck } from "react-icons/bs";
 
@@ -189,7 +189,7 @@ export default function DesignSystemPage() {
     <Page>
       <Header
         title="Design System"
-        breadcrumb={[{ to: "/", title: <HiOutlineCommandLine size={20} /> }, { title: "Design System" }]}
+        breadcrumb={[{ to: "/", title: <HiOutlineHome size={20} /> }, { title: "Design System" }]}
         actions={[<Button key="header-action-1" title={"Click me"} />]}
       />
       <Subheader title="Code, preview, test, build and ship." />

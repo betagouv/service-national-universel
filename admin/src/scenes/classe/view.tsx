@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiOutlineHome } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useParams, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -279,7 +279,7 @@ export default function View() {
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status) as TStatus} />}
         breadcrumb={[
-          { title: <HiOutlineOfficeBuilding size={20} /> },
+          { title: <HiOutlineHome size={20} to="/" /> },
           {
             title: "Mes classes",
             to: "/classes",

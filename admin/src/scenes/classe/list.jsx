@@ -5,7 +5,7 @@ import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/compo
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { Button, Container, Header, Page } from "@snu/ds/admin";
-import { HiPlus, HiOutlineOfficeBuilding, HiOutlineChartSquareBar } from "react-icons/hi";
+import { HiPlus, HiOutlineOfficeBuilding, HiOutlineHome } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-lib";
@@ -118,7 +118,7 @@ export default function List() {
     <Page>
       <Header
         title="Liste de mes classes"
-        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Mes classes" }]}
+        breadcrumb={[{ title: <HiOutlineHome size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Mes classes" }]}
         actions={[
           [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && IS_CREATION_CLASSE_OPEN_CLE && (
             <Link key="list" to="/classes/create" className="ml-2">
