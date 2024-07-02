@@ -66,22 +66,56 @@ export function Programs() {
         </div>
       </div>
 
-      <div className="mt-24 max-w-lg md:max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-y-16 gap-x-12   md:gap-x-24">
-        {dataToDisplay.map((program, index) => {
+      <div className="mt-12 mx-auto w-96 grid grid-cols-2 gap-x-4 lg:hidden">
+        <div className="">
+          {dataToDisplay.slice(0, dataToDisplay.length / 2).map((program) => {
+            const image = program.imageFile ? program.imageFile : images[`../../../../assets/programmes-engagement/${program.imageString}`]?.default;
+            return (
+              <div key={program.url} className="hover:text-gray-800 h-64 p-1">
+                <a href={program.url} rel="noreferrer" target="_blank">
+                  <div className="aspect-square rounded-full mx-auto overflow-hidden">
+                    <img src={image} alt={program.name} className="h-full w-full object-cover" />
+                  </div>
+                  <p className="text-center font-bold mt-2 text-sm">{program.name}</p>
+                </a>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-32">
+          {dataToDisplay.slice(dataToDisplay.length / 2, dataToDisplay.length).map((program) => {
+            const image = program.imageFile ? program.imageFile : images[`../../../../assets/programmes-engagement/${program.imageString}`]?.default;
+            return (
+              <div key={program.url} className="hover:text-gray-800 h-64 p-1">
+                <a href={program.url} rel="noreferrer" target="_blank">
+                  <div className="aspect-square rounded-full mx-auto overflow-hidden">
+                    <img src={image} alt={program.name} className="h-full w-full object-cover" />
+                  </div>
+                  <p className="text-center font-bold mt-2 text-sm">{program.name}</p>
+                </a>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-24 max-w-4xl mx-auto hidden lg:grid grid-cols-3 gap-y-16">
+        {dataToDisplay.map((program) => {
           const image = program.imageFile ? program.imageFile : images[`../../../../assets/programmes-engagement/${program.imageString}`]?.default;
           return (
-            <a key={index} href={program.url} rel="noreferrer" target="_blank" className="hover:text-gray-800">
-              <div className="aspect-square rounded-full mx-auto overflow-hidden">
+            <a key={program.url} href={program.url} rel="noreferrer" target="_blank" className="hover:text-gray-800">
+              <div className="aspect-square rounded-full mx-auto overflow-hidden w-56">
                 <img src={image} alt={program.name} className="h-full w-full object-cover" />
               </div>
-              <p className="text-center font-bold mt-4">{program.name}</p>
+              <p className="text-center text-sm font-bold mt-4">{program.name}</p>
             </a>
           );
         })}
       </div>
 
       <div className="mt-12 text-center">
-        <button onClick={() => setOpen(!open)} className="underline underline-offset-2">
+        <button onClick={() => setOpen(!open)} className="text-gray-600 text-sm underline underline-offset-2">
           {open ? "Afficher moins" : "Afficher tout"}
         </button>
       </div>

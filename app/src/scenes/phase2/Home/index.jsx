@@ -14,7 +14,7 @@ export default function HomePhase2() {
 
   return (
     <div className="bg-white pt-8 md:pt-16 pb-16">
-      <header className="px-[1rem] md:px-[6rem]">
+      <header className="px-3">
         <div className="mx-auto w-80">
           <img src={EngagementSrc} alt="engagement" />
         </div>
@@ -36,9 +36,9 @@ export default function HomePhase2() {
             Ajouter un engagement réalisé
           </Link>
         </div>
-      </header>
 
-      <hr className="my-12 md:max-w-5xl mx-[1rem] md:mx-auto" />
+        <hr className="my-12 md:max-w-5xl mx-auto" />
+      </header>
 
       <MesEngagements />
 

@@ -14,9 +14,11 @@ export function MesEngagements() {
   }, [young]);
 
   return (
-    <section className="px-[1rem] md:px-[6rem] py-4 bg-gray-50 h-64">
-      <h2 className="font-bold m-0">Mes engagements</h2>
-      <p className="mt-2">Todo</p>
-    </section>
+    <div className="p-3 bg-gray-50 h-64">
+      <section className="max-w-5xl mx-auto">
+        <h2 className="font-bold m-0">Mes engagements</h2>
+        <p className="mt-2">Todo</p>
+      </section>
+    </div>
   );
 }
