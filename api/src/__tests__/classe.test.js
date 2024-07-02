@@ -12,7 +12,7 @@ const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper } = require("./helpers/young");
 const YoungModel = require("../models/young");
 //cohort
-const { getNewCohortFixture } = require("./fixtures/cohort");
+const getNewCohortFixture = require("./fixtures/cohort");
 const { createCohortHelper } = require("./helpers/cohort");
 
 const { ROLES } = require("snu-lib");

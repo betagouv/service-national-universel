@@ -1,6 +1,6 @@
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
-const { getNewCohortFixture } = require("./fixtures/cohort");
+const getNewCohortFixture = require("./fixtures/cohort");
 const { createCohortHelper } = require("./helpers/cohort");
 const { createClasse } = require("./helpers/classe");
 const { createFixtureClasse } = require("./fixtures/classe");
@@ -97,7 +97,7 @@ describe("PUT /:cohort", () => {
     const oneMonthAfter = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
     const cohortFixture = getNewCohortFixture({ type: COHORT_TYPE.CLE });
     const cohort = await createCohortHelper(cohortFixture);
-    const classe = createFixtureClasse({ status: STATUS_CLASSE.VALIDATED, cohort: cohort.name });
+    const classe = createFixtureClasse({ status: STATUS_CLASSE.VERIFIED, cohort: cohort.name });
     const classeId = (await createClasse(classe))._id;
     const res = await request(getAppHelper())
       .put(`/cohort/${encodeURIComponent(cohort.name)}`)

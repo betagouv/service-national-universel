@@ -23,7 +23,7 @@ const YoungModel = require("../models/young");
 const { validateYoung } = require("../utils/validator");
 //cohort
 const { createCohortHelper } = require("./helpers/cohort");
-const { getNewCohortFixture } = require("./fixtures/cohort");
+const getNewCohortFixture = require("./fixtures/cohort");
 //referent
 const { createReferentHelper } = require("./helpers/referent");
 const getNewReferentFixture = require("./fixtures/referent");

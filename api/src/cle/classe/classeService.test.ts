@@ -418,7 +418,7 @@ describe("ClasseStateManager.compute function", () => {
   it("should transition class to STATUS_CLASSE.OPEN when inscription open", async () => {
     const patchedClasse = {
       ...mockedClasse,
-      status: STATUS_CLASSE.VALIDATED,
+      status: STATUS_CLASSE.VERIFIED,
     };
 
     const now = new Date();

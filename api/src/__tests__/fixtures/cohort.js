@@ -43,6 +43,4 @@ function getNewCohortFixture(object = {}) {
     ...object,
   };
 }
-module.exports = {
-  getNewCohortFixture,
-};
+module.exports = getNewCohortFixture;
