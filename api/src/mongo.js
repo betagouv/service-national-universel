@@ -3,8 +3,6 @@ const config = require("config");
 
 // Set up default mongoose connection
 async function initDB() {
-  console.log("MONGODB: connecting to", config.MONGO_URL);
-
   if (!config.MONGO_URL) {
     throw new Error("ERROR CONNECTION. MONGO URL EMPTY");
   }

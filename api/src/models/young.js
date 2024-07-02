@@ -6,12 +6,11 @@ const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YO
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const config = require("config");
-const { capture } = require("../sentry");
 const anonymize = require("../anonymization/young");
 
 const MODELNAME = "young";
 
-const StateManager = require("../states");
+const ClasseStateManager = require("../cle/classe/stateManager");
 
 const File = new mongoose.Schema({
   name: String,
@@ -2056,12 +2055,9 @@ Schema.methods.anonymise = function () {
 
 //Sync with sendinblue
 Schema.post("save", async function (doc) {
+  //TODO ajouter la transaction
   if (doc.source === YOUNG_SOURCE.CLE && doc.status === YOUNG_STATUS.VALIDATED) {
-    try {
-      await StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) });
-    } catch (e) {
-      capture(e);
-    }
+    await ClasseStateManager.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) });
   }
 
   if (config.ENVIRONMENT === "test") return;

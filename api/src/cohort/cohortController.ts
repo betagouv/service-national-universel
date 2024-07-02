@@ -2,12 +2,12 @@ import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
 
-import { ROLES, isSuperAdmin, COHORT_TYPE } from "snu-lib";
+import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone } from "snu-lib";
 
 import CohortModel from "../models/cohort";
 import ClasseModel from "../models/cle/classe";
 import YoungModel from "../models/young";
-import ClasseStateManager from "../states/models/classe";
+import ClasseStateManager from "../cle/classe/stateManager";
 import SessionPhase1Model from "../models/sessionPhase1";
 import { capture } from "../sentry";
 import { ERRORS, getFile, deleteFile } from "../utils";
@@ -276,10 +276,8 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
 
     if (cohort.type === COHORT_TYPE.CLE && (oldCohort.inscriptionStartDate !== cohort.inscriptionStartDate || oldCohort.inscriptionEndDate !== cohort.inscriptionEndDate)) {
       const classes = await ClasseModel.find({ cohort: cohortName });
-      if (classes.length > 0) {
-        for (const c of classes) {
-          await ClasseStateManager.compute(c._id, req.user, { YoungModel });
-        }
+      for (const c of classes) {
+        await ClasseStateManager.compute(c._id, req.user, { YoungModel });
       }
     }
     return res.status(200).send({ ok: true, data: cohort });
@@ -288,12 +286,5 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-const formatDateTimeZone = (date) => {
-  //set timezone to UTC
-  let d = new Date(date);
-  d.toISOString();
-  return d;
-};
 
 module.exports = router;

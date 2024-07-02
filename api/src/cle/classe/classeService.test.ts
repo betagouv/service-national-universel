@@ -5,7 +5,7 @@ const classService = require("./classeService");
 const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
 const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
 
-const ClasseStateManager = require("../../states/models/classe");
+import ClasseStateManager from "./classeStateManager";
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
 import YoungModel from "../../models/young";

@@ -38,7 +38,7 @@ import CohortModel from "../../models/cohort";
 import emailsEmitter from "../../emails";
 import EtablissementModel from "../../models/cle/etablissement";
 import YoungModel from "../../models/young";
-import StateManager from "../../states";
+import ClasseStateManager from "./stateManager";
 import { validateId } from "../../utils/validator";
 import ReferentModel from "../../models/referent";
 
@@ -385,7 +385,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (type === "delete") {
       await deleteClasse(id, req.user);
     } else if (type === "withdraw") {
-      await StateManager.Classe.withdraw(id, req.user, { YoungModel });
+      await ClasseStateManager.withdraw(id, req.user, { YoungModel });
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }

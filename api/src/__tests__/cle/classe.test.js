@@ -1,29 +1,29 @@
 const request = require("supertest");
-const getAppHelper = require("./helpers/app");
+const getAppHelper = require("../helpers/app");
 //classe
-const { createClasse } = require("./helpers/classe");
-const { createFixtureClasse } = require("./fixtures/classe");
+const { createClasse } = require("../helpers/classe");
+const { createFixtureClasse } = require("../fixtures/classe");
 //etablissement
-const { createFixtureEtablissement } = require("./fixtures/etablissement");
-const { createEtablissement } = require("./helpers/etablissement");
-const EtablissementModel = require("../models/cle/etablissement");
+const { createFixtureEtablissement } = require("../fixtures/etablissement");
+const { createEtablissement } = require("../helpers/etablissement");
+const EtablissementModel = require("../../models/cle/etablissement");
 //young
-const getNewYoungFixture = require("./fixtures/young");
-const { createYoungHelper } = require("./helpers/young");
-const YoungModel = require("../models/young");
+const getNewYoungFixture = require("../fixtures/young");
+const { createYoungHelper } = require("../helpers/young");
+const YoungModel = require("../../models/young");
 //cohort
-const getNewCohortFixture = require("./fixtures/cohort");
-const { createCohortHelper } = require("./helpers/cohort");
+const getNewCohortFixture = require("../fixtures/cohort");
+const { createCohortHelper } = require("../helpers/cohort");
 
 const { ROLES } = require("snu-lib");
 const passport = require("passport");
-const { dbConnect, dbClose } = require("./helpers/db");
+const { dbConnect, dbClose } = require("../helpers/db");
 const { ObjectId } = require("mongoose").Types;
 
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-jest.mock("../emails", () => ({
+jest.mock("../../emails", () => ({
   emit: jest.fn(),
 }));
 
