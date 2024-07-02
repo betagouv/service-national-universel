@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { fr } from "@codegouvfr/react-dsfr";
-import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
+import Stepper from "./components/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { toastr } from "react-redux-toastr";
@@ -9,6 +9,7 @@ import { toastr } from "react-redux-toastr";
 import { ROLES, translate } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 import api from "@/services/api";
+import Loader from "@/components/Loader";
 
 export default function confirmation() {
   const history = useHistory();
@@ -68,13 +69,11 @@ export default function confirmation() {
     }
   };
 
-  if (!user) return <div>Chargement...</div>;
+  if (!user) return <Loader />;
 
   return (
     <Section>
-      <div className="m-auto max-w-[587px]">
-        <Stepper currentStep={5} stepCount={5} title="Création d’un compte : confirmation" />
-      </div>
+      <Stepper currentStep={5} stepCount={5} title="Création d’un compte : confirmation" />
       <form onSubmit={submit}>
         <Container className="flex flex-col gap-8">
           <div className="flex items-start justify-between">

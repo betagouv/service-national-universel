@@ -15,6 +15,7 @@ export default function useReactSelectTheme({
   controlCustomStyle,
   menuCustomStyle,
   optionCustomStyle,
+  size,
 }: SelectProps) {
   const paddingStyle = label ? "16px 0 0 0" : "0";
 
@@ -44,6 +45,7 @@ export default function useReactSelectTheme({
       }),
       borderRadius: "8px",
       ...(controlCustomStyle || {}),
+      ...(size === "sm" && { minHeight: 32, height: 32 }),
     }),
     option: (styles, { isSelected, isFocused }) => {
       return {
@@ -69,7 +71,7 @@ export default function useReactSelectTheme({
     },
     input: (styles) => ({
       ...styles,
-      height: "46px",
+      height: size === "sm" ? 24 : 46,
       cursor: "pointer",
       padding: paddingStyle,
     }),
@@ -101,8 +103,8 @@ export default function useReactSelectTheme({
       color: disabled || readOnly ? "#D1D5DB" : "#6B7280",
       marginRight: error ? "25px" : "0",
       "& svg": {
-        width: "24px",
-        height: "24px",
+        width: size === "sm" ? "16px" : "24px",
+        height: size === "sm" ? "16px" : "24px",
       },
     }),
     menu: (styles) => ({

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { HiOutlineChartSquareBar, HiChartSquareBar, HiClipboardList } from "react-icons/hi";
+import { HiOutlineHome } from "react-icons/hi";
 
 import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
@@ -56,7 +56,7 @@ export default function Index() {
       <BandeauInfo />
       <Header
         title="Tableau de bord"
-        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]}
+        breadcrumb={[{ title: <HiOutlineHome size={20} /> }, { title: "Tableau de bord" }]}
         actions={[<DropdownButton title={"Exporter"} optionsGroup={selectOptions} key={"export"} position="right" />]}
       />
       <DashboardContainer active="inscription" availableTab={["general", "engagement", "sejour", "inscription"]}>
