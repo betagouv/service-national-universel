@@ -29,6 +29,13 @@ const getNewReferentFixture = require("./fixtures/referent");
 const { createClasse } = require("./helpers/classe");
 const { createFixtureClasse } = require("./fixtures/classe");
 const ClasseModel = require("../models/cle/classe");
+const ClasseStateManager = require("../cle/classe/stateManager");
+
+jest.mock("../cle/classe/stateManager", () => ({
+  ClasseStateManager: {
+    compute: jest.fn(),
+  },
+}));
 
 jest.mock("../utils/validator", () => ({
   validateYoung: jest.fn(),
@@ -760,11 +767,14 @@ describe("Young", () => {
       const classeId = (await createClasse(classe))._id;
       const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId });
       const young = await createYoungHelper(youngFixture);
+      const updatedYoung = { ...young.toObject(), status: "VALIDATED" };
+      await young.set(updatedYoung).save();
       const modifiedYoung = { ...young, status: "VALIDATED" };
       validateYoung.mockReturnValue({ error: null, value: modifiedYoung });
       const passport = require("passport");
       const previous = passport.user.role;
       passport.user.role = ROLES.ADMIN;
+      ClasseStateManager.compute.mockResolvedValueOnce(classe);
       const res = await request(getAppHelper()).put(`/referent/young/${young._id}`).send({
         status: "VALIDATED",
       });
