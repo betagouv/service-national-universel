@@ -1,15 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { apiURL } from "@/config";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
-
-async function fetchPrograms() {
-  const res = await fetch(`${apiURL}/program/public/engagements`);
-  const { ok, data } = await res.json();
-  if (!ok) throw new Error("Une erreur s'est produite lors du chargement des programmes.");
-  return data;
-}
+import { fetchPrograms } from "../repo";
 
 // TODO: put in cellar instead of asset folder: dynamic content should not be in the bundle
 const imagePath = "../../../../assets/programmes-engagement";
