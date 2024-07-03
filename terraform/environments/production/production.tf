@@ -145,6 +145,11 @@ resource "scaleway_container" "antivirus" {
   environment_variables = {
     "APP_NAME" = "antivirus"
   }
+  secret_environment_variables = {
+    "SENTRY_URL"     = local.secrets.SENTRY_URL
+    "SECRET_API_KEY" = local.secrets.API_ANTIVIRUS_KEY
+    "JWT_SECRET"     = local.secrets.JWT_SECRET
+  }
 }
 
 resource "scaleway_container_domain" "antivirus" {
