@@ -998,7 +998,7 @@ const REGLEMENT_INTERIEUR_VERSION = "2024-07-07";
 
 const CLE_TYPE_LIST = Object.values(CLE_TYPE);
 const CLE_SECTOR_LIST = Object.values(CLE_SECTOR);
-const CLE_GRADE_LIST = Object.values(CLE_GRADE)
+const CLE_GRADE_LIST = Object.values(CLE_GRADE);
 const STATUS_CLASSE_LIST = Object.values(STATUS_CLASSE);
 const STATUS_PHASE1_CLASSE_LIST = Object.values(STATUS_PHASE1_CLASSE);
 const YOUNG_SOURCE_LIST = Object.values(YOUNG_SOURCE);
