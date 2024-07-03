@@ -48,12 +48,15 @@ describe("dates", () => {
   });
   it("formatDateTimeZone", () => {
     let date = formatDateTimeZone("2024-06-03T23:00:00.000+00:00");
-    expect(date).toBe("2024-06-03T23:00:00.000Z");
+    expect(date.toISOString()).toBe("2024-06-03T23:00:00.000Z");
+
     date = formatDateTimeZone("2024-06-03T01:00:00.000+00:00");
-    expect(date).toBe("2024-06-03T01:00:00.000Z");
+    expect(date.toISOString()).toBe("2024-06-03T01:00:00.000Z");
+
     date = formatDateTimeZone("2024-06-03T00:00:00.000+00:00");
-    expect(date).toBe("2024-06-03T00:00:00.000Z");
+    expect(date.toISOString()).toBe("2024-06-03T00:00:00.000Z");
+
     date = formatDateTimeZone("2024-06-03T18:00:00.000+00:00");
-    expect(date).toBe("2024-06-03T18:00:00.000Z");
+    expect(date.toISOString()).toBe("2024-06-03T18:00:00.000Z");
   });
 });
