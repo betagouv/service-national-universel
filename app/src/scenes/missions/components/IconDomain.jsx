@@ -11,49 +11,19 @@ import Securite from "../../../assets/mission-domaines/securite";
 import Culture from "../../../assets/mission-domaines/culture";
 import PreparationMilitaire from "../../../assets/mission-domaines/preparation-militaire";
 
-export default function IconDomain({ domain, bgStyle = null, iconStyle = "text-white h-8 w-8" }) {
-  const [icon, setIcon] = React.useState(null);
+const icon = {
+  CITIZENSHIP: <Citoyennete className="text-white h-8 w-8" />,
+  CULTURE: <Culture className="text-white h-8 w-8" />,
+  DEFENSE: <DefenseEtMemoire className="text-white h-8 w-8" />,
+  EDUCATION: <Education className="text-white h-8 w-8" />,
+  ENVIRONMENT: <Environment className="text-white h-8 w-8" />,
+  HEALTH: <Sante className="text-white h-8 w-8" />,
+  SECURITY: <Securite className="text-white h-8 w-8" />,
+  SOLIDARITY: <Solidarite className="text-white h-8 w-8" />,
+  SPORT: <Sport className="text-white h-8 w-8" />,
+  PREPARATION_MILITARY: <PreparationMilitaire className="text-white h-8 w-8" />,
+};
 
-  React.useEffect(() => {
-    switch (domain) {
-      case "CITIZENSHIP":
-        setIcon(<Citoyennete className={iconStyle} />);
-        break;
-      case "CULTURE":
-        setIcon(<Culture className={iconStyle} />);
-        break;
-      case "DEFENSE":
-        setIcon(<DefenseEtMemoire className={iconStyle} />);
-        break;
-      case "EDUCATION":
-        setIcon(<Education className={iconStyle} />);
-        break;
-      case "ENVIRONMENT":
-        setIcon(<Environment className={iconStyle} />);
-        break;
-      case "HEALTH":
-        setIcon(<Sante className={iconStyle} />);
-        break;
-      case "SECURITY":
-        setIcon(<Securite className={iconStyle} />);
-        break;
-      case "SOLIDARITY":
-        setIcon(<Solidarite className={iconStyle} />);
-        break;
-      case "SPORT":
-        setIcon(<Sport className={iconStyle} />);
-        break;
-      case "PREPARATION_MILITARY":
-        setIcon(<PreparationMilitaire className={iconStyle} />);
-        break;
-    }
-  }, [domain]);
-
-  return domain ? (
-    <div className={`flex items-center rounded-xl py-3 px-1.5  ${bgStyle ? bgStyle : "bg-[#212B44]"}`}>{icon}</div>
-  ) : (
-    <div className={`flex items-center rounded-xl py-3 px-1.5  ${bgStyle ? bgStyle : "bg-[#212B44]"} `}>
-      <img className="h-8 w-8" src={Img2} style={{}} />
-    </div>
-  );
+export default function IconDomain({ domain }) {
+  return <div className="flex items-center rounded-lg w-8 h-12 bg-[#212B44]">{icon[domain] || <img src={Img2} className="h-8 w-8" />}</div>;
 }
