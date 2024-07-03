@@ -62,4 +62,4 @@ EXPOSE $PORT
 
 RUN pm2 install --docker pm2-slack
 
-ENTRYPOINT ["api/docker_start.sh"]
+CMD ["api/docker_start.sh"]
