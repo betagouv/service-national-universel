@@ -38,9 +38,6 @@ module.exports = {
       fontSize: {
         0: "0px",
       },
-      fontWeight: {
-        semibold: "700",
-      },
       colors: {
         "snu-purple-900": "#32257F",
         "snu-purple-800": "#3830a9",
