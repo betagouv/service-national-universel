@@ -44,8 +44,8 @@ export type Session = {
   cohort: string;
   placesTotal: number;
   placesLeft: number;
-  dateStart: string | null;
-  dateEnd: string | null;
+  dateStart: null | Date;
+  dateEnd: null | Date;
   canBeDeleted?: boolean;
   sanitaryContactEmail: string;
 };

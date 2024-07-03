@@ -14,8 +14,8 @@ function classNames(...classes: (string | boolean | undefined)[]): string {
 interface ToggleDateProps {
   value: boolean;
   onChange: (value: boolean) => void;
-  range: { from: string | null; to: string | null };
-  onChangeRange: (range: { from: string | null; to: string | null }) => void;
+  range: { from: Date | null; to: Date | null };
+  onChangeRange: (range: { from: Date | null; to: Date | null }) => void;
   disabled?: boolean;
   label?: string;
   readOnly?: boolean;
