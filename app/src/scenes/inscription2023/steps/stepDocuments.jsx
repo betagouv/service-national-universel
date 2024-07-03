@@ -24,7 +24,7 @@ export default function StepDocuments() {
   const corrections = young?.correctionRequests?.filter(
     (correction) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(correction.field) && ["SENT", "REMINDED"].includes(correction.status),
   );
-  const disabledUpload = young?.files.cniFiles.length > 2;
+  const disabledUpload = young?.files?.cniFiles.length > 2;
 
   const IDs = [
     {
@@ -94,7 +94,7 @@ export default function StepDocuments() {
 
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
-        {young.files.cniFiles?.length > 0 && (
+        {young.files?.cniFiles?.length > 0 && (
           <div className="mb-4">
             <MyDocs />
             <hr className="my-2" />
