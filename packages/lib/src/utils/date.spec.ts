@@ -1,5 +1,5 @@
 import { format } from "date-fns-tz";
-import { formatDateFRTimezoneUTC, getZonedDate, isNowBetweenDates } from "./date";
+import { formatDateFRTimezoneUTC, getZonedDate, isNowBetweenDates, formatDateTimeZone } from "./date";
 
 describe("dates", () => {
   it("should return zoned date", () => {
@@ -45,5 +45,15 @@ describe("dates", () => {
     const from = new Date();
     from.setDate(from.getDate() - 1);
     expect(isNowBetweenDates(from.toISOString(), undefined)).toBe(true);
+  });
+  it("formatDateTimeZone", () => {
+    let date = formatDateTimeZone("2024-06-03T23:00:00.000+00:00");
+    expect(date).toBe("2024-06-03T23:00:00.000Z");
+    date = formatDateTimeZone("2024-06-03T01:00:00.000+00:00");
+    expect(date).toBe("2024-06-03T01:00:00.000Z");
+    date = formatDateTimeZone("2024-06-03T00:00:00.000+00:00");
+    expect(date).toBe("2024-06-03T00:00:00.000Z");
+    date = formatDateTimeZone("2024-06-03T18:00:00.000+00:00");
+    expect(date).toBe("2024-06-03T18:00:00.000Z");
   });
 });
