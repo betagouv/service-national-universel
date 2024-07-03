@@ -10,7 +10,7 @@ const anonymize = require("../anonymization/young");
 
 const MODELNAME = "young";
 
-const ClasseStateManager = require("../cle/classe/stateManager");
+const ClasseStateManager = require("../cle/classe/stateManager").default;
 
 const File = new mongoose.Schema({
   name: String,
