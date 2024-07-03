@@ -1,7 +1,7 @@
 import React from "react";
 import queryString from "query-string";
 import { useSelector } from "react-redux";
-import { HiOutlineHome } from "react-icons/hi";
+import { HiHome } from "react-icons/hi";
 
 import api from "@/services/api";
 import { getNewLink } from "@/utils";
@@ -33,7 +33,7 @@ export default function Index() {
 
   return (
     <Page>
-      <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineHome size={20} /> }, { title: "Tableau de bord" }]} />
+      <Header title="Tableau de bord" breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]} />
       <DashboardContainer active="sejour" availableTab={["general", "sejour"]}>
         <div className="flex flex-col gap-8">
           <h1 className="text-[28px] font-bold leading-8 text-gray-900">Général</h1>

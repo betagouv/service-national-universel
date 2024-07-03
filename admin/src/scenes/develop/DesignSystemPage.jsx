@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, Select, Navbar } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
-import { HiUsers, HiPencil, HiOutlinePencil, HiOutlineHome } from "react-icons/hi";
+import { HiUsers, HiPencil, HiOutlinePencil, HiHome } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
 import { BsCheck } from "react-icons/bs";
 
@@ -82,7 +82,7 @@ export default function DesignSystemPage() {
   console.log(valueSelect);
 
   const [StatusTitle, setStatusTitle] = useState("Candidature approuvée");
-  const [StatusSelect, setStatusSelect] = useState("VALIDATED");
+  const [StatusSelect, setStatusSelect] = useState("WAITING_LIST");
 
   const selectTest = [
     {
@@ -146,11 +146,11 @@ export default function DesignSystemPage() {
           key: "1",
           action: () => {
             setStatusTitle("Candidature approuvée");
-            setStatusSelect("VALIDATED");
+            setStatusSelect("WAITING_LIST");
           },
           render: (
             <div className="flex items-center gap-4 p-2 px-3">
-              <div className="w-3 h-3 shrink-0 bg-emerald-600 rounded-[50%] mt-0.5" />
+              <div className="w-3 h-3 shrink-0 bg-cyan-600 rounded-[50%] mt-0.5" />
               <div className={`${StatusSelect === "WAITING_LIST" && "font-bold"} text-sm`}>Candidature Approuvée</div>
               {StatusSelect === "WAITING_LIST" && <BsCheck size={20} color="black" className="mt-0.5" />}
             </div>
@@ -189,7 +189,7 @@ export default function DesignSystemPage() {
     <Page>
       <Header
         title="Design System"
-        breadcrumb={[{ to: "/", title: <HiOutlineHome size={20} /> }, { title: "Design System" }]}
+        breadcrumb={[{ to: "/", title: <HiHome size={20} className="text-gray-400" /> }, { title: "Design System" }]}
         actions={[<Button key="header-action-1" title={"Click me"} />]}
       />
       <Subheader title="Code, preview, test, build and ship." />
@@ -358,11 +358,14 @@ export default function DesignSystemPage() {
             optionsGroup={selectTest2}
           />
           <Badge title={<HiPencil size={16} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
+          {/* Candidature approuvée */}
           <DropdownButton title={StatusTitle} status={StatusSelect} mode={"badge"} optionsGroup={selectTestStatus} />
+          {/* Mission effectuée */}
+          <DropdownButton title="Mission effectuée" status="VALIDATED" mode="badge" optionsGroup={[]} />
           <Badge title={"Désisté"} status={"CANCEL"} />
           <Badge title={"Refusée"} status={"REFUSED"} />
           <Badge title={"En attente de validation"} status={"WAITING_VALIDATION"} />
-          <Badge title={"En attente de correction"} status={"WAITING-CORRECTION"} />
+          <Badge title={"En attente de correction"} status={"WAITING_CORRECTION"} />
           <Badge title={"En cours"} status={"IN_PROGRESS"} />
           <Badge title={"Validée sur liste principale"} status={"VALIDATED"} />
           <Badge title={"Validée sur liste complémentaire"} status={"WAITING_LIST"} className="!w-[100px]" />

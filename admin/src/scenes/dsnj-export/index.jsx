@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
-import { HiOutlineHome, HiOutlineCalendar } from "react-icons/hi";
+import { HiHome, HiOutlineCalendar } from "react-icons/hi";
 import plausibleEvent from "@/services/plausible";
 
 import { translate } from "snu-lib";
@@ -106,7 +106,7 @@ const DSNJExport = () => {
       <Page>
         <Header
           title="Données centres & volontaires (DSNJ)"
-          breadcrumb={[{ title: <HiOutlineHome size={20} />, to: "/" }, { title: "Séjours" }, { title: "Export DSNJ" }]}
+          breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Séjours" }, { title: "Export DSNJ" }]}
           actions={
             <SelectCohort
               cohort={currentCohort.name}

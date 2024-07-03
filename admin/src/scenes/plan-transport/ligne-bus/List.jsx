@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { FiFolderPlus } from "react-icons/fi";
-import { HiOutlineHome, HiOutlineAdjustments } from "react-icons/hi";
+import { HiHome, HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
@@ -170,7 +170,7 @@ export default function List() {
     <Page>
       <Header
         title="Plan de transport"
-        breadcrumb={[{ title: <HiOutlineHome size={20} />, to: "/" }, { title: "Plan de transport" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Plan de transport" }]}
         actions={
           <SelectCohort
             cohort={cohort}

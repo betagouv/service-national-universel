@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { HiOutlineHome } from "react-icons/hi";
+import { HiHome } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
 import { useSelector } from "react-redux";
@@ -110,7 +110,7 @@ export default function Index() {
 
   return (
     <Page>
-      <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineHome size={20} /> }, { title: "Tableau de bord" }]} />
+      <Header title="Tableau de bord" breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]} />
       <DashboardContainer active="engagement" availableTab={["general", "engagement"]}>
         <div className="flex flex-col gap-8">
           <h1 className="text-[28px] font-bold leading-8 text-gray-900">Candidatures</h1>

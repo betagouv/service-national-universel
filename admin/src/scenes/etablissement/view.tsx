@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { HiOutlineHome, HiPlus } from "react-icons/hi";
+import { HiHome, HiPlus } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
 import { Page, Header, Button } from "@snu/ds/admin";
@@ -95,7 +95,7 @@ export default function View() {
     <Page>
       <Header
         title={etablissement.name}
-        breadcrumb={[{ title: <HiOutlineHome size={20} className="hover:text-gray-500" />, to: "/" }, { title: "Fiche de mon établissement" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Fiche de mon établissement" }]}
         actions={[
           [ROLES.ADMIN].includes(user.role) && (
             <Button

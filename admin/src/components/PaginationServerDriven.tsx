@@ -59,7 +59,7 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
       {setSize ? (
         <div className="text-xs flex gap-2 justify-center items-center text-[#242526]">
           <Select
-            // placeholder="Mono Select"
+            placeholder="par page"
             defaultValue={sizeOptions[0].value}
             options={sizeOptions}
             value={sizeOptions.find((option) => Number(option.value) === size) || null}
@@ -67,6 +67,9 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
               checkSize(Number(option.value));
             }}
             size="sm"
+            controlCustomStyle={{
+              boxShadow: "none",
+            }}
           />
           Éléments par page
         </div>
