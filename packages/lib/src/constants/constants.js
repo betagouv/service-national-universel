@@ -994,7 +994,7 @@ const LIMIT_DATE_ADMIN_CLE = new Date("2024-08-31");
 const LIMIT_DATE_REF_CLASSE = new Date("2024-09-20");
 
 // Version courante du reglement intérieur, au format date, cela permet de vérifier si un jeune doit le revalider avant son départ en séjour.
-const REGLEMENT_INTERIEUR_VERSION = "2024-03-01";
+const REGLEMENT_INTERIEUR_VERSION = "2024-07-07";
 
 const CLE_TYPE_LIST = Object.values(CLE_TYPE);
 const CLE_SECTOR_LIST = Object.values(CLE_SECTOR);
