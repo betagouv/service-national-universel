@@ -22,7 +22,7 @@ const runMigrations = async () => {
 
     await doMigrations(db);
   } catch (error) {
-    capture(error, "Migrations");
+    capture(error);
   } finally {
     await unlockChangelogLock(db);
   }
