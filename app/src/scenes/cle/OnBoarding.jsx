@@ -16,8 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
 import { RiArrowLeftLine } from "react-icons/ri";
-import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
-
+import { STATUS_CLASSE } from "snu-lib";
 import { Button } from "@snu/ds/dsfr";
 
 const Title = () => (
@@ -72,27 +71,6 @@ const OnBoarding = () => {
   const { isLoggedIn, logout } = useAuth();
   if (isLoggedIn) logout({ redirect: false });
   const { id } = queryString.parse(window.location.search);
-
-  if (!IS_INSCRIPTION_OPEN_CLE) {
-    return (
-      <DSFRLayout title="Inscription de l'élève">
-        <DSFRContainer title="Les inscriptions sont cloturées">
-          <p className="leading-relaxed">Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023 - 2024.</p>
-        </DSFRContainer>
-      </DSFRLayout>
-    );
-  }
-
-  if (!validateId(id)) {
-    return <OnboardingError message="Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis." />;
-  }
-
-  return <OnboardingContent id={id} />;
-};
-
-const OnboardingContent = ({ id }) => {
-  const history = useHistory();
-  const [showContactSupport, setShowContactSupport] = useState(false);
   const {
     isError,
     isPending,
@@ -106,38 +84,44 @@ const OnboardingContent = ({ id }) => {
   if (isPending) return <Loader />;
   if (isError)
     return <OnboardingError message="Impossible de joindre le service. Essayez de vérifier le lien d'inscription qui vous a été transmis. Sinon, veuillez réessayer plus tard." />;
+
+  if (classe.status !== STATUS_CLASSE.OPEN) {
+    return (
+      <DSFRLayout title="Inscription de l'élève">
+        <DSFRContainer title="Les inscriptions sont cloturées">
+          <p className="leading-relaxed">Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023 - 2024.</p>
+        </DSFRContainer>
+      </DSFRLayout>
+    );
+  }
+
+  return <OnboardingContent classe={classe} />;
+};
+
+const OnboardingContent = ({ classe }) => {
+  const history = useHistory();
+  const [showContactSupport, setShowContactSupport] = useState(false);
+
   return (
     <DSFRLayout title="Inscription de l'élève">
-      {classe && (
-        <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
-          <MyClass classe={classe} />
-          <hr className="my-4" />
-          {classe.isInscriptionOpen && (
-            <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-              <Button className="md:pr-4 pt-2 pb-1" priority="tertiary no outline" onClick={() => setShowContactSupport(true)}>
-                J'ai déjà un compte
-              </Button>
-              <Button
-                onClick={() => {
-                  plausibleEvent("CLE/CTA preinscription - demarrer");
-                  history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`);
-                }}>
-                Démarrer mon inscription
-              </Button>
-            </div>
-          )}
+      <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
+        <MyClass classe={classe} />
+        <hr className="my-4" />
+        <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
+          <Button className="md:pr-4 pt-2 pb-1" priority="tertiary no outline" onClick={() => setShowContactSupport(true)}>
+            J'ai déjà un compte
+          </Button>
+          <Button
+            onClick={() => {
+              plausibleEvent("CLE/CTA preinscription - demarrer");
+              history.push(`/preinscription/profil?parcours=CLE&classeId=${classe.id}`);
+            }}>
+            Démarrer mon inscription
+          </Button>
+        </div>
 
-          {!classe.isInscriptionOpen && (
-            <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
-              <Button className="sm:w-full md:w-52 md:self-end" disabled>
-                {classe.isFull ? "☹ Classe complète" : "Inscriptions désactivées"}
-              </Button>
-              {classe.isFull && <p className="text-[13px] w-full text-end mt-2">Pour plus d'informations contactez votre référent.</p>}
-            </div>
-          )}
-          <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={id}></ModalInfo>
-        </DSFRContainer>
-      )}
+        <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={classe.id}></ModalInfo>
+      </DSFRContainer>
     </DSFRLayout>
   );
 };
