@@ -19,6 +19,15 @@ export function getNewReferentFixture(object = {}) {
   };
 }
 
+export function getReinscriptionSignupReferentFixture(object = {}) {
+  return {
+    ...getNewReferentFixture(),
+    invitationToken: faker.string.uuid(),
+    invitationExpires: faker.date.future(),
+    ...object,
+  };
+}
+
 export function getNewSignupReferentFixture(object = {}) {
   return {
     email: faker.internet.email().toLowerCase(),

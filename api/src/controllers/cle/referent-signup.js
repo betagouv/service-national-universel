@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, validateEmailAcademique, isAdminCle, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, isAdminCle, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
 
 const emailsEmitter = require("../../emails");
 const config = require("config");
@@ -40,7 +40,7 @@ router.get("/token/:token", async (req, res) => {
       etablissement = await EtablissementModel.findById(classe.etablissementId);
     }
 
-    return res.status(200).send({ ok: true, data: { referent: serializeReferent(referent), etablissement } });
+    return res.status(200).send({ ok: true, data: { referent: serializeReferent(referent), etablissement, reinscription: !!referent.lastLoginAt } });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -61,10 +61,9 @@ router.put("/request-confirmation-email", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
-    if (value.email !== value.confirmEmail)
+    if (value.email !== value.confirmEmail) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
-
-    if (!validateEmailAcademique(value.email)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
+    }
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -72,11 +71,17 @@ router.put("/request-confirmation-email", async (req, res) => {
     const token2FA = await crypto.randomInt(1000000);
     referent.set({ emailWaitingValidation: value.email, token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
     await referent.save();
+
+    let cta = `${config.ADMIN_URL}/creer-mon-compte/code?token=${value.invitationToken}&code=${token2FA}`;
+    if (referent.lastLoginAt) {
+      cta += "&reinscription=1";
+    }
+
     await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: value.email }],
       params: {
         token2FA,
-        cta: `${config.ADMIN_URL}/creer-mon-compte/code?token=${value.invitationToken}&code=${token2FA}`,
+        cta,
       },
     });
 

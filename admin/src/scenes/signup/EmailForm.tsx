@@ -78,9 +78,6 @@ export default function EmailForm({ user }) {
             </div>
           </div>
           <div>
-            <Alert description="Il doit s'agir d'une adresse email académique." severity="info" small />
-          </div>
-          <div>
             <Alert description="Nous allons vous envoyer un code pour activer votre adresse email renseignée ci-dessus." severity="info" small />
           </div>
           <hr className="p-1" />

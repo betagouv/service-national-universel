@@ -26,7 +26,7 @@ export default function CodeForm() {
   const invitationToken = urlParams.get("token");
   const reinscription = urlParams.get("reinscription");
   const codeUrl = urlParams.get("code");
-  const [code, setCode] = useState(codeUrl);
+  const [code, setCode] = useState(codeUrl || "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -90,7 +90,7 @@ export default function CodeForm() {
               nativeInputProps={{
                 placeholder: "000000",
                 type: "text",
-                value: String(code),
+                value: code,
                 onChange: (e) => setCode(e.target.value),
                 required: true,
               }}
