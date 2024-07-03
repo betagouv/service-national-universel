@@ -22,10 +22,6 @@ const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
-(async () => {
-  await runMigrations();
-})();
-
 async function runCrons() {
   initSentry();
   await initDB();
@@ -46,6 +42,7 @@ async function runAPI() {
   }
 
   await initDB();
+  await runMigrations();
 
   /*
       Download all certificate templates when instance is starting,
