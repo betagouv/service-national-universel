@@ -45,11 +45,9 @@ export class AppelAProjetEtablissementService {
       const schoolYears = [...new Set([...existingEtablissement.schoolYears, ...formattedEtablissement.schoolYears])];
 
       if (save) {
-        const referentEtablissementIds = [...new Set([...existingEtablissement.referentEtablissementIds, referentEtablissementId])];
         existingEtablissement.set({
           ...existingEtablissement,
           ...formattedEtablissement,
-          referentEtablissementIds: referentEtablissementIds,
           schoolYears: schoolYears,
         });
 

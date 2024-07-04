@@ -25,6 +25,9 @@ export class AppelAProjetReferentService {
         referentEtablissement.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
         await referentEtablissement.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
       }
+      if (!hasAlreadyBeenProcessed) {
+        this.referents.push({ ...referentEtablissement, _id: referentEtablissement?._id, operation: "none" });
+      }
       return referentEtablissement.id;
     }
 
