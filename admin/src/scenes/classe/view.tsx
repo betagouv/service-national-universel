@@ -128,7 +128,6 @@ export default function View() {
       filiere?: string;
       grades?: string;
       estimatedSeats?: string;
-      trimester?: string;
       type?: string;
     }
 
@@ -138,7 +137,6 @@ export default function View() {
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
     if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
-    if (!classe?.trimester) errors.trimester = "Ce champ est obligatoire";
     if (!classe?.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
     if (!classe?.type) errors.type = "Ce champ est obligatoire";
     if (!classe?.grades.length) errors.grades = "Ce champ est obligatoire";

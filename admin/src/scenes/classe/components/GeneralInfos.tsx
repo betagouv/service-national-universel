@@ -64,11 +64,6 @@ export default function GeneralInfos({
     value: TYPE_CLASSE_LIST[value],
     label: translate(TYPE_CLASSE_LIST[value]),
   }));
-  const trimesterOptions = [
-    { value: "T1", label: "T1" },
-    { value: "T2", label: "T2" },
-    { value: "T3", label: "T3" },
-  ];
 
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
@@ -138,32 +133,6 @@ export default function GeneralInfos({
               setClasse({ ...classe, coloration: options.value });
             }}
             error={errors.coloration}
-          />
-          <Label title="Trimestre de préférence pour le séjour" name="trimester" />
-          <Select
-            className="mb-3"
-            isActive={edit}
-            readOnly={!edit}
-            placeholder={"Choisissez un trimestre"}
-            options={trimesterOptions}
-            closeMenuOnSelect={true}
-            value={classe?.trimester ? { value: classe?.trimester, label: classe?.trimester } : null}
-            onChange={(options) => {
-              setClasse({ ...classe, trimester: options.value });
-            }}
-            error={errors.trimester}
-          />
-
-          <Field
-            name="comments"
-            label="Contraintes spécifiques"
-            errors={errors}
-            className="text-gray-900  w-full mb-3"
-            placeholder="Précisez en quelques mots"
-            handleChange={(e) => setClasse({ ...classe, comments: e.target.value })}
-            value={classe?.comments}
-            readOnly={!edit}
-            type="textarea"
           />
         </div>
         <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
