@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
@@ -12,45 +12,23 @@ import { Section, Container } from "@snu/ds/dsfr";
 
 import api from "@/services/api";
 import { User } from "@/types";
-import Loader from "@/components/Loader";
 
 import Stepper from "./components/Stepper";
-import { REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY, ETABLISSEMENT_LOCAL_STORAGE_KEY } from "@/services/cle";
+import { REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY } from "@/services/cle";
 
-export default function ConfirmationForm() {
+interface Props {
+  user: User;
+  etablissement?: EtablissementDto & { fullName?: string; postcode?: string };
+  invitationToken: string;
+  reinscription: boolean;
+}
+
+export default function ConfirmationForm({ user, etablissement, invitationToken, reinscription }: Props) {
   const history = useHistory();
-
-  const [etablissement, setEtablissement] = useState<EtablissementDto & { fullName?: string; postcode?: string }>();
   const { search } = useLocation();
 
-  const urlParams = new URLSearchParams(search);
-  const invitationToken = urlParams.get("token");
-  const reinscription = urlParams.get("reinscription");
-
-  const [user, setUser] = useState<User | null>(null);
   const [cguChecked, setCguChecked] = useState(false);
   const [donneesChecked, setDonneesChecked] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!invitationToken) return toastr.error("Votre lien d'invitation a expiré", "");
-        const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
-        if (ok && data) setUser(data.referent);
-
-        if (data.etablissement) {
-          setEtablissement(data.etablissement);
-        } else {
-          const localStorageEtablissement = localStorage.getItem(ETABLISSEMENT_LOCAL_STORAGE_KEY);
-          if (localStorageEtablissement) {
-            setEtablissement(JSON.parse(localStorageEtablissement));
-          }
-        }
-      } catch (error) {
-        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return toastr.error("Votre lien d'invitation a expiré", "");
-      }
-    })();
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,17 +39,17 @@ export default function ConfirmationForm() {
         return toastr.error(response.message || translate(response.code), "");
       }
 
-      // todo : refirect to the auth screen
-      localStorage.removeItem(ETABLISSEMENT_LOCAL_STORAGE_KEY);
       localStorage.setItem(REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY, String(true));
       toastr.success("Votre compte a bien été créé. Vous pouvez maintenant vous connecter.", "");
       history.push("/auth");
     } catch (e) {
-      console.log(e);
+      if (e.ok == false) {
+        return toastr.error(e.message || translate(e.code), "");
+      } else {
+        console.log(e);
+      }
     }
   };
-
-  if (!user) return <Loader />;
 
   return (
     <Section>

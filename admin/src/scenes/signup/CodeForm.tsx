@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
@@ -11,21 +10,23 @@ import { translate } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 
 import api from "@/services/api";
-import { User } from "@/types";
-import Loader from "@/components/Loader";
 
 import Stepper from "./components/Stepper";
+import { User } from "@/types";
 
-export default function CodeForm() {
+interface Props {
+  user: User;
+  reinscription: boolean;
+  invitationToken: string;
+}
+
+export default function CodeForm({ user, reinscription, invitationToken }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
-  const [user, setUser] = React.useState<User | null>(null);
-
   const urlParams = new URLSearchParams(search);
-  const invitationToken = urlParams.get("token");
-  const reinscription = urlParams.get("reinscription");
   const codeUrl = urlParams.get("code");
+
   const [code, setCode] = useState(codeUrl || "");
 
   const handleSubmit = async (e) => {
@@ -40,28 +41,6 @@ export default function CodeForm() {
       if (error?.message) return toastr.error(error?.message, "");
     }
   };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!invitationToken) {
-          history.push("/auth");
-          return toastr.error("Votre lien d'invitation a expiré", "");
-        }
-        const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
-        if (ok && data) {
-          setUser(data.referent);
-        }
-      } catch (error) {
-        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") {
-          history.push("/auth");
-          return toastr.error("Votre lien d'invitation a expiré", "");
-        }
-      }
-    })();
-  }, []);
-
-  if (!user) return <Loader />;
 
   return (
     <Section>

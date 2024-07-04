@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, isAdminCle, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, ROLES, isAdminCle, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
 
 const emailsEmitter = require("../../emails");
 const config = require("config");
@@ -31,7 +31,7 @@ router.get("/token/:token", async (req, res) => {
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let etablissement;
-    if (referent.subRole === SUB_ROLES.coordinateur_cle) {
+    if (isAdminCle(referent)) {
       etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
     }
     if (referent.role === ROLES.REFERENT_CLASSE) {

@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { fr } from "@codegouvfr/react-dsfr";
-import Stepper from "./components/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
@@ -13,16 +11,21 @@ import { Section, Container } from "@snu/ds/dsfr";
 
 import api from "@/services/api";
 
-export default function EmailForm({ user }) {
+import Stepper from "./components/Stepper";
+import { User } from "@/types";
+
+interface Props {
+  user: User;
+  reinscription: boolean;
+  invitationToken: string;
+}
+
+export default function EmailForm({ user, reinscription, invitationToken }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
   const [email, setEmail] = useState(user.email);
   const [confirmEmail, setConfirmEmail] = useState("");
-
-  const urlParams = new URLSearchParams(search);
-  const invitationToken = urlParams.get("token");
-  const reinscription = urlParams.get("reinscription");
 
   const handleSubmit = async (e) => {
     e.preventDefault();

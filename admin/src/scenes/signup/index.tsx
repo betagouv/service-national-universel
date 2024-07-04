@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Switch, Link, NavLink, useHistory, Redirect, useLocation } from "react-router-dom";
-import useDocumentTitle from "@/hooks/useDocumentTitle";
-import useDocumentCss from "@/hooks/useDocumentCss";
-import { SentryRoute } from "@/sentry";
 import { toastr } from "react-redux-toastr";
 
 // DSFR Requirements
@@ -11,18 +8,24 @@ import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import { Header } from "@codegouvfr/react-dsfr/Header";
 import { Footer } from "@codegouvfr/react-dsfr/Footer";
 import { Page, Section, Container } from "@snu/ds/dsfr";
-import LogoSNU from "@/assets/logo-snu.png";
 
+import { ROLES } from "snu-lib";
+import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+
+import { User } from "@/types";
+import { SentryRoute } from "@/sentry";
+import api from "@/services/api";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+import useDocumentCss from "@/hooks/useDocumentCss";
+import LogoSNU from "@/assets/logo-snu.png";
 import HumanCooperation from "@/assets/icons/HumanCooperation";
+import Loader from "@/components/Loader";
+
 import Role from "./RoleForm";
 import Email from "./EmailForm";
 import Code from "./CodeForm";
 import Informations from "./InformationsForm";
 import Confirmation from "./ConfirmationForm";
-import api from "@/services/api";
-import { ROLES } from "snu-lib";
-import Loader from "@/components/Loader";
-import { User } from "@/types";
 
 export default function Index() {
   useDocumentTitle("Creer mon compte");
@@ -33,6 +36,8 @@ export default function Index() {
   const { search } = useLocation();
 
   const [onboardedUser, setOnboardedUser] = useState<User | null>(null);
+  const [etablissement, setEtablissement] = useState<EtablissementDto & { fullName?: string; postcode?: string }>();
+  const [reinscription, setReinscription] = useState(false);
 
   const urlParams = new URLSearchParams(search);
   const invitationToken = urlParams.get("token");
@@ -45,10 +50,13 @@ export default function Index() {
           return toastr.error("Votre lien d'invitation a expiré", "");
         }
         const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
-        if (ok && data) setOnboardedUser(data.referent);
         if (!ok) {
           history.push("/auth");
           return toastr.error("Votre lien d'invitation a expiré", "");
+        } else if (data) {
+          setReinscription(!!data.reinscription);
+          setOnboardedUser(data.referent);
+          setEtablissement(data.etablissement);
         }
       } catch (error) {
         if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") {
@@ -64,7 +72,7 @@ export default function Index() {
     [ROLES.REFERENT_CLASSE]: "Compte Responsable Classe engagée",
   };
 
-  if (!onboardedUser) return <Loader />;
+  if (!onboardedUser || !invitationToken) return <Loader />;
 
   return (
     <Page>
@@ -115,12 +123,18 @@ export default function Index() {
       />
 
       <Switch>
-        <SentryRoute path="/creer-mon-compte" exact component={() => <Role />} />
-        <SentryRoute path="/creer-mon-compte/email" component={() => <Email user={onboardedUser} />} />
-        <SentryRoute path="/creer-mon-compte/code" component={() => <Code />} />
-        <SentryRoute path="/creer-mon-compte/informations" component={() => <Informations />} />
+        <SentryRoute path="/creer-mon-compte" exact component={() => <Role user={onboardedUser} etablissement={etablissement} reinscription={reinscription} />} />
+        <SentryRoute path="/creer-mon-compte/email" component={() => <Email user={onboardedUser} reinscription={reinscription} invitationToken={invitationToken} />} />
+        <SentryRoute path="/creer-mon-compte/code" component={() => <Code user={onboardedUser} reinscription={reinscription} invitationToken={invitationToken} />} />
+        <SentryRoute
+          path="/creer-mon-compte/informations"
+          component={() => <Informations user={onboardedUser} reinscription={reinscription} invitationToken={invitationToken} />}
+        />
         <SentryRoute path="/verifier-mon-compte" component={() => <Redirect to={`/creer-mon-compte/confirmation${search ? `${search}&reinscription=1` : search}`} />} />
-        <SentryRoute path="/creer-mon-compte/confirmation" component={() => <Confirmation />} />
+        <SentryRoute
+          path="/creer-mon-compte/confirmation"
+          component={() => <Confirmation user={onboardedUser} etablissement={etablissement} reinscription={reinscription} invitationToken={invitationToken} />}
+        />
       </Switch>
 
       <Section>

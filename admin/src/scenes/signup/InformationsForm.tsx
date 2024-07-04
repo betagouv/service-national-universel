@@ -3,48 +3,43 @@ import { useHistory, useLocation } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import Stepper from "./components/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { PasswordInput } from "@codegouvfr/react-dsfr/blocks/PasswordInput";
 
-import { ROLES, SUB_ROLES, translate } from "snu-lib";
+import { isChefEtablissement, translate } from "snu-lib";
+import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
 
 import { Section, Container } from "@snu/ds/dsfr";
 
+import { User } from "@/types";
 import api from "@/services/api";
-import { ETABLISSEMENT_LOCAL_STORAGE_KEY } from "@/services/cle";
-import Loader from "@/components/Loader";
 
-import SchoolInFrance from "./components/SchoolInFrance";
+interface Props {
+  user: User;
+  etablissement?: EtablissementDto & { fullName?: string; postcode?: string };
+  invitationToken: string;
+  reinscription: boolean;
+}
 
-export default function InformationsForm() {
+export default function InformationsForm({ user, etablissement, invitationToken, reinscription }: Props) {
   const history = useHistory();
   const { search } = useLocation();
-  const urlParams = new URLSearchParams(search);
-  const invitationToken = urlParams.get("token");
-  const reinscription = urlParams.get("reinscription");
 
-  const [user, setUser] = useState(null);
+  const [firstName, setFirstName] = useState(user.firstName || "");
+  const [lastName, setLastName] = useState(user.lastName || "");
+  const [phone, setPhone] = useState(user.phone || "");
 
-  const [firstName, setFirstName] = React.useState();
-  const [lastName, setLastName] = React.useState();
-
-  const [etablissement, setEtablissement] = React.useState();
-
-  const [phone, setPhone] = React.useState();
-
-  const [password, setPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (!reinscription && password !== confirmPassword) return toastr.error("Les mots de passe ne correspondent pas");
-      if (!validator.isMobilePhone(phone, "fr-FR")) return toastr.error("Le numéro de téléphone n'est pas valide");
-      // stocker dans local storage, pour une création de compte en plusieurs étapes
-      if (etablissement) localStorage.setItem(ETABLISSEMENT_LOCAL_STORAGE_KEY, JSON.stringify(etablissement));
+      if (!reinscription && password !== confirmPassword) return toastr.error("Les mots de passe ne correspondent pas", "");
+      if (!validator.isMobilePhone(phone, "fr-FR")) return toastr.error("Le numéro de téléphone n'est pas valide", "");
+
       const { ok, code, message } = await api.post(`/cle/referent-signup`, {
         firstName,
         lastName,
@@ -54,7 +49,7 @@ export default function InformationsForm() {
         invitationToken,
       });
       if (!ok) {
-        return toastr.error(message || translate(code));
+        return toastr.error(message || translate(code), "");
       }
       history.push(`/creer-mon-compte/confirmation${search}`);
     } catch (error) {
@@ -62,57 +57,8 @@ export default function InformationsForm() {
         return toastr.error("Mot de passe incorrect", "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole", {
           timeOut: 10000,
         });
-      return toastr.error(error?.message || translate(error?.code));
+      return toastr.error(error?.message || translate(error?.code), "");
     }
-  };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!invitationToken) {
-          history.push("/auth");
-          return toastr.error("Votre lien d'invitation a expiré");
-        }
-        const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
-        if (ok && data) setUser(data.referent);
-      } catch (error) {
-        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") {
-          history.push("/auth");
-          return toastr.error("Votre lien d'invitation a expiré");
-        }
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    const localStorageEtablissement = localStorage.getItem(ETABLISSEMENT_LOCAL_STORAGE_KEY);
-    if (localStorageEtablissement) {
-      setEtablissement(JSON.parse(localStorageEtablissement));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    setFirstName(user.firstName);
-    setLastName(user.lastName);
-    setPhone(user.phone);
-  }, [user]);
-
-  if (!user) return <Loader />;
-
-  const renderSchool = () => {
-    if (!user) return null;
-    if (user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement) {
-      return (
-        <div className="w-full">
-          {/* todo : flag it as required */}
-          {/* todo : on reload the state seems broken : there is the city prefilled, but we no school is available in the list */}
-          <div className="flex items-center justify-between">Établissement scolaire</div>
-          <SchoolInFrance school={etablissement} onSelectSchool={(s) => setEtablissement(s)} />
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
@@ -150,7 +96,18 @@ export default function InformationsForm() {
               />
             </div>
           </div>
-          {renderSchool()}
+          {isChefEtablissement(user) && (
+            <div className="w-full">
+              <div className="flex items-center justify-between">Établissement scolaire</div>
+              {etablissement ? (
+                <span>
+                  {etablissement?.fullName || etablissement?.name}, {etablissement?.postcode || etablissement?.zip}, {etablissement?.city}
+                </span>
+              ) : (
+                <span className="text-gray-400 italic">Aucun établissement sélectionné</span>
+              )}
+            </div>
+          )}
           <div className="w-full">
             {/* todo : handle phone zone */}
             <Input

@@ -35,6 +35,7 @@ describe("Referent Signup", () => {
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(response.body.data).toHaveProperty("referent");
+      expect(response.body.data).toHaveProperty("etablissement");
       expect(response.body.data.reinscription).toBe(false);
     });
 
