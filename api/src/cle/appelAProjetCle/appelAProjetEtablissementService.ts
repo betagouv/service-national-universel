@@ -42,21 +42,23 @@ export class AppelAProjetEtablissementService {
       if (hasAlreadyBeenProcessed) {
         return existingEtablissement;
       }
+      const schoolYears = [...new Set([...existingEtablissement.schoolYears, ...formattedEtablissement.schoolYears])];
+
       if (save) {
         const referentEtablissementIds = [...new Set([...existingEtablissement.referentEtablissementIds, referentEtablissementId])];
         existingEtablissement.set({
           ...existingEtablissement,
           ...formattedEtablissement,
           referentEtablissementIds: referentEtablissementIds,
-          schoolYears: [...new Set([...existingEtablissement.schoolYears, ...formattedEtablissement.schoolYears])],
+          schoolYears: schoolYears,
         });
 
         await existingEtablissement.save({ fromUser: { firstName: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 } });
         console.log("AppelAProjetEtablissementService - processEtablissement() - updated etablissement : ", existingEtablissement?._id);
-        this.etablissements.push({ ...existingEtablissement.toObject(), operation: "update" });
+        this.etablissements.push({ ...existingEtablissement.toObject(), schoolYears: schoolYears, operation: "update" });
         return existingEtablissement;
       }
-      this.etablissements.push({ ...formattedEtablissement, operation: "update" });
+      this.etablissements.push({ ...formattedEtablissement, schoolYears: schoolYears, operation: "update" });
       return formattedEtablissement;
     }
 
