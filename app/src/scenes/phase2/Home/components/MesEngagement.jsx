@@ -60,11 +60,11 @@ function EngagementList() {
   }
   return (
     <div className="flex gap-4 snap-x snap-mandatory overflow-auto pb-3">
-      {equivalences.map((equivalence) => (
-        <EquivalenceCard key={equivalence._id} equivalence={equivalence} />
-      ))}
       {applications.map((application) => (
         <ApplicationCard key={application._id} application={application} />
+      ))}
+      {equivalences.map((equivalence) => (
+        <EquivalenceCard key={equivalence._id} equivalence={equivalence} />
       ))}
     </div>
   );
