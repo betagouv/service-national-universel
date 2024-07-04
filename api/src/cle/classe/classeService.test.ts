@@ -1,4 +1,4 @@
-import { buildUniqueClasseId, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
+import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
 const youngService = require("../../young/young.service");
 const classService = require("./classeService");
 
@@ -475,30 +475,33 @@ describe("ClasseStateManager.compute function", () => {
     expect(patchedClasse.save).toHaveBeenCalledWith({ fromUser });
   });
 });
-describe("buildUniqueClasseId", () => {
+describe("buildUniqueClasseId and key", () => {
   it("should return the correct unique classe ID", () => {
-    const etablissement = {
-      region: "Île-de-France",
-      zip: "75001",
-      academy: "Paris",
-    } as IEtablissement;
     const classe = {
       name: "une classe",
       coloration: "SPORT",
     };
-    const expectedId = "IDFP075-E73E72";
-    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+    const expectedId = "E73E72";
+
+    expect(buildUniqueClasseId(classe)).toEqual(expectedId);
   });
 
-  it("should handle missing inputs gracefully and return NO_UID", () => {
+  it("should return the correct unique classe Key", () => {
     const etablissement = {
       region: "Île-de-France",
       zip: "75001",
       academy: "Paris",
     } as IEtablissement;
+    const expectedKey = "C-IDFP075";
+
+    expect(buildUniqueClasseKey(etablissement)).toEqual(expectedKey);
+  });
+
+  it("should handle missing inputs gracefully and return NO_UID", () => {
     const classe = { name: "", coloration: undefined };
-    const expectedId = "IDFP075-NO_UID";
-    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+    const expectedId = "NO_UID";
+
+    expect(buildUniqueClasseId(classe)).toEqual(expectedId);
   });
 });
 

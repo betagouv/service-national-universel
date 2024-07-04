@@ -44,7 +44,12 @@ export class AppelAProjetEtablissementService {
       }
       if (save) {
         const referentEtablissementIds = [...new Set([...existingEtablissement.referentEtablissementIds, referentEtablissementId])];
-        existingEtablissement.set({ ...existingEtablissement, ...formattedEtablissement, referentEtablissementIds: referentEtablissementIds });
+        existingEtablissement.set({
+          ...existingEtablissement,
+          ...formattedEtablissement,
+          referentEtablissementIds: referentEtablissementIds,
+          schoolYears: [...new Set([...existingEtablissement.schoolYears, ...formattedEtablissement.schoolYears])],
+        });
 
         await existingEtablissement.save({ fromUser: { firstName: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 } });
         console.log("AppelAProjetEtablissementService - processEtablissement() - updated etablissement : ", existingEtablissement?._id);

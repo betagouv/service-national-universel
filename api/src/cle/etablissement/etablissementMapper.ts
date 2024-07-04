@@ -1,6 +1,6 @@
 import { IEtablissement } from "../../models/cle/etablissementType";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
-import { CLE_SECTOR, CLE_TYPE } from "snu-lib";
+import { ClasseSchoolYear, CLE_SECTOR, CLE_TYPE } from "snu-lib";
 
 export function mapEtablissementFromAnnuaireToEtablissement(etablissement: EtablissementProviderDto, referentIds: string[]): IEtablissement {
   return {
@@ -18,7 +18,7 @@ export function mapEtablissementFromAnnuaireToEtablissement(etablissement: Etabl
     sector: [mapStatutToSector(etablissement.statut_public_prive)],
     academy: etablissement.libelle_academie,
     state: "inactive",
-    schoolYears: [],
+    schoolYears: [ClasseSchoolYear.YEAR_2024_2025],
   };
 }
 
