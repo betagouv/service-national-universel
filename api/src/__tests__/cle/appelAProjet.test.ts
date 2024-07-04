@@ -161,5 +161,52 @@ describe("Appel A Projet Controller", () => {
       expect(etablissementAfterSync.uai).toEqual("UAI_42");
       expect(etablissementAfterSync.name).toEqual("Lycée Jean Monnet");
     });
+
+    it("should persist data and link existing referent to created etablissement", async () => {
+      const mockEtablissement = {
+        uai: "UAI_42",
+        name: "Example School",
+        referentEtablissementIds: [],
+        coordinateurIds: ["coordinateurId1", "coordinateurId2"],
+        department: "Example Department",
+        region: "Example Region",
+        zip: "12345",
+        city: "Example City",
+        country: "France",
+        state: "inactive",
+        academy: "Example Academy",
+        schoolYears: ["2021-2022", "2022-2023"],
+      };
+      await CleEtablissementModel.create(mockEtablissement);
+
+      const mockReferent = {
+        email: "mail@etablissement.fr",
+        firstName: "John",
+        lastName: "Doe",
+        phoneNumber: "1234567890",
+        password: "password",
+        role: "administrateur_cle",
+        subRole: "coordinateur_cle",
+        etablissementIds: [],
+        classeIds: [],
+      };
+
+      const referent = await ReferentModel.create(mockReferent);
+
+      passport.user.subRole = "god";
+      const responseAppelAProjetMock = Promise.resolve({
+        json: () => {
+          return getMockAppelAProjetDto(false);
+        },
+      });
+
+      fetch.mockImplementation(() => responseAppelAProjetMock);
+      await responseAppelAProjetMock;
+
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send();
+      const etablissementAfterSync = await CleEtablissementModel.findOne({ uai: "UAI_42" });
+
+      expect([...etablissementAfterSync.referentEtablissementIds]).toEqual([referent?.id]);
+    });
   });
 });
