@@ -6,6 +6,7 @@ import getAppHelper from "../helpers/app";
 import request from "supertest";
 import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult, InvitationType } from "../../services/cle/referent";
 import passport from "passport";
+import { SUB_ROLES } from "snu-lib";
 
 jest.mock("../../sendinblue", () => ({
   ...jest.requireActual("../../sendinblue"),
@@ -82,6 +83,7 @@ describe("Referent Service", () => {
           firstName: "Chef1",
           lastName: "Etablissement1",
           role: ROLES.ADMINISTRATEUR_CLE,
+          subRole: SUB_ROLES.referent_etablissement,
           metadata: { isFirstInvitationPending: true, invitationType: InvitationType.INSCRIPTION },
         },
         {
@@ -89,6 +91,7 @@ describe("Referent Service", () => {
           firstName: "Chef2",
           lastName: "Etablissement2",
           role: ROLES.ADMINISTRATEUR_CLE,
+          subRole: SUB_ROLES.referent_etablissement,
           metadata: { isFirstInvitationPending: true, invitationType: InvitationType.CONFIRMATION },
         },
       ]);
@@ -118,8 +121,6 @@ describe("Referent Service", () => {
         },
       ]);
 
-      const emails = referents.map((referent) => referent.email);
-      emails.push("nonexistent@mail.com");
       const expectedInvitation: InvitationResult[] = [
         {
           to: "chef1@etablissement.fr",

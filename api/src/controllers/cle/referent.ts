@@ -65,7 +65,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
 
 router.post("/send-invitation-chef-etablissement", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    console.log("Controller - send-invitation-chef-etablissement-inscriptions");
+    console.log("Controller - send-invitation-chef-etablissement");
 
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
