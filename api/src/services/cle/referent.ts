@@ -3,7 +3,7 @@ import { EtablissementDocument } from "../../models/cle/etablissementType";
 import { randomUUID } from "node:crypto";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { UserDto } from "snu-lib/src/dto";
-import { IReferent } from "../../models/referentType";
+import { IReferent, ReferentDocument } from "../../models/referentType";
 
 const crypto = require("crypto");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
@@ -63,39 +63,45 @@ export const inviteReferent = async (referent, { role, user }, etablissement) =>
   });
 };
 
-export const doInviteMultipleChefsEtablissements = async (emails: string[], user: UserDto, invitationType: InvitationType) => {
+export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
+  const chefsEtablissementsToSendInvitation = await ReferentModel.find({ "metadata.isFirstInvitationPending": true });
+  console.log(chefsEtablissementsToSendInvitation);
   const invitations: InvitationResult[] = [];
-  for (const email of emails) {
+  for (const chefEtablissement of chefsEtablissementsToSendInvitation) {
     try {
-      const mailResponse = await doInviteChefEtablissement(email, user, invitationType);
+      console.log("doInviteMultipleChefsEtablissements() - creating invitation for :", chefEtablissement.email);
+      const mailResponse = await doInviteChefEtablissement(chefEtablissement, user);
+      chefEtablissement.set({ metadata: { ...chefEtablissement.metadata, isFirstInvitationPending: false } });
+      await chefEtablissement.save({ fromUser: user });
       if (mailResponse) {
-        invitations.push({ to: email, status: "ok", type: invitationType });
+        invitations.push({ to: chefEtablissement.email, status: "ok", type: chefEtablissement.metadata.invitationType });
       } else {
-        invitations.push({ to: email, status: "notSent", details: mailResponse, type: invitationType });
+        invitations.push({ to: chefEtablissement.email, status: "notSent", details: mailResponse, type: chefEtablissement.metadata.invitationType });
       }
     } catch (error) {
-      invitations.push({ to: email, status: "error", details: error.message, type: invitationType });
+      invitations.push({ to: chefEtablissement.email, status: "error", details: error.message, type: chefEtablissement.metadata.invitationType });
       capture(error, "failed sending invitations inscription");
     }
   }
   return invitations;
 };
 
-export const doInviteChefEtablissement = async (email: string, user: UserDto, invitationType: InvitationType) => {
-  const referent: IReferent = await generateInvitationTokenAndSaveReferent(email, user);
+export const doInviteChefEtablissement = async (chefEtablissement: ReferentDocument, user: UserDto) => {
+  const referent: IReferent = await generateInvitationTokenAndSaveReferent(chefEtablissement, user);
+  const invitationType = referent.metadata.invitationType;
 
   const etablissement: EtablissementDocument = await CleEtablissementModel.findOne({ referentEtablissementIds: referent._id });
   const nbreClasseAValider = await getNumberOfClassesByEtablissement(etablissement);
   const effectifPrevisionnel = await getEstimatedSeatsByEtablissement(etablissement);
 
   let inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte?token=${referent.invitationToken}`;
+  let templateId = SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE;
+
   if (invitationType === InvitationType.CONFIRMATION) {
     inscriptionUrl = `${config.ADMIN_URL}/verifier-mon-compte?token=${referent.invitationToken}`;
-  }
-  let templateId = SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE;
-  if (invitationType === InvitationType.CONFIRMATION) {
     templateId = SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_CONFIRMATION_TEMPLATE;
   }
+
   const toName = `${referent.firstName} ${referent.lastName}`;
   const name_school = `${etablissement.name}`;
   return await sendTemplate(templateId, {
@@ -104,16 +110,13 @@ export const doInviteChefEtablissement = async (email: string, user: UserDto, in
   });
 };
 
-async function generateInvitationTokenAndSaveReferent(email: string, user: UserDto) {
-  const referent = await ReferentModel.findOne({ email });
-  if (!referent) {
-    throw new Error("Referent not found: " + email);
-  }
+async function generateInvitationTokenAndSaveReferent(chefEtablissement: ReferentDocument, user: UserDto) {
   const invitationToken = randomUUID();
-  referent.set({
+  chefEtablissement.set({
     invitationToken,
     invitationExpires: inSevenDays(),
   });
-  await referent.save({ fromUser: user });
-  return referent;
+  //@ts-ignore
+  await chefEtablissement.save({ fromUser: user });
+  return chefEtablissement;
 }

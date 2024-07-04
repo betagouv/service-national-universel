@@ -1,6 +1,6 @@
 import { IAppelAProjet } from "./appelAProjetType";
 import { ReferentModel } from "../../models";
-import { IReferent, ReferentMetadata } from "../../models/referentType";
+import { InvitationType, IReferent, ReferentMetadata } from "../../models/referentType";
 import { ReferentCreatedBy, ROLES, SUB_ROLES } from "snu-lib";
 
 export class AppelAProjetReferentService {
@@ -9,6 +9,7 @@ export class AppelAProjetReferentService {
   async processReferentEtablissement(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
     const referentEtablissement = await ReferentModel.findOne({ email: appelAProjet.referentEtablissement.email });
     const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentEtablissement.email);
+    const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (referentEtablissement) {
       if (!hasAlreadyBeenProcessed) {
@@ -20,15 +21,18 @@ export class AppelAProjetReferentService {
           operation: "none",
         });
       }
+      if (save) {
+        referentEtablissement.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
+        await referentEtablissement.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
+      }
       return referentEtablissement.id;
     }
 
-    const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 };
     let newReferent = {
       ...appelAProjet.referentEtablissement,
       role: ROLES.ADMINISTRATEUR_CLE,
       subRole: SUB_ROLES.referent_etablissement,
-      metadata: referentMetadata,
+      metadata: { ...referentMetadata, invitationType: InvitationType.INSCRIPTION },
     };
     let createdReferent;
     if (save) {
@@ -44,16 +48,20 @@ export class AppelAProjetReferentService {
   async processReferentClasse(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
     const existingReferentClasse = await ReferentModel.findOne({ email: appelAProjet.referentClasse.email });
     const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentClasse.email);
+    const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (existingReferentClasse) {
       if (!hasAlreadyBeenProcessed) {
         this.referents.push({ _id: existingReferentClasse._id, email: existingReferentClasse.email, role: existingReferentClasse.role, operation: "none" });
       }
+      if (save) {
+        existingReferentClasse.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
+        await existingReferentClasse.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
+      }
       return existingReferentClasse._id;
     }
-    const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 };
 
-    const newClasseReferent = { ...appelAProjet.referentClasse, role: ROLES.REFERENT_CLASSE, metadata: referentMetadata };
+    const newClasseReferent = { ...appelAProjet.referentClasse, role: ROLES.REFERENT_CLASSE, metadata: { ...referentMetadata, invitationType: InvitationType.INSCRIPTION } };
     let createdReferent;
     if (save) {
       createdReferent = await ReferentModel.create(newClasseReferent);

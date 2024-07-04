@@ -1,7 +1,5 @@
 {
   "extends": "./build.tsconfig.json",
   "compilerOptions": {
-    "allowJs": true,
-    "moduleDetection": "force"
   }
 }
