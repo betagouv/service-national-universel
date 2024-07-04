@@ -6,7 +6,7 @@ import { applicationBadgeStyle } from "@/utils";
 
 export default function EquivalenceCard({ equivalence }) {
   return (
-    <div className="bg-white rounded-xl border  w-72 md:w-96 flex-none snap-always snap-center first:ml-4 last:mr-4">
+    <div className="bg-white rounded-xl border  w-72 md:w-96 flex-none snap-always snap-center first:ml-4 md:first:ml-0 last:mr-4 md:last:mr-0">
       <p className="h-8 p-2 text-xs bg-gray-50 border-b-[1px] rounded-t-xl">✏️ Vous avez ajouté cet engagement</p>
 
       <div className="h-36 px-3 py-2.5 flex flex-col justify-between">

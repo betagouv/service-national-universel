@@ -37,14 +37,14 @@ export default function HomePhase2() {
           </Link>
         </div>
 
-        <hr className="mt-12 mb-6 md:max-w-5xl mx-auto" />
+        <hr className="mt-12 mb-6 md:max-w-6xl mx-auto" />
       </header>
 
       <MesEngagements />
 
       <Programs />
 
-      <hr className="my-12 md:max-w-5xl mx-[1rem] md:mx-auto" />
+      <hr className="my-12 md:max-w-6xl mx-[1rem] md:mx-auto" />
 
       <FAQ />
     </div>

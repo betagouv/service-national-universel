@@ -7,7 +7,7 @@ import { applicationBadgeStyle } from "@/utils";
 
 export default function ApplicationCard({ application }) {
   return (
-    <div className="bg-white rounded-xl border p-3 w-72 md:w-96 h-44 flex flex-col justify-between flex-none snap-always snap-center first:ml-4 last:mr-4">
+    <div className="bg-white rounded-xl border p-3 w-72 md:w-96 h-44 flex flex-col justify-between flex-none snap-always snap-center first:ml-4 md:first:ml-0 last:mr-4 md:last:mr-0">
       <p className={`text-xs rounded-full px-2 py-1 w-fit ${applicationBadgeStyle[application.status]}`}>{translateApplication(application.status)}</p>
 
       <p className="text-xs leading-5 text-gray-400">{application.mission.structureName}</p>

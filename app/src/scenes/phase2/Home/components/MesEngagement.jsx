@@ -10,7 +10,7 @@ import ApplicationCard from "../../components/ApplicationCard";
 export function MesEngagements() {
   return (
     <section className="bg-gradient-to-b from-white to-gray-100 pb-2">
-      <div className="max-w-5xl px-[1rem] mx-auto my-8 flex justify-between items-center">
+      <div className="max-w-6xl px-[1rem] md:px-3 mx-auto my-8 flex justify-between items-center">
         <h2 className="font-bold m-0">Mes engagements</h2>
         <Link to="/" className="text-blue-600">
           Voir
@@ -59,7 +59,7 @@ function EngagementList() {
     );
   }
   return (
-    <div className="flex gap-4 snap-x snap-mandatory overflow-auto pb-3">
+    <div className="md:max-w-6xl mx-auto flex gap-4 snap-x snap-mandatory overflow-auto pb-3">
       {applications.map((application) => (
         <ApplicationCard key={application._id} application={application} />
       ))}
