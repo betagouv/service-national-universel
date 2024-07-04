@@ -13,6 +13,7 @@ const { sendTemplate } = require("../../sendinblue");
 const config = require("config");
 const { inSevenDays } = require("../../utils");
 const { capture } = require("../../sentry");
+const datefns = require("date-fns");
 
 export interface InvitationResult {
   to: string;
@@ -70,7 +71,6 @@ export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
     role: ROLES.ADMINISTRATEUR_CLE,
     subRole: SUB_ROLES.referent_etablissement,
   });
-  console.log(chefsEtablissementsToSendInvitation);
   const invitations: InvitationResult[] = [];
   for (const chefEtablissement of chefsEtablissementsToSendInvitation) {
     try {
@@ -122,7 +122,7 @@ async function generateInvitationTokenAndSaveReferent(chefEtablissement: Referen
   const invitationToken = randomUUID();
   chefEtablissement.set({
     invitationToken,
-    invitationExpires: inSevenDays(),
+    invitationExpires: datefns.addDays(new Date(), 50),
   });
   //@ts-ignore
   await chefEtablissement.save({ fromUser: user });

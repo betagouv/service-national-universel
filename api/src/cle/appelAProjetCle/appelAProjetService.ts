@@ -3,6 +3,7 @@ import { apiEducation } from "../../services/gouv.fr/api-education";
 import { AppelAProjetReferentService } from "./appelAProjetReferentService";
 import { AppelAProjetEtablissementService } from "./appelAProjetEtablissementService";
 import { AppelAProjetClasseService } from "./appelAProjetClasseService";
+import { ReferentModel } from "../../models";
 
 export class AppelAProjetService {
   public sync = async (save: boolean = false) => {
@@ -24,6 +25,8 @@ export class AppelAProjetService {
       let referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
       let savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save);
       if (!savedEtablissement) {
+        // TODO : remove referentEtablissement ???
+        // console.log("AppelAProjetService.sync() - deleting ", referentEtablissementId);
         console.log("AppelAProjetService.sync() - Etablissement not found: ", appelAProjet.etablissement?.uai);
         continue;
       }

@@ -9,6 +9,7 @@ import { dbConnect, dbClose } from "../helpers/db";
 import { getEtablissementsFromAnnuaire } from "../fixtures/providers/annuaireEtablissement";
 import { CleClasseModel, CleEtablissementModel, ReferentModel } from "../../models";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
+import { InvitationType } from "../../models/referentType";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -207,6 +208,30 @@ describe("Appel A Projet Controller", () => {
       const etablissementAfterSync = await CleEtablissementModel.findOne({ uai: "UAI_42" });
 
       expect([...etablissementAfterSync.referentEtablissementIds]).toEqual([referent?.id]);
+    });
+
+    it("should not change invitationType if run twice", async () => {
+      passport.user.subRole = "god";
+      const responseAppelAProjetMock = Promise.resolve({
+        json: () => {
+          return getMockAppelAProjetDto(false);
+        },
+      });
+
+      fetch.mockImplementation(() => responseAppelAProjetMock);
+      await responseAppelAProjetMock;
+
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send();
+      const referentEtablissementAfterSync = await ReferentModel.findOne({ email: "mail@etablissement.fr" });
+
+      expect(referentEtablissementAfterSync.email).toEqual("mail@etablissement.fr");
+      expect(referentEtablissementAfterSync.metadata.invitationType).toEqual(InvitationType.INSCRIPTION);
+
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send();
+      const referentEtablissementAfterSecondSync = await ReferentModel.findOne({ email: "mail@etablissement.fr" });
+
+      expect(referentEtablissementAfterSecondSync.email).toEqual("mail@etablissement.fr");
+      expect(referentEtablissementAfterSecondSync.metadata.invitationType).toEqual(InvitationType.INSCRIPTION);
     });
   });
 });

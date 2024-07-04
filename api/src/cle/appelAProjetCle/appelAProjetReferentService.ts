@@ -22,7 +22,9 @@ export class AppelAProjetReferentService {
         });
       }
       if (save) {
-        referentEtablissement.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
+        if (!referentEtablissement.metadata.createdBy === ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
+          referentEtablissement.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
+        }
         await referentEtablissement.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
       }
       if (!hasAlreadyBeenProcessed) {
@@ -58,7 +60,9 @@ export class AppelAProjetReferentService {
         this.referents.push({ _id: existingReferentClasse._id, email: existingReferentClasse.email, role: existingReferentClasse.role, operation: "none" });
       }
       if (save) {
-        existingReferentClasse.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
+        if (!existingReferentClasse.metadata.createdBy === ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
+          existingReferentClasse.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
+        }
         await existingReferentClasse.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
       }
       return existingReferentClasse._id;
