@@ -16,6 +16,10 @@ export const statusClassForBadge = (status) => {
       statusClasse = "WAITING_VALIDATION";
       break;
 
+    case STATUS_CLASSE.ASSIGNED:
+      statusClasse = "WAITING_VALIDATION";
+      break;
+
     case STATUS_CLASSE.WITHDRAWN:
       statusClasse = "REFUSED";
       break;

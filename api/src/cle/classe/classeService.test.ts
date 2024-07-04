@@ -420,7 +420,7 @@ describe("ClasseStateManager.compute function", () => {
   it("should transition class to STATUS_CLASSE.OPEN when inscription open", async () => {
     const patchedClasse = {
       ...mockedClasse,
-      status: STATUS_CLASSE.VERIFIED,
+      status: STATUS_CLASSE.ASSIGNED,
     };
 
     const now = new Date();
