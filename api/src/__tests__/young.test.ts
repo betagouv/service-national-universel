@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
 
-const { ROLES, COHORTS } = require("snu-lib");
+const { ROLES, COHORTS, YOUNG_SOURCE } = require("snu-lib");
 
 const fileUtils = require("../utils/file");
 
@@ -18,12 +18,16 @@ const { createMissionHelper } = require("./helpers/mission");
 //young
 const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
-
+//cohort
 const { createCohortHelper } = require("./helpers/cohort");
 const getNewCohortFixture = require("./fixtures/cohort");
-
+//referent
 const { createReferentHelper } = require("./helpers/referent");
 const getNewReferentFixture = require("./fixtures/referent");
+//classe
+const { createClasse } = require("./helpers/classe");
+const { createFixtureClasse } = require("./fixtures/classe");
+const ClasseModel = require("../models/cle/classe");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -40,6 +44,10 @@ jest.mock("../utils", () => ({
   getFile: () => Promise.resolve({ Body: "" }),
   uploadFile: (path, file) => Promise.resolve({ path, file }),
   deleteFile: (path, file) => Promise.resolve({ path, file }),
+}));
+
+jest.mock("../emails", () => ({
+  emit: jest.fn(),
 }));
 
 jest.mock("../cryptoUtils", () => ({
@@ -716,6 +724,31 @@ describe("Young", () => {
       expect(res.status).toBe(403);
 
       passport.user = previous;
+    });
+  });
+  describe("YoungModel post save hook", () => {
+    it("should call StateManager.Classe.compute if source is CLE", async () => {
+      const cohortFixture = getNewCohortFixture({ type: "CLE" });
+      const cohort = await createCohortHelper(cohortFixture);
+      const classe = createFixtureClasse({ seatsTaken: 0, status: "OPEN", cohort: cohort.name });
+      const classeId = (await createClasse(classe))._id;
+      const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId });
+      const young = await createYoungHelper(youngFixture);
+      const updatedYoung = { ...young.toObject(), status: "VALIDATED" };
+      await young.set(updatedYoung).save();
+      const passport = require("passport");
+      const previous = passport.user.role;
+      passport.user.role = ROLES.ADMIN;
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}`).send({
+        status: "VALIDATED",
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe("VALIDATED");
+
+      const updatedClasse = await ClasseModel.findById(classeId);
+      expect(updatedClasse.seatsTaken).toBe(1);
+      passport.user.role = previous;
     });
   });
 });
