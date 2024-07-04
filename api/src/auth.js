@@ -25,6 +25,8 @@ const {
   departmentToAcademy,
   DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS,
   DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS,
+  isAdminCle,
+  isReferentClasse,
 } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
@@ -351,6 +353,14 @@ class Auth {
         await user.save();
         if (date > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: date } });
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
+
+      if (user.invitationToken && (isAdminCle(user) || isReferentClasse(user))) {
+        return res.status(200).send({
+          ok: true,
+          code: "VERIFICATION_REQUIRED",
+          redirect: `/verifier-mon-compte?token=${user.invitationToken}`,
+        });
       }
 
       const shouldUse2FA = async () => {
