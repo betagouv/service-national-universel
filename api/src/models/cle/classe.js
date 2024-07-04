@@ -87,7 +87,7 @@ const Schema = new mongoose.Schema({
     type: Number,
     default: 0,
     documentation: {
-      description: "Nombre de places prises de la classe",
+      description: "Nombre de places prises de la classe = nombre d'élèves statut validé",
     },
   },
 
@@ -262,10 +262,6 @@ Schema.virtual("ligne", {
   localField: "ligneId",
   foreignField: "_id",
   justOne: true,
-});
-
-Schema.virtual("isFull").get(function () {
-  return this.totalSeats - this.seatsTaken <= 0;
 });
 
 Schema.virtual("user").set(function (user) {
