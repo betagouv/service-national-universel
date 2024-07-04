@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
-import { fetchPrograms } from "../repo";
+import { fetchPrograms } from "../../repo";
 
 // TODO: put in cellar instead of asset folder: dynamic content should not be in the bundle
 const imagePath = "../../../../assets/programmes-engagement";

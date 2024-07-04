@@ -10,6 +10,7 @@ import Environment from "../../../assets/mission-domaines/environment";
 import Securite from "../../../assets/mission-domaines/securite";
 import Culture from "../../../assets/mission-domaines/culture";
 import PreparationMilitaire from "../../../assets/mission-domaines/preparation-militaire";
+import Equivalence from "@/assets/mission-domaines/equivalence";
 
 const icon = {
   CITIZENSHIP: <Citoyennete className="text-white h-8 w-8" />,
@@ -22,8 +23,13 @@ const icon = {
   SOLIDARITY: <Solidarite className="text-white h-8 w-8" />,
   SPORT: <Sport className="text-white h-8 w-8" />,
   PREPARATION_MILITARY: <PreparationMilitaire className="text-white h-8 w-8" />,
+  EQUIVALENCE: <Equivalence className="text-white h-8 w-8" />,
 };
 
-export default function IconDomain({ domain }) {
-  return <div className="flex items-center rounded-lg w-8 h-12 bg-[#212B44]">{icon[domain] || <img src={Img2} className="h-8 w-8" />}</div>;
+export default function IconDomain({ domain, disabled = false }) {
+  return (
+    <div className={`flex items-center justify-center rounded-lg w-8 h-16 ${disabled ? "bg-gray-300" : "bg-[#212B44]"}`}>
+      {icon[domain] || <img src={Img2} className="h-8 w-8" />}
+    </div>
+  );
 }
