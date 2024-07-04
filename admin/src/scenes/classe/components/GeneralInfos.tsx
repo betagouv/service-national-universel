@@ -56,9 +56,9 @@ export default function GeneralInfos({
     value: CLE_FILIERE_LIST[value],
     label: CLE_FILIERE_LIST[value],
   }));
-  const gradeOptions = Object.keys(CLE_GRADE_LIST).map((value) => ({
-    value: CLE_GRADE_LIST[value],
-    label: translateGrade(CLE_GRADE_LIST[value]),
+  const gradeOptions = CLE_GRADE_LIST.filter((value) => value !== "CAP").map((value) => ({
+    value: value,
+    label: translateGrade(value),
   }));
   const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
     value: TYPE_CLASSE_LIST[value],
