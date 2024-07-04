@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { FiFolderPlus } from "react-icons/fi";
-import { HiOutlineChartSquareBar, HiOutlineAdjustments } from "react-icons/hi";
+import { HiHome, HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
@@ -170,7 +170,7 @@ export default function List() {
     <Page>
       <Header
         title="Plan de transport"
-        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Plan de transport" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Plan de transport" }]}
         actions={
           <SelectCohort
             cohort={cohort}
@@ -267,8 +267,8 @@ export default function List() {
                   { label: "Nom (Z > A)", field: "busId.keyword", order: "desc" },
                 ]}
                 selectedFilters={selectedFilters}
-                paramData={paramData}
-                setParamData={setParamData}
+                pagination={paramData}
+                onPaginationChange={setParamData}
               />
             </div>
 

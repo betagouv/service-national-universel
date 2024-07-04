@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { fr } from "@codegouvfr/react-dsfr";
-import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
+import Stepper from "./components/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
@@ -35,14 +35,11 @@ export default function email({ user }) {
 
   return (
     <Section>
-      <div className="m-auto max-w-[587px]">
-        <Stepper currentStep={2} stepCount={5} title="Création d’un compte : adresse email" nextTitle="Code d'activation" />
-      </div>
+      <Stepper currentStep={2} stepCount={5} title="Création d’un compte : adresse email" nextTitle="Code d'activation" />
       <form onSubmit={submit}>
         <Container className="flex flex-col gap-8">
           <div className="flex items-start justify-between">
             <h1 className="text-2xl font-bold">Renseignez l'adresse email de votre établissement</h1>
-            <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
           </div>
           <hr className="p-1" />
           <div className="flex gap-6">

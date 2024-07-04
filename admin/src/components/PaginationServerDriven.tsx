@@ -6,8 +6,18 @@ import { getPages, sizeOptions } from "../utils/pagination.utils";
  * Il gère les données de pagination en provenance du serveur.
  */
 import React from "react";
+import { Select } from "@snu/ds/admin";
 
-export default function PaginationServerDriven({ currentPageNumber, setCurrentPageNumber, itemsCountTotal, itemsCountOnCurrentPage, size = 10, setSize }) {
+interface Props {
+  currentPageNumber: number;
+  setCurrentPageNumber: (page: number) => void;
+  itemsCountTotal: number;
+  itemsCountOnCurrentPage: number;
+  size?: number;
+  setSize?: (size: number) => void;
+}
+
+export default function PaginationServerDriven({ currentPageNumber, setCurrentPageNumber, itemsCountTotal, itemsCountOnCurrentPage, size = 10, setSize }: Props) {
   const displayedPages = 3;
   const itemsCountMax = 10000;
   let itemCountToDisplay = 0;
@@ -22,9 +32,9 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
 
   const pages = getPages(lastDisplayItem, firstDisplayPage, lastDisplayPage, itemCountToDisplay, lastPage, size);
 
-  function checkSize(newSize) {
+  function checkSize(newSize: number) {
     if (currentPageNumber * newSize > itemCountToDisplay) setCurrentPageNumber(Math.floor(itemCountToDisplay / newSize) - 1);
-    setSize(newSize);
+    setSize?.(newSize);
   }
 
   function goToPrevious() {
@@ -48,13 +58,19 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
     <div className={"flex items-center justify-between gap-1 px-4 pt-3"}>
       {setSize ? (
         <div className="text-xs flex gap-2 justify-center items-center text-[#242526]">
-          <select className="min-w-[56px] min-h-[32px] pl-2 border text-gray-600 rounded-md pb-0.5" value={size} onChange={(e) => checkSize(parseInt(e.target.value))}>
-            {sizeOptions.map((item) => (
-              <option key={item.label} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
+          <Select
+            placeholder="par page"
+            defaultValue={sizeOptions[0].value}
+            options={sizeOptions}
+            value={sizeOptions.find((option) => Number(option.value) === size) || null}
+            onChange={(option) => {
+              checkSize(Number(option.value));
+            }}
+            size="sm"
+            controlCustomStyle={{
+              boxShadow: "none",
+            }}
+          />
           Éléments par page
         </div>
       ) : null}
@@ -132,7 +148,7 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
 
 function PageButton({ page, setCurrentPageNumber, active, lastPage, isLast = false }) {
   const getClass = () => {
-    let classTab = [];
+    const classTab: string[] = [];
     active ? classTab.push("font-bold bg-gray-100 text-gray-900") : classTab.push("font-normal"); // la page est active
     page !== lastPage && !isLast ? classTab.push("border-r border-solid border-gray-200") : null; // page par defaut
     page === 0 && active ? classTab.push("rounded-l-md") : null; //premiere page active

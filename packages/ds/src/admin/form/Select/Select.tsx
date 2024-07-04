@@ -1,4 +1,5 @@
 import React, { ReactElement, useEffect, useState } from "react";
+import cx from "classnames";
 import Select, {
   components,
   GroupBase,
@@ -11,7 +12,10 @@ import { CSSObject } from "@emotion/react";
 
 import useReactSelectTheme from "./theme";
 
-export type SelectOption = { value: string; label: string | ReactElement };
+export type SelectOption = {
+  value: string | number;
+  label: string | ReactElement;
+};
 
 export type SelectProps = {
   // Fix type to allow only string and string[]
@@ -44,12 +48,13 @@ export type SelectProps = {
   noOptionsMessage?: string;
   loadOptions?: (
     inputValue: string,
-    callback: (options: GroupBase<string>[]) => void
+    callback: (options: GroupBase<string>[]) => void,
   ) => void | Promise<GroupBase<string>[]>;
   defaultOptions?:
     | boolean
     | GroupBase<string>[]
     | (() => Promise<GroupBase<string>[]>);
+  size?: "sm" | "lg";
 };
 
 export default function SelectButton(props: SelectProps) {
@@ -157,7 +162,7 @@ export default function SelectButton(props: SelectProps) {
       };
 
   return (
-    <div className={"flex flex-col gap-3 border-0 " + className}>
+    <div className={cx("flex flex-col gap-3 border-0", className)}>
       <div className="relative">
         <label
           className={`absolute top-1 left-3 z-10 text-xs font-normal ${

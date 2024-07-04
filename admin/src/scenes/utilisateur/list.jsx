@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
+import { HiHome } from "react-icons/hi";
 
-import AdminIcon from "@/components/drawer/icons/Admin";
 import dayjs from "@/utils/dayjs.utils";
 import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
 import { BsDownload } from "react-icons/bs";
@@ -97,7 +97,7 @@ export default function List() {
       <Header
         title={[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Liste de mes contacts" : "Utilisateurs"}
         breadcrumb={[
-          { title: <AdminIcon className="scale-[65%]" /> },
+          { title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" },
           { title: [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Mes contacts" : "Utilisateurs" },
         ]}
         actions={[
@@ -178,8 +178,8 @@ export default function List() {
                 { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
               ]}
               selectedFilters={selectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
+              pagination={paramData}
+              onPaginationChange={setParamData}
             />
           </div>
           <div className="mt-2 flex flex-row flex-wrap items-center px-4">
