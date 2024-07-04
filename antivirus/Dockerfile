@@ -38,6 +38,9 @@ RUN chmod +x /service-national-universel/antivirus/docker_start.sh
 LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel" \
     org.opencontainers.image.description="This image provides a consistent and reproducible environment for the backend, ensuring it deploys faster and runs the same way regardless of the deployment environment."
 
+ARG RELEASE=""
+ENV RELEASE=${RELEASE}
+
 EXPOSE $PORT
 
 CMD ["/service-national-universel/antivirus/docker_start.sh"]

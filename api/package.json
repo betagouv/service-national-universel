@@ -21,7 +21,10 @@
     "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "doc": "node ./src/utils/generate-models-documentation.js",
     "clean": "rm -fr node_modules .turbo",
-    "build": "tsc -b ./build.tsconfig.json"
+    "build": "tsc -b ./build.tsconfig.json",
+    "migrate-status": "migrate-mongo status",
+    "migrate-create": "migrate-mongo create",
+    "migrate-down": "tsx node_modules/.bin/migrate-mongo down"
   },
   "author": "SELEGO",
   "license": "MIT",
@@ -29,7 +32,7 @@
     "@elastic/elasticsearch": "^7.14.0",
     "@fast-csv/format": "^5.0.0",
     "@godaddy/terminus": "^4.12.1",
-    "@selego/mongoose-elastic": "^1.7.1",
+    "@selego/mongoose-elastic": "1.7.1",
     "@sentry/integrations": "^7.58.1",
     "@sentry/node": "^7.92.0",
     "@sentry/profiling-node": "^1.2.1",
@@ -54,6 +57,7 @@
     "joi": "^17.7.0",
     "jsonwebtoken": "^9.0.1",
     "logfmt": "^1.4.0",
+    "migrate-mongo": "^11.0.0",
     "mime-types": "^2.1.35",
     "mongoose": "^5.13.9",
     "mongoose-patch-history": "^2.0.0",

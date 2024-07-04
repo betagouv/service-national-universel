@@ -20,6 +20,7 @@ const { getAllPdfTemplates } = require("./utils/pdf-renderer");
 const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
+const { runMigrations } = require("./migration");
 
 async function runCrons() {
   initSentry();
@@ -41,6 +42,7 @@ async function runAPI() {
   }
 
   await initDB();
+  await runMigrations();
 
   /*
       Download all certificate templates when instance is starting,

@@ -11,19 +11,37 @@ describe("demarcheSimplifieeProvider", () => {
     expect(result).toEqual(expectedOutput);
   });
 
+  it("should return an empty string and log a warning if no UAI is found", () => {
+    const input = "Lycée, Ville ()";
+    const expectedOutput = "";
+
+    console.warn = jest.fn();
+
+    const result = getUaiFromString(input);
+
+    expect(result).toEqual(expectedOutput);
+    expect(console.warn).toHaveBeenCalledWith("getUaiFromString() - no UAI found in string: ", "Lycée, Ville ()");
+  });
+
   it("should return the right data", () => {
     const mockAppelAProjetDto = getMockAppelAProjetDto();
     const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto);
 
     const expectedAppelAProjet = [
       {
-        etablissement: { uai: "SOME_UAI", email: "mail@etablissement.fr" },
+        etablissement: { uai: "SOME_UAI", nameAndCommune: "Un nom de lycée, Grenoble (SOME_UAI)" },
+        referentEtablissement: { email: "mail@etablissement.fr" },
         classe: {
-          referent: { nom: "NOM_REFERENT", prenom: "PRENOM_REFERENT", email: "email@referent.fr" },
-          nom: "SNU 2024 2025",
-          nombreElevesPrevus: "42",
-          coloration: "Résilience et prévention des risques",
-          trimestre: "Au 3ème trimestre (séjour réalisé en avril, mai ou juin 2025).",
+          name: "SNU 2024 2025",
+          coloration: "RESILIENCE",
+          estimatedSeats: 42,
+          trimester: "Au 3ème trimestre (séjour réalisé en avril, mai ou juin 2025).",
+          type: "GROUP",
+        },
+        referentClasse: {
+          lastName: "NOM_REFERENT",
+          firstName: "PRENOM_REFERENT",
+          email: "email@referent.fr",
         },
       },
     ];

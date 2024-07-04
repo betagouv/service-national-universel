@@ -1,13 +1,19 @@
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/young.service";
 import ClasseModel from "../../models/cle/classe";
 import YoungModel from "../../models/young";
-import { YOUNG_STATUS, ROLES, SUB_ROLES,LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib";
+import { STATUS_CLASSE, STATUS_PHASE1_CLASSE, YOUNG_STATUS, ROLES, SUB_ROLES, LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib";
 
 type User = {
   role: (typeof ROLES)[keyof typeof ROLES];
   structureId?: string;
   subRole?: string;
 };
+
+import { EtablissementDocument, IEtablissement } from "../../models/cle/etablissementType";
+import { ClasseDocument, IClasse } from "../../models/cle/classeType";
+import { CleClasseModel } from "../../models";
+import { mapRegionToTrigramme } from "../../services/regionService";
+const crypto = require("crypto");
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
@@ -62,3 +68,31 @@ export function canEditTotalSeats(user: User) {
   const now = new Date();
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_REF_CLASSE;
 }
+
+export const buildUniqueClasseId = (etablissement: IEtablissement, classe: Pick<IClasse, "name" | "coloration">): string => {
+  const trigrammeRegion = mapRegionToTrigramme(etablissement.region) || "REG";
+  const departmentNumber = `0${(etablissement.zip || "DP")?.substring(0, 2)}`;
+  const academy = (etablissement.academy || "A")?.substring(0, 1);
+  let hash = crypto
+    .createHash("sha256")
+    .update(`${classe?.name}${classe?.coloration}` || "NAME")
+    .digest("hex");
+  if (!classe?.name || !classe?.coloration) {
+    hash = "NO_UID";
+  }
+  const subHash = hash?.toString()?.substring(0, 6)?.toUpperCase();
+  return `${trigrammeRegion}${academy}${departmentNumber}-${subHash}`;
+};
+
+export const findClasseByUniqueKeyAndUniqueId = async (uniqueKey: string | undefined | null, uniqueId: string): Promise<ClasseDocument | null> => {
+  return await CleClasseModel.findOne({ uniqueKey, uniqueId });
+};
+
+export const getNumberOfClassesByEtablissement = async (etablissement: EtablissementDocument): Promise<number> => {
+  return await CleClasseModel.countDocuments({ etablissementId: etablissement._id });
+};
+
+export const getEstimatedSeatsByEtablissement = async (etablissement: EtablissementDocument): Promise<number> => {
+  const classes = await CleClasseModel.find({ etablissementId: etablissement._id });
+  return classes.reduce((classeNumberAcc: number, classe: ClasseDocument) => classeNumberAcc + classe.estimatedSeats, 0);
+};

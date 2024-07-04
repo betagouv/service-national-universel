@@ -51,7 +51,7 @@ resource "scaleway_container" "api" {
   port            = 8080
   cpu_limit       = 1024
   memory_limit    = 2048
-  min_scale       = 4
+  min_scale       = 0
   max_scale       = 20
   timeout         = 60
   max_concurrency = 25
@@ -82,7 +82,7 @@ resource "scaleway_container" "admin" {
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
-  min_scale       = 1
+  min_scale       = 0
   max_scale       = 20
   timeout         = 60
   max_concurrency = 50
@@ -108,7 +108,7 @@ resource "scaleway_container" "app" {
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
-  min_scale       = 1
+  min_scale       = 0
   max_scale       = 20
   timeout         = 60
   max_concurrency = 50
@@ -134,16 +134,21 @@ resource "scaleway_container" "antivirus" {
   port            = 8089
   cpu_limit       = 1024
   memory_limit    = 4096
-  min_scale       = 1
+  min_scale       = 0
   max_scale       = 5
   timeout         = 60
   max_concurrency = 50
-  privacy         = "private"
+  privacy         = "public"
   protocol        = "http1"
   deploy          = true
 
   environment_variables = {
     "APP_NAME" = "antivirus"
+  }
+  secret_environment_variables = {
+    "SENTRY_URL"     = local.secrets.SENTRY_URL
+    "SECRET_API_KEY" = local.secrets.API_ANTIVIRUS_KEY
+    "JWT_SECRET"     = local.secrets.JWT_SECRET
   }
 }
 
@@ -159,7 +164,7 @@ resource "scaleway_container" "crons" {
   port           = 8080
   cpu_limit      = 1024
   memory_limit   = 1024
-  min_scale      = 1
+  min_scale      = 0
   max_scale      = 1
   privacy        = "private"
   protocol       = "http1"
@@ -167,7 +172,7 @@ resource "scaleway_container" "crons" {
 
   environment_variables = {
     "NODE_ENV"       = "production"
-    "RUN_CRONS"      = "true"
+    "RUN_CRONS"      = "false"
   }
 
   secret_environment_variables = {

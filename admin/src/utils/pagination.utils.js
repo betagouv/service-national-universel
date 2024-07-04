@@ -14,8 +14,8 @@ export function getPages(lastDisplayItem, firstDisplayPage, lastDisplayPage, ite
 }
 
 export const sizeOptions = [
-  { label: "10", value: 10 },
-  { label: "20", value: 20 },
-  { label: "40", value: 40 },
-  { label: "50", value: 50 },
+  { label: "10", value: "10" },
+  { label: "20", value: "20" },
+  { label: "40", value: "40" },
+  { label: "50", value: "50" },
 ];

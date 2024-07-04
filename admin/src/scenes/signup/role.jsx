@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { fr } from "@codegouvfr/react-dsfr";
-import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
+import Stepper from "./components/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Section, Container } from "@snu/ds/dsfr";
 import { ROLES, SUB_ROLES, translate } from "snu-lib";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
+import Loader from "@/components/Loader";
 
 export default function role() {
   const history = useHistory();
@@ -74,17 +75,14 @@ export default function role() {
     );
   };
 
-  if (!user) return <div>Chargement...</div>;
+  if (!user) return <Loader />;
 
   return (
     <Section>
-      <div className="m-auto max-w-[587px]">
-        <Stepper currentStep={1} stepCount={5} title="Création d’un compte : rôle et fonction" nextTitle="Adresse email" />
-      </div>
+      <Stepper currentStep={1} stepCount={5} title="Création d’un compte : rôle et fonction" nextTitle="Adresse email" />
       <Container className="flex flex-col gap-8">
         <div className="flex items-start justify-between">
           <h1 className="text-2xl font-bold">Confirmez votre rôle et votre fonction</h1>
-          <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
         </div>
         <hr className="p-1" />
         {displayText()}

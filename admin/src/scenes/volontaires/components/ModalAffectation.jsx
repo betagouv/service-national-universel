@@ -13,7 +13,7 @@ import { MultiLine } from "../../../components/list";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import api from "../../../services/api";
-import { debounce, formatStringDateWithDayTimezoneUTC, translate } from "../../../utils";
+import { debounce, formatDateFR, getZonedDate, translate } from "../../../utils";
 import RightArrow from "./RightArrow";
 import MeetingInfo from "./phase1/MeetingInfo";
 
@@ -527,13 +527,13 @@ const HitPdr = ({ hit, onSend, data, young }) => {
           <div className="text-gray-500">
             Départ :{" "}
             <span className=" text-gray-900">
-              {formatStringDateWithDayTimezoneUTC(data?.ligneBus.departuredDate)} {data?.ligneToPoint.departureHour}
+              {formatDateFR(getZonedDate(data?.ligneBus.departuredDate))} {data?.ligneToPoint.departureHour}
             </span>
           </div>
           <div className=" text-gray-500">
             Retour :{" "}
             <span className=" text-gray-900">
-              {formatStringDateWithDayTimezoneUTC(data?.ligneBus?.returnDate)} {data?.ligneToPoint.returnHour}
+              {formatDateFR(getZonedDate(data?.ligneBus?.returnDate))} {data?.ligneToPoint.returnHour}
             </span>
           </div>
         </div>

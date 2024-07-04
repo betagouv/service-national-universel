@@ -1,12 +1,14 @@
 import passport from "passport";
 import express, { Response } from "express";
 import { UserRequest } from "../../controllers/request";
-import { syncAppelAProjet } from "./appelAProjetService";
+import { AppelAProjetService } from "./appelAProjetService";
 import { ERRORS } from "../../utils";
 import { isSuperAdmin } from "snu-lib";
 import { capture } from "../../sentry";
 import { generateCSVStream } from "../../services/fileService";
 import archiver from "archiver";
+import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
+import { FeatureFlagName } from "../../models/featureFlagType";
 
 const router = express.Router();
 router.post(
@@ -20,19 +22,22 @@ router.post(
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    if (!(await isFeatureAvailable(FeatureFlagName.SYNC_APPEL_A_PROJET_CLE))) {
+      return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
+    }
     try {
-      const results: { name: string; data: any[] }[] = await syncAppelAProjet();
+      const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync();
 
       const archive = archiver("zip", { zlib: { level: 9 } });
       archive.pipe(res);
 
       for (const { name, data } of results) {
         const stream = generateCSVStream(data);
-        archive.append(stream, { name: `${name}.csv` });
+        archive.append(stream, { name: `${name}-simulation.csv` });
       }
-
+      const fileName = `appelAProjet-simulate-${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}.zip`;
       res.setHeader("Content-Type", "application/zip");
-      res.setHeader("Content-Disposition", `attachment; filename=appelAProjet-simulate-${new Date().toISOString()}.zip`);
+      res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
       archive.finalize();
     } catch (e) {
       capture(e);
@@ -53,10 +58,23 @@ router.post(
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    if (!(await isFeatureAvailable(FeatureFlagName.SYNC_APPEL_A_PROJET_CLE))) {
+      return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
+    }
     try {
-      // referent
-      // etablissement
-      // classe
+      const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync(true);
+
+      const archive = archiver("zip", { zlib: { level: 9 } });
+      archive.pipe(res);
+
+      for (const { name, data } of results) {
+        const stream = generateCSVStream(data);
+        archive.append(stream, { name: `${name}-real.csv` });
+      }
+      const fileName = `appelAProjet-real-${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}.zip`;
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+      archive.finalize();
     } catch (e) {
       capture(e);
       res.status(500).json({ error: e.message });
