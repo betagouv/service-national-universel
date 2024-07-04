@@ -464,6 +464,22 @@ function isReferentOrAdmin(user) {
   return isAdmin(user) || isReferent(user);
 }
 
+function isAdminCle(user) {
+  return user?.role === ROLES.ADMINISTRATEUR_CLE;
+}
+
+function isChefEtablissement(user) {
+  return isAdminCle(user) && user?.subRole === SUB_ROLES.referent_etablissement;
+}
+
+function isCoordinateurEtablissement(user) {
+  return isAdminCle(user) && user?.subRole === SUB_ROLES.coordinateur_cle;
+}
+
+function isReferentClasse(user) {
+  return user?.role === ROLES.REFERENT_CLASSE;
+}
+
 const isTemporaryAffected = (young) => young?.statusPhase1 === "WAITING_AFFECTATION" && ["AFFECTED", "WAITING_LIST"].includes(young?.statusPhase1Tmp);
 
 const FORCE_DISABLED_ASSIGN_COHESION_CENTER = false;
@@ -1065,6 +1081,10 @@ export {
   canCreateTags,
   isSuperAdmin,
   isAdmin,
+  isAdminCle,
+  isChefEtablissement,
+  isCoordinateurEtablissement,
+  isReferentClasse,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,

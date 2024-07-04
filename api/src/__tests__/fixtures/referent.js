@@ -1,7 +1,7 @@
 const { fakerFR: faker } = require("@faker-js/faker");
 const { ROLES } = require("snu-lib");
 
-function getNewReferentFixture() {
+function getNewReferentFixture(object = {}) {
   return {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
@@ -13,6 +13,8 @@ function getNewReferentFixture() {
     mobile: faker.phone.number(),
     role: ROLES.ADMIN,
     acceptCGU: "true",
+    lastLoginAt: faker.date.past(),
+    ...object,
   };
 }
 
