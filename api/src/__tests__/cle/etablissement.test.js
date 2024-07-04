@@ -1,14 +1,14 @@
 const request = require("supertest");
-const getAppHelper = require("./helpers/app");
-const { createEtablissement } = require("./helpers/etablissement");
-const { createFixtureEtablissement } = require("./fixtures/etablissement");
-const { createClasse } = require("./helpers/classe");
-const { createFixtureClasse } = require("./fixtures/classe");
+const getAppHelper = require("../helpers/app");
+const { createEtablissement } = require("../helpers/etablissement");
+const { createFixtureEtablissement } = require("../fixtures/etablissement");
+const { createClasse } = require("../helpers/classe");
+const { createFixtureClasse } = require("../fixtures/classe");
 const { ROLES } = require("snu-lib");
 const passport = require("passport");
-const { dbConnect, dbClose } = require("./helpers/db");
+const { dbConnect, dbClose } = require("../helpers/db");
 const { ObjectId } = require("mongoose").Types;
-const { CleClasseModel } = require("../models");
+const { CleClasseModel } = require("../../models");
 
 beforeAll(dbConnect);
 afterAll(dbClose);
