@@ -3,7 +3,7 @@ const request = require("supertest");
 const { ROLES, SUB_ROLES } = require("snu-lib");
 
 const getAppHelper = require("./helpers/app");
-const getNewReferentFixture = require("./fixtures/referent");
+const { getNewReferentFixture } = require("./fixtures/referent");
 const getNewStructureFixture = require("./fixtures/structure");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 const { dbConnect, dbClose } = require("./helpers/db");

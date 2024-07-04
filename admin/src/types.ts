@@ -10,6 +10,9 @@ export type User = {
   subRole?: string;
   firstName: string;
   lastName: string;
+  phone?: string;
+  email?: string;
+  emailWaitingValidation?: string;
   _id: string;
 };
 

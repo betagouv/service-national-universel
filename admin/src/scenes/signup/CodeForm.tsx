@@ -1,66 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import { fr } from "@codegouvfr/react-dsfr";
-import Stepper from "./components/Stepper";
+import { toastr } from "react-redux-toastr";
+
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { toastr } from "react-redux-toastr";
 
 import { translate } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
-import api from "@/services/api";
-import Loader from "@/components/Loader";
 
-export default function code() {
+import api from "@/services/api";
+
+import Stepper from "./components/Stepper";
+import { User } from "@/types";
+
+interface Props {
+  user: User;
+  reinscription: boolean;
+  invitationToken: string;
+}
+
+export default function CodeForm({ user, reinscription, invitationToken }: Props) {
   const history = useHistory();
   const { search } = useLocation();
-  const [user, setUser] = React.useState();
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const invitationToken = urlParams.get("token");
+  const urlParams = new URLSearchParams(search);
   const codeUrl = urlParams.get("code");
-  const [code, setCode] = useState(codeUrl);
 
-  const submit = async (e) => {
+  const [code, setCode] = useState(codeUrl || "");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await api.post(`/cle/referent-signup/confirm-email`, { code, invitationToken });
-      if (!response.ok) return toastr.error(response.message || translate(response.code));
+      if (!response.ok) return toastr.error(response.message || translate(response.code), "");
 
       history.push(`/creer-mon-compte/informations${search}`);
     } catch (error) {
       console.log(error);
-      if (error?.message) return toastr.error(error?.message);
+      if (error?.message) return toastr.error(error?.message, "");
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!invitationToken) {
-          history.push("/auth");
-          return toastr.error("Votre lien d'invitation a expiré");
-        }
-        const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
-        if (ok && data) {
-          setUser(data.referent);
-        }
-      } catch (error) {
-        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") {
-          history.push("/auth");
-          return toastr.error("Votre lien d'invitation a expiré");
-        }
-      }
-    })();
-  }, []);
-
-  if (!user) return <Loader />;
-
   return (
     <Section>
-      <Stepper currentStep={3} stepCount={5} title="Création d’un compte : code d'activation" nextTitle="Informations" />
-      <form onSubmit={submit}>
+      {!reinscription && <Stepper currentStep={3} stepCount={5} title="Création d’un compte : code d'activation" nextTitle="Informations" />}
+      <form onSubmit={handleSubmit}>
         <Container className="flex flex-col gap-8">
           <div className="flex items-start justify-between">
             <h1 className="text-2xl font-bold">Renseignez votre code d'activation</h1>
@@ -102,7 +87,10 @@ export default function code() {
             </ul>
           </div>
           <hr className="p-1" />
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button type="button" priority="secondary" onClick={() => history.goBack()}>
+              Précédent
+            </Button>
             <Button disabled={!code} type="submit">
               Continuer
             </Button>

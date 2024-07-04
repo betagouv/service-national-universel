@@ -1,42 +1,48 @@
 import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { fr } from "@codegouvfr/react-dsfr";
-import Stepper from "./components/Stepper";
+
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 
-import { Section, Container } from "@snu/ds/dsfr";
-import api from "@/services/api";
 import { patternEmailAcademy, translate } from "snu-lib";
+import { Section, Container } from "@snu/ds/dsfr";
 
-export default function email({ user }) {
+import api from "@/services/api";
+
+import Stepper from "./components/Stepper";
+import { User } from "@/types";
+
+interface Props {
+  user: User;
+  reinscription: boolean;
+  invitationToken: string;
+}
+
+export default function EmailForm({ user, reinscription, invitationToken }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
   const [email, setEmail] = useState(user.email);
   const [confirmEmail, setConfirmEmail] = useState("");
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const invitationToken = urlParams.get("token");
-
-  const submit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { ok, data, code, message } = await api.put(`/cle/referent-signup/request-confirmation-email`, { email, confirmEmail, invitationToken });
-      if (!ok) return toastr.error(message || translate(code));
+      const { ok, code, message } = await api.put(`/cle/referent-signup/request-confirmation-email`, { email, confirmEmail, invitationToken });
+      if (!ok) return toastr.error(message || translate(code), "");
       history.push(`/creer-mon-compte/code${search}`);
     } catch (error) {
       console.log(error);
-      if (error?.message) return toastr.error(error?.message);
+      if (error?.message) return toastr.error(error?.message, "");
     }
   };
 
   return (
     <Section>
-      <Stepper currentStep={2} stepCount={5} title="Création d’un compte : adresse email" nextTitle="Code d'activation" />
-      <form onSubmit={submit}>
+      {!reinscription && <Stepper currentStep={2} stepCount={5} title="Création d’un compte : adresse email" nextTitle="Code d'activation" />}
+      <form onSubmit={handleSubmit}>
         <Container className="flex flex-col gap-8">
           <div className="flex items-start justify-between">
             <h1 className="text-2xl font-bold">Renseignez l'adresse email de votre établissement</h1>
@@ -75,13 +81,13 @@ export default function email({ user }) {
             </div>
           </div>
           <div>
-            <Alert description="Il doit s'agir d'une adresse email académique." severity="info" small />
-          </div>
-          <div>
             <Alert description="Nous allons vous envoyer un code pour activer votre adresse email renseignée ci-dessus." severity="info" small />
           </div>
           <hr className="p-1" />
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button type="button" priority="secondary" onClick={() => history.goBack()}>
+              Précédent
+            </Button>
             <Button type="submit">Continuer</Button>
           </div>
         </Container>
