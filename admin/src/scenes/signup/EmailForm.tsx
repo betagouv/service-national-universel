@@ -7,24 +7,24 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 
 import { patternEmailAcademy, translate } from "snu-lib";
+import { ReferentDto } from "snu-lib/src/dto";
 import { Section, Container } from "@snu/ds/dsfr";
 
 import api from "@/services/api";
 
 import Stepper from "./components/Stepper";
-import { User } from "@/types";
 
 interface Props {
-  user: User;
+  referent: ReferentDto;
   reinscription: boolean;
   invitationToken: string;
 }
 
-export default function EmailForm({ user, reinscription, invitationToken }: Props) {
+export default function EmailForm({ referent, reinscription, invitationToken }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
-  const [email, setEmail] = useState(user.email);
+  const [email, setEmail] = useState(referent.email);
   const [confirmEmail, setConfirmEmail] = useState("");
 
   const handleSubmit = async (e) => {

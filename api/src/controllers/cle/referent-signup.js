@@ -31,10 +31,11 @@ router.get("/token/:token", async (req, res) => {
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let etablissement;
-    if (isAdminCle(referent)) {
+    if (isCoordinateurEtablissement(referent)) {
       etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
-    }
-    if (referent.role === ROLES.REFERENT_CLASSE) {
+    } else if (isChefEtablissement(referent)) {
+      etablissement = await EtablissementModel.findOne({ referentEtablissementIds: referent._id });
+    } else if (referent.role === ROLES.REFERENT_CLASSE) {
       const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       etablissement = await EtablissementModel.findById(classe.etablissementId);

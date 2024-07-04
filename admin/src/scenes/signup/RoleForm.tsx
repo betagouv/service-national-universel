@@ -4,19 +4,19 @@ import { useHistory, useLocation } from "react-router-dom";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 
 import { translate, isChefEtablissement, isCoordinateurEtablissement, isAdminCle } from "snu-lib";
+import { ReferentDto } from "snu-lib/src/dto";
 import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
 import { Section, Container } from "@snu/ds/dsfr";
 
 import Stepper from "./components/Stepper";
-import { User } from "@/types";
 
 interface Props {
-  user: User;
-  etablissement?: EtablissementDto & { fullName?: string; postcode?: string };
+  referent: ReferentDto;
+  etablissement?: EtablissementDto;
   reinscription: boolean;
 }
 
-export default function RoleForm({ user, etablissement, reinscription }: Props) {
+export default function RoleForm({ referent, etablissement, reinscription }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
@@ -28,28 +28,28 @@ export default function RoleForm({ user, etablissement, reinscription }: Props) 
           <h1 className="text-2xl font-bold">Confirmez votre rôle et votre fonction</h1>
         </div>
         <hr className="p-1" />
-        {isChefEtablissement(user) && (
+        {isChefEtablissement(referent) && (
           <p>
             <span>
-              Vous allez créez un compte {translate(user.role)} en tant que <b>{translate(user.subRole)}</b>.
+              Vous allez créez un compte {translate(referent.role)} en tant que <b>{translate(referent.subRole)}</b>.
             </span>
             <br />
             Confirmez-vous qu’il s’agit bien de votre rôle et de votre fonction ?
           </p>
         )}
-        {isCoordinateurEtablissement(user) && (
+        {isCoordinateurEtablissement(referent) && (
           <p>
             <span>
-              Vous allez créez un compte {translate(user.role)} en tant que <b>{translate(user.subRole)}</b> du <b>{etablissement?.name}</b>.
+              Vous allez créez un compte {translate(referent.role)} en tant que <b>{translate(referent.subRole)}</b> du <b>{etablissement?.name}</b>.
             </span>
             <br />
             Confirmez-vous qu’il s’agit bien de votre rôle et de votre fonction ?
           </p>
         )}
-        {!isAdminCle(user) && (
+        {!isAdminCle(referent) && (
           <p>
             <span>
-              Vous allez créez un compte SNU en tant que <b>{translate(user.role)}</b> du <b>{etablissement?.name}</b>.
+              Vous allez créez un compte SNU en tant que <b>{translate(referent.role)}</b> du <b>{etablissement?.name}</b>.
             </span>
             <br />
             Confirmez-vous qu’il s’agit bien de votre rôle ?
