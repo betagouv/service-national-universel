@@ -48,6 +48,8 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     etablissement.uai = getUaiFromString(champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw=="));
     etablissement.nameAndCommune = champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw==");
     referentEtablissement.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4Mw==") || "";
+    referentEtablissement.lastName = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4MA==") || "";
+    referentEtablissement.firstName = champDescriptorValueMap.get("Q2hhbXAtNDA1MTQ1MQ==") || "";
 
     classe.name = champDescriptorValueMap.get("Q2hhbXAtNDA1NDIzMg==");
     classe.coloration = mapColorationFromAppelAProjetToColoration(champDescriptorValueMap.get("Q2hhbXAtNDA1NDI0Mw=="));

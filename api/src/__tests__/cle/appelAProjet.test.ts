@@ -123,6 +123,8 @@ describe("Appel A Projet Controller", () => {
       const classeAfterSync = await CleClasseModel.findOne({ etablissementId: etablissementAfterSync._id });
 
       expect(referentEtablissementAfterSync.email).toEqual("mail@etablissement.fr");
+      expect(referentEtablissementAfterSync.lastName).toEqual("NOM_CHEF_ETABLISSEMENT");
+      expect(referentEtablissementAfterSync.firstName).toEqual("PRENOM_CHEF_ETABLISSEMENT");
       expect(etablissementAfterSync.uai).toEqual("UAI_42");
       expect(etablissementAfterSync.referentEtablissementIds).toContain(referentEtablissementAfterSync._id.toString());
       expect(classeAfterSync.etablissementId).toEqual(etablissementAfterSync._id.toString());
