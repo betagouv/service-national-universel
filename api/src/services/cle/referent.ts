@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { UserDto } from "snu-lib/src/dto";
 import { IReferent, ReferentDocument } from "../../models/referentType";
+import { ROLES, SUB_ROLES } from "snu-lib";
 
 const crypto = require("crypto");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
@@ -64,7 +65,11 @@ export const inviteReferent = async (referent, { role, user }, etablissement) =>
 };
 
 export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
-  const chefsEtablissementsToSendInvitation = await ReferentModel.find({ "metadata.isFirstInvitationPending": true });
+  const chefsEtablissementsToSendInvitation = await ReferentModel.find({
+    "metadata.isFirstInvitationPending": true,
+    role: ROLES.ADMINISTRATEUR_CLE,
+    subRole: SUB_ROLES.referent_etablissement,
+  });
   console.log(chefsEtablissementsToSendInvitation);
   const invitations: InvitationResult[] = [];
   for (const chefEtablissement of chefsEtablissementsToSendInvitation) {
@@ -91,6 +96,9 @@ export const doInviteChefEtablissement = async (chefEtablissement: ReferentDocum
   const invitationType = referent.metadata.invitationType;
 
   const etablissement: EtablissementDocument = await CleEtablissementModel.findOne({ referentEtablissementIds: referent._id });
+  if (!etablissement) {
+    throw new Error("Etablissement not found for referent : " + referent._id);
+  }
   const nbreClasseAValider = await getNumberOfClassesByEtablissement(etablissement);
   const effectifPrevisionnel = await getEstimatedSeatsByEtablissement(etablissement);
 

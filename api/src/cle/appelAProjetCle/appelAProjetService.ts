@@ -24,6 +24,7 @@ export class AppelAProjetService {
       let referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
       let savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save);
       if (!savedEtablissement) {
+        console.log("AppelAProjetService.sync() - Etablissement not found: ", appelAProjet.etablissement?.uai);
         continue;
       }
       let referentClasseId = await appelAProjetReferentService.processReferentClasse(appelAProjet, save);
