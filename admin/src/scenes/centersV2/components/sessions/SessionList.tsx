@@ -67,7 +67,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     } else if (values.placesTotal < session.placesTotal - session.placesLeft) {
       errorsObject.placesTotal = "Le nombre de places total est inférieur au nombre d'inscrits";
     }
-    if (values.dateStart && values.dateEnd && values.dateStart > values.dateEnd) {
+    if (values.dateStart && values.dateEnd && new Date(values.dateStart) > new Date(values.dateEnd)) {
       errorsObject.date = "La date de début doit être antérieure à la date de fin";
     }
     if (Object.keys(errorsObject).length > 0) {
@@ -125,8 +125,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     } else {
       setValues({
         ...values,
-        dateStart: session?.dateStart || cohort?.dateStart.toDateString() || new Date().toDateString(),
-        dateEnd: session?.dateEnd || cohort?.dateEnd.toDateString() || new Date().toDateString(),
+        dateStart: session?.dateStart || cohort?.dateStart?.toString() || new Date().toString(),
+        dateEnd: session?.dateEnd || cohort?.dateEnd?.toString() || new Date().toString(),
       });
     }
   };

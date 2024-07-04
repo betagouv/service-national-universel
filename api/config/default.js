@@ -55,5 +55,6 @@ module.exports = {
   JVA_API_KEY: undefined,
   REDIS_URL: undefined,
   API_DEMARCHE_SIMPLIFIEE_TOKEN: undefined,
+  PM2_SLACK_URL: undefined,
   API_ANTIVIRUS_KEY: undefined,
 };

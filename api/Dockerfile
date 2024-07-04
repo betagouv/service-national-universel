@@ -56,6 +56,10 @@ ARG RELEASE=""
 ENV RELEASE=${RELEASE}
 ENV NODE_CONFIG_DIR=/app/api/config
 
+ENV PATH=/app/node_modules/pm2/bin/:$PATH
+
 EXPOSE $PORT
 
-CMD ["node", "api/src/index.js"]
+RUN pm2 install --docker pm2-slack
+
+CMD ["api/docker_start.sh"]
