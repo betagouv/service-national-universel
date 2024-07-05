@@ -12,7 +12,7 @@ export default function Region({ region, youngsInRegion, placesCenterByRegion, l
   const [open, setOpen] = React.useState(false);
   const [assignRegion, setAssignRegion] = React.useState([]);
   const [avancement, setAvancement] = React.useState(0);
-  const editDisabled = user.role !== ROLES.ADMIN;
+  const editDisabled = !(user.role === ROLES.ADMIN || (user.role === ROLES.REFERENT_REGION && user.region === region));
   const history = useHistory();
 
   React.useEffect(() => {
