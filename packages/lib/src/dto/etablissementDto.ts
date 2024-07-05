@@ -16,4 +16,6 @@ export type EtablissementDto = {
   academy: string;
   state: string;
   schoolYears: string[];
-}
+  fullName?: string;
+  postcode?: string;
+};

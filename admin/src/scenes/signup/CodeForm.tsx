@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
@@ -7,20 +7,22 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 
 import { translate } from "snu-lib";
+import { ReferentDto } from "snu-lib/src/dto";
 import { Section, Container } from "@snu/ds/dsfr";
 
+import { User } from "@/types";
 import api from "@/services/api";
 
 import Stepper from "./components/Stepper";
-import { User } from "@/types";
 
 interface Props {
-  user: User;
+  referent: ReferentDto;
   reinscription: boolean;
   invitationToken: string;
+  onReferentChange: (referent: User) => void;
 }
 
-export default function CodeForm({ user, reinscription, invitationToken }: Props) {
+export default function CodeForm({ referent, reinscription, invitationToken, onReferentChange }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
@@ -34,8 +36,8 @@ export default function CodeForm({ user, reinscription, invitationToken }: Props
     try {
       const response = await api.post(`/cle/referent-signup/confirm-email`, { code, invitationToken });
       if (!response.ok) return toastr.error(response.message || translate(response.code), "");
-
-      history.push(`/creer-mon-compte/informations${search}`);
+      onReferentChange(response.data);
+      history.push(`/creer-mon-compte/${reinscription ? "confirmation" : "informations"}${search}`);
     } catch (error) {
       console.log(error);
       if (error?.message) return toastr.error(error?.message, "");
@@ -55,7 +57,8 @@ export default function CodeForm({ user, reinscription, invitationToken }: Props
             <Alert
               description={
                 <div>
-                  Pour valider la création de votre compte administrateur SNU, vous devez entrer le code d'activation reçu à l'adresse email <b>{user.emailWaitingValidation}</b>.
+                  Pour valider la création de votre compte administrateur SNU, vous devez entrer le code d'activation reçu à l'adresse email{" "}
+                  <b>{referent.emailWaitingValidation}</b>.
                 </div>
               }
               severity="info"

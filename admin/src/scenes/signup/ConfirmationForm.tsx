@@ -6,24 +6,24 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 
-import { ROLES, translate } from "snu-lib";
+import { isAdminCle, translate } from "snu-lib";
+import { ReferentDto } from "snu-lib/src/dto";
 import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
 import { Section, Container } from "@snu/ds/dsfr";
 
 import api from "@/services/api";
-import { User } from "@/types";
 
 import Stepper from "./components/Stepper";
 import { REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY } from "@/services/cle";
 
 interface Props {
-  user: User;
-  etablissement?: EtablissementDto & { fullName?: string; postcode?: string };
+  referent: ReferentDto;
+  etablissement?: EtablissementDto;
   invitationToken: string;
   reinscription: boolean;
 }
 
-export default function ConfirmationForm({ user, etablissement, invitationToken, reinscription }: Props) {
+export default function ConfirmationForm({ referent, etablissement, invitationToken, reinscription }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
@@ -40,7 +40,7 @@ export default function ConfirmationForm({ user, etablissement, invitationToken,
       }
 
       localStorage.setItem(REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY, String(true));
-      toastr.success("Votre compte a bien été créé. Vous pouvez maintenant vous connecter.", "");
+      toastr.success("Votre compte a bien été créé. Vous pouvez maintenant vous connecter.", "", { timeOut: 5000 });
       history.push("/auth");
     } catch (e) {
       if (e.ok == false) {
@@ -81,25 +81,25 @@ export default function ConfirmationForm({ user, etablissement, invitationToken,
             </div>
             <div className="flex items-start justify-between">
               <div className="text-[#666]">Rôle :</div>
-              <div className="text-right text-[#161616]">{translate(user.role)}</div>
+              <div className="text-right text-[#161616]">{translate(referent.role)}</div>
             </div>
-            {user.role === ROLES.ADMINISTRATEUR_CLE ? (
+            {isAdminCle(referent) && (
               <div className="flex items-start justify-between">
                 <div className="text-[#666]">Fonction :</div>
-                <div className="text-right text-[#161616]">{translate(user.subRole)}</div>
+                <div className="text-right text-[#161616]">{translate(referent.subRole)}</div>
               </div>
-            ) : null}
+            )}
             <div className="flex items-start justify-between">
               <div className="text-[#666]">Prénom :</div>
-              <div className="text-right text-[#161616]">{user.firstName}</div>
+              <div className="text-right text-[#161616]">{referent.firstName}</div>
             </div>
             <div className="flex items-start justify-between">
               <div className="text-[#666]">Nom :</div>
-              <div className="text-right text-[#161616]">{user.lastName}</div>
+              <div className="text-right text-[#161616]">{referent.lastName}</div>
             </div>
             <div className="flex items-start justify-between">
               <div className="text-[#666]">Numéro de téléphone :</div>
-              <div className="text-right text-[#161616]">{user.phone}</div>
+              <div className="text-right text-[#161616]">{referent.phone}</div>
             </div>
           </div>
           <div>
@@ -111,7 +111,7 @@ export default function ConfirmationForm({ user, etablissement, invitationToken,
             </div>
             <div className="flex items-start justify-between">
               <div className="text-[#666]">Adresse email :</div>
-              <div className="text-right text-[#161616]">{user.email}</div>
+              <div className="text-right text-[#161616]">{referent.email}</div>
             </div>
           </div>
           {!reinscription && (

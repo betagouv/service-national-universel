@@ -35,7 +35,7 @@ export default function FirstLoginAdminCoordinator({ user }: Props) {
         localStorage.removeItem(REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY);
       }}
       className="md:max-w-[700px]"
-      icon={<ProfilePic initials={`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`} />}
+      icon={<ProfilePic initials={`${user.firstName?.charAt(0)}${user.lastName?.charAt(0)}`} />}
       title={`Bonjour ${user.firstName} ${user.lastName} !`}
       text="Bienvenue sur votre compte Administrateur CLE en tant que Coordinateur d’établissement. Vous pouvez créer une classe engagée, suivre l'évolution de celles déjà créées et consulter les inscriptions des élèves."
       actions={[
