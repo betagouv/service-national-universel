@@ -62,6 +62,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     referentClasse.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjU4MA==") || "";
 
     return {
+      numberDS: formulaire.number,
       etablissement,
       referentEtablissement,
       classe,

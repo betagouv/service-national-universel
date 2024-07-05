@@ -69,7 +69,7 @@ export function canEditTotalSeats(user: User) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_TOTAL_SEATS;
 }
 
-export const buildUniqueClasseId = (etablissement: IEtablissement, classe: Pick<IClasse, "name" | "coloration" | "department" | "estimatedSeats">): string => {
+export const buildUniqueClasseId = (etablissement: Pick<IEtablissement, "uai">, classe: Pick<IClasse, "name" | "coloration" | "estimatedSeats">): string => {
   let hash = crypto
     .createHash("sha256")
     .update(`${etablissement?.uai}${classe?.name}${classe?.coloration}${classe?.estimatedSeats}` || "NAME")

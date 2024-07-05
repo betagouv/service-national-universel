@@ -12,7 +12,6 @@ export class AppelAProjetClasseService {
     const uniqueClasseId = buildUniqueClasseId(savedEtablissement, {
       name: appelAProjet.classe.name || "",
       coloration: appelAProjet.classe.coloration,
-      department: savedEtablissement.department,
       estimatedSeats: appelAProjet.classe.estimatedSeats,
     });
     const uniqueClasseKey = buildUniqueClasseKey(savedEtablissement);

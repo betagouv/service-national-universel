@@ -4,9 +4,11 @@ import { AppelAProjetReferentService } from "./appelAProjetReferentService";
 import { AppelAProjetEtablissementService } from "./appelAProjetEtablissementService";
 import { AppelAProjetClasseService } from "./appelAProjetClasseService";
 import { IAppelAProjet } from "./appelAProjetType";
+import crypto from "crypto";
+import { buildUniqueClasseId } from "../classe/classeService";
 
 type IRemovedAppelAProjet = IAppelAProjet & {
-  removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail";
+  removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail" | "sameClasseUniqueId";
 };
 export class AppelAProjetService {
   public sync = async (save: boolean = false) => {
@@ -66,13 +68,36 @@ export class AppelAProjetService {
     for (const appelAProjet of appelAProjets) {
       const email = appelAProjet.referentEtablissement.email;
       const uai = appelAProjet.etablissement?.uai;
+      const classeUniqueId = buildUniqueClasseId(
+        { uai: appelAProjet.etablissement.uai },
+        {
+          name: appelAProjet.classe.name || "",
+          coloration: appelAProjet.classe.coloration,
+          estimatedSeats: appelAProjet.classe.estimatedSeats,
+        },
+      );
+      const foundSameUniqueId = appelAProjets.some(
+        (appelAProjetSub) =>
+          buildUniqueClasseId(
+            { uai: appelAProjetSub.etablissement.uai },
+            {
+              name: appelAProjetSub.classe.name || "",
+              coloration: appelAProjetSub.classe.coloration,
+              estimatedSeats: appelAProjetSub.classe.estimatedSeats,
+            },
+          ) === classeUniqueId && appelAProjetSub.numberDS !== appelAProjet.numberDS,
+      );
       if (!uai || !email) {
         appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "noUaiOrEmail" });
         continue;
       }
-      const hasSameUaiButDifferentEmail = appelAProjets.some((appelAProjet) => appelAProjet.etablissement?.uai === uai && appelAProjet.referentEtablissement.email !== email);
+      const hasSameUaiButDifferentEmail = appelAProjets.some(
+        (appelAProjetSub) => appelAProjetSub.etablissement?.uai === uai && appelAProjetSub.referentEtablissement.email !== email,
+      );
       if (hasSameUaiButDifferentEmail) {
         appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "sameUaiDifferentEmail" });
+      } else if (foundSameUniqueId) {
+        appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "sameClasseUniqueId" });
       } else {
         appelAProjetsRetained.push(appelAProjet);
       }

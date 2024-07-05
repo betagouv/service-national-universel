@@ -480,7 +480,6 @@ describe("buildUniqueClasseId and key", () => {
     const classe = {
       name: "une classe",
       coloration: "SPORT",
-      department: "Maine et Loire",
       estimatedSeats: 22,
     };
     const etablissement: IEtablissement = {
