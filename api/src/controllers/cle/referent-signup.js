@@ -150,9 +150,10 @@ router.post("/confirm-signup", async (req, res) => {
 
     //Check if user is already linked to an etablissement
     let etablissement;
-    if (isAdminCle(referent)) {
-      // coordinateur et chef d'établissement
+    if (isCoordinateurEtablissement(referent)) {
       etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
+    } else if (isChefEtablissement(referent)) {
+      etablissement = await EtablissementModel.findOne({ referentEtablissementIds: referent._id });
     } else if (isReferentClasse(referent)) {
       const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
