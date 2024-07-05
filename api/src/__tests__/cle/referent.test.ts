@@ -155,7 +155,11 @@ describe("POST /api/cle/referent/send-invitation-inscription-chef-etablissement"
     passport.user.subRole = null;
     jest.mock("../../services/cle/referent", () => ({
       ...jest.requireActual("../../services/cle/referent"),
-      doInviteMultipleChefsEtablissements: jest.fn(() => Promise.resolve()),
+      doInviteMultipleChefsEtablissements: jest.fn(() => Promise.resolve([])),
+    }));
+    jest.mock("../../utils", () => ({
+      ...jest.requireActual("../../utils"),
+      uploadFile: () => Promise.resolve(),
     }));
   });
 
@@ -163,13 +167,13 @@ describe("POST /api/cle/referent/send-invitation-inscription-chef-etablissement"
     passport.user.role = ROLES.ADMIN;
     passport.user.subRole = "god";
 
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send(["test1@example.com", "test2@example.com"]);
+    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();
 
     expect(res.statusCode).toEqual(200);
   });
 
   it("should return 403 Forbidden if the user is not a super admin", async () => {
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send(["test1@example.com", "test2@example.com"]);
+    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();
 
     expect(res.statusCode).toEqual(403);
     expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });
