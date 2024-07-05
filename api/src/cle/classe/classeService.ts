@@ -1,13 +1,7 @@
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/young.service";
 import ClasseModel from "../../models/cle/classe";
 import YoungModel from "../../models/young";
-import { STATUS_CLASSE, STATUS_PHASE1_CLASSE, YOUNG_STATUS, ROLES, SUB_ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "snu-lib";
-
-type User = {
-  role: (typeof ROLES)[keyof typeof ROLES];
-  structureId?: string;
-  subRole?: string;
-};
+import { YOUNG_STATUS } from "snu-lib";
 
 import { EtablissementDocument, IEtablissement } from "../../models/cle/etablissementType";
 import { ClasseDocument, IClasse } from "../../models/cle/classeType";
@@ -56,18 +50,6 @@ export const deleteClasse = async (_id: string, fromUser: object) => {
 
   return classe;
 };
-
-export function canEditEstimatedSeats(user: User) {
-  if (user.role === ROLES.ADMIN) return true;
-  const now = new Date();
-  return user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement && now < LIMIT_DATE_ESTIMATED_SEATS;
-}
-
-export function canEditTotalSeats(user: User) {
-  if (user.role === ROLES.ADMIN) return true;
-  const now = new Date();
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_TOTAL_SEATS;
-}
 
 export const buildUniqueClasseId = (etablissement: Pick<IEtablissement, "uai">, classe: Pick<IClasse, "name" | "coloration" | "estimatedSeats">): string => {
   let hash = crypto

@@ -1,5 +1,4 @@
-import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE } from "snu-lib";
-import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "snu-lib/src/constants/constants";
+import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE, canEditEstimatedSeats, canEditTotalSeats } from "snu-lib";
 import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { User } from "@/types";
@@ -52,18 +51,6 @@ export function getRights(user: User, classe, cohort: CohortDto | undefined) {
     canEditEstimatedSeats: canEditEstimatedSeats(user),
     canEditTotalSeats: canEditTotalSeats(user),
   };
-}
-
-function canEditEstimatedSeats(user: User) {
-  if (user.role === ROLES.ADMIN) return true;
-  const now = new Date();
-  return user.role === ROLES.ADMINISTRATEUR_CLE && now < LIMIT_DATE_ESTIMATED_SEATS;
-}
-
-function canEditTotalSeats(user: User) {
-  if (user.role === ROLES.ADMIN) return true;
-  const now = new Date();
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_TOTAL_SEATS;
 }
 
 const showCohort = (cohort: CohortDto | undefined, user: User | undefined): boolean => {

@@ -10,7 +10,6 @@ import { CohortDto } from "snu-lib/src/dto/cohortDto";
 import { User } from "@/types";
 import { ClasseDto } from "snu-lib/src/dto/classeDto";
 import { Rights } from "./types";
-import Field from "@/components/forms/Field";
 
 type SelectOption = {
   value: string;

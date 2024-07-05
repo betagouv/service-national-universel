@@ -9,7 +9,18 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Button, Badge, DropdownButton } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS } from "snu-lib";
+import {
+  translate,
+  ROLES,
+  YOUNG_STATUS,
+  STATUS_CLASSE,
+  translateStatusClasse,
+  COHORT_TYPE,
+  FUNCTIONAL_ERRORS,
+  isNowBetweenDates,
+  LIMIT_DATE_ESTIMATED_SEATS,
+  LIMIT_DATE_TOTAL_SEATS,
+} from "snu-lib";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
@@ -135,12 +146,16 @@ export default function View() {
     if (classe?.cohort !== oldClasseCohort && classe.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
     if (!classe?.name) errors.name = "Ce champ est obligatoire";
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
-    if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
-    if (!classe?.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
     if (!classe?.type) errors.type = "Ce champ est obligatoire";
     if (!classe?.grades.length) errors.grades = "Ce champ est obligatoire";
     if (classe?.grades && classe?.grades.length > 3) errors.grades = "Une classe ne peut avoir que 3 niveaux maximum";
+    if (!classe?.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
+    if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
+    const now = new Date();
+    const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+    if (classe?.totalSeats && classe.estimatedSeats && classe.totalSeats > classe.estimatedSeats && now > limitDateEstimatedSeats)
+      errors.totalSeats = "L'effectif ajusté ne peut pas être supérieur à l'effectif prévisionnel";
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);

@@ -22,6 +22,10 @@ import {
   canWithdrawClasse,
   canDeleteClasse,
   canUpdateCohort,
+  LIMIT_DATE_ESTIMATED_SEATS,
+  LIMIT_DATE_TOTAL_SEATS,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -252,6 +256,35 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       const youngWithStatusPhase1Done = youngs.find((y) => y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE);
       if (youngWithStatusPhase1Done) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+
+    console.log("value.totalSeats", value.totalSeats);
+    console.log("classe.totalSeats", classe.totalSeats);
+    console.log("value.estimatedSeats", value.estimatedSeats);
+    console.log("classe.estimatedSeats", classe.estimatedSeats);
+    if (value.estimatedSeats !== classe.estimatedSeats) {
+      if (!canEditEstimatedSeats(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const now = new Date();
+      const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+      if (now <= limitDateEstimatedSeats) {
+        classe.set({ ...classe, estimatedSeats: value.estimatedSeats, totalSeats: value.estimatedSeats });
+        value.totalSeats = value.estimatedSeats;
+      }
+    }
+
+    console.log("value.totalSeats", value.totalSeats);
+    console.log("classe.totalSeats", classe.totalSeats);
+    console.log("value.estimatedSeats", value.estimatedSeats);
+    console.log("classe.estimatedSeats", classe.estimatedSeats);
+
+    if (value.totalSeats !== classe.totalSeats) {
+      if (!canEditTotalSeats(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (value.totalSeats > value.estimatedSeats) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    console.log("value.totalSeats", value.totalSeats);
+    console.log("classe.totalSeats", classe.totalSeats);
+    console.log("value.estimatedSeats", value.estimatedSeats);
+    console.log("classe.estimatedSeats", classe.estimatedSeats);
 
     const oldCohort = classe.cohort;
     classe.set({ ...value, sessionId: classe.sessionId || null });
