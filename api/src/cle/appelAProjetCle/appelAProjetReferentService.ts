@@ -4,11 +4,19 @@ import { InvitationType, IReferent, ReferentMetadata } from "../../models/refere
 import { ReferentCreatedBy, ROLES, SUB_ROLES } from "snu-lib";
 
 export class AppelAProjetReferentService {
-  referents: Partial<IReferent & { operation: "create" | "none" }>[] = [];
+  referents: Partial<IReferent & { operation: "create" | "none"; error: "sameUaiDifferentEmailChefEtablissement" | ""; uai?: string }>[] = [];
 
   async processReferentEtablissement(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
     const referentEtablissement = await ReferentModel.findOne({ email: appelAProjet.referentEtablissement.email });
     const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentEtablissement.email);
+    const hasSameUaiButDifferentEmailThanAlreadyProcessed = this.referents.some(
+      (referent) =>
+        referent.uai === appelAProjet.etablissement?.uai &&
+        referent.email !== appelAProjet.referentEtablissement.email &&
+        referent.role === ROLES.ADMINISTRATEUR_CLE &&
+        referent.uai &&
+        appelAProjet.etablissement.uai,
+    );
     const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (referentEtablissement) {
@@ -19,6 +27,19 @@ export class AppelAProjetReferentService {
           role: referentEtablissement.role,
           subRole: referentEtablissement.subRole,
           operation: "none",
+          error: "",
+          uai: appelAProjet.etablissement?.uai,
+        });
+      }
+      if (hasSameUaiButDifferentEmailThanAlreadyProcessed) {
+        this.referents.push({
+          _id: referentEtablissement.id,
+          email: referentEtablissement.email,
+          role: referentEtablissement.role,
+          subRole: referentEtablissement.subRole,
+          operation: "none",
+          error: "sameUaiDifferentEmailChefEtablissement",
+          uai: appelAProjet.etablissement?.uai,
         });
       }
       if (save) {
@@ -28,7 +49,7 @@ export class AppelAProjetReferentService {
         await referentEtablissement.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
       }
       if (!hasAlreadyBeenProcessed) {
-        this.referents.push({ ...referentEtablissement, _id: referentEtablissement?._id, operation: "none" });
+        this.referents.push({ ...referentEtablissement, _id: referentEtablissement?._id, operation: "none", error: "", uai: appelAProjet.etablissement?.uai });
       }
       return referentEtablissement.id;
     }
@@ -45,7 +66,16 @@ export class AppelAProjetReferentService {
       console.log("AppelAProjetReferentService - processReferentEtablissement() - created referentEtablissement : ", createdReferent?._id);
     }
     if (!hasAlreadyBeenProcessed) {
-      this.referents.push({ ...newReferent, _id: createdReferent?._id, operation: "create" });
+      this.referents.push({ ...newReferent, _id: createdReferent?._id, operation: "create", error: "", uai: appelAProjet.etablissement?.uai });
+    }
+    if (hasSameUaiButDifferentEmailThanAlreadyProcessed) {
+      this.referents.push({
+        ...newReferent,
+        _id: createdReferent?._id,
+        operation: "create",
+        error: "sameUaiDifferentEmailChefEtablissement",
+        uai: appelAProjet.etablissement?.uai,
+      });
     }
     return createdReferent?.id;
   }
@@ -57,7 +87,14 @@ export class AppelAProjetReferentService {
 
     if (existingReferentClasse) {
       if (!hasAlreadyBeenProcessed) {
-        this.referents.push({ _id: existingReferentClasse._id, email: existingReferentClasse.email, role: existingReferentClasse.role, operation: "none" });
+        this.referents.push({
+          _id: existingReferentClasse._id,
+          email: existingReferentClasse.email,
+          role: existingReferentClasse.role,
+          operation: "none",
+          error: "",
+          uai: appelAProjet.etablissement?.uai,
+        });
       }
       if (save) {
         if (!existingReferentClasse.metadata.createdBy === ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
@@ -75,7 +112,7 @@ export class AppelAProjetReferentService {
       console.log("AppelAProjetReferentService - processReferentClasse() - created referentClasse : ", createdReferent?._id);
     }
     if (!hasAlreadyBeenProcessed) {
-      this.referents.push({ ...newClasseReferent, _id: createdReferent?._id, operation: "create" });
+      this.referents.push({ ...newClasseReferent, _id: createdReferent?._id, operation: "create", error: "", uai: appelAProjet.etablissement?.uai });
     }
 
     return createdReferent?._id;
