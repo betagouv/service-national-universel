@@ -69,19 +69,24 @@ export function canEditTotalSeats(user: User) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_TOTAL_SEATS;
 }
 
-export const buildUniqueClasseId = (etablissement: IEtablissement, classe: Pick<IClasse, "name" | "coloration">): string => {
-  const trigrammeRegion = mapRegionToTrigramme(etablissement.region) || "REG";
-  const departmentNumber = `0${(etablissement.zip || "DP")?.substring(0, 2)}`;
-  const academy = (etablissement.academy || "A")?.substring(0, 1);
+export const buildUniqueClasseId = (etablissement: Pick<IEtablissement, "uai">, classe: Pick<IClasse, "name" | "coloration" | "estimatedSeats">): string => {
   let hash = crypto
     .createHash("sha256")
-    .update(`${classe?.name}${classe?.coloration}` || "NAME")
+    .update(`${etablissement?.uai}${classe?.name}${classe?.coloration}${classe?.estimatedSeats}` || "NAME")
     .digest("hex");
-  if (!classe?.name || !classe?.coloration) {
+  if (!etablissement?.uai || !classe?.name || !classe?.coloration) {
     hash = "NO_UID";
   }
   const subHash = hash?.toString()?.substring(0, 6)?.toUpperCase();
-  return `${trigrammeRegion}${academy}${departmentNumber}-${subHash}`;
+  return `${subHash}`;
+};
+
+export const buildUniqueClasseKey = (etablissement: IEtablissement): string => {
+  const trigrammeRegion = mapRegionToTrigramme(etablissement.region) || "REG";
+  const departmentNumber = `0${(etablissement.zip || "DP")?.substring(0, 2)}`;
+  const academy = (etablissement.academy || "A")?.substring(0, 1);
+
+  return `C-${trigrammeRegion}${academy}${departmentNumber}`;
 };
 
 export const findClasseByUniqueKeyAndUniqueId = async (uniqueKey: string | undefined | null, uniqueId: string): Promise<ClasseDocument | null> => {
