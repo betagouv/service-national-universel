@@ -12,6 +12,10 @@ export class AppelAProjetReferentService {
     const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (referentEtablissement) {
+      if (save && referentEtablissement.metadata.createdBy !== ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
+        referentEtablissement.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
+        await referentEtablissement.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
+      }
       if (!hasAlreadyBeenProcessed) {
         this.referents.push({
           _id: referentEtablissement.id,
@@ -21,16 +25,6 @@ export class AppelAProjetReferentService {
           operation: "none",
           uai: appelAProjet.etablissement?.uai,
         });
-      }
-
-      if (save) {
-        if (!referentEtablissement.metadata.createdBy === ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
-          referentEtablissement.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
-        }
-        await referentEtablissement.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
-      }
-      if (!hasAlreadyBeenProcessed) {
-        this.referents.push({ ...referentEtablissement, _id: referentEtablissement?._id, operation: "none", error: "", uai: appelAProjet.etablissement?.uai });
       }
       return referentEtablissement.id;
     }

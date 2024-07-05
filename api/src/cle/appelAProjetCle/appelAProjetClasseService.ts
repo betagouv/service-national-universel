@@ -15,7 +15,7 @@ export class AppelAProjetClasseService {
     });
     const uniqueClasseKey = buildUniqueClasseKey(savedEtablissement);
     let formattedClasse: Partial<IClasse>;
-    const classeFound = await findClasseByUniqueKeyAndUniqueId(appelAProjet.etablissement?.uai, uniqueClasseId);
+    const classeFound = await findClasseByUniqueKeyAndUniqueId(uniqueClasseKey, uniqueClasseId);
     if (classeFound) {
       console.log("AppelAProjetClasseService - processClasse() - classe found : ", classeFound?._id);
 
