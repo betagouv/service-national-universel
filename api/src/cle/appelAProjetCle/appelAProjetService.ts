@@ -23,13 +23,14 @@ export class AppelAProjetService {
     });
 
     const { retained: appelAProjetsRetained, removed: appelAProjetsRemoved } = this.filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets);
-    console.log(appelAProjetsRemoved);
 
     const appelAProjetReferentService = new AppelAProjetReferentService();
     const appelAProjetEtablissementService = new AppelAProjetEtablissementService();
     const appelAProjetClasseService = new AppelAProjetClasseService();
 
+    let processCounter = 0;
     for (const appelAProjet of appelAProjetsRetained) {
+      console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", appelAProjetsRetained.length);
       let referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
       let savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save);
       if (!savedEtablissement) {

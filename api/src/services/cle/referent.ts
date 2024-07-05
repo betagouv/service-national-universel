@@ -72,8 +72,10 @@ export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
     subRole: SUB_ROLES.referent_etablissement,
   });
   const invitations: InvitationResult[] = [];
+  let processCounter = 0;
   for (const chefEtablissement of chefsEtablissementsToSendInvitation) {
     try {
+      console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", chefsEtablissementsToSendInvitation.length);
       console.log("doInviteMultipleChefsEtablissements() - creating invitation for :", chefEtablissement.email);
       const mailResponse = await doInviteChefEtablissement(chefEtablissement, user);
       chefEtablissement.set({ metadata: { ...chefEtablissement.metadata, isFirstInvitationPending: false } });
