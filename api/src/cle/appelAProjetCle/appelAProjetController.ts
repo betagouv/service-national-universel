@@ -9,6 +9,7 @@ import { generateCSVStream } from "../../services/fileService";
 import archiver from "archiver";
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { FeatureFlagName } from "../../models/featureFlagType";
+import { uploadFile } from "../../utils";
 
 const router = express.Router();
 router.post(
@@ -31,11 +32,18 @@ router.post(
       const archive = archiver("zip", { zlib: { level: 9 } });
       archive.pipe(res);
 
+      const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
       for (const { name, data } of results) {
         const stream = generateCSVStream(data);
-        archive.append(stream, { name: `${name}-simulation.csv` });
+        const file = {
+          data: stream,
+          encoding: "",
+          mimetype: "text/csv",
+        };
+        uploadFile(`file/appelAProjet/${timestamp}-${name}-simulate.csv`, file);
+        archive.append(stream, { name: `${name}-simulate.csv` });
       }
-      const fileName = `appelAProjet-simulate-${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}.zip`;
+      const fileName = `appelAProjet-simulate-${timestamp}.zip`;
       res.setHeader("Content-Type", "application/zip");
       res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
       archive.finalize();
@@ -67,8 +75,15 @@ router.post(
       const archive = archiver("zip", { zlib: { level: 9 } });
       archive.pipe(res);
 
+      const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
       for (const { name, data } of results) {
         const stream = generateCSVStream(data);
+        const file = {
+          data: stream,
+          encoding: "",
+          mimetype: "text/csv",
+        };
+        uploadFile(`file/appelAProjet/${timestamp}-${name}-real.csv`, file);
         archive.append(stream, { name: `${name}-real.csv` });
       }
       const fileName = `appelAProjet-real-${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}.zip`;

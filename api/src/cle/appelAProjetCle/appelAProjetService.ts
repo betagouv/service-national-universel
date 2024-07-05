@@ -45,7 +45,7 @@ export class AppelAProjetService {
       classeName: appelAProjet.classe.name,
       referentClasse: JSON.stringify(appelAProjet.referentClasse),
     }));
-    console.log("appelAProjetsErrors", appelAProjetsErrors);
+
     return [
       { name: "etablissements", data: appelAProjetEtablissementService.etablissements },
       {

@@ -2,6 +2,7 @@ import { isSuperAdmin } from "snu-lib";
 import { UserRequest } from "../request";
 import { Response } from "express";
 import { doInviteMultipleChefsEtablissements, InvitationType } from "../../services/cle/referent";
+import { uploadFile } from "../../utils";
 
 const express = require("express");
 const passport = require("passport");
@@ -71,7 +72,14 @@ router.post("/send-invitation-chef-etablissement", passport.authenticate("refere
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
     const referentInvitationSent = await doInviteMultipleChefsEtablissements(req.user);
+    const file = {
+      data: Buffer.from(JSON.stringify(referentInvitationSent)),
+      encoding: "",
+      mimetype: "application/json",
+    };
+    uploadFile(`file/appelAProjet/${timestamp}-send-invitation-chef-etablissement.json`, file);
 
     return res.status(200).send({ ok: true, data: referentInvitationSent });
   } catch (error) {
