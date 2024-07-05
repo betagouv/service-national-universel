@@ -30,7 +30,7 @@ describe("demarcheSimplifieeProvider", () => {
     const expectedAppelAProjet = [
       {
         etablissement: { uai: "SOME_UAI", nameAndCommune: "Un nom de lycée, Grenoble (SOME_UAI)" },
-        referentEtablissement: { email: "mail@etablissement.fr" },
+        referentEtablissement: { email: "mail@etablissement.fr", firstName: "PRENOM_CHEF_ETABLISSEMENT", lastName: "NOM_CHEF_ETABLISSEMENT" },
         classe: {
           name: "SNU 2024 2025",
           coloration: "RESILIENCE",
