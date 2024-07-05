@@ -39,7 +39,7 @@ export default function BoxVolontaires({ summary, className, loading }: BoxProps
       </div>
       {!loading && (
         <div className={cx("flex flex-col items-end justify-between")}>
-          <MiniTitle>Objectifs:</MiniTitle>
+          <MiniTitle>Objectif:</MiniTitle>
           <BigDigits className="mx-[8px]">{summary.goal}</BigDigits>
         </div>
       )}
