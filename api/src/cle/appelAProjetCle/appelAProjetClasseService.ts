@@ -9,9 +9,11 @@ export class AppelAProjetClasseService {
   classes: Partial<IClasse & { operation: "create" | "none" }>[] = [];
 
   async processClasse(appelAProjet: IAppelAProjet, savedEtablissement: IEtablissement, referentClasseId, save: boolean) {
-    const uniqueClasseId = buildUniqueClasseId({
+    const uniqueClasseId = buildUniqueClasseId(savedEtablissement, {
       name: appelAProjet.classe.name || "",
       coloration: appelAProjet.classe.coloration,
+      department: savedEtablissement.department,
+      estimatedSeats: appelAProjet.classe.estimatedSeats,
     });
     const uniqueClasseKey = buildUniqueClasseKey(savedEtablissement);
     let formattedClasse: Partial<IClasse>;

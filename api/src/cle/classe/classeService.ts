@@ -69,12 +69,12 @@ export function canEditTotalSeats(user: User) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_TOTAL_SEATS;
 }
 
-export const buildUniqueClasseId = (classe: Pick<IClasse, "name" | "coloration">): string => {
+export const buildUniqueClasseId = (etablissement: IEtablissement, classe: Pick<IClasse, "name" | "coloration" | "department" | "estimatedSeats">): string => {
   let hash = crypto
     .createHash("sha256")
-    .update(`${classe?.name}${classe?.coloration}` || "NAME")
+    .update(`${etablissement?.uai}${classe?.name}${classe?.coloration}${classe?.estimatedSeats}` || "NAME")
     .digest("hex");
-  if (!classe?.name || !classe?.coloration) {
+  if (!etablissement?.uai || !classe?.name || !classe?.coloration) {
     hash = "NO_UID";
   }
   const subHash = hash?.toString()?.substring(0, 6)?.toUpperCase();

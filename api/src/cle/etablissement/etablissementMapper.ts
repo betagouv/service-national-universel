@@ -2,12 +2,11 @@ import { IEtablissement } from "../../models/cle/etablissementType";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 import { ClasseSchoolYear, CLE_SECTOR, CLE_TYPE } from "snu-lib";
 
-export function mapEtablissementFromAnnuaireToEtablissement(etablissement: EtablissementProviderDto, referentIds: string[]): IEtablissement {
+export function mapEtablissementFromAnnuaireToEtablissement(etablissement: EtablissementProviderDto, referentIds: string[]): Omit<IEtablissement, "coordinateurIds"> {
   return {
     uai: etablissement.identifiant_de_l_etablissement,
     name: etablissement.nom_etablissement,
     referentEtablissementIds: referentIds,
-    coordinateurIds: [],
     department: etablissement.libelle_departement,
     region: etablissement.libelle_region,
     zip: etablissement.code_postal,

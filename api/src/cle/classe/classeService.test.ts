@@ -480,10 +480,15 @@ describe("buildUniqueClasseId and key", () => {
     const classe = {
       name: "une classe",
       coloration: "SPORT",
+      department: "Maine et Loire",
+      estimatedSeats: 22,
     };
-    const expectedId = "E73E72";
+    const etablissement: IEtablissement = {
+      uai: "UN_UAI",
+    } as IEtablissement;
+    const expectedId = "52FD6A";
 
-    expect(buildUniqueClasseId(classe)).toEqual(expectedId);
+    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
   });
 
   it("should return the correct unique classe Key", () => {
@@ -498,10 +503,10 @@ describe("buildUniqueClasseId and key", () => {
   });
 
   it("should handle missing inputs gracefully and return NO_UID", () => {
-    const classe = { name: "", coloration: undefined };
+    const classe = { name: "", coloration: undefined, department: "Maine et Loire", estimatedSeats: 22 };
     const expectedId = "NO_UID";
 
-    expect(buildUniqueClasseId(classe)).toEqual(expectedId);
+    expect(buildUniqueClasseId({} as IEtablissement, classe)).toEqual(expectedId);
   });
 });
 

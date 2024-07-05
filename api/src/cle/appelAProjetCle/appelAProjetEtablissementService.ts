@@ -40,8 +40,8 @@ export class AppelAProjetEtablissementService {
         this.etablissements.push({ ...existingEtablissement.toObject(), schoolYears: schoolYears, operation: "update" });
         return existingEtablissement;
       }
-      this.etablissements.push({ ...formattedEtablissement, schoolYears: schoolYears, operation: "update" });
-      return formattedEtablissement;
+      this.etablissements.push({ ...formattedEtablissement, schoolYears: schoolYears, coordinateurIds: existingEtablissement.coordinateurIds, operation: "update" });
+      return { ...formattedEtablissement, coordinateurIds: existingEtablissement.coordinateurIds };
     }
 
     let createdEtablissement;
@@ -50,11 +50,11 @@ export class AppelAProjetEtablissementService {
       console.log("AppelAProjetEtablissementService - processEtablissement() - created etablissement : ", createdEtablissement?._id);
     }
     if (!hasAlreadyBeenProcessed) {
-      this.etablissements.push({ ...formattedEtablissement, _id: createdEtablissement?.id, operation: "create" });
+      this.etablissements.push({ ...formattedEtablissement, _id: createdEtablissement?.id, coordinateurIds: [], operation: "create" });
     }
     if (save) {
       return createdEtablissement;
     }
-    return formattedEtablissement;
+    return { ...formattedEtablissement, coordinateurIds: [] };
   }
 }

@@ -11,6 +11,11 @@ import { CleClasseModel, CleEtablissementModel, ReferentModel } from "../../mode
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
 import { InvitationType } from "../../models/referentType";
 
+jest.mock("../../utils", () => ({
+  ...jest.requireActual("../../utils"),
+  uploadFile: () => Promise.resolve(),
+}));
+
 beforeAll(dbConnect);
 afterAll(dbClose);
 beforeEach(async () => {
