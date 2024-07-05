@@ -3,8 +3,11 @@ import { apiEducation } from "../../services/gouv.fr/api-education";
 import { AppelAProjetReferentService } from "./appelAProjetReferentService";
 import { AppelAProjetEtablissementService } from "./appelAProjetEtablissementService";
 import { AppelAProjetClasseService } from "./appelAProjetClasseService";
-import { ReferentModel } from "../../models";
+import { IAppelAProjet } from "./appelAProjetType";
 
+type IRemovedAppelAProjet = IAppelAProjet & {
+  removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail";
+};
 export class AppelAProjetService {
   public sync = async (save: boolean = false) => {
     const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
@@ -17,16 +20,17 @@ export class AppelAProjetService {
       size: -1,
     });
 
+    const { retained: appelAProjetsRetained, removed: appelAProjetsRemoved } = this.filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets);
+    console.log(appelAProjetsRemoved);
+
     const appelAProjetReferentService = new AppelAProjetReferentService();
     const appelAProjetEtablissementService = new AppelAProjetEtablissementService();
     const appelAProjetClasseService = new AppelAProjetClasseService();
 
-    for (const appelAProjet of appelAProjets) {
+    for (const appelAProjet of appelAProjetsRetained) {
       let referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
       let savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save);
       if (!savedEtablissement) {
-        // TODO : remove referentEtablissement ???
-        // console.log("AppelAProjetService.sync() - deleting ", referentEtablissementId);
         console.log("AppelAProjetService.sync() - Etablissement not found: ", appelAProjet.etablissement?.uai);
         continue;
       }
@@ -34,11 +38,45 @@ export class AppelAProjetService {
       await appelAProjetClasseService.processClasse(appelAProjet, savedEtablissement, referentClasseId, save);
     }
 
+    const appelAProjetsErrors = appelAProjetsRemoved.map((appelAProjet) => ({
+      removedReason: appelAProjet.removedReason,
+      etablissementUai: appelAProjet.etablissement.uai,
+      referentEtablissementEmail: appelAProjet.referentEtablissement.email,
+      classeName: appelAProjet.classe.name,
+      referentClasse: JSON.stringify(appelAProjet.referentClasse),
+    }));
+    console.log("appelAProjetsErrors", appelAProjetsErrors);
     return [
       { name: "etablissements", data: appelAProjetEtablissementService.etablissements },
-      { name: "etablissementsErrors", data: appelAProjetEtablissementService.etablissementsErrors },
+      {
+        name: "appelAProjetsErrors",
+        data: appelAProjetsErrors,
+      },
       { name: "classes", data: appelAProjetClasseService.classes },
       { name: "referents", data: appelAProjetReferentService.referents },
     ];
   };
+
+  filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets: IAppelAProjet[]): {
+    retained: IAppelAProjet[];
+    removed: IRemovedAppelAProjet[];
+  } {
+    const appelAProjetsRetained: IAppelAProjet[] = [];
+    const appelAProjetsRemoved: IRemovedAppelAProjet[] = [];
+    for (const appelAProjet of appelAProjets) {
+      const email = appelAProjet.referentEtablissement.email;
+      const uai = appelAProjet.etablissement?.uai;
+      if (!uai || !email) {
+        appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "noUaiOrEmail" });
+        continue;
+      }
+      const hasSameUaiButDifferentEmail = appelAProjets.some((appelAProjet) => appelAProjet.etablissement?.uai === uai && appelAProjet.referentEtablissement.email !== email);
+      if (hasSameUaiButDifferentEmail) {
+        appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "sameUaiDifferentEmail" });
+      } else {
+        appelAProjetsRetained.push(appelAProjet);
+      }
+    }
+    return { retained: appelAProjetsRetained, removed: appelAProjetsRemoved };
+  }
 }

@@ -7,29 +7,13 @@ import { ReferentCreatedBy } from "snu-lib";
 
 export class AppelAProjetEtablissementService {
   etablissements: (IEtablissement & { operation: "create" | "update" })[] = [];
-  etablissementsErrors: { error: string; uai?: string | null; email?: string | null; nameAndCommune: string | undefined }[] = [];
 
   async processEtablissement(appelAProjet: IAppelAProjet, etablissements: EtablissementProviderDto[], referentEtablissementId, save: boolean): Promise<IEtablissement | undefined> {
     const uai = appelAProjet.etablissement?.uai;
-    if (!uai) {
-      this.etablissementsErrors.push({
-        error: "No UAI provided",
-        uai: null,
-        nameAndCommune: appelAProjet?.etablissement.nameAndCommune,
-        email: appelAProjet.referentEtablissement.email,
-      });
-      return;
-    }
-
     const etablissementFromAnnuaire = etablissements.find((etablissement) => etablissement.identifiant_de_l_etablissement === uai);
 
     if (!etablissementFromAnnuaire) {
-      this.etablissementsErrors.push({
-        error: "Etablissement not found",
-        uai: appelAProjet.etablissement.uai,
-        nameAndCommune: appelAProjet?.etablissement.nameAndCommune,
-        email: appelAProjet.referentEtablissement.email,
-      });
+      console.log(`Etablissement not found for UAI ${uai}`);
       return;
     }
 

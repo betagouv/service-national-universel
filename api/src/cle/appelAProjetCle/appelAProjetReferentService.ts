@@ -4,19 +4,11 @@ import { InvitationType, IReferent, ReferentMetadata } from "../../models/refere
 import { ReferentCreatedBy, ROLES, SUB_ROLES } from "snu-lib";
 
 export class AppelAProjetReferentService {
-  referents: Partial<IReferent & { operation: "create" | "none"; error: "sameUaiDifferentEmailChefEtablissement" | ""; uai?: string }>[] = [];
+  referents: Partial<IReferent & { operation: "create" | "none"; uai?: string }>[] = [];
 
   async processReferentEtablissement(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
     const referentEtablissement = await ReferentModel.findOne({ email: appelAProjet.referentEtablissement.email });
     const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentEtablissement.email);
-    const hasSameUaiButDifferentEmailThanAlreadyProcessed = this.referents.some(
-      (referent) =>
-        referent.uai === appelAProjet.etablissement?.uai &&
-        referent.email !== appelAProjet.referentEtablissement.email &&
-        referent.role === ROLES.ADMINISTRATEUR_CLE &&
-        referent.uai &&
-        appelAProjet.etablissement.uai,
-    );
     const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (referentEtablissement) {
@@ -27,21 +19,10 @@ export class AppelAProjetReferentService {
           role: referentEtablissement.role,
           subRole: referentEtablissement.subRole,
           operation: "none",
-          error: "",
           uai: appelAProjet.etablissement?.uai,
         });
       }
-      if (hasSameUaiButDifferentEmailThanAlreadyProcessed) {
-        this.referents.push({
-          _id: referentEtablissement.id,
-          email: referentEtablissement.email,
-          role: referentEtablissement.role,
-          subRole: referentEtablissement.subRole,
-          operation: "none",
-          error: "sameUaiDifferentEmailChefEtablissement",
-          uai: appelAProjet.etablissement?.uai,
-        });
-      }
+
       if (save) {
         if (!referentEtablissement.metadata.createdBy === ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
           referentEtablissement.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
@@ -61,22 +42,16 @@ export class AppelAProjetReferentService {
       metadata: { ...referentMetadata, invitationType: InvitationType.INSCRIPTION },
     };
     let createdReferent;
+
     if (save) {
       createdReferent = await ReferentModel.create(newReferent);
       console.log("AppelAProjetReferentService - processReferentEtablissement() - created referentEtablissement : ", createdReferent?._id);
     }
+
     if (!hasAlreadyBeenProcessed) {
-      this.referents.push({ ...newReferent, _id: createdReferent?._id, operation: "create", error: "", uai: appelAProjet.etablissement?.uai });
+      this.referents.push({ ...newReferent, _id: createdReferent?._id, operation: "create", uai: appelAProjet.etablissement?.uai });
     }
-    if (hasSameUaiButDifferentEmailThanAlreadyProcessed) {
-      this.referents.push({
-        ...newReferent,
-        _id: createdReferent?._id,
-        operation: "create",
-        error: "sameUaiDifferentEmailChefEtablissement",
-        uai: appelAProjet.etablissement?.uai,
-      });
-    }
+
     return createdReferent?.id;
   }
 
@@ -92,7 +67,6 @@ export class AppelAProjetReferentService {
           email: existingReferentClasse.email,
           role: existingReferentClasse.role,
           operation: "none",
-          error: "",
           uai: appelAProjet.etablissement?.uai,
         });
       }
@@ -112,7 +86,7 @@ export class AppelAProjetReferentService {
       console.log("AppelAProjetReferentService - processReferentClasse() - created referentClasse : ", createdReferent?._id);
     }
     if (!hasAlreadyBeenProcessed) {
-      this.referents.push({ ...newClasseReferent, _id: createdReferent?._id, operation: "create", error: "", uai: appelAProjet.etablissement?.uai });
+      this.referents.push({ ...newClasseReferent, _id: createdReferent?._id, operation: "create", uai: appelAProjet.etablissement?.uai });
     }
 
     return createdReferent?._id;
