@@ -8,6 +8,7 @@ import { HiPlus, HiSearch } from "react-icons/hi";
 import { MesEngagements } from "./components/MesEngagement";
 import { Programs } from "./components/Programs";
 import { FAQ } from "./components/FAQ";
+import MesAttestations from "./components/MesAttestations";
 
 export default function HomePhase2() {
   const { young } = useSelector((state) => state.Auth);
@@ -19,9 +20,11 @@ export default function HomePhase2() {
           <img src={EngagementSrc} alt="engagement" />
         </div>
 
-        <h1 className="mt-6 mx-auto text-center font-bold text-5xl max-w-xl leading-tight">
-          {young?.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? `👏 ${young?.firstName}, vous avez validé votre phase Engagement !` : "Engagez-vous au service de la Nation !"}
-        </h1>
+        {young?.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? (
+          <h1 className="mt-6 mx-auto text-center font-bold text-4xl md:text-5xl max-w-3xl leading-tight">👏 {young?.firstName}, vous avez validé votre phase Engagement&nbsp;!</h1>
+        ) : (
+          <h1 className="mt-6 mx-auto text-center font-bold text-4xl md:text-5xl max-w-3xl leading-tight">Engagez-vous au service de la Nation&nbsp;!</h1>
+        )}
 
         <div className="flex flex-col md:flex-row justify-center gap-4 my-6">
           <Link
@@ -39,6 +42,8 @@ export default function HomePhase2() {
 
         <hr className="mt-12 mb-6 md:max-w-6xl mx-auto" />
       </header>
+
+      {young?.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? <MesAttestations /> : null}
 
       <MesEngagements />
 
