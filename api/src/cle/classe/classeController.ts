@@ -257,10 +257,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       if (youngWithStatusPhase1Done) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    console.log("value.totalSeats", value.totalSeats);
-    console.log("classe.totalSeats", classe.totalSeats);
-    console.log("value.estimatedSeats", value.estimatedSeats);
-    console.log("classe.estimatedSeats", classe.estimatedSeats);
     if (value.estimatedSeats !== classe.estimatedSeats) {
       if (!canEditEstimatedSeats(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       const now = new Date();
@@ -271,20 +267,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
-    console.log("value.totalSeats", value.totalSeats);
-    console.log("classe.totalSeats", classe.totalSeats);
-    console.log("value.estimatedSeats", value.estimatedSeats);
-    console.log("classe.estimatedSeats", classe.estimatedSeats);
-
     if (value.totalSeats !== classe.totalSeats) {
       if (!canEditTotalSeats(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       if (value.totalSeats > value.estimatedSeats) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
-    console.log("value.totalSeats", value.totalSeats);
-    console.log("classe.totalSeats", classe.totalSeats);
-    console.log("value.estimatedSeats", value.estimatedSeats);
-    console.log("classe.estimatedSeats", classe.estimatedSeats);
 
     const oldCohort = classe.cohort;
     classe.set({ ...value, sessionId: classe.sessionId || null });
