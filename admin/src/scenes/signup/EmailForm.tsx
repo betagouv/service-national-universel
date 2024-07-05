@@ -31,7 +31,7 @@ export default function EmailForm({ referent, reinscription, invitationToken }: 
     e.preventDefault();
     try {
       const { ok, code, message } = await api.put(`/cle/referent-signup/request-confirmation-email`, { email, confirmEmail, invitationToken });
-      if (!ok) return toastr.error(message || translate(code), "");
+      if (!ok) return toastr.error(message || translate(code), "", { timeOut: 5000 });
       history.push(`/creer-mon-compte/code${search}`);
     } catch (error) {
       console.log(error);

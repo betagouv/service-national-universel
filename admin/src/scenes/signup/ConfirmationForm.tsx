@@ -40,7 +40,7 @@ export default function ConfirmationForm({ referent, etablissement, invitationTo
       }
 
       localStorage.setItem(REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY, String(true));
-      toastr.success("Votre compte a bien été créé. Vous pouvez maintenant vous connecter.", "");
+      toastr.success("Votre compte a bien été créé. Vous pouvez maintenant vous connecter.", "", { timeOut: 5000 });
       history.push("/auth");
     } catch (e) {
       if (e.ok == false) {
