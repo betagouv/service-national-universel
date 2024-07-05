@@ -493,61 +493,65 @@ export default function Settings() {
                   <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
                 </div>
                 <div className="flex w-[45%] flex-col gap-4">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Création de groupe et modification du schéma de répartition</p>
-                      <MdInfoOutline data-tip data-for="création_groupe" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="création_groupe" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Ouverture ou fermeture pour les utilisateurs de la possibilité de créer et modifier des groupes sur le schéma de répartition.
-                        </p>
-                      </ReactTooltip>
-                    </div>
-                    <ToggleDate
-                      label="Référents régionaux"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      value={data.repartitionSchemaCreateAndEditGroupAvailability}
-                      onChange={() => setData({ ...data, repartitionSchemaCreateAndEditGroupAvailability: !data.repartitionSchemaCreateAndEditGroupAvailability })}
-                      range={{
-                        from: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityFrom || undefined,
-                        to: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityTo || undefined,
-                      }}
-                      onChangeRange={(range) => {
-                        setData({
-                          ...data,
-                          uselessInformation: {
-                            ...data.uselessInformation,
-                            repartitionSchemaCreateAndEditGroupAvailabilityFrom: range?.from,
-                            repartitionSchemaCreateAndEditGroupAvailabilityTo: range?.to,
-                          },
-                        });
-                      }}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Accès au schéma de répartition </p>
-                      <MdInfoOutline data-tip data-for="acces_schema" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="acces_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Autoriser ou bloquer l’accès à la consultation du schéma de répartition.
-                        </p>
-                      </ReactTooltip>
-                    </div>
-                    <SimpleToggle
-                      label="Référents régionaux"
-                      disabled={isLoading || readOnly}
-                      value={data.schemaAccessForReferentRegion}
-                      onChange={() => setData({ ...data, schemaAccessForReferentRegion: !data.schemaAccessForReferentRegion })}
-                    />
-                    <SimpleToggle
-                      label="Référents départementaux"
-                      disabled={isLoading || readOnly}
-                      value={data.schemaAccessForReferentDepartment}
-                      onChange={() => setData({ ...data, schemaAccessForReferentDepartment: !data.schemaAccessForReferentDepartment })}
-                    />
-                  </div>
+                  {data.type !== COHORT_TYPE.CLE && (
+                    <>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs  font-medium text-gray-900">Création de groupe et modification du schéma de répartition</p>
+                          <MdInfoOutline data-tip data-for="création_groupe" className="h-5 w-5 cursor-pointer text-gray-400" />
+                          <ReactTooltip id="création_groupe" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                            <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                              Ouverture ou fermeture pour les utilisateurs de la possibilité de créer et modifier des groupes sur le schéma de répartition.
+                            </p>
+                          </ReactTooltip>
+                        </div>
+                        <ToggleDate
+                          label="Référents régionaux"
+                          disabled={isLoading}
+                          readOnly={readOnly}
+                          value={data.repartitionSchemaCreateAndEditGroupAvailability}
+                          onChange={() => setData({ ...data, repartitionSchemaCreateAndEditGroupAvailability: !data.repartitionSchemaCreateAndEditGroupAvailability })}
+                          range={{
+                            from: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityFrom || undefined,
+                            to: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityTo || undefined,
+                          }}
+                          onChangeRange={(range) => {
+                            setData({
+                              ...data,
+                              uselessInformation: {
+                                ...data.uselessInformation,
+                                repartitionSchemaCreateAndEditGroupAvailabilityFrom: range?.from,
+                                repartitionSchemaCreateAndEditGroupAvailabilityTo: range?.to,
+                              },
+                            });
+                          }}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs  font-medium text-gray-900">Accès au schéma de répartition </p>
+                          <MdInfoOutline data-tip data-for="acces_schema" className="h-5 w-5 cursor-pointer text-gray-400" />
+                          <ReactTooltip id="acces_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                            <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                              Autoriser ou bloquer l’accès à la consultation du schéma de répartition.
+                            </p>
+                          </ReactTooltip>
+                        </div>
+                        <SimpleToggle
+                          label="Référents régionaux"
+                          disabled={isLoading || readOnly}
+                          value={data.schemaAccessForReferentRegion}
+                          onChange={() => setData({ ...data, schemaAccessForReferentRegion: !data.schemaAccessForReferentRegion })}
+                        />
+                        <SimpleToggle
+                          label="Référents départementaux"
+                          disabled={isLoading || readOnly}
+                          value={data.schemaAccessForReferentDepartment}
+                          onChange={() => setData({ ...data, schemaAccessForReferentDepartment: !data.schemaAccessForReferentDepartment })}
+                        />
+                      </div>
+                    </>
+                  )}
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Téléchargement du schéma de répartition</p>
