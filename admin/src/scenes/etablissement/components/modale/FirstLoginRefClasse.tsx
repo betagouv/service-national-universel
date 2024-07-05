@@ -36,7 +36,7 @@ export default function FirstLoginRefClasse({ user, classeId }: Props) {
         localStorage.removeItem(REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY);
       }}
       className="md:max-w-[700px]"
-      icon={<ProfilePic initials={`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`} />}
+      icon={<ProfilePic initials={`${user.firstName?.charAt(0)}${user.lastName?.charAt(0)}`} />}
       title={`Bonjour ${user.firstName} ${user.lastName} !`}
       text="Bienvenue sur votre compte SNU en tant que Référent de classe. Vous pouvez compléter la fiche de votre classe en renseignant toutes les informations."
       actions={[
