@@ -1,5 +1,6 @@
 const request = require("supertest");
 const getAppHelper = require("../helpers/app");
+
 //classe
 const { createClasse } = require("../helpers/classe");
 const { createFixtureClasse } = require("../fixtures/classe");
@@ -15,7 +16,8 @@ const YoungModel = require("../../models/young");
 const getNewCohortFixture = require("../fixtures/cohort");
 const { createCohortHelper } = require("../helpers/cohort");
 
-const { ROLES, LIMIT_DATE_ESTIMATED_SEATS } = require("snu-lib");
+const snuLib = require("snu-lib");
+const { ROLES } = require("snu-lib");
 const passport = require("passport");
 const { dbConnect, dbClose } = require("../helpers/db");
 const { ObjectId } = require("mongoose").Types;
@@ -259,9 +261,7 @@ describe("PUT /cle/classe/:id", () => {
   it("should return 400 when totalSeats > estimatedSeats", async () => {
     const classe = createFixtureClasse({ estimatedSeats: 1, totalSeats: 1 });
     const validId = (await createClasse(classe))._id;
-    jest.useFakeTimers();
-    const afterEstimatedSeatsDate = new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() + 24 * 60 * 60 * 1000); // 1 day after
-    jest.setSystemTime(afterEstimatedSeatsDate);
+    jest.spyOn(snuLib, "canEditTotalSeats").mockReturnValueOnce(true);
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
@@ -269,7 +269,6 @@ describe("PUT /cle/classe/:id", () => {
         totalSeats: 10,
       });
     expect(res.status).toBe(400);
-    jest.useRealTimers();
   });
 
   it("should return 403 when changing cohort is not allowed because classe has a ligneID", async () => {
