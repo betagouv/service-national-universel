@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
@@ -9,27 +9,28 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { PasswordInput } from "@codegouvfr/react-dsfr/blocks/PasswordInput";
 
 import { isChefEtablissement, translate } from "snu-lib";
+import { ReferentDto } from "snu-lib/src/dto";
 import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
 
 import { Section, Container } from "@snu/ds/dsfr";
 
-import { User } from "@/types";
 import api from "@/services/api";
 
 interface Props {
-  user: User;
-  etablissement?: EtablissementDto & { fullName?: string; postcode?: string };
+  referent: ReferentDto;
+  etablissement?: EtablissementDto;
   invitationToken: string;
   reinscription: boolean;
+  onReferentChange: (referent: ReferentDto) => void;
 }
 
-export default function InformationsForm({ user, etablissement, invitationToken, reinscription }: Props) {
+export default function InformationsForm({ referent, etablissement, invitationToken, reinscription, onReferentChange }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
-  const [firstName, setFirstName] = useState(user.firstName || "");
-  const [lastName, setLastName] = useState(user.lastName || "");
-  const [phone, setPhone] = useState(user.phone || "");
+  const [firstName, setFirstName] = useState(referent.firstName || "");
+  const [lastName, setLastName] = useState(referent.lastName || "");
+  const [phone, setPhone] = useState(referent.phone || "");
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,6 +52,7 @@ export default function InformationsForm({ user, etablissement, invitationToken,
       if (!ok) {
         return toastr.error(message || translate(code), "");
       }
+      onReferentChange({ ...referent, firstName, lastName, phone });
       history.push(`/creer-mon-compte/confirmation${search}`);
     } catch (error) {
       if (error.code === "PASSWORD_NOT_VALIDATED")
@@ -96,7 +98,7 @@ export default function InformationsForm({ user, etablissement, invitationToken,
               />
             </div>
           </div>
-          {isChefEtablissement(user) && (
+          {isChefEtablissement(referent) && (
             <div className="w-full">
               <div className="flex items-center justify-between">Établissement scolaire</div>
               {etablissement ? (
