@@ -33,9 +33,6 @@ class InMemoryWritable extends Writable {
 }
 
 async function generatePdfIntoStream(outStream, { type, template, young, contract }) {
-  console.log("🚀 ~ generatePdfIntoStream ~ young:", young);
-  console.log("🚀 ~ generatePdfIntoStream ~ template:", template);
-  console.log("🚀 ~ generatePdfIntoStream ~ type:", type);
   if (type === "certificate" && template === "1" && young) {
     return await generateCertifPhase1(outStream, young);
   }

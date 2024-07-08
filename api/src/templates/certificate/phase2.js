@@ -3,8 +3,6 @@ const { initDocument, getMinistres, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_C
 const config = require("config");
 
 function render(doc, young) {
-  console.log("🚀 ~ render ~ doc:", doc);
-  console.log("Rendering certificate phase 2");
   const d = young.statusPhase2ValidatedAt;
   if (!d) throw "Date de validation de la phase 2 non trouvée";
   const ministresData = getMinistres(d);

@@ -63,7 +63,6 @@ router.post("/:type/:template", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    console.log("🚀 ~ router.post ~ value:", value);
     const { id, type, template } = value;
 
     const young = await YoungObject.findById(id);

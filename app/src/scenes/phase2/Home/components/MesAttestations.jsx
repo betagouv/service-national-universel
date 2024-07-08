@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { RiAttachmentLine } from "react-icons/ri";
 import { HiChevronDown } from "react-icons/hi";
@@ -6,47 +6,21 @@ import { useSelector } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
 import { download } from "snu-lib";
-import { apiURL } from "@/config";
-import API from "@/services/api";
-
-// const sendAttestation = async (doc, young) => {
-//   // TODO: move this to the backend
-//   const res = await fetch(`/young/${young._id}/documents/certificate/${doc}/send-email`, {
-//     headers: { "Content-Type": "application/json" },
-//     Authorization: `JWT ${young.token}`,
-//     method: "POST",
-//     body: JSON.stringify({ fileName: `${young.firstName} ${young.lastName} - attestation ${doc}.pdf` }),
-//   });
-//   const { ok, error } = await res.json();
-//   if (!ok) throw new Error(error.message);
-// };
-
-async function fetchAttestation(doc, young) {
-  const res = await fetch(`${apiURL}/young/${young._id}/documents/certificate/${doc}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `JWT ${API.getToken()}`,
-    },
-    method: "POST",
-  });
-  if (!res.ok) throw new Error("Erreur lors du téléchargement de l'attestation");
-  const file = await res.blob();
-  return file;
-}
+import { fetchAttestation } from "../../repo";
 
 export default function MesAttestations() {
   const { young } = useSelector((state) => state.Auth);
 
-  // const sendAttestationMutation = useMutation({
-  //   mutationFn: (doc) => sendAttestation(doc, young),
-  //   onError: () => toastr.error("Une erreur est survenue lors de l'envoi de l'attestation"),
-  //   onSuccess: () => toastr.success(`Document envoyé à ${young.email}`),
-  // });
-
   const downloadAttestation = useMutation({
-    mutationFn: () => fetchAttestation("2", young),
+    mutationFn: (template) => fetchAttestation(young._id, template, false),
     onError: () => toastr.error("Une erreur est survenue lors du téléchargement de l'attestation"),
     onSuccess: (file) => download(file, `${young.firstName} ${young.lastName} - attestation.pdf`),
+  });
+
+  const sendAttestation = useMutation({
+    mutationFn: (template) => fetchAttestation(young._id, template, true),
+    onError: () => toastr.error("Une erreur est survenue lors de l'envoi de l'attestation"),
+    onSuccess: () => toastr.success("Envoi réalisé"),
   });
 
   return (
@@ -64,8 +38,19 @@ export default function MesAttestations() {
                   Télécharger
                   <HiChevronDown className="inline-block text-xl" />
                 </PopoverButton>
-                <PopoverPanel anchor="bottom" className="flex flex-col">
-                  <button onClick={() => downloadAttestation.mutate("2")}>{downloadAttestation.isPending ? "Téléchargement en cours..." : "Télécharger"}</button>
+                <PopoverPanel anchor="bottom" className="flex flex-col bg-white py-1 rounded shadow-nina">
+                  <button
+                    onClick={() => downloadAttestation.mutate("2")}
+                    disabled={downloadAttestation.isLoading}
+                    className="px-2 py-1 hover:bg-blue-600 hover:text-white w-full text-left">
+                    {downloadAttestation.isPending ? "Téléchargement en cours..." : "Télécharger"}
+                  </button>
+                  <button
+                    onClick={() => sendAttestation.mutate("2")}
+                    disabled={sendAttestation.isLoading}
+                    className="px-2 py-1 hover:bg-blue-600 hover:text-white w-full text-left">
+                    Envoyer par email
+                  </button>
                 </PopoverPanel>
               </Popover>
             </div>
@@ -75,6 +60,26 @@ export default function MesAttestations() {
               <p className="text-white text-sm">2</p>
             </div>
             <p>Attestation de réalisation SNU</p>
+            <Popover className="relative">
+              <PopoverButton className="text-blue-600">
+                Télécharger
+                <HiChevronDown className="inline-block text-xl" />
+              </PopoverButton>
+              <PopoverPanel anchor="bottom" className="flex flex-col bg-white py-1 rounded shadow-nina">
+                <button
+                  onClick={() => downloadAttestation.mutate("snu")}
+                  disabled={downloadAttestation.isLoading}
+                  className="px-2 py-1 hover:bg-blue-600 hover:text-white w-full text-left">
+                  {downloadAttestation.isPending ? "Téléchargement en cours..." : "Télécharger"}
+                </button>
+                <button
+                  onClick={() => sendAttestation.mutate("snu")}
+                  disabled={sendAttestation.isLoading}
+                  className="px-2 py-1 hover:bg-blue-600 hover:text-white w-full text-left">
+                  Envoyer par email
+                </button>
+              </PopoverPanel>
+            </Popover>
           </div>
         </div>
       </div>
