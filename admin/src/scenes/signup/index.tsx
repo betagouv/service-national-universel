@@ -21,11 +21,11 @@ import LogoSNU from "@/assets/logo-snu.png";
 import HumanCooperation from "@/assets/icons/HumanCooperation";
 import Loader from "@/components/Loader";
 
-import Role from "./RoleForm";
-import Email from "./EmailForm";
-import Code from "./CodeForm";
-import Informations from "./InformationsForm";
-import Confirmation from "./ConfirmationForm";
+import RoleForm from "./RoleForm";
+import EmailForm from "./EmailForm";
+import CodeForm from "./CodeForm";
+import InformationsForm from "./InformationsForm";
+import ConfirmationForm from "./ConfirmationForm";
 
 export default function Index() {
   useDocumentTitle("Creer mon compte");
@@ -123,20 +123,22 @@ export default function Index() {
       />
 
       <Switch>
-        <SentryRoute path="/creer-mon-compte" exact component={() => <Role referent={referent} etablissement={etablissement} reinscription={reinscription} />} />
-        <SentryRoute path="/creer-mon-compte/email" component={() => <Email referent={referent} reinscription={reinscription} invitationToken={invitationToken} />} />
+        <SentryRoute path="/creer-mon-compte" exact component={() => <RoleForm referent={referent} etablissement={etablissement} reinscription={reinscription} />} />
+        <SentryRoute path="/creer-mon-compte/email" component={() => <EmailForm referent={referent} reinscription={reinscription} invitationToken={invitationToken} />} />
         <SentryRoute
           path="/creer-mon-compte/code"
-          component={() => <Code referent={referent} reinscription={reinscription} invitationToken={invitationToken} onReferentChange={setReferent} />}
+          component={() => <CodeForm referent={referent} reinscription={reinscription} invitationToken={invitationToken} onReferentChange={setReferent} />}
         />
         <SentryRoute
           path="/creer-mon-compte/informations"
-          component={() => <Informations referent={referent} reinscription={reinscription} invitationToken={invitationToken} onReferentChange={setReferent} />}
+          component={() => (
+            <InformationsForm referent={referent} etablissement={etablissement} reinscription={reinscription} invitationToken={invitationToken} onReferentChange={setReferent} />
+          )}
         />
         <SentryRoute path="/verifier-mon-compte" component={() => <Redirect to={`/creer-mon-compte/confirmation${search ? `${search}&reinscription=1` : search}`} />} />
         <SentryRoute
           path="/creer-mon-compte/confirmation"
-          component={() => <Confirmation referent={referent} etablissement={etablissement} reinscription={reinscription} invitationToken={invitationToken} />}
+          component={() => <ConfirmationForm referent={referent} etablissement={etablissement} reinscription={reinscription} invitationToken={invitationToken} />}
         />
       </Switch>
 
