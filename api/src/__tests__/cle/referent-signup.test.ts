@@ -177,7 +177,7 @@ describe("Referent Signup", () => {
   describe("POST /cle/referent-signup/confirm-signup", () => {
     it("should confirm signup for chef etablissement", async () => {
       const referent = (await createReferentHelper(getNewSignupReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))) as ReferentDocument;
-      await createEtablissement(createFixtureEtablissement({ coordinateurIds: [referent._id] }));
+      await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referent._id] }));
       const response = await request(getAppHelper()).post("/cle/referent-signup/confirm-signup").send({
         invitationToken: referent.invitationToken,
       });
