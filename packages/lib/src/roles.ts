@@ -66,6 +66,26 @@ const SUB_ROLES_LIST = Object.values(SUB_ROLES);
 const SUPPORT_ROLES_LIST = Object.keys(SUPPORT_ROLES);
 const VISITOR_SUB_ROLES_LIST = Object.keys(VISITOR_SUBROLES);
 
+//TODO a supprimer
+const REFERENT_ROLES = ROLES;
+
+const REFERENT_DEPARTMENT_SUBROLE = {
+  manager_department: SUB_ROLES.manager_department,
+  assistant_manager_department: SUB_ROLES.assistant_manager_department,
+  manager_phase2: SUB_ROLES.manager_phase2,
+  secretariat: SUB_ROLES.secretariat,
+};
+const REFERENT_REGION_SUBROLE = {
+  coordinator: SUB_ROLES.coordinator,
+  assistant_coordinator: SUB_ROLES.assistant_coordinator,
+  manager_phase2: SUB_ROLES.manager_phase2,
+};
+
+const ADMINISTRATEUR_CLE_SUBROLE = {
+  referent_etablissement: SUB_ROLES.referent_etablissement,
+  coordinateur_cle: SUB_ROLES.coordinateur_cle,
+};
+
 // TODO - Geography department ref-ref array-array ref-ref/struc|young array-string
 const sameGeography = (actor, target) => {
   const actorAndTargetInTheSameRegion = (actor?.region && actor?.region === target?.region) || region2department[actor?.region].includes(target?.department);
@@ -1004,6 +1024,10 @@ export {
   CENTER_ROLES,
   DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS,
   DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS,
+  REFERENT_ROLES,
+  REFERENT_DEPARTMENT_SUBROLE,
+  REFERENT_REGION_SUBROLE,
+  ADMINISTRATEUR_CLE_SUBROLE,
   canInviteUser,
   canDeleteYoung,
   canEditYoung,
