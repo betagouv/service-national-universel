@@ -44,7 +44,7 @@ const ClasseStateManager: IClasseStateManager = {
 
     // Closed
     const seatsValidated = studentValidated.length;
-    const isInscriptionClosed = now > inscriptionEndDate;
+    const isInscriptionClosed = now >= inscriptionEndDate;
     if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats === seatsValidated) {
       classe.set({ status: STATUS_CLASSE.CLOSED });
       classe = await classe.save({ fromUser });
