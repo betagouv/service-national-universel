@@ -40,16 +40,7 @@ function getMailParams(type, template, young, contract) {
   throw new Error(ERRORS.NOT_FOUND);
 }
 
-interface sendDocumentEmailOptions {
-  type: string;
-  template: string;
-  young_id: string;
-  contract_id?: string;
-  fileName: string;
-  switchToCle: boolean;
-}
-
-async function sendDocumentEmail(opts: sendDocumentEmailOptions) {
+async function sendDocumentEmail(opts: { young_id: string; type: string; template: string; fileName: string; switchToCle: boolean; contract_id?: string }) {
   const young = await YoungObject.findById(opts.young_id);
 
   if (!young) {

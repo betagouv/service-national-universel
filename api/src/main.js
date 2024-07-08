@@ -21,6 +21,7 @@ const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
+const SendMailService = require("./MOVE_ME/send-mail-service"); // TODO: REMOVE_ME
 
 async function runCrons() {
   initSentry();
@@ -43,15 +44,16 @@ async function runAPI() {
 
   await initDB();
   await runMigrations();
+  SendMailService.startWorker(); // TODO: REMOVE_ME
 
   /*
-      Download all certificate templates when instance is starting,
-      making them available for PDF generation
+    Download all certificate templates when instance is starting,
+    making them available for PDF generation
 
-      These templates are sensitive data, so we can't treat them as simple statics
+    These templates are sensitive data, so we can't treat them as simple statics
 
-      TODO : A possible improvement would be to download templates at build time
-    */
+    TODO : A possible improvement would be to download templates at build time
+  */
   getAllPdfTemplates();
 
   const app = express();
