@@ -15,7 +15,7 @@ const YoungModel = require("../../models/young");
 const getNewCohortFixture = require("../fixtures/cohort");
 const { createCohortHelper } = require("../helpers/cohort");
 
-const { ROLES } = require("snu-lib");
+const { ROLES, LIMIT_DATE_ESTIMATED_SEATS } = require("snu-lib");
 const passport = require("passport");
 const { dbConnect, dbClose } = require("../helpers/db");
 const { ObjectId } = require("mongoose").Types;
@@ -77,6 +77,12 @@ describe("DELETE /cle/classe/:id", () => {
 });
 
 describe("PUT /cle/classe/:id", () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   it("should return 400 when id is invalid", async () => {
     const res = await request(getAppHelper()).put("/cle/classe/invalidId").send({ name: "New Class" });
     expect(res.status).toBe(400);
@@ -259,6 +265,8 @@ describe("PUT /cle/classe/:id", () => {
   it("should return 400 when totalSeats > estimatedSeats", async () => {
     const classe = createFixtureClasse({ estimatedSeats: 1, totalSeats: 1 });
     const validId = (await createClasse(classe))._id;
+    const afterEstimatedSeatsDate = new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() + 24 * 60 * 60 * 1000); // 1 day after
+    jest.setSystemTime(afterEstimatedSeatsDate);
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({

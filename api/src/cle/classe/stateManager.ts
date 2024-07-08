@@ -25,16 +25,17 @@ const ClasseStateManager: IClasseStateManager = {
     // Get students
     const students = await YoungModel.find({ classeId: classe._id }).lean();
     const studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
+    const seatsValidated = studentValidated.length;
+    classe.set({ seatsTaken: seatsValidated });
 
-    const seatsTaken = studentValidated.length;
-    classe.set({ seatsTaken });
-
+    // Get inscription date
     const now = new Date();
     const inscriptionStartDate = new Date(classeCohort.inscriptionStartDate);
     const inscriptionEndDate = new Date(classeCohort.inscriptionEndDate);
+    const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
+    const isInscriptionClosed = now >= inscriptionEndDate;
 
     // Open
-    const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
     if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status) && isInscriptionOpen) {
       classe.set({ status: STATUS_CLASSE.OPEN });
       classe = await classe.save({ fromUser });
@@ -43,8 +44,6 @@ const ClasseStateManager: IClasseStateManager = {
     }
 
     // Closed
-    const seatsValidated = studentValidated.length;
-    const isInscriptionClosed = now >= inscriptionEndDate;
     if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats === seatsValidated) {
       classe.set({ status: STATUS_CLASSE.CLOSED });
       classe = await classe.save({ fromUser });

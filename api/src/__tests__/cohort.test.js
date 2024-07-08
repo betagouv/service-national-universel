@@ -97,7 +97,7 @@ describe("PUT /:cohort", () => {
     const oneMonthAfter = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
     const cohortFixture = getNewCohortFixture({ type: COHORT_TYPE.CLE });
     const cohort = await createCohortHelper(cohortFixture);
-    const classe = createFixtureClasse({ cohort: cohort.name });
+    const classe = createFixtureClasse({ cohort: cohort.name, status: STATUS_CLASSE.ASSIGNED });
     const classeId = (await createClasse(classe))._id;
     const res = await request(getAppHelper())
       .put(`/cohort/${encodeURIComponent(cohort.name)}`)
