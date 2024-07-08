@@ -46,10 +46,12 @@ export default function SchemaRepartition({ region, department }) {
     intradepartmentalAssigned: 0,
     centers: 0,
     toRegions: [],
+    goal: 0,
   });
 
   const [data, setData] = useState({ rows: getDefaultRows() });
   const [filteredCohortList, setFilteredCohortList] = useState([]);
+  const [goals, setGoals] = useState(null);
   const [exportLoading, setExportLoading] = useState(false);
 
   if (region) useDocumentTitle(`Schéma de répartition - ${region}`);
@@ -92,6 +94,7 @@ export default function SchemaRepartition({ region, department }) {
   useEffect(() => {
     if (cohort) {
       loadSchemaData();
+      loadGoalData();
     }
   }, [cohort]);
 
@@ -103,6 +106,13 @@ export default function SchemaRepartition({ region, department }) {
     let intradepartmentalAssigned = 0;
     let centers = 0;
     let toRegions = [];
+    let goal = 0;
+
+    if (goals) {
+      if (!region && !department) goal = goals.reduce((acc, cur) => acc + cur.max, 0);
+      else if (region && !department) goal = goals.filter((g) => g.region === region).reduce((acc, cur) => acc + cur.max, 0);
+      else if (region && department) goal = goals.filter((g) => g.region === region && g.department === department).reduce((acc, cur) => acc + cur.max, 0);
+    }
 
     if (data.toCenters) {
       for (const row of data.toCenters) {
@@ -128,7 +138,7 @@ export default function SchemaRepartition({ region, department }) {
         centers += row.centers ? row.centers : 0;
       }
     }
-    setSummary({ capacity, total, assigned, intradepartmental, intradepartmentalAssigned, centers, toRegions });
+    setSummary({ capacity, total, assigned, intradepartmental, intradepartmentalAssigned, centers, toRegions, goal });
   }, [data]);
 
   function getDefaultRows() {
@@ -169,6 +179,17 @@ export default function SchemaRepartition({ region, department }) {
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+    }
+  }
+
+  async function loadGoalData() {
+    try {
+      const { data, ok } = await API.get(`/inscription-goal/${cohort.name}`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des objectifs");
+      setGoals(data);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des objectifs");
     }
   }
 

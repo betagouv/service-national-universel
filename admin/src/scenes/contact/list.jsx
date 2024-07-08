@@ -3,11 +3,11 @@ import { useSelector } from "react-redux";
 import { Page, Header, Container, Badge, DropdownButton } from "@snu/ds/admin";
 import { formatLongDateFR, getDepartmentNumber, ROLES, translate } from "snu-lib";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
-import AdminIcon from "@/components/drawer/icons/Admin";
 import { BsDownload } from "react-icons/bs";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
-import { IoFlashOutline, IoWarning } from "react-icons/io5";
+import { IoFlashOutline } from "react-icons/io5";
+import { HiHome } from "react-icons/hi";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -159,7 +159,7 @@ export default function List() {
     <Page>
       <Header
         title="Liste de mes contacts"
-        breadcrumb={[{ title: <AdminIcon className="scale-[65%]" /> }, { title: "Mes contacts" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes contacts" }]}
         actions={[
           <ExportComponent
             key={0}
@@ -231,8 +231,8 @@ export default function List() {
                 { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
               ]}
               selectedFilters={selectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
+              pagination={paramData}
+              onPaginationChange={setParamData}
             />
           </div>
           <div className="mt-2 flex flex-row flex-wrap items-center px-4">

@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { HiOutlineChartSquareBar, HiChartSquareBar } from "react-icons/hi";
+import { HiHome } from "react-icons/hi";
 
 import api from "@/services/api";
 import plausibleEvent from "@/services/plausible";
@@ -162,7 +162,7 @@ export default function Index() {
       <BandeauInfo />
       <Header
         title="Tableau de bord"
-        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]}
         actions={[<DropdownButton title={"Exporter"} optionsGroup={selectOptions} key={"export"} position="right" />]}
       />
       <DashboardContainer active="sejour" availableTab={["general", "engagement", "sejour", "inscription"]}>

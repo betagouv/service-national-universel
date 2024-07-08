@@ -6,7 +6,7 @@ import { BoxProps } from "./types";
 
 export default function BoxDisponibilite({ summary, className, loading, isNational }: BoxProps & { isNational?: boolean }) {
   return (
-    <Box className={`flex-column flex justify-between pb-[0px] ${className}`}>
+    <Box className={`flex-column flex justify-between pb-[0px] w-1/3 ${className}`}>
       <div>
         <MiniTitle className="mb-[10px]">Disponibilité des places</MiniTitle>
         {loading ? (
