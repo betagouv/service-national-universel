@@ -1130,6 +1130,8 @@ const translateStatusClasse = (status) => {
       return "Classe Créée";
     case "VERIFIED":
       return "Classe Vérifiée";
+    case "ASSIGNED":
+      return "Cohorte attribuée";
     case "OPEN":
       return "Inscription Ouverte";
     case "CLOSED":

@@ -1,5 +1,7 @@
 import { UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
+import { isNowBetweenDates } from "./utils/date";
+import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "./constants/constants";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -968,6 +970,28 @@ function canAllowSNU(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
 
+function canEditEstimatedSeats(actor) {
+  if (actor.role === ROLES.ADMIN) return true;
+  const now = new Date();
+  const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+  return actor.role === ROLES.ADMINISTRATEUR_CLE && now <= limitDateEstimatedSeats;
+}
+
+function canEditTotalSeats(actor) {
+  if (actor.role === ROLES.ADMIN) {
+    const now = new Date();
+    const limitDateEstimatedSeat = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+    if (now <= limitDateEstimatedSeat) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  const limitDatesEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS).toISOString();
+  const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -1111,4 +1135,6 @@ export {
   canWithdrawClasse,
   canAllowSNU,
   canEditSanitaryEmailContact,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
 };

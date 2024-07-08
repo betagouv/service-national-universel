@@ -23,8 +23,7 @@ const { createCohortHelper } = require("./helpers/cohort");
 const getNewCohortFixture = require("./fixtures/cohort");
 //referent
 const { createReferentHelper } = require("./helpers/referent");
-const { getNewReferentFixture } = require("./fixtures/referent");
-
+const { getNewReferentFixture }= require("./fixtures/referent");
 //classe
 const { createClasse } = require("./helpers/classe");
 const { createFixtureClasse } = require("./fixtures/classe");

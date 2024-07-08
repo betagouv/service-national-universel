@@ -215,6 +215,59 @@ describe("PUT /cle/classe/:id", () => {
     expect(res.status).toBe(403);
   });
 
+  it("should return 403 when user can't edit estimatedSeats", async () => {
+    const classe = createFixtureClasse({ estimatedSeats: 5 });
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.RESPONSIBLE;
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        estimatedSeats: 10,
+      });
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should updte totalSeats when estimatedSeats change and date < LIMIT_DATE_ESTIMATED_SEATS", async () => {
+    const classe = createFixtureClasse({ estimatedSeats: 5, totalSeats: 5 });
+    const validId = (await createClasse(classe))._id;
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        estimatedSeats: 10,
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.data.totalSeats).toBe(10);
+  });
+
+  it("should return 403 when user can't edit totalSeats", async () => {
+    const classe = createFixtureClasse({ totalSeats: 5 });
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.RESPONSIBLE;
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        totalSeats: 10,
+      });
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 400 when totalSeats > estimatedSeats", async () => {
+    const classe = createFixtureClasse({ estimatedSeats: 1, totalSeats: 1 });
+    const validId = (await createClasse(classe))._id;
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}`)
+      .send({
+        ...classe,
+        totalSeats: 10,
+      });
+    expect(res.status).toBe(400);
+  });
+
   it("should return 403 when changing cohort is not allowed because classe has a ligneID", async () => {
     const cohort = await createCohortHelper(getNewCohortFixture());
     const classe = createFixtureClasse({ ligneId: "1234" });
