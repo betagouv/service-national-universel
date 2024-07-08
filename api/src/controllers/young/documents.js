@@ -7,9 +7,8 @@ const YoungObject = require("../../models/young");
 const CohortObject = require("../../models/cohort");
 const ContractObject = require("../../models/contract");
 const ApplicationObject = require("../../models/application");
-const { ERRORS, isYoung, isReferent, getCcOfYoung, uploadFile, deleteFile, getFile } = require("../../utils");
-const { sendTemplate } = require("../../sendinblue");
-const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, COHORTS, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
+const { ERRORS, isYoung, isReferent, uploadFile, deleteFile, getFile } = require("../../utils");
+const { FILE_KEYS, MILITARY_FILE_KEYS, COHORTS, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
@@ -17,42 +16,9 @@ const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
 const mime = require("mime-types");
 const scanFile = require("../../utils/virusScanner");
-const { generatePdfIntoStream, generatePdfIntoBuffer } = require("../../utils/pdf-renderer");
+const { generatePdfIntoStream } = require("../../utils/pdf-renderer");
 const { getMimeFromFile } = require("../../utils/file");
-
-function getMailParams(type, template, young, contract) {
-  if (type === "certificate" && template === "1")
-    return {
-      object: `Attestation de fin de phase 1 de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation de phase 1 du SNU.`,
-    };
-  if (type === "certificate" && template === "2")
-    return {
-      object: `Attestation de fin de phase 2 de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation de phase 2 du SNU.`,
-    };
-  if (type === "certificate" && template === "3")
-    return {
-      object: `Attestation de fin de phase 3 de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation de phase 3 du SNU.`,
-    };
-  if (type === "certificate" && template === "snu")
-    return {
-      object: `Attestation de réalisation du SNU de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation du SNU.`,
-    };
-  if (type === "contract" && template === "2" && contract)
-    return {
-      object: `Contrat de la mission ${contract.missionName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${contract.missionName}.`,
-    };
-  if (type === "convocation" && template === "cohesion") {
-    return {
-      object: `Convocation au séjour de cohésion de ${young.firstName} ${young.lastName}`,
-      message: "Vous trouverez en pièce-jointe de ce mail votre convocation au séjour de cohésion à présenter à votre arrivée au point de rassemblement.",
-    };
-  }
-}
+const sendDocumentEmail = require("../../MOVE_ME/send-document-email");
 
 router.post("/:type/:template", async (req, res) => {
   try {
@@ -103,7 +69,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     }
     const { id, type, template, fileName, contract_id, switchToCle } = value;
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungObject.findById(id).select({ region: 1, department: 1 }); // used by canSendFileByMailToYoung
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only send to them their own documents.
@@ -118,29 +84,14 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     if (type === "contract") {
       if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-      contract = await ContractObject.findById(contract_id);
+      contract = await ContractObject.exists({ _id: contract_id });
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const buffer = await generatePdfIntoBuffer({ type, template, young, contract });
+    await sendDocumentEmail(young._id, contract_id, type, template, fileName, switchToCle);
 
-    const content = buffer.toString("base64");
-
-    const { object, message } = getMailParams(type, template, young, contract);
-    let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
-    let params = { object, message };
-
-    if (switchToCle) {
-      emailTemplate = SENDINBLUE_TEMPLATES.young.PHASE_1_ATTESTATION_SWITCH_CLE;
-    }
-
-    const mail = await sendTemplate(emailTemplate, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      attachment: [{ content, name: fileName }],
-      params,
-      cc: getCcOfYoung({ template: emailTemplate, young }),
-    });
-    res.status(200).send({ ok: true, data: mail });
+    //start task
+    res.status(200).send({ ok: true });
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
