@@ -77,12 +77,6 @@ describe("DELETE /cle/classe/:id", () => {
 });
 
 describe("PUT /cle/classe/:id", () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-  afterAll(() => {
-    jest.useRealTimers();
-  });
   it("should return 400 when id is invalid", async () => {
     const res = await request(getAppHelper()).put("/cle/classe/invalidId").send({ name: "New Class" });
     expect(res.status).toBe(400);
@@ -265,6 +259,7 @@ describe("PUT /cle/classe/:id", () => {
   it("should return 400 when totalSeats > estimatedSeats", async () => {
     const classe = createFixtureClasse({ estimatedSeats: 1, totalSeats: 1 });
     const validId = (await createClasse(classe))._id;
+    jest.useFakeTimers();
     const afterEstimatedSeatsDate = new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() + 24 * 60 * 60 * 1000); // 1 day after
     jest.setSystemTime(afterEstimatedSeatsDate);
     const res = await request(getAppHelper())
@@ -274,6 +269,7 @@ describe("PUT /cle/classe/:id", () => {
         totalSeats: 10,
       });
     expect(res.status).toBe(400);
+    jest.useRealTimers();
   });
 
   it("should return 403 when changing cohort is not allowed because classe has a ligneID", async () => {
