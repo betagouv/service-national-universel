@@ -1,4 +1,4 @@
-import { ROLES, SUB_ROLES } from "../roles";
+import { ROLES, SUB_ROLES } from "../..";
 
 const IS_CREATION_CLASSE_OPEN_CLE = new Date() <= new Date("2024-02-01 23:59:00");
 
