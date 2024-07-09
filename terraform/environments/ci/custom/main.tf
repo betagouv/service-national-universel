@@ -117,7 +117,7 @@ resource "scaleway_container" "api" {
 resource "scaleway_container" "tasks" {
   name            = "${local.env}-tasks"
   namespace_id    = data.scaleway_container_namespace.main.id
-  registry_image = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port           = 8080
   cpu_limit      = 1024
   memory_limit   = 2048
