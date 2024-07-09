@@ -51,10 +51,10 @@ export const deleteClasse = async (_id: string, fromUser: object) => {
   return classe;
 };
 
-export const buildUniqueClasseId = (etablissement: Pick<IEtablissement, "uai">, classe: Pick<IClasse, "name" | "coloration" | "estimatedSeats">): string => {
+export const buildUniqueClasseId = (etablissement: Pick<IEtablissement, "uai">, classe: Pick<IClasse, "name" | "coloration" | "estimatedSeats">, originId = ""): string => {
   let hash = crypto
     .createHash("sha256")
-    .update(`${etablissement?.uai}${classe?.name}${classe?.coloration}${classe?.estimatedSeats}` || "NAME")
+    .update(`${etablissement?.uai}${classe?.name}${classe?.coloration}${classe?.estimatedSeats}${originId}` || "NAME")
     .digest("hex");
   if (!etablissement?.uai || !classe?.name || !classe?.coloration) {
     hash = "NO_UID";

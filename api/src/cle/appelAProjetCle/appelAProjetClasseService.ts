@@ -3,32 +3,39 @@ import { IEtablissement } from "../../models/cle/etablissementType";
 import { buildUniqueClasseId, buildUniqueClasseKey, findClasseByUniqueKeyAndUniqueId } from "../classe/classeService";
 import { IClasse } from "../../models/cle/classeType";
 import { CleClasseModel } from "../../models";
-import { ClasseSchoolYear, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+import { ClasseSchoolYear, ReferentCreatedBy, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 
 export class AppelAProjetClasseService {
-  classes: Partial<IClasse & { operation: "create" | "none" }>[] = [];
+  classes: Partial<IClasse & { numberDS: number; uai: string; operation: "create" | "none" }>[] = [];
 
   async processClasse(appelAProjet: IAppelAProjet, savedEtablissement: IEtablissement, referentClasseId, save: boolean) {
-    const uniqueClasseId = buildUniqueClasseId(savedEtablissement, {
-      name: appelAProjet.classe.name || "",
-      coloration: appelAProjet.classe.coloration,
-      estimatedSeats: appelAProjet.classe.estimatedSeats,
-    });
+    const uniqueClasseId = buildUniqueClasseId(
+      savedEtablissement,
+      {
+        name: appelAProjet.classe.name || "",
+        coloration: appelAProjet.classe.coloration,
+        estimatedSeats: appelAProjet.classe.estimatedSeats,
+      },
+      String(appelAProjet.numberDS),
+    );
     const uniqueClasseKey = buildUniqueClasseKey(savedEtablissement);
     let formattedClasse: Partial<IClasse>;
     const classeFound = await findClasseByUniqueKeyAndUniqueId(uniqueClasseKey, uniqueClasseId);
     if (classeFound) {
       console.log("AppelAProjetClasseService - processClasse() - classe found : ", classeFound?._id);
 
-      this.classes.push({ ...classeFound.toObject({ virtuals: false }), operation: "none" });
+      this.classes.push({ ...classeFound.toObject({ virtuals: false }), uai: appelAProjet.etablissement?.uai, numberDS: appelAProjet.numberDS, operation: "none" });
     } else {
       formattedClasse = this.mapAppelAProjetToClasse(appelAProjet.classe, savedEtablissement, uniqueClasseId, uniqueClasseKey, [referentClasseId]);
       let createdClasse;
       if (save) {
-        createdClasse = await CleClasseModel.create(formattedClasse);
+        createdClasse = await CleClasseModel.create({
+          ...formattedClasse,
+          metadata: { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, numeroDossierDS: appelAProjet.numberDS },
+        });
         console.log("AppelAProjetClasseService - processClasse() - created classe : ", createdClasse?._id);
       }
-      this.classes.push({ ...formattedClasse, _id: createdClasse?._id, operation: "create" });
+      this.classes.push({ ...formattedClasse, _id: createdClasse?._id, uai: appelAProjet.etablissement?.uai, numberDS: appelAProjet.numberDS, operation: "create" });
     }
   }
 
@@ -55,6 +62,7 @@ export class AppelAProjetClasseService {
       referentClasseIds: referentClasseIds,
       etablissementId: etablissement._id!,
       estimatedSeats: classeFromAppelAProjet.estimatedSeats,
+      metadata: {},
     };
   };
 }

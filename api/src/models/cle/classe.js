@@ -3,7 +3,23 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST, TYPE_CLASSE_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
+const { ReferentCreatedBy } = require("snu-lib");
 const MODELNAME = "classe";
+
+const classeMetadataSchema = {
+  createdBy: {
+    type: ReferentCreatedBy,
+    documentation: {
+      description: "Par quel workflow a été créé la classe",
+    },
+  },
+  numeroDossierDS: {
+    type: Number,
+    documentation: {
+      description: "Numéro de dossier Démarche Simplifiée si la classe a été importé",
+    },
+  },
+};
 
 const Schema = new mongoose.Schema({
   etablissementId: {
@@ -215,6 +231,14 @@ const Schema = new mongoose.Schema({
     enum: TYPE_CLASSE_LIST,
     documentation: {
       description: "Type de la classe, une classe complète ou une groupe d'élèves",
+    },
+  },
+
+  metadata: {
+    type: classeMetadataSchema,
+    default: {},
+    documentation: {
+      description: "Métadonnées d'un référent",
     },
   },
 
