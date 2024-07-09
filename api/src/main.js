@@ -28,7 +28,7 @@ const SendMailService = require("./MOVE_ME/send-mail-service"); // TODO: REMOVE_
 
 async function runTasks() {
   initSentry();
-  await initDB();
+  await Promise.all([initDB(), getAllPdfTemplates()]);
   SendMailService.startWorker();
   // Serverless containers requires running http server
   const app = express();
