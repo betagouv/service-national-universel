@@ -103,6 +103,7 @@ export default function View() {
               title="Créer une classe"
               leftIcon={<HiPlus size={20} />}
               onClick={() => history.push("/classes/create?etablissementId=" + etablissement._id)}
+              disabled={true}
             />
           ),
           user.subRole === SUB_ROLES.referent_etablissement && <ButtonAddCoordinator etablissement={etablissement} />,

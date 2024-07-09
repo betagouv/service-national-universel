@@ -6,6 +6,7 @@ import getAppHelper from "../helpers/app";
 import request from "supertest";
 import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult, InvitationType } from "../../services/cle/referent";
 import passport from "passport";
+import { SUB_ROLES } from "snu-lib";
 
 jest.mock("../../sendinblue", () => ({
   ...jest.requireActual("../../sendinblue"),
@@ -65,16 +66,12 @@ describe("Referent Service", () => {
         type: "FULL",
       });
 
-      await doInviteChefEtablissement(referent.email, user, InvitationType.INSCRIPTION);
+      await doInviteChefEtablissement(referent, user);
       const updatedReferent = await ReferentModel.findOne({ email: referent.email });
 
       expect(updatedReferent.invitationToken).toBeDefined();
       expect(updatedReferent.invitationToken.length).toBeGreaterThanOrEqual(36);
       expect(updatedReferent.invitationExpires).toBeDefined();
-    });
-
-    it("should throw if the referent email does not exist", async () => {
-      await expect(doInviteChefEtablissement("nonexistent@mail.com", user, InvitationType.INSCRIPTION)).rejects.toThrow("Referent not found");
     });
   });
 
@@ -86,12 +83,16 @@ describe("Referent Service", () => {
           firstName: "Chef1",
           lastName: "Etablissement1",
           role: ROLES.ADMINISTRATEUR_CLE,
+          subRole: SUB_ROLES.referent_etablissement,
+          metadata: { isFirstInvitationPending: true, invitationType: InvitationType.INSCRIPTION },
         },
         {
           email: "chef2@etablissement.fr",
           firstName: "Chef2",
           lastName: "Etablissement2",
           role: ROLES.ADMINISTRATEUR_CLE,
+          subRole: SUB_ROLES.referent_etablissement,
+          metadata: { isFirstInvitationPending: true, invitationType: InvitationType.CONFIRMATION },
         },
       ]);
 
@@ -120,15 +121,7 @@ describe("Referent Service", () => {
         },
       ]);
 
-      const emails = referents.map((referent) => referent.email);
-      emails.push("nonexistent@mail.com");
       const expectedInvitation: InvitationResult[] = [
-        {
-          to: "nonexistent@mail.com",
-          status: "error",
-          details: "Referent not found: nonexistent@mail.com",
-          type: InvitationType.INSCRIPTION,
-        },
         {
           to: "chef1@etablissement.fr",
           status: "ok",
@@ -137,11 +130,11 @@ describe("Referent Service", () => {
         {
           to: "chef2@etablissement.fr",
           status: "ok",
-          type: InvitationType.INSCRIPTION,
+          type: InvitationType.CONFIRMATION,
         },
       ];
 
-      const result = await doInviteMultipleChefsEtablissements(emails, user, InvitationType.INSCRIPTION);
+      const result = await doInviteMultipleChefsEtablissements(user);
 
       for (const referent of referents) {
         const updatedReferent = await ReferentModel.findOne({ email: referent.email });
@@ -162,7 +155,11 @@ describe("POST /api/cle/referent/send-invitation-inscription-chef-etablissement"
     passport.user.subRole = null;
     jest.mock("../../services/cle/referent", () => ({
       ...jest.requireActual("../../services/cle/referent"),
-      doInviteMultipleChefsEtablissements: jest.fn(() => Promise.resolve()),
+      doInviteMultipleChefsEtablissements: jest.fn(() => Promise.resolve([])),
+    }));
+    jest.mock("../../utils", () => ({
+      ...jest.requireActual("../../utils"),
+      uploadFile: () => Promise.resolve(),
     }));
   });
 
@@ -170,13 +167,13 @@ describe("POST /api/cle/referent/send-invitation-inscription-chef-etablissement"
     passport.user.role = ROLES.ADMIN;
     passport.user.subRole = "god";
 
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement-inscription").send(["test1@example.com", "test2@example.com"]);
+    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();
 
     expect(res.statusCode).toEqual(200);
   });
 
   it("should return 403 Forbidden if the user is not a super admin", async () => {
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement-inscription").send(["test1@example.com", "test2@example.com"]);
+    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();
 
     expect(res.statusCode).toEqual(403);
     expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });

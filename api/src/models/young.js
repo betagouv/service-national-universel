@@ -2,16 +2,15 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE } = require("snu-lib");
+const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_STATUS } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const config = require("config");
-const { capture } = require("../sentry");
 const anonymize = require("../anonymization/young");
 
 const MODELNAME = "young";
 
-const StateManager = require("../states");
+const ClasseStateManager = require("../cle/classe/stateManager").default;
 
 const File = new mongoose.Schema({
   name: String,
@@ -2055,10 +2054,10 @@ Schema.methods.anonymise = function () {
 };
 
 //Sync with sendinblue
-Schema.post("save", function (doc) {
-  if (doc.source === YOUNG_SOURCE.CLE) {
-    // doc.previousStatus !== doc.status is not working in post save hook...
-    StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) }).catch((error) => capture(error));
+Schema.post("save", async function (doc) {
+  //TODO ajouter la transaction
+  if (doc.source === YOUNG_SOURCE.CLE && doc.status === YOUNG_STATUS.VALIDATED) {
+    await ClasseStateManager.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) });
   }
 
   if (config.ENVIRONMENT === "test") return;

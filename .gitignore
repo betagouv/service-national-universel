@@ -15,3 +15,6 @@ requestZammad.json
 node_modules
 out/
 coverage/
+
+*.bson.gz
+*.json.gz

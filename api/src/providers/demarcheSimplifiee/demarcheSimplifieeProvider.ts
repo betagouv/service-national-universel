@@ -8,7 +8,7 @@ import { CLE_COLORATION, TYPE_CLASSE } from "snu-lib";
 
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
-export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IAppelAProjet[]> => {
+export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetFixes: Partial<IAppelAProjet>[]): Promise<IAppelAProjet[]> => {
   let cursor = "";
   let numberOfCalls = 0;
   let hasNextPage = true;
@@ -27,7 +27,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IA
 
     cursor = appelAProjetDemarcheSimplifieeDto.data.demarche.dossiers.pageInfo.endCursor;
     hasNextPage = appelAProjetDemarcheSimplifieeDto.data.demarche.dossiers.pageInfo.hasNextPage;
-    appelsAProjet = [...appelsAProjet, ...mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDemarcheSimplifieeDto)];
+    appelsAProjet = [...appelsAProjet, ...mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDemarcheSimplifieeDto, appelAProjetFixes)];
 
     console.timeEnd("Demarche_Simplifiee_call_" + numberOfCalls);
     numberOfCalls++;
@@ -36,7 +36,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (): Promise<IA
   return appelsAProjet;
 };
 
-export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: DemarcheSimplifieeDto): IAppelAProjet[] => {
+export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: DemarcheSimplifieeDto, appelAProjetFixes: Partial<IAppelAProjet>[]): IAppelAProjet[] => {
   return appelAProjetDto.data.demarche.dossiers.nodes.map((formulaire) => {
     const etablissement: IAppelAProjet["etablissement"] = {} as IAppelAProjet["etablissement"];
     const referentEtablissement: IAppelAProjet["referentEtablissement"] = {} as IAppelAProjet["referentEtablissement"];
@@ -45,9 +45,17 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
 
     const champDescriptorValueMap = new Map(formulaire.champs.map((champ) => [champ.champDescriptorId, champ.stringValue]));
 
-    etablissement.uai = getUaiFromString(champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw=="));
+    if (champDescriptorValueMap.get("Q2hhbXAtNDA5MDU1MA==") === "true") {
+      // Champ UAI renseigné à la main (champ séparé)
+      etablissement.uai = champDescriptorValueMap.get("Q2hhbXAtNDA5MDc0NQ==")?.toUpperCase() || "";
+    } else {
+      // UAI auto-completer lors de la saisie du dossier
+      etablissement.uai = getUaiFromString(champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw=="));
+    }
     etablissement.nameAndCommune = champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw==");
     referentEtablissement.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4Mw==") || "";
+    referentEtablissement.lastName = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4MA==") || "";
+    referentEtablissement.firstName = champDescriptorValueMap.get("Q2hhbXAtNDA1MTQ1MQ==") || "";
 
     classe.name = champDescriptorValueMap.get("Q2hhbXAtNDA1NDIzMg==");
     classe.coloration = mapColorationFromAppelAProjetToColoration(champDescriptorValueMap.get("Q2hhbXAtNDA1NDI0Mw=="));
@@ -59,12 +67,21 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     referentClasse.firstName = champDescriptorValueMap.get("Q2hhbXAtNDA1MTUxNw==") || "";
     referentClasse.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjU4MA==") || "";
 
-    return {
+    const appelAProjet = {
+      numberDS: formulaire.number,
       etablissement,
       referentEtablissement,
       classe,
       referentClasse,
     };
+    const fixe = appelAProjetFixes.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
+    if (fixe) {
+      if (fixe.etablissement?.uai) {
+        console.log("mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet() - UAI  ", appelAProjet.etablissement.uai, fixe.etablissement.uai);
+        appelAProjet.etablissement.uai = fixe.etablissement.uai;
+      }
+    }
+    return appelAProjet;
   });
 };
 

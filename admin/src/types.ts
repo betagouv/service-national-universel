@@ -1,17 +1,10 @@
-import { ROLES, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST } from "snu-lib";
+import { ReferentDto } from "snu-lib/src/dto";
 
 export type Young = { _id: string };
 
 export type BusLine = { _id: string };
 
-export type User = {
-  role: (typeof ROLES)[keyof typeof ROLES];
-  structureId?: string;
-  subRole?: string;
-  firstName: string;
-  lastName: string;
-  _id: string;
-};
+export type User = ReferentDto;
 
 export type Center = {
   academy: string;
