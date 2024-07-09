@@ -36,8 +36,9 @@ export class AppelAProjetEtablissementService {
     const formattedEtablissement = mapEtablissementFromAnnuaireToEtablissement(etablissementFromAnnuaire, [referentEtablissementId]);
 
     const existingEtablissement = await CleEtablissementModel.findOne({ uai });
+    const hasAlreadyBeenProcessed = this.etablissements.some((etablissement) => etablissement.uai === appelAProjet.etablissement.uai);
+
     if (existingEtablissement) {
-      const hasAlreadyBeenProcessed = this.etablissements.some((etablissement) => etablissement.uai === appelAProjet.etablissement.uai);
       if (hasAlreadyBeenProcessed) {
         return existingEtablissement;
       }
@@ -59,8 +60,12 @@ export class AppelAProjetEtablissementService {
       createdEtablissement = await CleEtablissementModel.create(formattedEtablissement);
       console.log("AppelAProjetEtablissementService - processEtablissement() - created etablissement : ", createdEtablissement?._id);
     }
-    this.etablissements.push({ ...formattedEtablissement, _id: createdEtablissement?.id, operation: "create" });
-
-    return createdEtablissement;
+    if (!hasAlreadyBeenProcessed) {
+      this.etablissements.push({ ...formattedEtablissement, _id: createdEtablissement?.id, operation: "create" });
+    }
+    if (save) {
+      return createdEtablissement;
+    }
+    return formattedEtablissement;
   }
 }

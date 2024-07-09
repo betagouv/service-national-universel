@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { HiOutlineChartSquareBar, HiChartSquareBar, HiClipboardList } from "react-icons/hi";
+import { HiHome } from "react-icons/hi";
 
 import { getCohortNames, departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
 import { YOUNG_STATUS } from "snu-lib";
@@ -159,7 +159,7 @@ export default function Index() {
       <BandeauInfo />
       <Header
         title="Tableau de bord"
-        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]}
         actions={[<DropdownButton title={"Exporter"} optionsGroup={selectOptions} key={"export"} position="right" />]}
       />
       <DashboardContainer availableTab={["general", "engagement", "sejour", "inscription"]} active="engagement">

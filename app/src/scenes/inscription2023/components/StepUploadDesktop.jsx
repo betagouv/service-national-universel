@@ -113,7 +113,7 @@ export default function StepUploadDesktop({
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>
 
-      {young.files.cniFiles?.length > 0 && (
+      {young?.files?.cniFiles?.length > 0 && (
         <>
           <hr className="my-8" />
           <MyDocs />

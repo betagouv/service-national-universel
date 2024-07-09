@@ -764,7 +764,7 @@ function canEditTableDeRepartitionDepartment(actor) {
 }
 
 function canEditTableDeRepartitionRegion(actor) {
-  return [ROLES.ADMIN].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
 }
 
 function canViewSchemaDeRepartition(actor) {

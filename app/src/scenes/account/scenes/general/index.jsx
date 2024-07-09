@@ -171,7 +171,7 @@ const AccountGeneralPage = () => {
                   J’ai changé d’adresse
                 </InlineButton>
               </section>
-              {young?.files.cniFiles.length > 0 && (
+              {young?.files?.cniFiles.length > 0 && (
                 <section>
                   <SectionTitle>Pièce d&apos;identité</SectionTitle>
                   <div className="flex flex-col gap-2">
