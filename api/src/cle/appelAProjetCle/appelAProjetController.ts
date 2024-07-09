@@ -1,5 +1,6 @@
 import passport from "passport";
 import express, { Response } from "express";
+import Joi from "joi";
 import { UserRequest } from "../../controllers/request";
 import { AppelAProjetService } from "./appelAProjetService";
 import { ERRORS } from "../../utils";
@@ -12,6 +13,19 @@ import { FeatureFlagName } from "../../models/featureFlagType";
 import { uploadFile } from "../../utils";
 
 const router = express.Router();
+
+const validateAppelAProjetPayload = (body) =>
+  Joi.array()
+    .items(
+      Joi.object({
+        numberDS: Joi.number().required(),
+        etablissement: Joi.object({
+          uai: Joi.string(),
+        }),
+      }),
+    )
+    .validate(body);
+
 router.post(
   "/simulate",
   passport.authenticate(["referent"], {
@@ -26,8 +40,12 @@ router.post(
     if (!(await isFeatureAvailable(FeatureFlagName.SYNC_APPEL_A_PROJET_CLE))) {
       return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
     }
+    const { error, value: payload } = validateAppelAProjetPayload(req.body);
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
     try {
-      const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync();
+      const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync(false, payload);
 
       const archive = archiver("zip", { zlib: { level: 9 } });
       archive.pipe(res);
@@ -69,8 +87,12 @@ router.post(
     if (!(await isFeatureAvailable(FeatureFlagName.SYNC_APPEL_A_PROJET_CLE))) {
       return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
     }
+    const { error, value: payload } = validateAppelAProjetPayload(req.body);
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
     try {
-      const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync(true);
+      const results: { name: string; data: any[] }[] = await new AppelAProjetService().sync(true, payload);
 
       const archive = archiver("zip", { zlib: { level: 9 } });
       archive.pipe(res);

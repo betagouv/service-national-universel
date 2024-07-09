@@ -10,8 +10,8 @@ type IRemovedAppelAProjet = IAppelAProjet & {
   removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail" | "sameClasseUniqueId" | "invalidUAI";
 };
 export class AppelAProjetService {
-  public sync = async (save: boolean = false) => {
-    const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets();
+  public sync = async (save: boolean = false, appelAProjetFixes: IAppelAProjet[] = []) => {
+    const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets(appelAProjetFixes);
 
     const uais = [...new Set(appelAProjets.map((AAP) => AAP.etablissement?.uai).filter(Boolean))];
     console.log("AppelAProjetService.sync() - uais.length: ", uais.length);
@@ -33,16 +33,16 @@ export class AppelAProjetService {
 
     let processCounter = 0;
     for (const appelAProjet of appelAProjetsRetained) {
-      console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", appelAProjetsRetained.length);
-      let referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
-      let savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save);
-      if (!savedEtablissement) {
+      console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", appelAProjetsRetained.length, `(${appelAProjet.etablissement?.uai})`);
+      if (!appelAProjetEtablissementService.getEtablissementFromAnnuaire(appelAProjet, etablissements)) {
         appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "invalidUAI" });
         console.log("AppelAProjetService.sync() - Etablissement not found: ", appelAProjet.etablissement?.uai);
-        continue;
+      } else {
+        const referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
+        const savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save);
+        const referentClasseId = await appelAProjetReferentService.processReferentClasse(appelAProjet, save);
+        await appelAProjetClasseService.processClasse(appelAProjet, savedEtablissement!, referentClasseId, save);
       }
-      let referentClasseId = await appelAProjetReferentService.processReferentClasse(appelAProjet, save);
-      await appelAProjetClasseService.processClasse(appelAProjet, savedEtablissement, referentClasseId, save);
     }
 
     const appelAProjetsErrors = [...appelAProjetsRemoved, ...appelAProjetsWarning].map((appelAProjet) => ({

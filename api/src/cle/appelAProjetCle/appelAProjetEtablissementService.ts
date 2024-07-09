@@ -8,10 +8,14 @@ import { ReferentCreatedBy } from "snu-lib";
 export class AppelAProjetEtablissementService {
   etablissements: (IEtablissement & { operation: "create" | "update" })[] = [];
 
+  getEtablissementFromAnnuaire(appelAProjet: IAppelAProjet, etablissements: EtablissementProviderDto[]) {
+    const uai = appelAProjet.etablissement?.uai;
+    return etablissements.find((etablissement) => etablissement.identifiant_de_l_etablissement === uai);
+  }
+
   async processEtablissement(appelAProjet: IAppelAProjet, etablissements: EtablissementProviderDto[], referentEtablissementId, save: boolean): Promise<IEtablissement | undefined> {
     const uai = appelAProjet.etablissement?.uai;
-    const etablissementFromAnnuaire = etablissements.find((etablissement) => etablissement.identifiant_de_l_etablissement === uai);
-
+    const etablissementFromAnnuaire = this.getEtablissementFromAnnuaire(appelAProjet, etablissements);
     if (!etablissementFromAnnuaire) {
       console.log(`Etablissement not found for UAI ${uai}`);
       return;
