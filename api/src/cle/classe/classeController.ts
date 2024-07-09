@@ -23,9 +23,9 @@ import {
   canDeleteClasse,
   canUpdateCohort,
   LIMIT_DATE_ESTIMATED_SEATS,
-  LIMIT_DATE_TOTAL_SEATS,
   canEditEstimatedSeats,
   canEditTotalSeats,
+  canVerifyClasse,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -413,6 +413,45 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: error });
+  }
+});
+
+router.put("/:id/verify", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      status: Joi.string().allow(STATUS_CLASSE.VERIFIED).required(),
+      estimatedSeats: Joi.number().required(),
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canVerifyClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let classe = await ClasseModel.findById(value.id).populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } });
+    if (!classe || !classe.referents.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!etablissement.referentEtablissementIds.includes(req.user._id)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    classe.set({
+      status: STATUS_CLASSE.VERIFIED,
+    });
+
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, classe);
+
+    classe = await classe.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: classe });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

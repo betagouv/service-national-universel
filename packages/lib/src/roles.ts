@@ -1012,6 +1012,10 @@ function canEditTotalSeats(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats);
 }
 
+function canVerifyClasse(actor) {
+  return (actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement) || [ROLES.ADMIN].includes(actor.role);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -1161,4 +1165,5 @@ export {
   canEditSanitaryEmailContact,
   canEditEstimatedSeats,
   canEditTotalSeats,
+  canVerifyClasse,
 };

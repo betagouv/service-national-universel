@@ -15,9 +15,12 @@ const YoungModel = require("../../models/young");
 //cohort
 const getNewCohortFixture = require("../fixtures/cohort");
 const { createCohortHelper } = require("../helpers/cohort");
+//referent
+const { getNewReferentFixture } = require("../fixtures/referent");
+const { createReferentHelper } = require("../helpers/referent");
 
 const snuLib = require("snu-lib");
-const { ROLES } = require("snu-lib");
+const { ROLES, SUB_ROLES, STATUS_CLASSE } = require("snu-lib");
 const passport = require("passport");
 const { dbConnect, dbClose } = require("../helpers/db");
 const { ObjectId } = require("mongoose").Types;
@@ -324,5 +327,102 @@ describe("PUT /cle/classe/:id", () => {
       expect(y.cohesionCenterId).toBeUndefined();
       expect(y.meetingPointId).toBeUndefined();
     });
+  });
+});
+
+describe("PUT /cle/classe/:id/verify", () => {
+  it("should return 400 when id is invalid", async () => {
+    const res = await request(getAppHelper()).put("/cle/classe/invalidId/verify").send({ name: "New Class" });
+    expect(res.status).toBe(400);
+  });
+
+  it("should return 400 when required fields are missing", async () => {
+    const classeId = new ObjectId();
+    const res = await request(getAppHelper()).put(`/cle/classe/${classeId}/verify`).send({ name: "New Class" });
+    expect(res.status).toBe(400);
+  });
+
+  it("should return 403 when user cannot verify classes", async () => {
+    const classe = createFixtureClasse();
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.RESPONSIBLE;
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}/verify`)
+      .send({
+        ...classe,
+      });
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 404 when class is not found", async () => {
+    const nonExistingId = "104a49ba503555e4d8853003";
+    const classe = createFixtureClasse();
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${nonExistingId}/verify`)
+      .send({
+        ...classe,
+      });
+    expect(res.status).toBe(404);
+  });
+
+  it("should return 404 when class doesn't have a referent_classe", async () => {
+    const classe = createFixtureClasse();
+    const validId = (await createClasse(classe))._id;
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}/verify`)
+      .send({
+        ...classe,
+      });
+    expect(res.status).toBe(404);
+  });
+
+  it("should return 404 when the associated etablissement does not exist", async () => {
+    const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE })))._id;
+    const classe = createFixtureClasse({ etablissementId: new ObjectId(), referentClasseIds: [referentId] });
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
+    passport.user.subRole = SUB_ROLES.referent_etablissement;
+    passport.user._id = new ObjectId();
+    jest.spyOn(EtablissementModel, "findById").mockResolvedValueOnce(null);
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}/verify`)
+      .send({
+        ...classe,
+      });
+    expect(res.status).toBe(404);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 403 when REFERENT_ETABLISSEMENT tries to verify a class they don't manage", async () => {
+    const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE })))._id;
+    const etablissementId = (await createEtablissement(createFixtureEtablissement()))._id;
+    const classe = createFixtureClasse({ etablissementId: etablissementId, referentClasseIds: [referentId] });
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
+    passport.user.subRole = SUB_ROLES.referent_etablissement;
+    passport.user._id = new ObjectId();
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}/verify`)
+      .send({
+        ...classe,
+      });
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 200 when class is updated successfully", async () => {
+    const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE })))._id;
+    const classe = createFixtureClasse({ referentClasseIds: [referentId] });
+    const validId = (await createClasse(classe))._id;
+
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${validId}/verify`)
+      .send({
+        ...classe,
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.status).toBe(STATUS_CLASSE.VERIFIED);
   });
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { HiHome } from "react-icons/hi";
+import { HiHome, HiOutlineCheck } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useParams, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -9,18 +9,7 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Button, Badge, DropdownButton } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import {
-  translate,
-  ROLES,
-  YOUNG_STATUS,
-  STATUS_CLASSE,
-  translateStatusClasse,
-  COHORT_TYPE,
-  FUNCTIONAL_ERRORS,
-  isNowBetweenDates,
-  LIMIT_DATE_ESTIMATED_SEATS,
-  LIMIT_DATE_TOTAL_SEATS,
-} from "snu-lib";
+import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, SUB_ROLES } from "snu-lib";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
@@ -40,6 +29,7 @@ import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleCohort from "./components/modale/modaleCohort";
 import ButtonInvite from "./components/ButtonInvite";
 import { InfoBus, TStatus, Rights } from "./components/types";
+import ModaleErrorOnVerify from "./components/modale/modaleErrorOnVerify";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
@@ -47,6 +37,7 @@ export default function View() {
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
   const [showModaleWithdraw, setShowModaleWithdraw] = useState(false);
   const [showModaleCohort, setShowModaleCohort] = useState(false);
+  const [showModaleErrorOnVerify, setShowModaleErrorOnVerify] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
   const [edit, setEdit] = useState(false);
@@ -169,6 +160,48 @@ export default function View() {
     }
   };
 
+  const checkVerifyClasse = () => {
+    interface Errors {
+      estimatedSeats?: boolean;
+      firstName?: boolean;
+      lastName?: boolean;
+      email?: boolean;
+    }
+
+    const errors: Errors = {};
+    if (!classe?.estimatedSeats) errors.estimatedSeats = true;
+    if (!classe?.referents?.[0]?.firstName) errors.firstName = true;
+    if (!classe?.referents?.[0]?.lastName) errors.lastName = true;
+    if (!classe?.referents?.[0]?.email) errors.email = true;
+
+    if (Object.keys(errors).length > 0) {
+      setShowModaleErrorOnVerify(true);
+      setIsLoading(false);
+      return;
+    }
+    verifyClasse();
+  };
+
+  const verifyClasse = async () => {
+    try {
+      setIsLoading(true);
+
+      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}/verify`, classe);
+
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", translate(code));
+        return setIsLoading(false);
+      }
+      setClasse(data);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", e);
+    } finally {
+      toastr.success("Opération réussie", "La classe a bien été vérifiée");
+      setIsLoading(false);
+    }
+  };
+
   const sendInfo = async () => {
     try {
       setShowModaleCohort(false);
@@ -246,6 +279,18 @@ export default function View() {
 
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
+    if (classe?.status === STATUS_CLASSE.CREATED && user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement) {
+      actionsList.push(
+        <Button
+          key="verify"
+          title="Déclarer cette classe vérifiée"
+          leftIcon={<HiOutlineCheck size={20} className="mt-1" />}
+          className="mr-2"
+          onClick={checkVerifyClasse}
+          disabled={isLoading}
+        />,
+      );
+    }
     if (classe?.status && [STATUS_CLASSE.OPEN].includes(classe.status)) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} type="wired" title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
@@ -340,6 +385,7 @@ export default function View() {
 
       <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
       <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />
+      <ModaleErrorOnVerify isOpen={showModaleErrorOnVerify} onClose={() => setShowModaleErrorOnVerify(false)} />
     </Page>
   );
 }
