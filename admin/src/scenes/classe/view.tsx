@@ -279,7 +279,7 @@ export default function View() {
 
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
-    if (classe?.status === STATUS_CLASSE.CREATED && user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement) {
+    if (classe?.status === STATUS_CLASSE.CREATED && (user.role === ROLES.ADMIN || (user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement))) {
       actionsList.push(
         <Button
           key="verify"
