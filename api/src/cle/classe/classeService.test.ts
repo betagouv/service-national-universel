@@ -507,6 +507,7 @@ describe("buildUniqueClasseId and key", () => {
     const expectedId = "52FD6A";
 
     expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+    expect(buildUniqueClasseId(etablissement, classe, String(12345))).toEqual("7DE84F");
   });
 
   it("should return the correct unique classe Key", () => {

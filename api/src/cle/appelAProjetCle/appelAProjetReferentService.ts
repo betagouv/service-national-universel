@@ -1,14 +1,17 @@
-import { IAppelAProjet } from "./appelAProjetType";
+import { ReferentCreatedBy, ROLES, SUB_ROLES } from "snu-lib";
 import { ReferentModel } from "../../models";
 import { InvitationType, IReferent, ReferentMetadata } from "../../models/referentType";
-import { ReferentCreatedBy, ROLES, SUB_ROLES } from "snu-lib";
+import { IEtablissement } from "../../models/cle/etablissementType";
+import { IAppelAProjet } from "./appelAProjetType";
 
 export class AppelAProjetReferentService {
   referents: Partial<IReferent & { operation: "create" | "none"; uai?: string }>[] = [];
+  etablissements: Partial<IEtablissement>[] = [];
 
   async processReferentEtablissement(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
     const referentEtablissement = await ReferentModel.findOne({ email: appelAProjet.referentEtablissement.email });
     const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentEtablissement.email);
+    const alreadyProcessedEtablissement = this.etablissements.find((etablissement) => etablissement.uai === appelAProjet.etablissement.uai);
     const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (referentEtablissement) {
@@ -25,8 +28,18 @@ export class AppelAProjetReferentService {
           operation: "none",
           uai: appelAProjet.etablissement?.uai,
         });
+        this.etablissements.push({ uai: appelAProjet.etablissement?.uai, referentEtablissementIds: [referentEtablissement.id] });
       }
       return referentEtablissement.id;
+    }
+    if (alreadyProcessedEtablissement) {
+      console.log(
+        "AppelAProjetReferentService - processReferentEtablissement() - alreadyProcessedEtablissement: ",
+        appelAProjet.referentEtablissement.email,
+        alreadyProcessedEtablissement.referentEtablissementIds![0],
+        alreadyProcessedEtablissement.uai,
+      );
+      return alreadyProcessedEtablissement.referentEtablissementIds![0];
     }
 
     let newReferent = {
@@ -44,6 +57,7 @@ export class AppelAProjetReferentService {
 
     if (!hasAlreadyBeenProcessed) {
       this.referents.push({ ...newReferent, _id: createdReferent?._id, operation: "create", uai: appelAProjet.etablissement?.uai });
+      this.etablissements.push({ uai: appelAProjet.etablissement?.uai, referentEtablissementIds: [createdReferent?.id] });
     }
 
     return createdReferent?.id;

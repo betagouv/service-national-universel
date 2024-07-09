@@ -4,11 +4,10 @@ import { AppelAProjetReferentService } from "./appelAProjetReferentService";
 import { AppelAProjetEtablissementService } from "./appelAProjetEtablissementService";
 import { AppelAProjetClasseService } from "./appelAProjetClasseService";
 import { IAppelAProjet } from "./appelAProjetType";
-import crypto from "crypto";
 import { buildUniqueClasseId } from "../classe/classeService";
 
 type IRemovedAppelAProjet = IAppelAProjet & {
-  removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail" | "sameClasseUniqueId";
+  removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail" | "sameClasseUniqueId" | "invalidUAI";
 };
 export class AppelAProjetService {
   public sync = async (save: boolean = false) => {
@@ -22,7 +21,11 @@ export class AppelAProjetService {
       size: -1,
     });
 
-    const { retained: appelAProjetsRetained, removed: appelAProjetsRemoved } = this.filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets);
+    const {
+      retained: appelAProjetsRetained,
+      warning: appelAProjetsWarning,
+      removed: appelAProjetsRemoved,
+    } = this.filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets);
 
     const appelAProjetReferentService = new AppelAProjetReferentService();
     const appelAProjetEtablissementService = new AppelAProjetEtablissementService();
@@ -34,6 +37,7 @@ export class AppelAProjetService {
       let referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
       let savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save);
       if (!savedEtablissement) {
+        appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "invalidUAI" });
         console.log("AppelAProjetService.sync() - Etablissement not found: ", appelAProjet.etablissement?.uai);
         continue;
       }
@@ -41,12 +45,13 @@ export class AppelAProjetService {
       await appelAProjetClasseService.processClasse(appelAProjet, savedEtablissement, referentClasseId, save);
     }
 
-    const appelAProjetsErrors = appelAProjetsRemoved.map((appelAProjet) => ({
+    const appelAProjetsErrors = [...appelAProjetsRemoved, ...appelAProjetsWarning].map((appelAProjet) => ({
       removedReason: appelAProjet.removedReason,
       etablissementUai: appelAProjet.etablissement.uai,
       referentEtablissementEmail: appelAProjet.referentEtablissement.email,
       classeName: appelAProjet.classe.name,
       referentClasse: JSON.stringify(appelAProjet.referentClasse),
+      numberDS: appelAProjet.numberDS,
     }));
 
     return [
@@ -62,10 +67,12 @@ export class AppelAProjetService {
 
   filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets: IAppelAProjet[]): {
     retained: IAppelAProjet[];
+    warning: IRemovedAppelAProjet[];
     removed: IRemovedAppelAProjet[];
   } {
     const appelAProjetsRetained: IAppelAProjet[] = [];
     const appelAProjetsRemoved: IRemovedAppelAProjet[] = [];
+    const appelAProjetsWarning: IRemovedAppelAProjet[] = [];
     for (const appelAProjet of appelAProjets) {
       const email = appelAProjet.referentEtablissement.email;
       const uai = appelAProjet.etablissement?.uai;
@@ -96,13 +103,15 @@ export class AppelAProjetService {
         (appelAProjetSub) => appelAProjetSub.etablissement?.uai === uai && appelAProjetSub.referentEtablissement.email !== email,
       );
       if (hasSameUaiButDifferentEmail) {
-        appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "sameUaiDifferentEmail" });
+        appelAProjetsWarning.push({ ...appelAProjet, removedReason: "sameUaiDifferentEmail" });
+        appelAProjetsRetained.push(appelAProjet);
       } else if (foundSameUniqueId) {
-        appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "sameClasseUniqueId" });
+        appelAProjetsWarning.push({ ...appelAProjet, removedReason: "sameClasseUniqueId" });
+        appelAProjetsRetained.push(appelAProjet);
       } else {
         appelAProjetsRetained.push(appelAProjet);
       }
     }
-    return { retained: appelAProjetsRetained, removed: appelAProjetsRemoved };
+    return { retained: appelAProjetsRetained, warning: appelAProjetsWarning, removed: appelAProjetsRemoved };
   }
 }

@@ -45,7 +45,13 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
 
     const champDescriptorValueMap = new Map(formulaire.champs.map((champ) => [champ.champDescriptorId, champ.stringValue]));
 
-    etablissement.uai = getUaiFromString(champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw=="));
+    if (champDescriptorValueMap.get("Q2hhbXAtNDA5MDU1MA==") === "true") {
+      // Champ UAI renseigné à la main (champ séparé)
+      etablissement.uai = champDescriptorValueMap.get("Q2hhbXAtNDA5MDc0NQ==") || "";
+    } else {
+      // UAI auto-completer lors de la saisie du dossier
+      etablissement.uai = getUaiFromString(champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw=="));
+    }
     etablissement.nameAndCommune = champDescriptorValueMap.get("Q2hhbXAtMzI2MTcwMw==");
     referentEtablissement.email = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4Mw==") || "";
     referentEtablissement.lastName = champDescriptorValueMap.get("Q2hhbXAtMzI2MjQ4MA==") || "";
