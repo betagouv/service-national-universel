@@ -21,7 +21,35 @@ const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
+
+import { BullMonitorExpress } from "@bull-monitor/express";
+import { BullAdapter } from "@bull-monitor/root/dist/bull-adapter";
 const SendMailService = require("./MOVE_ME/send-mail-service"); // TODO: REMOVE_ME
+
+async function runTasks() {
+  initSentry();
+  await initDB();
+  SendMailService.startWorker();
+  // Serverless containers requires running http server
+  const app = express();
+  const monitor = new BullMonitorExpress({
+    queues: [new BullAdapter(SendMailService.queue)],
+    // enables graphql introspection query. false by default if NODE_ENV == production, true otherwise
+    gqlIntrospection: true,
+    // enable metrics collector. false by default
+    // metrics are persisted into redis as a list
+    // with keys in format "bull_monitor::metrics::{{queue}}"
+    metrics: {
+      // collect metrics every X
+      // where X is any value supported by https://github.com/kibertoad/toad-scheduler
+      collectInterval: { hours: 1 },
+      maxMetrics: 100,
+    },
+  });
+  await monitor.init();
+  app.use("/", monitor.router);
+  app.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
+}
 
 async function runCrons() {
   initSentry();
@@ -44,7 +72,6 @@ async function runAPI() {
 
   await initDB();
   await runMigrations();
-  SendMailService.startWorker(); // TODO: REMOVE_ME
 
   /*
     Download all certificate templates when instance is starting,
@@ -218,4 +245,5 @@ async function runAPI() {
 module.exports = {
   runCrons,
   runAPI,
+  runTasks,
 };

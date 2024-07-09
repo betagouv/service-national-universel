@@ -29,6 +29,7 @@
   "author": "SELEGO",
   "license": "MIT",
   "dependencies": {
+    "@bull-monitor/express": "^5.4.0",
     "@elastic/elasticsearch": "^7.14.0",
     "@fast-csv/format": "^5.0.0",
     "@godaddy/terminus": "^4.12.1",
