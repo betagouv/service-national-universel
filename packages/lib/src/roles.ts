@@ -1,5 +1,7 @@
 import { UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
+import { isNowBetweenDates } from "./utils/date";
+import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "./constants/constants";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -63,6 +65,26 @@ const ROLES_LIST = Object.values(ROLES);
 const SUB_ROLES_LIST = Object.values(SUB_ROLES);
 const SUPPORT_ROLES_LIST = Object.keys(SUPPORT_ROLES);
 const VISITOR_SUB_ROLES_LIST = Object.keys(VISITOR_SUBROLES);
+
+//TODO a supprimer
+const REFERENT_ROLES = ROLES;
+
+const REFERENT_DEPARTMENT_SUBROLE = {
+  manager_department: SUB_ROLES.manager_department,
+  assistant_manager_department: SUB_ROLES.assistant_manager_department,
+  manager_phase2: SUB_ROLES.manager_phase2,
+  secretariat: SUB_ROLES.secretariat,
+};
+const REFERENT_REGION_SUBROLE = {
+  coordinator: SUB_ROLES.coordinator,
+  assistant_coordinator: SUB_ROLES.assistant_coordinator,
+  manager_phase2: SUB_ROLES.manager_phase2,
+};
+
+const ADMINISTRATEUR_CLE_SUBROLE = {
+  referent_etablissement: SUB_ROLES.referent_etablissement,
+  coordinateur_cle: SUB_ROLES.coordinateur_cle,
+};
 
 // TODO - Geography department ref-ref array-array ref-ref/struc|young array-string
 const sameGeography = (actor, target) => {
@@ -462,6 +484,22 @@ function isSupervisor(user) {
 
 function isReferentOrAdmin(user) {
   return isAdmin(user) || isReferent(user);
+}
+
+function isAdminCle(user) {
+  return user?.role === ROLES.ADMINISTRATEUR_CLE;
+}
+
+function isChefEtablissement(user) {
+  return isAdminCle(user) && user?.subRole === SUB_ROLES.referent_etablissement;
+}
+
+function isCoordinateurEtablissement(user) {
+  return isAdminCle(user) && user?.subRole === SUB_ROLES.coordinateur_cle;
+}
+
+function isReferentClasse(user) {
+  return user?.role === ROLES.REFERENT_CLASSE;
 }
 
 const isTemporaryAffected = (young) => young?.statusPhase1 === "WAITING_AFFECTATION" && ["AFFECTED", "WAITING_LIST"].includes(young?.statusPhase1Tmp);
@@ -952,6 +990,28 @@ function canAllowSNU(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
 
+function canEditEstimatedSeats(actor) {
+  if (actor.role === ROLES.ADMIN) return true;
+  const now = new Date();
+  const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+  return actor.role === ROLES.ADMINISTRATEUR_CLE && now <= limitDateEstimatedSeats;
+}
+
+function canEditTotalSeats(actor) {
+  if (actor.role === ROLES.ADMIN) {
+    const now = new Date();
+    const limitDateEstimatedSeat = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+    if (now <= limitDateEstimatedSeat) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  const limitDatesEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS).toISOString();
+  const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -964,6 +1024,10 @@ export {
   CENTER_ROLES,
   DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS,
   DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS,
+  REFERENT_ROLES,
+  REFERENT_DEPARTMENT_SUBROLE,
+  REFERENT_REGION_SUBROLE,
+  ADMINISTRATEUR_CLE_SUBROLE,
   canInviteUser,
   canDeleteYoung,
   canEditYoung,
@@ -1065,6 +1129,10 @@ export {
   canCreateTags,
   isSuperAdmin,
   isAdmin,
+  isAdminCle,
+  isChefEtablissement,
+  isCoordinateurEtablissement,
+  isReferentClasse,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,
@@ -1091,4 +1159,6 @@ export {
   canWithdrawClasse,
   canAllowSNU,
   canEditSanitaryEmailContact,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
 };

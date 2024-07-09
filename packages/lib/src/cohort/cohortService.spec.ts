@@ -1,5 +1,5 @@
 import { canUpdateCenter, canUpdateCohort } from "./cohortService";
-import { CohortDto, ReferentRoleDto } from "../dto";
+import { CohortDto, ReferentDto } from "../dto";
 import { ROLES } from "../roles";
 
 let from;
@@ -13,7 +13,7 @@ describe("cohortService", () => {
     // Arrange
     const user = {
       role: ROLES.ADMIN,
-    } as ReferentRoleDto;
+    } as ReferentDto;
 
     // Act
     const result = canUpdateCohort(undefined, user);
@@ -54,7 +54,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.ADMIN,
-    } as ReferentRoleDto;
+    } as ReferentDto;
 
     // Act
     const result = canUpdateCohort(cohort, user);
@@ -76,7 +76,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.REFERENT_REGION,
-    } as ReferentRoleDto;
+    } as ReferentDto;
 
     // Act
     const result = canUpdateCohort(cohort, user);
@@ -98,7 +98,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.REFERENT_DEPARTMENT,
-    } as ReferentRoleDto;
+    } as ReferentDto;
 
     // Act
     const result = canUpdateCohort(cohort, user);
@@ -120,7 +120,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.REFERENT_DEPARTMENT,
-    } as ReferentRoleDto;
+    } as ReferentDto;
 
     // Act
     const result = canUpdateCohort(cohort, user);
@@ -142,7 +142,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.REFERENT_REGION,
-    } as ReferentRoleDto;
+    } as ReferentDto;
 
     // Act
     const result = canUpdateCenter(cohort, user);
@@ -164,7 +164,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.REFERENT_REGION,
-    } as ReferentRoleDto;
+    } as ReferentDto;
 
     // Act
     const result = canUpdateCenter(cohort, user);
@@ -186,7 +186,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.REFERENT_DEPARTMENT,
-    } as ReferentRoleDto;
+    } as ReferentDto;
 
     // Act
     const result = canUpdateCenter(cohort, user);

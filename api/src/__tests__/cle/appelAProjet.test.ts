@@ -9,6 +9,12 @@ import { dbConnect, dbClose } from "../helpers/db";
 import { getEtablissementsFromAnnuaire } from "../fixtures/providers/annuaireEtablissement";
 import { CleClasseModel, CleEtablissementModel, ReferentModel } from "../../models";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
+import { InvitationType } from "../../models/referentType";
+
+jest.mock("../../utils", () => ({
+  ...jest.requireActual("../../utils"),
+  uploadFile: () => Promise.resolve(),
+}));
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -54,13 +60,13 @@ describe("Appel A Projet Controller", () => {
       fetch.mockImplementation(() => response2);
       await response2;
 
-      const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send();
+      const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send([]);
       expect(res.statusCode).toEqual(200);
       expect(fetch).toHaveBeenCalledTimes(2);
     });
 
     it("should return 403 for non super admin", async () => {
-      const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send();
+      const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send([]);
       expect(res.statusCode).toEqual(403);
       expect(res.body.ok).toBe(false);
       expect(fetch).toHaveBeenCalledTimes(0);
@@ -77,7 +83,7 @@ describe("Appel A Projet Controller", () => {
 
       await response;
 
-      const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send();
+      const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send([]);
 
       expect(res.statusCode).toEqual(200);
       expect(res.headers["content-type"]).toEqual("application/zip");
@@ -95,7 +101,7 @@ describe("Appel A Projet Controller", () => {
       fetch.mockImplementation(() => response1);
       await response1;
 
-      const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send();
+      const res = await request(getAppHelper()).post("/cle/appel-a-projet/simulate").send([]);
       expect(res.statusCode).toEqual(200);
       expect(fetch).toHaveBeenCalledTimes(50);
     });
@@ -115,13 +121,15 @@ describe("Appel A Projet Controller", () => {
       fetch.mockImplementation(() => responseAppelAProjetMock);
       await responseAppelAProjetMock;
 
-      await request(getAppHelper()).post("/cle/appel-a-projet/real").send();
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send([]);
       const referentEtablissementAfterSync = await ReferentModel.findOne({ email: "mail@etablissement.fr" });
       const etablissementAfterSync = await CleEtablissementModel.findOne({ uai: "UAI_42" });
       const referentClasseAfterSync = await ReferentModel.findOne({ email: "email@referent.fr" });
       const classeAfterSync = await CleClasseModel.findOne({ etablissementId: etablissementAfterSync._id });
 
       expect(referentEtablissementAfterSync.email).toEqual("mail@etablissement.fr");
+      expect(referentEtablissementAfterSync.lastName).toEqual("NOM_CHEF_ETABLISSEMENT");
+      expect(referentEtablissementAfterSync.firstName).toEqual("PRENOM_CHEF_ETABLISSEMENT");
       expect(etablissementAfterSync.uai).toEqual("UAI_42");
       expect(etablissementAfterSync.referentEtablissementIds).toContain(referentEtablissementAfterSync._id.toString());
       expect(classeAfterSync.etablissementId).toEqual(etablissementAfterSync._id.toString());
@@ -155,7 +163,7 @@ describe("Appel A Projet Controller", () => {
       fetch.mockImplementation(() => responseAppelAProjetMock);
       await responseAppelAProjetMock;
 
-      await request(getAppHelper()).post("/cle/appel-a-projet/real").send();
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send([]);
       const etablissementAfterSync = await CleEtablissementModel.findOne({ uai: "UAI_42" });
 
       expect(etablissementAfterSync.uai).toEqual("UAI_42");
@@ -203,10 +211,34 @@ describe("Appel A Projet Controller", () => {
       fetch.mockImplementation(() => responseAppelAProjetMock);
       await responseAppelAProjetMock;
 
-      await request(getAppHelper()).post("/cle/appel-a-projet/real").send();
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send([]);
       const etablissementAfterSync = await CleEtablissementModel.findOne({ uai: "UAI_42" });
 
       expect([...etablissementAfterSync.referentEtablissementIds]).toEqual([referent?.id]);
+    });
+
+    it("should not change invitationType if run twice", async () => {
+      passport.user.subRole = "god";
+      const responseAppelAProjetMock = Promise.resolve({
+        json: () => {
+          return getMockAppelAProjetDto(false);
+        },
+      });
+
+      fetch.mockImplementation(() => responseAppelAProjetMock);
+      await responseAppelAProjetMock;
+
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send([]);
+      const referentEtablissementAfterSync = await ReferentModel.findOne({ email: "mail@etablissement.fr" });
+
+      expect(referentEtablissementAfterSync.email).toEqual("mail@etablissement.fr");
+      expect(referentEtablissementAfterSync.metadata.invitationType).toEqual(InvitationType.INSCRIPTION);
+
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send([]);
+      const referentEtablissementAfterSecondSync = await ReferentModel.findOne({ email: "mail@etablissement.fr" });
+
+      expect(referentEtablissementAfterSecondSync.email).toEqual("mail@etablissement.fr");
+      expect(referentEtablissementAfterSecondSync.metadata.invitationType).toEqual(InvitationType.INSCRIPTION);
     });
   });
 });

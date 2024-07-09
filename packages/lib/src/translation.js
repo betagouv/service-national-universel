@@ -1125,17 +1125,17 @@ const translateYoungSource = (source) => {
 const translateStatusClasse = (status) => {
   switch (status) {
     case "WITHDRAWN":
-      return "Désistée";
-    case "DRAFT":
-      return "Brouillon";
+      return "Classe Désistée";
     case "CREATED":
-      return "Créée";
-    case "INSCRIPTION_IN_PROGRESS":
-      return "Inscription en cours";
-    case "INSCRIPTION_TO_CHECK":
-      return "Inscription à valider";
-    case "VALIDATED":
-      return "Classe validée";
+      return "Classe Créée";
+    case "VERIFIED":
+      return "Classe Vérifiée";
+    case "ASSIGNED":
+      return "Cohorte attribuée";
+    case "OPEN":
+      return "Inscription Ouverte";
+    case "CLOSED":
+      return "Inscription Fermée";
     default:
       return status;
   }
