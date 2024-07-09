@@ -23,35 +23,20 @@ export function MesEngagements() {
 
 function EngagementList() {
   const { young } = useSelector((state) => state.Auth);
+  const applications = useQuery({ queryKey: ["application"], queryFn: () => fetchApplications(young._id) });
+  const equivalences = useQuery({ queryKey: ["equivalence"], queryFn: () => fetchEquivalences(young._id) });
 
-  const {
-    isPending: isPendingApplications,
-    error: errorApplications,
-    data: applications,
-  } = useQuery({
-    queryKey: ["application"],
-    queryFn: () => fetchApplications(young._id),
-  });
-
-  const {
-    isPending: isPendingEquivalences,
-    error: errorEquivalences,
-    data: equivalences,
-  } = useQuery({
-    queryKey: ["equivalence"],
-    queryFn: () => fetchEquivalences(young._id),
-  });
-
-  if (isPendingEquivalences || isPendingApplications) return <Loader />;
-
-  if (errorEquivalences || errorApplications) {
+  if (equivalences.isPending || applications.isPending) {
+    return <Loader />;
+  }
+  if (equivalences.isError || applications.isError) {
     return (
       <div className="mt-8 mb-4 bg-white rounded-lg shadow-sm p-12">
         <p className="text-center">Erreur lors du chargement des engagements 🥲</p>
       </div>
     );
   }
-  if (equivalences.length === 0 && applications.length === 0) {
+  if ([...equivalences.data, ...applications.data].length === 0) {
     return (
       <div className="mt-8 mb-4 bg-white rounded-lg shadow-sm p-12">
         <p className="text-center">Vous n’avez aucun engagement en cours 🥲</p>
@@ -59,11 +44,11 @@ function EngagementList() {
     );
   }
   return (
-    <div className="md:max-w-6xl mx-auto flex gap-4 snap-x snap-mandatory overflow-auto pb-3">
-      {applications.map((application) => (
+    <div className="md:max-w-6xl mx-auto flex gap-4 snap-x snap-mandatory overflow-x-auto pb-3">
+      {applications.data.map((application) => (
         <ApplicationCard key={application._id} application={application} />
       ))}
-      {equivalences.map((equivalence) => (
+      {equivalences.data.map((equivalence) => (
         <EquivalenceCard key={equivalence._id} equivalence={equivalence} />
       ))}
     </div>
