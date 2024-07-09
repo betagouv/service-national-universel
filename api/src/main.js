@@ -22,8 +22,8 @@ const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
-import { BullMonitorExpress } from "@bull-monitor/express";
-import { BullAdapter } from "@bull-monitor/root/dist/bull-adapter";
+const { BullMonitorExpress } = require("@bull-monitor/express");
+const { BullAdapter } = require("@bull-monitor/root/dist/bull-adapter");
 const SendMailService = require("./MOVE_ME/send-mail-service"); // TODO: REMOVE_ME
 
 async function runTasks() {
