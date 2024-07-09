@@ -10,7 +10,7 @@ type IRemovedAppelAProjet = IAppelAProjet & {
   removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail" | "sameClasseUniqueId" | "invalidUAI";
 };
 export class AppelAProjetService {
-  public sync = async (save: boolean = false, appelAProjetFixes: IAppelAProjet[] = []) => {
+  public sync = async (save: boolean = false, appelAProjetFixes: Partial<IAppelAProjet>[] = []) => {
     const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets(appelAProjetFixes);
 
     const uais = [...new Set(appelAProjets.map((AAP) => AAP.etablissement?.uai).filter(Boolean))];

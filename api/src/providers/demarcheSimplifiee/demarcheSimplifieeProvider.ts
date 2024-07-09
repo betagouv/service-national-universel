@@ -8,7 +8,7 @@ import { CLE_COLORATION, TYPE_CLASSE } from "snu-lib";
 
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
-export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetFixes: IAppelAProjet[]): Promise<IAppelAProjet[]> => {
+export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetFixes: Partial<IAppelAProjet>[]): Promise<IAppelAProjet[]> => {
   let cursor = "";
   let numberOfCalls = 0;
   let hasNextPage = true;
@@ -36,7 +36,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetF
   return appelsAProjet;
 };
 
-export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: DemarcheSimplifieeDto, appelAProjetFixes: IAppelAProjet[]): IAppelAProjet[] => {
+export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: DemarcheSimplifieeDto, appelAProjetFixes: Partial<IAppelAProjet>[]): IAppelAProjet[] => {
   return appelAProjetDto.data.demarche.dossiers.nodes.map((formulaire) => {
     const etablissement: IAppelAProjet["etablissement"] = {} as IAppelAProjet["etablissement"];
     const referentEtablissement: IAppelAProjet["referentEtablissement"] = {} as IAppelAProjet["referentEtablissement"];
@@ -76,7 +76,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     };
     const fixe = appelAProjetFixes.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
     if (fixe) {
-      if (fixe.etablissement.uai) {
+      if (fixe.etablissement?.uai) {
         console.log("mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet() - UAI  ", appelAProjet.etablissement.uai, fixe.etablissement.uai);
         appelAProjet.etablissement.uai = fixe.etablissement.uai;
       }
