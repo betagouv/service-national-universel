@@ -70,7 +70,7 @@ module.exports = (emailsEmitter) => {
       });
 
       // Referents departementaux et régionaux
-      const refsDepReg = [...(await getReferentDep(etablissement.departement)), ...(await getReferentReg(etablissement.region))];
+      const refsDepReg = [...(await getReferentDep(etablissement.department)), ...(await getReferentReg(etablissement.region))];
 
       await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED_DEP_REG, {
         emailTo: refsDepReg.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
@@ -92,7 +92,7 @@ module.exports = (emailsEmitter) => {
       if (!etablissement) throw new Error("Etablissement not found");
 
       // Referents departementaux et régionaux
-      const refsDepReg = [...(await getReferentDep(etablissement.departement)), ...(await getReferentReg(etablissement.region))];
+      const refsDepReg = [...(await getReferentDep(etablissement.department)), ...(await getReferentReg(etablissement.region))];
       await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_VALIDATED, {
         emailTo: refsDepReg.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
         params: {
@@ -115,6 +115,28 @@ module.exports = (emailsEmitter) => {
       await sendTemplate(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, {
         emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
         params: {
+          class_code: classe.uniqueKeyAndId,
+          cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
+        },
+      });
+    } catch (error) {
+      capture(error);
+    }
+  });
+
+  //classe verified
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, async (classe) => {
+    try {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) throw new Error("Etablissement not found");
+
+      // Referents departementaux et régionaux
+      const refsDepReg = [...(await getReferentDep(etablissement.department)), ...(await getReferentReg(etablissement.region))];
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, {
+        emailTo: refsDepReg.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
+        params: {
+          class_name: classe.name,
           class_code: classe.uniqueKeyAndId,
           cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
         },
