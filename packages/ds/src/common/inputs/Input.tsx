@@ -10,6 +10,7 @@ interface proptype {
   error?: string | null;
   type?: "text" | "email";
   disabled?: boolean;
+  readOnly?: boolean; 
 }
 
 const Input = ({
@@ -21,6 +22,7 @@ const Input = ({
   error = null,
   type = "text",
   disabled = false,
+  readOnly = false,
 }: proptype) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value);
@@ -36,6 +38,7 @@ const Input = ({
           value={value}
           onChange={handleChange}
           disabled={disabled}
+          readOnly={readOnly}
         />
       </Label>
       {error && <p className="pt-1 text-sm text-red-500">{error}</p>}
