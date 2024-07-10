@@ -1,15 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { apiURL } from "@/config";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
-
-async function fetchPrograms() {
-  const res = await fetch(`${apiURL}/program/public/engagements`);
-  const { ok, data } = await res.json();
-  if (!ok) throw new Error("Une erreur s'est produite lors du chargement des programmes.");
-  return data;
-}
+import { fetchPrograms } from "../../repo";
 
 // TODO: put in cellar instead of asset folder: dynamic content should not be in the bundle
 const imagePath = "../../../../assets/programmes-engagement";
@@ -39,7 +32,7 @@ export function Programs() {
 
       <h2 className="text-center font-bold text-4xl m-0 mt-2">Trouvez un engagement par vous-même</h2>
 
-      <div className="mt-12 border rounded-xl p-3 max-w-4xl mx-auto">
+      <div className="mt-12 border rounded-xl p-3 max-w-5xl mx-auto">
         <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2">
           <div className="flex gap-4 items-center md:border-r border-b md:border-b-0 px-3 pb-[0.75rem] md:pb-0">
             <div className="rounded-full bg-blue-france-sun-113 flex justify-center w-6 h-6 flex-none">
@@ -64,7 +57,7 @@ export function Programs() {
         </div>
       </div>
 
-      <div className="mt-12 mx-auto w-80 md:w-auto max-w-4xl gap-4 md:gap-x-24 md:gap-y-12 grid grid-cols-2 md:grid-cols-3">
+      <div className="mt-24 mx-auto w-80 md:w-auto max-w-4xl gap-4 md:gap-x-24 md:gap-y-12 grid grid-cols-2 md:grid-cols-3">
         {programs.map((program) => {
           const image = getProgramImage(program);
           return (
@@ -73,7 +66,7 @@ export function Programs() {
                 <div className="aspect-square rounded-full mx-auto overflow-hidden">
                   <img src={image} alt={program.name} className="h-full w-full object-cover" />
                 </div>
-                <p className="text-center font-bold mt-2 text-sm">{program.name}</p>
+                <p className="text-center font-bold mt-2 text-sm line-clamp-3">{program.name}</p>
               </a>
             </div>
           );
