@@ -130,10 +130,22 @@ module.exports = (emailsEmitter) => {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
       if (!etablissement) throw new Error("Etablissement not found");
 
+      // Admins CLE
+      const referents = await ReferentModel.find({ _id: { $in: [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds] } });
+      if (!referents?.length) throw new Error("Referents not found");
+      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, {
+        emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
+        params: {
+          class_name: classe.name,
+          class_code: classe.uniqueKeyAndId,
+          classUrl: `${config.APP_URL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`,
+        },
+      });
+
       // Referents departementaux et régionaux
       const refsDepReg = [...(await getReferentDep(etablissement.department)), ...(await getReferentReg(etablissement.region))];
 
-      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, {
+      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED_DEP_REG, {
         emailTo: refsDepReg.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
         params: {
           class_name: classe.name,
