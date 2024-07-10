@@ -396,6 +396,7 @@ export default function View() {
 
       <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
       <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />
+      <ModaleErrorOnVerify isOpen={showModaleErrorOnVerify} onClose={() => setShowModaleErrorOnVerify(false)} />
     </Page>
   );
 }
