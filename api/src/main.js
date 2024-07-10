@@ -22,6 +22,7 @@ const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
+const basicAuth = require("express-basic-auth");
 const { BullMonitorExpress } = require("@bull-monitor/express");
 const { BullAdapter } = require("@bull-monitor/root/dist/bull-adapter");
 const SendMailService = require("./MOVE_ME/send-mail-service"); // TODO: REMOVE_ME
@@ -32,21 +33,25 @@ async function runTasks() {
   SendMailService.startWorker();
   // Serverless containers requires running http server
   const app = express();
+
   const monitor = new BullMonitorExpress({
     queues: [new BullAdapter(SendMailService.queue)],
-    // enables graphql introspection query. false by default if NODE_ENV == production, true otherwise
-    gqlIntrospection: true,
-    // enable metrics collector. false by default
-    // metrics are persisted into redis as a list
-    // with keys in format "bull_monitor::metrics::{{queue}}"
     metrics: {
-      // collect metrics every X
-      // where X is any value supported by https://github.com/kibertoad/toad-scheduler
       collectInterval: { hours: 1 },
       maxMetrics: 100,
     },
   });
   await monitor.init();
+  if (config.get("TASK_MONITOR_ENABLE_AUTH")) {
+    app.use(
+      basicAuth({
+        challenge: true,
+        users: {
+          [config.get("TASK_MONITOR_USER")]: config.get("TASK_MONITOR_SECRET"),
+        },
+      }),
+    );
+  }
   app.use("/", monitor.router);
   app.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
 }

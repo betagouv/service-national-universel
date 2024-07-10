@@ -126,6 +126,7 @@ resource "scaleway_container" "tasks" {
   privacy        = "public"
   protocol       = "http1"
   deploy         = true
+  http_option    = "redirected"
 
   environment_variables = {
     "NODE_ENV"       = "custom"
