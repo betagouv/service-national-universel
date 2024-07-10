@@ -11,6 +11,8 @@ const EtablissementModel = require("../../../models/cle/etablissement");
 const CohortModel = require("../../../models/cohort");
 const { serializeReferents } = require("../../../utils/es-serializer");
 const { YOUNG_STATUS, STATUS_CLASSE } = require("snu-lib");
+const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
+const { FeatureFlagName } = require("../../../models/featureFlagType");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -104,6 +106,11 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
 async function buildClasseContext(user) {
   const contextFilters = [];
+  if (await isFeatureAvailable(FeatureFlagName.CLE_BEFORE_JULY_15)) {
+    if (user.role !== ROLES.ADMIN) {
+      contextFilters.push({ term: { "schoolYear.keyword": "2023-2024" } });
+    }
+  }
 
   if (user.role === ROLES.ADMINISTRATEUR_CLE) {
     const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
