@@ -429,8 +429,9 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
 
     const classe = await ClasseModel.findById(value).populate({
       path: "etablissement",
-      options: { select: { referentEtablissementIds: 1, coordinateurIds: 1, createdAt: 0, updatedAt: 0 } },
+      options: { select: { referentEtablissementIds: 1, coordinateurIds: 1 } },
     });
+    console.log(classe);
     if (!classe || !classe.etablissement || !classe.etablissement.referentEtablissementIds) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }

@@ -240,14 +240,14 @@ export default function View() {
       const { ok, code } = await api.get(`/cle/classe/${id}/notifyRef`);
 
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de l'envoie de la notification", translate(code));
+        toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification", translate(code));
         return setIsLoading(false);
       } else {
         toastr.success("Opération réussie", "Notification envoyée");
       }
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de l'envoie de la notification", e);
+      toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification", e);
     } finally {
       setIsLoading(false);
     }
