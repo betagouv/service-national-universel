@@ -32,6 +32,7 @@ const sessions2024CohortNames = [
   "CLE GE1 2024",
   "CLE GE2 2024",
   "Toussaint 2024",
+  "Toussaint 2024 - La Réunion",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
@@ -80,6 +81,7 @@ const COHESION_STAY_START = {
   "CLE GE1 2024": new Date("04/22/2024"),
   "CLE GE2 2024": new Date("06/17/2024"),
   "Toussaint 2024": new Date("10/21/2024"),
+  "Toussaint 2024 - La Réunion": new Date("14/20/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -117,6 +119,7 @@ const START_DATE_SESSION_PHASE1 = {
   "CLE GE1 2024": new Date("04/22/2024"),
   "CLE GE2 2024": new Date("06/17/2024"),
   "Toussaint 2024": new Date("10/21/2024"),
+  "Toussaint 2024 - La Réunion": new Date("14/20/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -157,6 +160,7 @@ const COHESION_STAY_END = {
   "CLE GE1 2024": new Date("05/04/2024"),
   "CLE GE2 2024": new Date("06/28/2024"),
   "Toussaint 2024": new Date("10/31/2024"),
+  "Toussaint 2024 - La Réunion": new Date("26/10/2024"),
 };
 
 // @todo: to be removed after adding old cohorts in bd
@@ -297,11 +301,11 @@ function hasAccessToReinscription(young) {
       return false;
     }
 
-    if([YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)){
-      return false
+    if ([YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+      return false;
     }
 
-    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN, ].includes(young.status)) {
+    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
       return true;
     }
 

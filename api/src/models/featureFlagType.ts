@@ -13,4 +13,5 @@ export interface FeatureFlagType {
 
 export enum FeatureFlagName {
   SYNC_APPEL_A_PROJET_CLE = "SYNC_APPEL_A_PROJET_CLE",
+  CLE_BEFORE_JULY_15 = "CLE_BEFORE_JULY_15",
 }
