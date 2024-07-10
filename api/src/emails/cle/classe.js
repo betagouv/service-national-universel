@@ -123,6 +123,28 @@ module.exports = (emailsEmitter) => {
       capture(error);
     }
   });
+
+  // Notify admin CLE Verif
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, async (classe) => {
+    try {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) throw new Error("Etablissement not found");
+
+      // Admins CLE
+      const referents = await ReferentModel.find({ _id: { $in: [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds] } });
+      if (!referents?.length) throw new Error("Referents not found");
+      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, {
+        emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
+        params: {
+          class_name: classe.name,
+          class_code: classe.uniqueKeyAndId,
+          classUrl: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
+        },
+      });
+    } catch (error) {
+      capture(error);
+    }
+  });
 };
 
 //We want to send emails to the right referents department

@@ -233,6 +233,26 @@ export default function View() {
     return true;
   };
 
+  const notifyRefForVerif = async () => {
+    try {
+      setIsLoading(true);
+
+      const { ok, code } = await api.get(`/cle/classe/${id}/notifyRef`);
+
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de l'envoie de la notification", translate(code));
+        return setIsLoading(false);
+      } else {
+        toastr.success("Opération réussie", "Notification envoyée");
+      }
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de l'envoie de la notification", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
     if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
@@ -243,7 +263,7 @@ export default function View() {
           type="wired"
           title="Relancer la vérification"
           className="mr-2"
-          onClick={() => console.log("hello")}
+          onClick={notifyRefForVerif}
         />,
       );
     }
