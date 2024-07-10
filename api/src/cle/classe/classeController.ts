@@ -416,4 +416,28 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
+router.get("/:id/notifyRef", async (req, res) => {
+  try {
+    const { error, value } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    // We need to populate the model with the 2 virtuals etablissement and referents
+    const classe = await ClasseModel.findById(value).populate({
+      path: "etablissement",
+      options: { select: { referentEtablissementIds: 1, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } },
+    });
+    if (!classe || !classe.etablissement || !classe.etablissement.referentEtablissementIds) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    return res.status(200).send({ ok: true, classe });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;

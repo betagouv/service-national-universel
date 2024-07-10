@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { HiHome } from "react-icons/hi";
+import { HiHome, HiOutlineRefresh } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useParams, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -246,6 +246,18 @@ export default function View() {
 
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
+    if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+      actionsList.push(
+        <Button
+          key="relance"
+          leftIcon={<HiOutlineRefresh size={20} className="mt-1" />}
+          type="wired"
+          title="Relancer la vérification"
+          className="mr-2"
+          onClick={() => console.log("hello")}
+        />,
+      );
+    }
     if (classe?.status && [STATUS_CLASSE.OPEN].includes(classe.status)) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} type="wired" title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
