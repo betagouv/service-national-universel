@@ -26,6 +26,7 @@ import {
   LIMIT_DATE_TOTAL_SEATS,
   canEditEstimatedSeats,
   canEditTotalSeats,
+  canNotifyAdminCleForVerif,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -416,7 +417,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.get("/:id/notifyRef", async (req, res) => {
+router.get("/:id/notifyRef", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
@@ -424,14 +425,24 @@ router.get("/:id/notifyRef", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    // We need to populate the model with the 2 virtuals etablissement and referents
+    if (!canNotifyAdminCleForVerif(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const classe = await ClasseModel.findById(value).populate({
       path: "etablissement",
-      options: { select: { referentEtablissementIds: 1, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } },
+      options: { select: { referentEtablissementIds: 1, coordinateurIds: 1, createdAt: 0, updatedAt: 0 } },
     });
     if (!classe || !classe.etablissement || !classe.etablissement.referentEtablissementIds) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+
+    if (req.user.role === ROLES.REFERENT_REGION && classe.etablissement.region !== req.user.region) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT && classe.etablissement.department !== req.user.departement) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, classe);
 
     return res.status(200).send({ ok: true, classe });
   } catch (error) {
