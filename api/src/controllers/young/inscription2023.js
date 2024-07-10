@@ -16,7 +16,6 @@ const {
   isInRuralArea,
   PHONE_ZONES_NAMES_ARR,
   formatPhoneNumberFromPhoneZone,
-  getCohortNames,
   isYoungInReinscription,
   isCle,
   REGLEMENT_INTERIEUR_VERSION,
@@ -422,10 +421,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
 router.put("/changeCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      cohort: Joi.string()
-        .trim()
-        .valid(...getCohortNames(true, false, false))
-        .required(),
+      cohort: Joi.string().trim().required(),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {

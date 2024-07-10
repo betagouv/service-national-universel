@@ -3,171 +3,6 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { isCle } from "./young";
 import { getZonedDate } from "./utils/date";
 
-const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "2022" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
-
-const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
-
-const sessions2024CohortNames = [
-  "Février 2024 - C",
-  "Février 2024 - A",
-  "Février 2024 - B",
-  "Avril 2024 - C",
-  "Avril 2024 - A",
-  "Avril 2024 - B",
-  "Juin 2024 - 2",
-  "Juin 2024 - Martinique",
-  "Juin 2024 - NC",
-  "Juillet 2024",
-  "Juillet 2024 - Martinique",
-  "Juillet 2024 - Mayotte",
-  "Juillet 2024 - PF",
-  "Juillet Guyane 2 2024",
-  "CLE 23-24",
-  "CLE mars 2024 1",
-  "CLE mars 2024 2",
-  "CLE mai 2024",
-  "CLE juin 2024",
-  "CLE juin 2024 Martinique",
-  "CLE février 2024 Réunion",
-  "CLE GE1 2024",
-  "CLE GE2 2024",
-  "Toussaint 2024",
-  "Toussaint 2024 - La Réunion",
-  "Octobre 2024 - Nouvelle-Calédonie",
-];
-
-const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
-  let cohortNames = ["Test"];
-  if (withNew) cohortNames = [...cohortNames, ...sessions2023CohortNames, ...sessions2024CohortNames];
-  if (withToCome) cohortNames = [...cohortNames, "à venir"];
-  if (withOld) cohortNames = [...oldSessions.map((e) => e.name), ...cohortNames];
-  return cohortNames;
-};
-
-// @todo: to be removed @hlecourt
-const COHESION_STAY_START = {
-  2019: new Date("06/16/2019"),
-  2020: new Date("06/21/2020"),
-  2021: new Date("06/21/2021"),
-  "Février 2022": new Date("02/13/2022"),
-  "Juin 2022": new Date("06/12/2022"),
-  "Juillet 2022": new Date("07/03/2022"),
-  "Février 2023 - C": new Date("02/19/2023"),
-  "Avril 2023 - A": new Date("04/09/2023"),
-  "Avril 2023 - B": new Date("04/16/2023"),
-  "Juin 2023": new Date("06/11/2023"),
-  "Juillet 2023": new Date("07/05/2023"),
-  "Octobre 2023 - NC": new Date("10/09/2023"),
-  "Février 2024 - C": new Date("02/12/2024"),
-  "Février 2024 - A": new Date("02/19/2024"),
-  "Février 2024 - B": new Date("02/26/2024"),
-  "Avril 2024 - C": new Date("04/08/2024"),
-  "Avril 2024 - A": new Date("04/15/2024"),
-  "Avril 2024 - B": new Date("04/22/2024"),
-  "Juin 2024 - 2": new Date("06/17/2024"),
-  "Juin 2024 - Martinique": new Date("06/13/2024"),
-  "Juin 2024 - NC": new Date("06/03/2024"),
-  "Juillet 2024": new Date("07/03/2024"),
-  "Juillet 2024 - Martinique": new Date("07/01/2024"),
-  "Juillet 2024 - Mayotte": new Date("07/01/2024"),
-  "Juillet 2024 - PF": new Date("07/08/2024"),
-  "Juillet Guyane 2 2024": new Date("07/20/2024"),
-  "CLE 23-24": new Date("01/01/2024"),
-  "CLE mars 2024 1": new Date("03/11/2024"),
-  "CLE mars 2024 2": new Date("03/25/2024"),
-  "CLE mai 2024": new Date("05/13/2024"),
-  "CLE juin 2024": new Date("06/03/2024"),
-  "CLE juin 2024 Martinique": new Date("05/26/2024"),
-  "CLE février 2024 Réunion": new Date("02/12/2024"),
-  "CLE GE1 2024": new Date("04/22/2024"),
-  "CLE GE2 2024": new Date("06/17/2024"),
-  "Toussaint 2024": new Date("10/21/2024"),
-  "Toussaint 2024 - La Réunion": new Date("10/14/2024"),
-  "Octobre 2024 - Nouvelle-Calédonie": new Date("10/07/2024"),
-};
-
-// @todo: to be removed @hlecourt
-const START_DATE_SESSION_PHASE1 = {
-  "Février 2022": new Date("03/13/2022"),
-  "Juin 2022": new Date("06/12/2022"),
-  "Juillet 2022": new Date("07/03/2022"),
-  "Février 2023 - C": new Date("02/19/2023"),
-  "Avril 2023 - A": new Date("04/09/2023"),
-  "Avril 2023 - B": new Date("04/16/2023"),
-  "Juin 2023": new Date("06/11/2023"),
-  "Juillet 2023": new Date("07/04/2023"),
-  "Octobre 2023 - NC": new Date("10/09/2023"),
-  "Février 2024 - C": new Date("02/12/2024"),
-  "Février 2024 - A": new Date("02/19/2024"),
-  "Février 2024 - B": new Date("02/26/2024"),
-  "Avril 2024 - C": new Date("04/08/2024"),
-  "Avril 2024 - A": new Date("04/15/2024"),
-  "Avril 2024 - B": new Date("04/22/2024"),
-  "Juin 2024 - 2": new Date("06/17/2024"),
-  "Juin 2024 - Martinique": new Date("06/13/2024"),
-  "Juin 2024 - NC": new Date("06/03/2024"),
-  "Juillet 2024": new Date("07/03/2024"),
-  "Juillet 2024 - Martinique": new Date("07/01/2024"),
-  "Juillet 2024 - Mayotte": new Date("07/01/2024"),
-  "Juillet 2024 - PF": new Date("07/08/2024"),
-  "Juillet Guyane 2 2024": new Date("07/20/2024"),
-  "CLE 23-24": new Date("01/01/2024"),
-  "CLE février 2024 Réunion": new Date("02/12/2024"),
-  "CLE mars 2024 1": new Date("03/11/2024"),
-  "CLE mars 2024 2": new Date("03/25/2024"),
-  "CLE mai 2024": new Date("05/13/2024"),
-  "CLE juin 2024": new Date("06/03/2024"),
-  "CLE juin 2024 Martinique": new Date("05/26/2024"),
-  "CLE GE1 2024": new Date("04/22/2024"),
-  "CLE GE2 2024": new Date("06/17/2024"),
-  "Toussaint 2024": new Date("10/21/2024"),
-  "Toussaint 2024 - La Réunion": new Date("10/14/2024"),
-  "Octobre 2024 - Nouvelle-Calédonie": new Date("10/07/2024"),
-};
-
-// @todo: to be removed @hlecourt
-const COHESION_STAY_END = {
-  2019: new Date("06/28/2019"),
-  2020: new Date("07/02/2021"),
-  2021: new Date("07/02/2021"),
-  "Février 2022": new Date("02/25/2022"),
-  "Juin 2022": new Date("06/24/2022"),
-  "Juillet 2022": new Date("07/15/2022"),
-  "Février 2023 - C": new Date("03/03/2023"),
-  "Avril 2023 - A": new Date("04/21/2023"),
-  "Avril 2023 - B": new Date("04/28/2023"),
-  "Juin 2023": new Date("06/23/2023"),
-  "Juillet 2023": new Date("07/17/2023"),
-  "Octobre 2023 - NC": new Date("10/20/2023"),
-  "Février 2024 - C": new Date("02/24/2024"),
-  "Février 2024 - A": new Date("03/02/2024"),
-  "Février 2024 - B": new Date("03/09/2024"),
-  "Avril 2024 - C": new Date("04/20/2024"),
-  "Avril 2024 - A": new Date("04/27/2024"),
-  "Avril 2024 - B": new Date("05/04/2024"),
-  "Juin 2024 - 2": new Date("06/28/2024"),
-  "Juin 2024 - Martinique": new Date("06/24/2024"),
-  "Juin 2024 - NC": new Date("06/14/2024"),
-  "Juillet 2024": new Date("07/15/2024"),
-  "Juillet 2024 - Martinique": new Date("07/12/2024"),
-  "Juillet 2024 - Mayotte": new Date("07/12/2024"),
-  "Juillet 2024 - PF": new Date("07/20/2024"),
-  "Juillet Guyane 2 2024": new Date("08/02/2024"),
-  "CLE 23-24": new Date("31/12/2024"),
-  "CLE février 2024 Réunion": new Date("02/24/2024"),
-  "CLE mars 2024 1": new Date("03/23/2024"),
-  "CLE mars 2024 2": new Date("04/06/2024"),
-  "CLE mai 2024": new Date("05/25/2024"),
-  "CLE juin 2024": new Date("06/14/2024"),
-  "CLE juin 2024 Martinique": new Date("06/07/2024"),
-  "CLE GE1 2024": new Date("05/04/2024"),
-  "CLE GE2 2024": new Date("06/28/2024"),
-  "Toussaint 2024": new Date("10/31/2024"),
-  "Toussaint 2024 - La Réunion": new Date("10/26/2024"),
-  "Toussaint 2024 - Nouvelle-Calédonie": new Date("10/18/2024"),
-  "Octobre 2024 - Nouvelle-Calédonie": new Date("10/18/2024"),
-};
-
 // @todo: to be removed after adding old cohorts in bd
 const START_DATE_PHASE1 = {
   2019: new Date("06/16/2019"),
@@ -359,13 +194,10 @@ function canApplyToPhase2(young, cohort) {
 }
 
 export {
-  oldSessions,
   getCohortYear,
   getCohortPeriod,
   formatCohortPeriod,
   getCohortPeriodTemp,
-  sessions2023CohortNames,
-  getCohortNames,
   inscriptionModificationOpenForYoungs,
   inscriptionCreationOpenForYoungs,
   shouldForceRedirectToReinscription,
@@ -375,10 +207,7 @@ export {
   canApplyToPhase2,
   getCohortStartDate,
   getCohortEndDate,
-  COHESION_STAY_START,
-  START_DATE_SESSION_PHASE1,
   START_DATE_PHASE1,
   END_DATE_PHASE1,
-  COHESION_STAY_END,
   COHORTS_BEFORE_JULY_2023,
 };
