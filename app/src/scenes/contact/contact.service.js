@@ -1,8 +1,8 @@
 import { YOUNG_SOURCE, departmentList } from "snu-lib";
 
 export const categories = [
-  { label: "J'ai une question", value: "QUESTION" },
-  { label: "J'ai un problème technique", value: "TECHNICAL" },
+  { label: "J'ai une question (éligibilité, séjour, missions, code de la route...)", value: "QUESTION" },
+  { label: "J'ai un problème technique (inscription, compte, téléversement...)", value: "TECHNICAL" },
 ];
 
 export const roleOptions = [
@@ -83,6 +83,14 @@ export const articleSummaries = [
 // TODO: Move to DB
 export const questions = [
   {
+    category: "QUESTION",
+    value: "PHASE_2_LICENSE",
+    label: "Code de la route - Comment obtenir mes codes d'accès ?",
+    articles: ["permis-et-code-de-la-route"],
+    roles: ["public", "young"],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE],
+  },
+  {
     value: "PHASE_0_ELIGIBILITY",
     category: "QUESTION",
     label: "Séjour -  Eligibilité aux séjours 2024",
@@ -158,14 +166,6 @@ export const questions = [
     value: "PHASE_2_JDC",
     label: "Phase Engagement - Ma JDC / Mon CIP",
     articles: ["journee-defense-et-citoyennete"],
-    roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.VOLONTAIRE],
-  },
-  {
-    category: "QUESTION",
-    value: "PHASE_2_LICENSE",
-    label: "Phase Engagement - Permis",
-    articles: ["permis-et-code-de-la-route"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
   },

@@ -1,6 +1,6 @@
 import { STATUS_PHASE1_CLASSE_LIST } from "../constants/constants";
 
-import { ReferentRoleDto } from "./referentDto";
+import { ReferentDto } from "./referentDto";
 
 export type ClasseDto = {
   _id: string;
@@ -39,5 +39,5 @@ export type ClasseDto = {
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date;
-  referentClasse?: ReferentRoleDto[];
+  referentClasse?: ReferentDto[];
 };

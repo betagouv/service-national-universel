@@ -1,8 +1,8 @@
 import { ROLES } from "../roles";
-import { CohortDto, ReferentRoleDto } from "../dto";
+import { CohortDto, ReferentDto } from "../dto";
 import { isNowBetweenDates } from "../utils/date";
 
-export const canUpdateCohort = (cohort: CohortDto | undefined, user: ReferentRoleDto | undefined): boolean => {
+export const canUpdateCohort = (cohort: CohortDto | undefined, user: ReferentDto | undefined): boolean => {
   if (!user) return false;
   if (!cohort) return true;
 
@@ -17,7 +17,7 @@ export const canUpdateCohort = (cohort: CohortDto | undefined, user: ReferentRol
   );
 };
 
-export const canUpdateCenter = (cohort: CohortDto | undefined, user: ReferentRoleDto | undefined): boolean => {
+export const canUpdateCenter = (cohort: CohortDto | undefined, user: ReferentDto | undefined): boolean => {
   if (!user) return false;
   if (!cohort) return true;
 

@@ -2,6 +2,7 @@ import { isSuperAdmin } from "snu-lib";
 import { UserRequest } from "../request";
 import { Response } from "express";
 import { doInviteMultipleChefsEtablissements, InvitationType } from "../../services/cle/referent";
+import { uploadFile } from "../../utils";
 
 const express = require("express");
 const passport = require("passport");
@@ -63,55 +64,28 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
   }
 });
 
-router.post(
-  "/send-invitation-chef-etablissement-inscription",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req: UserRequest, res: Response) => {
-    try {
-      const { error, value: emails } = Joi.array().items(Joi.string().email().required()).validate(req.body, { stripUnknown: true });
-      console.log("Controller - send-invitation-chef-etablissement-inscription - emails : ", emails);
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-      }
-      if (!isSuperAdmin(req.user)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
+router.post("/send-invitation-chef-etablissement", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    console.log("Controller - send-invitation-chef-etablissement");
 
-      const referentInvitationSent = await doInviteMultipleChefsEtablissements(emails, req.user, InvitationType.INSCRIPTION);
-
-      return res.status(200).send({ ok: true, data: referentInvitationSent });
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    if (!isSuperAdmin(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-  },
-);
 
-router.post(
-  "/send-invitation-chef-etablissement-confirmation",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req: UserRequest, res: Response) => {
-    try {
-      const { error, value: emails } = Joi.array().items(Joi.string().email().required()).validate(req.body, { stripUnknown: true });
-      console.log("Controller - send-invitation-chef-etablissement-confirmation - emails : ", emails);
+    const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+    const referentInvitationSent = await doInviteMultipleChefsEtablissements(req.user);
+    const file = {
+      data: Buffer.from(JSON.stringify(referentInvitationSent)),
+      encoding: "",
+      mimetype: "application/json",
+    };
+    uploadFile(`file/appelAProjet/${timestamp}-send-invitation-chef-etablissement.json`, file);
 
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-      }
-      if (!isSuperAdmin(req.user)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
-
-      const referentInvitationSent = await doInviteMultipleChefsEtablissements(emails, req.user, InvitationType.CONFIRMATION);
-
-      return res.status(200).send({ ok: true, data: referentInvitationSent });
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  },
-);
+    return res.status(200).send({ ok: true, data: referentInvitationSent });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 module.exports = router;
