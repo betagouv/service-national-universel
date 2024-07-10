@@ -162,13 +162,14 @@ export default function View() {
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", translate(code));
         return setIsLoading(false);
+      } else {
+        toastr.success("Opération réussie", "La classe a bien été vérifiée");
       }
       setClasse(data);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", e);
     } finally {
-      toastr.success("Opération réussie", "La classe a bien été vérifiée");
       setIsLoading(false);
     }
   };
