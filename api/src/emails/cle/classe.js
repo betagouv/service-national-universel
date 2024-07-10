@@ -138,7 +138,7 @@ module.exports = (emailsEmitter) => {
         params: {
           class_name: classe.name,
           class_code: classe.uniqueKeyAndId,
-          classUrl: `${config.APP_URL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`,
+          classUrl: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
         },
       });
 
