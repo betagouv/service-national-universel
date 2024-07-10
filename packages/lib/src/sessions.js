@@ -32,6 +32,7 @@ const sessions2024CohortNames = [
   "CLE GE1 2024",
   "CLE GE2 2024",
   "Toussaint 2024",
+  "Toussaint 2024 - La Réunion",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
@@ -297,11 +298,11 @@ function hasAccessToReinscription(young) {
       return false;
     }
 
-    if([YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)){
-      return false
+    if ([YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+      return false;
     }
 
-    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN, ].includes(young.status)) {
+    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
       return true;
     }
 
