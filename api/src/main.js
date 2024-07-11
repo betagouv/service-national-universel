@@ -23,25 +23,15 @@ const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
 const basicAuth = require("express-basic-auth");
-const { BullMonitorExpress } = require("@bull-monitor/express");
-const { BullAdapter } = require("@bull-monitor/root/dist/bull-adapter");
-const SendMailService = require("./MOVE_ME/send-mail-service"); // TODO: REMOVE_ME
+const { initTaskQueues, initTaskMonitor } = require("./MOVE_ME/queue-service"); // TODO: REMOVE_ME
 
 async function runTasks() {
   initSentry();
   await Promise.all([initDB(), getAllPdfTemplates()]);
-  SendMailService.startWorker();
-  // Serverless containers requires running http server
+  initTaskQueues();
+
   const app = express();
 
-  const monitor = new BullMonitorExpress({
-    queues: [new BullAdapter(SendMailService.queue)],
-    metrics: {
-      collectInterval: { hours: 1 },
-      maxMetrics: 100,
-    },
-  });
-  await monitor.init();
   if (config.get("TASK_MONITOR_ENABLE_AUTH")) {
     app.use(
       basicAuth({
@@ -52,6 +42,7 @@ async function runTasks() {
       }),
     );
   }
+  const monitor = await initTaskMonitor();
   app.use("/", monitor.router);
   app.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
 }
