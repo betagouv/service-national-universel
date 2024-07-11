@@ -18,7 +18,7 @@ const mime = require("mime-types");
 const scanFile = require("../../utils/virusScanner");
 const { generatePdfIntoStream } = require("../../utils/pdf-renderer");
 const { getMimeFromFile } = require("../../utils/file");
-const sendMailService = require("../../MOVE_ME/send-mail-service");
+const sendMailQueue = require("../../queues/sendMailQueue");
 
 router.post("/:type/:template", async (req, res) => {
   try {
@@ -88,8 +88,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    //start task
-    await sendMailService.sendDocumentEmailTask({ young_id: young._id, contract_id, type, template, fileName, switchToCle });
+    await sendMailQueue.sendDocumentEmailTask({ young_id: young._id, contract_id, type, template, fileName, switchToCle });
 
     res.status(200).send({ ok: true });
   } catch (e) {

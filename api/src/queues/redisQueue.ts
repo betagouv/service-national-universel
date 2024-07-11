@@ -1,11 +1,11 @@
 const { BullMonitorExpress } = require("@bull-monitor/express");
 const { BullAdapter } = require("@bull-monitor/root/dist/bull-adapter");
-const SendMailService = require("./send-mail-service"); // TODO: REMOVE_ME
+const sendMailQueue = require("./sendMailQueue");
 
-const queues = [SendMailService.queue];
+const queues = [sendMailQueue.queue];
 
 function initTaskQueues() {
-  SendMailService.startWorker();
+  sendMailQueue.startWorker();
 }
 
 async function stopQueues() {

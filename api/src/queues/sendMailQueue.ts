@@ -1,6 +1,6 @@
 const config = require("config");
 const Queue = require("bull");
-const { sendDocumentEmail } = require("./send-document-email");
+const { sendDocumentEmail } = require("../young/youngSendDocumentEmailService");
 const { capture } = require("../sentry");
 
 const MAIL_QUEUE = "send_mail";
@@ -17,7 +17,7 @@ class SendMailQueueService {
     },
     redis: {
       enableAutoPipelining: true,
-      enableOfflineQueue: false, // throw error when the connection isn't ready
+      commandTimeout: 500,
     },
   });
 

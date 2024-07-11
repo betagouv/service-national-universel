@@ -23,7 +23,7 @@ const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
 const basicAuth = require("express-basic-auth");
-const { initTaskQueues, initTaskMonitor, stopQueues } = require("./MOVE_ME/queue-service"); // TODO: REMOVE_ME
+const { initTaskQueues, initTaskMonitor, stopQueues } = require("./queues/redisQueue");
 
 async function runTasks() {
   initSentry();
