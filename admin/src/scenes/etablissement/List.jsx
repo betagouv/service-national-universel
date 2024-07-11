@@ -27,7 +27,7 @@ export default function List() {
     { title: "Type", name: "type", missingLabel: "Non renseigné" },
     { title: "Secteur", name: "sector", missingLabel: "Non renseigné" },
     { title: "Académie", name: "academy", missingLabel: "Non renseigné", translate },
-    { title: "Années scolaires", name: "schoolYears", missingLabel: "Non renseigné", defaultValue: ["2024-2025"] },
+    { title: "Années scolaires", name: "schoolYears", missingLabel: "Non renseigné" },
     { title: "État", name: "state", missingLabel: "Non renseigné", translate },
   ];
 

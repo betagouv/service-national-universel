@@ -142,6 +142,7 @@ resource "scaleway_container" "api" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NODE_ENV"       = "ci"
@@ -173,6 +174,7 @@ resource "scaleway_container" "admin" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NGINX_HOSTNAME" = local.admin_hostname
@@ -199,6 +201,7 @@ resource "scaleway_container" "app" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NGINX_HOSTNAME" = local.app_hostname
