@@ -33,7 +33,7 @@ const sessions2024CohortNames = [
   "CLE GE2 2024",
   "Toussaint 2024",
   "Toussaint 2024 - La Réunion",
-  "Toussaint 2024 - Nouvelle-Calédonie",
+  "Octobre 2024 - Nouvelle-Calédonie",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
@@ -83,7 +83,7 @@ const COHESION_STAY_START = {
   "CLE GE2 2024": new Date("06/17/2024"),
   "Toussaint 2024": new Date("10/21/2024"),
   "Toussaint 2024 - La Réunion": new Date("10/14/2024"),
-  "Toussaint 2024 - Nouvelle-Calédonie": new Date("10/07/2024"),
+  "Octobre 2024 - Nouvelle-Calédonie": new Date("10/07/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -122,7 +122,7 @@ const START_DATE_SESSION_PHASE1 = {
   "CLE GE2 2024": new Date("06/17/2024"),
   "Toussaint 2024": new Date("10/21/2024"),
   "Toussaint 2024 - La Réunion": new Date("10/14/2024"),
-  "Toussaint 2024 - Nouvelle-Calédonie": new Date("10/07/2024"),
+  "Octobre 2024 - Nouvelle-Calédonie": new Date("10/07/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -165,6 +165,7 @@ const COHESION_STAY_END = {
   "Toussaint 2024": new Date("10/31/2024"),
   "Toussaint 2024 - La Réunion": new Date("10/26/2024"),
   "Toussaint 2024 - Nouvelle-Calédonie": new Date("10/18/2024"),
+  "Octobre 2024 - Nouvelle-Calédonie": new Date("10/18/2024"),
 };
 
 // @todo: to be removed after adding old cohorts in bd
