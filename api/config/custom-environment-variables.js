@@ -8,7 +8,7 @@ except the ones defined in BLACKLIST_KEYS
 
 const config = require("./default.js");
 
-const BLACKLIST_KEYS = ["RUN_CRONS", "ENVIRONMENT", "PORT", "IMAGES_ROOTDIR", "FONT_ROOTDIR", "ENABLE_FLATTEN_ERROR_LOGS"];
+const BLACKLIST_KEYS = ["ENVIRONMENT", "PORT", "IMAGES_ROOTDIR", "FONT_ROOTDIR", "ENABLE_FLATTEN_ERROR_LOGS"];
 
 const keys = Object.keys(config).filter((x) => !BLACKLIST_KEYS.includes(x));
 

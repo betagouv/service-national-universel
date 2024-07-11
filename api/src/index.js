@@ -23,10 +23,8 @@ process.on("unhandledRejection", (reason, promise) => {
   throw reason;
 });
 
-const { runCrons, runTasks, runAPI } = require("./main");
-if (process.env.RUN_CRONS === "true") {
-  runCrons();
-} else if (process.env.RUN_TASKS === "true") {
+const { runTasks, runAPI } = require("./main");
+if (process.env.RUN_TASKS === "true") {
   runTasks();
 } else {
   runAPI();

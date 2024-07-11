@@ -3,7 +3,7 @@ const Queue = require("bull");
 const { sendDocumentEmail } = require("../young/youngSendDocumentEmailService");
 const { capture } = require("../sentry");
 
-const MAIL_QUEUE = "send_mail";
+const MAIL_QUEUE = `${config.get("ENVIRONMENT")}_send_mail`;
 const SEND_DOCUMENT_EMAIL = "send_document_mail";
 
 class SendMailQueueService {

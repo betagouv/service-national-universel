@@ -157,22 +157,24 @@ resource "scaleway_container_domain" "antivirus" {
   hostname     = local.antivirus_hostname
 }
 
-resource "scaleway_container" "crons" {
-  name           = "production-crons"
+resource "scaleway_container" "tasks" {
+  name           = "production-tasks"
   namespace_id   = scaleway_container_namespace.production.id
   registry_image = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port           = 8080
   cpu_limit      = 1024
-  memory_limit   = 1024
+  memory_limit   = 2048
   min_scale      = 0
   max_scale      = 1
   privacy        = "private"
   protocol       = "http1"
   deploy         = true
+  http_option    = "redirected"
 
   environment_variables = {
     "NODE_ENV"       = "production"
     "RUN_CRONS"      = "false"
+    "RUN_TASKS"      = "true"
   }
 
   secret_environment_variables = {

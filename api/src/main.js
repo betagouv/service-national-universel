@@ -28,6 +28,10 @@ const { initTaskQueues, initTaskMonitor, stopQueues } = require("./queues/redisQ
 async function runTasks() {
   initSentry();
   await Promise.all([initDB(), getAllPdfTemplates()]);
+
+  if (config.get("RUN_CRONS")) {
+    scheduleCrons();
+  }
   initTaskQueues();
 
   const app = express();
@@ -72,15 +76,6 @@ async function runTasks() {
   createTerminus(server, options);
 
   server.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
-}
-
-async function runCrons() {
-  initSentry();
-  await initDB();
-  scheduleCrons();
-  // Serverless containers requires running http server
-  const app = express();
-  app.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
 }
 
 async function runAPI() {
@@ -266,7 +261,6 @@ async function runAPI() {
 }
 
 module.exports = {
-  runCrons,
   runAPI,
   runTasks,
 };
