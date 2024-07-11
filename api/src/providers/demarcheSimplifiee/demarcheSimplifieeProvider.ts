@@ -1,14 +1,14 @@
 import fetch from "node-fetch";
 import config from "config";
 
-import { IAppelAProjet } from "../../cle/appelAProjetCle/appelAProjetType";
+import { IAppelAProjet, IAppelAProjetOptions } from "../../cle/appelAProjetCle/appelAProjetType";
 import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
 import { DemarcheSimplifieeDto, DossierState } from "./demarcheSimplifieeDto";
 import { CLE_COLORATION, TYPE_CLASSE } from "snu-lib";
 
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
-export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetFixes: Partial<IAppelAProjet>[]): Promise<IAppelAProjet[]> => {
+export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetOptions: IAppelAProjetOptions): Promise<IAppelAProjet[]> => {
   let cursor = "";
   let numberOfCalls = 0;
   let hasNextPage = true;
@@ -27,7 +27,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetF
 
     cursor = appelAProjetDemarcheSimplifieeDto.data.demarche.dossiers.pageInfo.endCursor;
     hasNextPage = appelAProjetDemarcheSimplifieeDto.data.demarche.dossiers.pageInfo.hasNextPage;
-    appelsAProjet = [...appelsAProjet, ...mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDemarcheSimplifieeDto, appelAProjetFixes)];
+    appelsAProjet = [...appelsAProjet, ...mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDemarcheSimplifieeDto, appelAProjetOptions)];
 
     console.timeEnd("Demarche_Simplifiee_call_" + numberOfCalls);
     numberOfCalls++;
@@ -36,7 +36,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetF
   return appelsAProjet;
 };
 
-export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: DemarcheSimplifieeDto, appelAProjetFixes: Partial<IAppelAProjet>[]): IAppelAProjet[] => {
+export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetDto: DemarcheSimplifieeDto, appelAProjetOptions: IAppelAProjetOptions): IAppelAProjet[] => {
   return appelAProjetDto.data.demarche.dossiers.nodes.map((formulaire) => {
     const etablissement: IAppelAProjet["etablissement"] = {} as IAppelAProjet["etablissement"];
     const referentEtablissement: IAppelAProjet["referentEtablissement"] = {} as IAppelAProjet["referentEtablissement"];
@@ -74,12 +74,10 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
       classe,
       referentClasse,
     };
-    const fixe = appelAProjetFixes.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
-    if (fixe) {
-      if (fixe.etablissement?.uai) {
-        console.log("mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet() - UAI  ", appelAProjet.etablissement.uai, fixe.etablissement.uai);
-        appelAProjet.etablissement.uai = fixe.etablissement.uai;
-      }
+    const fixe = appelAProjetOptions.fixes?.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
+    if (fixe?.etablissement?.uai) {
+      console.log("mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet() - UAI  ", appelAProjet.etablissement.uai, fixe.etablissement.uai);
+      appelAProjet.etablissement.uai = fixe.etablissement.uai;
     }
     return appelAProjet;
   });
