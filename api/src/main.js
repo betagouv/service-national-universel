@@ -23,7 +23,7 @@ const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
 const basicAuth = require("express-basic-auth");
-const { initTaskQueues, initTaskMonitor } = require("./MOVE_ME/queue-service"); // TODO: REMOVE_ME
+const { initTaskQueues, initTaskMonitor, stopQueues } = require("./MOVE_ME/queue-service"); // TODO: REMOVE_ME
 
 async function runTasks() {
   initSentry();
@@ -44,7 +44,34 @@ async function runTasks() {
   }
   const monitor = await initTaskMonitor();
   app.use("/", monitor.router);
-  app.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
+
+  // * Use Terminus for graceful shutdown when using Docker
+  const server = http.createServer(app);
+
+  function onSignal() {
+    console.log("server is starting cleanup");
+    return Promise.all([closeDB(), stopQueues()]);
+  }
+
+  function onShutdown() {
+    console.log("cleanup finished, server is shutting down");
+  }
+
+  function healthCheck({ state }) {
+    return Promise.resolve();
+  }
+
+  const options = {
+    healthChecks: {
+      "/healthcheck": healthCheck,
+    },
+    onSignal,
+    onShutdown,
+  };
+
+  createTerminus(server, options);
+
+  server.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
 }
 
 async function runCrons() {
