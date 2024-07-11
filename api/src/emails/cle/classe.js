@@ -142,11 +142,11 @@ module.exports = (emailsEmitter) => {
         },
       });
 
-      // Referents departementaux et régionaux
-      const refsDepReg = [...(await getReferentDep(etablissement.department)), ...(await getReferentReg(etablissement.region))];
+      // Referents departementaux
+      const refsDep = [...(await getReferentDep(etablissement.department))];
 
       await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED_DEP_REG, {
-        emailTo: refsDepReg.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
+        emailTo: refsDep.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
         params: {
           class_name: classe.name,
           class_code: classe.uniqueKeyAndId,
