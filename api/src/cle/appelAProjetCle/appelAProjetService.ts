@@ -3,15 +3,15 @@ import { apiEducation } from "../../services/gouv.fr/api-education";
 import { AppelAProjetReferentService } from "./appelAProjetReferentService";
 import { AppelAProjetEtablissementService } from "./appelAProjetEtablissementService";
 import { AppelAProjetClasseService } from "./appelAProjetClasseService";
-import { IAppelAProjet } from "./appelAProjetType";
+import { IAppelAProjet, IAppelAProjetOptions } from "./appelAProjetType";
 import { buildUniqueClasseId } from "../classe/classeService";
 
 type IRemovedAppelAProjet = IAppelAProjet & {
-  removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail" | "sameClasseUniqueId" | "invalidUAI";
+  removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail" | "sameClasseUniqueId" | "invalidUAI" | "excluded";
 };
 export class AppelAProjetService {
-  public sync = async (save: boolean = false, appelAProjetFixes: Partial<IAppelAProjet>[] = []) => {
-    const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets(appelAProjetFixes);
+  public sync = async (save: boolean = false, appelAProjetOptions: IAppelAProjetOptions = {}) => {
+    const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets(appelAProjetOptions);
 
     const uais = [...new Set(appelAProjets.map((AAP) => AAP.etablissement?.uai).filter(Boolean))];
     console.log("AppelAProjetService.sync() - uais.length: ", uais.length);
@@ -25,7 +25,7 @@ export class AppelAProjetService {
       retained: appelAProjetsRetained,
       warning: appelAProjetsWarning,
       removed: appelAProjetsRemoved,
-    } = this.filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets);
+    } = this.filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets, appelAProjetOptions);
 
     const appelAProjetReferentService = new AppelAProjetReferentService();
     const appelAProjetEtablissementService = new AppelAProjetEtablissementService();
@@ -34,14 +34,15 @@ export class AppelAProjetService {
     let processCounter = 0;
     for (const appelAProjet of appelAProjetsRetained) {
       console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", appelAProjetsRetained.length, `(${appelAProjet.etablissement?.uai})`);
-      if (!appelAProjetEtablissementService.getEtablissementFromAnnuaire(appelAProjet, etablissements)) {
-        appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "invalidUAI" });
-        console.log("AppelAProjetService.sync() - Etablissement not found: ", appelAProjet.etablissement?.uai);
-      } else {
+      const option = appelAProjetOptions.fixes?.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
+      if (option?.useExistingEtablissement || appelAProjetEtablissementService.getEtablissementFromAnnuaire(appelAProjet, etablissements)) {
         const referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
-        const savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save);
+        const savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save, appelAProjetOptions);
         const referentClasseId = await appelAProjetReferentService.processReferentClasse(appelAProjet, save);
         await appelAProjetClasseService.processClasse(appelAProjet, savedEtablissement!, referentClasseId, save);
+      } else {
+        appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "invalidUAI" });
+        console.log("AppelAProjetService.sync() - Etablissement not found: ", appelAProjet.etablissement?.uai);
       }
     }
 
@@ -65,7 +66,10 @@ export class AppelAProjetService {
     ];
   };
 
-  filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets: IAppelAProjet[]): {
+  filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(
+    appelAProjets: IAppelAProjet[],
+    appelAProjetOptions: IAppelAProjetOptions,
+  ): {
     retained: IAppelAProjet[];
     warning: IRemovedAppelAProjet[];
     removed: IRemovedAppelAProjet[];
@@ -76,6 +80,12 @@ export class AppelAProjetService {
     for (const appelAProjet of appelAProjets) {
       const email = appelAProjet.referentEtablissement.email;
       const uai = appelAProjet.etablissement?.uai;
+
+      if (appelAProjetOptions?.filters && !appelAProjetOptions.filters.find((number) => number === appelAProjet.numberDS)) {
+        appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "excluded" });
+        continue;
+      }
+
       const classeUniqueId = buildUniqueClasseId(
         { uai: appelAProjet.etablissement.uai },
         {
