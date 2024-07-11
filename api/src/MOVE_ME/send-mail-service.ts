@@ -3,8 +3,11 @@ const Queue = require("bull");
 const { sendDocumentEmail } = require("./send-document-email");
 const { capture } = require("../sentry");
 
+const MAIL_QUEUE = "send_mail";
+const SEND_DOCUMENT_EMAIL = "send_document_mail";
+
 class SendMailQueueService {
-  queue = new Queue("send_mail", config.REDIS_URL, {
+  queue = new Queue(MAIL_QUEUE, config.REDIS_URL, {
     defaultJobOptions: {
       attempts: 3,
       backoff: {
@@ -12,21 +15,24 @@ class SendMailQueueService {
         delay: 2000,
       },
     },
+    redis: {
+      enableAutoPipelining: true,
+      enableOfflineQueue: false, // throw error when the connection isn't ready
+    },
   });
 
   async sendDocumentEmailTask(options) {
-    const job = await this.queue.add("send_document_mail", options);
-    console.log(`Add send_document_mail job : ${job.id}`);
+    const job = await this.queue.add(SEND_DOCUMENT_EMAIL, options);
+    console.log(`Add task ${SEND_DOCUMENT_EMAIL} (${job.id})`);
     return job;
   }
 
   startWorker() {
-    this.queue.process("send_document_mail", async (job) => {
+    this.queue.process(SEND_DOCUMENT_EMAIL, async (job) => {
       try {
-        console.log(`Start processing send_document_mail job : ${job.id}`);
-        console.log(job.data);
+        console.log(`Start processing task ${SEND_DOCUMENT_EMAIL} (${job.id})`);
         const res = await sendDocumentEmail(job.data);
-        console.log(`End processing send_document_mail job : ${job.id}`);
+        console.log(`End processing task ${SEND_DOCUMENT_EMAIL} (${job.id})`);
         return res;
       } catch (err) {
         capture(err);
