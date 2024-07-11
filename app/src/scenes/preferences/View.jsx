@@ -191,69 +191,6 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
                 </div>
               )}
             </div>
-            <div className="md:rounded-0 mb-8 rounded-lg border-[1px] border-gray-200 py-6 px-3 md:mb-0 md:border-none md:p-0">
-              <MiniTitle>Périmètre de recherche</MiniTitle>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                <SimpleCheckbox value={young.mobilityNearHome} title="Autour de l’adresse principale" detail={young.city} onChange={(val) => onChange("mobilityNearHome", val)} />
-                {young.schooled && young.schoolCity && (
-                  <SimpleCheckbox
-                    value={young.mobilityNearSchool}
-                    title="Autour de l’établissement"
-                    detail={young.schoolCity}
-                    onChange={(val) => onChange("mobilityNearSchool", val)}
-                  />
-                )}
-                <SimpleCheckbox
-                  value={young.mobilityNearRelative}
-                  title="Autour de l’adresse d’un proche"
-                  detail={young.mobilityNearRelativeCity ? young.mobilityNearRelativeCity : "Renseigner une adresse"}
-                  onChange={(val) => onChange("mobilityNearRelative", val)}
-                />
-              </div>
-              {young.mobilityNearRelative && (
-                <div className="mt-8 flex justify-center">
-                  <div className="w-[100%] rounded-md border border-gray-200 p-8 md:w-[50%]">
-                    <MiniTitle>Adresse du proche</MiniTitle>
-                    <div className="grid grid-rows-3 gap-4">
-                      <SimpleInput
-                        className=""
-                        title="Nom"
-                        value={young.mobilityNearRelativeName}
-                        placeholder="Nom du proche"
-                        onChange={(val) => onChange("mobilityNearRelativeName", val)}
-                        error={errors.mobilityNearRelativeName}
-                      />
-                      <SimpleInput
-                        className=""
-                        title="Adresse"
-                        value={young.mobilityNearRelativeAddress}
-                        placeholder="Adresse du proche"
-                        onChange={(val) => onChange("mobilityNearRelativeAddress", val)}
-                        error={errors.mobilityNearRelativeAddress}
-                      />
-                      <div className="grid grid-cols-2 gap-4">
-                        <SimpleInput
-                          className=""
-                          title="Code postal"
-                          value={young.mobilityNearRelativeZip}
-                          placeholder="Saisissez un code postal"
-                          onChange={(val) => onChange("mobilityNearRelativeZip", val)}
-                          error={errors.mobilityNearRelativeZip}
-                        />
-                        <SimpleInput
-                          className=""
-                          title="Ville"
-                          value={young.mobilityNearRelativeCity}
-                          placeholder="Ville du proche"
-                          onChange={(val) => onChange("mobilityNearRelativeCity", val)}
-                          error={errors.mobilityNearRelativeCity}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </Section>
         {Object.values(errors).length ? <div className="text-center mt-6 text-sm text-[#F71701]">Il y a des erreurs ou des données manquantes dans le formulaire.</div> : null}
