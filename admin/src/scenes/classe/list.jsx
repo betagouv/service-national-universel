@@ -5,10 +5,10 @@ import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/compo
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { Button, Container, Header, Page } from "@snu/ds/admin";
-import { HiPlus, HiOutlineOfficeBuilding, HiHome } from "react-icons/hi";
+import { HiPlus, HiHome } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-lib";
+import { ROLES, translateStatusClasse } from "snu-lib";
 
 import dayjs from "@/utils/dayjs.utils";
 import { getCohortGroups } from "@/services/cohort.service";
@@ -29,7 +29,6 @@ export default function List() {
   const [exportLoading, setExportLoading] = useState(false);
 
   const pageId = "classe-list";
-  const exportv1 = new URLSearchParams(history.location.search).get("export-v1");
 
   useEffect(() => {
     (async () => {
@@ -56,15 +55,14 @@ export default function List() {
   const exportData = async ({ type }) => {
     setExportLoading(true);
     try {
-      // TODO: reintégrer export ES une fois synchro ok
       let res;
-      if (exportv1) {
+      if (type === "export-des-classes") {
         res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
           filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
             return { ...e, [key]: value.filter };
           }, {}),
         });
-      } else {
+      } else if (type === "schema-de-repartition") {
         res = await api.post(
           `/cle/classe/export?type=${type}`,
           Object.entries(selectedFilters).reduce((e, [key, value]) => {
@@ -112,7 +110,7 @@ export default function List() {
   ].filter(Boolean);
 
   if (classes === null) return null;
-  const isCohortSelected = exportv1 || (selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0);
+  const isCohortSelected = selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0;
 
   return (
     <Page>
@@ -120,21 +118,18 @@ export default function List() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes classes" }]}
         actions={[
-          [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && IS_CREATION_CLASSE_OPEN_CLE && (
-            <Link key="list" to="/classes/create" className="ml-2">
-              <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
-            </Link>
+          [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (
+            <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />
           ),
+
           [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
-            <div className="flex gap-2 items-center">
-              <Button
-                title="Exporter le SR"
-                onClick={() => exportData({ type: "schema-de-repartition" })}
-                loading={exportLoading}
-                disabled={!isCohortSelected}
-                tooltip="Vous devez selectionner une cohort pour pouvoir exporter le SR"
-              />
-            </div>
+            <Button
+              title="Exporter le SR"
+              onClick={() => exportData({ type: "schema-de-repartition" })}
+              loading={exportLoading}
+              disabled={!isCohortSelected}
+              tooltip="Vous devez selectionner une cohort pour pouvoir exporter le SR"
+            />
           ),
         ].filter(Boolean)}
       />
@@ -231,15 +226,45 @@ function exportExcelSheet({ data: classes, type }) {
   let sheetData = classes.map((c) => ({
     id: c._id.toString(),
     uniqueKeyAndId: c.uniqueKeyAndId,
+    dossier: c.metadata?.numeroDossierDS ?? "Non renseigné",
     name: c.name,
-    cohort: c.cohort,
-    students: (c.seatsTaken ?? 0) + "/" + (c.totalSeats ?? 0),
+    cohort: c.cohort ?? "Non renseigné",
     coloration: c.coloration,
     status: translateStatusClasse(c.status),
-    updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
-    createdAt: dayjs(c.createdAt).format("DD/MM/YYYY HH:mm"),
+    estimatedSeats: c.estimatedSeats,
+    academy: c.academy,
+    region: c.region,
+    department: c.department,
+    classeRefLastName: c.referentClasse ? c.referentClasse[0]?.lastName : "",
+    classeRefFirstName: c.referentClasse ? c.referentClasse[0]?.firstName : "",
+    classeRefEmail: c.referentClasse ? c.referentClasse[0]?.email : "",
+    uai: c.etablissement?.uai,
+    etablissementName: c.etablissement?.name,
+    etabRefLastName: c.referentEtablissement ? c.referentEtablissement[0]?.lastName : "",
+    etabRefFirstName: c.referentEtablissement ? c.referentEtablissement[0]?.firstName : "",
+    etabRefEmail: c.referentEtablissement ? c.referentEtablissement[0]?.email : "",
   }));
-  let headers = ["ID", "Identifiant", "Nom", "Cohorte", "Élèves", "Coloration", "Statut", "Date de dernière modification", "Date de création"];
+  let headers = [
+    "ID",
+    "Identifiant",
+    "Numéro de dossier DS",
+    "Nom",
+    "Cohorte",
+    "Coloration",
+    "Statut",
+    "Effectif prévisionnel",
+    "Académie",
+    "Région",
+    "Département",
+    "Nom du référent de classe",
+    "Prénom du référent de classe",
+    "Email du référent de classe",
+    "UAI de l'établissement",
+    "Nom de l'établissement",
+    "Nom du chef d'établissement",
+    "Prénom du chef d'établissement",
+    "Email du chef d'établissement",
+  ];
 
   if (type === "schema-de-repartition") {
     sheetData = classes.map((c) => ({
@@ -323,6 +348,6 @@ function exportExcelSheet({ data: classes, type }) {
   let workbook = XLSX.utils.book_new();
   // ⚠️ Becareful, sheet name length is limited to 31 characters
   XLSX.utils.book_append_sheet(workbook, sheet, type === "schema-de-repartition" ? "Répartition des classes" : "Liste des classes");
-  const fileName = "classes-schema-repartition.xlsx";
+  const fileName = type === "schema-de-repartition" ? "classes-schema-repartition.xlsx" : "classes_list.xlsx";
   return { workbook, fileName };
 }
