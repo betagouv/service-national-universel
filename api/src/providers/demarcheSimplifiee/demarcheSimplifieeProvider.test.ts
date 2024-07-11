@@ -25,7 +25,7 @@ describe("demarcheSimplifieeProvider", () => {
 
   it("should return the right data", () => {
     const mockAppelAProjetDto = getMockAppelAProjetDto();
-    const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto, []);
+    const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto, {});
 
     const expectedAppelAProjet = [
       {
@@ -55,7 +55,7 @@ describe("demarcheSimplifieeProvider", () => {
       numberDS: 1000,
       etablissement: { uai: "FIXED_UAI" },
     };
-    const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto, [fixe]);
+    const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto, { fixes: [fixe] });
 
     const expectedAppelAProjet = [
       {

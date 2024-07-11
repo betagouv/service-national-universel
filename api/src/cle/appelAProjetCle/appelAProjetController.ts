@@ -15,16 +15,18 @@ import { uploadFile } from "../../utils";
 const router = express.Router();
 
 const validateAppelAProjetPayload = (body) =>
-  Joi.array()
-    .items(
+  Joi.object({
+    fixes: Joi.array().items(
       Joi.object({
         numberDS: Joi.number().required(),
         etablissement: Joi.object({
           uai: Joi.string(),
         }),
+        useExistingEtablissement: Joi.boolean(),
       }),
-    )
-    .validate(body);
+    ),
+    filters: Joi.array(),
+  }).validate(body);
 
 router.post(
   "/simulate",
