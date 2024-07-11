@@ -33,11 +33,12 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       city: Joi.string().trim().required(),
       startDate: Joi.string().trim().required(),
       endDate: Joi.string().trim().required(),
-      frequency: Joi.object().keys({
-        nombre: Joi.string().trim().required(),
-        duree: Joi.string().trim().valid("Heure(s)", "Demi-journée(s)", "Jour(s)").required(),
-        frequence: Joi.string().valid("Par semaine", "Par mois", "Par an").trim().required(),
-      }),
+      // frequency: Joi.object().keys({
+      //   nombre: Joi.string().trim().required(),
+      //   duree: Joi.string().trim().valid("Heure(s)", "Demi-journée(s)", "Jour(s)").required(),
+      //   frequence: Joi.string().valid("Par semaine", "Par mois", "Par an").trim().required(),
+      // }),
+      missionDuration: Joi.string().trim().required(),
       contactFullName: Joi.string().trim().required(),
       contactEmail: Joi.string().trim().required(),
       files: Joi.array().items(Joi.string().required()).required().min(1),
@@ -77,6 +78,8 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
     }
     await young.save({ fromUser: req.user });
+
+    await updateYoungPhase2Hours(young, req.user);
 
     let template = SENDINBLUE_TEMPLATES.young.EQUIVALENCE_WAITING_VERIFICATION;
     let cc = getCcOfYoung({ template, young });
@@ -127,6 +130,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 });
 
 router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  console.log(req.body);
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -145,11 +149,12 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       city: Joi.string().trim(),
       startDate: Joi.string().trim(),
       endDate: Joi.string().trim(),
-      frequency: Joi.object().keys({
-        nombre: Joi.string().trim().required(),
-        duree: Joi.string().trim().valid("Heure(s)", "Demi-journée(s)", "Jour(s)").required(),
-        frequence: Joi.string().valid("Par semaine", "Par mois", "Par an").trim().required(),
-      }),
+      // frequency: Joi.object().keys({
+      //   nombre: Joi.string().trim().required(),
+      //   duree: Joi.string().trim().valid("Heure(s)", "Demi-journée(s)", "Jour(s)").required(),
+      //   frequence: Joi.string().valid("Par semaine", "Par mois", "Par an").trim().required(),
+      // }),
+      // missionDuration: Joi.string().trim().required(),
       contactFullName: Joi.string().trim(),
       contactEmail: Joi.string().trim(),
       files: Joi.array().items(Joi.string()),

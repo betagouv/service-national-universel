@@ -16,20 +16,18 @@ import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
-  const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
-  const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
   const keyList = ["type", "desc", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
   const [data, setData] = useState();
   const [openType, setOpenType] = useState(false);
   const [openSousType, setOpenSousType] = React.useState(false);
-  const [openDuree, setOpenDuree] = useState(false);
-  const [openFrequence, setOpenFrequence] = useState(false);
   const [frequence, setFrequence] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [errorMail, setErrorMail] = useState(false);
+  const [duration, setDuration] = useState("");
+  const [unit, setUnit] = useState("heures");
   const refType = useRef(null);
   const refSousType = React.useRef(null);
   const refDuree = useRef(null);
@@ -79,12 +77,6 @@ export default function EditEquivalence() {
       if (refSousType.current && !refSousType.current.contains(event.target)) {
         setOpenSousType(false);
       }
-      if (refDuree.current && !refDuree.current.contains(event.target)) {
-        setOpenDuree(false);
-      }
-      if (refFrequence.current && !refFrequence.current.contains(event.target)) {
-        setOpenFrequence(false);
-      }
     };
     document.addEventListener("click", handleClickOutside, true);
     return () => {
@@ -98,7 +90,7 @@ export default function EditEquivalence() {
         const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`);
         if (ok) {
           setData(data);
-          if (data?.frequency?.nombre && data?.frequency?.duree && data?.frequency?.frequence) setFrequence(true);
+          // if (data?.frequency?.nombre && data?.frequency?.duree && data?.frequency?.frequence) setFrequence(true);
           return;
         }
       })();
@@ -180,13 +172,33 @@ export default function EditEquivalence() {
     }
   };
 
+  const handleInputChange = (e) => {
+    const value = Math.ceil(Number(e.target.value));
+    setDuration(value);
+    const missionDuration = unit === "jours" ? String(value * 7) : String(value);
+    setData((prevData) => ({
+      ...prevData,
+      missionDuration: missionDuration,
+    }));
+  };
+
+  const handleSelectChange = (e) => {
+    const value = e.target.value;
+    setUnit(value);
+    setDuration("");
+    setData((prevData) => ({
+      ...prevData,
+      missionDuration: "",
+    }));
+  };
+
   if (data?._id && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data?.status)) history.push("/phase2");
 
   return (
     <div className="align-center my-4 flex justify-center ">
       <div className="p-4 max-w-2xl">
         <div className="text-center text-2xl font-bold leading-10 tracking-tight md:text-4xl ">
-          {mode === "create" ? "Je demande la reconnaissance d'un engagement déjà réalisé" : "Je modifie ma demande de reconnaissance d'engagement"}
+          {mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}
         </div>
         <div className="mt-4 rounded-lg border-[1px] border-blue-400 bg-blue-50">
           <div className="flex items-center px-4 py-3">
@@ -403,105 +415,28 @@ export default function EditEquivalence() {
               />
             </div>
           </div>
-          {frequence ? (
-            <>
-              <div className="mt-2 flex flex-wrap items-stretch gap-2 md:!flex-nowrap">
-                <div className="flex flex-1 gap-2 md:flex-none">
-                  <div className="mt-3 flex w-1/2 flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2">
-                    {data?.frequency?.nombre ? <div className="text-xs font-normal leading-4 text-gray-500">Nombre</div> : null}
-                    <input
-                      className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
-                      placeholder="Nombre"
-                      type="text"
-                      value={data?.frequency?.nombre}
-                      onChange={(e) => setData({ ...data, frequency: { ...data.frequency, nombre: e.target.value } })}
-                    />
-                  </div>
-                  <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
-                    {data?.frequency?.duree ? <div className="text-xs font-normal leading-4 text-gray-500">Durée</div> : null}
-                    <div className="relative" ref={refDuree}>
-                      <button className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50" onClick={() => setOpenDuree((e) => !e)}>
-                        <div className="flex items-center gap-2">
-                          {data?.frequency?.duree ? (
-                            <span className="text-sm font-normal leading-5">{data?.frequency?.duree}</span>
-                          ) : (
-                            <span className="text-sm font-normal leading-5 text-gray-400">Durée</span>
-                          )}
-                        </div>
-                        <ChevronDown className="text-gray-400" />
-                      </button>
-                      {/* display options */}
-                      <div className={`${openDuree ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
-                        {optionsDuree.map((option) => (
-                          <div
-                            key={option}
-                            onClick={() => {
-                              setData({ ...data, frequency: { ...data.frequency, duree: option } });
-                              setOpenDuree(false);
-                            }}
-                            className={`${option === data?.frequency?.duree && "bg-gray font-bold"}`}>
-                            <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
-                              <div>{option}</div>
-                              {option === data?.frequency?.duree ? <BsCheck2 /> : null}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
-                  {data?.frequency?.frequence ? <div className="text-xs font-normal leading-4 text-gray-500">Fréquence</div> : null}
-                  <div className="relative" ref={refFrequence}>
-                    <button
-                      className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
-                      onClick={() => setOpenFrequence((e) => !e)}>
-                      <div className="flex items-center gap-2">
-                        {data?.frequency?.frequence ? (
-                          <span className="text-sm font-normal leading-5">{data?.frequency?.frequence}</span>
-                        ) : (
-                          <span className="text-sm font-normal leading-5 text-gray-400">Fréquence</span>
-                        )}
-                      </div>
-                      <ChevronDown className="text-gray-400" />
-                    </button>
-                    {/* display options */}
-                    <div className={`${openFrequence ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
-                      {optionsFrequence.map((option) => (
-                        <div
-                          key={option}
-                          onClick={() => {
-                            setData({ ...data, frequency: { ...data.frequency, frequence: option } });
-                            setOpenFrequence(false);
-                          }}
-                          className={`${option === data?.frequency?.frequence && "bg-gray font-bold"}`}>
-                          <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
-                            <div>{option}</div>
-                            {option === data?.frequency?.frequence ? <BsCheck2 /> : null}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+          <div className="mt-4">
+            <div className="text-xs font-medium leading-4">Combien de temps ?</div>
+            <div className="mt-3 flex flex-row  items-stretch gap-2 align-middle">
+              <div className="w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+                <input
+                  className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
+                  placeholder="Exemple: 10"
+                  type="number"
+                  min="1"
+                  value={duration}
+                  onChange={handleInputChange}
+                />
               </div>
-              <div
-                className="mt-3 text-center text-sm font-normal leading-5 text-indigo-600 hover:underline"
-                onClick={() => {
-                  setFrequence(false);
-                  setData({ ...data, frequency: undefined });
-                }}>
-                Supprimer la fréquence
+              <div className="w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+                <select className="text-gray-500 w-full text-sm font-normal leading-5" value={unit} onChange={handleSelectChange}>
+                  <option value="heures">Heures</option>
+                  <option value="jours">Jours</option>
+                </select>
               </div>
-            </>
-          ) : (
-            <>
-              <div className="group mt-4 flex cursor-pointer items-center justify-center rounded-lg bg-blue-50 py-3" onClick={() => setFrequence(true)}>
-                <AiOutlinePlus className="mr-2 h-5 w-5 text-indigo-400 group-hover:scale-110" />
-                <div className="text-sm font-medium leading-5 text-blue-700 group-hover:underline">Ajouter la fréquence (facultatif)</div>
-              </div>
-            </>
-          )}
+            </div>
+            <p className="text-gray-500 w-full text-xs font-normal leading-5 mt-1">Arrondir à l'entier supérieur.</p>
+          </div>
         </div>
         <div className="mt-4 rounded-lg bg-white p-6">
           <div className="text-lg font-bold leading-7">Personne contact au sein de la structure d’accueil</div>
