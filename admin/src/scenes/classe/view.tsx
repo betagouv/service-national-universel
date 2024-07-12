@@ -29,6 +29,8 @@ import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleCohort from "./components/modale/modaleCohort";
 import ButtonInvite from "./components/ButtonInvite";
 import { InfoBus, TStatus, Rights } from "./components/types";
+import ModaleRelanceVerif from "./components/modale/modaleRelanceVerif";
+import { set } from "date-fns";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
@@ -36,6 +38,7 @@ export default function View() {
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
   const [showModaleWithdraw, setShowModaleWithdraw] = useState(false);
   const [showModaleCohort, setShowModaleCohort] = useState(false);
+  const [showModaleRelanceVerif, setShowModaleRelanceVerif] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
   const [edit, setEdit] = useState(false);
@@ -236,6 +239,7 @@ export default function View() {
   const notifyRefForVerif = async () => {
     try {
       setIsLoading(true);
+      setShowModaleRelanceVerif(false);
 
       const { ok, code } = await api.get(`/cle/classe/${id}/notifyRef`);
 
@@ -250,6 +254,7 @@ export default function View() {
       toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification", e);
     } finally {
       setIsLoading(false);
+      setShowModaleRelanceVerif(false);
     }
   };
 
@@ -263,7 +268,7 @@ export default function View() {
           type="wired"
           title="Relancer la vérification"
           className="mr-2"
-          onClick={notifyRefForVerif}
+          onClick={() => setShowModaleRelanceVerif(true)}
         />,
       );
     }
@@ -361,6 +366,7 @@ export default function View() {
 
       <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
       <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />
+      <ModaleRelanceVerif isOpen={showModaleRelanceVerif} onClose={() => setShowModaleRelanceVerif(false)} onRelance={notifyRefForVerif} />
     </Page>
   );
 }

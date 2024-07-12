@@ -431,6 +431,7 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
       path: "etablissement",
       options: { select: { referentEtablissementIds: 1, coordinateurIds: 1 } },
     });
+
     if (!classe?.etablissement?.referentEtablissementIds) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }

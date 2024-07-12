@@ -4,6 +4,7 @@ const ReferentModel = require("../../models/referent");
 const { capture } = require("../../sentry");
 const config = require("config");
 const { sendTemplate } = require("../../sendinblue");
+const { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } = require("../../cle/classe/classeService");
 
 module.exports = (emailsEmitter) => {
   // Classe created
@@ -133,14 +134,32 @@ module.exports = (emailsEmitter) => {
       // Admins CLE
       const referents = await ReferentModel.find({ _id: { $in: [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds] } });
       if (!referents?.length) throw new Error("Referents not found");
-      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, {
-        emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
-        params: {
-          class_name: classe.name,
-          class_code: classe.uniqueKeyAndId,
-          classUrl: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
-        },
-      });
+
+      const chefEtablissement = referents.find((referent) => referent.subRole === SUB_ROLES.referent_etablissement);
+      const isRegistered = chefEtablissement.lastLoginAt;
+      if (isRegistered) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, {
+          emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
+          params: {
+            class_name: classe.name,
+            class_code: classe.uniqueKeyAndId,
+            classUrl: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
+          },
+        });
+      } else {
+        const nbreClasseAValider = await getNumberOfClassesByEtablissement(etablissement);
+        const effectifPrevisionnel = await getEstimatedSeatsByEtablissement(etablissement);
+        await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE, {
+          emailTo: [{ name: `${chefEtablissement.firstName} ${chefEtablissement.lastName}`, email: chefEtablissement.email }],
+          params: {
+            cta: `${config.ADMIN_URL}/creer-mon-compte?token=${chefEtablissement.invitationToken}`,
+            toName: `${chefEtablissement.firstName} ${chefEtablissement.lastName}`,
+            name_school: etablissement.name,
+            nbreClasseAValider,
+            effectifPrevisionnel,
+          },
+        });
+      }
     } catch (error) {
       capture(error);
     }
