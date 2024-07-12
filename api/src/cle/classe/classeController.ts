@@ -24,7 +24,6 @@ import {
   LIMIT_DATE_ESTIMATED_SEATS,
   canEditEstimatedSeats,
   canEditTotalSeats,
-  canNotifyAdminCleForVerif,
   canVerifyClasse,
 } from "snu-lib";
 
