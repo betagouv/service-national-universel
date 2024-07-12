@@ -39,7 +39,6 @@ const ClasseStateManager: IClasseStateManager = {
     if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status) && isInscriptionOpen) {
       classe.set({ status: STATUS_CLASSE.OPEN });
       classe = await classe.save({ fromUser });
-      //TODO : send email to referent
       return classe;
     }
 
@@ -47,8 +46,6 @@ const ClasseStateManager: IClasseStateManager = {
     if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats === seatsValidated) {
       classe.set({ status: STATUS_CLASSE.CLOSED });
       classe = await classe.save({ fromUser });
-
-      emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VALIDATED, classe);
       return classe;
     }
 
