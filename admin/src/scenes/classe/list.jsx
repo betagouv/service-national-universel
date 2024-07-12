@@ -8,7 +8,7 @@ import { Button, Container, Header, Page } from "@snu/ds/admin";
 import { HiPlus, HiHome } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, translateStatusClasse } from "snu-lib";
+import { ROLES, translateStatusClasse, translate } from "snu-lib";
 
 import dayjs from "@/utils/dayjs.utils";
 import { getCohortGroups } from "@/services/cohort.service";
