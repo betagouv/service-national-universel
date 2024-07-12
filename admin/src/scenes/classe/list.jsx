@@ -119,7 +119,7 @@ export default function List() {
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes classes" }]}
         actions={[
           [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (
-            <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />
+            <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} />
           ),
 
           [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
