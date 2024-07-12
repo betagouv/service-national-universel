@@ -32,7 +32,7 @@ describe("AppelAProjetService", () => {
         },
       ] as IAppelAProjet[];
 
-      const result = service.filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets);
+      const result = service.filterAppelAProjetsSameUaiButDifferentEmailChefEtablissement(appelAProjets, {});
       const expectedResult = {
         retained: [
           {

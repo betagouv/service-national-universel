@@ -9,3 +9,8 @@ export type IAppelAProjet = {
   classe: Pick<IClasse, "name" | "coloration" | "trimester" | "estimatedSeats" | "type">;
   referentClasse: Pick<IReferent, "firstName" | "lastName" | "email">;
 };
+
+export type IAppelAProjetOptions = {
+  fixes?: Array<Partial<IAppelAProjet> & { useExistingEtablissement?: boolean }>;
+  filters?: number[];
+};
