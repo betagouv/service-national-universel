@@ -3,6 +3,7 @@ const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
 const { SENDINBLUE_TEMPLATES, ROLES, isAdminCle, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
+const { InvitationType } = require("../../services/cle/referent");
 
 const emailsEmitter = require("../../emails");
 const config = require("config");
@@ -166,7 +167,7 @@ router.post("/confirm-signup", async (req, res) => {
 
     if (isCoordinateurEtablissement(referent)) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_COORDINATEUR, referent);
     else if (isChefEtablissement(referent)) {
-      if (referent.metadata.invitationType === "CONFIRMATION") {
+      if (referent.metadata.invitationType === InvitationType.CONFIRMATION) {
         emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_REINSCRIPTION_REFERENT_ETABLISSEMENT, referent);
       } else {
         emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT, referent);
