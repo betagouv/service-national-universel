@@ -4,6 +4,7 @@ const ReferentModel = require("../../models/referent");
 const { capture } = require("../../sentry");
 const config = require("config");
 const { sendTemplate } = require("../../sendinblue");
+const { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } = require("../../cle/classe/classeService");
 
 module.exports = (emailsEmitter) => {
   // Classe created
@@ -51,24 +52,6 @@ module.exports = (emailsEmitter) => {
     }
   });
 
-  //ref added to classe
-  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, async (classe) => {
-    try {
-      const referents = await ReferentModel.find({ _id: { $in: [...classe.referentClasseIds] } });
-      if (!referents?.length) throw new Error("Referents not found");
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, {
-        emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
-        params: {
-          class_code: classe.uniqueKeyAndId,
-          cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
-        },
-      });
-    } catch (error) {
-      capture(error);
-    }
-  });
-
   //classe verified
   emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, async (classe) => {
     try {
@@ -98,6 +81,45 @@ module.exports = (emailsEmitter) => {
           cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
         },
       });
+    } catch (error) {
+      capture(error);
+    }
+  });
+
+  // Notify admin CLE Verif
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, async (classe) => {
+    try {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) throw new Error("Etablissement not found");
+      // Admins CLE
+      const referents = await ReferentModel.find({ _id: { $in: [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds] } });
+      if (!referents?.length) throw new Error("Referents not found");
+
+      const chefEtablissement = referents.find((referent) => referent.subRole === SUB_ROLES.referent_etablissement);
+      const isRegistered = chefEtablissement.lastLoginAt;
+      if (isRegistered) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, {
+          emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
+          params: {
+            class_name: classe.name,
+            class_code: classe.uniqueKeyAndId,
+            classUrl: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
+          },
+        });
+      } else {
+        const nbreClasseAValider = await getNumberOfClassesByEtablissement(etablissement);
+        const effectifPrevisionnel = await getEstimatedSeatsByEtablissement(etablissement);
+        await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE, {
+          emailTo: [{ name: `${chefEtablissement.firstName} ${chefEtablissement.lastName}`, email: chefEtablissement.email }],
+          params: {
+            cta: `${config.ADMIN_URL}/creer-mon-compte?token=${chefEtablissement.invitationToken}`,
+            toName: `${chefEtablissement.firstName} ${chefEtablissement.lastName}`,
+            name_school: etablissement.name,
+            nbreClasseAValider,
+            effectifPrevisionnel,
+          },
+        });
+      }
     } catch (error) {
       capture(error);
     }

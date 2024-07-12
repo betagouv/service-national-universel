@@ -461,3 +461,56 @@ describe("PUT /cle/classe/:id/verify", () => {
     expect(res.body.data.status).toBe(STATUS_CLASSE.VERIFIED);
   });
 });
+
+describe("GET /:id/notifyRef", () => {
+  it("should return 400 when id is invalid", async () => {
+    const res = await request(getAppHelper()).get("/cle/classe/invalidId/notifyRef");
+    expect(res.status).toBe(400);
+  });
+
+  it("should return 403 when user cannot notify admin", async () => {
+    passport.user.role = ROLES.RESPONSIBLE;
+    const classeId = new ObjectId();
+    const res = await request(getAppHelper()).get(`/cle/classe/${classeId}/notifyRef`);
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 404 when class is not found", async () => {
+    const nonExistingId = "104a49ba503555e4d8853003";
+    const res = await request(getAppHelper()).get(`/cle/classe/${nonExistingId}/notifyRef`);
+    expect(res.status).toBe(404);
+  });
+
+  it("should return 403 when REFERENT_REGION tries to notify a class they don't manage", async () => {
+    const etablissementId = (await createEtablissement(createFixtureEtablissement()))._id;
+    const classe = createFixtureClasse({ etablissementId: etablissementId, region: "Normandie" });
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.REFERENT_REGION;
+    passport.user.region = "Bretagne";
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}/notifyRef`);
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 403 when REFERENT_DEPARTMENT tries to notify a class they don't manage", async () => {
+    const etablissementId = (await createEtablissement(createFixtureEtablissement()))._id;
+    const classe = createFixtureClasse({ etablissementId: etablissementId, department: "Nord" });
+    const validId = (await createClasse(classe))._id;
+    passport.user.role = ROLES.REFERENT_DEPARTMENT;
+    passport.user.departement = "Loire";
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}/notifyRef`);
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 200 when referents are notified successfully", async () => {
+    const etablissementId = (await createEtablissement(createFixtureEtablissement()))._id;
+    const classe = createFixtureClasse({ etablissementId: etablissementId });
+    const validId = (await createClasse(classe))._id;
+
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}/notifyRef`);
+
+    expect(res.status).toBe(200);
+  });
+});
