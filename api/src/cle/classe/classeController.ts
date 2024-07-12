@@ -25,6 +25,7 @@ import {
   canEditEstimatedSeats,
   canEditTotalSeats,
   canVerifyClasse,
+  canNotifyAdminCleForVerif,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
