@@ -54,22 +54,15 @@ export default function List() {
 
   const exportData = async ({ type }) => {
     setExportLoading(true);
+    //Ne pas utiliser ES pour l'instant, si nécessaire (pb de perf) il suffit de changer l'URL
     try {
-      let res;
-      if (type === "export-des-classes") {
-        res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
-          filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
-            return { ...e, [key]: value.filter };
-          }, {}),
-        });
-      } else if (type === "schema-de-repartition") {
-        res = await api.post(
-          `/cle/classe/export?type=${type}`,
-          Object.entries(selectedFilters).reduce((e, [key, value]) => {
-            return { ...e, [key]: value.filter };
-          }, {}),
-        );
-      }
+      const res = await api.post(
+        `/cle/classe/export?type=${type}`,
+        Object.entries(selectedFilters).reduce((e, [key, value]) => {
+          return { ...e, [key]: value.filter };
+        }, {}),
+      );
+
       const result = await exportExcelSheet({ data: res.data, type });
       const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
       FileSaver.saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" }), result.fileName);
@@ -119,7 +112,7 @@ export default function List() {
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes classes" }]}
         actions={[
           [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (
-            <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} />
+            <Button title="Exporter toutes les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />
           ),
 
           [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
@@ -228,6 +221,7 @@ function exportExcelSheet({ data: classes, type }) {
     uniqueKeyAndId: c.uniqueKeyAndId,
     dossier: c.metadata?.numeroDossierDS ?? "Non renseigné",
     name: c.name,
+    schoolYear: c.schoolYear,
     cohort: c.cohort ?? "Non renseigné",
     coloration: c.coloration,
     status: translateStatusClasse(c.status),
@@ -235,9 +229,9 @@ function exportExcelSheet({ data: classes, type }) {
     academy: c.academy,
     region: c.region,
     department: c.department,
-    classeRefLastName: c.referentClasse ? c.referentClasse[0]?.lastName : "",
-    classeRefFirstName: c.referentClasse ? c.referentClasse[0]?.firstName : "",
-    classeRefEmail: c.referentClasse ? c.referentClasse[0]?.email : "",
+    classeRefLastName: c.referents ? c.referents[0]?.lastName : "",
+    classeRefFirstName: c.referents ? c.referents[0]?.firstName : "",
+    classeRefEmail: c.referents ? c.referents[0]?.email : "",
     uai: c.etablissement?.uai,
     etablissementName: c.etablissement?.name,
     etabRefLastName: c.referentEtablissement ? c.referentEtablissement[0]?.lastName : "",
@@ -249,6 +243,7 @@ function exportExcelSheet({ data: classes, type }) {
     "Identifiant",
     "Numéro de dossier DS",
     "Nom",
+    "Année scolaire",
     "Cohorte",
     "Coloration",
     "Statut",
@@ -277,9 +272,9 @@ function exportExcelSheet({ data: classes, type }) {
       department: c.etablissement?.department,
       uai: c.etablissement?.uai,
       etablissementName: c.etablissement?.name,
-      classeRefLastName: c.referentClasse ? c.referentClasse[0]?.lastName : "",
-      classeRefFirstName: c.referentClasse ? c.referentClasse[0]?.firstName : "",
-      classeRefEmail: c.referentClasse ? c.referentClasse[0]?.email : "",
+      classeRefLastName: c.referents ? c.referents[0]?.lastName : "",
+      classeRefFirstName: c.referents ? c.referents[0]?.firstName : "",
+      classeRefEmail: c.referents ? c.referents[0]?.email : "",
       youngsVolume: c.totalSeats ?? 0,
       studentInProgress: c.studentInProgress,
       studentWaiting: c.studentWaiting,
