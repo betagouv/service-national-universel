@@ -25,6 +25,7 @@ import {
   canEditEstimatedSeats,
   canEditTotalSeats,
   canVerifyClasse,
+  canNotifyAdminCleForVerif,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -421,6 +422,41 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: error });
+  }
+});
+
+router.get("/:id/notifyRef", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canNotifyAdminCleForVerif(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const classe = await ClasseModel.findById(value).populate({
+      path: "etablissement",
+      options: { select: { referentEtablissementIds: 1, coordinateurIds: 1 } },
+    });
+
+    if (!classe?.etablissement?.referentEtablissementIds) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    if (req.user.role === ROLES.REFERENT_REGION && classe.etablissement.region !== req.user.region) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT && classe.etablissement.department !== req.user.departement) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, classe);
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
