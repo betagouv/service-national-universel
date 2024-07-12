@@ -59,7 +59,7 @@ export default function ButtonRelanceVerif({ classeId, onLoading }: Props) {
           { title: "Annuler", isCancel: true },
           {
             title: "Confirmer",
-            onClick: notifyRefForVerif,
+            onClick: handleNotifyRefForVerif,
           },
         ]}
       />
