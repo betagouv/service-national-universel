@@ -40,6 +40,7 @@ export default function StepUploadMobile({
     if (!dayjs(date).isValid()) {
       return false;
     }
+    if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) return false;
     if (corrections?.length) {
       return hasChanged && !loading && !error.text;
     } else {
@@ -170,6 +171,15 @@ function Verso({ corrections, category, setVerso, setStep, setHasChanged, setErr
 }
 
 function ExpirationDate({ corrections, category, young, date, setDate, setHasChanged }) {
+  const [error, setError] = useState(false);
+  const handleChange = (date) => {
+    setDate(date);
+    setHasChanged(true);
+
+    if (!date) return setError("Veuillez renseigner une date d'expiration.");
+    if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) return setError("Veuillez renseigner une date d'expiration valide. Elle doit être comprise entre 1990 et 2070.");
+    setError(false);
+  };
   return (
     <>
       <div className="mb-4">
@@ -193,11 +203,11 @@ function ExpirationDate({ corrections, category, young, date, setDate, setHasCha
         <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
       </div>
       <DatePicker
-        displayError
+        state={error ? "error" : "default"}
+        errorText={error}
         initialValue={date}
         onChange={(date) => {
-          setDate(date);
-          setHasChanged(true);
+          handleChange(date);
         }}
       />
     </>
