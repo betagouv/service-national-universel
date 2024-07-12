@@ -9,18 +9,7 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Button, Badge, DropdownButton } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import {
-  translate,
-  ROLES,
-  YOUNG_STATUS,
-  STATUS_CLASSE,
-  translateStatusClasse,
-  COHORT_TYPE,
-  FUNCTIONAL_ERRORS,
-  isNowBetweenDates,
-  LIMIT_DATE_ESTIMATED_SEATS,
-  LIMIT_DATE_TOTAL_SEATS,
-} from "snu-lib";
+import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
@@ -40,6 +29,7 @@ import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleCohort from "./components/modale/modaleCohort";
 import ButtonInvite from "./components/ButtonInvite";
 import { InfoBus, TStatus, Rights } from "./components/types";
+import VerifClassButton from "./components/VerifClassButton";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
@@ -246,6 +236,9 @@ export default function View() {
 
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
+    if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+      actionsList.push(<VerifClassButton key="verify" classe={classe} setClasse={setClasse} isLoading={isLoading} setLoading={setIsLoading} />);
+    }
     if (classe?.status && [STATUS_CLASSE.OPEN].includes(classe.status)) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} type="wired" title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
