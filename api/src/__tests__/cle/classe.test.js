@@ -17,7 +17,6 @@ const getNewCohortFixture = require("../fixtures/cohort");
 const { createCohortHelper } = require("../helpers/cohort");
 //referent
 const { getNewReferentFixture } = require("../fixtures/referent");
-const { createReferentHelper } = require("../helpers/referent");
 
 const snuLib = require("snu-lib");
 const { ROLES } = require("snu-lib");
