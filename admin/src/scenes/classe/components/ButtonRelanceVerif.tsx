@@ -15,7 +15,7 @@ interface Props {
 export default function ButtonRelanceVerif({ classeId, onLoading }: Props) {
   const [showModal, setShowModal] = useState(false);
 
-  const notifyRefForVerif = async () => {
+  const handleNotifyRefForVerif = async () => {
     try {
       onLoading(true);
       setShowModal(false);
