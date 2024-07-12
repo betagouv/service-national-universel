@@ -1,4 +1,4 @@
-import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/young.service";
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
 import ClasseModel from "../../models/cle/classe";
 import YoungModel from "../../models/young";
 import { YOUNG_STATUS } from "snu-lib";

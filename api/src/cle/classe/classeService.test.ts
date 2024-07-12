@@ -1,5 +1,5 @@
 import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
-const youngService = require("../../young/young.service");
+const youngService = require("../../young/youngService");
 const classService = require("./classeService");
 
 const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");

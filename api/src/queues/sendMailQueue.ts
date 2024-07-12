@@ -1,7 +1,7 @@
-const config = require("config");
-const Queue = require("bull");
-const { sendDocumentEmail } = require("../young/youngSendDocumentEmailService");
-const { capture } = require("../sentry");
+import config from "config";
+import Queue from "bull";
+import { capture } from "../sentry";
+import { sendDocumentEmail, SendDocumentEmailOptions } from "../young/youngSendDocumentEmailService";
 
 const MAIL_QUEUE = `${config.get("ENVIRONMENT")}_send_mail`;
 const SEND_DOCUMENT_EMAIL = "send_document_mail";
@@ -21,7 +21,7 @@ class SendMailQueueService {
     },
   });
 
-  async sendDocumentEmailTask(options) {
+  async sendDocumentEmailTask(options: SendDocumentEmailOptions) {
     const job = await this.queue.add(SEND_DOCUMENT_EMAIL, options);
     console.log(`Add task ${SEND_DOCUMENT_EMAIL} (${job.id})`);
     return job;

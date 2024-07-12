@@ -1,11 +1,13 @@
-const { generatePdfIntoBuffer } = require("../utils/pdf-renderer");
-const { sendTemplate } = require("../sendinblue");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { ERRORS, getCcOfYoung } = require("../utils");
-const YoungObject = require("../models/young");
-const ContractObject = require("../models/contract");
+import { SENDINBLUE_TEMPLATES } from "snu-lib";
+import { YoungDto } from "snu-lib/src/dto/youngDto";
+import { ContractDto } from "snu-lib/src/dto/ContractDto";
 
-function getMailParams(type, template, young, contract) {
+import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
+import { sendTemplate } from "../sendinblue";
+import { ERRORS, getCcOfYoung } from "../utils";
+import { YoungModel, ContractModel } from "../models";
+
+function getMailParams(type: string, template: string, young: YoungDto, contract?: ContractDto | null) {
   if (type === "certificate" && template === "1")
     return {
       object: `Attestation de fin de phase 1 de ${young.firstName}`,
@@ -40,41 +42,47 @@ function getMailParams(type, template, young, contract) {
   throw new Error(ERRORS.NOT_FOUND);
 }
 
-async function sendDocumentEmail(opts: { young_id: string; type: string; template: string; fileName: string; switchToCle: boolean; contract_id?: string }) {
-  const young = await YoungObject.findById(opts.young_id);
+export interface SendDocumentEmailOptions {
+  young_id: string;
+  type: string;
+  template: string;
+  fileName: string;
+  switchToCle: boolean;
+  contract_id?: string;
+}
+
+export async function sendDocumentEmail(options: SendDocumentEmailOptions) {
+  const young: YoungDto | null = await YoungModel.findById(options.young_id);
 
   if (!young) {
     throw new Error(ERRORS.NOT_FOUND);
   }
 
-  let contract = null;
-  if (opts.contract_id) {
-    contract = await ContractObject.findById(opts.contract_id);
+  let contract: ContractDto | null = null;
+  if (options.contract_id) {
+    contract = await ContractModel.findById(options.contract_id);
     if (!contract) {
       throw new Error(ERRORS.NOT_FOUND);
     }
   }
 
-  const buffer = await generatePdfIntoBuffer({ type: opts.type, template: opts.template, young, contract });
+  const buffer = await generatePdfIntoBuffer({ type: options.type, template: options.template, young, contract });
 
   const content = buffer.toString("base64");
 
-  const { object, message } = getMailParams(opts.type, opts.template, young, contract);
+  const { object, message } = getMailParams(options.type, options.template, young, contract);
   let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
   let params = { object, message };
 
-  if (opts.switchToCle) {
+  if (options.switchToCle) {
     emailTemplate = SENDINBLUE_TEMPLATES.young.PHASE_1_ATTESTATION_SWITCH_CLE;
   }
 
-  const mail = await sendTemplate(emailTemplate, {
+  // @ts-expect-error sendTemplate is vanilla js
+  await sendTemplate(emailTemplate, {
     emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-    attachment: [{ content, name: opts.fileName }],
+    attachment: [{ content, name: options.fileName }],
     params,
     cc: getCcOfYoung({ template: emailTemplate, young }),
   });
 }
-
-module.exports = {
-  sendDocumentEmail,
-};
