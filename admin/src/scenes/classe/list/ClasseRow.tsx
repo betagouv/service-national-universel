@@ -38,7 +38,7 @@ export default function ClasseRow({ classe }: Props) {
         </div>
       </td>
       <td className="flex w-[20%] flex-col gap-2">
-        <Badge title={classe?.cohort} leftIcon={<HiUsers color="#EC4899" size={20} />} />
+        <Badge title={classe?.cohort || "Non renseigné"} className={`${!classe?.cohort && "!text-gray-400 italic"}`} leftIcon={<HiUsers color="#EC4899" size={20} />} />
       </td>
       <td className="flex w-[20%] flex-col gap-2">
         {classe?.totalSeats ? (
