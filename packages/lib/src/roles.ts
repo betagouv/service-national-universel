@@ -1015,6 +1015,9 @@ function canEditTotalSeats(actor) {
 function canNotifyAdminCleForVerif(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
 }
+function canVerifyClasse(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
+}
 
 export {
   ROLES,
@@ -1166,4 +1169,5 @@ export {
   canEditEstimatedSeats,
   canEditTotalSeats,
   canNotifyAdminCleForVerif,
+  canVerifyClasse,
 };
