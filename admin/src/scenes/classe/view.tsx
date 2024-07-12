@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { HiHome, HiOutlineRefresh } from "react-icons/hi";
+import { HiHome } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useParams, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -29,8 +29,7 @@ import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleCohort from "./components/modale/modaleCohort";
 import ButtonInvite from "./components/ButtonInvite";
 import { InfoBus, TStatus, Rights } from "./components/types";
-import ModaleRelanceVerif from "./components/modale/modaleRelanceVerif";
-import { set } from "date-fns";
+import ButtonRelanceVerif from "./components/ButtonRelanceVerif";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
@@ -38,7 +37,6 @@ export default function View() {
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
   const [showModaleWithdraw, setShowModaleWithdraw] = useState(false);
   const [showModaleCohort, setShowModaleCohort] = useState(false);
-  const [showModaleRelanceVerif, setShowModaleRelanceVerif] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
   const [edit, setEdit] = useState(false);
@@ -236,41 +234,10 @@ export default function View() {
     return true;
   };
 
-  const notifyRefForVerif = async () => {
-    try {
-      setIsLoading(true);
-      setShowModaleRelanceVerif(false);
-
-      const { ok, code } = await api.get(`/cle/classe/${id}/notifyRef`);
-
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification", translate(code));
-        return setIsLoading(false);
-      } else {
-        toastr.success("Opération réussie", "Notification envoyée");
-      }
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification", e);
-    } finally {
-      setIsLoading(false);
-      setShowModaleRelanceVerif(false);
-    }
-  };
-
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
     if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
-      actionsList.push(
-        <Button
-          key="relance"
-          leftIcon={<HiOutlineRefresh size={20} className="mt-1" />}
-          type="wired"
-          title="Relancer la vérification"
-          className="mr-2"
-          onClick={() => setShowModaleRelanceVerif(true)}
-        />,
-      );
+      actionsList.push(<ButtonRelanceVerif key="relance" classeId={id} onLoading={setIsLoading} />);
     }
     if (classe?.status && [STATUS_CLASSE.OPEN].includes(classe.status)) {
       actionsList.push(
@@ -366,7 +333,6 @@ export default function View() {
 
       <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
       <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />
-      <ModaleRelanceVerif isOpen={showModaleRelanceVerif} onClose={() => setShowModaleRelanceVerif(false)} onRelance={notifyRefForVerif} />
     </Page>
   );
 }
