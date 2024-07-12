@@ -8,7 +8,7 @@ import { Button, Container, Header, Page } from "@snu/ds/admin";
 import { HiPlus, HiOutlineOfficeBuilding, HiHome } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-lib";
+import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE, translate } from "snu-lib";
 
 import dayjs from "@/utils/dayjs.utils";
 import { getCohortGroups } from "@/services/cohort.service";
@@ -99,7 +99,7 @@ export default function List() {
 
     { title: "Numéro d'identification", name: "uniqueKeyAndId", missingLabel: "Non renseigné" },
     { title: "Statut", name: "status", missingLabel: "Non renseigné", translate: translateStatusClasse },
-    { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné" },
+    { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné", translate },
     { title: "Nom", name: "name", missingLabel: "Non renseigné" },
     { title: "Couleur", name: "coloration", missingLabel: "Non renseigné" },
     { title: "Type", name: "type", missingLabel: "Non renseigné" },

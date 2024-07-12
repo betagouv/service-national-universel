@@ -3,6 +3,7 @@ const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
 const { SENDINBLUE_TEMPLATES, ROLES, isAdminCle, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
+const { InvitationType } = require("../../services/cle/referent");
 
 const emailsEmitter = require("../../emails");
 const config = require("config");
@@ -165,8 +166,13 @@ router.post("/confirm-signup", async (req, res) => {
     await referent.save({ fromUser: referent });
 
     if (isCoordinateurEtablissement(referent)) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_COORDINATEUR, referent);
-    else if (isChefEtablissement(referent)) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT, referent);
-    else if (isReferentClasse(referent)) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_CLASSE, referent);
+    else if (isChefEtablissement(referent)) {
+      if (referent.metadata.invitationType === InvitationType.CONFIRMATION) {
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_REINSCRIPTION_REFERENT_ETABLISSEMENT, referent);
+      } else {
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT, referent);
+      }
+    } else if (isReferentClasse(referent)) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_CLASSE, referent);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
