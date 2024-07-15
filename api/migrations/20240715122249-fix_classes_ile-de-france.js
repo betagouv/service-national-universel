@@ -1,6 +1,7 @@
-const ClasseModel = require("../src/models/cle/classe");
 module.exports = {
-  async up() {
-    await ClasseModel.updateMany({ region: "Ile-de-France" }, { $set: { region: "Île-de-France" } });
+  async up(db) {
+    db.collection("etablissements").updateMany({ region: "Ile-de-France" }, { $set: { region: "Île-de-France" } });
+
+    db.collection("classes").updateMany({ region: "Ile-de-France" }, { $set: { region: "Île-de-France" } });
   },
 };
