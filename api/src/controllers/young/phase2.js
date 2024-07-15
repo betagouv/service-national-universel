@@ -10,7 +10,7 @@ const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
-const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2 } = require("../../utils");
+const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateYoungPhase2HoursWithEquivalences, updateStatusPhase2 } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
@@ -60,8 +60,8 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     //Pas plus de 3 demandes d'équivalence + creation possible seulement si le statut des ancienne equiv est "REFUSED"
     const equivalences = await MissionEquivalenceModel.find({ youngId: value.id });
     if (equivalences.length >= 3) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    const filteredEquivalences = equivalences.filter((equivalence) => equivalence.status !== "REFUSED");
-    if (filteredEquivalences.length > 0) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // const filteredEquivalences = equivalences.filter((equivalence) => equivalence.status !== "REFUSED");
+    // if (filteredEquivalences.length > 0) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const youngId = value.id;
     delete value.id;
@@ -130,7 +130,6 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 });
 
 router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  console.log(req.body);
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -149,12 +148,6 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       city: Joi.string().trim(),
       startDate: Joi.string().trim(),
       endDate: Joi.string().trim(),
-      // frequency: Joi.object().keys({
-      //   nombre: Joi.string().trim().required(),
-      //   duree: Joi.string().trim().valid("Heure(s)", "Demi-journée(s)", "Jour(s)").required(),
-      //   frequence: Joi.string().valid("Par semaine", "Par mois", "Par an").trim().required(),
-      // }),
-      // missionDuration: Joi.string().trim().required(),
       contactFullName: Joi.string().trim(),
       contactEmail: Joi.string().trim(),
       files: Joi.array().items(Joi.string()),
@@ -179,32 +172,34 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    delete value.id;
+    delete value.idEquivalence;
+    equivalence.set(value);
+    const data = await equivalence.save({ fromUser: req.user });
 
     if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
-      const applications = await ApplicationModel.find({ youngId: young._id });
-      if (young.statusPhase2 !== "VALIDATED" && value.status === "VALIDATED") {
-        young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
-        const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
-        await cancelPendingApplications(pendingApplication, req.user);
-        const applications_v2 = await ApplicationModel.find({ youngId: young._id });
-        young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
-      }
-      if (young.statusPhase2 === "VALIDATED" && ["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
-        // Dans ces fonctions on va mettre à jour le nombre d'heure de MIG si des missions sont VALIDATED
-        // ensuite on va valider ou non le status en regardant le nombre d'heure effectué et si des missions sont encore actives
-        await updateYoungPhase2Hours(young, req.user);
-        await updateStatusPhase2(young, req.user);
-      }
+      // if (young.statusPhase2 !== "VALIDATED" && value.status === "VALIDATED") {
+      // young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+      // const applications = await ApplicationModel.find({ youngId: young._id });
+      await updateYoungPhase2HoursWithEquivalences(young, req.user);
+      await updateStatusPhase2(young, req.user);
+      // const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
+      // await cancelPendingApplications(pendingApplication, req.user);
+      // const applications_v2 = await ApplicationModel.find({ youngId: young._id });
+      // young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
+      // }
+      // if (["WAITING_CORRECTION", "REFUSED"].includes(value.status)) {
+      //   // Dans ces fonctions on va mettre à jour le nombre d'heure de MIG si des missions sont VALIDATED
+      //   // ensuite on va valider ou non le status en regardant le nombre d'heure effectué et si des missions sont encore actives
+      //   await updateYoungPhase2Hours(young, req.user);
+      //   await updateStatusPhase2(young, req.user);
+      // }
     }
 
     if (young.statusPhase2 !== "VALIDATED" && !["VALIDATED"].includes(value.status)) {
       young.set({ status_equivalence: value.status });
     }
 
-    delete value.id;
-    delete value.idEquivalence;
-    equivalence.set(value);
-    const data = await equivalence.save({ fromUser: req.user });
     await young.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young[`EQUIVALENCE_${value.status}`];
