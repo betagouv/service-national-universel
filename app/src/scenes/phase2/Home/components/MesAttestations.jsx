@@ -25,7 +25,7 @@ export default function MesAttestations() {
 
   return (
     <div className="max-w-6xl px-3 mx-auto">
-      <h2 className="font-bold mx-0 my-12">Mes attestations</h2>
+      <h2 className="font-bold mx-0 mt-12">Mes attestations</h2>
 
       <div className="mt-8 border rounded-xl p-3 mx-auto">
         <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2">
@@ -55,31 +55,32 @@ export default function MesAttestations() {
               </Popover>
             </div>
           </div>
-          <div className="flex gap-4 items-center px-3 pt-[0.75rem] md:p-0">
-            <div className="rounded-full bg-blue-france-sun-113 flex justify-center w-6 h-6 flex-none">
-              <p className="text-white text-sm">2</p>
+
+          <div className="flex gap-2 px-3 pt-[0.75rem] md:p-0">
+            <RiAttachmentLine className="text-gray-400 text-xl pt-1 flex-none" />
+            <div>
+              <p>Attestation de réalisation SNU</p>
+              <Popover className="relative">
+                <PopoverButton className="text-blue-600">
+                  Télécharger
+                  <HiChevronDown className="inline-block text-xl" />
+                </PopoverButton>
+                <PopoverPanel anchor="bottom" className="flex flex-col bg-white py-1 rounded shadow-nina">
+                  <button
+                    onClick={() => downloadAttestation.mutate("snu")}
+                    disabled={downloadAttestation.isLoading}
+                    className="px-2 py-1 hover:bg-blue-600 hover:text-white w-full text-left">
+                    {downloadAttestation.isPending ? "Téléchargement en cours..." : "Télécharger"}
+                  </button>
+                  <button
+                    onClick={() => sendAttestation.mutate("snu")}
+                    disabled={sendAttestation.isLoading}
+                    className="px-2 py-1 hover:bg-blue-600 hover:text-white w-full text-left">
+                    Envoyer par email
+                  </button>
+                </PopoverPanel>
+              </Popover>
             </div>
-            <p>Attestation de réalisation SNU</p>
-            <Popover className="relative">
-              <PopoverButton className="text-blue-600">
-                Télécharger
-                <HiChevronDown className="inline-block text-xl" />
-              </PopoverButton>
-              <PopoverPanel anchor="bottom" className="flex flex-col bg-white py-1 rounded shadow-nina">
-                <button
-                  onClick={() => downloadAttestation.mutate("snu")}
-                  disabled={downloadAttestation.isLoading}
-                  className="px-2 py-1 hover:bg-blue-600 hover:text-white w-full text-left">
-                  {downloadAttestation.isPending ? "Téléchargement en cours..." : "Télécharger"}
-                </button>
-                <button
-                  onClick={() => sendAttestation.mutate("snu")}
-                  disabled={sendAttestation.isLoading}
-                  className="px-2 py-1 hover:bg-blue-600 hover:text-white w-full text-left">
-                  Envoyer par email
-                </button>
-              </PopoverPanel>
-            </Popover>
           </div>
         </div>
       </div>
