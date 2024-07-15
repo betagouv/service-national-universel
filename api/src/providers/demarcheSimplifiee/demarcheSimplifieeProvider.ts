@@ -60,7 +60,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     classe.name = champDescriptorValueMap.get("Q2hhbXAtNDA1NDIzMg==");
     classe.coloration = mapColorationFromAppelAProjetToColoration(champDescriptorValueMap.get("Q2hhbXAtNDA1NDI0Mw=="));
     classe.estimatedSeats = parseInt(champDescriptorValueMap.get("Q2hhbXAtNDA1NDEzNA==") || "0");
-    classe.trimester = champDescriptorValueMap.get("Q2hhbXAtNDA1NDQyMw==");
+    classe.trimester = champDescriptorValueMap.get("Q2hhbXAtNDA1NDQyMw==") as any;
     classe.type = mapClasseTypeFromAppelAProjetToClasseType(champDescriptorValueMap.get("Q2hhbXAtNDA1NDEyNg=="));
 
     referentClasse.lastName = champDescriptorValueMap.get("Q2hhbXAtNDA1MTUxNg==") || "";

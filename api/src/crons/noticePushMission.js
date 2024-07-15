@@ -2,7 +2,7 @@ const esClient = require("../es");
 const path = require("path");
 
 const { capture } = require("../sentry");
-const Young = require("../models/young");
+const { YoungModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, translate, formatStringDate, END_DATE_PHASE1 } = require("snu-lib");
@@ -22,7 +22,7 @@ exports.handler = async () => {
       return diff < 1;
     });
 
-    const cursor = Young.find({
+    const cursor = YoungModel.find({
       cohort: { $in: cohort },
       status: "VALIDATED",
       statusPhase1: "DONE",
@@ -61,7 +61,7 @@ exports.handler = async () => {
           // stock the list in young
           const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
           // This is used in order to minimize risk of version conflict.
-          const youngForUpdate = await Young.findOne({ _id: young._id });
+          const youngForUpdate = await YoungModel.findOne({ _id: young._id });
           youngForUpdate.set({ missionsInMail });
           await youngForUpdate.save({ fromUser: { firstName: `Cron ${fileName}` } });
         }

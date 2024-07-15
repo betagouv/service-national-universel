@@ -1,11 +1,11 @@
-const MissionObject = require("../../models/mission");
+const { MissionModel } = require("../../models");
 
 async function getMissionsHelper(params = {}) {
-  return await MissionObject.find(params);
+  return await MissionModel.find(params);
 }
 
 async function getMissionByIdHelper(missionId) {
-  return await MissionObject.findById(missionId);
+  return await MissionModel.findById(missionId);
 }
 
 async function deleteMissionByIdHelper(missionId) {
@@ -14,7 +14,7 @@ async function deleteMissionByIdHelper(missionId) {
 }
 
 async function createMissionHelper(mission) {
-  return await MissionObject.create(mission);
+  return await MissionModel.create(mission);
 }
 
 function expectMissionToEqual(mission, expectedMission) {

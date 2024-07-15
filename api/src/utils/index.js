@@ -3,16 +3,19 @@ const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
-const YoungModel = require("../models/young");
-const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
-const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
-const MeetingPointModel = require("../models/meetingPoint");
-const MissionEquivalenceModel = require("../models/missionEquivalence");
-const ApplicationModel = require("../models/application");
-const ReferentModel = require("../models/referent");
-const ContractObject = require("../models/contract");
-const SessionPhase1 = require("../models/sessionPhase1");
-const CohortModel = require("../models/cohort");
+const {
+  YoungModel,
+  ReferentModel,
+  ContractModel,
+  PlanTransportModel,
+  LigneBusModel,
+  MeetingPointModel,
+  ApplicationModel,
+  SessionPhase1Model,
+  CohortModel,
+  MissionEquivalenceModel,
+} = require("../models");
+
 const { sendEmail, sendTemplate } = require("../brevo");
 const path = require("path");
 const fs = require("fs");
@@ -270,7 +273,7 @@ const updateCenterDependencies = async (center, fromUser) => {
     referent.set({ cohesionCenterName: center.name });
     await referent.save({ fromUser });
   });
-  const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });
+  const sessions = await SessionPhase1Model.find({ cohesionCenterId: center._id });
   for (let i = 0; i < sessions.length; i++) {
     sessions[i].set({
       department: center.department,
@@ -529,7 +532,7 @@ const checkStatusContract = (contract) => {
 
 const updateYoungStatusPhase2Contract = async (young, fromUser) => {
   try {
-    const contracts = await ContractObject.find({ youngId: young._id });
+    const contracts = await ContractModel.find({ youngId: young._id });
 
     // on récupère toutes les candidatures du volontaire
     const applications = await ApplicationModel.find({ _id: { $in: contracts?.map((c) => c.applicationId) } });
@@ -862,7 +865,7 @@ const updateYoungApplicationFilesType = async (application, user) => {
 const updateHeadCenter = async (headCenterId, user) => {
   const headCenter = await ReferentModel.findById(headCenterId);
   if (!headCenter) return;
-  const sessions = await SessionPhase1.find({ headCenterId }, { cohort: 1 });
+  const sessions = await SessionPhase1Model.find({ headCenterId }, { cohort: 1 });
   const cohorts = new Set(sessions.map((s) => s.cohort));
   headCenter.set({ cohorts: [...cohorts] });
   await headCenter.save({ fromUser: user });

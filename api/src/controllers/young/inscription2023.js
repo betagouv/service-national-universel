@@ -4,8 +4,7 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const crypto = require("crypto");
 
-const YoungObject = require("../../models/young");
-const CohortObject = require("../../models/cohort");
+const { YoungModel, CohortModel } = require("../../models");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName, validateParents, representantSchema } = require("../../utils/validator");
@@ -54,7 +53,7 @@ const getObjectWithEmptyData = (fields, emptyValue = "") => {
 
 router.put("/eligibilite", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -125,7 +124,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
 
 router.put("/noneligible", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.set({ status: YOUNG_STATUS.NOT_ELIGIBLE });
@@ -143,7 +142,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     const { error: typeError, value: type } = checkParameter(req.params.type);
     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -288,7 +287,7 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -327,7 +326,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
     value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
 
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!value.parent2) {
@@ -367,7 +366,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
 
 router.put("/confirm", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let value = { informationAccuracy: "true" };
@@ -378,7 +377,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     }
 
     if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && !young?.inscriptionDoneDate) {
-      const cohort = await CohortObject.findOne({ name: young.cohort });
+      const cohort = await CohortModel.findOne({ name: young.cohort });
       // If latest ID proof has an invalid date, notify parent 1.
       if (young.latestCNIFileExpirationDate < new Date(cohort.dateStart)) {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
@@ -433,7 +432,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -473,7 +472,7 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     const { error: typeError, value: type } = checkParameter(req.params.type);
     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (type === "next") {
@@ -487,7 +486,7 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       }
       let CNIFileNotValidOnStart = undefined;
       if (young.cohort !== COHORTS.AVENIR) {
-        const cohort = await CohortObject.findOne({ name: young.cohort });
+        const cohort = await CohortModel.findOne({ name: young.cohort });
         CNIFileNotValidOnStart = value.date < new Date(cohort.dateStart);
       }
       young.set({ latestCNIFileExpirationDate: value.date, latestCNIFileCategory: value.latestCNIFileCategory, CNIFileNotValidOnStart });
@@ -510,7 +509,7 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       }
       let data = { ...value, ...validateCorrectionRequest(young, ["latestCNIFileExpirationDate", "cniFile", "latestCNIFileCategory"]) };
       if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      const cohort = await CohortObject.findOne({ name: young.cohort });
+      const cohort = await CohortModel.findOne({ name: young.cohort });
       const CNIFileNotValidOnStart = data.latestCNIFileExpirationDate < new Date(cohort.dateStart);
       young.set({ ...data, CNIFileNotValidOnStart });
     }
@@ -524,11 +523,11 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
 
 router.put("/relance", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // If latest ID proof has an invalid date, notify parent 1.
-    const cohort = await CohortObject.findOne({ name: young.cohort });
+    const cohort = await CohortModel.findOne({ name: young.cohort });
     const notifyExpirationDate = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
     const needCniRelance = young?.parentStatementOfHonorInvalidId !== "true";
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
@@ -566,7 +565,7 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
 
 router.put("/done", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (young.reinscriptionStep2023 === "WAITING_CONSENT") {
@@ -585,7 +584,7 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
 
 router.put("/goToInscriptionAgain", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoungInReinscription(young)) {
@@ -605,7 +604,7 @@ router.put("/goToInscriptionAgain", passport.authenticate("young", { session: fa
 
 router.put("/profil", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const profilSchema = {

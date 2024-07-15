@@ -1,5 +1,4 @@
-const StructureObject = require("../models/structure");
-const ReferentObject = require("../models/referent");
+const { ReferentModel, StructureModel } = require("../models");
 const { ROLES } = require("snu-lib");
 const config = require("config");
 const { isYoung } = require("../utils");
@@ -22,7 +21,7 @@ const getUserAttributes = async (user) => {
 
   if (isYoung(user)) {
     // @todo : departmentReferentPhase2Link can be given to all users but extra logic is needed: for referents departement is an array and for supervisors and responsible it should be retrieved via the structure
-    const departmentReferentPhase2 = await ReferentObject.findOne({
+    const departmentReferentPhase2 = await ReferentModel.findOne({
       department: user.department,
       subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
     });
@@ -45,7 +44,7 @@ const getUserAttributes = async (user) => {
       userAttributes.push({ name: "lien vers la fiche structure", value: structureLink });
       userAttributes.push({ name: "lien général vers la page des missions proposées par la structure", value: missionsLink });
       if (user.structureId) {
-        const structure = await StructureObject.findById(user.structureId).lean();
+        const structure = await StructureModel.findById(user.structureId).lean();
         userAttributes = userAttributes.map((a) => {
           if (a.name === "departement") {
             return { name: "departement", value: structure?.department };

@@ -1,12 +1,10 @@
+import crypto from "crypto";
 import { YOUNG_STATUS } from "snu-lib";
 
+import { YoungModel, ClasseModel, ClasseDocument, ClasseType, EtablissementDocument, EtablissementType } from "../../models";
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
-import ClasseModel from "../../models/cle/classe";
-import YoungModel from "../../models/young";
 
-import { ClasseDocument, IClasse, EtablissementDocument, IEtablissement } from "../../models";
 import { mapRegionToTrigramme } from "../../services/regionService";
-import crypto from "crypto";
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
@@ -50,7 +48,7 @@ export const deleteClasse = async (_id: string, fromUser: object) => {
   return classe;
 };
 
-export const buildUniqueClasseId = (etablissement: Pick<IEtablissement, "uai">, classe: Pick<IClasse, "name" | "coloration" | "estimatedSeats">, originId = ""): string => {
+export const buildUniqueClasseId = (etablissement: Pick<EtablissementType, "uai">, classe: Pick<ClasseType, "name" | "coloration" | "estimatedSeats">, originId = ""): string => {
   let hash = crypto
     .createHash("sha256")
     .update(`${etablissement?.uai}${classe?.name}${classe?.coloration}${classe?.estimatedSeats}${originId}` || "NAME")
@@ -62,7 +60,7 @@ export const buildUniqueClasseId = (etablissement: Pick<IEtablissement, "uai">, 
   return `${subHash}`;
 };
 
-export const buildUniqueClasseKey = (etablissement: IEtablissement): string => {
+export const buildUniqueClasseKey = (etablissement: EtablissementType): string => {
   const trigrammeRegion = mapRegionToTrigramme(etablissement.region) || "REG";
   const departmentNumber = `0${(etablissement.zip || "DP")?.substring(0, 2)}`;
   const academy = (etablissement.academy || "A")?.substring(0, 1);

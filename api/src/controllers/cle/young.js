@@ -5,9 +5,7 @@ const Joi = require("joi");
 const { validateId } = require("../../utils/validator");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
-const ClasseModel = require("../../models/cle/classe");
-const YoungModel = require("../../models/young");
-const EtablissementModel = require("../../models/cle/etablissement");
+const { ClasseModel, YoungModel, EtablissementModel } = require("../../models");
 const { canSearchStudent, ROLES, YOUNG_STATUS } = require("snu-lib");
 
 router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {

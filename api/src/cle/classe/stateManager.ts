@@ -1,16 +1,8 @@
-import { STATUS_CLASSE, YOUNG_STATUS, SENDINBLUE_TEMPLATES } from "snu-lib";
-import ClasseModel from "../../models/cle/classe";
-import CohortModel from "../../models/cohort";
-import emailsEmitter from "../../emails";
-import { ClasseDto } from "snu-lib/src/dto";
+import { STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
+import { ClasseModel, CohortModel } from "../../models";
 
-interface IClasseStateManager {
-  compute: (_id: string, fromUser: any, options: { YoungModel?: any }) => Promise<ClasseDto>;
-  withdraw: (_id: string, fromUser: any, options: { YoungModel?: any }) => Promise<ClasseDto>;
-}
-
-const ClasseStateManager: IClasseStateManager = {
-  compute: async (_id, fromUser, options): Promise<ClasseDto> => {
+const ClasseStateManager = {
+  compute: async (_id, fromUser, options) => {
     const YoungModel = options?.YoungModel; // Prevent circular dependency in YoungModel post save hook
     if (!YoungModel) throw new Error("YoungModel is required");
 
@@ -54,7 +46,7 @@ const ClasseStateManager: IClasseStateManager = {
     return classe;
   },
 
-  withdraw: async (_id, fromUser, options): Promise<ClasseDto> => {
+  withdraw: async (_id, fromUser, options) => {
     const YoungModel = options?.YoungModel; // Prevent circular dependency in YoungModel post save hook
     if (!YoungModel) throw new Error("YoungModel is required");
 

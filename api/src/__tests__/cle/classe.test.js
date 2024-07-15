@@ -14,11 +14,11 @@ const { createFixtureClasse } = require("../fixtures/classe");
 //etablissement
 const { createFixtureEtablissement } = require("../fixtures/etablissement");
 const { createEtablissement } = require("../helpers/etablissement");
-const EtablissementModel = require("../../models/cle/etablissement");
+const { EtablissementModel } = require("../../models");
 //young
 const getNewYoungFixture = require("../fixtures/young");
 const { createYoungHelper } = require("../helpers/young");
-const YoungModel = require("../../models/young");
+const { YoungModel } = require("../../models");
 //cohort
 const getNewCohortFixture = require("../fixtures/cohort");
 const { createCohortHelper } = require("../helpers/cohort");

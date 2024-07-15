@@ -1,12 +1,11 @@
+import request from "supertest";
+import passport from "passport";
+import { ROLES, SUB_ROLES, InvitationType } from "snu-lib";
+import { UserDto } from "snu-lib/src/dto";
 import { dbClose, dbConnect } from "../helpers/db";
 import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
-import { ROLES, InvitationType } from "snu-lib";
-import { UserDto } from "snu-lib/src/dto";
 import getAppHelper from "../helpers/app";
-import request from "supertest";
 import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult } from "../../services/cle/referent";
-import passport from "passport";
-import { SUB_ROLES } from "snu-lib";
 
 jest.mock("../../brevo", () => ({
   ...jest.requireActual("../../brevo"),
@@ -37,7 +36,7 @@ describe("Referent Service", () => {
 
       const etablissement = await EtablissementModel.create({
         name: "Example School",
-        referentEtablissementIds: [referent._id],
+        referentEtablissementIds: [referent!._id],
         department: "Example Department",
         region: "Example Region",
         academy: "Example Academy",
@@ -50,9 +49,9 @@ describe("Referent Service", () => {
       await ClasseModel.create({
         name: "Mock Class",
         uniqueKeyAndId: "MOCK123",
-        etablissementId: etablissement._id,
+        etablissementId: etablissement!._id,
         cohort: "2022",
-        referentClasseIds: [referent._id],
+        referentClasseIds: [referent!._id],
         uniqueKey: "UAI_DATE_123",
         uniqueId: "DATE_1234",
         estimatedSeats: 30,
@@ -66,12 +65,12 @@ describe("Referent Service", () => {
         type: "FULL",
       });
 
-      await doInviteChefEtablissement(referent, user);
-      const updatedReferent = await ReferentModel.findOne({ email: referent.email });
+      await doInviteChefEtablissement(referent!, user);
+      const updatedReferent = await ReferentModel.findOne({ email: referent!.email });
 
-      expect(updatedReferent.invitationToken).toBeDefined();
-      expect(updatedReferent.invitationToken.length).toBeGreaterThanOrEqual(36);
-      expect(updatedReferent.invitationExpires).toBeDefined();
+      expect(updatedReferent!.invitationToken).toBeDefined();
+      expect(updatedReferent!.invitationToken.length).toBeGreaterThanOrEqual(36);
+      expect(updatedReferent!.invitationExpires).toBeDefined();
     });
   });
 
@@ -138,9 +137,9 @@ describe("Referent Service", () => {
 
       for (const referent of referents) {
         const updatedReferent = await ReferentModel.findOne({ email: referent.email });
-        expect(updatedReferent.invitationToken).toBeDefined();
-        expect(updatedReferent.invitationToken.length).toBeGreaterThanOrEqual(36);
-        expect(updatedReferent.invitationExpires).toBeDefined();
+        expect(updatedReferent!.invitationToken).toBeDefined();
+        expect(updatedReferent!.invitationToken.length).toBeGreaterThanOrEqual(36);
+        expect(updatedReferent!.invitationExpires).toBeDefined();
       }
       expect(result).toEqual(expect.arrayContaining(expectedInvitation));
     });
@@ -152,6 +151,7 @@ describe("POST /api/cle/referent/send-invitation-chef-etablissement", () => {
   afterAll(dbClose);
   beforeEach(async () => {
     jest.clearAllMocks();
+    // @ts-ignore
     passport.user.subRole = null;
     jest.mock("../../services/cle/referent", () => ({
       ...jest.requireActual("../../services/cle/referent"),
@@ -164,7 +164,9 @@ describe("POST /api/cle/referent/send-invitation-chef-etablissement", () => {
   });
 
   it("should return 200 OK and the list of sent invitations", async () => {
+    // @ts-ignore
     passport.user.role = ROLES.ADMIN;
+    // @ts-ignore
     passport.user.subRole = "god";
 
     const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();

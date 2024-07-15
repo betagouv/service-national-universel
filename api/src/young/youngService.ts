@@ -1,5 +1,5 @@
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
-import YoungModel from "../models/young";
+import { YoungModel } from "../models";
 import { YoungDto } from "snu-lib/src/dto/youngDto";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 

@@ -1,11 +1,11 @@
-const DepartmentServiceObject = require("../../models/departmentService");
+const { DepartmentServiceModel } = require("../../models");
 
 async function getDepartmentServicesHelper() {
-  return await DepartmentServiceObject.find({});
+  return await DepartmentServiceModel.find({});
 }
 
 async function getDepartmentServiceByIdHelper(id) {
-  return await DepartmentServiceObject.findById(id);
+  return await DepartmentServiceModel.findById(id);
 }
 
 async function deleteDepartmentServiceByIdHelper(id) {
@@ -14,11 +14,11 @@ async function deleteDepartmentServiceByIdHelper(id) {
 }
 
 async function deleteAllDepartmentServicesHelper() {
-  await DepartmentServiceObject.deleteMany({});
+  await DepartmentServiceModel.deleteMany({});
 }
 
 async function createDepartmentServiceHelper(departmentService) {
-  return await DepartmentServiceObject.create(departmentService);
+  return await DepartmentServiceModel.create(departmentService);
 }
 
 function expectDepartmentServiceToEqual(departmentService, expectedDepartmentService) {

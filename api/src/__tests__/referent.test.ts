@@ -107,10 +107,10 @@ describe("Referent", () => {
         },
       );
       expect(response.statusCode).toEqual(200);
-      expect(young.status).toEqual("WITHDRAWN");
-      expect(young.statusPhase1).toEqual("AFFECTED");
-      expect(young.statusPhase2).toEqual("WAITING_REALISATION");
-      expect(young.statusPhase3).toEqual("WAITING_REALISATION");
+      expect(young?.status).toEqual("WITHDRAWN");
+      expect(young?.statusPhase1).toEqual("AFFECTED");
+      expect(young?.statusPhase2).toEqual("WAITING_REALISATION");
+      expect(young?.statusPhase3).toEqual("WAITING_REALISATION");
     });
     it("should not cascade status to WITHDRAWN if validated", async () => {
       const { young, response } = await createYoungThenUpdate(
@@ -124,22 +124,22 @@ describe("Referent", () => {
         },
       );
       expect(response.statusCode).toEqual(200);
-      expect(young.status).toEqual("WITHDRAWN");
-      expect(young.statusPhase1).toEqual("DONE");
-      expect(young.statusPhase2).toEqual("WAITING_REALISATION");
-      expect(young.statusPhase3).toEqual("VALIDATED");
+      expect(young?.status).toEqual("WITHDRAWN");
+      expect(young?.statusPhase1).toEqual("DONE");
+      expect(young?.statusPhase2).toEqual("WAITING_REALISATION");
+      expect(young?.statusPhase3).toEqual("VALIDATED");
     });
     it("should update young statuses when sending cohection stay presence true", async () => {
       const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, { cohesionStayPresence: undefined });
       expect(response.statusCode).toEqual(200);
-      expect(young.statusPhase1).toEqual("DONE");
-      expect(young.cohesionStayPresence).toEqual("true");
+      expect(young?.statusPhase1).toEqual("DONE");
+      expect(young?.cohesionStayPresence).toEqual("true");
     });
     it("should update young statuses when sending cohection stay presence false", async () => {
       const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "false" });
       expect(response.statusCode).toEqual(200);
-      expect(young.statusPhase1).toEqual("NOT_DONE");
-      expect(young.cohesionStayPresence).toEqual("false");
+      expect(young?.statusPhase1).toEqual("NOT_DONE");
+      expect(young?.cohesionStayPresence).toEqual("false");
     });
     it("should remove places when sending to cohesion center", async () => {
       const sessionPhase1: any = await createSessionPhase1(getNewSessionPhase1Fixture());
@@ -150,8 +150,8 @@ describe("Referent", () => {
         statusPhase1: "AFFECTED",
       });
       expect(response.statusCode).toEqual(200);
-      const updatedSessionPhase1 = await getSessionPhase1ById(young.sessionPhase1Id);
-      expect(updatedSessionPhase1.placesLeft).toEqual(placesLeft - 1);
+      const updatedSessionPhase1 = await getSessionPhase1ById(young?.sessionPhase1Id);
+      expect(updatedSessionPhase1?.placesLeft).toEqual(placesLeft - 1);
     });
   });
   describe("PUT /referent/youngs", () => {
@@ -184,7 +184,7 @@ describe("Referent", () => {
       for (const updatedYoungId of res.body.data) {
         expect(youngIds.includes(updatedYoungId)).toBe(true);
         const updatedYoung = await YoungModel.findById(updatedYoungId);
-        expect(updatedYoung.status).toEqual(YOUNG_STATUS.VALIDATED);
+        expect(updatedYoung?.status).toEqual(YOUNG_STATUS.VALIDATED);
       }
     });
   });

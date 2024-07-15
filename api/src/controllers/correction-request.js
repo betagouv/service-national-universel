@@ -11,7 +11,7 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const YoungModel = require("../models/young");
+const { YoungModel } = require("../models");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
 const { ERRORS, deleteFile } = require("../utils");

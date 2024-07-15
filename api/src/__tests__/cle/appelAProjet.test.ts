@@ -7,7 +7,7 @@ import * as apiEducationModule from "../../services/gouv.fr/api-education";
 import passport from "passport";
 import { dbConnect, dbClose } from "../helpers/db";
 import { getEtablissementsFromAnnuaire } from "../fixtures/providers/annuaireEtablissement";
-import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
+import { ClasseDocument, ClasseModel, EtablissementDocument, EtablissementModel, ReferentDocument, ReferentModel } from "../../models";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
 
 jest.mock("../../utils", () => ({
@@ -18,8 +18,11 @@ jest.mock("../../utils", () => ({
 beforeAll(dbConnect);
 afterAll(dbClose);
 beforeEach(async () => {
+  // @ts-ignore
   passport.user.role = ROLES.ADMIN;
+  // @ts-ignore
   passport.user.subRole = null;
+  // @ts-ignore
   fetch.mockClear();
   await EtablissementModel.deleteMany();
   await ClasseModel.deleteMany();
@@ -40,6 +43,7 @@ jest.mock("node-fetch", () => jest.fn());
 describe("Appel A Projet Controller", () => {
   describe("POST /cle/appel-a-projet/simulate", () => {
     it("should return 200 OK with appelAProjet data for super admin", async () => {
+      // @ts-ignore
       passport.user.subRole = "god";
 
       const response1 = Promise.resolve({
@@ -48,6 +52,7 @@ describe("Appel A Projet Controller", () => {
         },
       });
 
+      // @ts-ignore
       fetch.mockImplementationOnce(() => response1);
       await response1;
 
@@ -56,6 +61,7 @@ describe("Appel A Projet Controller", () => {
           return getMockAppelAProjetDto(false);
         },
       });
+      // @ts-ignore
       fetch.mockImplementation(() => response2);
       await response2;
 
@@ -72,12 +78,14 @@ describe("Appel A Projet Controller", () => {
     });
 
     it("should return a zip file", async () => {
+      // @ts-ignore
       passport.user.subRole = "god";
       const response = Promise.resolve({
         json: () => {
           return getMockAppelAProjetDto(false);
         },
       });
+      // @ts-ignore
       fetch.mockImplementation(() => response);
 
       await response;
@@ -90,6 +98,7 @@ describe("Appel A Projet Controller", () => {
     });
 
     it("should DS be called a maximum of 50 times", async () => {
+      // @ts-ignore
       passport.user.subRole = "god";
 
       const response1 = Promise.resolve({
@@ -97,6 +106,7 @@ describe("Appel A Projet Controller", () => {
           return getMockAppelAProjetDto(true);
         },
       });
+      // @ts-ignore
       fetch.mockImplementation(() => response1);
       await response1;
 
@@ -110,6 +120,7 @@ describe("Appel A Projet Controller", () => {
     it("should persist data", async () => {
       const etablissementBeforeSync = await EtablissementModel.findOne({ uai: "UAI_42" });
       expect(etablissementBeforeSync).toBeNull();
+      // @ts-ignore
       passport.user.subRole = "god";
       const responseAppelAProjetMock = Promise.resolve({
         json: () => {
@@ -117,6 +128,7 @@ describe("Appel A Projet Controller", () => {
         },
       });
 
+      // @ts-ignore
       fetch.mockImplementation(() => responseAppelAProjetMock);
       await responseAppelAProjetMock;
 
@@ -124,15 +136,15 @@ describe("Appel A Projet Controller", () => {
       const referentEtablissementAfterSync = await ReferentModel.findOne({ email: "mail@etablissement.fr" });
       const etablissementAfterSync = await EtablissementModel.findOne({ uai: "UAI_42" });
       const referentClasseAfterSync = await ReferentModel.findOne({ email: "email@referent.fr" });
-      const classeAfterSync = await ClasseModel.findOne({ etablissementId: etablissementAfterSync._id });
+      const classeAfterSync = await ClasseModel.findOne({ etablissementId: etablissementAfterSync!._id });
 
-      expect(referentEtablissementAfterSync.email).toEqual("mail@etablissement.fr");
-      expect(referentEtablissementAfterSync.lastName).toEqual("NOM_CHEF_ETABLISSEMENT");
-      expect(referentEtablissementAfterSync.firstName).toEqual("PRENOM_CHEF_ETABLISSEMENT");
-      expect(etablissementAfterSync.uai).toEqual("UAI_42");
-      expect(etablissementAfterSync.referentEtablissementIds).toContain(referentEtablissementAfterSync._id.toString());
-      expect(classeAfterSync.etablissementId).toEqual(etablissementAfterSync._id.toString());
-      expect(classeAfterSync.referentClasseIds).toContain(referentClasseAfterSync._id.toString());
+      expect(referentEtablissementAfterSync!.email).toEqual("mail@etablissement.fr");
+      expect(referentEtablissementAfterSync!.lastName).toEqual("NOM_CHEF_ETABLISSEMENT");
+      expect(referentEtablissementAfterSync!.firstName).toEqual("PRENOM_CHEF_ETABLISSEMENT");
+      expect(etablissementAfterSync!.uai).toEqual("UAI_42");
+      expect(etablissementAfterSync!.referentEtablissementIds).toContain(referentEtablissementAfterSync!._id.toString());
+      expect(classeAfterSync!.etablissementId).toEqual(etablissementAfterSync!._id.toString());
+      expect(classeAfterSync!.referentClasseIds).toContain(referentClasseAfterSync!._id.toString());
     });
 
     it("should persist data and update existing etablissement", async () => {
@@ -152,6 +164,7 @@ describe("Appel A Projet Controller", () => {
       };
       await EtablissementModel.create(mockEtablissement);
 
+      // @ts-ignore
       passport.user.subRole = "god";
       const responseAppelAProjetMock = Promise.resolve({
         json: () => {
@@ -159,14 +172,15 @@ describe("Appel A Projet Controller", () => {
         },
       });
 
+      // @ts-ignore
       fetch.mockImplementation(() => responseAppelAProjetMock);
       await responseAppelAProjetMock;
 
       await request(getAppHelper()).post("/cle/appel-a-projet/real").send({});
       const etablissementAfterSync = await EtablissementModel.findOne({ uai: "UAI_42" });
 
-      expect(etablissementAfterSync.uai).toEqual("UAI_42");
-      expect(etablissementAfterSync.name).toEqual("Lycée Jean Monnet");
+      expect(etablissementAfterSync!.uai).toEqual("UAI_42");
+      expect(etablissementAfterSync!.name).toEqual("Lycée Jean Monnet");
     });
 
     it("should persist data and link existing referent to created etablissement", async () => {
@@ -200,6 +214,7 @@ describe("Appel A Projet Controller", () => {
 
       const referent = await ReferentModel.create(mockReferent);
 
+      // @ts-ignore
       passport.user.subRole = "god";
       const responseAppelAProjetMock = Promise.resolve({
         json: () => {
@@ -207,16 +222,18 @@ describe("Appel A Projet Controller", () => {
         },
       });
 
+      // @ts-ignore
       fetch.mockImplementation(() => responseAppelAProjetMock);
       await responseAppelAProjetMock;
 
       await request(getAppHelper()).post("/cle/appel-a-projet/real").send({});
       const etablissementAfterSync = await EtablissementModel.findOne({ uai: "UAI_42" });
 
-      expect([...etablissementAfterSync.referentEtablissementIds]).toEqual([referent?.id]);
+      expect([...etablissementAfterSync!.referentEtablissementIds]).toEqual([referent?.id]);
     });
 
     it("should not change invitationType if run twice", async () => {
+      // @ts-ignore
       passport.user.subRole = "god";
       const responseAppelAProjetMock = Promise.resolve({
         json: () => {
@@ -224,20 +241,21 @@ describe("Appel A Projet Controller", () => {
         },
       });
 
+      // @ts-ignore
       fetch.mockImplementation(() => responseAppelAProjetMock);
       await responseAppelAProjetMock;
 
       await request(getAppHelper()).post("/cle/appel-a-projet/real").send({});
       const referentEtablissementAfterSync = await ReferentModel.findOne({ email: "mail@etablissement.fr" });
 
-      expect(referentEtablissementAfterSync.email).toEqual("mail@etablissement.fr");
-      expect(referentEtablissementAfterSync.metadata.invitationType).toEqual(InvitationType.INSCRIPTION);
+      expect(referentEtablissementAfterSync!.email).toEqual("mail@etablissement.fr");
+      expect(referentEtablissementAfterSync!.metadata.invitationType).toEqual(InvitationType.INSCRIPTION);
 
       await request(getAppHelper()).post("/cle/appel-a-projet/real").send({});
       const referentEtablissementAfterSecondSync = await ReferentModel.findOne({ email: "mail@etablissement.fr" });
 
-      expect(referentEtablissementAfterSecondSync.email).toEqual("mail@etablissement.fr");
-      expect(referentEtablissementAfterSecondSync.metadata.invitationType).toEqual(InvitationType.INSCRIPTION);
+      expect(referentEtablissementAfterSecondSync!.email).toEqual("mail@etablissement.fr");
+      expect(referentEtablissementAfterSecondSync!.metadata.invitationType).toEqual(InvitationType.INSCRIPTION);
     });
   });
 });

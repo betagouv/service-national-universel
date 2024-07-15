@@ -12,8 +12,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const { YoungModel, CohortModel } = require("../models");
 const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, REGLEMENT_INTERIEUR_VERSION } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");

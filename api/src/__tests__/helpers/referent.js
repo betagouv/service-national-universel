@@ -1,11 +1,11 @@
-const ReferentObject = require("../../models/referent");
+const { ReferentModel } = require("../../models");
 
 async function getReferentsHelper() {
-  return await ReferentObject.find({});
+  return await ReferentModel.find({});
 }
 
 async function getReferentByIdHelper(referentId) {
-  return await ReferentObject.findById(referentId);
+  return await ReferentModel.findById(referentId);
 }
 
 async function deleteReferentByIdHelper(referentId) {
@@ -14,14 +14,14 @@ async function deleteReferentByIdHelper(referentId) {
 }
 
 async function deleteAllReferentBySubrole(subRole) {
-  const referents = await ReferentObject.find({ subRole: subRole });
+  const referents = await ReferentModel.find({ subRole: subRole });
   for (const referent of referents) {
     await deleteReferentByIdHelper(referent._id);
   }
 }
 
 async function createReferentHelper(referent) {
-  return await ReferentObject.create(referent);
+  return await ReferentModel.create(referent);
 }
 
 function expectReferentToEqual(referent, expectedReferent) {

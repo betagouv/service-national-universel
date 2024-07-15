@@ -1,7 +1,13 @@
-import mongoose from "mongoose";
-import { FeatureFlagDocument } from "./featureFlagType";
+import mongoose, { Schema, InferSchemaType } from "mongoose";
 
-const featureFlagSchema = new mongoose.Schema({
+import { DocumentExtended, InterfaceExtended } from "./types";
+
+export enum FeatureFlagName {
+  SYNC_APPEL_A_PROJET_CLE = "SYNC_APPEL_A_PROJET_CLE",
+  CLE_BEFORE_JULY_15 = "CLE_BEFORE_JULY_15",
+}
+
+const schema = new Schema({
   name: {
     type: String,
     required: true,
@@ -29,5 +35,8 @@ const featureFlagSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-const featureFlagDocumentModel = mongoose.model<FeatureFlagDocument>("featureFlag", featureFlagSchema);
-export { featureFlagDocumentModel };
+export type FeatureFlagType = InterfaceExtended<InferSchemaType<typeof schema>>;
+export type FeatureFlagDocument<T = {}> = DocumentExtended<FeatureFlagType & T>;
+
+const FeatureFlagModel = mongoose.model<FeatureFlagDocument>("featureFlag", schema);
+export { FeatureFlagModel };

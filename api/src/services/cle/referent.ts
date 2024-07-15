@@ -10,10 +10,9 @@ import { sendTemplate } from "../../brevo";
 import { inSevenDays } from "../../utils";
 import { capture } from "../../sentry";
 
-import { EtablissementModel, ReferentModel, EtablissementDocument } from "../../models";
+import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument } from "../../models";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { UserDto } from "snu-lib/src/dto";
-import { IReferent, ReferentDocument } from "../../models/referentType";
 
 export interface InvitationResult {
   to: string;
@@ -89,10 +88,10 @@ export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
 };
 
 export const doInviteChefEtablissement = async (chefEtablissement: ReferentDocument, user: UserDto) => {
-  const referent: IReferent = await generateInvitationTokenAndSaveReferent(chefEtablissement, user);
+  const referent: ReferentType = await generateInvitationTokenAndSaveReferent(chefEtablissement, user);
   const invitationType = referent.metadata.invitationType;
 
-  const etablissement: EtablissementDocument = await EtablissementModel.findOne({ referentEtablissementIds: referent._id });
+  const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: referent._id });
   if (!etablissement) {
     throw new Error("Etablissement not found for referent : " + referent._id);
   }

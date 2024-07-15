@@ -1,4 +1,4 @@
-const { featureFlagDocumentModel } = require("../src/models/featureFlag");
+const { FeatureFlagModel } = require("../src/models");
 module.exports = {
   async up() {
     const syncAppelAProjetFeatureFlag = {
@@ -6,6 +6,6 @@ module.exports = {
       name: "SYNC_APPEL_A_PROJET_CLE",
       date: { from: new Date("2024-06-27").toISOString(), to: new Date("2024-07-31").toISOString() },
     };
-    await featureFlagDocumentModel.create(syncAppelAProjetFeatureFlag);
+    await FeatureFlagModel.create(syncAppelAProjetFeatureFlag);
   },
 };

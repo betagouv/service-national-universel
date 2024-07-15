@@ -24,12 +24,6 @@ async function initDB() {
 
   let options = {
     appname: "ApiSnu", // Add your application name
-    // * Remove when we update to mongoose 6 : https://stackoverflow.com/a/68962378
-    useCreateIndex: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-    // * ----
     maxPoolSize: 30,
     minPoolSize: 5,
     waitQueueTimeoutMS: 30_000,
@@ -41,6 +35,7 @@ async function initDB() {
   }
 
   try {
+    mongoose.set("strictQuery", false);
     await mongoose.connect(config.MONGO_URL, options);
   } catch (error) {
     if (error.reason && error.reason.servers) {
@@ -53,8 +48,7 @@ async function initDB() {
 }
 
 async function closeDB() {
-  const db = mongoose.connection;
-  await db.close();
+  return await mongoose.connection.close();
 }
 
 async function startSession() {

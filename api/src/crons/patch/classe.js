@@ -4,7 +4,7 @@ const { getAge } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const ClasseModel = require("../../models/cle/classe");
+const { ClasseModel } = require("../../models");
 const ClassePatchModel = require("./models/classePatch");
 const config = require("config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");

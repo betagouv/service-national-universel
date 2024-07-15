@@ -4,13 +4,13 @@
  * Si c'est le cas, il envoit à tous les référents départementaux pour qui il reste des jeunes en attente de validation une relance mail.
  */
 const { capture } = require("../sentry");
-const ReferentModel = require("../models/referent");
+const { ReferentModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const config = require("config");
 const { YOUNG_STATUS, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, SENDINBLUE_TEMPLATES } = require("snu-lib");
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const { YoungModel } = require("../models");
+const { CohortModel } = require("../models");
 
 // /!\ WARNING /!\ Only works if the instructionEndDate is set to midnight UTC +/- 30 minutes
 const HOURS_BEFORE_END_REMINDER = 48 - 14; // à 14h la veille

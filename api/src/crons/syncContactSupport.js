@@ -1,5 +1,4 @@
-const YoungObject = require("../models/young");
-const ReferentObject = require("../models/referent");
+const { YoungModel, ReferentModel } = require("../models");
 const SNUpport = require("../SNUpport");
 const { capture } = require("../sentry");
 const slack = require("../slack");
@@ -37,8 +36,8 @@ exports.handler = async () => {
       slack.success({ title: `Successfully synced ${type} contacts to SNUpport` });
     };
 
-    await processContacts(YoungObject, "young");
-    await processContacts(ReferentObject, "referent");
+    await processContacts({ YoungModel }, "young");
+    await processContacts(ReferentModel, "referent");
   } catch (e) {
     capture(e);
     throw e;

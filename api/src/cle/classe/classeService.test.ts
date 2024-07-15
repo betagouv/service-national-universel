@@ -1,14 +1,14 @@
-import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
-
-import * as youngService from "../../young/youngService";
-import * as classService from "./classeService";
-import ClasseStateManager from "./stateManager";
-import { ClasseModel, CohortModel, EtablissementDocument, IEtablissement } from "../../models";
-import YoungModel from "../../models/young";
 import { Types } from "mongoose";
 const ObjectId = Types.ObjectId;
 
 import { ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE, isNowBetweenDates, canEditEstimatedSeats, canEditTotalSeats } from "snu-lib";
+
+import { ClasseModel, CohortModel, YoungModel, EtablissementDocument, EtablissementType } from "../../models";
+
+import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
+import * as youngService from "../../young/youngService";
+import ClasseStateManager from "./stateManager";
+import * as classService from "./classeService";
 
 const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
 const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
@@ -150,7 +150,7 @@ describe("deleteClasse function", () => {
     const mockedClasse = {
       _id: classId,
       deletedAt: null,
-      cohesionCenterId: new ObjectId(), // Assuming cohesionCenterId is set
+      cohesionCenterId: new ObjectId().toString(), // Assuming cohesionCenterId new is set
       sessionId: null,
       ligneId: null,
     };
@@ -165,7 +165,7 @@ describe("deleteClasse function", () => {
       _id: classId,
       deletedAt: null,
       cohesionCenterId: null,
-      sessionId: new ObjectId(), // Assuming sessionId is set
+      sessionId: new ObjectId().toString(), // Assuming sessionId new is set
       ligneId: null,
     };
 
@@ -180,7 +180,7 @@ describe("deleteClasse function", () => {
       deletedAt: null,
       cohesionCenterId: null,
       sessionId: null,
-      ligneId: new ObjectId(), // Assuming ligneId is set
+      ligneId: new ObjectId(), // Assuming ligneId new is set
     };
 
     jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
@@ -268,7 +268,7 @@ describe("deleteClasse function", () => {
         withdrawnReason: "other",
       });
     });
-    expect(deletedClasse.deletedAt).toBeDefined();
+    expect(deletedClasse!.deletedAt).toBeDefined();
   });
 });
 
@@ -425,7 +425,7 @@ describe("ClasseStateManager.compute function", () => {
     jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
     jest.spyOn(YoungModel, "find").mockReturnValueOnce({
       lean: jest.fn().mockResolvedValue(patchedYoungs),
-    });
+    } as any);
     jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
 
     const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
@@ -453,7 +453,7 @@ describe("ClasseStateManager.compute function", () => {
     jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(patchedClasse);
     jest.spyOn(YoungModel, "find").mockReturnValueOnce({
       lean: jest.fn().mockResolvedValue(mockedYoungs),
-    });
+    } as any);
     jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
 
     const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
@@ -482,7 +482,7 @@ describe("ClasseStateManager.compute function", () => {
     jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(patchedClasse);
     jest.spyOn(YoungModel, "find").mockReturnValueOnce({
       lean: jest.fn().mockResolvedValue(mockedYoungs),
-    });
+    } as any);
     jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
 
     const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
@@ -499,9 +499,9 @@ describe("buildUniqueClasseId and key", () => {
       coloration: "SPORT",
       estimatedSeats: 22,
     };
-    const etablissement: IEtablissement = {
+    const etablissement: EtablissementType = {
       uai: "UN_UAI",
-    } as IEtablissement;
+    } as EtablissementType;
     const expectedId = "52FD6A";
 
     expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
@@ -513,7 +513,7 @@ describe("buildUniqueClasseId and key", () => {
       region: "Île-de-France",
       zip: "75001",
       academy: "Paris",
-    } as IEtablissement;
+    } as EtablissementType;
     const expectedKey = "C-IDFP075";
 
     expect(buildUniqueClasseKey(etablissement)).toEqual(expectedKey);
@@ -523,7 +523,7 @@ describe("buildUniqueClasseId and key", () => {
     const classe = { name: "", coloration: undefined, department: "Maine et Loire", estimatedSeats: 22 };
     const expectedId = "NO_UID";
 
-    expect(buildUniqueClasseId({} as IEtablissement, classe)).toEqual(expectedId);
+    expect(buildUniqueClasseId({} as EtablissementType, classe)).toEqual(expectedId);
   });
 });
 

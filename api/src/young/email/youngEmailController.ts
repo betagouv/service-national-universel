@@ -8,7 +8,7 @@ import { capture } from "../../sentry";
 import { UserRequest } from "../../controllers/request";
 
 import { isReferent, isYoung } from "../../utils";
-import YoungObject from "../../models/young";
+import { YoungModel } from "../../models";
 
 import { sendEmailToYoung } from "./youngEmailService";
 
@@ -43,7 +43,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     }
 
     // The young must exist.
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // If actor is a young it must be the same as the young.

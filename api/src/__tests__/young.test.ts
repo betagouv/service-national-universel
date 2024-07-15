@@ -30,7 +30,7 @@ const { getNewReferentFixture } = require("./fixtures/referent");
 //classe
 const { createClasse } = require("./helpers/classe");
 const { createFixtureClasse } = require("./fixtures/classe");
-const ClasseModel = require("../models/cle/classe");
+const { ClasseModel } = require("../models");
 
 jest.mock("../redis", () => {
   const redis = require("redis");

@@ -1,6 +1,5 @@
 const { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES } = require("snu-lib");
-const EtablissementModel = require("../../models/cle/etablissement");
-const ReferentModel = require("../../models/referent");
+const { EtablissementModel, ReferentModel } = require("../../models");
 const { capture } = require("../../sentry");
 const config = require("config");
 const { sendTemplate } = require("../../brevo");

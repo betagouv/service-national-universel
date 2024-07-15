@@ -3,8 +3,7 @@ import { addDays } from "date-fns";
 
 import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 
-import { ReferentModel, EtablissementModel } from "../../models";
-import { ReferentDocument } from "../../models/referentType";
+import { ReferentModel, ReferentDocument, EtablissementModel } from "../../models";
 import * as brevo from "../../brevo";
 
 import { dbConnect, dbClose } from "../helpers/db";

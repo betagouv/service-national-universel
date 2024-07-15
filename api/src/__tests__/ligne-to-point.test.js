@@ -7,8 +7,7 @@ const { createCohesionCenter } = require("./helpers/cohesionCenter");
 const getNewPointDeRassemblementFixture = require("./fixtures/PlanDeTransport/pointDeRassemblement");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
-const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
-const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
+const { PointDeRassemblementModel, LigneToPointModel } = require("../models");
 
 beforeAll(dbConnect);
 afterAll(dbClose);

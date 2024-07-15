@@ -14,9 +14,7 @@ const SNUpport = require("../SNUpport");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
 const config = require("config");
 const { sendTemplate } = require("../brevo");
-const ReferentObject = require("../models/referent");
-const YoungObject = require("../models/young");
-const ClasseObject = require("../models/cle/classe");
+const { YoungModel, ClasseModel, ReferentModel } = require("../models");
 const { validateId } = require("../utils/validator");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
@@ -113,7 +111,7 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
 
 router.get("/ticketscount", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const user = await ReferentObject.findById(req.user._id);
+    const user = await ReferentModel.findById(req.user._id);
     let query = {};
     if (user.role === ROLES.REFERENT_DEPARTMENT)
       query = {
@@ -244,12 +242,12 @@ router.post("/ticket/form", async (req, res) => {
 
     if (req.body.role === "young" || req.body.role === "parent") {
       author = req.body.role;
-      req.body.role = await checkRole("young", req.body.email, YoungObject);
+      req.body.role = await checkRole("young", req.body.email, YoungModel);
     }
 
     if (req.body.role === "admin" || req.body.role === "admin exterior") {
       author = req.body.role;
-      req.body.role = await checkRole("admin", req.body.email, ReferentObject);
+      req.body.role = await checkRole("admin", req.body.email, ReferentModel);
     }
 
     const obj = {
@@ -322,7 +320,7 @@ router.post("/ticket/form", async (req, res) => {
     };
 
     if (classeId) {
-      const classe = await ClasseObject.findById(classeId);
+      const classe = await ClasseModel.findById(classeId);
       if (!classe) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       body = { ...body, classe };
     }
@@ -498,11 +496,11 @@ const getS3Path = (fileName) => {
 
 const notifyReferent = async (ticket, message) => {
   if (!ticket) return false;
-  let ticketCreator = await YoungObject.findOne({ email: ticket.contactEmail });
+  let ticketCreator = await YoungModel.findOne({ email: ticket.contactEmail });
   if (!ticketCreator) return false;
 
   const department = ticketCreator.department;
-  const departmentReferents = await ReferentObject.find({
+  const departmentReferents = await ReferentModel.find({
     role: ROLES.REFERENT_DEPARTMENT,
     department,
   });

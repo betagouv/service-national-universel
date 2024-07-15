@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../sentry");
-const EventObject = require("../models/event");
+const { EventModel } = require("../models");
 const { ERRORS, isYoung } = require("../utils");
 const { validateEvent } = require("../utils/validator");
 const { canCreateEvent } = require("snu-lib");
@@ -18,7 +18,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     // The only event creatable id of type "ASSOCIATION" currently.
     if (!canCreateEvent(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    await EventObject.create({ ...event, userId: req.user.id, userType: isYoung(req.user) ? "young" : "referent" });
+    await EventModel.create({ ...event, userId: req.user.id, userType: isYoung(req.user) ? "young" : "referent" });
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

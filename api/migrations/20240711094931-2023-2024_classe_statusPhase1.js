@@ -1,5 +1,4 @@
-const ClasseModel = require("../src/models/cle/classe");
-const YoungModel = require("../src/models/young");
+const { ClasseModel, YoungModel } = require("../src/models");
 const { STATUS_PHASE1_CLASSE, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 
 module.exports = {

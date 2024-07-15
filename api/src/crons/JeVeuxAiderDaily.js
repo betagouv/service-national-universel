@@ -5,9 +5,9 @@ const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
 const config = require("config");
 const slack = require("../slack");
-const MissionModel = require("../models/mission");
-const StructureModel = require("../models/structure");
-const ReferentModel = require("../models/referent");
+const { MissionModel } = require("../models");
+const { StructureModel } = require("../models");
+const { ReferentModel } = require("../models");
 
 const { sendTemplate } = require("../brevo");
 

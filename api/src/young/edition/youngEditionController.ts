@@ -17,7 +17,7 @@
 
 import express, { Response } from "express";
 import Joi from "joi";
-import { YoungModel, ApplicationModel } from "../../models";
+import { YoungModel, LigneBusModel, SessionPhase1Model, CohortModel, ApplicationModel, YoungType } from "../../models";
 import { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } from "../../utils";
 import { capture } from "../../sentry";
 import { validateFirstName } from "../../utils/validator";
@@ -39,10 +39,6 @@ import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
 import { format } from "date-fns";
 import config from "config";
-import YoungObject from "../../models/young";
-import LigneDeBusModel from "../../models/PlanDeTransport/ligneBus";
-import SessionPhase1Model from "../../models/sessionPhase1";
-import CohortModel from "../../models/cohort";
 import { validateId, idSchema } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
 import { canEditYoungConsent, updateYoungConsent } from "./youngEditionService";
@@ -140,7 +136,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 
     if (value.latestCNIFileExpirationDate && young.cohort !== "à venir") {
       const cohort = await CohortModel.findOne({ name: young.cohort });
-      value.CNIFileNotValidOnStart = new Date(value.latestCNIFileExpirationDate) < new Date(cohort.dateStart);
+      value.CNIFileNotValidOnStart = new Date(value.latestCNIFileExpirationDate) < new Date(cohort!.dateStart);
     }
 
     // test de déménagement.
@@ -311,7 +307,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     let oldSession;
     let oldBus;
     if (value.statusPhase1 === "WAITING_AFFECTATION") {
-      if (young?.meetingPointId) oldBus = await LigneDeBusModel.findById(young.ligneId);
+      if (young?.meetingPointId) oldBus = await LigneBusModel.findById(young.ligneId);
       if (young?.sessionPhase1Id) {
         oldSession = await SessionPhase1Model.findById(young.sessionPhase1Id);
         young.set({
@@ -405,14 +401,15 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
     };
 
     let notification: string | null = null;
-    const futureYoung = { ...young, ...changes };
+    const futureYoung = { ...young, ...changes } as YoungType;
     if (futureYoung.parent1AllowSNU === "false" || futureYoung.parent2AllowSNU === "false") {
       if (young.parentAllowSNU !== "false") {
         changes.parentAllowSNU = "false";
         changes.status = YOUNG_STATUS.NOT_AUTORISED;
         notification = "rejected";
       }
-    } else if (futureYoung.parent1AllowSNU === "true" && futureYoung.parent2AllowSNU !== "false") {
+    } else if (futureYoung.parent1AllowSNU === "true") {
+      // ici futureYoung.parent2AllowSNU !== false
       if (young.parentAllowSNU !== "true") {
         // TODO: on ne traite pas ce cas là pour l'instant la route n'étant appelée QUE pour un rejet du parent2.
         // body.parentAllowSNU = "true";
@@ -546,7 +543,7 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
         return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       }
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
         params: {
           cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
@@ -567,7 +564,7 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
         return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       }
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! }],
         params: {
           cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
           youngFirstName: young.firstName,
@@ -601,7 +598,7 @@ router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", {
     const parentId = bodyValue.parentId;
 
     // --- get young & verify rights
-    const young = await YoungObject.findById(youngId);
+    const young = await YoungModel.findById(youngId);
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     }
@@ -646,7 +643,7 @@ router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { se
     const youngId = paramValue.id;
 
     // --- get young & verify rights
-    const young = await YoungObject.findById(youngId);
+    const young = await YoungModel.findById(youngId);
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     }
@@ -657,30 +654,31 @@ router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { se
 
     // --- reset parent allow snu
     young.set({ parentAllowSNU: undefined, parent1AllowSNU: undefined, status: YOUNG_STATUS.IN_PROGRESS, parent1ValidationDate: undefined });
-    if (young.parent2Id) young.set({ parent2AllowSnu: undefined, parent2ValidationDate: undefined });
+    // FIXME: parent2Id: legacy
+    // if (young.parent2Id) young.set({ parent2AllowSnu: undefined, parent2ValidationDate: undefined });
     await young.save();
 
     // --- send notification
     // parent 1
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
       params: {
         cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
         youngFirstName: young.firstName,
         youngName: young.lastName,
       },
     });
-    // parent 2
-    if (young.parent2Id) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-    }
+    // parent 2 FIXME: parent2Id: legacy
+    // if (young.parent2Id) {
+    //   await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
+    //     emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! }],
+    //     params: {
+    //       cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
+    //       youngFirstName: young.firstName,
+    //       youngName: young.lastName,
+    //     },
+    //   });
+    // }
 
     // --- return updated young
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
@@ -709,7 +707,7 @@ router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent"
     const parentId = bodyValue.parentId;
 
     // --- get young & verify rights
-    const young = await YoungObject.findById(youngId);
+    const young = await YoungModel.findById(youngId);
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     }

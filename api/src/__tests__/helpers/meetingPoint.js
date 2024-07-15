@@ -1,11 +1,11 @@
-const MeetingPointObject = require("../../models/meetingPoint");
+const { MeetingPointModel } = require("../../models");
 
 async function createMeetingPointHelper(MeetingPoint) {
-  return await MeetingPointObject.create(MeetingPoint);
+  return await MeetingPointModel.create(MeetingPoint);
 }
 
 async function getMeetingPointByIdHelper(id) {
-  return await MeetingPointObject.findById(id);
+  return await MeetingPointModel.findById(id);
 }
 
 const notExistingMeetingPointId = "104a49ba223040e4d2153223";

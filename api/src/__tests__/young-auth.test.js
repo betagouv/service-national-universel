@@ -18,7 +18,7 @@ jest.mock("../brevo", () => ({
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-describe("Young", () => {
+describe("Young Auth", () => {
   let res;
   describe("POST /young/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {

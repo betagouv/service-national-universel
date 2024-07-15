@@ -30,7 +30,20 @@ import {
 
 import { capture, captureMessage } from "../../sentry";
 import { ERRORS, isReferent } from "../../utils";
-import { ClasseModel, CohortModel, YoungModel, EtablissementModel, ReferentModel } from "../../models";
+import {
+  ClasseModel,
+  CohortModel,
+  YoungModel,
+  EtablissementModel,
+  ReferentModel,
+  ReferentType,
+  ClasseDocument,
+  EtablissementDocument,
+  ReferentDocument,
+  CohesionCenterDocument,
+  PointDeRassemblementDocument,
+  LigneBusDocument,
+} from "../../models";
 
 import { UserRequest } from "../../controllers/request";
 
@@ -99,7 +112,18 @@ router.post("/export", passport.authenticate("referent", { session: false, failW
     if (req.user.role === ROLES.REFERENT_REGION) queryParams["region"] = req.user.region;
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.departement;
 
-    const classes = await ClasseModel.find(queryParams)
+    const classes: ClasseDocument<{
+      cohesionCenter?: CohesionCenterDocument;
+      pointDeRassemblement?: PointDeRassemblementDocument;
+      ligne?: LigneBusDocument;
+      studentInProgress?: number;
+      studentWaiting?: number;
+      studentValidated?: number;
+      studentAbandoned?: number;
+      studentNotAutorized: number;
+      studentWithdrawn?: number;
+      referentEtablissement?: ReferentDocument[];
+    }>[] = await ClasseModel.find(queryParams)
       .populate({
         path: "etablissement",
       })
@@ -114,7 +138,7 @@ router.post("/export", passport.authenticate("referent", { session: false, failW
       const youngs = await getYoungsGroupByClasses(classes);
       const lignesBus = await findLigneInfoForClasses(classes);
 
-      for (let classe of classes) {
+      for (const classe of classes) {
         // populate
         classe.cohesionCenter = centres?.find((e) => classe.cohesionCenterId === e._id.toString());
         classe.pointDeRassemblement = pdrs?.find((e) => classe.pointDeRassemblementId === e._id.toString());
@@ -132,7 +156,7 @@ router.post("/export", passport.authenticate("referent", { session: false, failW
     } else if (req.query.type === "export-des-classes") {
       const chefEtablissement = await findChefEtablissementInfoForClasses(classes);
       for (let classe of classes) {
-        classe.referentEtablissement = chefEtablissement?.filter((e) => classe.etablissement.referentEtablissementIds.includes(e._id.toString()));
+        classe.referentEtablissement = chefEtablissement?.filter((ce) => classe.etablissement?.referentEtablissementIds.includes(ce._id.toString()));
       }
     }
     res.send({ ok: true, data: classes });
@@ -361,7 +385,7 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
 
     if (!canViewClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const classes = await ClasseModel.find({ etablissementId: value })?.lean();
+    const classes: ClasseDocument<{ referent: Array<ReferentType | null> }>[] = await ClasseModel.find({ etablissementId: value })?.lean();
     if (!classes) {
       captureMessage("Error finding classe with etablissementId : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -433,7 +457,7 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
 
     if (!canNotifyAdminCleForVerif(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const classe = await ClasseModel.findById(value).populate({
+    const classe: ClasseDocument<{ etablissement: EtablissementDocument }> | null = await ClasseModel.findById(value).populate({
       path: "etablissement",
       options: { select: { referentEtablissementIds: 1, coordinateurIds: 1 } },
     });
@@ -471,7 +495,10 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
     }
 
     if (!canVerifyClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let classe = await ClasseModel.findById(value.id).populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } });
+    let classe: ClasseDocument<{ referents: ReferentDocument[] }> | null = await ClasseModel.findById(value.id).populate({
+      path: "referents",
+      options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } },
+    });
     if (!classe || !classe.referents.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {

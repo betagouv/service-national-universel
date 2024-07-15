@@ -64,7 +64,7 @@
     "logfmt": "^1.4.0",
     "migrate-mongo": "^11.0.0",
     "mime-types": "^2.1.35",
-    "mongoose": "^5.13.9",
+    "mongoose": "^6.12.9",
     "mongoose-patch-history": "^2.0.0",
     "nanoid": "^2.1.11",
     "netmask": "^2.0.2",

@@ -1,11 +1,11 @@
-const YoungObject = require("../../models/young");
+const { YoungModel } = require("../../models");
 
 async function getYoungsHelper() {
-  return await YoungObject.find({});
+  return await YoungModel.find({});
 }
 
 async function getYoungByIdHelper(youngId) {
-  return await YoungObject.findById(youngId);
+  return await YoungModel.findById(youngId);
 }
 
 async function deleteYoungByIdHelper(youngId) {
@@ -14,12 +14,12 @@ async function deleteYoungByIdHelper(youngId) {
 }
 
 async function deleteYoungByEmailHelper(email) {
-  const young = await YoungObject.findOne({ email });
+  const young = await YoungModel.findOne({ email });
   if (young) await young.remove();
 }
 
 async function createYoungHelper(young) {
-  return await YoungObject.create(young);
+  return await YoungModel.create(young);
 }
 
 function expectYoungToEqual(young, expectedYoung) {
