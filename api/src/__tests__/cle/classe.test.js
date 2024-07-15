@@ -1,5 +1,12 @@
 const request = require("supertest");
+const passport = require("passport");
+const { ObjectId } = require("mongoose").Types;
+const { dbConnect, dbClose } = require("../helpers/db");
+const { mockEsClient } = require("../helpers/es");
 const getAppHelper = require("../helpers/app");
+
+const snuLib = require("snu-lib");
+const { ROLES, SUB_ROLES, STATUS_CLASSE } = require("snu-lib");
 
 //classe
 const { createClasse } = require("../helpers/classe");
@@ -19,14 +26,14 @@ const { createCohortHelper } = require("../helpers/cohort");
 const { getNewReferentFixture } = require("../fixtures/referent");
 const { createReferentHelper } = require("../helpers/referent");
 
-const snuLib = require("snu-lib");
-const { ROLES, SUB_ROLES, STATUS_CLASSE } = require("snu-lib");
-const passport = require("passport");
-const { dbConnect, dbClose } = require("../helpers/db");
-const { ObjectId } = require("mongoose").Types;
-
 beforeAll(dbConnect);
 afterAll(dbClose);
+
+mockEsClient({
+  classe: [{ _id: "classeId", etablissementIds: ["etabId"], referentClasseIds: ["referentId"] }],
+  etablissement: [{ _id: "etabId" }],
+  referent: [{ _id: "referentId" }],
+});
 
 jest.mock("../../emails", () => ({
   emit: jest.fn(),
@@ -512,5 +519,37 @@ describe("GET /:id/notifyRef", () => {
     const res = await request(getAppHelper()).get(`/cle/classe/${validId}/notifyRef`);
 
     expect(res.status).toBe(200);
+  });
+});
+
+describe("POST /elasticsearch/cle/classe/export", () => {
+  it("should return 403 when user is not admin", async () => {
+    passport.user.role = ROLES.RESPONSIBLE;
+    const res = await request(getAppHelper()).post("/elasticsearch/cle/classe/export").send();
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+  it("should return 200 when export is successful", async () => {
+    const res = await request(getAppHelper())
+      .post("/elasticsearch/cle/classe/export")
+      .send({ filters: {}, exportFields: ["name", "uniqueKeyAndId"] });
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThan(0);
+  });
+});
+
+describe("POST /elasticsearch/cle/etablissement/export", () => {
+  it("should return 403 when user is not admin", async () => {
+    passport.user.role = ROLES.RESPONSIBLE;
+    const res = await request(getAppHelper()).post("/elasticsearch/cle/etablissement/export").send();
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+  it("should return 200 when export is successful", async () => {
+    const res = await request(getAppHelper())
+      .post("/elasticsearch/cle/etablissement/export")
+      .send({ filters: {}, exportFields: ["name", "uai"] });
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThan(0);
   });
 });
