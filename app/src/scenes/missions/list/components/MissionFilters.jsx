@@ -74,7 +74,7 @@ function _location(results) {
 
 export default function MissionFilters({ filters, setFilters }) {
   const { young } = useAuth();
-  const [youngAddress, setYoungAddress] = useState({ zip: young.zip, city: young.city, location: young.location });
+  const [cityFilter, setCityFilter] = useState({ zip: young.zip, city: young.city, location: young.location });
   const [query, setQuery] = useState("");
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
@@ -87,14 +87,12 @@ export default function MissionFilters({ filters, setFilters }) {
   const refDropdownControlWhen = useOutsideClick(() => setDropdownControlWhenOpen(false));
 
   const updateAddressData = (address) => {
-    const newAddress = { ...youngAddress, ...address };
-    setYoungAddress(newAddress);
-    const newLocation = _location(results) || young.location;
-    setFilters((prev) => ({ ...prev, location: newLocation }));
+    setCityFilter(address);
+    setFilters((prev) => ({ ...prev, location: address.location }));
   };
 
   const debouncedQuery = useDebounce(query, 300);
-  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10, type: "municipality" }, enabled: debouncedQuery.length > 2 });
 
   const DISTANCE_MAX = 100;
   const marginDistance = getMarginDistance(document.getElementById("distanceKm"));
@@ -307,7 +305,7 @@ export default function MissionFilters({ filters, setFilters }) {
 
                     <div className="flex w-full flex-col space-y-2 py-2 px-2">
                       <div className="my-3 flex justify-around">
-                        <CityForm data={youngAddress} updateData={updateAddressData} query={query} setQuery={setQuery} options={results} />
+                        <CityForm data={cityFilter} updateData={updateAddressData} query={query} setQuery={setQuery} options={results} />
                       </div>
                       <div className="mb-3 flex flex-row items-center justify-start">
                         <Toggle toggled={filters.hebergement} onClick={() => setFilters((prev) => ({ ...prev, hebergement: !prev.hebergement }))} />
@@ -511,7 +509,7 @@ export default function MissionFilters({ filters, setFilters }) {
             <div className="flex w-full flex-col space-y-2 py-2 px-4">
               <div className="my-3 flex flex-row justify-around">
                 <div className="flex w-1/2 flex-col items-center justify-center">
-                  <CityForm data={youngAddress} updateData={updateAddressData} query={query} setQuery={setQuery} options={results} />
+                  <CityForm data={cityFilter} updateData={updateAddressData} query={query} setQuery={setQuery} options={results} />
                 </div>
                 <div className="flex w-1/2 flex-col items-center justify-center">
                   <div className="flex  flex-row items-center justify-center">

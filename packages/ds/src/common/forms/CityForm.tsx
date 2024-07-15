@@ -3,27 +3,23 @@ import Input from "../inputs/Input";
 import Combobox from "../inputs/Combobox";
 import { RiSearchLine } from "react-icons/ri";
 
-export type Address = {
+export type City = {
   city: string;
   zip: string;
-  department: string;
-  region: string;
   location: {
     lat: number;
     lon: number;
   } | null;
-  coordinatesAccuracyLevel: string | null;
-  addressVerified: "true" | "false";
 };
 
 interface Props {
   label?: string;
   readOnly?: boolean;
-  data: Partial<Address>;
-  updateData: (data: Partial<Address>) => void;
+  data: Partial<City>;
+  updateData: (data: Partial<City>) => void;
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
-  options: Address[];
+  options: City[];
 }
 
 export default function CityForm({
@@ -39,11 +35,7 @@ export default function CityForm({
     updateData({
       city: "",
       zip: "",
-      addressVerified: "false",
-      department: "",
-      region: "",
       location: null,
-      coordinatesAccuracyLevel: null,
     });
   }
 
@@ -58,7 +50,7 @@ export default function CityForm({
             updateData({ ...data, city, zip });
           }}
           className="col-span-2"
-          readOnly={true}
+          disabled={true}
         />
         {!readOnly && (
           <button
