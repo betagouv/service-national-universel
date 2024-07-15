@@ -142,8 +142,8 @@ async function buildClasseContext(user) {
 const populateWithReferentEtablissementInfo = async (classes, action) => {
   const refIds =
     action === "search"
-      ? [...new Set(classes.map((item) => item._source.etablissement.referentEtablissementIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.etablissement.referentEtablissementIds).filter(Boolean))];
+      ? [...new Set(classes.map((item) => item._source.etablissement?.referentEtablissementIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
 
   const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
   const referentsData = serializeReferents(referents);
@@ -152,7 +152,7 @@ const populateWithReferentEtablissementInfo = async (classes, action) => {
     if (action === "search") {
       item._source.referentEtablissement = referentsData?.filter((e) => item._source.etablissement.referentEtablissementIds.includes(e._id.toString()));
     } else {
-      item.referentEtablissement = referentsData?.filter((e) => item.etablissement.referentEtablissementIds.includes(e._id.toString()));
+      item.referentEtablissement = referentsData?.filter((e) => item.etablissement?.referentEtablissementIds.includes(e._id.toString()));
     }
     return item;
   });
@@ -171,7 +171,7 @@ const populateWithReferentInfo = async (classes, action) => {
     if (action === "search") {
       item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
     } else {
-      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds.includes(e._id.toString()));
+      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
     }
     return item;
   });
