@@ -16,7 +16,7 @@ const getNewYoungFixture = require("./fixtures/young");
 const { createPointDeRassemblementWithBus } = require("./helpers/PlanDeTransport/pointDeRassemblement");
 
 mockEsClient({
-  lignebus: [{ _id: "referentId" }],
+  lignebus: [{ _id: "ligneId" }],
 });
 
 const mockModelMethodWithError = (model, method) => {
@@ -848,7 +848,7 @@ describe("Meeting point", () => {
     });
   });
 
-  describe("GET /elasticsearch/lignebus/export", () => {
+  describe("POST /elasticsearch/lignebus/export", () => {
     it("should return 200 when export is successful", async () => {
       const res = await request(getAppHelper())
         .post("/elasticsearch/lignebus/export")

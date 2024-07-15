@@ -522,7 +522,7 @@ describe("GET /:id/notifyRef", () => {
   });
 });
 
-describe("GET /elasticsearch/cle/classe/export", () => {
+describe("POST /elasticsearch/cle/classe/export", () => {
   it("should return 403 when user is not admin", async () => {
     passport.user.role = ROLES.RESPONSIBLE;
     const res = await request(getAppHelper()).post("/elasticsearch/cle/classe/export").send();
@@ -538,7 +538,7 @@ describe("GET /elasticsearch/cle/classe/export", () => {
   });
 });
 
-describe("GET /elasticsearch/cle/etablissement/export", () => {
+describe("POST /elasticsearch/cle/etablissement/export", () => {
   it("should return 403 when user is not admin", async () => {
     passport.user.role = ROLES.RESPONSIBLE;
     const res = await request(getAppHelper()).post("/elasticsearch/cle/etablissement/export").send();
