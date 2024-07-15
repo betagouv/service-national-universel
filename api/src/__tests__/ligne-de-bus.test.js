@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
+const { mockEsClient } = require("./helpers/es");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const CohortModel = require("../models/cohort");
 const YoungModel = require("../models/young");
@@ -14,13 +15,17 @@ const { createYoungHelper } = require("./helpers/young");
 const getNewYoungFixture = require("./fixtures/young");
 const { createPointDeRassemblementWithBus } = require("./helpers/PlanDeTransport/pointDeRassemblement");
 
-beforeAll(dbConnect);
+mockEsClient({
+  lignebus: [{ _id: "referentId" }],
+});
 
 const mockModelMethodWithError = (model, method) => {
   jest.spyOn(model, method).mockImplementation(() => {
     throw new Error("test error");
   });
 };
+
+beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Meeting point", () => {
@@ -840,6 +845,16 @@ describe("Meeting point", () => {
       jest.spyOn(LigneBusModel, "findById").mockRestore();
 
       passport.user = previous;
+    });
+  });
+
+  describe("GET /elasticsearch/lignebus/export", () => {
+    it("should return 200 when export is successful", async () => {
+      const res = await request(getAppHelper())
+        .post("/elasticsearch/lignebus/export")
+        .send({ filters: {}, exportFields: ["busId"] });
+      expect(res.status).toBe(200);
+      expect(res.body.data.length).toBeGreaterThan(0);
     });
   });
 });
