@@ -402,7 +402,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
   );
 };
 
-async function updateYoungPhase2Hours(young, fromUser) {
+async function updateYoungPhase2HoursCC(young, fromUser) {
   try {
     const applications = await ApplicationModel.find({
       youngId: young._id,
@@ -429,7 +429,7 @@ async function updateYoungPhase2Hours(young, fromUser) {
   }
 }
 
-async function updateYoungPhase2HoursWithEquivalences(young, fromUser) {
+async function updateYoungPhase2Hours(young, fromUser) {
   try {
     const applications = await ApplicationModel.find({
       youngId: young._id,
@@ -449,16 +449,14 @@ async function updateYoungPhase2HoursWithEquivalences(young, fromUser) {
         .map((equivalence) => Number(equivalence?.missionDuration || 0))
         .reduce((acc, current) => acc + current, 0);
 
-    const totalHoursEstimated =
-      applications
-        .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
-        .map((application) => Number(application.missionDuration || 0))
-        .reduce((acc, current) => acc + current, 0) +
-      equivalences
-        .filter((equivalence) => ["VALIDATED", "IN_PROGRESS"].includes(equivalence.status))
-        .map((equivalence) => Number(equivalence.missionDuration || 0))
-        .reduce((acc, current) => acc + current, 0);
-    console.log(totalHoursDone);
+    const totalHoursEstimated = applications
+      .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
+      .map((application) => Number(application.missionDuration || 0))
+      .reduce((acc, current) => acc + current, 0);
+    // equivalences
+    //   .filter((equivalence) => ["VALIDATED", "IN_PROGRESS"].includes(equivalence.status))
+    //   .map((equivalence) => Number(equivalence.missionDuration || 0))
+    //   .reduce((acc, current) => acc + current, 0);
     young.set({
       phase2NumberHoursDone: String(totalHoursDone),
       phase2NumberHoursEstimated: String(totalHoursEstimated),
@@ -1028,7 +1026,6 @@ module.exports = {
   isReferent,
   inSevenDays,
   updateYoungPhase2Hours,
-  updateYoungPhase2HoursWithEquivalences,
   updateStatusPhase2,
   getSignedUrlForApiAssociation,
   updateYoungStatusPhase2Contract,

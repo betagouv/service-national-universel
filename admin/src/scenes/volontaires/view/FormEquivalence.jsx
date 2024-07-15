@@ -13,6 +13,7 @@ import YoungHeader from "../../phase0/components/YoungHeader";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES, UNSS_TYPE } from "snu-lib";
 import Select from "../../../components/forms/SelectHookForm";
 import InputText from "../../../components/ui/forms/InputTextHookForm";
+import NumberInput from "../../../components/ui/forms/NumberInput";
 import { useForm, Controller } from "react-hook-form";
 
 const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
@@ -25,6 +26,8 @@ export default function FormEquivalence({ young, onChange }) {
   const [loading, setLoading] = React.useState(false);
   const [filesList, setFilesList] = React.useState([]);
   const [uploading, setUploading] = React.useState(false);
+  const [duration, setDuration] = React.useState("");
+  const [unit, setUnit] = React.useState("heures");
 
   const {
     register,
@@ -70,6 +73,20 @@ export default function FormEquivalence({ young, onChange }) {
     setValue("files", res.data);
     toastr.success("Fichier téléversé");
     setUploading(false);
+  };
+
+  const handleInputChange = (e) => {
+    const value = Math.ceil(Number(e.target.value));
+    setDuration(value);
+    const missionDuration = unit === "jours" ? String(value * 7) : String(value);
+    setValue("missionDuration", missionDuration);
+  };
+
+  const handleSelectChange = (e) => {
+    const value = e.target.value;
+    setUnit(value);
+    setDuration("");
+    setValue("missionDuration", "");
   };
 
   const sendData = async (data) => {
@@ -234,38 +251,12 @@ export default function FormEquivalence({ young, onChange }) {
                 </div>
               </div>
 
-              {frequence ? (
-                <>
-                  <div className="mt-2 flex flex-wrap items-stretch gap-2 md:!flex-nowrap">
-                    <InputText register={register} name="frequency.nombre" label="Nombre" validation={{ required: true }} />
-                    <Controller
-                      rules={{ required: true }}
-                      name="frequency.duree"
-                      control={control}
-                      render={({ field: { ref, ...rest } }) => <Select {...rest} options={optionsDuree} label="Durée" />}
-                    />
-                    <Controller
-                      rules={{ required: true }}
-                      name="frequency.frequence"
-                      control={control}
-                      render={({ field: { ref, ...rest } }) => <Select {...rest} options={optionsFrequence} label="Fréquence" />}
-                    />
-                  </div>
-
-                  <button
-                    className="mt-3 text-center text-sm font-normal leading-5 text-indigo-600 hover:underline"
-                    onClick={() => {
-                      setFrequence(false);
-                    }}>
-                    Supprimer la fréquence
-                  </button>
-                </>
-              ) : (
-                <div className="group mt-4 flex cursor-pointer items-center justify-center rounded-lg bg-blue-50 py-3" onClick={() => setFrequence(true)}>
-                  <AiOutlinePlus className="mr-2 h-5 w-5 text-indigo-400 group-hover:scale-110" />
-                  <div className="text-sm font-medium leading-5 text-blue-700 group-hover:underline">Ajouter la fréquence (facultatif)</div>
+              <div className="mt-4 text-xs font-medium leading-4">Combien de temps ?</div>
+              <div className="mt-3 space-y-4">
+                <div className="flex items-stretch gap-2">
+                  <InputText register={register} name="missionDuration" label="durée (en heures)" validation={{ required: true }} />
                 </div>
-              )}
+              </div>
             </div>
             <div className="flex basis-1/2 flex-col justify-between pb-2">
               <div className="rounded-xl bg-white p-6">
