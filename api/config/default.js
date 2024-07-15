@@ -22,7 +22,6 @@ module.exports = {
   API_ANALYTICS_ENDPOINT: "http://localhost:8085",
   API_ANALYTICS_API_KEY: "api-key",
   API_ANTIVIRUS_ENDPOINT: "http://localhost:8089",
-  API_ANTIVIRUS_TOKEN: undefined,
   ES_ENDPOINT: undefined,
   SENDINBLUEKEY: undefined,
   SENTRY_URL: undefined,
@@ -56,4 +55,6 @@ module.exports = {
   JVA_API_KEY: undefined,
   REDIS_URL: undefined,
   API_DEMARCHE_SIMPLIFIEE_TOKEN: undefined,
+  PM2_SLACK_URL: undefined,
+  API_ANTIVIRUS_KEY: undefined,
 };

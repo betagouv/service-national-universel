@@ -25,12 +25,43 @@ describe("demarcheSimplifieeProvider", () => {
 
   it("should return the right data", () => {
     const mockAppelAProjetDto = getMockAppelAProjetDto();
-    const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto);
+    const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto, {});
 
     const expectedAppelAProjet = [
       {
+        numberDS: 1000,
         etablissement: { uai: "SOME_UAI", nameAndCommune: "Un nom de lycée, Grenoble (SOME_UAI)" },
-        referentEtablissement: { email: "mail@etablissement.fr" },
+        referentEtablissement: { email: "mail@etablissement.fr", firstName: "PRENOM_CHEF_ETABLISSEMENT", lastName: "NOM_CHEF_ETABLISSEMENT" },
+        classe: {
+          name: "SNU 2024 2025",
+          coloration: "RESILIENCE",
+          estimatedSeats: 42,
+          trimester: "Au 3ème trimestre (séjour réalisé en avril, mai ou juin 2025).",
+          type: "GROUP",
+        },
+        referentClasse: {
+          lastName: "NOM_REFERENT",
+          firstName: "PRENOM_REFERENT",
+          email: "email@referent.fr",
+        },
+      },
+    ];
+    expect(result).toEqual(expectedAppelAProjet);
+  });
+
+  it("should return the fixed data", () => {
+    const mockAppelAProjetDto = getMockAppelAProjetDto();
+    const fixe = {
+      numberDS: 1000,
+      etablissement: { uai: "FIXED_UAI" },
+    };
+    const result = mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(mockAppelAProjetDto, { fixes: [fixe] });
+
+    const expectedAppelAProjet = [
+      {
+        numberDS: 1000,
+        etablissement: { uai: "FIXED_UAI", nameAndCommune: "Un nom de lycée, Grenoble (SOME_UAI)" },
+        referentEtablissement: { email: "mail@etablissement.fr", firstName: "PRENOM_CHEF_ETABLISSEMENT", lastName: "NOM_CHEF_ETABLISSEMENT" },
         classe: {
           name: "SNU 2024 2025",
           coloration: "RESILIENCE",

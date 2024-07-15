@@ -12,7 +12,7 @@ import ChevronRight from "@/assets/icons/ChevronRight";
 
 export default function BoxCentres({ summary, className, loading, isNational, isDepartmental, user }: BoxProps & { isNational?: boolean; isDepartmental?: boolean; user: User }) {
   return (
-    <Box className={`overflow-hidden ${className}`}>
+    <Box className={`overflow-hidden ${className} w-1/3`}>
       <FrenchMap className="absolute right-[-40px] top-[30px] z-[0]" />
       <MiniTitle className="mb-[10px] flex items-center">
         {isDepartmental ? (
@@ -28,7 +28,7 @@ export default function BoxCentres({ summary, className, loading, isNational, is
       {!isNational && loading ? (
         <Loading width="w-1/3" />
       ) : (
-        <ul className="mb-6 list-none">
+        <ul className="mb-6 list-none ">
           {summary.toRegions.map((region) => (
             <React.Fragment key={region.name}>
               <li className="mt-[12px] text-[15px] font-bold leading-[18px] text-[#171725]">{region.name}</li>

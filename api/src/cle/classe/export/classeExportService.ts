@@ -32,8 +32,8 @@ export const findLigneInfoForClasses = async (classes) => {
   return await LigneBusModel.find({ _id: { $in: ligneIds } });
 };
 
-export const findReferentInfoForClasses = async (classes) => {
-  const refIds = classes.map(({ referentClasseIds }) => referentClasseIds).filter(Boolean);
-  const referents = await ReferentModel.find({ _id: { $in: refIds } });
-  return referents.map(serializeReferent);
+export const findChefEtablissementInfoForClasses = async (classes) => {
+  const chefIds = classes.map(({ etablissement }) => etablissement.referentEtablissementIds).filter(Boolean);
+  const chefEtablissement = await ReferentModel.find({ _id: { $in: chefIds } });
+  return chefEtablissement.map(serializeReferent);
 };

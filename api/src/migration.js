@@ -4,32 +4,28 @@ const { up, status, config: migrateMongoConfig } = migrateMongo;
 const { getDb } = require("./mongo");
 const { capture } = require("./sentry");
 
-const CHANGHELOG_LOCK_COLLECTION = "changeloglock";
+const CHANGHELOG_LOCK_COLLECTION = "migrationchangeloglock";
 const CHANGELOG_LOCK_ID = "changeloglock_id";
 
 const runMigrations = async () => {
   const db = getDb();
   migrateMongoConfig.set(migrateMongoConfiguration);
-  db.on("connected", async () => {
-    const isLocked = await isChangelogLocked(db);
-    if (isLocked) {
-      console.error("runMigrations - Changelog is locked. Skipping migrations");
-    }
-    if (!isLocked) {
-      console.log("runMigrations - Connected to MongoDB");
-      try {
-        const statusResult = await status(db);
-        console.log("runMigrations - Migration status:", JSON.stringify(statusResult));
+  const isLocked = await isChangelogLocked(db);
+  if (isLocked) {
+    console.error("runMigrations - Changelog is locked. Skipping migrations");
+    return;
+  }
 
-        await doMigrations(db);
-      } catch (error) {
-        console.error("runMigrations - Migration failed: ", error);
-        capture(error, "Migrations");
-      } finally {
-        await unlockChangelogLock(db);
-      }
-    }
-  });
+  try {
+    const statusResult = await status(db);
+    console.log("runMigrations - Migration status:", JSON.stringify(statusResult));
+
+    await doMigrations(db);
+  } catch (error) {
+    capture(error);
+  } finally {
+    await unlockChangelogLock(db);
+  }
 };
 
 const unlockChangelogLock = async (db) => {
