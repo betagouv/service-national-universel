@@ -14,7 +14,7 @@ export default function EquivalenceCard({ equivalence }) {
 
         <p className="text-xs leading-5 text-gray-400">{equivalence.structureName}</p>
 
-        <Link to={`/equivalence/${equivalence.id}`} className="flex items-center gap-4">
+        <Link to={`/phase2/equivalence/${equivalence._id}`} className="flex items-center gap-4">
           <IconDomain domain={"EQUIVALENCE"} disabled={equivalence.status !== EQUIVALENCE_STATUS.VALIDATED} />
           <p className="text-lg leading-tight font-bold line-clamp-2">{equivalence.type}</p>
         </Link>
