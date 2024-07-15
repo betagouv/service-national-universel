@@ -1,6 +1,6 @@
 import { SENDINBLUE_TEMPLATES } from "snu-lib";
 import { YoungDto } from "snu-lib/src/dto/youngDto";
-import { ContractDto } from "snu-lib/src/dto/ContractDto";
+import { ContractDto } from "snu-lib/src/dto/contractDto";
 
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 import { sendTemplate } from "../sendinblue";
@@ -78,7 +78,6 @@ export async function sendDocumentEmail(options: SendDocumentEmailOptions) {
     emailTemplate = SENDINBLUE_TEMPLATES.young.PHASE_1_ATTESTATION_SWITCH_CLE;
   }
 
-  // @ts-expect-error sendTemplate is vanilla js
   await sendTemplate(emailTemplate, {
     emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
     attachment: [{ content, name: options.fileName }],
