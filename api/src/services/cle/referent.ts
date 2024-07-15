@@ -116,7 +116,7 @@ export const doInviteChefEtablissement = async (chefEtablissement: ReferentDocum
   const name_school = `${etablissement.name}`;
   return await sendTemplate(templateId, {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { cta: inscriptionUrl, toName, name_school, nbreClasseAValider, effectifPrevisionnel },
+    params: { cta: inscriptionUrl, toName, name_school, nbreClasseAValider, effectifPrevisionnel, emailEtablissement: referent.email },
   });
 };
 
