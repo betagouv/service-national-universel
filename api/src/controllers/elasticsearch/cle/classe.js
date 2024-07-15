@@ -142,8 +142,8 @@ async function buildClasseContext(user) {
 const populateWithReferentEtablissementInfo = async (classes, action) => {
   const refIds =
     action === "search"
-      ? [...new Set(classes.map((item) => item._source.etablissement.referentEtablissementIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.etablissement.referentEtablissementIds).filter(Boolean))];
+      ? [...new Set(classes.map((item) => item._source.etablissement?.referentEtablissementIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
 
   const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
   const referentsData = serializeReferents(referents);
