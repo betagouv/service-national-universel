@@ -46,4 +46,11 @@ export interface IReferent extends Document {
 
 export interface ReferentMetadata {
   createdBy: typeof ReferentCreatedBy;
+  isFirstInvitationPending?: boolean;
+  invitationType?: InvitationType;
+}
+
+export enum InvitationType {
+  INSCRIPTION = "INSCRIPTION",
+  CONFIRMATION = "CONFIRMATION",
 }

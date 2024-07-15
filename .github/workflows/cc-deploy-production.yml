@@ -13,11 +13,13 @@ on:
       app_image_tag:
         required: true
         type: string
-
+      antivirus_image_tag:
+        required: true
+        type: string
 jobs:
-
   deploy_image:
     runs-on: ubuntu-latest
+    environment: production # Needed for manual approval before deploy
     strategy:
       matrix:
         include:
@@ -34,6 +36,9 @@ jobs:
           - name: api
             tag: ${{inputs.api_image_tag}}
             remote: CLEVER_CLOUD_GIT_REMOTE_CRONS_DOCKER
+          - name: antivirus
+            tag: ${{inputs.antivirus_image_tag}}
+            remote: CLEVER_CLOUD_GIT_REMOTE_ANTIVIRUS_DOCKER
 
     steps:
       - name: Create SSH key
@@ -46,7 +51,6 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-
 
       - name: Push
         env:

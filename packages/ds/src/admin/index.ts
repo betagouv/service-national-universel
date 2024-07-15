@@ -10,6 +10,7 @@ import Select from "./form/Select/Select";
 // Layout
 import Container from "./layout/Container";
 import Header from "./layout/Header";
+import Breadcrumbs from "./layout/Breadcrumbs";
 import Page from "./layout/Page";
 import Subheader from "./layout/Subheader";
 import Navbar from "./layout/Navbar";
@@ -32,6 +33,7 @@ export {
   // Layout
   Container,
   Header,
+  Breadcrumbs,
   Page,
   Subheader,
   Navbar,

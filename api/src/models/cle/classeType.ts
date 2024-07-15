@@ -1,4 +1,5 @@
 import { Document } from "mongoose";
+import { ReferentCreatedBy } from "snu-lib";
 import { IReferent } from "../referentType";
 
 export type ClasseDocument = IClasse & Document;
@@ -39,4 +40,10 @@ export interface IClasse {
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
+  metadata: ClasseMetadata;
+}
+
+export interface ClasseMetadata {
+  createdBy?: typeof ReferentCreatedBy;
+  numeroDossierDS?: number;
 }

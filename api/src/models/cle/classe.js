@@ -3,7 +3,23 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST, TYPE_CLASSE_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
+const { ReferentCreatedBy } = require("snu-lib");
 const MODELNAME = "classe";
+
+const classeMetadataSchema = {
+  createdBy: {
+    type: ReferentCreatedBy,
+    documentation: {
+      description: "Par quel workflow a été créé la classe",
+    },
+  },
+  numeroDossierDS: {
+    type: Number,
+    documentation: {
+      description: "Numéro de dossier Démarche Simplifiée si la classe a été importé",
+    },
+  },
+};
 
 const Schema = new mongoose.Schema({
   etablissementId: {
@@ -87,7 +103,7 @@ const Schema = new mongoose.Schema({
     type: Number,
     default: 0,
     documentation: {
-      description: "Nombre de places prises de la classe",
+      description: "Nombre de places prises de la classe = nombre d'élèves statut validé",
     },
   },
 
@@ -218,6 +234,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  metadata: {
+    type: classeMetadataSchema,
+    default: {},
+    documentation: {
+      description: "Métadonnées d'un référent",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   deletedAt: { type: Date },
@@ -262,10 +286,6 @@ Schema.virtual("ligne", {
   localField: "ligneId",
   foreignField: "_id",
   justOne: true,
-});
-
-Schema.virtual("isFull").get(function () {
-  return this.totalSeats - this.seatsTaken <= 0;
 });
 
 Schema.virtual("user").set(function (user) {
