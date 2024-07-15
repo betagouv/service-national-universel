@@ -37,19 +37,21 @@ export const statusClassForBadge = (status) => {
 };
 
 export function getRights(user: User, classe, cohort: CohortDto | undefined) {
-  if (!user || !classe || !cohort) return {};
+  if (!user || !classe) return {};
   return {
     canEdit:
       ([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN) ||
       ([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status) && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)),
-    canEditCohort: canUpdateCohort(cohort, user),
-    canEditCenter: canUpdateCenter(cohort, user),
-    canEditPDR: user?.role === ROLES.ADMIN,
-    showCohort: showCohort(cohort, user),
-    showCenter: showCenter(cohort, user),
-    showPDR: showPdr(cohort, user),
     canEditEstimatedSeats: canEditEstimatedSeats(user),
     canEditTotalSeats: canEditTotalSeats(user),
+    canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
+
+    canEditCohort: cohort ? canUpdateCohort(cohort, user) : false,
+    canEditCenter: cohort ? canUpdateCenter(cohort, user) : false,
+    canEditPDR: cohort ? user?.role === ROLES.ADMIN : false,
+    showCohort: cohort ? showCohort(cohort, user) : false,
+    showCenter: cohort ? showCenter(cohort, user) : false,
+    showPDR: cohort ? showPdr(cohort, user) : false,
   };
 }
 
