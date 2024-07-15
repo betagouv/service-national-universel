@@ -18,7 +18,7 @@ const mime = require("mime-types");
 const scanFile = require("../../utils/virusScanner");
 const { generatePdfIntoStream } = require("../../utils/pdf-renderer");
 const { getMimeFromFile } = require("../../utils/file");
-const sendMailQueue = require("../../queues/sendMailQueue");
+const sendMailQueue = require("../../queues/sendMailQueue").default;
 
 router.post("/:type/:template", async (req, res) => {
   try {

@@ -42,4 +42,5 @@ class SendMailQueueService {
   }
 }
 
-module.exports = new SendMailQueueService();
+const service = new SendMailQueueService();
+export default service;
