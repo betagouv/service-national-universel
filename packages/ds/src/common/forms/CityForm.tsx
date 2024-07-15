@@ -52,7 +52,7 @@ export default function CityForm({
           className="col-span-2"
           disabled={true}
         />
-        {!readOnly && (
+        {!disabled && (
           <button
             onClick={resetData}
             className="col-span-2 text-blue-600 hover:text-blue-800 ml-auto py-1 flex gap-2 items-center"

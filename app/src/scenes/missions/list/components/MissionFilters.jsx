@@ -501,8 +501,8 @@ export default function MissionFilters({ filters, setFilters }) {
           <div
             ref={refDropdownControlDistance}
             className={`${
-              dropdownControlDistanceOpen ? "max-h-96" : "max-h-0"
-            } h-auto w-full relative overflow-hidden rounded-2xl bg-white transition-maxHeight duration-200 ease-in-out`}>
+              dropdownControlDistanceOpen ? "max-h-96" : "max-h-0 overflow-hidden"
+            } h-auto w-full relative rounded-2xl bg-white transition-maxHeight duration-200 ease-in-out`}>
             <div className="flex items-center pt-2 justify-center">
               <CloseSvg className="absolute right-4 top-4 cursor-pointer" height={10} width={10} onClick={() => setDropdownControlDistanceOpen(false)} />
             </div>
