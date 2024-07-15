@@ -5,7 +5,7 @@ import sendMailQueue from "./sendMailQueue";
 const queues = [sendMailQueue.queue];
 
 export function initTaskQueues() {
-  sendMailQueue.startWorker();
+  return sendMailQueue.startWorker();
 }
 
 export async function stopQueues() {

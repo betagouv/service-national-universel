@@ -15,20 +15,15 @@ class SendMailQueueService {
         delay: 2000,
       },
     },
-    redis: {
-      enableAutoPipelining: true,
-      commandTimeout: 500,
-    },
   });
 
-  async sendDocumentEmailTask(options: SendDocumentEmailOptions) {
-    const job = await this.queue.add(SEND_DOCUMENT_EMAIL, options);
-    console.log(`Add task ${SEND_DOCUMENT_EMAIL} (${job.id})`);
-    return job;
+  sendDocumentEmailTask(options: SendDocumentEmailOptions) {
+    console.log(`Add task ${SEND_DOCUMENT_EMAIL}`);
+    return this.queue.add(SEND_DOCUMENT_EMAIL, options);
   }
 
-  startWorker() {
-    this.queue.process(SEND_DOCUMENT_EMAIL, async (job) => {
+  async startWorker() {
+    return this.queue.process(SEND_DOCUMENT_EMAIL, async (job) => {
       try {
         console.log(`Start processing task ${SEND_DOCUMENT_EMAIL} (${job.id})`);
         const res = await sendDocumentEmail(job.data);

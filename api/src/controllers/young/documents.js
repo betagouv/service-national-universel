@@ -88,7 +88,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    await sendMailQueue.sendDocumentEmailTask({ young_id: young._id, contract_id, type, template, fileName, switchToCle });
+    sendMailQueue.sendDocumentEmailTask({ young_id: young._id, contract_id, type, template, fileName, switchToCle });
 
     res.status(200).send({ ok: true });
   } catch (e) {

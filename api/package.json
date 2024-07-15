@@ -10,7 +10,9 @@
   },
   "scripts": {
     "//": "dev sleep 2 seconds to let lib compile",
-    "dev": "sleep 2 && nodemon",
+    "dev": "sleep 2 && concurrently -k 'npm run dev:*'",
+    "dev:api": "nodemon",
+    "dev:tasks": "RUN_TASKS=true PORT=8087 nodemon",
     "debug": "DEBUG=express:* nodemon",
     "test": "jest --silent --runInBand --detectOpenHandles --testTimeout=30000",
     "test:debug": "jest --detectOpenHandles --forceExit --testTimeout=30000",
@@ -87,6 +89,7 @@
     "@types/bull": "^4.10.0",
     "@types/jest": "^29.5.12",
     "@types/pdfkit": "^0.13.4",
+    "concurrently": "^8.2.2",
     "csv-parser": "^3.0.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
