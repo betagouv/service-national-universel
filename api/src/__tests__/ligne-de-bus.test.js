@@ -173,6 +173,7 @@ describe("Meeting point", () => {
 
     it("should return 500 when there's an error", async () => {
       const passport = require("passport");
+      const previous = passport.user;
       passport.user = null;
       jest.spyOn(LigneBusModel, "find").mockImplementation(() => {
         throw new Error("test error");
@@ -185,6 +186,7 @@ describe("Meeting point", () => {
       expect(res.body.code).toBe("SERVER_ERROR");
 
       jest.spyOn(LigneBusModel, "find").mockRestore();
+      passport.user = previous;
     });
   });
   describe("GET /:id", () => {
@@ -850,11 +852,16 @@ describe("Meeting point", () => {
 
   describe("POST /elasticsearch/lignebus/export", () => {
     it("should return 200 when export is successful", async () => {
+      const user = { _id: "123", role: "admin" };
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = user;
       const res = await request(getAppHelper())
         .post("/elasticsearch/lignebus/export")
         .send({ filters: {}, exportFields: ["busId"] });
       expect(res.status).toBe(200);
       expect(res.body.data.length).toBeGreaterThan(0);
+      passport.user = previous;
     });
   });
 });
