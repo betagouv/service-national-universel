@@ -65,29 +65,12 @@ export default function List() {
     <div className="bg-white p-[1rem] md:p-[3rem] md:m-10 md:pb-[2rem] md:rounded-xl md:shadow-xl">
       {/* BEGIN HEADER */}
       <div className="space-y-6">
-        <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Trouvez une mission d&apos;intérêt général</h1>
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-normal text-gray-700">
-            Vous disposez d’un an pour débuter votre phase d’engagement et de deux ans pour la terminer.{" "}
-            <a
-              className="font-medium underline hover:text-gray-700 hover:underline"
-              href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
-              target="_blank"
-              rel="noreferrer">
-              En savoir plus
-            </a>
-            .
-            <br />
-            Astuce : si les missions proposées ne correspondent pas à votre zone géographique, pensez à{" "}
-            <Link className="font-medium underline hover:text-gray-700 hover:underline" to="/account">
-              vérifier votre adresse
-            </Link>
-            .
-          </p>
-          <Link className="hidden md:block" to="/preferences">
+        <h1 className="text-2xl md:text-4xl text-center font-bold text-gray-800">Trouvez un Engagement</h1>
+        <div className="flex items-center justify-center">
+          <Link className="block" to="/preferences">
             <div className="group flex items-center gap-1 rounded-[10px] border-[1px] border-blue-700 py-2.5 px-3 hover:bg-blue-700 hover:text-[#ffffff]">
               <HiOutlineAdjustments className="text-blue-700 group-hover:text-[#ffffff]" />
-              <div className="flex-1 text-sm text-blue-700 group-hover:text-[#ffffff]">Renseigner mes préférences</div>
+              <div className="flex-1 text-sm text-blue-700 group-hover:text-[#ffffff]">Mes préférences</div>
             </div>
           </Link>
         </div>
