@@ -43,7 +43,7 @@ const Phase2 = lazy(() => import("./scenes/phase2"));
 const Phase3 = lazy(() => import("./scenes/phase3"));
 const Preferences = lazy(() => import("./scenes/preferences"));
 
-export const Espace = () => {
+const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isModalRIOpen, setIsModalRIOpen] = useState(false);
 
@@ -122,3 +122,5 @@ export const Espace = () => {
     </>
   );
 };
+
+export default Espace;

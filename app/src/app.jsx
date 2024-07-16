@@ -19,6 +19,7 @@ import { YOUNG_STATUS } from "./utils";
 import { inscriptionModificationOpenForYoungs, isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { cohortsInit, getCohort } from "./utils/cohorts";
+import FallbackComponent from "./components/FallBackComponent";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
 const AllEngagements = lazy(() => import("./scenes/all-engagements/index"));
@@ -42,15 +43,9 @@ const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 initSentry();
 initApi();
 
-function FallbackComponent() {
-  return <></>;
-}
-
-const myFallback = <FallbackComponent />;
-
 export default function App() {
   return (
-    <Sentry.ErrorBoundary fallback={myFallback}>
+    <Sentry.ErrorBoundary fallback={FallbackComponent}>
       <QueryClientProvider client={queryClient}>
         <Router history={history}>
           <ScrollToTop />
