@@ -122,8 +122,9 @@ export default function GeneralInfos({
           <Label title="Coloration souhaitée" name="coloration" tooltip="Les colorations définitives seront confirmées au moment des affectations." />
           <Select
             className="mb-3"
-            isActive={edit}
+            isActive={edit && rights.canEditColoration}
             readOnly={!edit}
+            disabled={!rights.canEditColoration}
             placeholder={"Choisissez une coloration"}
             options={colorOptions}
             closeMenuOnSelect={true}
