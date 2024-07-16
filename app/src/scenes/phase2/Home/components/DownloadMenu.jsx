@@ -3,8 +3,8 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { fetchAttestation } from "../../repo";
 import { download } from "snu-lib";
-import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-import { HiChevronDown, HiDownload, HiMail } from "react-icons/hi";
+import { PopoverPanel } from "@headlessui/react";
+import { HiDownload, HiMail } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
 export default function DownloadMenu({ template }) {

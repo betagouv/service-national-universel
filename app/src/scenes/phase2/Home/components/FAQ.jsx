@@ -27,7 +27,7 @@ export function FAQ() {
           rel="noreferrer"
           className="flex justify-between border rounded-xl p-3 items-center gap-4 bg-white shadow-sm hover:text-gray-800">
           <p className="line-clamp-2">{question.label}</p>
-          <HiExternalLink className="text-xl text-gray-400 flex-none" />
+          <HiExternalLink className="text-xl text-gray-500 flex-none" />
         </a>
       ))}
     </div>

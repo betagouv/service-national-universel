@@ -5,6 +5,7 @@ import { fetchApplications, fetchEquivalences } from "../../repo";
 import Loader from "@/components/Loader";
 import EquivalenceCard from "../../components/EquivalenceCard";
 import ApplicationCard from "../../components/ApplicationCard";
+import { YOUNG_STATUS_PHASE2 } from "snu-lib";
 
 export function MesEngagements() {
   const { young } = useSelector((state) => state.Auth);
@@ -16,20 +17,27 @@ export function MesEngagements() {
   }
   if (equivalences.isError || applications.isError) {
     return (
-      <div className="mt-8 mb-4 bg-white rounded-lg shadow-sm p-12">
-        <p className="text-center text-gray-500">Erreur lors du chargement des engagements&nbsp;🥲</p>
+      <div className="mt-8 mb-4 max-w-6xl px-3 mx-auto">
+        <div className="p-12 bg-white rounded-lg shadow-sm">
+          <p className="text-center text-gray-500">Erreur lors du chargement des engagements&nbsp;🥲</p>
+        </div>
       </div>
     );
   }
   if ([...equivalences.data, ...applications.data].length === 0) {
     return (
-      <div className="mt-8 mb-4 bg-white rounded-lg shadow-sm p-12">
-        <p className="text-center text-gray-500">Vous n’avez aucun engagement en cours&nbsp;🥲</p>
+      <div className="mt-8 mb-4 max-w-6xl px-3 mx-auto">
+        <div className="p-12 bg-white rounded-lg shadow-sm">
+          <p className="text-center text-gray-500">Vous n’avez aucun engagement en cours&nbsp;🥲</p>
+        </div>
       </div>
     );
   }
 
-  const cards = [...applications.data, ...equivalences.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).filter((e, i) => i < 5);
+  const cards = [...applications.data, ...equivalences.data]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .filter((engagement) => (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? engagement.status === "VALIDATED" : true))
+    .filter((e, i) => i < 5);
 
   return (
     <div className="md:max-w-6xl mx-auto px-3 flex gap-4 snap-x snap-mandatory overflow-x-auto overflow-y-hidden pb-3 mt-[1rem] md:mt-[2rem]">
