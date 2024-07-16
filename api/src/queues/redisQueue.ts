@@ -1,20 +1,37 @@
+import config from "config";
 import { BullMonitorExpress } from "@bull-monitor/express";
 import { BullAdapter } from "@bull-monitor/root/dist/bull-adapter";
-import sendMailQueue from "./sendMailQueue";
-import Bull from "bull";
+import { initQueue, initWorker } from "./sendMailQueue";
+import { Queue, Worker } from "bullmq";
+import Redis from "ioredis";
 
-const queues: Bull.Queue[] = [];
+const queues: Queue[] = [];
+const workers: Worker[] = [];
 
-export function initQueues() {
-  queues.push(sendMailQueue.initQueue());
+function initRedisConnection() {
+  const opts = {
+    enableOfflineQueue: false,
+    maxRetriesPerRequest: null,
+  };
+  return new Redis(config.get("REDIS_URL"), opts);
 }
 
-export function startQueues() {
-  return sendMailQueue.startWorker();
+export function initQueues() {
+  const connection = initRedisConnection();
+  queues.push(initQueue(connection));
 }
 
 export async function closeQueues() {
   return Promise.all(queues.map((q) => q.close()));
+}
+
+export function initWorkers() {
+  const connection = initRedisConnection();
+  workers.push(initWorker(connection));
+}
+
+export async function closeWorkers() {
+  return Promise.all(workers.map((w) => w.close()));
 }
 
 export async function initMonitor() {

@@ -23,7 +23,7 @@ const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
 const basicAuth = require("express-basic-auth");
-const { initQueues, initMonitor, startQueues, closeQueues } = require("./queues/redisQueue");
+const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers } = require("./queues/redisQueue");
 
 async function runTasks() {
   initSentry();
@@ -33,7 +33,7 @@ async function runTasks() {
     scheduleCrons();
   }
   initQueues();
-  startQueues();
+  initWorkers();
 
   const app = express();
 
@@ -55,7 +55,7 @@ async function runTasks() {
 
   function onSignal() {
     console.log("server is starting cleanup");
-    return Promise.all([closeDB(), closeQueues()]);
+    return Promise.all([closeDB(), closeQueues(), closeWorkers()]);
   }
 
   function onShutdown() {
