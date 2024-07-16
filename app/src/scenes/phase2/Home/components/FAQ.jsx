@@ -18,21 +18,18 @@ export function FAQ() {
   ];
 
   return (
-    <section className="px-4 md:px-24 mt-12">
-      <h2 className="text-center font-bold text-4xl m-0 mt-12">Questions fréquentes</h2>
-      <div className="mt-12 mx-auto max-w-5xl grid grid-rows-3 md:grid-rows-1 md:grid-cols-3 gap-4">
-        {questions.map((question) => (
-          <a
-            key={question.url}
-            href={question.url}
-            target="_blank"
-            rel="noreferrer"
-            className="flex justify-between border rounded-xl p-3 items-center gap-4 bg-white shadow-sm hover:text-gray-800">
-            <p>{question.label}</p>
-            <HiExternalLink className="text-xl text-gray-400 flex-none" />
-          </a>
-        ))}
-      </div>
-    </section>
+    <div className="mt-12 mx-auto max-w-5xl grid grid-rows-3 lg:grid-rows-1 lg:grid-cols-3 gap-4">
+      {questions.map((question) => (
+        <a
+          key={question.url}
+          href={question.url}
+          target="_blank"
+          rel="noreferrer"
+          className="flex justify-between border rounded-xl p-3 items-center gap-4 bg-white shadow-sm hover:text-gray-800">
+          <p className="line-clamp-2">{question.label}</p>
+          <HiExternalLink className="text-xl text-gray-400 flex-none" />
+        </a>
+      ))}
+    </div>
   );
 }

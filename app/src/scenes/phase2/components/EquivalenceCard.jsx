@@ -6,19 +6,19 @@ import { statusColors } from "../engagement.utils";
 
 export default function EquivalenceCard({ equivalence }) {
   return (
-    <div className="bg-white rounded-xl border  w-72 md:w-96 flex-none snap-always snap-center first:ml-4 last:mr-4">
-      <p className="h-8 p-2 text-xs bg-gray-50 border-b-[1px] rounded-t-xl">✏️ Vous avez ajouté cet engagement</p>
+    <Link to={`/phase2/equivalence/${equivalence.id}`} className="bg-white rounded-xl border  w-72 md:w-96 flex-none snap-always snap-center">
+      <p className="h-8 p-2 text-xs bg-gray-50 border-b-[1px] rounded-t-xl text-gray-800">✏️ Vous avez ajouté cet engagement</p>
 
-      <div className="h-36 px-3 py-2.5 flex flex-col justify-between">
+      <div className="h-40 p-3 flex flex-col justify-between">
         <p className={`text-xs rounded-full px-2 py-1 w-fit ${statusColors[equivalence.status]}`}>{translateEquivalenceStatus(equivalence.status)}</p>
 
         <p className="text-xs leading-5 text-gray-400">{equivalence.structureName}</p>
 
-        <Link to={`/equivalence/${equivalence.id}`} className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
           <IconDomain domain={"EQUIVALENCE"} disabled={equivalence.status !== EQUIVALENCE_STATUS.VALIDATED} />
-          <p className="text-lg leading-tight font-bold line-clamp-2">{equivalence.type}</p>
-        </Link>
+          <p className="text-lg leading-tight font-bold line-clamp-2 text-gray-800">{equivalence.type}</p>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
