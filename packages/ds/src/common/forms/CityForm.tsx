@@ -24,7 +24,6 @@ interface Props {
 
 export default function CityForm({
   label = "Rechercher une ville",
-  readOnly = false,
   data,
   updateData,
   query,
@@ -52,15 +51,13 @@ export default function CityForm({
           className="col-span-2"
           disabled={true}
         />
-        {!disabled && (
-          <button
-            onClick={resetData}
-            className="col-span-2 text-blue-600 hover:text-blue-800 ml-auto py-1 flex gap-2 items-center"
-          >
-            <RiSearchLine />
-            Rechercher une nouvelle ville
-          </button>
-        )}
+        <button
+          onClick={resetData}
+          className="col-span-2 text-blue-600 hover:text-blue-800 ml-auto py-1 flex gap-2 items-center"
+        >
+          <RiSearchLine />
+          Rechercher une nouvelle ville
+        </button>
       </div>
     );
   }
