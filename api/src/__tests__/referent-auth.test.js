@@ -1,6 +1,9 @@
 const request = require("supertest");
+
+const { ROLES, SUB_ROLES } = require("snu-lib");
+
 const getAppHelper = require("./helpers/app");
-const getNewReferentFixture = require("./fixtures/referent");
+const { getNewReferentFixture } = require("./fixtures/referent");
 const getNewStructureFixture = require("./fixtures/structure");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 const { dbConnect, dbClose } = require("./helpers/db");
@@ -47,6 +50,21 @@ describe("Referent", () => {
       const user = await createReferentHelper({ ...fixture, password: "bar", email: fixture.email.toLowerCase() });
       const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "bar" });
       expect(res.status).toBe(200);
+      expect(res.body.redirect).toBeUndefined();
+    });
+    it("should return 200 with redirect when user is admin cle with reinscription", async () => {
+      const user = await createReferentHelper(
+        getNewReferentFixture({
+          password: "bar",
+          role: ROLES.ADMINISTRATEUR_CLE,
+          subRole: SUB_ROLES.referent_etablissement,
+          invitationToken: "validToken",
+        }),
+      );
+      const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "bar" });
+      expect(res.status).toBe(200);
+      expect(res.body.code).toBe("VERIFICATION_REQUIRED");
+      expect(res.body.redirect).toBe(`/verifier-mon-compte?token=${user.invitationToken}`);
     });
   });
   describe("POST /referent/signup", () => {

@@ -10,7 +10,6 @@ import { CohortDto } from "snu-lib/src/dto/cohortDto";
 import { User } from "@/types";
 import { ClasseDto } from "snu-lib/src/dto/classeDto";
 import { Rights } from "./types";
-import Field from "@/components/forms/Field";
 
 type SelectOption = {
   value: string;
@@ -56,19 +55,14 @@ export default function GeneralInfos({
     value: CLE_FILIERE_LIST[value],
     label: CLE_FILIERE_LIST[value],
   }));
-  const gradeOptions = Object.keys(CLE_GRADE_LIST).map((value) => ({
-    value: CLE_GRADE_LIST[value],
-    label: translateGrade(CLE_GRADE_LIST[value]),
+  const gradeOptions = CLE_GRADE_LIST.filter((value) => value !== "CAP").map((value) => ({
+    value: value,
+    label: translateGrade(value),
   }));
   const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
     value: TYPE_CLASSE_LIST[value],
     label: translate(TYPE_CLASSE_LIST[value]),
   }));
-  const trimesterOptions = [
-    { value: "T1", label: "T1" },
-    { value: "T2", label: "T2" },
-    { value: "T3", label: "T3" },
-  ];
 
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
@@ -101,7 +95,7 @@ export default function GeneralInfos({
             readOnly={!edit}
             active={edit}
           />
-          <Label title="Effectif prévisionnel" name="estimatedSeats" tooltip="Importé de démarche simplifiée et modifiable par le chef d'établissement jusqu'au 31 aout 2024" />
+          <Label title="Effectif prévisionnel" name="estimatedSeats" tooltip="Nombre d'élèves prévisionnel de la classe" />
           <InputText
             name="estimatedSeats"
             className="flex-1 mb-3"
@@ -112,7 +106,7 @@ export default function GeneralInfos({
             active={edit}
             error={errors.estimatedSeats}
           />
-          <Label title="Effectif ajusté" name="totalSeats" tooltip="Modifiable par le référent de classe et le chef d'établissement jusqu'au 20 septembre" />
+          <Label title="Effectif ajusté" name="totalSeats" tooltip="Nombre d'élèves attendu sur la classe. Vous ne pouvez le modifier qu'à la baisse" />
           <InputText
             name="totalSeats"
             className="flex-1 mb-3"
@@ -123,7 +117,7 @@ export default function GeneralInfos({
             active={edit}
             error={errors.totalSeats}
           />
-          <Label title="Effectif inscrit" name="validatedYoung" tooltip="Non modifiable - calculé sur la base du nombre d'élèves inscrits" />
+          <Label title="Effectif inscrit" name="validatedYoung" tooltip="Nombre d'élèves validés inscrit sur la classe" />
           <InputText name="validatedYoung" className="flex-1 mb-3" value={validatedYoung.toString()} disabled />
           <Label title="Coloration souhaitée" name="coloration" tooltip="Les colorations définitives seront confirmées au moment des affectations." />
           <Select
@@ -138,31 +132,6 @@ export default function GeneralInfos({
               setClasse({ ...classe, coloration: options.value });
             }}
             error={errors.coloration}
-          />
-          <Label title="Trimestre de préférence pour le séjour" name="trimester" />
-          <Select
-            className="mb-3"
-            isActive={edit}
-            readOnly={!edit}
-            placeholder={"Choisissez un trimestre"}
-            options={trimesterOptions}
-            closeMenuOnSelect={true}
-            value={classe?.trimester ? { value: classe?.trimester, label: classe?.trimester } : null}
-            onChange={(options) => {
-              setClasse({ ...classe, trimester: options.value });
-            }}
-            error={errors.trimester}
-          />
-          <Field
-            name="comments"
-            label="Contraintes spécifiques"
-            errors={errors}
-            className="text-gray-900  w-full mb-3"
-            placeholder="Précisez en quelques mots"
-            handleChange={(e) => setClasse({ ...classe, comments: e.target.value })}
-            value={classe?.comments}
-            readOnly={!edit}
-            type="textarea"
           />
         </div>
         <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>

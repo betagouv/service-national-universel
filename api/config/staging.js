@@ -6,7 +6,7 @@ if (!secretKey) {
   throw new Error("SCW_SECRET_KEY is required to get configuration secrets");
 }
 
-const REVISION = 11;
+const REVISION = 13;
 const secrets = getSecrets(secretKey, PROD_PROJECT_ID, "snu-staging", REVISION);
 
 module.exports = {

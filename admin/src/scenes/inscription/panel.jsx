@@ -120,7 +120,7 @@ export default function InscriptionPanel({ onChange, value }) {
             </Info>
           )}
           <Info title="Pièce d’identité" id={value._id}>
-            {(young?.files.cniFiles || []).map((e, i) => (
+            {(young?.files?.cniFiles || []).map((e, i) => (
               <DownloadButton
                 key={i}
                 source={() => api.get(`/young/${value._id}/documents/cniFiles/${e._id}`)}

@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import dayjs from "dayjs";
 import Input from "./input";
 
-export default function DatePicker({ initialValue, onChange, disabled = false, state = "default", displayError = false }) {
+export default function DatePicker({ initialValue, onChange, disabled = false, state = "default", displayError = false, errorText }) {
   const [day, setDay] = useState(initialValue ? initialValue.getDate() : null);
   const [month, setMonth] = useState(initialValue ? initialValue.getMonth() + 1 : null);
   const [year, setYear] = useState(initialValue ? initialValue.getFullYear() : null);
   const maxYear = new Date().getFullYear();
-  const minYear = 0;
+  const minYear = 1990;
   const error = state == "error" || displayError;
 
   const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
@@ -80,6 +80,11 @@ export default function DatePicker({ initialValue, onChange, disabled = false, s
         </div>
       </div>
       {displayError && <div className="h-8">{initialValue && !dayjs(initialValue).isValid() && <span className="text-sm text-red-500">La date n'est pas valide</span>}</div>}
+      {error && (
+        <div className="h-8">
+          <span className="text-sm text-red-500">{errorText}</span>
+        </div>
+      )}
     </>
   );
 }

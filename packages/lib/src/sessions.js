@@ -21,6 +21,7 @@ const sessions2024CohortNames = [
   "Juillet 2024 - Martinique",
   "Juillet 2024 - Mayotte",
   "Juillet 2024 - PF",
+  "Juillet Guyane 2 2024",
   "CLE 23-24",
   "CLE mars 2024 1",
   "CLE mars 2024 2",
@@ -31,6 +32,8 @@ const sessions2024CohortNames = [
   "CLE GE1 2024",
   "CLE GE2 2024",
   "Toussaint 2024",
+  "Toussaint 2024 - La Réunion",
+  "Octobre 2024 - Nouvelle-Calédonie",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
@@ -68,6 +71,7 @@ const COHESION_STAY_START = {
   "Juillet 2024 - Martinique": new Date("07/01/2024"),
   "Juillet 2024 - Mayotte": new Date("07/01/2024"),
   "Juillet 2024 - PF": new Date("07/08/2024"),
+  "Juillet Guyane 2 2024": new Date("07/20/2024"),
   "CLE 23-24": new Date("01/01/2024"),
   "CLE mars 2024 1": new Date("03/11/2024"),
   "CLE mars 2024 2": new Date("03/25/2024"),
@@ -78,6 +82,8 @@ const COHESION_STAY_START = {
   "CLE GE1 2024": new Date("04/22/2024"),
   "CLE GE2 2024": new Date("06/17/2024"),
   "Toussaint 2024": new Date("10/21/2024"),
+  "Toussaint 2024 - La Réunion": new Date("10/14/2024"),
+  "Octobre 2024 - Nouvelle-Calédonie": new Date("10/07/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -104,6 +110,7 @@ const START_DATE_SESSION_PHASE1 = {
   "Juillet 2024 - Martinique": new Date("07/01/2024"),
   "Juillet 2024 - Mayotte": new Date("07/01/2024"),
   "Juillet 2024 - PF": new Date("07/08/2024"),
+  "Juillet Guyane 2 2024": new Date("07/20/2024"),
   "CLE 23-24": new Date("01/01/2024"),
   "CLE février 2024 Réunion": new Date("02/12/2024"),
   "CLE mars 2024 1": new Date("03/11/2024"),
@@ -114,6 +121,8 @@ const START_DATE_SESSION_PHASE1 = {
   "CLE GE1 2024": new Date("04/22/2024"),
   "CLE GE2 2024": new Date("06/17/2024"),
   "Toussaint 2024": new Date("10/21/2024"),
+  "Toussaint 2024 - La Réunion": new Date("10/14/2024"),
+  "Octobre 2024 - Nouvelle-Calédonie": new Date("10/07/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -143,6 +152,7 @@ const COHESION_STAY_END = {
   "Juillet 2024 - Martinique": new Date("07/12/2024"),
   "Juillet 2024 - Mayotte": new Date("07/12/2024"),
   "Juillet 2024 - PF": new Date("07/20/2024"),
+  "Juillet Guyane 2 2024": new Date("08/02/2024"),
   "CLE 23-24": new Date("31/12/2024"),
   "CLE février 2024 Réunion": new Date("02/24/2024"),
   "CLE mars 2024 1": new Date("03/23/2024"),
@@ -153,6 +163,9 @@ const COHESION_STAY_END = {
   "CLE GE1 2024": new Date("05/04/2024"),
   "CLE GE2 2024": new Date("06/28/2024"),
   "Toussaint 2024": new Date("10/31/2024"),
+  "Toussaint 2024 - La Réunion": new Date("10/26/2024"),
+  "Toussaint 2024 - Nouvelle-Calédonie": new Date("10/18/2024"),
+  "Octobre 2024 - Nouvelle-Calédonie": new Date("10/18/2024"),
 };
 
 // @todo: to be removed after adding old cohorts in bd
@@ -293,11 +306,11 @@ function hasAccessToReinscription(young) {
       return false;
     }
 
-    if([YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)){
-      return false
+    if ([YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+      return false;
     }
 
-    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN, ].includes(young.status)) {
+    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
       return true;
     }
 
