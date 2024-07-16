@@ -14,7 +14,7 @@ export async function fetchApplications(youngId) {
   });
   const { ok, data, error } = await res.json();
   if (!ok) throw new Error(error.message);
-  return data;
+  return data.map((e) => ({ ...e, engagementType: "mig" }));
 }
 
 export async function fetchEquivalences(youngId) {
@@ -23,7 +23,7 @@ export async function fetchEquivalences(youngId) {
   });
   const { ok, data, error } = await res.json();
   if (!ok) throw new Error(error.message);
-  return data;
+  return data.map((e) => ({ ...e, engagementType: "equivalence" }));
 }
 
 export async function fetchAttestation(youngId, template, sendEmail) {

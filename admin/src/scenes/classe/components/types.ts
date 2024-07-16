@@ -8,6 +8,7 @@ export type Rights = {
   showPDR: boolean;
   canEditEstimatedSeats: boolean;
   canEditTotalSeats: boolean;
+  canEditColoration: boolean;
 };
 
 export type InfoBus = {
