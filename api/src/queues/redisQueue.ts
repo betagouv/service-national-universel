@@ -36,7 +36,7 @@ export async function closeWorkers() {
 
 export async function initMonitor() {
   const monitor = new BullMonitorExpress({
-    queues: queues.map((q) => new BullAdapter(q)),
+    queues: queues.map((q: any) => new BullAdapter(q)),
     metrics: {
       collectInterval: { hours: 1 },
       maxMetrics: 100,
