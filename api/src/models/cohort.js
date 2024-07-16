@@ -375,7 +375,8 @@ Schema.virtual("isReInscriptionOpen").get(function () {
   return this.getIsReInscriptionOpen();
 });
 
-Schema.pre("save", function (next) {
+Schema.pre("save", function (next, params) {
+  this.fromUser = params?.fromUser;
   this.updatedAt = Date.now();
   next();
 });
