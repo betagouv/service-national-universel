@@ -8,6 +8,7 @@ import CohortModel from "../../models/cohort";
 import config from "config";
 import { ERRORS } from "../../utils/errors";
 import { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } from "./utils";
+import { withPipeStream } from "../utils";
 
 import type PDFDocument from "pdfkit";
 
@@ -51,12 +52,12 @@ async function fetchDataForYoung(young) {
 
 function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter) {
   if (!cohesionCenter) {
-    throw { error: ERRORS.NO_COHESION_CENTER_FOUND };
+    throw new Error(ERRORS.NO_COHESION_CENTER_FOUND);
   }
   const cohortEndDate = getCohortEndDate(young, cohort);
 
   const ministresData = getMinistres(cohortEndDate);
-  if (!ministresData) throw { error: "NO_MINISTRES_FOUND" };
+  if (!ministresData) throw new Error("NO_MINISTRES_FOUND");
   const template = ministresData.template;
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   const departureDate = getDepartureDateSession(session, young, cohort);
@@ -101,9 +102,9 @@ async function generateCertifPhase1(outStream, young) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument();
-  doc.pipe(outStream);
-  render(doc, young, session, cohort, cohesionCenter);
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    render(doc, young, session, cohort, cohesionCenter);
+  });
   console.timeEnd("RENDERING " + random);
 }
 
@@ -111,12 +112,12 @@ function generateBatchCertifPhase1(outStream, youngs, session, cohort, cohesionC
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument({ autoFirstPage: false });
-  doc.pipe(outStream);
-  for (const young of youngs) {
-    doc.addPage();
-    render(doc, young, session, cohort, cohesionCenter);
-  }
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    for (const young of youngs) {
+      doc.addPage();
+      render(doc, young, session, cohort, cohesionCenter);
+    }
+  });
   console.timeEnd("RENDERING " + random);
 }
 
