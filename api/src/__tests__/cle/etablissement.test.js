@@ -10,7 +10,7 @@ const { ROLES, SUB_ROLES } = require("snu-lib");
 const passport = require("passport");
 const { dbConnect, dbClose } = require("../helpers/db");
 const { ObjectId } = require("mongoose").Types;
-const { CleClasseModel } = require("../../models");
+const { ClasseModel } = require("../../models");
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -119,7 +119,7 @@ describe("PUT /cle/etablissement/:id", () => {
         department: "Ille-et-Vilaine",
       });
 
-    const updatedClasse = await CleClasseModel.findById(classeId);
+    const updatedClasse = await ClasseModel.findById(classeId);
 
     expect(res.status).toBe(200);
     expect(res.body.data.region).toBe("Bretagne");

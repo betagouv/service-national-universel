@@ -25,8 +25,10 @@ export { default as TagsModel } from "./tags";
 export { default as WaitingListModel } from "./waitingList";
 export { default as YoungModel } from "./young";
 
-export { default as CleClasseModel } from "./cle/classe";
-export { default as CleEtablissementModel } from "./cle/etablissement";
+export { default as ClasseModel } from "./cle/classe";
+export type { IClasse, ClasseDocument } from "./cle/classeType";
+export { default as EtablissementModel } from "./cle/etablissement";
+export type { IEtablissement, EtablissementDocument } from "./cle/etablissementType";
 
 export { default as ImportPlanTransportModel } from "./PlanDeTransport/importPlanTransport";
 export { default as LigneBusModel } from "./PlanDeTransport/ligneBus";

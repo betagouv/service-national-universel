@@ -1,9 +1,11 @@
-import { IAppelAProjet } from "./appelAProjetType";
-import { IEtablissement } from "../../models/cle/etablissementType";
-import { buildUniqueClasseId, buildUniqueClasseKey, findClasseByUniqueKeyAndUniqueId } from "../classe/classeService";
-import { IClasse } from "../../models/cle/classeType";
-import { CleClasseModel } from "../../models";
 import { ClasseSchoolYear, ReferentCreatedBy, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+
+import {} from "../../models/cle/classeType";
+import { ClasseModel, IClasse, IEtablissement } from "../../models";
+
+import { buildUniqueClasseId, buildUniqueClasseKey, findClasseByUniqueKeyAndUniqueId } from "../classe/classeService";
+
+import { IAppelAProjet } from "./appelAProjetType";
 
 export class AppelAProjetClasseService {
   classes: Partial<IClasse & { numberDS: number; uai: string; operation: "create" | "none" }>[] = [];
@@ -29,7 +31,7 @@ export class AppelAProjetClasseService {
       formattedClasse = this.mapAppelAProjetToClasse(appelAProjet.classe, savedEtablissement, uniqueClasseId, uniqueClasseKey, [referentClasseId]);
       let createdClasse;
       if (save) {
-        createdClasse = await CleClasseModel.create({
+        createdClasse = await ClasseModel.create({
           ...formattedClasse,
           metadata: { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, numeroDossierDS: appelAProjet.numberDS },
         });

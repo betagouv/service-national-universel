@@ -1,30 +1,25 @@
-import { CleEtablissementModel, ReferentModel } from "../../models";
-import { EtablissementDocument } from "../../models/cle/etablissementType";
 import { randomUUID } from "node:crypto";
+import { addDays } from "date-fns";
+import crypto from "crypto";
+import config from "config";
+
+import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType } from "snu-lib";
+
+import { ERRORS } from "../../utils";
+import { sendTemplate } from "../../sendinblue";
+import { inSevenDays } from "../../utils";
+import { capture } from "../../sentry";
+
+import { EtablissementModel, ReferentModel, EtablissementDocument } from "../../models";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { UserDto } from "snu-lib/src/dto";
 import { IReferent, ReferentDocument } from "../../models/referentType";
-import { ROLES, SUB_ROLES } from "snu-lib";
-
-const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { ERRORS } = require("../../utils");
-const { sendTemplate } = require("../../sendinblue");
-const config = require("config");
-const { inSevenDays } = require("../../utils");
-const { capture } = require("../../sentry");
-const datefns = require("date-fns");
 
 export interface InvitationResult {
   to: string;
   status: string;
   details?: string;
-  type?: InvitationType;
-}
-
-export enum InvitationType {
-  INSCRIPTION = "INSCRIPTION",
-  CONFIRMATION = "CONFIRMATION",
+  type?: typeof InvitationType;
 }
 
 export const findOrCreateReferent = async (referent, { etablissement, role, subRole }) => {
@@ -97,7 +92,7 @@ export const doInviteChefEtablissement = async (chefEtablissement: ReferentDocum
   const referent: IReferent = await generateInvitationTokenAndSaveReferent(chefEtablissement, user);
   const invitationType = referent.metadata.invitationType;
 
-  const etablissement: EtablissementDocument = await CleEtablissementModel.findOne({ referentEtablissementIds: referent._id });
+  const etablissement: EtablissementDocument = await EtablissementModel.findOne({ referentEtablissementIds: referent._id });
   if (!etablissement) {
     throw new Error("Etablissement not found for referent : " + referent._id);
   }
@@ -124,7 +119,7 @@ async function generateInvitationTokenAndSaveReferent(chefEtablissement: Referen
   const invitationToken = randomUUID();
   chefEtablissement.set({
     invitationToken,
-    invitationExpires: datefns.addDays(new Date(), 50),
+    invitationExpires: addDays(new Date(), 50),
   });
   //@ts-ignore
   await chefEtablissement.save({ fromUser: user });
