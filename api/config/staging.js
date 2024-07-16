@@ -16,5 +16,6 @@ module.exports = {
   ADMIN_URL: "https://admin.beta-snu.dev",
   SENTRY_PROFILE_SAMPLE_RATE: 0.8,
   SENTRY_TRACING_SAMPLE_RATE: 0.1,
+  TASK_QUEUE_PREFIX: "staging",
   ...secrets,
 };

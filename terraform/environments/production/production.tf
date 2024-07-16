@@ -170,7 +170,7 @@ resource "scaleway_container" "tasks" {
   memory_limit   = 2048
   min_scale      = 0
   max_scale      = 1
-  privacy        = "private"
+  privacy        = "public"
   protocol       = "http1"
   deploy         = true
   http_option    = "redirected"

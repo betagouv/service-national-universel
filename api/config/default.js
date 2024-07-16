@@ -58,6 +58,7 @@ module.exports = {
   API_DEMARCHE_SIMPLIFIEE_TOKEN: undefined,
   PM2_SLACK_URL: undefined,
   API_ANTIVIRUS_KEY: undefined,
+  TASK_QUEUE_PREFIX: undefined,
   TASK_MONITOR_ENABLE_AUTH: true,
   TASK_MONITOR_USER: undefined,
   TASK_MONITOR_SECRET: undefined,

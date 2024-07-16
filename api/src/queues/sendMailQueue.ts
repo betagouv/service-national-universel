@@ -3,7 +3,7 @@ import Queue from "bull";
 import { capture } from "../sentry";
 import { sendDocumentEmail, SendDocumentEmailOptions } from "../young/youngSendDocumentEmailService";
 
-const MAIL_QUEUE = `${config.get("ENVIRONMENT")}_send_mail`;
+const MAIL_QUEUE = `${config.get("TASK_QUEUE_PREFIX")}_send_mail`;
 const SEND_DOCUMENT_EMAIL = "send_document_mail";
 
 class SendMailQueueService {
