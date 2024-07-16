@@ -23,7 +23,7 @@ const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
 const basicAuth = require("express-basic-auth");
-const { initTaskQueues, initTaskMonitor, stopQueues } = require("./queues/redisQueue");
+const { initQueues, initMonitor, startQueues, closeQueues } = require("./queues/redisQueue");
 
 async function runTasks() {
   initSentry();
@@ -32,7 +32,8 @@ async function runTasks() {
   if (config.get("RUN_CRONS")) {
     scheduleCrons();
   }
-  initTaskQueues();
+  initQueues();
+  startQueues();
 
   const app = express();
 
@@ -46,7 +47,7 @@ async function runTasks() {
       }),
     );
   }
-  const monitor = await initTaskMonitor();
+  const monitor = await initMonitor();
   app.use("/", monitor.router);
 
   // * Use Terminus for graceful shutdown when using Docker
@@ -54,7 +55,7 @@ async function runTasks() {
 
   function onSignal() {
     console.log("server is starting cleanup");
-    return Promise.all([closeDB(), stopQueues()]);
+    return Promise.all([closeDB(), closeQueues()]);
   }
 
   function onShutdown() {
@@ -100,6 +101,7 @@ async function runAPI() {
     TODO : A possible improvement would be to download templates at build time
   */
   getAllPdfTemplates();
+  initQueues();
 
   const app = express();
   const registerSentryErrorHandler = initSentryMiddlewares(app);
@@ -236,7 +238,7 @@ async function runAPI() {
 
   function onSignal() {
     console.log("server is starting cleanup");
-    return Promise.all([closeDB()]);
+    return Promise.all([closeDB(), closeQueues()]);
   }
 
   function onShutdown() {
