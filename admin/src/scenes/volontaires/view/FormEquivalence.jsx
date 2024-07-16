@@ -13,21 +13,14 @@ import YoungHeader from "../../phase0/components/YoungHeader";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES, UNSS_TYPE } from "snu-lib";
 import Select from "../../../components/forms/SelectHookForm";
 import InputText from "../../../components/ui/forms/InputTextHookForm";
-import NumberInput from "../../../components/ui/forms/NumberInput";
 import { useForm, Controller } from "react-hook-form";
-
-const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
-const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
 
 export default function FormEquivalence({ young, onChange }) {
   const [clickStartDate, setClickStartDate] = React.useState(false);
   const [clickEndDate, setClickEndDate] = React.useState(false);
-  const [frequence, setFrequence] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [filesList, setFilesList] = React.useState([]);
   const [uploading, setUploading] = React.useState(false);
-  const [duration, setDuration] = React.useState("");
-  const [unit, setUnit] = React.useState("heures");
 
   const {
     register,
@@ -73,20 +66,6 @@ export default function FormEquivalence({ young, onChange }) {
     setValue("files", res.data);
     toastr.success("Fichier téléversé");
     setUploading(false);
-  };
-
-  const handleInputChange = (e) => {
-    const value = Math.ceil(Number(e.target.value));
-    setDuration(value);
-    const missionDuration = unit === "jours" ? String(value * 7) : String(value);
-    setValue("missionDuration", missionDuration);
-  };
-
-  const handleSelectChange = (e) => {
-    const value = e.target.value;
-    setUnit(value);
-    setDuration("");
-    setValue("missionDuration", "");
   };
 
   const sendData = async (data) => {

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AiOutlinePlus } from "react-icons/ai";
 import { BsCheck2 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -20,7 +19,6 @@ export default function EditEquivalence() {
   const [data, setData] = useState();
   const [openType, setOpenType] = useState(false);
   const [openSousType, setOpenSousType] = React.useState(false);
-  const [frequence, setFrequence] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [filesList, setFilesList] = useState([]);
@@ -30,8 +28,6 @@ export default function EditEquivalence() {
   const [unit, setUnit] = useState("heures");
   const refType = useRef(null);
   const refSousType = React.useRef(null);
-  const refDuree = useRef(null);
-  const refFrequence = useRef(null);
   const history = useHistory();
   const { equivalenceId } = useParams();
   const mode = equivalenceId ? "edit" : "create";
@@ -90,7 +86,6 @@ export default function EditEquivalence() {
         const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`);
         if (ok) {
           setData(data);
-          // if (data?.frequency?.nombre && data?.frequency?.duree && data?.frequency?.frequence) setFrequence(true);
           return;
         }
       })();
@@ -102,18 +97,6 @@ export default function EditEquivalence() {
     for (const key of keyList) {
       if (key === "files" && !data[key]?.length) {
         error = true;
-      } else if (key === "frequency") {
-        if (
-          frequence &&
-          (data[key]?.nombre === "" ||
-            data[key]?.nombre === undefined ||
-            data[key]?.duree === "" ||
-            data[key]?.duree === undefined ||
-            data[key]?.frequence === "" ||
-            data[key]?.frequence === undefined)
-        ) {
-          error = true;
-        }
       } else if (key === "sousType") {
         if (["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === undefined || data.sousType === "")) {
           error = true;
@@ -173,7 +156,7 @@ export default function EditEquivalence() {
   };
 
   const handleInputChange = (e) => {
-    const value = Math.ceil(Number(e.target.value));
+    const value = e.target.value;
     setDuration(value);
     const missionDuration = unit === "jours" ? String(value * 7) : String(value);
     setData((prevData) => ({

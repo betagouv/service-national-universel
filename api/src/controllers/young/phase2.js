@@ -52,12 +52,6 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     if (isYoung && !canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    //Pas plus de 3 demandes d'équivalence + creation possible seulement si le statut des ancienne equiv est "REFUSED"
-    // const equivalences = await MissionEquivalenceModel.find({ youngId: value.id });
-    // if (equivalences.length >= 3) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    // const filteredEquivalences = equivalences.filter((equivalence) => equivalence.status !== "REFUSED");
-    // if (filteredEquivalences.length > 0) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
     const youngId = value.id;
     delete value.id;
     const data = await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
