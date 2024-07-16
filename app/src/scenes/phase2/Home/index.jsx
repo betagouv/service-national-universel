@@ -4,12 +4,13 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
 import { YOUNG_STATUS_PHASE2 } from "../../../utils";
-import { HiPlus, HiSearch } from "react-icons/hi";
+import { HiChevronDown, HiPlus, HiSearch } from "react-icons/hi";
 import { MesEngagements } from "./components/MesEngagement";
 import { Programs } from "./components/Programs";
 import { FAQ } from "./components/FAQ";
 import { RiAttachmentLine } from "react-icons/ri";
 import DownloadMenu from "./components/DownloadMenu";
+import { Popover, PopoverButton } from "@headlessui/react";
 
 export default function HomePhase2() {
   const { young } = useSelector((state) => state.Auth);
@@ -31,21 +32,33 @@ export default function HomePhase2() {
 
               <div className="mt-8 border rounded-xl p-3 mx-auto">
                 <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2">
-                  <div className="flex gap-2 md:border-r border-b md:border-b-0 pb-[0.75rem] md:pb-0">
-                    <RiAttachmentLine className="text-gray-400 text-xl pt-1 flex-none" />
-                    <div>
-                      <p>Attestation de réalisation phase 2</p>
-                      <DownloadMenu template="2" />
-                    </div>
-                  </div>
+                  <Popover className="relative">
+                    <PopoverButton className="w-full flex gap-2 md:border-r border-b md:border-b-0 pb-[0.75rem] md:pb-0 ">
+                      <RiAttachmentLine className="text-gray-400 text-xl pt-1 flex-none" />
+                      <div>
+                        <p>Attestation de réalisation phase 2</p>
+                        <p className="text-blue-600 text-left">
+                          Télécharger
+                          <HiChevronDown className="inline-block text-xl" />
+                        </p>
+                      </div>
+                    </PopoverButton>
+                    <DownloadMenu template="2" />
+                  </Popover>
 
-                  <div className="flex gap-2 md:px-3 pt-[0.75rem] md:p-0">
-                    <RiAttachmentLine className="text-gray-400 text-xl pt-1 flex-none" />
-                    <div>
-                      <p>Attestation de réalisation SNU</p>
-                      <DownloadMenu template="snu" />
-                    </div>
-                  </div>
+                  <Popover className="relative">
+                    <PopoverButton className="w-full flex gap-2 md:px-3 pt-[0.75rem] md:p-0">
+                      <RiAttachmentLine className="text-gray-400 text-xl pt-1 flex-none" />
+                      <div>
+                        <p>Attestation de réalisation SNU</p>
+                        <p className="text-blue-600 text-left">
+                          Télécharger
+                          <HiChevronDown className="inline-block text-xl" />
+                        </p>
+                      </div>
+                    </PopoverButton>
+                    <DownloadMenu template="snu" />
+                  </Popover>
                 </div>
               </div>
             </div>
