@@ -5,7 +5,7 @@ import { fetchApplications, fetchEquivalences } from "../../repo";
 import Loader from "@/components/Loader";
 import EquivalenceCard from "../../components/EquivalenceCard";
 import ApplicationCard from "../../components/ApplicationCard";
-import { YOUNG_STATUS_PHASE2 } from "snu-lib";
+import { APPLICATION_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS_PHASE2 } from "snu-lib";
 
 export function MesEngagements() {
   const { young } = useSelector((state) => state.Auth);
@@ -36,7 +36,7 @@ export function MesEngagements() {
 
   const cards = [...applications.data, ...equivalences.data]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .filter((engagement) => (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? engagement.status === "VALIDATED" : true))
+    .filter((engagement) => (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? [APPLICATION_STATUS.DONE, EQUIVALENCE_STATUS.VALIDATED].includes(engagement.status) : true))
     .filter((e, i) => i < 5);
 
   return (

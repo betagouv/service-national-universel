@@ -33,28 +33,32 @@ export default function HomePhase2() {
 
             <div className="mt-[1rem] md:mt-[2rem] border rounded-xl p-3 mx-auto">
               <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2">
-                <Popover className="relative">
+                <Popover className="relative group">
                   <PopoverButton className="w-full flex gap-2 md:border-r border-b md:border-b-0 pb-[0.75rem] md:pb-0 ">
-                    <RiAttachmentLine className="text-gray-400 text-xl pt-1 flex-none" />
+                    <div className=" flex-none mt-1">
+                      <RiAttachmentLine className="text-gray-400 text-xl align-bottom flex-none" />
+                    </div>
                     <div>
                       <p>Attestation de réalisation phase 2</p>
-                      <p className="text-blue-600 text-left">
+                      <p className="mt-1 text-blue-600 text-left">
                         Télécharger
-                        <HiChevronDown className="inline-block text-xl" />
+                        <HiChevronDown className="inline-block ml-1 transition group-data-[open]:rotate-180" />
                       </p>
                     </div>
                   </PopoverButton>
                   <DownloadMenu template="2" />
                 </Popover>
 
-                <Popover className="relative">
+                <Popover className="relative group">
                   <PopoverButton className="w-full flex gap-2 md:px-3 pt-[0.75rem] md:p-0">
-                    <RiAttachmentLine className="text-gray-400 text-xl pt-1 flex-none" />
+                    <div className=" flex-none mt-1">
+                      <RiAttachmentLine className="text-gray-400 text-xl align-bottom flex-none" />
+                    </div>
                     <div>
                       <p>Attestation de réalisation SNU</p>
-                      <p className="text-blue-600 text-left">
+                      <p className="mt-1 text-blue-600 text-left">
                         Télécharger
-                        <HiChevronDown className="inline-block text-xl" />
+                        <HiChevronDown className="inline-block ml-1 transition group-data-[open]:rotate-180" />
                       </p>
                     </div>
                   </PopoverButton>
@@ -67,8 +71,8 @@ export default function HomePhase2() {
               href={`${supportURL}/base-de-connaissance/permis-et-code-de-la-route`}
               target="_blank"
               rel="noopener noreferrer"
-              className="relative mt-6 block md:flex bg-white border rounded-xl p-4 gap-5 items-center">
-              <div className="w-fit mx-auto">
+              className="relative mt-6 flex flex-col md:flex-row bg-white border rounded-xl p-4 gap-5 items-center">
+              <div className="w-fit">
                 <Voiture className="w-12 h-12" />
               </div>
               <div>
@@ -101,7 +105,7 @@ export default function HomePhase2() {
           </>
         )}
 
-        <hr className="mt-[1rem] md:mt-[3rem]" />
+        <hr className="mt-[2rem] md:mt-[3rem]" />
       </header>
 
       <section className="bg-gradient-to-b from-white to-gray-100 pb-2">
@@ -116,7 +120,7 @@ export default function HomePhase2() {
 
       <section className="mt-12 md:mt-24 px-4 md:px-24">
         {young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? (
-          <h2 className="text-center font-bold text-2xl md:text-4xl m-0 max-w-3xl mx-auto">Tous les programmes d'engagement possibles après le SNU</h2>
+          <h2 className="text-center font-bold text-2xl md:text-4xl md:leading-snug m-0 max-w-3xl mx-auto">Tous les programmes d'engagement possibles après le SNU</h2>
         ) : (
           <>
             <p className="w-fit mx-auto text-xs font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">EXPLOREZ D'AUTRES POSSIBILITES</p>
@@ -152,7 +156,7 @@ export default function HomePhase2() {
         <Programs />
       </section>
 
-      <hr className="mt-24 md:max-w-5xl mx-[1rem] md:mx-auto" />
+      <hr className="mt-[1rem] md:mt-[3rem] md:max-w-6xl mx-[1rem] md:mx-auto" />
 
       <section className="px-4 md:px-24 mt-12">
         <h2 className="text-center font-bold text2xl md:text-4xl m-0 mt-12">Questions fréquentes</h2>
