@@ -8,7 +8,8 @@ import { HiPlus, HiSearch } from "react-icons/hi";
 import { MesEngagements } from "./components/MesEngagement";
 import { Programs } from "./components/Programs";
 import { FAQ } from "./components/FAQ";
-import MesAttestations from "./components/MesAttestations";
+import { RiAttachmentLine } from "react-icons/ri";
+import DownloadMenu from "./components/DownloadMenu";
 
 export default function HomePhase2() {
   const { young } = useSelector((state) => state.Auth);
@@ -25,7 +26,29 @@ export default function HomePhase2() {
             <h1 className="mt-6 mx-auto text-center font-bold text-4xl md:text-5xl max-w-xl leading-tight md:leading-tight">
               👏 {young?.firstName}, vous avez validé votre phase Engagement&nbsp;!
             </h1>
-            <MesAttestations />
+            <div className="max-w-6xl px-3 mx-auto">
+              <h2 className="font-bold mx-0 mt-12">Mes attestations</h2>
+
+              <div className="mt-8 border rounded-xl p-3 mx-auto">
+                <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2">
+                  <div className="flex gap-2 md:border-r border-b md:border-b-0 pb-[0.75rem] md:pb-0">
+                    <RiAttachmentLine className="text-gray-400 text-xl pt-1 flex-none" />
+                    <div>
+                      <p>Attestation de réalisation phase 2</p>
+                      <DownloadMenu template="2" />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 md:px-3 pt-[0.75rem] md:p-0">
+                    <RiAttachmentLine className="text-gray-400 text-xl pt-1 flex-none" />
+                    <div>
+                      <p>Attestation de réalisation SNU</p>
+                      <DownloadMenu template="snu" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </>
         ) : (
           <>
@@ -35,11 +58,11 @@ export default function HomePhase2() {
                 to="/mission"
                 onClick={() => plausibleEvent("Phase 2/CTA - Realiser ma mission")}
                 className="bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center line-clamp-1">
-                <HiSearch className="inline-block mr-2 text-xl" />
+                <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
                 Trouver un engagement
               </Link>
               <Link to="/phase2/equivalence" className="border rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center">
-                <HiPlus className="inline-block mr-2 text-xl" />
+                <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
                 Ajouter un engagement réalisé
               </Link>
             </div>
