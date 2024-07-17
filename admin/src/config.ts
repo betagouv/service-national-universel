@@ -20,6 +20,7 @@ const appURL = getEnv("APP_URL", "http://localhost:8081");
 const adminURL = getEnv("ADMIN_URL", "http://localhost:8082");
 const supportURL = getEnv("SUPPORT_URL", "http://localhost:8083");
 const maintenance = getEnv("MAINTENANCE", false) === "true";
+const enable2fa = getEnv("ENABLE_2FA_ADMIN", false) === "true";
 const environment: "production" | "staging" | "ci" | "custom" | "test" | "development" = getEnv("ENVIRONMENT", "development");
 const RELEASE = getEnv("RELEASE");
 const SENTRY_URL = getEnv("SENTRY_URL", "https://70778e8aa9a6f1b9f483a8b6c9046a12@sentry.selego.co/140");
@@ -27,4 +28,17 @@ const SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 0.1);
 const SENTRY_SESSION_SAMPLE_RATE = getEnv("SENTRY_SESSION_SAMPLE_RATE", 0.1);
 const SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("SENTRY_ON_ERROR_SAMPLE_RATE", 1);
 
-export { apiURL, appURL, RELEASE, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_ON_ERROR_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };
+export {
+  apiURL,
+  appURL,
+  RELEASE,
+  SENTRY_URL,
+  SENTRY_TRACING_SAMPLE_RATE,
+  SENTRY_SESSION_SAMPLE_RATE,
+  SENTRY_ON_ERROR_SAMPLE_RATE,
+  environment,
+  adminURL,
+  supportURL,
+  maintenance,
+  enable2fa,
+};

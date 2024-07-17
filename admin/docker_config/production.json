@@ -5,6 +5,7 @@
   "ADMIN_URL": "https://admin.snu.gouv.fr",
   "SUPPORT_URL": "https://support.snu.gouv.fr",
   "MAINTENANCE": "$MAINTENANCE",
+  "ENABLE_2FA_ADMIN": "$ENABLE_2FA_ADMIN",
   "RELEASE": "$RELEASE",
   "SENTRY_SESSION_SAMPLE_RATE": "0.005",
   "SENTRY_TRACING_SAMPLE_RATE": "0.01"
