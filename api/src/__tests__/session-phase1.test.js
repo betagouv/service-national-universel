@@ -6,6 +6,7 @@ const { ROLES } = require("snu-lib");
 const { LigneBusModel } = require("../models");
 
 const getAppHelper = require("./helpers/app");
+const { mockEsClient } = require("./helpers/es");
 const { createSessionPhase1, notExistingSessionPhase1Id } = require("./helpers/sessionPhase1");
 const { createSessionWithCohesionCenter } = require("./helpers/cohesionCenter");
 const { dbConnect, dbClose } = require("./helpers/db");
@@ -17,6 +18,10 @@ const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const { getNewReferentFixture } = require("./fixtures/referent");
 const getNewCohortFixture = require("./fixtures/cohort");
 const getNewLigneBusFixture = require("./fixtures/PlanDeTransport/ligneBus");
+
+mockEsClient({
+  sessionphase1: [{ _id: "sessionId" }],
+});
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -147,6 +152,16 @@ describe("Session Phase 1", () => {
         .send();
 
       expect(res.status).toBe(403);
+    });
+  });
+
+  describe("POST /elasticsearch/sessionphase1/export", () => {
+    it("should return 200 when export is successful", async () => {
+      const res = await request(getAppHelper())
+        .post("/elasticsearch/sessionphase1/export")
+        .send({ filters: {}, exportFields: ["codeCentre", "cohesionCenterId"] });
+      expect(res.status).toBe(200);
+      expect(res.body.data.length).toBeGreaterThan(0);
     });
   });
 });

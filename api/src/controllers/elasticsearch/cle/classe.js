@@ -66,6 +66,9 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     if (req.params.action === "export") {
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
+      response = await populateWithReferentInfo(response, req.params.action);
+      response = await populateWithEtablissementInfo(response);
+      response = await populateWithReferentEtablissementInfo(response, req.params.action);
 
       if (req.query?.type === "schema-de-repartition") {
         if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -80,12 +83,10 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
           }
         }
 
-        response = await populateWithEtablissementInfo(response);
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
         response = await populateWithYoungsInfo(response);
         response = await populateWithLigneInfo(response);
-        response = await populateWithReferentInfo(response, req.params.action);
       }
 
       return res.status(200).send({ ok: true, data: response });
@@ -138,6 +139,25 @@ async function buildClasseContext(user) {
   return { classeContextFilters: contextFilters };
 }
 
+const populateWithReferentEtablissementInfo = async (classes, action) => {
+  const refIds =
+    action === "search"
+      ? [...new Set(classes.map((item) => item._source.etablissement?.referentEtablissementIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
+
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
+  const referentsData = serializeReferents(referents);
+
+  return classes.map((item) => {
+    if (action === "search") {
+      item._source.referentEtablissement = referentsData?.filter((e) => item._source.etablissement.referentEtablissementIds.includes(e._id.toString()));
+    } else {
+      item.referentEtablissement = referentsData?.filter((e) => item.etablissement?.referentEtablissementIds.includes(e._id.toString()));
+    }
+    return item;
+  });
+};
+
 const populateWithReferentInfo = async (classes, action) => {
   const refIds =
     action === "search"
@@ -151,7 +171,7 @@ const populateWithReferentInfo = async (classes, action) => {
     if (action === "search") {
       item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
     } else {
-      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds.includes(e._id.toString()));
+      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
     }
     return item;
   });

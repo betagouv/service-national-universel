@@ -7,7 +7,6 @@ import {
   canDownloadYoungDocuments,
   YOUNG_STATUS,
   STATUS_CLASSE,
-  STATUS_CLASSE_LIST,
   canCreateClasse,
   STATUS_PHASE1_CLASSE,
   SENDINBLUE_TEMPLATES,
@@ -23,9 +22,10 @@ import {
   canDeleteClasse,
   canUpdateCohort,
   LIMIT_DATE_ESTIMATED_SEATS,
-  LIMIT_DATE_TOTAL_SEATS,
   canEditEstimatedSeats,
   canEditTotalSeats,
+  canVerifyClasse,
+  canNotifyAdminCleForVerif,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -35,7 +35,13 @@ import { CleClasseModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
 
 import { deleteClasse, generateConvocationsByClasseId } from "./classeService";
-import { findCohesionCentersForClasses, findPdrsForClasses, getYoungsGroupByClasses, findLigneInfoForClasses, findReferentInfoForClasses } from "./export/classeExportService";
+import {
+  findCohesionCentersForClasses,
+  findPdrsForClasses,
+  getYoungsGroupByClasses,
+  findLigneInfoForClasses,
+  findChefEtablissementInfoForClasses,
+} from "./export/classeExportService";
 import ClasseModel from "../../models/cle/classe";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 import CohortModel from "../../models/cohort";
@@ -49,7 +55,7 @@ import ReferentModel from "../../models/referent";
 const router = express.Router();
 router.post(
   "/:id/convocations",
-  passport.authenticate(["young", "referent"], {
+  passport.authenticate("referent", {
     session: false,
     failWithError: true,
   }),
@@ -80,46 +86,44 @@ router.post(
   },
 );
 
-router.post(
-  "/export",
-  passport.authenticate(["young", "referent"], {
-    session: false,
-    failWithError: true,
-  }),
-  async (req: UserRequest, res: Response) => {
-    try {
-      const { error, value } = Joi.object({ cohort: Joi.array().min(1).items(Joi.string()).required() })
+router.post("/export", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    if (req.query.type === "schema-de-repartition") {
+      const validation = Joi.object({ cohort: Joi.array().min(1).items(Joi.string()).required() })
         .unknown()
         .validate(req.body, { stripUnknown: true });
-      if (error) {
+      if (validation.error) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
       if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
-      const allClasses = await CleClasseModel.find({
-        cohort: value.cohort,
-        status: { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] },
+    const queryParams = req.query.type === "schema-de-repartition" ? { cohort: req.body.cohort, status: { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] } } : {};
+    if (req.user.role === ROLES.REFERENT_REGION) queryParams["region"] = req.user.region;
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.departement;
+
+    const classes = await CleClasseModel.find(queryParams)
+      .populate({
+        path: "etablissement",
       })
-        .populate({
-          path: "etablissement",
-        })
-        .lean();
+      .populate({
+        path: "referents",
+      })
+      .lean();
 
-      // uniquement les classes de la région du référent
-      const classes = allClasses.filter((classe) => req.user.role !== ROLES.REFERENT_REGION || classe.etablissement?.region === req.user.region);
-
+    if (req.query.type === "schema-de-repartition") {
       const centres = await findCohesionCentersForClasses(classes);
       const pdrs = await findPdrsForClasses(classes);
       const youngs = await getYoungsGroupByClasses(classes);
       const lignesBus = await findLigneInfoForClasses(classes);
-      const referents = await findReferentInfoForClasses(classes);
 
       for (let classe of classes) {
         // populate
         classe.cohesionCenter = centres?.find((e) => classe.cohesionCenterId === e._id.toString());
         classe.pointDeRassemblement = pdrs?.find((e) => classe.pointDeRassemblementId === e._id.toString());
         classe.ligne = lignesBus.find((e) => classe.ligneId === e._id.toString());
-        classe.referentClasse = referents?.filter((e) => classe.referentClasseIds.includes(e._id.toString()));
 
         // calcul des effectifs
         const classeYoungs = youngs[classe._id];
@@ -130,13 +134,18 @@ router.post(
         classe.studentNotAutorized = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length || 0;
         classe.studentWithdrawn = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length || 0;
       }
-      res.send({ ok: true, data: classes });
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: error.message });
+    } else if (req.query.type === "export-des-classes") {
+      const chefEtablissement = await findChefEtablissementInfoForClasses(classes);
+      for (let classe of classes) {
+        classe.referentEtablissement = chefEtablissement?.filter((e) => classe.etablissement.referentEtablissementIds.includes(e._id.toString()));
+      }
     }
-  },
-);
+    res.send({ ok: true, data: classes });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: error.message });
+  }
+});
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
@@ -413,6 +422,90 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: error });
+  }
+});
+
+router.get("/:id/notifyRef", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canNotifyAdminCleForVerif(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const classe = await ClasseModel.findById(value).populate({
+      path: "etablissement",
+      options: { select: { referentEtablissementIds: 1, coordinateurIds: 1 } },
+    });
+
+    if (!classe?.etablissement?.referentEtablissementIds) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    if (req.user.role === ROLES.REFERENT_REGION && classe.etablissement.region !== req.user.region) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT && classe.etablissement.department !== req.user.departement) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, classe);
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/verify", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      status: Joi.string().allow(STATUS_CLASSE.VERIFIED).required(),
+      estimatedSeats: Joi.number().required(),
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canVerifyClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let classe = await ClasseModel.findById(value.id).populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } });
+    if (!classe || !classe.referents.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!etablissement.referentEtablissementIds.includes(req.user._id) && !etablissement.coordinateurIds.includes(req.user._id)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
+      if (classe.department !== req.user.departement) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+    if (req.user.role === ROLES.REFERENT_REGION) {
+      if (classe.region !== req.user.region) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    classe.set({
+      status: STATUS_CLASSE.VERIFIED,
+    });
+
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, classe);
+
+    classe = await classe.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: classe });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

@@ -1,6 +1,6 @@
 function serializeHits(body, callback) {
   // In case body is already an array of records.
-  if (Array.isArray(body) && body[0]?._id) {
+  if (Array.isArray(body) && (body[0]?._id || body.length === 0)) {
     return body.map(callback);
   }
   return {
