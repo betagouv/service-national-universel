@@ -7,6 +7,7 @@ const YoungModel = require("../models/young");
 const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const MeetingPointModel = require("../models/meetingPoint");
+const MissionEquivalenceModel = require("../models/missionEquivalence");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
 const ContractObject = require("../models/contract");
@@ -407,20 +408,29 @@ async function updateYoungPhase2Hours(young, fromUser) {
       youngId: young._id,
       status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
     });
-    young.set({
-      phase2NumberHoursDone: String(
-        applications
-          .filter((application) => application.status === "DONE")
-          .map((application) => Number(application.missionDuration || 0))
-          .reduce((acc, current) => acc + current, 0),
-      ),
-      phase2NumberHoursEstimated: String(
-        applications
-          .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
-          .map((application) => Number(application.missionDuration || 0))
-          .reduce((acc, current) => acc + current, 0),
-      ),
+    const equivalences = await MissionEquivalenceModel.find({
+      youngId: young._id,
+      status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
     });
+    const totalHoursDone =
+      applications
+        .filter((application) => application.status === "DONE")
+        .map((application) => Number(application.missionDuration || 0))
+        .reduce((acc, current) => acc + current, 0) +
+      equivalences
+        .filter((equivalence) => equivalence.status === "VALIDATED")
+        .map((equivalence) => equivalence?.missionDuration || 0)
+        .reduce((acc, current) => acc + current, 0);
+
+    const totalHoursEstimated = applications
+      .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
+      .map((application) => Number(application.missionDuration || 0))
+      .reduce((acc, current) => acc + current, 0);
+    young.set({
+      phase2NumberHoursDone: String(totalHoursDone),
+      phase2NumberHoursEstimated: String(totalHoursEstimated),
+    });
+
     await young.save({ fromUser });
   } catch (e) {
     console.log(e);
@@ -446,11 +456,7 @@ const updateStatusPhase2 = async (young, fromUser) => {
 
     young.set({ statusPhase2UpdatedAt: Date.now() });
 
-    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
-      // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
-      young.set({ statusPhase2: young.statusPhase2, statusPhase2ValidatedAt: Date.now() });
-      await cancelPendingApplications(pendingApplication, fromUser);
-    } else if (Number(young.phase2NumberHoursDone) >= 84) {
+    if (Number(young.phase2NumberHoursDone) >= 84) {
       // We change young status to DONE if he has 84 hours of phase 2 done.
       young.set({
         statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
@@ -471,11 +477,25 @@ const updateStatusPhase2 = async (young, fromUser) => {
         },
         cc,
       });
+    } else if (Number(young.phase2NumberHoursDone) < 84) {
+      young.set({
+        statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+        statusPhase2ValidatedAt: null,
+        "files.militaryPreparationFilesIdentity": [],
+        "files.militaryPreparationFilesCensus": [],
+        "files.militaryPreparationFilesAuthorization": [],
+        "files.militaryPreparationFilesCertificate": [],
+        statusMilitaryPreparationFiles: undefined,
+      });
+    } else if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
+      // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
+      young.set({ statusPhase2: young.statusPhase2, statusPhase2ValidatedAt: Date.now() });
+      await cancelPendingApplications(pendingApplication, fromUser);
     } else if (activeApplication.length) {
       // We change young status to IN_PROGRESS if he has an 'active' application.
       young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
     } else {
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
+      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
     }
 
     const applications_v2 = await ApplicationModel.find({ youngId: young._id });
