@@ -39,6 +39,8 @@ import Toggle from "./Toggle";
 import Modal from "../../../../components/ui/modals/Modal";
 import { useAddress } from "snu-lib";
 import useAuth from "@/services/useAuth";
+import { CityForm } from "@snu/ds/common";
+import { useDebounce } from "@uidotdev/usehooks";
 
 const useOutsideClick = (callback) => {
   const ref = React.useRef();
@@ -72,6 +74,8 @@ function _location(results) {
 
 export default function MissionFilters({ filters, setFilters }) {
   const { young } = useAuth();
+  const [cityFilter, setCityFilter] = useState({ zip: young.zip, city: young.city, location: young.location });
+  const [query, setQuery] = useState("");
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
@@ -82,19 +86,13 @@ export default function MissionFilters({ filters, setFilters }) {
   const refDropdownControlDistance = useOutsideClick(() => setDropdownControlDistanceOpen(false));
   const refDropdownControlWhen = useOutsideClick(() => setDropdownControlWhenOpen(false));
 
-  const { results: youngResults } = useAddress({
-    query: `${young?.address} ${young?.city}`,
-    options: { postcode: young?.zip, limit: 1 },
-    enabled: Boolean(young?.address && young?.zip && !young?.location),
-  });
-  const youngLocation = young?.location || _location(youngResults);
+  const updateAddressData = (address) => {
+    setCityFilter(address);
+    setFilters((prev) => ({ ...prev, location: address.location }));
+  };
 
-  const { results: relativeResults } = useAddress({
-    query: `${young?.mobilityNearRelativeAddress} ${young?.mobilityNearRelativeCity}`,
-    options: { postcode: young?.mobilityNearRelativeZip, limit: 1 },
-    enabled: Boolean(young?.mobilityNearRelativeAddress && young?.mobilityNearRelativeZip),
-  });
-  const relativeLocation = _location(relativeResults);
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10, type: "municipality" }, enabled: debouncedQuery.length > 2 });
 
   const DISTANCE_MAX = 100;
   const marginDistance = getMarginDistance(document.getElementById("distanceKm"));
@@ -307,55 +305,7 @@ export default function MissionFilters({ filters, setFilters }) {
 
                     <div className="flex w-full flex-col space-y-2 py-2 px-2">
                       <div className="my-3 flex justify-around">
-                        <div className="flex items-center gap-2">
-                          <input
-                            id="main-address"
-                            name="main-address"
-                            type="radio"
-                            checked={filters.location === youngLocation}
-                            onChange={() => setFilters((prev) => ({ ...prev, location: youngLocation }))}
-                            className="hidden"
-                          />
-                          <label htmlFor="main-address" className="mr-2">
-                            {filters.location === youngLocation ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
-                          </label>
-                          <label htmlFor="main-address" className="cursor-pointer">
-                            <span className="text-xs leading-[15px] text-gray-700">Autour de mon adresse principale</span>
-                            <br />
-                            <span className="text-[13px] text-gray-700">{young.city}</span>
-                          </label>
-                        </div>
-                        {young?.mobilityNearRelativeZip ? (
-                          <div className="flex items-center gap-2">
-                            <input
-                              id="second-address"
-                              name="address"
-                              type="radio"
-                              checked={JSON.stringify(filters.location) === JSON.stringify(relativeLocation)}
-                              onChange={() => setFilters((prev) => ({ ...prev, location: relativeLocation }))}
-                              className="hidden"
-                            />
-                            <label htmlFor="second-address" className="mr-2">
-                              {JSON.stringify(filters.location) === JSON.stringify(relativeLocation) ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
-                            </label>
-                            <label htmlFor="second-address" className="cursor-pointer">
-                              <span className="text-xs text-gray-700">Autour de l&apos;adresse d&apos; un proche</span>
-                              <br />
-                              <span className="text-[13px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
-                            </label>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <input id="second-address" name="address" type="radio" value={young.city} disabled />
-                            <label htmlFor="second-address">
-                              <span className="text-xs text-gray-400">Autour de l&apos;adresse d&apos; un proche</span>
-                              <br />
-                              <Link to="/preferences" className="text-[13px] text-blue-600 underline hover:underline">
-                                Renseigner une adresse
-                              </Link>
-                            </label>
-                          </div>
-                        )}
+                        <CityForm data={cityFilter} updateData={updateAddressData} query={query} setQuery={setQuery} options={results} />
                       </div>
                       <div className="mb-3 flex flex-row items-center justify-start">
                         <Toggle toggled={filters.hebergement} onClick={() => setFilters((prev) => ({ ...prev, hebergement: !prev.hebergement }))} />
@@ -511,7 +461,7 @@ export default function MissionFilters({ filters, setFilters }) {
       </div>
 
       {/* Desktop */}
-      <div className="hidden md:block my-4 space-y-6 rounded-xl bg-gray-50 p-10">
+      <div className="hidden md:block my-4 space-y-6 rounded-xl p-10">
         {/* search bar */}
         <div className="relative flex flex-col justify-center">
           <div className="flex pl-8 pr-8 mb-2 w-full items-center overflow-hidden rounded-full border-[1px] border-gray-300 bg-white  p-1.5">
@@ -551,67 +501,15 @@ export default function MissionFilters({ filters, setFilters }) {
           <div
             ref={refDropdownControlDistance}
             className={`${
-              dropdownControlDistanceOpen ? "max-h-96" : "max-h-0"
-            } h-auto w-full relative overflow-hidden rounded-2xl bg-white transition-maxHeight duration-200 ease-in-out`}>
+              dropdownControlDistanceOpen ? "max-h-96" : "max-h-0 overflow-hidden"
+            } h-auto w-full relative rounded-2xl bg-white transition-maxHeight duration-200 ease-in-out`}>
             <div className="flex items-center pt-2 justify-center">
               <CloseSvg className="absolute right-4 top-4 cursor-pointer" height={10} width={10} onClick={() => setDropdownControlDistanceOpen(false)} />
             </div>
             <div className="flex w-full flex-col space-y-2 py-2 px-4">
               <div className="my-3 flex flex-row justify-around">
                 <div className="flex w-1/2 flex-col items-center justify-center">
-                  <div className="w-3/4">
-                    <div className="flex w-full items-center gap-2">
-                      <input
-                        id="main-address"
-                        name="main-address"
-                        type="radio"
-                        checked={filters.location === youngLocation}
-                        onChange={() => setFilters((prev) => ({ ...prev, location: youngLocation }))}
-                        className="hidden"
-                      />
-                      <label htmlFor="main-address" className="mr-2">
-                        {filters.location === youngLocation ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
-                      </label>
-                      <label htmlFor="main-address" className="cursor-pointer">
-                        <span className="text-[13px] text-gray-700">Autour de mon adresse principale</span>
-                        <br />
-                        <span className="text-[15px] text-gray-700">{young.city}</span>
-                      </label>
-                    </div>
-                    {young?.mobilityNearRelativeCity ? (
-                      <div className="flex w-full items-center gap-2">
-                        <input
-                          id="second-address"
-                          name="address"
-                          type="radio"
-                          checked={JSON.stringify(filters.location) === JSON.stringify(relativeLocation)}
-                          onChange={() => setFilters((prev) => ({ ...prev, location: relativeLocation }))}
-                          className="hidden"
-                        />
-                        <label htmlFor="second-address" className="mr-2">
-                          {JSON.stringify(filters.location) === JSON.stringify(relativeLocation) ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
-                        </label>
-                        <label htmlFor="second-address" className="cursor-pointer">
-                          <span className="text-[13px] text-gray-700">Autour de l&apos;adresse d&apos;un proche</span>
-                          <br />
-                          <span className="text-[15px] text-gray-700">{young?.mobilityNearRelativeCity}</span>
-                        </label>
-                      </div>
-                    ) : (
-                      <div className="flex w-full items-center gap-2">
-                        <label className="mr-2">
-                          <img src={RadioUnchecked} />
-                        </label>
-                        <label htmlFor="second-address">
-                          <span className="text-[13px] text-gray-400">Autour de l&apos;adresse d&apos;un proche</span>
-                          <br />
-                          <Link to="/preferences" className="text-[15px] text-blue-600 underline hover:underline">
-                            Renseigner une adresse
-                          </Link>
-                        </label>
-                      </div>
-                    )}
-                  </div>
+                  <CityForm data={cityFilter} updateData={updateAddressData} query={query} setQuery={setQuery} options={results} />
                 </div>
                 <div className="flex w-1/2 flex-col items-center justify-center">
                   <div className="flex  flex-row items-center justify-center">
@@ -787,7 +685,7 @@ export default function MissionFilters({ filters, setFilters }) {
                     </div>
                   </div>
                   {filters.fromDate || filters.toDate ? (
-                    <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilters((prev) => ({ ...prev, fromDate: "", toDate: ""}))}>
+                    <div className="cursor-pointer text-xs text-gray-600 hover:underline" onClick={() => setFilters((prev) => ({ ...prev, fromDate: "", toDate: "" }))}>
                       Effacer
                     </div>
                   ) : null}
