@@ -62,4 +62,6 @@ module.exports = {
   TASK_MONITOR_ENABLE_AUTH: true,
   TASK_MONITOR_USER: undefined,
   TASK_MONITOR_SECRET: undefined,
+  ENABLE_2FA_APP: true,
+  ENABLE_2FA_ADMIN: true,
 };
