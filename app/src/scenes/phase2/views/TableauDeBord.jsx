@@ -2,7 +2,7 @@ import React from "react";
 import ReactTooltip from "react-tooltip";
 import { Link } from "react-router-dom";
 import { supportURL } from "@/config";
-import { APPLICATION_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS_PHASE2 } from "snu-lib";
+import { PHASE2_TOTAL_HOURS, APPLICATION_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS_PHASE2 } from "snu-lib";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/services/useAuth";
 import { HiPlus, HiSearch } from "react-icons/hi";
@@ -53,7 +53,7 @@ export default function View() {
     <div className="p-8 bg-white flex flex-col">
       <div className="flex flex-col md:flex-row border-2 rounded-2xl border-gray-200 justify-center items-center">
         <span className="relative">
-          <SemiCircleProgress current={phase2NumberHoursDone} total={84}></SemiCircleProgress>
+          <SemiCircleProgress current={phase2NumberHoursDone} total={PHASE2_TOTAL_HOURS}></SemiCircleProgress>
           <Tooltip className="absolute top-2 right-0" />
         </span>
         {phase2NumberHoursDone == 0 && (
@@ -87,10 +87,12 @@ export default function View() {
         <div className="pt-8 mt-8">
           <span className="font-bold text-2xl">
             Engagements Réalisés
-            <Link to="/phase2/equivalence" className="ml-4 text-sm font-normal bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center">
-              <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
-              Ajouter
-            </Link>
+            {phase2NumberHoursDone < PHASE2_TOTAL_HOURS && (
+              <Link to="/phase2/equivalence" className="ml-4 text-sm font-normal bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center">
+                <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
+                Ajouter
+              </Link>
+            )}
           </span>
           <div className="flex flex-col md:flex-row gap-3 pb-3 flex-wrap pt-4">
             {missionDoneCards.map((data) =>
@@ -117,7 +119,7 @@ export default function View() {
           <RiMedal2Line className="text-4xl p-2 bg-gray-200 rounded-full" />
           <span className="flex flex-col ml-4">
             <span>Mon dossier d'éligibilité</span>
-            <Link className="text-blue-600" to="ma-preparation-militaire">
+            <Link className="text-blue-600" to="/ma-preparation-militaire">
               Compléter
             </Link>
           </span>
