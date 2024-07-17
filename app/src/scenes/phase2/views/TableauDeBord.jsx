@@ -1,19 +1,18 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
 import { Link } from "react-router-dom";
-import MobileView from "./mobile";
 import { supportURL } from "@/config";
-import Loader from "@/components/Loader";
-import Validated from "./Validated";
-import { useQuery } from "@tanstack/react-query";
-import InfobulleIcon from "../../assets/infobulleIcon.svg";
-import SemiCircleProgress from "./components/SemiCircleProgress";
-import EquivalenceCard from "./components/EquivalenceCard";
-import ApplicationCard from "./components/ApplicationCard";
 import { APPLICATION_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS_PHASE2 } from "snu-lib";
+import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/services/useAuth";
 import { HiPlus, HiSearch } from "react-icons/hi";
-import { fetchApplications, fetchEquivalences } from "./repo";
+import { RiMedal2Line } from "react-icons/ri";
+import InfobulleIcon from "../../../assets/infobulleIcon.svg";
+import SemiCircleProgress from "../components/SemiCircleProgress";
+import EquivalenceCard from "../components/EquivalenceCard";
+import ApplicationCard from "../components/ApplicationCard";
+import Validated from "../Validated";
+import { fetchApplications, fetchEquivalences } from "../repo";
 
 const Tooltip = ({ className }) => (
   <span className={className}>
@@ -31,13 +30,15 @@ const Tooltip = ({ className }) => (
 
 export default function View() {
   const { young } = useAuth();
+  console.log(young);
   const phase2NumberHoursDone = young.phase2NumberHoursDone || 0;
   // const phase2NumberHoursDone = 0;
   const applications = useQuery({ queryKey: ["application"], queryFn: () => fetchApplications(young._id) });
   const equivalences = useQuery({ queryKey: ["equivalence"], queryFn: () => fetchEquivalences(young._id) });
 
   const missionDoneCards =
-    (applications.data || equivalences.data) &&
+    applications.data &&
+    equivalences.data &&
     [...applications.data, ...equivalences.data]
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .filter(({ status }) =>
@@ -49,14 +50,7 @@ export default function View() {
   if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return <Validated></Validated>;
 
   return (
-    <div className="p-8 flex flex-col">
-      <h1 className="mt-6 mb-6 mx-auto text-center font-bold text-4xl md:text-5xl max-w-xl leading-tight md:leading-tight">Mes engagements</h1>
-      <span className="p-8 flex justify-center ">
-        <span className="pr-1 pl-1 text-blue-600  pb-2 border-b-2 border-blue-600 cursor-pointer">Tableau de bord</span>
-        <Link to="/preferences" className="pr-1 pl-1 text-gray-400 ml-4 pb-2 cursor-pointer hover:text-blue-600 hover:border-b-2 border-blue-600">
-          Mes préférences
-        </Link>
-      </span>
+    <div className="p-8 bg-white flex flex-col">
       <div className="flex flex-col md:flex-row border-2 rounded-2xl border-gray-200 justify-center items-center">
         <span className="relative">
           <SemiCircleProgress current={phase2NumberHoursDone} total={84}></SemiCircleProgress>
@@ -119,6 +113,15 @@ export default function View() {
 
       <div className="pt-8 mt-8">
         <span className="font-bold text-2xl">Préparations Militaires</span>
+        <span className="mt-4 flex flex-row p-4 bg-gray-50 border-2 rounded-2xl border-gray-200 items-center">
+          <RiMedal2Line className="text-4xl p-2 bg-gray-200 rounded-full" />
+          <span className="flex flex-col ml-4">
+            <span>Mon dossier d'éligibilité</span>
+            <Link className="text-blue-600" to="ma-preparation-militaire">
+              Compléter
+            </Link>
+          </span>
+        </span>
       </div>
     </div>
   );

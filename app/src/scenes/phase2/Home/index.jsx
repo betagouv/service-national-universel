@@ -111,7 +111,7 @@ export default function HomePhase2() {
       <section className="bg-gradient-to-b from-white to-gray-100 pb-2">
         <div className="mx-auto max-w-6xl px-3 mt-[1rem] md:mt-[3rem] mb-[0.5rem] md:mb-[1.5rem] flex justify-between items-center">
           <h2 className="font-bold m-0 text-2xl md:text-4xl">Mes engagements</h2>
-          <Link to="/phase2/mig" className="text-blue-600">
+          <Link to="/phase2/mes-engagements" className="text-blue-600">
             Voir
           </Link>
         </div>
