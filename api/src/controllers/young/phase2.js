@@ -138,11 +138,11 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       startDate: Joi.string().trim(),
       endDate: Joi.string().trim(),
       contactFullName: Joi.string().trim(),
+      missionDuration: Joi.string().trim(),
       contactEmail: Joi.string().trim(),
       files: Joi.array().items(Joi.string()),
       message: Joi.string().trim(),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
-
     if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(value.type)) {
       value.sousType = undefined;
     }

@@ -96,22 +96,22 @@ export default function EditEquivalence() {
     setLoading(true);
     let error = false;
     for (const key of keyList) {
-      if (key === "files" && !data[key]?.length) {
-        error = true;
-      } else if (key === "sousType") {
-        if (["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === undefined || data.sousType === "")) {
-          error = true;
-        }
-      } else if (key === "desc") {
-        if (data.type === "Autre" && (data[key] === undefined || data[key] === "")) {
-          error = true;
-        }
-        if (data.type !== "Autre") {
-          delete data.desc;
-        }
-      } else if (data[key] === undefined || data[key] === "") {
-        error = true;
-      }
+      // if (key === "files" && !data[key]?.length) {
+      //   error = true;
+      // } else if (key === "sousType") {
+      //   if (["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === undefined || data.sousType === "")) {
+      //     error = true;
+      //   }
+      // } else if (key === "desc") {
+      //   if (data.type === "Autre" && (data[key] === undefined || data[key] === "")) {
+      //     error = true;
+      //   }
+      //   if (data.type !== "Autre") {
+      //     delete data.desc;
+      //   }
+      // } else if (data[key] === undefined || data[key] === "") {
+      //   error = true;
+      // }
 
       if (key === "contactEmail") {
         if (data[key] && !validator.isEmail(data[key])) {
@@ -158,7 +158,7 @@ export default function EditEquivalence() {
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    setDuration(value);
+    setData(value);
     const missionDuration = unit === "jours" ? String(value * 7) : String(value);
     setData((prevData) => ({
       ...prevData,
@@ -169,7 +169,6 @@ export default function EditEquivalence() {
   const handleSelectChange = (e) => {
     const value = e.target.value;
     setUnit(value);
-    setDuration("");
     setData((prevData) => ({
       ...prevData,
       missionDuration: "",
@@ -414,7 +413,7 @@ export default function EditEquivalence() {
                   placeholder="Exemple: 10"
                   type="number"
                   min="1"
-                  value={duration}
+                  value={data?.missionDuration}
                   onChange={handleInputChange}
                 />
               </div>
