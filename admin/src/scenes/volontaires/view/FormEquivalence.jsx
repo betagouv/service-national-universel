@@ -1,6 +1,5 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import { AiOutlinePlus } from "react-icons/ai";
 import PaperClip from "../../../assets/icons/PaperClip";
 import AddImage from "../../../assets/icons/AddImage";
 import { toastr } from "react-redux-toastr";
@@ -13,6 +12,7 @@ import YoungHeader from "../../phase0/components/YoungHeader";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES, UNSS_TYPE } from "snu-lib";
 import Select from "../../../components/forms/SelectHookForm";
 import InputText from "../../../components/ui/forms/InputTextHookForm";
+import InputNumber from "../../../components/ui/forms/InputNumberHookForm";
 import { useForm, Controller } from "react-hook-form";
 
 export default function FormEquivalence({ young, onChange }) {
@@ -233,7 +233,7 @@ export default function FormEquivalence({ young, onChange }) {
               <div className="mt-4 text-xs font-medium leading-4">Combien de temps ?</div>
               <div className="mt-3 space-y-4">
                 <div className="flex items-stretch gap-2">
-                  <InputText register={register} name="missionDuration" label="durée (en heures)" validation={{ required: true }} />
+                  <InputNumber register={register} name="missionDuration" label="durée (en heures)" validation={{ required: true }} />
                 </div>
               </div>
             </div>
