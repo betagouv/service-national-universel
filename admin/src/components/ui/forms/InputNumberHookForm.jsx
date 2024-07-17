@@ -1,5 +1,11 @@
 import React from "react";
 
+const handleInputChange = (e) => {
+  let value = Number(e.target.value);
+  value = Math.round(value); // Arrondir à l'entier le plus proche
+  e.target.value = value; // Mettre à jour la valeur de l'input
+};
+
 export default function InputNumber({ register, name, label, disabled = false, error = "", readOnly = false, placeholder = "", validation = {} }) {
   return (
     <div
@@ -22,6 +28,7 @@ export default function InputNumber({ register, name, label, disabled = false, e
           type="number"
           step="1"
           min="1"
+          onChange={handleInputChange}
         />
       </div>
       {error && <div className="text-[#EF4444]">{error}</div>}

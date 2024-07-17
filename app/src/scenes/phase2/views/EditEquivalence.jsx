@@ -154,7 +154,7 @@ export default function EditEquivalence() {
   };
 
   const handleInputChange = (e) => {
-    const value = e.target.value;
+    const value = Math.round(e.target.value);
     const missionDuration = unit === "jours" ? String(value * 8) : String(value);
     setData((prevData) => ({
       ...prevData,
