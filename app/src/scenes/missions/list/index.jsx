@@ -8,7 +8,7 @@ import { debounce } from "../../../utils";
 import MissionFilters from "./components/MissionFilters";
 import MissionList from "./components/MissionList";
 import Loader from "../../../components/Loader";
-import { HiOutlineAdjustments } from "react-icons/hi";
+import { RiHeartFill } from "react-icons/ri";
 import useAuth from "@/services/useAuth";
 
 export default function List() {
@@ -68,9 +68,9 @@ export default function List() {
         <h1 className="text-2xl md:text-4xl text-center font-bold text-gray-800">Trouvez un Engagement</h1>
         <div className="flex items-center justify-center">
           <Link className="block" to="/preferences">
-            <div className="group flex items-center gap-1 rounded-[10px] border-[1px] border-blue-700 py-2.5 px-3 hover:bg-blue-700 hover:text-[#ffffff]">
-              <HiOutlineAdjustments className="text-blue-700 group-hover:text-[#ffffff]" />
-              <div className="flex-1 text-sm text-blue-700 group-hover:text-[#ffffff]">Mes préférences</div>
+            <div className="group flex items-center gap-1 py-2.5 px-3">
+              <RiHeartFill className="text-[#111827]" />
+              <div className="flex-1 text-md leading-4 text-[#111827] underline">Mes préférences</div>
             </div>
           </Link>
         </div>

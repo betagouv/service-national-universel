@@ -461,7 +461,7 @@ export default function MissionFilters({ filters, setFilters }) {
       </div>
 
       {/* Desktop */}
-      <div className="hidden md:block my-4 space-y-6 rounded-xl bg-gray-50 p-10">
+      <div className="hidden md:block my-4 space-y-6 rounded-xl p-10">
         {/* search bar */}
         <div className="relative flex flex-col justify-center">
           <div className="flex pl-8 pr-8 mb-2 w-full items-center overflow-hidden rounded-full border-[1px] border-gray-300 bg-white  p-1.5">
