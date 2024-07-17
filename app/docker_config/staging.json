@@ -5,6 +5,5 @@
   "ADMIN_URL": "https://admin.beta-snu.dev",
   "SUPPORT_URL": "https://support.beta-snu.dev",
   "MAINTENANCE": "$MAINTENANCE",
-  "ENABLE_2FA_APP": "$ENABLE_2FA_APP",
   "RELEASE": "$RELEASE"
 }

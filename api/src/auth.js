@@ -365,8 +365,8 @@ class Auth {
 
       const shouldUse2FA = async () => {
         try {
-          if (this.model.modelName === "young" && config.ENABLE_2FA_APP === false) return false;
-          if (this.model.modelName === "referent" && config.ENABLE_2FA_ADMIN === false) return false;
+          if (this.model.modelName === "young" && config.get("ENABLE_2FA_APP") === false) return false;
+          if (this.model.modelName === "referent" && config.get("ENABLE_2FA_ADMIN") === false) return false;
           if (config.ENVIRONMENT === "development") return false;
           if (["staging", "ci", "custom"].includes(config.ENVIRONMENT) && !user.email.match(regexp_exception_staging)) return false;
 
