@@ -16,7 +16,7 @@ import { GrClose } from "react-icons/gr";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
-  const keyList = ["type", "desc", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
+  const keyList = ["type", "desc", "structureName", "address", "zip", "city", "startDate", "endDate", "contactFullName", "contactEmail", "files", "missionDuration"];
   const [data, setData] = useState();
   const [openType, setOpenType] = useState(false);
   const [openSousType, setOpenSousType] = React.useState(false);
@@ -25,7 +25,6 @@ export default function EditEquivalence() {
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [errorMail, setErrorMail] = useState(false);
-  const [duration, setDuration] = useState("");
   const [unit, setUnit] = useState("heures");
   const refType = useRef(null);
   const refSousType = React.useRef(null);
@@ -118,6 +117,12 @@ export default function EditEquivalence() {
           setErrorMail(false);
         }
       }
+      if (key === "missionDuration") {
+        console.log(data[key]);
+        if (data[key] === undefined || data[key] === "" || data[key] == 0) {
+          error = true;
+        }
+      }
     }
     setError(error);
 
@@ -165,7 +170,6 @@ export default function EditEquivalence() {
   const handleSelectChange = (e) => {
     const value = e.target.value;
     setUnit(value);
-    setDuration("");
     setData((prevData) => ({
       ...prevData,
       missionDuration: "",

@@ -419,7 +419,7 @@ async function updateYoungPhase2Hours(young, fromUser) {
         .reduce((acc, current) => acc + current, 0) +
       equivalences
         .filter((equivalence) => equivalence.status === "VALIDATED")
-        .map((equivalence) => Number(equivalence?.missionDuration || 0))
+        .map((equivalence) => equivalence?.missionDuration || 0)
         .reduce((acc, current) => acc + current, 0);
 
     const totalHoursEstimated = applications
