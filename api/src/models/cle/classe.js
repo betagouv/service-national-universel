@@ -5,6 +5,7 @@ const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRA
 const patchHistory = require("mongoose-patch-history").default;
 const { ReferentCreatedBy } = require("snu-lib");
 const MODELNAME = "classe";
+const EtablissementModel = require("./etablissement");
 
 const classeMetadataSchema = {
   createdBy: {
