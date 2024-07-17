@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory, useParams } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import AddImage from "../../../assets/icons/AddImage";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import InformationCircle from "../../../assets/icons/InformationCircle";
@@ -12,6 +12,7 @@ import validator from "validator";
 import { slugifyFileName, UNSS_TYPE, translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
+import { GrClose } from "react-icons/gr";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -178,12 +179,18 @@ export default function EditEquivalence() {
   if (data?._id && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data?.status)) history.push("/phase2");
 
   return (
-    <div className="align-center my-4 flex justify-center ">
-      <div className="p-4 max-w-2xl">
-        <div className="text-center text-2xl font-bold leading-10 tracking-tight md:text-4xl ">
-          {mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}
+    <>
+      <div className="mt-10 grid grid-cols-[10%_80%_10%] px-4">
+        <div className="flex items-center">
+          <Link to="/phase2">
+            <GrClose className="text-gray-600 hover:text-gray-800 text-xl" />
+          </Link>
         </div>
-        <div className="mt-4 rounded-lg border-[1px] border-blue-400 bg-blue-50">
+        <h1 className="text-center text-xl md:text-5xl font-bold">{mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}</h1>
+      </div>
+
+      <div className="mt-8 p-4 max-w-2xl mx-auto">
+        <div className="rounded-lg border-[1px] border-blue-400 bg-blue-50">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />
             <div className="ml-4 flex-1 text-sm font-medium leading-5 text-blue-800">Pour être reconnu et validé, votre engagement doit être terminé.</div>
@@ -516,7 +523,7 @@ export default function EditEquivalence() {
           {loading ? "Chargement" : mode === "edit" ? "Modifier ma demande" : "Soumettre ma demande"}
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
