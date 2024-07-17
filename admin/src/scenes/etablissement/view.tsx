@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { HiHome, HiPlus } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
+import { useQuery } from "@tanstack/react-query";
 
 import { Page, Header, Button } from "@snu/ds/admin";
 import { SUB_ROLES, ROLES, translate } from "snu-lib";
@@ -12,6 +13,7 @@ import Loader from "@/components/Loader";
 import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
 import { AuthState } from "@/redux/auth/reducer";
 import { ContactType } from "./components/types";
+import { AlerteMessageDto } from "snu-lib/src/dto";
 
 import Contact from "./components/Contact";
 import GeneralInfos from "./components/GeneralInfos";
@@ -19,6 +21,7 @@ import FirstLoginAdminChef from "./components/modale/FirstLoginAdminChef";
 import FirstLoginAdminCoordinator from "./components/modale/FirstLoginAdminCoordinator";
 import FirstLoginRefClasse from "./components/modale/FirstLoginRefClasse";
 import ButtonAddCoordinator from "./components/ButtonAddCoordinator";
+import InfoMessage from "../dashboardV2/components/ui/InfoMessage";
 
 export default function View() {
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -28,6 +31,18 @@ export default function View() {
   const [contacts, setContacts] = useState<ContactType[]>([]);
 
   const history = useHistory();
+
+  const { data: messages } = useQuery<AlerteMessageDto[]>({
+    queryKey: ["alerte-messages", "user"],
+    queryFn: async () => {
+      const { ok, code, data: response } = await api.get(`/alerte-message`);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
+        throw new Error(translate(code));
+      }
+      return response.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    },
+  });
 
   const getEtablissement = async () => {
     try {
@@ -93,6 +108,7 @@ export default function View() {
 
   return (
     <Page>
+      {messages?.map((msg) => <InfoMessage key={msg._id} title={msg.title} message={msg.content} priority={msg.priority} className="mb-6" />)}
       <Header
         title={etablissement.name}
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Fiche de mon établissement" }]}
