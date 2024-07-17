@@ -13,6 +13,8 @@ import EquivalenceCard from "../components/EquivalenceCard";
 import ApplicationCard from "../components/ApplicationCard";
 import Validated from "../Validated";
 import { fetchApplications, fetchEquivalences } from "../repo";
+import { theme } from "../../militaryPreparation/components/DocumentsPM";
+import { translateStatusMilitaryPreparationFiles } from "../../../utils";
 
 const Tooltip = ({ className }) => (
   <span className={className}>
@@ -26,6 +28,15 @@ const Tooltip = ({ className }) => (
       </div>
     </ReactTooltip>
   </span>
+);
+
+const MilitaryStatusBadge = ({ young, className }) => (
+  <div
+    className={`${className} md:ml-auto text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
+      theme.text[young.statusMilitaryPreparationFiles]
+    } rounded-sm px-2 py-[2px] `}>
+    {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
+  </div>
 );
 
 export default function View() {
@@ -50,18 +61,18 @@ export default function View() {
   if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return <Validated></Validated>;
 
   return (
-    <div className="p-8 bg-white flex flex-col">
+    <div className="p-4 md:p-8 bg-white flex flex-col">
       <div className="flex flex-col md:flex-row border-2 rounded-2xl border-gray-200 justify-center items-center">
         <span className="relative">
           <SemiCircleProgress current={phase2NumberHoursDone} total={PHASE2_TOTAL_HOURS}></SemiCircleProgress>
           <Tooltip className="absolute top-2 right-0" />
         </span>
         {phase2NumberHoursDone == 0 && (
-          <span className="m-4 p-8 flex flex-col sm:border-t-2 md:border-t-0 md:border-l-2 text-center">
+          <span className="m-4 p-4 md:p-8 flex flex-col sm:border-t-2 md:border-t-0 md:border-l-2 text-center">
             <span className="font-bold">C'est parti !</span>
             <span className="text-gray-400 text-sm">Engagez vous au service de la nation.</span>
             <div className="flex flex-col justify-center gap-4 my-6">
-              <Link to="/mission" className="text-sm bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center line-clamp-1">
+              <Link to="/mission" className="text-sm bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center">
                 <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
                 Trouver un engagement
               </Link>
@@ -88,9 +99,11 @@ export default function View() {
           <span className="font-bold text-2xl">
             Engagements Réalisés
             {phase2NumberHoursDone < PHASE2_TOTAL_HOURS && (
-              <Link to="/phase2/equivalence" className="ml-4 text-sm font-normal bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center">
-                <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
-                Ajouter
+              <Link
+                to="/phase2/equivalence"
+                className="ml-4 text-sm font-normal bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-full md:rounded-md md:px-3 p-2.5 text-center">
+                <HiPlus className="inline-block text-xl align-text-bottom" />
+                <span className="hidden md:inline">Ajouter</span>
               </Link>
             )}
           </span>
@@ -115,14 +128,17 @@ export default function View() {
 
       <div className="pt-8 mt-8">
         <span className="font-bold text-2xl">Préparations Militaires</span>
-        <span className="mt-4 flex flex-row p-4 bg-gray-50 border-2 rounded-2xl border-gray-200 items-center">
-          <RiMedal2Line className="text-4xl p-2 bg-gray-200 rounded-full" />
+        <span className="mt-4 flex justify-center md:justify-start flex-row p-4 bg-gray-50 border-2 rounded-2xl border-gray-200 items-center">
+          <RiMedal2Line className="text-5xl md:text-4xl p-1 md:p-2 bg-gray-200 rounded-full" />
           <span className="flex flex-col ml-4">
+            <MilitaryStatusBadge className="md:hidden w-20" young={young}></MilitaryStatusBadge>
             <span>Mon dossier d'éligibilité</span>
+
             <Link className="text-blue-600" to="/ma-preparation-militaire">
-              Compléter
+              {young.statusMilitaryPreparationFiles ? "Consulter" : "Compléter"}
             </Link>
           </span>
+          <MilitaryStatusBadge className="sm:hidden md:flex" young={young}></MilitaryStatusBadge>
         </span>
       </div>
     </div>

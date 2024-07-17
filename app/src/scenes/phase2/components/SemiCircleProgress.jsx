@@ -6,7 +6,7 @@ export const SemiCircleProgress = ({ current, total }) => {
     <svg className="h-80 pb-8" viewBox="0 0 110 100">
       <linearGradient id="gradient" x1="0" y1="0" x2="100%" y2="0%">
         <stop offset="0%" stopColor="#7197eb" />
-        <stop offset="100%" stopColor="#2865eb" />
+        <stop offset="50%" stopColor="#2865eb" />
       </linearGradient>
       <path strokeWidth="9" strokeLinecap="round" className="stroke-gray-200" d="M30,90 A40,40 0 1,1 80,90" fill="none" />
       <path

@@ -5,7 +5,7 @@ import Preferences from "../preferences";
 export default function View() {
   const [currentTab, setCurrentTab] = useState(0);
   return (
-    <div className="p-8 bg-white flex flex-col">
+    <div className="p-1 md:p-8 bg-white flex flex-col">
       <h1 className="mt-6 mb-6 mx-auto text-center font-bold text-4xl md:text-5xl max-w-xl leading-tight md:leading-tight">Mes engagements</h1>
       <span className="p-8 flex justify-center ">
         <span
