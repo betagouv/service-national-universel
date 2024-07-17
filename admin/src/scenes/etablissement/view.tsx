@@ -31,7 +31,6 @@ export default function View() {
 
   const getEtablissement = async () => {
     try {
-      //TODO make one request to get etablissement, contact and classe
       const url = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/cle/etablissement/from-user" : `/cle/etablissement/${id}`;
       const { ok, code, data: response } = await api.get(url);
 
@@ -39,49 +38,13 @@ export default function View() {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
       }
       setEtablissement(response);
-      getClasse(response._id);
-      getContacts(response);
+      setContacts(response.referents.concat(response.coordinateurs));
+      if (user.role === ROLES.REFERENT_CLASSE) {
+        setClasseId(response.classes[0].id);
+      }
     } catch (e) {
       capture(e);
       toastr.error("Erreur", "Oups, une erreur est survenue lors de la récupération de l'établissement");
-    }
-  };
-
-  const getContacts = async (etablissement) => {
-    const contactList = etablissement.referentEtablissementIds.concat(etablissement.coordinateurIds);
-    try {
-      const requests = contactList.map(async (referentId) => {
-        const { ok, code, data: response } = await api.get(`/referent/${referentId}`);
-
-        if (!ok) {
-          return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
-        }
-
-        return response;
-      });
-      const contactResponses = await Promise.all(requests);
-      setContacts(contactResponses);
-    } catch (e) {
-      capture(e);
-      toastr.error("Erreur", "Oups, une erreur est survenue lors de la récupération des contacts");
-    }
-  };
-
-  const getClasse = async (id) => {
-    try {
-      const { ok, code, data: response } = await api.get(`/cle/classe/from-etablissement/${id}`);
-
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération des classes", translate(code));
-      }
-      if (user.role === ROLES.REFERENT_CLASSE) {
-        const classId = response.find((classe) => classe.referentClasseIds.includes(user._id))._id;
-        if (!classId) return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
-        setClasseId(classId);
-      }
-    } catch (e) {
-      capture(e);
-      toastr.error("Erreur", "Oups, une erreur est survenue lors de la récupération des classes");
     }
   };
 
