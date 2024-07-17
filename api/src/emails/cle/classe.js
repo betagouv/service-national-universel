@@ -124,6 +124,28 @@ module.exports = (emailsEmitter) => {
       capture(error);
     }
   });
+
+  //classe increase objective
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_INCREASE_OBJECTIVE, async (classe) => {
+    try {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) throw new Error("Etablissement not found");
+
+      // Referents regionaux
+      const refsReg = [...(await getReferentReg(etablissement.region))];
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_INCREASE_OBJECTIVE, {
+        emailTo: refsReg.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
+        params: {
+          schoolName: etablissement.name,
+          class_name: classe.name,
+          cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
+        },
+      });
+    } catch (error) {
+      capture(error);
+    }
+  });
 };
 
 //We want to send emails to the right referents department
