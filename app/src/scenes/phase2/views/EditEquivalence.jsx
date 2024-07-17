@@ -157,7 +157,7 @@ export default function EditEquivalence() {
   };
 
   const handleInputChange = (e) => {
-    const value = e.target.value;
+    const value = Math.round(e.target.value);
     setData(value);
     const missionDuration = unit === "jours" ? String(value * 7) : String(value);
     setData((prevData) => ({
@@ -413,6 +413,7 @@ export default function EditEquivalence() {
                   placeholder="Exemple: 10"
                   type="number"
                   min="1"
+                  step="1"
                   value={data?.missionDuration}
                   onChange={handleInputChange}
                 />
