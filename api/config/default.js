@@ -57,6 +57,4 @@ module.exports = {
   API_DEMARCHE_SIMPLIFIEE_TOKEN: undefined,
   PM2_SLACK_URL: undefined,
   API_ANTIVIRUS_KEY: undefined,
-  ENABLE_2FA_APP: true,
-  ENABLE_2FA_ADMIN: true,
 };
