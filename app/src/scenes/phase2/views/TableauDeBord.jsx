@@ -2,7 +2,7 @@ import React from "react";
 import ReactTooltip from "react-tooltip";
 import { Link } from "react-router-dom";
 import { supportURL } from "@/config";
-import { PHASE2_TOTAL_HOURS, APPLICATION_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS_PHASE2 } from "snu-lib";
+import { PHASE2_TOTAL_HOURS, APPLICATION_STATUS, EQUIVALENCE_STATUS } from "snu-lib";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/services/useAuth";
 import { HiPlus, HiSearch } from "react-icons/hi";
@@ -11,18 +11,17 @@ import InfobulleIcon from "../../../assets/infobulleIcon.svg";
 import SemiCircleProgress from "../components/SemiCircleProgress";
 import EquivalenceCard from "../components/EquivalenceCard";
 import ApplicationCard from "../components/ApplicationCard";
-import Validated from "../Validated";
 import { fetchApplications, fetchEquivalences } from "../repo";
-import { theme } from "../../militaryPreparation/components/DocumentsPM";
+import { statusColors } from "../engagement.utils";
 import { translateStatusMilitaryPreparationFiles } from "../../../utils";
 
 const Tooltip = ({ className }) => (
   <span className={className}>
     <img src={InfobulleIcon} data-tip data-for="info" />
     <ReactTooltip clickable effect="solid" id="info" className="w-[527px] bg-white shadow-xl" arrowColor="white">
-      <div className="bg-white mb-2 text-left text-[15px] text-[#414458]">
-        Vous disposez d’un an pour débuter votre phase d’engagement et de deux ans pour la terminer.
-        <a href={`${supportURL}/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig`} target="_blank" rel="noreferrer" className="">
+      <div className="bg-white text-left text-[15px] text-[#414458]">
+        Vous disposez d’un an pour débuter votre phase d’engagement et de deux ans pour la terminer.{" "}
+        <a className="!text-blue-600" href={`${supportURL}/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig`} target="_blank" rel="noreferrer" className="">
           En savoir plus.
         </a>
       </div>
@@ -31,34 +30,26 @@ const Tooltip = ({ className }) => (
 );
 
 const MilitaryStatusBadge = ({ young, className }) => (
-  <div
-    className={`${className} md:ml-auto text-xs font-normal ${theme.background[young.statusMilitaryPreparationFiles]} ${
-      theme.text[young.statusMilitaryPreparationFiles]
-    } rounded-sm px-2 py-[2px] `}>
+  <div className={`${className} md:ml-auto text-xs font-normal  ${statusColors[young.statusMilitaryPreparationFiles]} rounded-sm px-2 py-[2px] `}>
     {translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}
   </div>
 );
 
 export default function View() {
   const { young } = useAuth();
-  console.log(young);
   const phase2NumberHoursDone = young.phase2NumberHoursDone || 0;
-  // const phase2NumberHoursDone = 0;
   const applications = useQuery({ queryKey: ["application"], queryFn: () => fetchApplications(young._id) });
   const equivalences = useQuery({ queryKey: ["equivalence"], queryFn: () => fetchEquivalences(young._id) });
 
   const missionDoneCards =
     applications.data &&
     equivalences.data &&
-    [...applications.data, ...equivalences.data]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .filter(({ status }) =>
-        [APPLICATION_STATUS.DONE, EQUIVALENCE_STATUS.VALIDATED, EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(status),
-      );
+    [
+      ...applications.data.filter(({ status }) => [APPLICATION_STATUS.DONE].includes(status)),
+      ...equivalences.data.filter(({ status }) => [EQUIVALENCE_STATUS.VALIDATED, EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(status)),
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const missionCandidateCards =
     applications.data && applications.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).filter(({ status }) => status !== APPLICATION_STATUS.DONE);
-
-  if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return <Validated></Validated>;
 
   return (
     <div className="p-4 md:p-8 bg-white flex flex-col">
