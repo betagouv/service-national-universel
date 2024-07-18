@@ -88,7 +88,7 @@ const Schema = new mongoose.Schema({
   },
 
   missionDuration: {
-    type: String,
+    type: Number,
     documentation: {
       description: "Durée de la mission pour cette candidature (peut-être différent de la durée initiale)",
     },
