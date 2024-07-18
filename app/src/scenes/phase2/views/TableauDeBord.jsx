@@ -18,10 +18,18 @@ import { translateStatusMilitaryPreparationFiles } from "../../../utils";
 const Tooltip = ({ className }) => (
   <span className={className}>
     <img src={InfobulleIcon} data-tip data-for="info" />
-    <ReactTooltip clickable effect="solid" id="info" className="w-[527px] bg-white shadow-xl" arrowColor="white">
-      <div className="bg-white text-left text-[15px] text-[#414458]">
+    <ReactTooltip
+      clickable
+      type="light"
+      effect="solid"
+      delayHide={1000}
+      id="info"
+      className="w-[527px] bg-white shadow-xl custom-tooltip-radius !opacity-100 !shadow-md"
+      tooltipRadius="6"
+      arrowColor="white">
+      <div className="list-outside bg-white text-left text-[15px] text-[#414458]">
         Vous disposez d’un an pour débuter votre phase d’engagement et de deux ans pour la terminer.{" "}
-        <a className="!text-blue-600" href={`${supportURL}/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig`} target="_blank" rel="noreferrer" className="">
+        <a className="!text-blue-600" href={`${supportURL}/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig`} target="_blank" rel="noreferrer">
           En savoir plus.
         </a>
       </div>
