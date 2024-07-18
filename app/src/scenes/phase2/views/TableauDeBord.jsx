@@ -93,7 +93,7 @@ export default function View() {
           </div>
         ))}
 
-      {missionDoneCards && (
+      {missionDoneCards?.length > 0 && (
         <div className="pt-8 mt-8">
           <span className="font-bold text-2xl">
             Engagements Réalisés
@@ -114,7 +114,7 @@ export default function View() {
         </div>
       )}
 
-      {missionCandidateCards && (
+      {missionCandidateCards?.length > 0 && (
         <div className="pt-8 mt-8">
           <span className="font-bold text-2xl">Candidatures</span>
           <div className="flex flex-col md:flex-row gap-3 pb-3 flex-wrap pt-4">
