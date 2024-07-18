@@ -32,8 +32,6 @@ import FuseeSvg from "../../assets/Fusee";
 import InfobulleIcon from "../../../../assets/infobulleIcon.svg";
 
 import { HiOutlineAdjustments, HiOutlineArrowNarrowRight } from "react-icons/hi";
-import RadioInput from "../../../../assets/radioInput.svg";
-import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 import Select from "./Select.jsx";
 import Toggle from "./Toggle";
 import Modal from "../../../../components/ui/modals/Modal";
