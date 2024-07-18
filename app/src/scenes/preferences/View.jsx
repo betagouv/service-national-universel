@@ -14,14 +14,7 @@ export default function View({ young, onSave, saving, onToggleDomain, hasDomainS
   return (
     <div className="md:m-8">
       <Box className="mb-8 rounded-b-lg shadow">
-        <div className="flex flex-col items-center md:flex-row md:items-start">
-          <div className="mr0 mb-4 md:mr-4 md:mb-0">
-            <BigTitle>Mes préférences de missions</BigTitle>
-            <div>
-              En vue de la mission d&apos;intérêt général de la Phase 2, renseignez ci-dessous vos préférences. Ces choix permettront à l&apos;administration de vous proposer des
-              missions en cohérence avec vos motivations.
-            </div>
-          </div>
+        <div className="flex justify-end">
           <PlainButton onClick={onSave} spinner={saving}>
             Enregistrer
           </PlainButton>

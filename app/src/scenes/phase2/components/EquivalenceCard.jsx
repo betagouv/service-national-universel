@@ -6,7 +6,7 @@ import { statusColors } from "../engagement.utils";
 
 export default function EquivalenceCard({ equivalence }) {
   return (
-    <Link to={`/phase2/equivalence/${equivalence._id}`} className="bg-white rounded-xl border w-72 md:w-96 only:w-full only:md:w-96 flex-none snap-always snap-center shadow-sm">
+    <Link to={`/phase2/equivalence/${equivalence._id}`} className="bg-white rounded-xl border w-72 md:w-96 w-full only:md:w-96 flex-none snap-always snap-center shadow-sm">
       <p className="h-8 p-2 text-xs bg-gray-50 border-b-[1px] rounded-t-xl text-gray-800">✏️ Vous avez ajouté cet engagement</p>
 
       <div className="h-40 p-3 flex flex-col justify-between">
