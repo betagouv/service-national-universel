@@ -3,7 +3,7 @@ import { SUB_ROLES, SUPPORT_ROLES_LIST, VISITOR_SUB_ROLES_LIST } from "../roles"
 export type UserDto = {
   _id: string;
   role: string;
-  eamil: string;
+  email: string;
   firstName: string;
   lastName: string;
   structureId: string;
