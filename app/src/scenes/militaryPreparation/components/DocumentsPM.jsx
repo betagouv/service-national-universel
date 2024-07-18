@@ -7,27 +7,27 @@ import FileCard from "./FileCard";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
 
+export const theme = {
+  background: {
+    WAITING_VALIDATION: "bg-sky-100",
+    WAITING_CORRECTION: "bg-[#FD7A02]",
+    VALIDATED: "bg-[#71C784]",
+    REFUSED: "bg-red-500",
+  },
+  text: {
+    WAITING_VALIDATION: "text-sky-600",
+    WAITING_CORRECTION: "text-white",
+    VALIDATED: "text-white",
+    REFUSED: "text-white",
+  },
+};
+
 export default function DocumentsPM({ docRef = null, showHelp = true }) {
   const young = useSelector((state) => state.Auth.young);
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalInform, setModalInform] = React.useState({ isOpen: false });
   const [open, setOpen] = React.useState();
   const [showFolder, setShowFolder] = React.useState(false);
-
-  const theme = {
-    background: {
-      WAITING_VALIDATION: "bg-sky-100",
-      WAITING_CORRECTION: "bg-[#FD7A02]",
-      VALIDATED: "bg-[#71C784]",
-      REFUSED: "bg-red-500",
-    },
-    text: {
-      WAITING_VALIDATION: "text-sky-600",
-      WAITING_CORRECTION: "text-white",
-      VALIDATED: "text-white",
-      REFUSED: "text-white",
-    },
-  };
 
   React.useEffect(() => {
     if (showHelp === true) {

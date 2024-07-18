@@ -771,6 +771,8 @@ const LIMIT_DATE_TOTAL_SEATS = new Date("2024-09-30");
 // Version courante du reglement intérieur, au format date, cela permet de vérifier si un jeune doit le revalider avant son départ en séjour.
 const REGLEMENT_INTERIEUR_VERSION = "2024-10-20";
 
+const PHASE2_TOTAL_HOURS = 84;
+
 const CLE_TYPE_LIST = Object.values(CLE_TYPE);
 const CLE_SECTOR_LIST = Object.values(CLE_SECTOR);
 const CLE_GRADE_LIST = Object.values(CLE_GRADE);
@@ -848,6 +850,7 @@ export {
   ACADEMIQUE_DOMAINS,
   LIMIT_DATE_ESTIMATED_SEATS,
   LIMIT_DATE_TOTAL_SEATS,
+  PHASE2_TOTAL_HOURS,
 };
 export default {
   YOUNG_STATUS,
@@ -912,4 +915,5 @@ export default {
   ACADEMIQUE_DOMAINS,
   LIMIT_DATE_ESTIMATED_SEATS,
   LIMIT_DATE_TOTAL_SEATS,
+  PHASE2_TOTAL_HOURS,
 };
