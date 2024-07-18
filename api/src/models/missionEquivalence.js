@@ -75,6 +75,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // legacy
   frequency: {
     type: {
       nombre: String,
@@ -83,6 +84,13 @@ const Schema = new mongoose.Schema({
     },
     documentation: {
       description: "Fréquence de la mission",
+    },
+  },
+
+  missionDuration: {
+    type: String,
+    documentation: {
+      description: "Durée de la mission pour cette candidature (peut-être différent de la durée initiale)",
     },
   },
 

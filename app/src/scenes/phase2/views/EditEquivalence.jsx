@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AiOutlinePlus } from "react-icons/ai";
 import { BsCheck2 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -17,24 +16,18 @@ import { GrClose } from "react-icons/gr";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
-  const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
-  const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
-  const keyList = ["type", "desc", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
+  const keyList = ["type", "desc", "structureName", "address", "zip", "city", "startDate", "endDate", "contactFullName", "contactEmail", "files", "missionDuration"];
   const [data, setData] = useState();
   const [openType, setOpenType] = useState(false);
   const [openSousType, setOpenSousType] = React.useState(false);
-  const [openDuree, setOpenDuree] = useState(false);
-  const [openFrequence, setOpenFrequence] = useState(false);
-  const [frequence, setFrequence] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [errorMail, setErrorMail] = useState(false);
+  const [unit, setUnit] = useState("heures");
   const refType = useRef(null);
   const refSousType = React.useRef(null);
-  const refDuree = useRef(null);
-  const refFrequence = useRef(null);
   const history = useHistory();
   const { equivalenceId } = useParams();
   const mode = equivalenceId ? "edit" : "create";
@@ -80,12 +73,6 @@ export default function EditEquivalence() {
       if (refSousType.current && !refSousType.current.contains(event.target)) {
         setOpenSousType(false);
       }
-      if (refDuree.current && !refDuree.current.contains(event.target)) {
-        setOpenDuree(false);
-      }
-      if (refFrequence.current && !refFrequence.current.contains(event.target)) {
-        setOpenFrequence(false);
-      }
     };
     document.addEventListener("click", handleClickOutside, true);
     return () => {
@@ -99,7 +86,6 @@ export default function EditEquivalence() {
         const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`);
         if (ok) {
           setData(data);
-          if (data?.frequency?.nombre && data?.frequency?.duree && data?.frequency?.frequence) setFrequence(true);
           return;
         }
       })();
@@ -111,18 +97,6 @@ export default function EditEquivalence() {
     for (const key of keyList) {
       if (key === "files" && !data[key]?.length) {
         error = true;
-      } else if (key === "frequency") {
-        if (
-          frequence &&
-          (data[key]?.nombre === "" ||
-            data[key]?.nombre === undefined ||
-            data[key]?.duree === "" ||
-            data[key]?.duree === undefined ||
-            data[key]?.frequence === "" ||
-            data[key]?.frequence === undefined)
-        ) {
-          error = true;
-        }
       } else if (key === "sousType") {
         if (["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === undefined || data.sousType === "")) {
           error = true;
@@ -134,16 +108,19 @@ export default function EditEquivalence() {
         if (data.type !== "Autre") {
           delete data.desc;
         }
-      } else if (data[key] === undefined || data[key] === "") {
-        error = true;
       }
-
       if (key === "contactEmail") {
         if (data[key] && !validator.isEmail(data[key])) {
           setErrorMail(true);
           error = true;
         } else {
           setErrorMail(false);
+        }
+      }
+      if (key === "missionDuration") {
+        console.log(data[key]);
+        if (data[key] === undefined || data[key] === "" || data[key] == 0) {
+          error = true;
         }
       }
     }
@@ -179,6 +156,24 @@ export default function EditEquivalence() {
       setLoading(false);
       return;
     }
+  };
+
+  const handleInputChange = (e) => {
+    const value = Math.round(e.target.value);
+    const missionDuration = unit === "jours" ? String(value * 8) : String(value);
+    setData((prevData) => ({
+      ...prevData,
+      missionDuration: missionDuration,
+    }));
+  };
+
+  const handleSelectChange = (e) => {
+    const value = e.target.value;
+    setUnit(value);
+    setData((prevData) => ({
+      ...prevData,
+      missionDuration: "",
+    }));
   };
 
   if (data?._id && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data?.status)) history.push("/phase2");
@@ -410,105 +405,29 @@ export default function EditEquivalence() {
               />
             </div>
           </div>
-          {frequence ? (
-            <>
-              <div className="mt-2 flex flex-wrap items-stretch gap-2 md:!flex-nowrap">
-                <div className="flex flex-1 gap-2 md:flex-none">
-                  <div className="mt-3 flex w-1/2 flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2">
-                    {data?.frequency?.nombre ? <div className="text-xs font-normal leading-4 text-gray-500">Nombre</div> : null}
-                    <input
-                      className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
-                      placeholder="Nombre"
-                      type="text"
-                      value={data?.frequency?.nombre}
-                      onChange={(e) => setData({ ...data, frequency: { ...data.frequency, nombre: e.target.value } })}
-                    />
-                  </div>
-                  <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
-                    {data?.frequency?.duree ? <div className="text-xs font-normal leading-4 text-gray-500">Durée</div> : null}
-                    <div className="relative" ref={refDuree}>
-                      <button className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50" onClick={() => setOpenDuree((e) => !e)}>
-                        <div className="flex items-center gap-2">
-                          {data?.frequency?.duree ? (
-                            <span className="text-sm font-normal leading-5">{data?.frequency?.duree}</span>
-                          ) : (
-                            <span className="text-sm font-normal leading-5 text-gray-400">Durée</span>
-                          )}
-                        </div>
-                        <ChevronDown className="text-gray-400" />
-                      </button>
-                      {/* display options */}
-                      <div className={`${openDuree ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
-                        {optionsDuree.map((option) => (
-                          <div
-                            key={option}
-                            onClick={() => {
-                              setData({ ...data, frequency: { ...data.frequency, duree: option } });
-                              setOpenDuree(false);
-                            }}
-                            className={`${option === data?.frequency?.duree && "bg-gray font-bold"}`}>
-                            <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
-                              <div>{option}</div>
-                              {option === data?.frequency?.duree ? <BsCheck2 /> : null}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 flex w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
-                  {data?.frequency?.frequence ? <div className="text-xs font-normal leading-4 text-gray-500">Fréquence</div> : null}
-                  <div className="relative" ref={refFrequence}>
-                    <button
-                      className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
-                      onClick={() => setOpenFrequence((e) => !e)}>
-                      <div className="flex items-center gap-2">
-                        {data?.frequency?.frequence ? (
-                          <span className="text-sm font-normal leading-5">{data?.frequency?.frequence}</span>
-                        ) : (
-                          <span className="text-sm font-normal leading-5 text-gray-400">Fréquence</span>
-                        )}
-                      </div>
-                      <ChevronDown className="text-gray-400" />
-                    </button>
-                    {/* display options */}
-                    <div className={`${openFrequence ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
-                      {optionsFrequence.map((option) => (
-                        <div
-                          key={option}
-                          onClick={() => {
-                            setData({ ...data, frequency: { ...data.frequency, frequence: option } });
-                            setOpenFrequence(false);
-                          }}
-                          className={`${option === data?.frequency?.frequence && "bg-gray font-bold"}`}>
-                          <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
-                            <div>{option}</div>
-                            {option === data?.frequency?.frequence ? <BsCheck2 /> : null}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+          <div className="mt-4">
+            <div className="text-xs font-medium leading-4">Combien de temps ?</div>
+            <div className="mt-3 flex flex-row  items-stretch gap-2 align-middle">
+              <div className="w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+                <input
+                  className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
+                  placeholder="Exemple: 10"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={data?.missionDuration}
+                  onChange={handleInputChange}
+                />
               </div>
-              <div
-                className="mt-3 text-center text-sm font-normal leading-5 text-indigo-600 hover:underline"
-                onClick={() => {
-                  setFrequence(false);
-                  setData({ ...data, frequency: undefined });
-                }}>
-                Supprimer la fréquence
+              <div className="w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+                <select className="text-gray-500 w-full text-sm font-normal leading-5" value={unit} onChange={handleSelectChange}>
+                  <option value="heures">Heures</option>
+                  <option value="jours">Jours</option>
+                </select>
               </div>
-            </>
-          ) : (
-            <>
-              <div className="group mt-4 flex cursor-pointer items-center justify-center rounded-lg bg-blue-50 py-3" onClick={() => setFrequence(true)}>
-                <AiOutlinePlus className="mr-2 h-5 w-5 text-indigo-400 group-hover:scale-110" />
-                <div className="text-sm font-medium leading-5 text-blue-700 group-hover:underline">Ajouter la fréquence (facultatif)</div>
-              </div>
-            </>
-          )}
+            </div>
+            <p className="text-gray-500 w-full text-xs font-normal leading-5 mt-1">Arrondir à l'entier supérieur.</p>
+          </div>
         </div>
         <div className="mt-4 rounded-lg bg-white p-6">
           <div className="text-lg font-bold leading-7">Personne contact au sein de la structure d’accueil</div>
