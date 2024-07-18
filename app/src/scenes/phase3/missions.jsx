@@ -10,12 +10,15 @@ import { useSelector } from "react-redux";
 import { Col, CustomInput, Row } from "reactstrap";
 import MissionCard from "./components/missionCard";
 import Pagination from "../../components/nav/Pagination";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { HeroContainer } from "@/components/Content";
 import { RiArrowLeftSLine } from "react-icons/ri";
 
 export default function MissionsComponent() {
   const young = useSelector((state) => state.Auth.young);
+  const location = useLocation();
+  const urlParams = new URLSearchParams(location.search);
+  const publisherName = urlParams.get("publisherName") || "";
   const [filters, setFilters] = React.useState({
     search: "",
     location: {
@@ -24,14 +27,15 @@ export default function MissionsComponent() {
     },
     distance: 50,
     domain: "",
+    publisherName: publisherName,
   });
+
   const [page, setPage] = React.useState(0);
   const [size, setSize] = React.useState(20);
   const [sort, setSort] = React.useState("geo");
   const [data, setData] = React.useState({});
-
   const domainOptions = Object.entries(JVA_MISSION_DOMAINS).map(([key, value]) => ({ value: key, label: value }));
-
+  console.log(filters);
   const updateOnFilterChange = useCallback(
     debounce(async (filters, page, size, sort, setData) => {
       try {

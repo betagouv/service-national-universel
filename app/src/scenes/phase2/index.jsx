@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { Switch, useHistory } from "react-router-dom";
 import { permissionPhase2 } from "../../utils";
 import MesEngagements from "./MesEngagements";
+import Missions from "../phase3/missions";
 import Home from "./Home";
 import EditEquivalence from "./views/EditEquivalence";
 import { SentryRoute } from "../../sentry";
@@ -21,6 +22,8 @@ export default function Index() {
       <SentryRoute path="/phase2/equivalence/:equivalenceId" component={EditEquivalence} />
       <SentryRoute path="/phase2/equivalence" component={EditEquivalence} />
       <SentryRoute path="/phase2/mes-engagements" component={MesEngagements} />
+      <SentryRoute path="/phase2/missions" component={Missions} />
+      {/* <SentryRoute path="/phase2/programs/:id" component={Programs} /> */}
       <SentryRoute path="/phase2" component={Home} />
     </Switch>
   );
