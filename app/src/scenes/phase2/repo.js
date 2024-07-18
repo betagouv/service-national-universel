@@ -26,6 +26,15 @@ export async function fetchEquivalences(youngId) {
   return data.map((e) => ({ ...e, engagementType: "equivalence" }));
 }
 
+export async function fetchEquivalence(youngId, id) {
+  const res = await fetch(`${apiURL}/young/${youngId}/phase2/equivalence/${id}`, {
+    headers: { Authorization: `JWT ${API.getToken()}` },
+  });
+  const { ok, data, error } = await res.json();
+  if (!ok) throw new Error(error.message);
+  return data;
+}
+
 export async function fetchAttestation(youngId, template, sendEmail) {
   const res = await fetch(`${apiURL}/young/${youngId}/documents/certificate/${template}${sendEmail ? "/send-email" : ""}`, {
     headers: { "Content-Type": "application/json", Authorization: `JWT ${API.getToken()}` },
