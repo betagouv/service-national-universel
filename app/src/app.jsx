@@ -1,84 +1,51 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Link, Router, Switch, useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { QueryClientProvider } from "@tanstack/react-query";
 
 import { setYoung } from "./redux/auth/actions";
-import { toastr } from "react-redux-toastr";
 import * as Sentry from "@sentry/react";
 
 import useDocumentCss from "@/hooks/useDocumentCss";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 
-import Account from "./scenes/account";
-import AllEngagements from "./scenes/all-engagements/index";
-import Auth from "./scenes/auth";
-import Candidature from "./scenes/candidature";
-import CGU from "./scenes/CGU";
-import ChangeSejour from "./scenes/phase1/changeSejour";
-import Contact from "./scenes/contact";
-import Contract from "./scenes/contract";
-import ContractDone from "./scenes/contract/done";
-import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
-import DesignSystemPage from "./scenes/develop/DesignSystemPage";
-import Diagoriente from "./scenes/diagoriente";
-import Engagement from "./scenes/engagement";
-import Footer from "./components/footer";
-import Home from "./scenes/home";
-import Inscription2023 from "./scenes/inscription2023";
-import Loader from "./components/Loader";
-import Maintenance from "./scenes/maintenance";
-import MilitaryPreparation from "./scenes/militaryPreparation";
-import Missions from "./scenes/missions";
-import ModalCGU from "./components/modals/ModalCGU";
-import Navbar from "./components/layout/navbar";
-import NonEligible from "./scenes/noneligible";
-import Phase1 from "./scenes/phase1";
-import Phase2 from "./scenes/phase2";
-import Phase3 from "./scenes/phase3";
-import AutresEngagements from "./scenes/phase3/home/waitingRealisation";
-import Echanges from "./scenes/echanges";
-import Preferences from "./scenes/preferences";
-import PreInscription from "./scenes/preinscription";
-import ReInscription from "./scenes/reinscription";
-import OnBoarding from "./scenes/cle/OnBoarding";
-import AccountAlreadyExists from "./scenes/account/AccountAlreadyExists";
-import RepresentantsLegaux from "./scenes/representants-legaux";
-import Thanks from "./scenes/contact/Thanks";
-import ViewMessage from "./scenes/echanges/View";
-import ModalRI from "./components/modals/ModalRI";
-import Notice from "./components/ui/alerts/Notice";
-
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
-import { ENABLE_PM, YOUNG_STATUS, shouldDisplayMaintenanceNotice, shouldReAcceptRI } from "./utils";
-import {
-  youngCanChangeSession,
-  inscriptionModificationOpenForYoungs,
-  shouldForceRedirectToReinscription,
-  shouldForceRedirectToInscription,
-  isFeatureEnabled,
-  FEATURES_NAME,
-} from "snu-lib";
+import { YOUNG_STATUS } from "./utils";
+import { inscriptionModificationOpenForYoungs, isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { cohortsInit, getCohort } from "./utils/cohorts";
+import FallbackComponent from "./components/FallBackComponent";
+
+const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
+const AllEngagements = lazy(() => import("./scenes/all-engagements/index"));
+const Auth = lazy(() => import("./scenes/auth"));
+const CGU = lazy(() => import("./scenes/CGU"));
+const Contact = lazy(() => import("./scenes/contact"));
+const Contract = lazy(() => import("./scenes/contract"));
+const ContractDone = lazy(() => import("./scenes/contract/done"));
+const Espace = lazy(() => import("./Espace"));
+const Inscription2023 = lazy(() => import("./scenes/inscription2023"));
+const Loader = lazy(() => import("./components/Loader"));
+const Maintenance = lazy(() => import("./scenes/maintenance"));
+const NonEligible = lazy(() => import("./scenes/noneligible"));
+const OnBoarding = lazy(() => import("./scenes/cle/OnBoarding"));
+const PreInscription = lazy(() => import("./scenes/preinscription"));
+const ReInscription = lazy(() => import("./scenes/reinscription"));
+const RepresentantsLegaux = lazy(() => import("./scenes/representants-legaux"));
+const Thanks = lazy(() => import("./scenes/contact/Thanks"));
+const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 
 initSentry();
 initApi();
 
-function FallbackComponent() {
-  return <></>;
-}
-
-const myFallback = <FallbackComponent />;
-
 export default function App() {
   return (
-    <Sentry.ErrorBoundary fallback={myFallback}>
+    <Sentry.ErrorBoundary fallback={FallbackComponent}>
       <QueryClientProvider client={queryClient}>
         <Router history={history}>
           <ScrollToTop />
@@ -155,23 +122,25 @@ const OptionalLogIn = () => {
   if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
 
   return (
-    <Switch>
-      <SentryRoute path="/validate-contract/done" component={ContractDone} />
-      <SentryRoute path="/validate-contract" component={Contract} />
-      <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-      <SentryRoute path="/noneligible" component={NonEligible} />
-      <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-      <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
-      <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
-      <SentryRoute path="/public-besoin-d-aide" component={Contact} />
-      <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
-      <SentryRoute path="/besoin-d-aide" component={Contact} />
-      <SentryRoute path="/auth" component={Auth} />
-      <SentryRoute path="/public-engagements" component={AllEngagements} />
-      <SentryRoute path="/merci" component={Thanks} />
-      <SentryRoute path="/preinscription" component={PreInscription} />
-      <Redirect to="/" />
-    </Switch>
+    <Suspense fallback={<Loader />}>
+      <Switch>
+        <SentryRoute path="/validate-contract/done" component={ContractDone} />
+        <SentryRoute path="/validate-contract" component={Contract} />
+        <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+        <SentryRoute path="/noneligible" component={NonEligible} />
+        <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
+        <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+        <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
+        <SentryRoute path="/public-besoin-d-aide" component={Contact} />
+        <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
+        <SentryRoute path="/besoin-d-aide" component={Contact} />
+        <SentryRoute path="/auth" component={Auth} />
+        <SentryRoute path="/public-engagements" component={AllEngagements} />
+        <SentryRoute path="/merci" component={Thanks} />
+        <SentryRoute path="/preinscription" component={PreInscription} />
+        <Redirect to="/" />
+      </Switch>
+    </Suspense>
   );
 };
 
@@ -180,11 +149,13 @@ const Inscription = () => {
   startReactDsfr({ defaultColorScheme: "light", Link });
 
   return (
-    <Switch>
-      <SentryRoute path="/inscription2023" component={Inscription2023} />
-      <SentryRoute path="/reinscription" component={ReInscription} />
-      <Redirect to="/" />
-    </Switch>
+    <Suspense fallback={<Loader />}>
+      <Switch>
+        <SentryRoute path="/inscription2023" component={Inscription2023} />
+        <SentryRoute path="/reinscription" component={ReInscription} />
+        <Redirect to="/" />
+      </Switch>
+    </Suspense>
   );
 };
 
@@ -232,89 +203,12 @@ const MandatoryLogIn = () => {
   }
 
   return (
-    <Switch>
-      <SentryRoute path={["/inscription2023", "/reinscription"]} component={Inscription} />
-      <SentryRoute path="/" component={Espace} />
-    </Switch>
-  );
-};
-
-const Espace = () => {
-  const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
-  const [isModalRIOpen, setIsModalRIOpen] = useState(false);
-
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
-
-  const handleModalCGUConfirm = async () => {
-    setIsModalCGUOpen(false);
-    const { ok, code } = await api.put(`/young/accept-cgu`);
-    if (!ok) {
-      setIsModalCGUOpen(true);
-      return toastr.error(`Une erreur est survenue : ${code}`);
-    }
-    return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
-  };
-
-  const handleModalRIConfirm = async () => {
-    setIsModalRIOpen(false);
-    const { ok, code } = await api.put(`/young/accept-ri`);
-    if (!ok) {
-      setIsModalRIOpen(true);
-      return toastr.error(`Une erreur est survenue : ${code}`);
-    }
-    return toastr.success("Vous avez bien accepté le nouveau règlement intérieur.");
-  };
-
-  useEffect(() => {
-    if (young && young.acceptCGU !== "true") {
-      setIsModalCGUOpen(true);
-    } else if (shouldReAcceptRI(young, cohort)) {
-      setIsModalRIOpen(true);
-    }
-  }, [young, cohort]);
-
-  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
-
-  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
-
-  if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
-
-  return (
-    <>
-      <div className="fixed top-0 left-0 right-0 z-10 w-screen  md:right-auto md:w-64">
-        <Navbar />
-      </div>
-      <main className="mt-16 md:mt-0 md:ml-[16rem]">
-        {shouldDisplayMaintenanceNotice && (
-          <Notice>Maintenance planifiée jeudi 18 avril de 20h à minuit&nbsp;: vous ne serez pas en mesure d'accéder aux plateformes pendant cette période.</Notice>
-        )}
-
-        <Switch>
-          <SentryRoute exact path="/" component={Home} />
-          <SentryRoute path="/account" component={Account} />
-          <SentryRoute path="/echanges" component={Echanges} />
-          <SentryRoute path="/phase1" component={Phase1} />
-          <SentryRoute path="/phase2" component={Phase2} />
-          <SentryRoute path="/phase3" component={Phase3} />
-          <SentryRoute path="/autres-engagements" component={AutresEngagements} />
-          <SentryRoute path="/les-programmes" component={Engagement} />
-          <SentryRoute path="/preferences" component={Preferences} />
-          <SentryRoute path="/mission" component={Missions} />
-          <SentryRoute path="/candidature" component={Candidature} />
-          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
-          <SentryRoute path="/diagoriente" component={Diagoriente} />
-          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={ChangeSejour} /> : null}
-          {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-          <Redirect to="/" />
-        </Switch>
-      </main>
-      <Footer />
-
-      <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
-      <ModalRI isOpen={isModalRIOpen} onAccept={handleModalRIConfirm} />
-    </>
+    <Suspense fallback={<Loader />}>
+      <Switch>
+        <SentryRoute path={["/inscription2023", "/reinscription"]} component={Inscription} />
+        <SentryRoute path="/" component={Espace} />
+      </Switch>
+    </Suspense>
   );
 };
 
