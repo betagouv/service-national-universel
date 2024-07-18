@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import EngagementSrc from "../../../assets/engagement/engagement-home.png";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -13,9 +13,20 @@ import DownloadMenu from "./components/DownloadMenu";
 import { Popover, PopoverButton } from "@headlessui/react";
 import { supportURL } from "@/config";
 import Voiture from "@/assets/Voiture";
+import { useLocation } from "react-router-dom";
 
 export default function HomePhase2() {
   const { young } = useSelector((state) => state.Auth);
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const element = document.getElementById(hash.replace("#", ""));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [hash]);
 
   return (
     <div className="bg-white pt-8 pb-16">
@@ -125,7 +136,9 @@ export default function HomePhase2() {
           <>
             <p className="w-fit mx-auto text-xs font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">EXPLOREZ D'AUTRES POSSIBILITES</p>
 
-            <h2 className="text-center font-bold text-2xl md:text-4xl m-0 mt-2 md:mt-4">Trouvez un engagement par vous-même</h2>
+            <h2 id="sectionEngagement" className="text-center font-bold text-2xl md:text-4xl m-0 mt-2 md:mt-4">
+              Trouvez un engagement par vous-même
+            </h2>
 
             <div className="mt-6 md:mt-12 border rounded-xl p-3 max-w-3xl mx-auto">
               <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 text-gray-500">
