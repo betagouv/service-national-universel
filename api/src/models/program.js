@@ -78,6 +78,11 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  publisherName: {
+    type: String,
+    documentation: "Ce params nous sert à filtrer les mission JVA et serviceCivique sur la phase 2 engagement, à ne pas modifier",
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
