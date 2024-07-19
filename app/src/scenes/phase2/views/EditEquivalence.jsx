@@ -25,6 +25,8 @@ export default function EditEquivalence() {
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [errorMail, setErrorMail] = useState(false);
+  const [duration, setDuration] = useState(null);
+  const [errorDuration, setErrorDuration] = useState(false);
   const [unit, setUnit] = useState("heures");
   const refType = useRef(null);
   const refSousType = React.useRef(null);
@@ -86,6 +88,7 @@ export default function EditEquivalence() {
         const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`);
         if (ok) {
           setData(data);
+          setDuration(data.missionDuration);
           return;
         }
       })();
@@ -118,8 +121,8 @@ export default function EditEquivalence() {
         }
       }
       if (key === "missionDuration") {
-        console.log(data[key]);
         if (data[key] === undefined || data[key] === "" || data[key] == 0) {
+          setErrorDuration(true);
           error = true;
         }
       }
@@ -159,8 +162,18 @@ export default function EditEquivalence() {
   };
 
   const handleInputChange = (e) => {
-    const value = Math.round(e.target.value);
-    const missionDuration = unit === "jours" ? String(value * 8) : String(value);
+    const value = e.target.value;
+    let missionDuration;
+
+    if (value === "") {
+      setDuration(null);
+      missionDuration = 0;
+    } else {
+      const roundedValue = Math.round(Number(value));
+      setDuration(roundedValue);
+      missionDuration = unit === "jours" ? String(roundedValue * 8) : String(roundedValue);
+    }
+
     setData((prevData) => ({
       ...prevData,
       missionDuration: missionDuration,
@@ -170,6 +183,7 @@ export default function EditEquivalence() {
   const handleSelectChange = (e) => {
     const value = e.target.value;
     setUnit(value);
+    setDuration("");
     setData((prevData) => ({
       ...prevData,
       missionDuration: "",
@@ -415,7 +429,7 @@ export default function EditEquivalence() {
                   type="number"
                   min="1"
                   step="1"
-                  value={data?.missionDuration}
+                  value={duration}
                   onChange={handleInputChange}
                 />
               </div>
@@ -427,6 +441,7 @@ export default function EditEquivalence() {
               </div>
             </div>
             <p className="text-gray-500 w-full text-xs font-normal leading-5 mt-1">Arrondir à l'entier supérieur.</p>
+            {errorDuration ? <div className="text-xs font-normal leading-4 text-red-500">Veuillez rentrer un nombre supérieur à 0</div> : null}
           </div>
         </div>
         <div className="mt-4 rounded-lg bg-white p-6">
