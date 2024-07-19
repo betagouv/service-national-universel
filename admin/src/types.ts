@@ -1,5 +1,7 @@
 import { ReferentDto } from "snu-lib/src/dto";
 
+export type RouteResponse<T> = { ok: boolean; code?: string; data: T };
+
 export type Young = { _id: string };
 
 export type BusLine = { _id: string };
