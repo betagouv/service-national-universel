@@ -4,9 +4,10 @@ import { Link, useHistory, useParams } from "react-router-dom";
 import { fetchEquivalence } from "../repo";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
-import { HiArrowLeft, HiPencil } from "react-icons/hi";
+import { HiArrowLeft, HiDownload, HiPaperClip, HiPencil } from "react-icons/hi";
 import EngagementStatusBadge from "../components/EngagementStatusBadge";
 import CopyButton from "@/components/buttons/CopyButton";
+import { EQUIVALENCE_STATUS } from "snu-lib";
 
 export default function Equivalence() {
   const { young } = useAuth();
@@ -28,17 +29,19 @@ export default function Equivalence() {
           <p className="w-fit mx-auto text-xs font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">AJOUT D'UN ENGAGEMENT REALISE</p>
           <h1 className="mt-2 text-3xl md:text-5xl text-center font-bold md:leading-tight">{data.type === "Autre" ? data.desc : data.type}</h1>
         </div>
-        <div className="mt-4 md:mt-0">
-          <Link to={`${data._id}/edit`}>
-            <div className="w-full border-[1px] border-gray-400 px-2 py-1.5 bg-white rounded-lg text-sm text-gray-500 text-center">
-              <HiPencil className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
-              Modifier
-            </div>
-          </Link>
+        <div className="mt-[1rem] md:mt-0">
+          {[EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(data.status) ? (
+            <Link to={`${data._id}/edit`}>
+              <div className="w-full border-[1px] border-gray-400 px-2 py-1.5 bg-white rounded-lg text-sm text-gray-500 text-center">
+                <HiPencil className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
+                Modifier
+              </div>
+            </Link>
+          ) : null}
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-[1rem]">
+      <div className="max-w-3xl mx-auto px-[1rem] pb-[6rem]">
         <h2 className="text-2xl md:text-3xl font-bold">Statut</h2>
         <div className="mt-4 px-4 py-3 border rounded-xl w-full">
           <EngagementStatusBadge status={data.status} />
@@ -93,9 +96,25 @@ export default function Equivalence() {
 
         <h2 className="mt-[2rem] md:mt-[3rem] text-2xl md:text-3xl font-bold">Document justificatif d&apos;engagement</h2>
         <div className="mt-4 p-3 border rounded-xl bg-gray-50">
-          <p className="text-gray-500">Aucun document</p>
+          {data?.files?.length ? (
+            data.files.map((file) => (
+              <div key={file.url}>
+                <div className="flex flex-row items-center gap-2">
+                  <HiPaperClip className="text-lg text-blue-600" />
+                  <p className="text-sm font-normal leading-5 text-gray-800">{file.fileName}</p>
+                </div>
+                <a href={decodeURI(file.url)} target="_blank" rel="noopener noreferrer">
+                  <div className="mt-2 w-full text-center border-[1px] bg-white p-2 text-sm rounded-lg">
+                    <HiDownload className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
+                    Télécharger
+                  </div>
+                </a>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">Aucun document</p>
+          )}
         </div>
-        <pre>{JSON.stringify(data, null, 2)}</pre>
       </div>
     </div>
   );

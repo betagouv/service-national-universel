@@ -10,7 +10,7 @@ const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
-const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2 } = require("../../utils");
+const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2, getSignedUrl } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
@@ -177,17 +177,19 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 
     await young.save({ fromUser: req.user });
 
-    let template = SENDINBLUE_TEMPLATES.young[`EQUIVALENCE_${value.status}`];
-    if (!template) {
-      capture(`Template not found for EQUIVALENCE_${value.status}`);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    if (SENDINBLUE_TEMPLATES.young[`EQUIVALENCE_${value.status}`]) {
+      let template = SENDINBLUE_TEMPLATES.young[`EQUIVALENCE_${value.status}`];
+      if (!template) {
+        capture(`Template not found for EQUIVALENCE_${value.status}`);
+        return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+      }
+      let cc = getCcOfYoung({ template, young });
+      await sendTemplate(template, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { message: value?.message ? value.message : "" },
+        cc,
+      });
     }
-    let cc = getCcOfYoung({ template, young });
-    await sendTemplate(template, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { message: value?.message ? value.message : "" },
-      cc,
-    });
 
     res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -226,8 +228,17 @@ router.get("/equivalence/:idEquivalence", passport.authenticate("young", { sessi
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    const equivalences = await MissionEquivalenceModel.findById(value.idEquivalence);
-    res.status(200).send({ ok: true, data: equivalences });
+    const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
+    const equivalenceObject = equivalence.toObject();
+    if (equivalence.files.length) {
+      equivalenceObject.files = equivalence.files.map((fileName) => {
+        return {
+          fileName,
+          url: encodeURI(getSignedUrl(`app/young/${young._id}/equivalenceFiles/${fileName}`)),
+        };
+      });
+    }
+    res.status(200).send({ ok: true, data: equivalenceObject });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
