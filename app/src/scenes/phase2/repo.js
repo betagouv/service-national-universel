@@ -1,5 +1,6 @@
 import { apiURL } from "@/config";
 import API from "@/services/api";
+import * as FileSaver from "file-saver";
 
 export async function fetchPrograms() {
   const res = await fetch(`${apiURL}/program/public/engagements`);
@@ -24,6 +25,20 @@ export async function fetchEquivalences(youngId) {
   const { ok, data, error } = await res.json();
   if (!ok) throw new Error(error.message);
   return data.map((e) => ({ ...e, engagementType: "equivalence" }));
+}
+
+export async function fetchEquivalence(youngId, id) {
+  const res = await fetch(`${apiURL}/young/${youngId}/phase2/equivalence/${id}`, {
+    headers: { Authorization: `JWT ${API.getToken()}` },
+  });
+  const { ok, data, error } = await res.json();
+  if (!ok) throw new Error(error.message);
+  return data;
+}
+
+export async function fetchEquivalenceFile(youngId, fileName) {
+  const f = await API.get(`/young/${youngId}/phase2/equivalence-file/${fileName}`);
+  FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
 }
 
 export async function fetchAttestation(youngId, template, sendEmail) {

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import AddImage from "../../../assets/icons/AddImage";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import InformationCircle from "../../../assets/icons/InformationCircle";
@@ -13,6 +13,7 @@ import { slugifyFileName, UNSS_TYPE, translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
 import { GrClose } from "react-icons/gr";
+import { queryClient } from "@/services/react-query";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -149,6 +150,7 @@ export default function EditEquivalence() {
           setLoading(false);
           return;
         }
+        queryClient.invalidateQueries({ queryKey: ["equivalence"] });
         toastr.success("Votre modification d'équivalence a bien été envoyée");
         history.push("/phase2");
       }
@@ -196,9 +198,9 @@ export default function EditEquivalence() {
     <>
       <div className="mt-10 grid grid-cols-[10%_80%_10%] px-4">
         <div className="flex items-center">
-          <Link to="/phase2">
+          <button onClick={() => history.goBack()} className="flex items-center gap-1">
             <GrClose className="text-gray-600 hover:text-gray-800 text-xl" />
-          </Link>
+          </button>
         </div>
         <h1 className="text-center text-xl md:text-5xl font-bold">{mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}</h1>
       </div>
