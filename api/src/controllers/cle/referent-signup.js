@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, ROLES, isAdminCle, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
-const { InvitationType } = require("../../services/cle/referent");
+const { SENDINBLUE_TEMPLATES, ROLES, InvitationType, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
 
 const emailsEmitter = require("../../emails");
 const config = require("config");

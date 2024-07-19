@@ -30,7 +30,7 @@ import {
 
 import { capture, captureMessage } from "../../sentry";
 import { ERRORS, isReferent } from "../../utils";
-import { CleClasseModel } from "../../models";
+import { ClasseModel, CohortModel, YoungModel, EtablissementModel, ReferentModel } from "../../models";
 
 import { UserRequest } from "../../controllers/request";
 
@@ -42,15 +42,10 @@ import {
   findLigneInfoForClasses,
   findChefEtablissementInfoForClasses,
 } from "./export/classeExportService";
-import ClasseModel from "../../models/cle/classe";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
-import CohortModel from "../../models/cohort";
 import emailsEmitter from "../../emails";
-import EtablissementModel from "../../models/cle/etablissement";
-import YoungModel from "../../models/young";
 import ClasseStateManager from "./stateManager";
 import { validateId } from "../../utils/validator";
-import ReferentModel from "../../models/referent";
 
 const router = express.Router();
 router.post(
@@ -104,7 +99,7 @@ router.post("/export", passport.authenticate("referent", { session: false, failW
     if (req.user.role === ROLES.REFERENT_REGION) queryParams["region"] = req.user.region;
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.departement;
 
-    const classes = await CleClasseModel.find(queryParams)
+    const classes = await ClasseModel.find(queryParams)
       .populate({
         path: "etablissement",
       })

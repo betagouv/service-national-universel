@@ -8,7 +8,8 @@ const MODELNAME = "classe";
 
 const classeMetadataSchema = {
   createdBy: {
-    type: ReferentCreatedBy,
+    type: String,
+    enum: ReferentCreatedBy,
     documentation: {
       description: "Par quel workflow a été créé la classe",
     },

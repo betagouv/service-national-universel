@@ -1,4 +1,4 @@
-import { IEtablissement } from "../../models/cle/etablissementType";
+import { IEtablissement } from "../../models";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 import { ClasseSchoolYear, CLE_SECTOR, CLE_TYPE } from "snu-lib";
 

@@ -3,7 +3,7 @@ import { addDays } from "date-fns";
 
 import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 
-import { ReferentModel, CleEtablissementModel } from "../../models";
+import { ReferentModel, EtablissementModel } from "../../models";
 import { ReferentDocument } from "../../models/referentType";
 import sendinblue from "../../sendinblue";
 
@@ -25,7 +25,7 @@ const sendTemplateSpy = jest.spyOn(sendinblue, "sendTemplate");
 describe("Referent Signup", () => {
   beforeEach(async () => {
     await ReferentModel.deleteMany();
-    await CleEtablissementModel.deleteMany();
+    await EtablissementModel.deleteMany();
   });
   describe("GET /cle/referent-signup/token/:token", () => {
     it("should validate token and return referent and etablissement data for chef etablissement", async () => {

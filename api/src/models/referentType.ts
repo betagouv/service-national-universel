@@ -1,5 +1,5 @@
 import { Document } from "mongoose";
-import { ReferentCreatedBy } from "snu-lib";
+import { ReferentCreatedBy, InvitationType } from "snu-lib";
 
 export type ReferentDocument = IReferent & Document;
 
@@ -47,10 +47,5 @@ export interface IReferent extends Document {
 export interface ReferentMetadata {
   createdBy: typeof ReferentCreatedBy;
   isFirstInvitationPending?: boolean;
-  invitationType?: InvitationType;
-}
-
-export enum InvitationType {
-  INSCRIPTION = "INSCRIPTION",
-  CONFIRMATION = "CONFIRMATION",
+  invitationType?: typeof InvitationType;
 }

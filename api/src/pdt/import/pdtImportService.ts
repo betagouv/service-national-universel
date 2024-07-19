@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 
-import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, CleClasseModel } from "../../models";
+import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../models";
 import { ERRORS } from "../../utils";
 
 import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
@@ -334,7 +334,7 @@ export const validatePdtFile = async (
     for (const [i, line] of lines.entries()) {
       const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
       if (line["ID CLASSE"] && mongoose.Types.ObjectId.isValid(line["ID CLASSE"])) {
-        const classe = await CleClasseModel.findById(line["ID CLASSE"]);
+        const classe = await ClasseModel.findById(line["ID CLASSE"]);
         if (!classe) {
           errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CLASSE_ID, extra: line["ID CLASSE"] });
         }

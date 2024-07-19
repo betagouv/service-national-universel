@@ -7,15 +7,29 @@ const sendinblue = require("../sendinblue");
 const anonymize = require("../anonymization/referent");
 
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
-const { ReferentCreatedBy } = require("snu-lib");
+const { ReferentCreatedBy, InvitationType } = require("snu-lib");
 
 const MODELNAME = "referent";
 
 const referentMetadataSchema = {
   createdBy: {
-    type: ReferentCreatedBy,
+    type: String,
+    enum: ReferentCreatedBy,
     documentation: {
       description: "Par quel workflow a été créé le référent",
+    },
+  },
+  isFirstInvitationPending: {
+    type: Boolean,
+    documentation: {
+      description: "Indique si une invitation est en attente de première envoi",
+    },
+  },
+  invitationType: {
+    type: String,
+    enum: InvitationType,
+    documentation: {
+      description: "Indique si le référent doit recevoir un email d'inscription ou de reinscription",
     },
   },
 };
