@@ -268,6 +268,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (value.estimatedSeats !== classe.estimatedSeats) {
       if (!canEditEstimatedSeats(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (value.estimatedSeats > classe.estimatedSeats) {
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INCREASE_OBJECTIVE, classe);
+      }
       const now = new Date();
       const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
       if (now <= limitDateEstimatedSeats) {
