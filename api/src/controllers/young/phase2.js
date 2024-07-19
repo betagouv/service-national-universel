@@ -231,7 +231,7 @@ router.get("/equivalence/:idEquivalence", passport.authenticate("young", { sessi
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     const equivalenceObject = equivalence.toObject();
     if (equivalence.files.length) {
-      equivalenceObject.files = equivalence.files.map((fileName) => {
+      equivalenceObject.fileUrls = equivalence.files.map((fileName) => {
         return {
           fileName,
           url: encodeURI(getSignedUrl(`app/young/${young._id}/equivalenceFiles/${fileName}`)),

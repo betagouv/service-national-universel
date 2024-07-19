@@ -492,7 +492,7 @@ export default function EditEquivalence() {
                 <div key={index} className="mt-1 flex w-full flex-row items-center justify-between rounded-lg border-[1px] border-gray-300 py-2 px-3">
                   <div className="flex flex-row items-center">
                     <PaperClip className="mr-2 text-gray-400" />
-                    <div className="text-sm font-normal leading-5 text-gray-800">{file.fileName}</div>
+                    <div className="text-sm font-normal leading-5 text-gray-800">{file}</div>
                   </div>
                   <div
                     className="cursor-pointer text-sm font-normal leading-5 text-gray-800 hover:underline"

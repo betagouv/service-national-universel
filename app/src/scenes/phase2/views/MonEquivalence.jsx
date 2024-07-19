@@ -96,8 +96,8 @@ export default function Equivalence() {
 
         <h2 className="mt-[2rem] md:mt-[3rem] text-2xl md:text-3xl font-bold">Document justificatif d&apos;engagement</h2>
         <div className="mt-4 p-3 border rounded-xl bg-gray-50">
-          {data?.files?.length ? (
-            data.files.map((file) => (
+          {data?.fileUrls?.length ? (
+            data.fileUrls.map((file) => (
               <div key={file.url}>
                 <div className="flex flex-row items-center gap-2">
                   <HiPaperClip className="text-lg text-blue-600" />
