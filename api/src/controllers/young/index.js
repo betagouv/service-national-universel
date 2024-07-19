@@ -925,6 +925,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     young.set({
       status: YOUNG_STATUS.WITHDRAWN,
+      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
       lastStatusAt: Date.now(),
       withdrawnMessage,
       withdrawnReason,
