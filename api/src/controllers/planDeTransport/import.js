@@ -19,10 +19,11 @@ const ClasseModel = require("../../models/cle/classe");
 const CohorteModel = require("../../models/cohort");
 const scanFile = require("../../utils/virusScanner");
 const { getMimeFromFile } = require("../../utils/file");
+const { validateId } = require("../../utils/validator");
 
 const { validatePdtFile, computeImportSummary } = require("../../pdt/import/pdtImportService");
 const { formatTime } = require("../../pdt/import/pdtImportUtils");
-const { startSession } = require("../../mongo");
+const { startSession, withTransaction, endSession } = require("../../mongo");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
 router.post(
@@ -38,12 +39,8 @@ router.post(
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      const cohort = await CohorteModel.findOne({ name: value.cohortName });
-      if (!cohort) {
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
 
-      const files = Object.values(req.files);
+      const files = Object.values(req.files || {});
       if (files.length === 0) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
@@ -57,7 +54,7 @@ router.post(
       const filetype = await getMimeFromFile(tempFilePath);
       const mimeFromMagicNumbers = filetype || MIME_TYPES.EXCEL;
       const validTypes = [MIME_TYPES.EXCEL];
-      if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
+      if (!validTypes.includes(mimetype) && !validTypes.includes(mimeFromMagicNumbers)) {
         fs.unlinkSync(tempFilePath);
         return res.status(400).send({ ok: false, code: ERRORS.UNSUPPORTED_TYPE });
       }
@@ -65,6 +62,11 @@ router.post(
       const scanResult = await scanFile(tempFilePath, name, req.user.id);
       if (scanResult.infected) {
         return res.status(400).send({ ok: false, code: ERRORS.FILE_INFECTED });
+      }
+
+      const cohort = await CohorteModel.findOne({ name: value.cohortName });
+      if (!cohort) {
+        return res.status(404).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
       const isCle = cohort.type === COHORT_TYPE.CLE;
@@ -94,22 +96,19 @@ router.post(
 router.post("/:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   const transaction = await startSession();
   try {
-    const { error, value } = Joi.object({
-      importId: Joi.string().required(),
-    }).validate(req.params, { stripUnknown: true });
+    const { error, value: importId } = validateId(req.params.importId);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { importId } = value;
-    await transaction.withTransaction(async () => {
+    if (!canSendPlanDeTransport(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    await withTransaction(transaction, async () => {
       const importData = await ImportPlanTransportModel.findById(importId);
       if (!importData) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      }
-
-      if (!canSendPlanDeTransport(req.user)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       const lines = importData.lines;
@@ -123,6 +122,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       }
       const oldLines = await Promise.all(promises);
       for (let i = 0; i < oldLines.length; i++) {
+        // oldLines[i] est null quand la ligne de bus n'existe pas encore dans le pdt
         if (!oldLines[i]) {
           newLines.push(importData.lines[i]);
         }
@@ -284,7 +284,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   } finally {
-    await transaction.endSession();
+    await endSession(transaction);
   }
 });
 
