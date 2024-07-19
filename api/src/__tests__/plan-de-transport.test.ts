@@ -10,11 +10,10 @@ import {
   SessionPhase1Model,
   LigneToPointModel,
   CohesionCenterModel,
-  CleClasseModel,
+  ClasseModel,
   PlanTransportModel,
   CohortModel,
 } from "../models";
-// import scanFile from "../utils/virusScanner";
 
 import { getNewImportPlanTransportFixture } from "./fixtures/PlanDeTransport/importPlanTransport";
 import getNewCohortFixture from "./fixtures/cohort";
@@ -75,7 +74,7 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
       SessionPhase1Model.deleteMany(),
       LigneToPointModel.deleteMany(),
       CohesionCenterModel.deleteMany(),
-      CleClasseModel.deleteMany(),
+      ClasseModel.deleteMany(),
       PlanTransportModel.deleteMany(),
     ]);
   });
@@ -85,12 +84,12 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
   });
 
   it("sgould return 403 if user is not authenticated", async () => {
-    const response = await request(getAppHelper(ROLES.VISITOR)).post(`/plan-de-transport/import/${ObjectId()}/execute`).send();
+    const response = await request(getAppHelper(ROLES.VISITOR)).post(`/plan-de-transport/import/${new ObjectId()}/execute`).send();
     expect(response.status).toBe(403);
   });
 
   it("should return 404 if import plan not found", async () => {
-    const response = await request(getAppHelper(ROLES.ADMIN)).post(`/plan-de-transport/import/${ObjectId()}/execute`).send();
+    const response = await request(getAppHelper(ROLES.ADMIN)).post(`/plan-de-transport/import/${new ObjectId()}/execute`).send();
     expect(response.status).toBe(404);
   });
 
