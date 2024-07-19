@@ -10,10 +10,13 @@ const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
-const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2, getSignedUrl } = require("../../utils");
+const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2, getSignedUrl, getFile, isYoung } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
+const { decrypt } = require("../../cryptoUtils");
+const { getMimeFromBuffer } = require("../../utils/file");
+const mime = require("mime-types");
 
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -229,16 +232,7 @@ router.get("/equivalence/:idEquivalence", passport.authenticate("young", { sessi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
-    const equivalenceObject = equivalence.toObject();
-    if (equivalence.files.length) {
-      equivalenceObject.fileUrls = equivalence.files.map((fileName) => {
-        return {
-          fileName,
-          url: encodeURI(getSignedUrl(`app/young/${young._id}/equivalenceFiles/${fileName}`)),
-        };
-      });
-    }
-    res.status(200).send({ ok: true, data: equivalenceObject });
+    res.status(200).send({ ok: true, data: equivalence });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -293,6 +287,36 @@ router.put("/preference", passport.authenticate("referent", { session: false, fa
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/equivalence-file/:name", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ name: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const { name } = value;
+
+    const downloaded = await getFile(`app/young/${req.user._id.toString()}/equivalenceFiles/${name}`);
+    const decryptedBuffer = decrypt(downloaded.Body);
+
+    const mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
+
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(name),
+      fileName: name,
+      ok: true,
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

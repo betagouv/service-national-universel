@@ -1,19 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
-import { fetchEquivalence } from "../repo";
+import { fetchEquivalence, fetchEquivalenceFile } from "../repo";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
 import { HiArrowLeft, HiDownload, HiPaperClip, HiPencil } from "react-icons/hi";
 import EngagementStatusBadge from "../components/EngagementStatusBadge";
 import CopyButton from "@/components/buttons/CopyButton";
 import { EQUIVALENCE_STATUS } from "snu-lib";
+import { toastr } from "react-redux-toastr";
 
 export default function Equivalence() {
   const { young } = useAuth();
   const { equivalenceId } = useParams();
   const { data, isError, isPending } = useQuery({ queryKey: ["equivalence", equivalenceId], queryFn: () => fetchEquivalence(young._id, equivalenceId) });
   const history = useHistory();
+
+  async function handleClick(fileName) {
+    try {
+      await fetchEquivalenceFile(young._id, fileName);
+    } catch (e) {
+      toastr.error("Une erreur s'est produite lors du téléchargement du fichier");
+    }
+  }
 
   if (isPending) return <Loader />;
   if (isError) return <div>Erreur lors du chargement de l'équivalence</div>;
@@ -96,19 +105,17 @@ export default function Equivalence() {
 
         <h2 className="mt-[2rem] md:mt-[3rem] text-2xl md:text-3xl font-bold">Document justificatif d&apos;engagement</h2>
         <div className="mt-4 p-3 border rounded-xl bg-gray-50">
-          {data?.fileUrls?.length ? (
-            data.fileUrls.map((file) => (
-              <div key={file.url}>
+          {data?.files?.length ? (
+            data.files.map((fileName) => (
+              <div key={fileName}>
                 <div className="flex flex-row items-center gap-2">
                   <HiPaperClip className="text-lg text-blue-600" />
-                  <p className="text-sm font-normal leading-5 text-gray-800">{file.fileName}</p>
+                  <p className="text-sm font-normal leading-5 text-gray-800">{fileName}</p>
                 </div>
-                <a href={decodeURI(file.url)} target="_blank" rel="noopener noreferrer">
-                  <div className="mt-2 w-full text-center border-[1px] bg-white p-2 text-sm rounded-lg">
-                    <HiDownload className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
-                    Télécharger
-                  </div>
-                </a>
+                <button onClick={() => handleClick(fileName)} className="mt-3 w-full text-center border-[1px] bg-white p-2 text-sm rounded-lg">
+                  <HiDownload className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
+                  Télécharger
+                </button>
               </div>
             ))
           ) : (
