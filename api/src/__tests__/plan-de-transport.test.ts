@@ -10,9 +10,9 @@ import {
   SessionPhase1Model,
   LigneToPointModel,
   CohesionCenterModel,
+  CleClasseModel,
   PlanTransportModel,
   CohortModel,
-  ClasseModel,
 } from "../models";
 // import scanFile from "../utils/virusScanner";
 
@@ -75,7 +75,7 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
       SessionPhase1Model.deleteMany(),
       LigneToPointModel.deleteMany(),
       CohesionCenterModel.deleteMany(),
-      ClasseModel.deleteMany(),
+      CleClasseModel.deleteMany(),
       PlanTransportModel.deleteMany(),
     ]);
   });
