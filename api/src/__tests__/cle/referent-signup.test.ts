@@ -5,7 +5,7 @@ import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 
 import { ReferentModel, EtablissementModel } from "../../models";
 import { ReferentDocument } from "../../models/referentType";
-import sendinblue from "../../sendinblue";
+import * as sendinblue from "../../sendinblue";
 
 import { dbConnect, dbClose } from "../helpers/db";
 

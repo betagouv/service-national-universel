@@ -7,7 +7,8 @@ module.exports = {
   IMAGES_ROOTDIR: `${__dirname}/../public/images`,
   FONT_ROOTDIR: `${__dirname}/../src/assets/fonts`,
   RUN_CRONS: false,
-  ENABLE_SENDINBLUE: true,
+  ENABLE_SENDINBLUE: true, // TODO: default false
+  ENABLE_SENDINBLUE_SIMULATE_TEMPLATE: false,
   ENABLE_ANTIVIRUS: true,
   ENABLE_FLATTEN_ERROR_LOGS: true, // Print error stack without newlines on stderr
   API_URL: "http://localhost:8080",

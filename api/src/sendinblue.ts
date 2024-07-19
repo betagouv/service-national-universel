@@ -1,10 +1,12 @@
-const fetch = require("node-fetch");
-const queryString = require("querystring");
+import fs from "fs";
+import fetch from "node-fetch";
+import queryString from "querystring";
+import config from "config";
 
-const config = require("config");
-const { capture, captureMessage } = require("./sentry");
-const { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } = require("snu-lib");
-const { rateLimiterContactSIB } = require("./rateLimiters");
+import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
+
+import { capture, captureMessage } from "./sentry";
+import { rateLimiterContactSIB } from "./rateLimiters";
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -14,9 +16,40 @@ const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports|snu)\.gouv\.fr|lexfo\.fr/;
 
-const api = async (path, options = {}) => {
+type ContactAttribute = {
+  FIRSTNAME: string;
+  PRENOM: string;
+  NOM: string;
+  LASTNAME: string;
+  TYPE: string;
+  REGISTRED: boolean;
+  REGISTRED_AT: string;
+  EMAIL: string;
+  PASSWORD: string;
+  __V: string;
+  _ID: string;
+};
+
+type Contact = {
+  email: string;
+  attributes?: object;
+  emailBlacklisted?: boolean;
+  smsBlacklisted?: boolean;
+  listIds?: number[];
+  listId?: number;
+  updateEnabled?: boolean;
+  smtpBlacklistSender?: string[];
+  unlinkListIds?: number[];
+};
+
+type Email = {
+  email: string;
+  name?: string;
+};
+
+const api = async (path, options: any = {}, force?: boolean) => {
   try {
-    if (!config.ENABLE_SENDINBLUE) return console.log("No mail sent as ENABLE_SENDINBLUE is disabled");
+    if (!config.ENABLE_SENDINBLUE && !force) return console.log("No mail sent as ENABLE_SENDINBLUE is disabled");
 
     if (!config.SENDINBLUEKEY) {
       console.log("NO SENDINBLUE KEY");
@@ -42,7 +75,7 @@ const api = async (path, options = {}) => {
 };
 
 // https://developers.sendinblue.com/reference/sendtransacsms
-async function sendSMS(phoneNumber, content, tag) {
+export async function sendSMS(phoneNumber, content, tag) {
   try {
     // format phone number for Sendinblue
     const formattedPhoneNumber = phoneNumber
@@ -50,7 +83,7 @@ async function sendSMS(phoneNumber, content, tag) {
       .replace(/^0([6,7])/, "33$1")
       .replace(/^330/, "33");
 
-    const body = {};
+    const body: any = {};
     body.sender = SENDER_NAME_SMS;
     body.recipient = formattedPhoneNumber;
     body.content = content;
@@ -71,9 +104,9 @@ async function sendSMS(phoneNumber, content, tag) {
 }
 
 // https://developers.sendinblue.com/reference#sendtransacemail
-async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc } = {}) {
+export async function sendEmail(to: Email[], subject: string, htmlContent, { params, attachment, cc, bcc }: any = {}) {
   try {
-    const body = {};
+    const body: any = {};
     if (config.ENVIRONMENT !== "production") {
       console.log("to before filter:", to);
       to = to.filter((e) => e.email.match(regexp_exception_staging));
@@ -102,7 +135,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
   }
 }
 
-async function getEmailsList({ email, templateId, messageId, startDate, endDate, sort, limit, offset } = {}) {
+export async function getEmailsList({ email, templateId, messageId, startDate, endDate, sort, limit, offset }: any = {}) {
   try {
     const body = {
       email,
@@ -127,7 +160,7 @@ async function getEmailsList({ email, templateId, messageId, startDate, endDate,
   }
 }
 
-async function getEmailContent(uuid) {
+export async function getEmailContent(uuid) {
   try {
     return await api(`/smtp/emails/${uuid}`, { method: "GET" });
   } catch (e) {
@@ -136,15 +169,59 @@ async function getEmailContent(uuid) {
   }
 }
 
+interface EmailTemplate {
+  id: number;
+  name: string;
+  subject: string;
+  htmlContent: string;
+  createdAt: string;
+  modifiedAt: string;
+  doiTemplate: boolean;
+}
+
+function replaceTemplateParams(content: string, params: EmailParams) {
+  let hydratedContent = content;
+  for (const paramKey of Object.keys(params)) {
+    hydratedContent = hydratedContent.replace(new RegExp(`{{ params.${paramKey} }}`, "g"), String(params[paramKey]));
+  }
+  return hydratedContent;
+}
+
+async function simulateTemplate(id: string, emailTo: Email[] = [], params: EmailParams = {}) {
+  if (!config.ENABLE_SENDINBLUE_SIMULATE_TEMPLATE || !config.SENDINBLUEKEY) return null;
+  const template: EmailTemplate = await api(`/smtp/templates/${id}`, undefined, true);
+  const subject = `<!-- EMAIL (${id}) TO ${emailTo?.map(({ email }) => email).join(",")}. SUBJECT: ${replaceTemplateParams(template.subject, params)} -->`;
+  let content = replaceTemplateParams(template.htmlContent, params);
+  // TODO: send to mailcatcher
+  fs.writeFileSync(`${new Date().toISOString()}-${id}.email.html`, subject + content);
+}
+
+interface EmailParams {
+  [key: string]: string | number;
+}
+
+interface SendTemplateParameters {
+  params?: EmailParams;
+  emailTo?: Email[];
+  cc?: Email[];
+  bcc?: Email[];
+  attachment?: any;
+}
+
+interface SendTemplateOptions {
+  force?: boolean;
+}
+
 // https://developers.sendinblue.com/reference#sendtransacemail
-async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, { force } = { force: false }) {
+export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attachment }: SendTemplateParameters = {}, options: SendTemplateOptions = {}) {
   try {
     if (!id) throw new Error("No template id provided");
 
-    const body = { templateId: parseInt(id) };
-    if (!force && config.ENVIRONMENT !== "production") {
+    const body: any = { templateId: parseInt(id) };
+    if (!options.force && config.ENVIRONMENT !== "production") {
+      await simulateTemplate(id, emailTo, params);
       console.log("emailTo before filter:", emailTo);
-      emailTo = emailTo.filter((e) => e.email.match(regexp_exception_staging));
+      emailTo = emailTo?.filter((e) => e.email.match(regexp_exception_staging));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
       if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp_exception_staging));
     }
@@ -166,7 +243,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
       captureMessage("Error sending a template", { extra: { mail, body } });
       return;
     }
-    if (config.ENVIRONMENT !== "production" || force) {
+    if (config.ENVIRONMENT !== "production" || options.force) {
       console.log(body, mail);
     }
     return mail;
@@ -187,7 +264,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
  * @param smtpBlacklistSender {string[]}
  * @returns {Promise<void>}
  */
-async function createContact({ email, attributes, emailBlacklisted, smsBlacklisted, listIds, updateEnabled, smtpBlacklistSender } = {}) {
+export async function createContact({ email, attributes, emailBlacklisted, smsBlacklisted, listIds, updateEnabled, smtpBlacklistSender }: Partial<Contact> = {}) {
   const body = {
     email,
     attributes,
@@ -205,7 +282,7 @@ async function createContact({ email, attributes, emailBlacklisted, smsBlacklist
  * @param id {string|number} Email (urlencoded) OR ID of the contact
  * @returns {Promise<void>}
  */
-async function deleteContact(id) {
+export async function deleteContact(id) {
   const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
   return await api(`/contacts/${identifier}`, { method: "DELETE" });
 }
@@ -215,7 +292,7 @@ async function deleteContact(id) {
  * @param id {string|number} Email (urlencoded) OR ID of the contact
  * @returns {Promise<void>}
  */
-async function getContact(id) {
+export async function getContact(id) {
   const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
   return await api(`/contacts/${identifier}`, { method: "GET" });
 }
@@ -231,7 +308,7 @@ async function getContact(id) {
  * @param smtpBlacklistSender {string[]}
  * @returns {Promise<void>}
  */
-async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted, listIds, unlinkListIds, smtpBlacklistSender } = {}) {
+export async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted, listIds, unlinkListIds, smtpBlacklistSender }: Partial<Contact> = {}) {
   const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
 
   const body = {
@@ -246,15 +323,15 @@ async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted,
   return await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
 }
 
-async function sync(obj, type, { force } = { force: false }) {
+export async function sync(obj, type, { force } = { force: false }) {
   if (config.ENVIRONMENT !== "production" && !force) return console.log("no sync sendinblue");
   try {
     const user = JSON.parse(JSON.stringify(obj));
     if (!user) return console.log("ERROR WITH ", obj);
 
     const email = user.email;
-    let parents = [];
-    const attributes = {};
+    let parents: Contact[] = [];
+    const attributes: Partial<ContactAttribute> = {};
     for (let i = 0; i < Object.keys(user).length; i++) {
       const key = Object.keys(user)[i];
       if (key.endsWith("At")) {
@@ -270,14 +347,14 @@ async function sync(obj, type, { force } = { force: false }) {
     attributes.TYPE = type.toUpperCase();
     attributes.REGISTRED = !!attributes.REGISTRED_AT;
 
-    let listIds = [];
+    let listIds: number[] = [];
     if (attributes.TYPE === "YOUNG") {
       if (user.status === YOUNG_STATUS.DELETED) return;
       if (user.parent1Email) {
-        parents.push({ email: user.parent1Email, attributes, listId: [1447] });
+        parents.push({ email: user.parent1Email, attributes, listIds: [1447] });
       }
       if (user.parent2Email) {
-        parents.push({ email: user.parent2Email, attributes, listId: [1447] });
+        parents.push({ email: user.parent2Email, attributes, listIds: [1447] });
       }
       listIds.push(1446);
     }
@@ -294,7 +371,7 @@ async function sync(obj, type, { force } = { force: false }) {
 
     syncContact(email, attributes, listIds);
     for (const parent of parents) {
-      syncContact(parent.email, parent.attributes, parent.listId);
+      syncContact(parent.email, parent.attributes, parent.listIds!);
     }
   } catch (e) {
     console.log("error", e);
@@ -302,7 +379,7 @@ async function sync(obj, type, { force } = { force: false }) {
   }
 }
 
-async function syncContact(email, attributes, listIds) {
+export async function syncContact(email: string, attributes, listIds: number[]) {
   try {
     const res = await rateLimiterContactSIB.call(() => createContact({ email, attributes, listIds, updateEnabled: true }));
     if (!res || res?.code) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
@@ -312,7 +389,7 @@ async function syncContact(email, attributes, listIds) {
   }
 }
 
-async function unsync(obj, options = { force: false }) {
+export async function unsync(obj, options = { force: false }) {
   if (config.ENVIRONMENT !== "production" && !options.force) {
     console.log("no unsync sendinblue");
     return;
@@ -327,19 +404,3 @@ async function unsync(obj, options = { force: false }) {
     capture(error);
   }
 }
-
-module.exports = {
-  regexp_exception_staging,
-  api,
-  sync,
-  unsync,
-  sendSMS,
-  sendEmail,
-  getEmailsList,
-  getEmailContent,
-  sendTemplate,
-  createContact,
-  updateContact,
-  deleteContact,
-  getContact,
-};
