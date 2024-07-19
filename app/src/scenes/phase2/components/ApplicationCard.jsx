@@ -10,6 +10,7 @@ export default function ApplicationCard({ application }) {
       to={`/mission/${application.missionId}`}
       className="bg-white rounded-xl border p-3 w-72 md:w-96 only:w-full only:md:w-96  h-48 flex flex-col justify-between flex-none snap-always snap-center shadow-sm">
       <EngagementStatusBadge status={application.status} />
+
       <p className="text-xs leading-5 text-gray-500 line-clamp-1">{application.mission.structureName}</p>
 
       <div className="flex items-center gap-4">

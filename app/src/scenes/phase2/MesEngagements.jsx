@@ -10,16 +10,16 @@ export default function View() {
       <span className="p-8 flex justify-center ">
         <span
           onClick={() => setCurrentTab(0)}
-          className={`pr-1 pl-1 pb-2 cursor-pointer hover:text-blue-600 hover:border-b-2 border-blue-600 text-gray-400 cursor-pointer ${
+          className={`${
             currentTab === 0 && "!text-blue-600 border-b-2"
-          }`}>
+          } pr-1 pl-1 pb-2 cursor-pointer hover:text-blue-600 hover:border-b-2 border-blue-600 text-gray-500 cursor-pointer`}>
           Tableau de bord
         </span>
         <span
           onClick={() => setCurrentTab(1)}
-          className={`pr-1 pl-1 ml-4 pb-2 cursor-pointer hover:text-blue-600 hover:border-b-2 border-blue-600 text-gray-400 cursor-pointer ${
-            currentTab === 1 && "text-blue-600 border-b-2"
-          }`}>
+          className={`${
+            currentTab === 1 && "!text-blue-600 border-b-2"
+          } pr-1 pl-1 ml-4 pb-2 cursor-pointer hover:text-blue-600 hover:border-b-2 border-blue-600 text-gray-500 cursor-pointer`}>
           Mes préférences
         </span>
       </span>

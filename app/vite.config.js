@@ -41,7 +41,26 @@ export default defineConfig(({ mode }) => {
       port: 8081,
     },
     plugins: plugins,
-    build: { sourcemap: mode === "development" ? false : true, outDir: "build" },
+    build: {
+      sourcemap: mode === "development" ? false : true,
+      outDir: "build",
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            "react-dom": ["react-dom"],
+            "react-router-dom": ["react-router-dom"],
+            "react-redux": ["react-redux"],
+            "react-router": ["react-router"],
+            "react-redux-toastr": ["react-redux-toastr"],
+            "react-select": ["react-select"],
+            reactstrap: ["reactstrap"],
+            "@sentry/react": ["@sentry/react"],
+            "@codegouvfr/react-dsfr": ["@codegouvfr/react-dsfr"],
+            "tanstack/react-query": ["@tanstack/react-query"],
+          },
+        },
+      },
+    },
     optimizeDeps: {
       include: ["@sentry/react", "snu-lib", "@snu/ds"],
       force: true,
