@@ -117,6 +117,7 @@ module.exports = (emailsEmitter) => {
             name_school: etablissement.name,
             nbreClasseAValider,
             effectifPrevisionnel,
+            emailEtablissement: chefEtablissement.email,
           },
         });
       }
