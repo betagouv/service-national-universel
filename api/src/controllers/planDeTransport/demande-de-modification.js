@@ -21,7 +21,7 @@ const {
   isLigneBusDemandeDeModificationOpen,
 } = require("snu-lib");
 const { ObjectId } = require("mongoose").Types;
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../brevo");
 const config = require("config");
 
 const updateModificationDependencies = async (modif, fromUser) => {

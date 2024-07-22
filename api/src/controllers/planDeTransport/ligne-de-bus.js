@@ -32,7 +32,7 @@ const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { ObjectId } = require("mongoose").Types;
 const mongoose = require("mongoose");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../brevo");
 const config = require("config");
 
 /**

@@ -2,7 +2,7 @@ const { SENDINBLUE_TEMPLATES, getCohortPeriod, YOUNG_SOURCE } = require("snu-lib
 const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
 const { capture } = require("../../sentry");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../brevo");
 const config = require("config");
 
 module.exports = (emailsEmitter) => {

@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
-const sendinblue = require("../sendinblue");
+const brevo = require("../brevo");
 const anonymize = require("../anonymization/referent");
 
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
@@ -308,13 +308,13 @@ Schema.methods.anonymise = function () {
 
 //Sync with Sendinblue
 Schema.post("save", function (doc) {
-  sendinblue.sync(doc, MODELNAME);
+  brevo.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
-  sendinblue.sync(doc, MODELNAME);
+  brevo.sync(doc, MODELNAME);
 });
 Schema.post("remove", function (doc) {
-  sendinblue.unsync(doc);
+  brevo.unsync(doc);
 });
 
 Schema.virtual("user").set(function (user) {

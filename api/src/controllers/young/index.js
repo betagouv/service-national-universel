@@ -38,7 +38,7 @@ const {
   updateSeatsTakenInBusLine,
 } = require("../../utils");
 const { getMimeFromFile, getMimeFromBuffer } = require("../../utils/file");
-const { sendTemplate, unsync } = require("../../sendinblue");
+const { sendTemplate, unsync } = require("../../brevo");
 const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");

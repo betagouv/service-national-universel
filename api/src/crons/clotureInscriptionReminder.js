@@ -5,7 +5,7 @@
  */
 const { capture } = require("../sentry");
 const ReferentModel = require("../models/referent");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const config = require("config");
 const { YOUNG_STATUS, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, SENDINBLUE_TEMPLATES } = require("snu-lib");

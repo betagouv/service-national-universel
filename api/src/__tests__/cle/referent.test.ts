@@ -8,8 +8,8 @@ import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, Invitat
 import passport from "passport";
 import { SUB_ROLES } from "snu-lib";
 
-jest.mock("../../sendinblue", () => ({
-  ...jest.requireActual("../../sendinblue"),
+jest.mock("../../brevo", () => ({
+  ...jest.requireActual("../../brevo"),
   sendTemplate: () => Promise.resolve(true),
 }));
 

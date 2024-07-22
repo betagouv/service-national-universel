@@ -324,7 +324,7 @@ export async function updateContact(id, { attributes, emailBlacklisted, smsBlack
 }
 
 export async function sync(obj, type, { force } = { force: false }) {
-  if (config.ENVIRONMENT !== "production" && !force) return console.log("no sync sendinblue");
+  if (config.ENVIRONMENT !== "production" && !force) return console.log("no sync brevo");
   try {
     const user = JSON.parse(JSON.stringify(obj));
     if (!user) return console.log("ERROR WITH ", obj);
@@ -391,7 +391,7 @@ export async function syncContact(email: string, attributes, listIds: number[]) 
 
 export async function unsync(obj, options = { force: false }) {
   if (config.ENVIRONMENT !== "production" && !options.force) {
-    console.log("no unsync sendinblue");
+    console.log("no unsync brevo");
     return;
   }
 
@@ -400,7 +400,7 @@ export async function unsync(obj, options = { force: false }) {
   try {
     await Promise.all(emails.map(deleteContact));
   } catch (error) {
-    console.log("Can't delete in sendinblue", emails);
+    console.log("Can't delete in brevo", emails);
     capture(error);
   }
 }

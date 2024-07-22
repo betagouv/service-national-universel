@@ -1,7 +1,7 @@
 const { capture } = require("../sentry");
 const Application = require("../models/application");
 const Referent = require("../models/referent");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const config = require("config");

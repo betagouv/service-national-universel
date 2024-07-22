@@ -9,7 +9,7 @@ const MissionModel = require("../models/mission");
 const StructureModel = require("../models/structure");
 const ReferentModel = require("../models/referent");
 
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 
 const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS, MISSION_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");

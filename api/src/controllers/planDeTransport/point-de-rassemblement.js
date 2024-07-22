@@ -26,7 +26,7 @@ const { validateId } = require("../../utils/validator");
 const nanoid = require("nanoid");
 const { getCohesionCenterFromSession } = require("./commons");
 const { getTransporter } = require("../../utils");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../brevo");
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.

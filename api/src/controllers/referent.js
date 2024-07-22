@@ -29,7 +29,7 @@ const { getQPV, getDensity } = require("../geo");
 const config = require("config");
 const { capture } = require("../sentry");
 const { decrypt, encrypt } = require("../cryptoUtils");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const {
   getFile,
   uploadFile,

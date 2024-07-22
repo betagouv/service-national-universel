@@ -9,3 +9,4 @@
 /dist
 tsconfig.tsbuildinfo
 !/src/scripts
+*.email.html

@@ -17,7 +17,7 @@ const { serializeYoung } = require("../utils/serializer");
 const { ERRORS, deleteFile } = require("../utils");
 const passport = require("passport");
 const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const config = require("config");
 
 router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {

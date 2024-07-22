@@ -17,7 +17,7 @@ const { validateId, validateMission } = require("../utils/validator");
 const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const config = require("config");
 const { putLocation } = require("../services/gouv.fr/api-adresse");
 
