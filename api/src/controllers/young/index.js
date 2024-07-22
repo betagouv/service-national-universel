@@ -13,7 +13,7 @@ const redis = require("redis");
 
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const config = require("config");
-const { capture } = require("../../sentry");
+const { capture, captureMessage } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const SessionPhase1 = require("../../models/sessionPhase1");
@@ -776,6 +776,12 @@ router.post("/france-connect/user-info", async (req, res) => {
     });
 
     const token = await tokenResponse.json();
+
+    if (token["status"] === "fail") {
+      captureMessage(`France Connect User Information failed: ${JSON.stringify({ token })}`);
+      return res.sendStatus(403, token);
+    }
+
     const franceConnectToken = token["id_token"];
 
     const decodedToken = jwt.decode(franceConnectToken);
