@@ -31,6 +31,19 @@ const { createClasse } = require("./helpers/classe");
 const { createFixtureClasse } = require("./fixtures/classe");
 const ClasseModel = require("../models/cle/classe");
 
+jest.mock("../redis", () => {
+  const redis = require("redis");
+  const client = redis.createClient();
+
+  return {
+    initRedisClient: jest.fn(async () => {
+      return await client.connect();
+    }),
+    closeRedisClient: jest.fn(async () => await client.disconnect()),
+    getRedisClient: jest.fn(() => client),
+  };
+});
+
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
