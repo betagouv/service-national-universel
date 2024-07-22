@@ -46,9 +46,6 @@ export default function MissionList({ publisherName }) {
     enabled: !!young.location?.lat,
   });
 
-  if (isPending) return <Loader />;
-  if (isError) return <div>Erreur lors du chargement des missions.</div>;
-
   return (
     <div className="mb-12">
       <Filters style={{ marginBottom: 20 }}>
@@ -124,7 +121,7 @@ export default function MissionList({ publisherName }) {
             itemsCountTotal={data.total.value}
             itemsCountOnCurrentPage={data.hits.length}
             size={size || 20}
-            setSize={() => setParams("size", size)}
+            setSize={(e) => setParams("size", e)}
           />
         </>
       )}

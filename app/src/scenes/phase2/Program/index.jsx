@@ -59,7 +59,7 @@ export default function Program() {
       <div className="max-w-4xl mx-auto p-[1rem] md:p-[2.5rem]">
         {data.publisherName ? (
           <>
-            <Link to="#tout-savoir" className="p-3 rounded-xl border bg-gray-50 block mb-10 font-bold">
+            <Link to="#tout-savoir" className="p-3 rounded-xl border bg-gray-50 hover:text-gray-800 block mb-10 font-bold">
               Tout savoir sur ce programme
               <HiChevronDown className="inline-block text-xl align-text-bottom ml-2" />
             </Link>
