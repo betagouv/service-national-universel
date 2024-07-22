@@ -7,7 +7,7 @@ import EquivalenceCard from "../../components/EquivalenceCard";
 import ApplicationCard from "../../components/ApplicationCard";
 import { APPLICATION_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS_PHASE2 } from "snu-lib";
 
-export function MesEngagements() {
+export function EngagementList() {
   const { young } = useSelector((state) => state.Auth);
   const applications = useQuery({ queryKey: ["application"], queryFn: () => fetchApplications(young._id) });
   const equivalences = useQuery({ queryKey: ["equivalence"], queryFn: () => fetchEquivalences(young._id) });
@@ -40,7 +40,7 @@ export function MesEngagements() {
     .filter((e, i) => i < 5);
 
   return (
-    <div className="md:max-w-6xl mx-auto px-3 flex gap-4 snap-x snap-mandatory overflow-x-auto overflow-y-hidden pb-3 mt-[1rem] md:mt-[2rem]">
+    <div className="md:max-w-6xl mx-auto px-3 grid grid-cols-5 gap-4 snap-x snap-mandatory overflow-x-auto overflow-y-hidden pb-3 mt-[1rem] md:mt-[2rem]">
       {cards.map((data) => (data.engagementType === "mig" ? <ApplicationCard key={data._id} application={data} /> : <EquivalenceCard key={data._id} equivalence={data} />))}
     </div>
   );

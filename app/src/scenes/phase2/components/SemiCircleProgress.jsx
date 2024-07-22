@@ -3,7 +3,7 @@ import React from "react";
 export const SemiCircleProgress = ({ current, total }) => {
   const progress = (Math.min(current, total) / total) * 100;
   return (
-    <svg className="h-80 pb-8" viewBox="0 0 110 100">
+    <svg className="h-80 pb-8 mx-auto" viewBox="0 0 110 100">
       <linearGradient id="gradient" x1="0" y1="0" x2="100%" y2="0%">
         <stop offset="0%" stopColor="#7197eb" />
         <stop offset="50%" stopColor="#2865eb" />
