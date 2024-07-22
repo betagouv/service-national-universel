@@ -8,6 +8,13 @@ export async function fetchPrograms() {
   return data;
 }
 
+export async function fetchProgram(id) {
+  const res = await fetch(`${apiURL}/program/public/engagement/${id}`);
+  const { ok, data, error } = await res.json();
+  if (!ok) throw new Error(error.message);
+  return data;
+}
+
 export async function fetchApplications(youngId) {
   const res = await fetch(`${apiURL}/young/${youngId}/application`, {
     headers: { Authorization: `JWT ${API.getToken()}` },
