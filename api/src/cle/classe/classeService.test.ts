@@ -1,19 +1,17 @@
 import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
-const youngService = require("../../young/youngService");
-const classService = require("./classeService");
+
+import * as youngService from "../../young/youngService";
+import * as classService from "./classeService";
+import ClasseStateManager from "./stateManager";
+import { ClasseModel, CohortModel, EtablissementDocument, IEtablissement } from "../../models";
+import YoungModel from "../../models/young";
+import { Types } from "mongoose";
+const ObjectId = Types.ObjectId;
+
+import { ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE, isNowBetweenDates, canEditEstimatedSeats, canEditTotalSeats } from "snu-lib";
 
 const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
 const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
-
-import ClasseStateManager from "./stateManager";
-const ClasseModel = require("../../models/cle/classe");
-const CohortModel = require("../../models/cohort");
-import YoungModel from "../../models/young";
-const { ObjectId } = require("mongoose").Types;
-
-import { ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE, isNowBetweenDates, canEditEstimatedSeats, canEditTotalSeats } from "snu-lib";
-import { EtablissementDocument, IEtablissement } from "../../models/cle/etablissementType";
-import { CleClasseModel } from "../../models";
 
 describe("ClasseService", () => {
   it("should return a pdf", async () => {
@@ -31,7 +29,7 @@ describe("ClasseService", () => {
 });
 
 describe("ClasseStateManager.withdraw function", () => {
-  const classId = new ObjectId();
+  const classId = new ObjectId().toString();
   const fromUser = { userId: "user123" };
   const options = { YoungModel: YoungModel }; // Mocked YoungModel
 
@@ -117,7 +115,7 @@ describe("ClasseStateManager.withdraw function", () => {
 });
 
 describe("deleteClasse function", () => {
-  const classId = new ObjectId();
+  const classId = new ObjectId().toString();
   const mockedFromUser = { userId: "user123" };
 
   const saveMock = jest.fn().mockImplementation(() => {
@@ -362,7 +360,7 @@ describe("canEditTotalSeats", () => {
 });
 
 describe("ClasseStateManager.compute function", () => {
-  const _id = new ObjectId();
+  const _id = new ObjectId().toString();
   const fromUser = { userId: "user123" };
   const options = { YoungModel: YoungModel };
   const saveStudentMock = jest.fn();
@@ -535,11 +533,11 @@ describe("getEffectifPrevisionnelByEtablissement", () => {
     const mockClasses = [{ estimatedSeats: 10 }, { estimatedSeats: 20 }, { estimatedSeats: 30 }];
     const expectedResult = 60;
 
-    CleClasseModel.find = jest.fn().mockResolvedValue(mockClasses);
+    ClasseModel.find = jest.fn().mockResolvedValue(mockClasses);
 
     const result = await getEstimatedSeatsByEtablissement(mockEtablissement);
 
     expect(result).toEqual(expectedResult);
-    expect(CleClasseModel.find).toHaveBeenCalledWith({ etablissementId: mockEtablissement._id });
+    expect(ClasseModel.find).toHaveBeenCalledWith({ etablissementId: mockEtablissement._id });
   });
 });

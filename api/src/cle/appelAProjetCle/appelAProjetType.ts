@@ -1,6 +1,5 @@
 import { IReferent } from "../../models/referentType";
-import { IClasse } from "../../models/cle/classeType";
-import { IEtablissement } from "../../models/cle/etablissementType";
+import { IEtablissement, IClasse } from "../../models";
 
 export type IAppelAProjet = {
   numberDS: number;

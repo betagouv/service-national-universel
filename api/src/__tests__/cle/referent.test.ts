@@ -1,10 +1,10 @@
 import { dbClose, dbConnect } from "../helpers/db";
-import { CleClasseModel, CleEtablissementModel, ReferentModel } from "../../models";
-import { ROLES } from "snu-lib";
+import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
+import { ROLES, InvitationType } from "snu-lib";
 import { UserDto } from "snu-lib/src/dto";
 import getAppHelper from "../helpers/app";
 import request from "supertest";
-import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult, InvitationType } from "../../services/cle/referent";
+import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult } from "../../services/cle/referent";
 import passport from "passport";
 import { SUB_ROLES } from "snu-lib";
 
@@ -21,8 +21,8 @@ describe("Referent Service", () => {
 
   beforeEach(async () => {
     await ReferentModel.deleteMany();
-    await CleEtablissementModel.deleteMany();
-    await CleClasseModel.deleteMany();
+    await EtablissementModel.deleteMany();
+    await ClasseModel.deleteMany();
     jest.clearAllMocks();
   });
 
@@ -35,7 +35,7 @@ describe("Referent Service", () => {
         role: ROLES.ADMINISTRATEUR_CLE,
       });
 
-      const etablissement = await CleEtablissementModel.create({
+      const etablissement = await EtablissementModel.create({
         name: "Example School",
         referentEtablissementIds: [referent._id],
         department: "Example Department",
@@ -47,7 +47,7 @@ describe("Referent Service", () => {
         uai: "UAI123",
       });
 
-      await CleClasseModel.create({
+      await ClasseModel.create({
         name: "Mock Class",
         uniqueKeyAndId: "MOCK123",
         etablissementId: etablissement._id,
@@ -96,7 +96,7 @@ describe("Referent Service", () => {
         },
       ]);
 
-      await CleEtablissementModel.create([
+      await EtablissementModel.create([
         {
           name: "Example School 1",
           referentEtablissementIds: [referents[0]._id],
@@ -147,7 +147,7 @@ describe("Referent Service", () => {
   });
 });
 
-describe("POST /api/cle/referent/send-invitation-inscription-chef-etablissement", () => {
+describe("POST /api/cle/referent/send-invitation-chef-etablissement", () => {
   beforeAll(dbConnect);
   afterAll(dbClose);
   beforeEach(async () => {

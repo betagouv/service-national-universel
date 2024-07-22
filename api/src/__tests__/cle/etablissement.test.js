@@ -4,11 +4,13 @@ const { createEtablissement } = require("../helpers/etablissement");
 const { createFixtureEtablissement } = require("../fixtures/etablissement");
 const { createClasse } = require("../helpers/classe");
 const { createFixtureClasse } = require("../fixtures/classe");
-const { ROLES } = require("snu-lib");
+const { getNewReferentFixture } = require("../fixtures/referent");
+const { createReferentHelper } = require("../helpers/referent");
+const { ROLES, SUB_ROLES } = require("snu-lib");
 const passport = require("passport");
 const { dbConnect, dbClose } = require("../helpers/db");
 const { ObjectId } = require("mongoose").Types;
-const { CleClasseModel } = require("../../models");
+const { ClasseModel } = require("../../models");
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -117,7 +119,7 @@ describe("PUT /cle/etablissement/:id", () => {
         department: "Ille-et-Vilaine",
       });
 
-    const updatedClasse = await CleClasseModel.findById(classeId);
+    const updatedClasse = await ClasseModel.findById(classeId);
 
     expect(res.status).toBe(200);
     expect(res.body.data.region).toBe("Bretagne");
@@ -125,5 +127,146 @@ describe("PUT /cle/etablissement/:id", () => {
     expect(updatedClasse.region).toBe(res.body.data.region);
     expect(updatedClasse.department).toBe(res.body.data.department);
     expect(updatedClasse.academy).toBe(res.body.data.academy);
+  });
+});
+
+describe("GET /from-user", () => {
+  it("should return 403 when user cannot view etablissement", async () => {
+    passport.user.role = ROLES.RESPONSIBLE;
+    const res = await request(getAppHelper()).get(`/cle/etablissement/from-user`);
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 404 when referent_classe don't have classe", async () => {
+    passport.user.role = ROLES.REFERENT_CLASSE;
+    const res = await request(getAppHelper()).get(`/cle/etablissement/from-user`);
+    expect(res.status).toBe(404);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 404 when etablissement is not found", async () => {
+    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
+    const previous = passport.user.subRole;
+    passport.user.subRole = SUB_ROLES.referent_etablissement;
+    const res = await request(getAppHelper()).get(`/cle/etablissement/from-user`);
+    expect(res.status).toBe(404);
+    passport.user.subRole = previous;
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 200 if coordinateur", async () => {
+    const coordinatorId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle })))._id;
+    const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [coordinatorId] }));
+    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
+    const previousSubRole = passport.user.subRole;
+    const previousId = passport.user._id;
+    passport.user._id = coordinatorId;
+    passport.user.subRole = SUB_ROLES.coordinateur_cle;
+    const res = await request(getAppHelper()).get(`/cle/etablissement/from-user`);
+    expect(res.status).toBe(200);
+    expect(res.body.data._id).toBe(String(etablissement._id));
+    expect(res.body.data.coordinateurIds).toStrictEqual([String(coordinatorId)]);
+    passport.user.subRole = previousSubRole;
+    passport.user.role = ROLES.ADMIN;
+    passport.user._id = previousId;
+  });
+
+  it("should return 200 if ref etablissement", async () => {
+    const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement })))._id;
+    const etablissement = await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referentId] }));
+    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
+    const previousSubRole = passport.user.subRole;
+    const previousId = passport.user._id;
+    passport.user._id = referentId;
+    passport.user.subRole = SUB_ROLES.referent_etablissement;
+    const res = await request(getAppHelper()).get(`/cle/etablissement/from-user`);
+    expect(res.status).toBe(200);
+    expect(res.body.data._id).toBe(String(etablissement._id));
+    expect(res.body.data.referentEtablissementIds).toStrictEqual([String(referentId)]);
+    passport.user.subRole = previousSubRole;
+    passport.user.role = ROLES.ADMIN;
+    passport.user._id = previousId;
+  });
+
+  it("should return 200 and populate coordinateurs and referent", async () => {
+    const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement })))._id;
+    const coordinatorId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle })))._id;
+    const etablissement = await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referentId], coordinateurIds: [coordinatorId] }));
+    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
+    const previousSubRole = passport.user.subRole;
+    const previousId = passport.user._id;
+    passport.user._id = referentId;
+    passport.user.subRole = SUB_ROLES.referent_etablissement;
+    const res = await request(getAppHelper()).get(`/cle/etablissement/from-user`);
+    expect(res.status).toBe(200);
+    expect(res.body.data._id).toBe(String(etablissement._id));
+    expect(res.body.data.coordinateurs.length).toBe(1);
+    expect(res.body.data.coordinateurs[0]._id).toBe(String(coordinatorId));
+    expect(res.body.data.referents.length).toBe(1);
+    expect(res.body.data.referents[0]._id).toBe(String(referentId));
+    passport.user.subRole = previousSubRole;
+    passport.user.role = ROLES.ADMIN;
+    passport.user._id = previousId;
+  });
+
+  it("should return 200 and populate with good classe if ref classe", async () => {
+    const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE })))._id;
+    const etablissement = await createEtablissement(createFixtureEtablissement({}));
+    const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [referentId] }));
+    const classeBis = await createClasse(createFixtureClasse({ etablissementId: etablissement._id }));
+    passport.user.role = ROLES.REFERENT_CLASSE;
+    const previousId = passport.user._id;
+    passport.user._id = referentId;
+    const res = await request(getAppHelper()).get(`/cle/etablissement/from-user`);
+    expect(res.status).toBe(200);
+    expect(res.body.data._id).toBe(String(etablissement._id));
+    expect(res.body.data.classes.length).toBe(1);
+    expect(res.body.data.classes[0]._id).toBe(String(classe._id));
+    passport.user.role = ROLES.ADMIN;
+    passport.user._id = previousId;
+  });
+});
+
+describe("GET /:id", () => {
+  it("should return 400 when id is invalid", async () => {
+    const res = await request(getAppHelper()).get("/cle/etablissement/invalidId");
+    expect(res.status).toBe(400);
+  });
+
+  it("should return 403 when user cannot view etablissement", async () => {
+    passport.user.role = ROLES.RESPONSIBLE;
+    const validId = new ObjectId();
+    const res = await request(getAppHelper()).get(`/cle/etablissement/${validId}`);
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 404 when etablissement is not found", async () => {
+    const nonExistingId = "104a49ba503555e4d8853003";
+    const res = await request(getAppHelper()).get(`/cle/etablissement/${nonExistingId}`);
+    expect(res.status).toBe(404);
+  });
+
+  it("should return 200 and etablissement when successful", async () => {
+    const etablissement = createFixtureEtablissement();
+    const validId = (await createEtablissement(etablissement))._id;
+    const res = await request(getAppHelper()).get(`/cle/etablissement/${validId}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data._id).toBe(String(validId));
+    expect(res.body.data.name).toBe(etablissement.name);
+  });
+
+  it("should return 200 and populate referent and coordinator  when successful", async () => {
+    const coordinatorId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle })))._id;
+    const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement })))._id;
+    const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [coordinatorId], referentEtablissementIds: [referentId] }));
+    const res = await request(getAppHelper()).get(`/cle/etablissement/${etablissement._id}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data._id).toBe(String(etablissement._id));
+    expect(res.body.data.coordinateurs.length).toBe(1);
+    expect(res.body.data.coordinateurs[0]._id).toBe(String(coordinatorId));
+    expect(res.body.data.referents.length).toBe(1);
+    expect(res.body.data.referents[0]._id).toBe(String(referentId));
   });
 });

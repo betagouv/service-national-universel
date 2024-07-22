@@ -1,9 +1,9 @@
+import { ReferentCreatedBy, ClasseSchoolYear } from "snu-lib";
+
 import { IAppelAProjet, IAppelAProjetOptions } from "./appelAProjetType";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 import { mapEtablissementFromAnnuaireToEtablissement } from "../etablissement/etablissementMapper";
-import { IEtablissement } from "../../models/cle/etablissementType";
-import { CleEtablissementModel } from "../../models";
-import { ReferentCreatedBy, ClasseSchoolYear } from "snu-lib";
+import { EtablissementModel, IEtablissement } from "../../models";
 
 export class AppelAProjetEtablissementService {
   etablissements: (IEtablissement & { operation: "create" | "update" })[] = [];
@@ -29,7 +29,7 @@ export class AppelAProjetEtablissementService {
       return;
     }
 
-    const existingEtablissement = await CleEtablissementModel.findOne({ uai });
+    const existingEtablissement = await EtablissementModel.findOne({ uai });
     const hasAlreadyBeenProcessed = this.etablissements.some((etablissement) => etablissement.uai === appelAProjet.etablissement.uai);
     if (useExistingEtablissement && !existingEtablissement) {
       console.log(`Cannot use existing etablissement ${uai}: Not Found !`);
@@ -69,7 +69,7 @@ export class AppelAProjetEtablissementService {
 
     let createdEtablissement;
     if (save) {
-      createdEtablissement = await CleEtablissementModel.create(formattedEtablissement);
+      createdEtablissement = await EtablissementModel.create(formattedEtablissement);
       console.log("AppelAProjetEtablissementService - processEtablissement() - created etablissement : ", createdEtablissement?._id);
     }
     if (!hasAlreadyBeenProcessed) {
