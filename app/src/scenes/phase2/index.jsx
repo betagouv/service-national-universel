@@ -8,7 +8,7 @@ import EditEquivalence from "./views/EditEquivalence";
 import MonEquivalence from "./views/MonEquivalence";
 import { SentryRoute } from "../../sentry";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import Program from "./Program";
+import Program from "./views/Programs";
 
 export default function Index() {
   useDocumentTitle("Phase 2 - MIG");
