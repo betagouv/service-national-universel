@@ -40,7 +40,7 @@ export function EngagementList() {
     .filter((e, i) => i < 5);
 
   return (
-    <div className="md:max-w-6xl mx-auto px-3 grid grid-cols-5 gap-4 snap-x snap-mandatory overflow-x-auto overflow-y-hidden pb-3 mt-[1rem] md:mt-[2rem]">
+    <div className="md:max-w-6xl mx-auto px-3 flex gap-4 snap-x snap-mandatory overflow-x-auto overflow-y-hidden pb-3 mt-[1rem] md:mt-[2rem]">
       {cards.map((data) => (data.engagementType === "mig" ? <ApplicationCard key={data._id} application={data} /> : <EquivalenceCard key={data._id} equivalence={data} />))}
     </div>
   );
