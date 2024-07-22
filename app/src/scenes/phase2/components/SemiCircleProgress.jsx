@@ -29,9 +29,9 @@ export const SemiCircleProgress = ({ current, total }) => {
       <text x={current == 0 ? "50%" : "60%"} y="57%" fontSize=".7em" dominantBaseline="middle" textAnchor="middle">
         {current == 0 ? `${total}h` : `/${total}`}
       </text>
-      <text x="50%" y="65%" fontSize=".25em" fill="gray" dominantBaseline="middle" textAnchor="middle">
-        {current == 0 && "à réaliser."}
-        {current >= total && "félicitations."}
+      <text x="50%" y="65%" fontSize=".3em" fill="gray" dominantBaseline="middle" textAnchor="middle">
+        {current == 0 && "à réaliser"}
+        {current >= total && "félicitations"}
         {current != 0 && current < total && `Plus que ${total - current}h`}
       </text>
       <text x="50%" y="95%" dominantBaseline="middle" textAnchor="middle">

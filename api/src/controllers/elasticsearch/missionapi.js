@@ -18,6 +18,7 @@ router.post("/search/", passport.authenticate("young", { session: false, failWit
           lat: Joi.number().min(-90).max(90),
           lon: Joi.number().min(-180).max(180),
         }),
+        publisherName: Joi.string().allow(""),
       }),
       page: Joi.number()
         .integer()
@@ -88,6 +89,7 @@ router.post("/search/", passport.authenticate("young", { session: false, failWit
 
     if (filters.domain) body.query.bool.must.push({ term: { "domain.keyword": filters.domain } });
     if (filters.distance) body.query.bool.must.push({ geo_distance: { distance: `${filters.distance}km`, location: filters.location } });
+    if (filters.publisherName) body.query.bool.must.push({ term: { "publisherName.keyword": filters.publisherName } });
 
     const results = await esClient.search({ index: "missionapi", body });
     if (results.body.error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

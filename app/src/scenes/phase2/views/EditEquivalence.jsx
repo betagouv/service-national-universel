@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import AddImage from "../../../assets/icons/AddImage";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import InformationCircle from "../../../assets/icons/InformationCircle";
@@ -13,6 +13,7 @@ import { slugifyFileName, UNSS_TYPE, translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
 import { GrClose } from "react-icons/gr";
+import { queryClient } from "@/services/react-query";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -25,6 +26,8 @@ export default function EditEquivalence() {
   const [filesList, setFilesList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [errorMail, setErrorMail] = useState(false);
+  const [duration, setDuration] = useState(null);
+  const [errorDuration, setErrorDuration] = useState(false);
   const [unit, setUnit] = useState("heures");
   const refType = useRef(null);
   const refSousType = React.useRef(null);
@@ -86,6 +89,7 @@ export default function EditEquivalence() {
         const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`);
         if (ok) {
           setData(data);
+          setDuration(data.missionDuration);
           return;
         }
       })();
@@ -118,8 +122,8 @@ export default function EditEquivalence() {
         }
       }
       if (key === "missionDuration") {
-        console.log(data[key]);
         if (data[key] === undefined || data[key] === "" || data[key] == 0) {
+          setErrorDuration(true);
           error = true;
         }
       }
@@ -146,6 +150,7 @@ export default function EditEquivalence() {
           setLoading(false);
           return;
         }
+        queryClient.invalidateQueries({ queryKey: ["equivalence"] });
         toastr.success("Votre modification d'équivalence a bien été envoyée");
         history.push("/phase2");
       }
@@ -159,8 +164,18 @@ export default function EditEquivalence() {
   };
 
   const handleInputChange = (e) => {
-    const value = Math.round(e.target.value);
-    const missionDuration = unit === "jours" ? String(value * 8) : String(value);
+    const value = e.target.value;
+    let missionDuration;
+
+    if (value === "") {
+      setDuration(null);
+      missionDuration = 0;
+    } else {
+      const roundedValue = Math.round(Number(value));
+      setDuration(roundedValue);
+      missionDuration = unit === "jours" ? String(roundedValue * 8) : String(roundedValue);
+    }
+
     setData((prevData) => ({
       ...prevData,
       missionDuration: missionDuration,
@@ -170,6 +185,7 @@ export default function EditEquivalence() {
   const handleSelectChange = (e) => {
     const value = e.target.value;
     setUnit(value);
+    setDuration("");
     setData((prevData) => ({
       ...prevData,
       missionDuration: "",
@@ -182,9 +198,9 @@ export default function EditEquivalence() {
     <>
       <div className="mt-10 grid grid-cols-[10%_80%_10%] px-4">
         <div className="flex items-center">
-          <Link to="/phase2">
+          <button onClick={() => history.goBack()} className="flex items-center gap-1">
             <GrClose className="text-gray-600 hover:text-gray-800 text-xl" />
-          </Link>
+          </button>
         </div>
         <h1 className="text-center text-xl md:text-5xl font-bold">{mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}</h1>
       </div>
@@ -415,7 +431,7 @@ export default function EditEquivalence() {
                   type="number"
                   min="1"
                   step="1"
-                  value={data?.missionDuration}
+                  value={duration}
                   onChange={handleInputChange}
                 />
               </div>
@@ -427,6 +443,7 @@ export default function EditEquivalence() {
               </div>
             </div>
             <p className="text-gray-500 w-full text-xs font-normal leading-5 mt-1">Arrondir à l'entier supérieur.</p>
+            {errorDuration ? <div className="text-xs font-normal leading-4 text-red-500">Veuillez rentrer un nombre supérieur à 0</div> : null}
           </div>
         </div>
         <div className="mt-4 rounded-lg bg-white p-6">

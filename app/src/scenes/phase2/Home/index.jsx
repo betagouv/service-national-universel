@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import EngagementSrc from "../../../assets/engagement/engagement-home.png";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -13,9 +13,20 @@ import DownloadMenu from "./components/DownloadMenu";
 import { Popover, PopoverButton } from "@headlessui/react";
 import { supportURL } from "@/config";
 import Voiture from "@/assets/Voiture";
+import { useLocation } from "react-router-dom";
 
 export default function HomePhase2() {
   const { young } = useSelector((state) => state.Auth);
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const element = document.getElementById(hash.replace("#", ""));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [hash]);
 
   return (
     <div className="bg-white pt-8 pb-16">
@@ -108,7 +119,7 @@ export default function HomePhase2() {
         <hr className="mt-[2rem] md:mt-[3rem]" />
       </header>
 
-      <section className="bg-gradient-to-b from-white to-gray-100 pb-2">
+      <section id="mes-engagements" className="bg-gradient-to-b from-white to-gray-100 pb-2">
         <div className="mx-auto max-w-6xl px-3 mt-[1rem] md:mt-[3rem] mb-[0.5rem] md:mb-[1.5rem] flex justify-between items-center">
           <h2 className="font-bold m-0 text-2xl md:text-4xl">Mes engagements</h2>
           <Link to="/phase2/mes-engagements" className="text-blue-600">
@@ -118,14 +129,16 @@ export default function HomePhase2() {
         <EngagementList />
       </section>
 
-      <section className="mt-12 md:mt-24 px-4 md:px-24">
+      <section id="les-programmes" className="mt-12 md:mt-24 px-4 md:px-24">
         {young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? (
           <h2 className="text-center font-bold text-2xl md:text-4xl md:leading-snug m-0 max-w-3xl mx-auto">Tous les programmes d'engagement possibles après le SNU</h2>
         ) : (
           <>
             <p className="w-fit mx-auto text-xs font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">EXPLOREZ D'AUTRES POSSIBILITES</p>
 
-            <h2 className="text-center font-bold text-2xl md:text-4xl m-0 mt-2 md:mt-4">Trouvez un engagement par vous-même</h2>
+            <h2 id="sectionEngagement" className="text-center font-bold text-2xl md:text-4xl m-0 mt-2 md:mt-4">
+              Trouvez un engagement par vous-même
+            </h2>
 
             <div className="mt-6 md:mt-12 border rounded-xl p-3 max-w-3xl mx-auto">
               <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 text-gray-500">
@@ -158,7 +171,7 @@ export default function HomePhase2() {
 
       <hr className="mt-[1rem] md:mt-[3rem] md:max-w-6xl mx-[1rem] md:mx-auto" />
 
-      <section className="px-4 md:px-24 mt-12">
+      <section id="questions-frequentes" className="px-4 md:px-24 mt-12">
         <h2 className="text-center font-bold text2xl md:text-4xl m-0 mt-12">Questions fréquentes</h2>
         <FAQ />
       </section>

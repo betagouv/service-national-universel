@@ -68,6 +68,8 @@ export default function View() {
     ),
   ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+  const hasAnyApplicationsOrEquivalences = missionDoneCards?.length || missionCandidateCards?.length;
+
   return (
     <div className="mt-[3rem]">
       <div className="flex flex-col md:flex-row border-2 rounded-2xl border-gray-200 justify-center items-center">
@@ -75,8 +77,8 @@ export default function View() {
           <SemiCircleProgress current={phase2NumberHoursDone} total={PHASE2_TOTAL_HOURS}></SemiCircleProgress>
           <Tooltip className="absolute top-4 right-4" />
         </span>
-        {phase2NumberHoursDone == 0 && (
-          <span className="m-4 p-4 md:p-8 flex flex-col sm:border-t-2 md:border-t-0 md:border-l-2 text-center">
+        {!hasAnyApplicationsOrEquivalences && (
+          <span className="p-4 md:p-8 md:basis-6/12 flex flex-col sm:border-t-2 md:border-t-0 md:border-l-2 text-center">
             <span className="font-bold">C'est parti !</span>
             <span className="text-gray-400 text-sm">Engagez vous au service de la nation.</span>
             <div className="flex flex-col justify-center gap-4 my-6">
@@ -102,10 +104,10 @@ export default function View() {
           </div>
         ))}
 
-      {missionDoneCards && (
+      {hasAnyApplicationsOrEquivalences && (
         <div className="pt-8 mt-8">
           <span className="font-bold text-2xl">
-            Engagements Réalisés
+            Engagements réalisés
             {phase2NumberHoursDone < PHASE2_TOTAL_HOURS && (
               <Link
                 to="/phase2/equivalence"
@@ -115,7 +117,7 @@ export default function View() {
               </Link>
             )}
           </span>
-          <div className="flex flex-col md:flex-row gap-3 pb-3 flex-wrap pt-4">
+          <div className="flex flex-col md:flex-row gap-4 pb-3 flex-wrap pt-4">
             {missionDoneCards.map((data) =>
               data.engagementType === "mig" ? <ApplicationCard key={data._id} application={data} /> : <EquivalenceCard key={data._id} equivalence={data} />,
             )}
@@ -123,7 +125,7 @@ export default function View() {
         </div>
       )}
 
-      {missionCandidateCards && (
+      {hasAnyApplicationsOrEquivalences && (
         <div className="pt-8 mt-8">
           <span className="font-bold text-2xl">Candidatures</span>
           <div className="flex flex-col md:flex-row gap-3 pb-3 flex-wrap pt-4">
@@ -136,7 +138,7 @@ export default function View() {
 
       <div className="pt-8 mt-8">
         <span className="font-bold text-2xl">Préparations Militaires</span>
-        <span className="mt-4 flex justify-center md:justify-start flex-row p-4 bg-gray-50 border-2 rounded-2xl border-gray-200 items-center">
+        <span className="mt-4 flex justify-center md:justify-start flex-row p-4 bg-gray-50 border rounded-2xl border-gray-200 items-center">
           <RiMedal2Line className="text-5xl md:text-4xl p-1 md:p-2 bg-gray-200 rounded-full" />
           <span className="flex flex-col ml-4">
             <MilitaryStatusBadge className="md:hidden w-20" young={young}></MilitaryStatusBadge>
