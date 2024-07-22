@@ -311,7 +311,7 @@ export default function Contract({ young }) {
           Télécharger le contrat
         </DownloadContractButton>
       ) : new Date(contract?.createdAt) < new Date("2024-03-14") ? (
-        <ContractOld young={young} initialValues={initialValues} onSubmit={onSubmit} loadings={loadings} isYoungAdult={isYoungAdult} />
+        <ContractOld young={young} initialValues={initialValues} onSubmit={onSubmit} loadings={loadings} isYoungAdult={isYoungAdult} trimEmailValues={trimEmailValues} />
       ) : (
         <Formik validateOnChange={false} validateOnBlur={false} initialValues={initialValues} onSubmit={onSubmit}>
           {({ values, errors, touched, handleChange, handleSubmit, setFieldValue, validateForm }) => {

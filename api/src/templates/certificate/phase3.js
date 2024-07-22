@@ -1,10 +1,11 @@
 const path = require("path");
 const { initDocument, getMinistres, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
 const config = require("config");
+const { withPipeStream } = require("../utils");
 
 function render(doc, young) {
   const d = young.statusPhase3ValidatedAt;
-  if (!d) throw "Date de validation de la phase 3 non trouvée";
+  if (!d) throw new Error("Date de validation de la phase 3 non trouvée");
   const ministresData = getMinistres(d);
   const template = ministresData.template;
 
@@ -42,9 +43,9 @@ function generateCertifPhase3(outStream, young) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument();
-  doc.pipe(outStream);
-  render(doc, young);
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    render(doc, young);
+  });
   console.timeEnd("RENDERING " + random);
 }
 

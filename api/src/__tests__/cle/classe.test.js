@@ -6,7 +6,7 @@ const { mockEsClient } = require("../helpers/es");
 const getAppHelper = require("../helpers/app");
 
 const snuLib = require("snu-lib");
-const { ROLES, SUB_ROLES, STATUS_CLASSE } = require("snu-lib");
+const { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 //classe
 const { createClasse } = require("../helpers/classe");
@@ -38,6 +38,8 @@ mockEsClient({
 jest.mock("../../emails", () => ({
   emit: jest.fn(),
 }));
+
+const emailsEmitter = require("../../emails");
 
 describe("DELETE /cle/classe/:id", () => {
   it("should return 400 when id is invalid", async () => {
@@ -239,6 +241,26 @@ describe("PUT /cle/classe/:id", () => {
       });
     expect(res.status).toBe(403);
     passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should send mail if value.estimatedSeats > classe.estimatedSeats", async () => {
+    const classeFixture = createFixtureClasse({ estimatedSeats: 5, totalSeats: 5 });
+    const classe = await createClasse(classeFixture);
+    const res = await request(getAppHelper())
+      .put(`/cle/classe/${classe._id}`)
+      .send({
+        ...classeFixture,
+        estimatedSeats: 10,
+      });
+    expect(res.status).toBe(200);
+    expect(emailsEmitter.emit).toHaveBeenCalledWith(
+      SENDINBLUE_TEMPLATES.CLE.CLASSE_INCREASE_OBJECTIVE,
+      expect.objectContaining({
+        estimatedSeats: 10,
+        totalSeats: 10,
+        _id: classe._id,
+      }),
+    );
   });
 
   it("should updte totalSeats when estimatedSeats change and date < LIMIT_DATE_ESTIMATED_SEATS", async () => {

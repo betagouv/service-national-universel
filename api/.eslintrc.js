@@ -12,10 +12,13 @@ module.exports = {
   },
   rules: {
     "prettier/prettier": ["warn"],
-    "no-unused-vars": "warn",
+    "no-unused-vars": "off",
     "no-inner-declarations": "warn",
     "jest/no-conditional-expect": "warn",
     "import/extensions": ["warn"],
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
   },
-  plugins: ["eslint-plugin-import", "jest", "prettier"],
+  plugins: ["@typescript-eslint", "eslint-plugin-import", "jest", "prettier"],
 };

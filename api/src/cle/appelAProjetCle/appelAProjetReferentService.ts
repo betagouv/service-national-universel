@@ -1,7 +1,6 @@
-import { ReferentCreatedBy, ROLES, SUB_ROLES } from "snu-lib";
-import { ReferentModel } from "../../models";
-import { InvitationType, IReferent, ReferentMetadata } from "../../models/referentType";
-import { IEtablissement } from "../../models/cle/etablissementType";
+import { ReferentCreatedBy, ROLES, SUB_ROLES, InvitationType } from "snu-lib";
+import { ReferentModel, IEtablissement } from "../../models";
+import { IReferent, ReferentMetadata } from "../../models/referentType";
 import { IAppelAProjet } from "./appelAProjetType";
 
 export class AppelAProjetReferentService {
