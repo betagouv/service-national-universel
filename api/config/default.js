@@ -6,6 +6,7 @@ module.exports = {
   PORT: 8080,
   IMAGES_ROOTDIR: `${__dirname}/../public/images`,
   FONT_ROOTDIR: `${__dirname}/../src/assets/fonts`,
+  RUN_CRONS: false,
   ENABLE_SENDINBLUE: true,
   ENABLE_ANTIVIRUS: true,
   ENABLE_FLATTEN_ERROR_LOGS: true, // Print error stack without newlines on stderr
@@ -57,4 +58,8 @@ module.exports = {
   API_DEMARCHE_SIMPLIFIEE_TOKEN: undefined,
   PM2_SLACK_URL: undefined,
   API_ANTIVIRUS_KEY: undefined,
+  TASK_QUEUE_PREFIX: undefined,
+  TASK_MONITOR_ENABLE_AUTH: true,
+  TASK_MONITOR_USER: undefined,
+  TASK_MONITOR_SECRET: undefined,
 };

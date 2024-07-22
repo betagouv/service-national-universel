@@ -1,5 +1,6 @@
 import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
-import * as youngService from "../../young/young.service";
+
+import * as youngService from "../../young/youngService";
 import * as classService from "./classeService";
 import ClasseStateManager from "./stateManager";
 import { ClasseModel, CohortModel, EtablissementDocument, IEtablissement } from "../../models";

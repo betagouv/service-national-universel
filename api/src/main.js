@@ -23,13 +23,61 @@ const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
-async function runCrons() {
+const basicAuth = require("express-basic-auth");
+const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers } = require("./queues/redisQueue");
+
+async function runTasks() {
   initSentry();
-  await initDB();
-  scheduleCrons();
-  // Serverless containers requires running http server
+  await Promise.all([initDB(), getAllPdfTemplates()]);
+
+  if (config.get("RUN_CRONS")) {
+    scheduleCrons();
+  }
+  initQueues();
+  initWorkers();
+
   const app = express();
-  app.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
+
+  if (config.get("TASK_MONITOR_ENABLE_AUTH")) {
+    app.use(
+      basicAuth({
+        challenge: true,
+        users: {
+          [config.get("TASK_MONITOR_USER")]: config.get("TASK_MONITOR_SECRET"),
+        },
+      }),
+    );
+  }
+  const monitor = await initMonitor();
+  app.use("/", monitor.router);
+
+  // * Use Terminus for graceful shutdown when using Docker
+  const server = http.createServer(app);
+
+  function onSignal() {
+    console.log("server is starting cleanup");
+    return Promise.all([closeDB(), closeQueues(), closeWorkers()]);
+  }
+
+  function onShutdown() {
+    console.log("cleanup finished, server is shutting down");
+  }
+
+  function healthCheck({ state }) {
+    return Promise.resolve();
+  }
+
+  const options = {
+    healthChecks: {
+      "/healthcheck": healthCheck,
+    },
+    onSignal,
+    onShutdown,
+  };
+
+  createTerminus(server, options);
+
+  server.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
 }
 
 async function runAPI() {
@@ -46,14 +94,15 @@ async function runAPI() {
   await runMigrations();
 
   /*
-      Download all certificate templates when instance is starting,
-      making them available for PDF generation
+    Download all certificate templates when instance is starting,
+    making them available for PDF generation
 
-      These templates are sensitive data, so we can't treat them as simple statics
+    These templates are sensitive data, so we can't treat them as simple statics
 
-      TODO : A possible improvement would be to download templates at build time
-    */
+    TODO : A possible improvement would be to download templates at build time
+  */
   getAllPdfTemplates();
+  initQueues();
 
   const app = express();
   const registerSentryErrorHandler = initSentryMiddlewares(app);
@@ -190,7 +239,7 @@ async function runAPI() {
 
   function onSignal() {
     console.log("server is starting cleanup");
-    return Promise.all([closeDB(), closeRedisClient()]);
+    return Promise.all([closeDB(), closeRedisClient(), closeQueues()]);
   }
 
   function onShutdown() {
@@ -215,6 +264,6 @@ async function runAPI() {
 }
 
 module.exports = {
-  runCrons,
   runAPI,
+  runTasks,
 };

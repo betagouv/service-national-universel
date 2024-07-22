@@ -14,5 +14,6 @@ module.exports = {
   API_URL: "https://api.ci.beta-snu.dev",
   APP_URL: "https://moncompte.ci.beta-snu.dev",
   ADMIN_URL: "https://admin.ci.beta-snu.dev",
+  TASK_QUEUE_PREFIX: "ci",
   ...secrets,
 };
