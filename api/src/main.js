@@ -16,6 +16,7 @@ const config = require("config");
 
 const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
 const { initDB, closeDB } = require("./mongo");
+const { initRedisClient, closeRedisClient } = require("./redis");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
 const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
@@ -89,7 +90,7 @@ async function runAPI() {
     console.log("ANALYTICS_URL", config.API_ANALYTICS_ENDPOINT);
   }
 
-  await initDB();
+  await Promise.all([initDB(), initRedisClient()]);
   await runMigrations();
 
   /*
@@ -238,7 +239,7 @@ async function runAPI() {
 
   function onSignal() {
     console.log("server is starting cleanup");
-    return Promise.all([closeDB(), closeQueues()]);
+    return Promise.all([closeDB(), closeRedisClient(), closeQueues()]);
   }
 
   function onShutdown() {

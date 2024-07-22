@@ -9,6 +9,8 @@ const fileUtils = require("../utils/file");
 
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
+const { initRedisClient, closeRedisClient } = require("../redis");
+
 //application
 const { getNewApplicationFixture } = require("./fixtures/application");
 const { createApplication } = require("./helpers/application");
@@ -23,11 +25,24 @@ const { createCohortHelper } = require("./helpers/cohort");
 const getNewCohortFixture = require("./fixtures/cohort");
 //referent
 const { createReferentHelper } = require("./helpers/referent");
-const { getNewReferentFixture }= require("./fixtures/referent");
+const { getNewReferentFixture } = require("./fixtures/referent");
 //classe
 const { createClasse } = require("./helpers/classe");
 const { createFixtureClasse } = require("./fixtures/classe");
 const ClasseModel = require("../models/cle/classe");
+
+jest.mock("../redis", () => {
+  const redis = require("redis");
+  const client = redis.createClient();
+
+  return {
+    initRedisClient: jest.fn(async () => {
+      return await client.connect();
+    }),
+    closeRedisClient: jest.fn(async () => await client.disconnect()),
+    getRedisClient: jest.fn(() => client),
+  };
+});
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -60,8 +75,13 @@ jest.mock("../utils/virusScanner", () => jest.fn().mockResolvedValue({ isInfecte
 
 const getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 
-beforeAll(dbConnect);
-afterAll(dbClose);
+beforeAll(() => {
+  return Promise.all([dbConnect(), initRedisClient()]);
+});
+
+afterAll(() => {
+  return Promise.all([dbClose(), closeRedisClient()]);
+});
 
 describe("Young", () => {
   describe("PUT /young/:id/soft-delete", () => {
