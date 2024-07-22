@@ -58,3 +58,14 @@ export async function fetchAttestation(youngId, template, sendEmail) {
   const file = await res.blob();
   return file;
 }
+
+export async function fetchMissionsFromApiEngagement(filters, page, size, sort) {
+  const res = await fetch(`${apiURL}/elasticsearch/missionapi/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `JWT ${API.getToken()}` },
+    body: JSON.stringify({ filters, page, size, sort }),
+  });
+  const { ok, data, error } = await res.json();
+  if (!ok) throw new Error(error.message);
+  return data;
+}

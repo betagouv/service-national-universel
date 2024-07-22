@@ -1,3 +1,5 @@
+import { JVA_MISSION_DOMAINS } from "snu-lib";
+
 export const statusColors = {
   WAITING_VALIDATION: "bg-[#ECECFE] text-blue-france-sun-113",
   WAITING_VERIFICATION: "bg-[#ECECFE] text-blue-france-sun-113",
@@ -10,3 +12,5 @@ export const statusColors = {
   DONE: "bg-[#B8FEC9] text-[#0F4B26]",
   ABANDON: "bg-gray-100 text-gray-700",
 };
+
+export const JvaDomainOptions = Object.entries(JVA_MISSION_DOMAINS).map(([key, value]) => ({ value: key, label: value }));

@@ -14,9 +14,9 @@ export default function Index() {
   useDocumentTitle("Phase 2 - MIG");
 
   const young = useSelector((state) => state.Auth.young);
-  // const history = useHistory();
+  const history = useHistory();
 
-  // if (!young || !permissionPhase2(young)) history.push("/");
+  if (!young || !permissionPhase2(young)) history.push("/");
 
   return (
     <Switch>
