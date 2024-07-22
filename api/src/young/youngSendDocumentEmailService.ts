@@ -79,7 +79,7 @@ export async function sendDocumentEmail(options: SendDocumentEmailOptions) {
   }
 
   await sendTemplate(emailTemplate, {
-    emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+    emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email! }],
     attachment: [{ content, name: options.fileName }],
     params,
     cc: getCcOfYoung({ template: emailTemplate, young }),
