@@ -8,6 +8,7 @@ import EditEquivalence from "./views/EditEquivalence";
 import MonEquivalence from "./views/MonEquivalence";
 import { SentryRoute } from "../../sentry";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+import Program from "./Program";
 
 export default function Index() {
   useDocumentTitle("Phase 2 - MIG");
@@ -23,6 +24,7 @@ export default function Index() {
       <SentryRoute path="/phase2/equivalence/:equivalenceId" component={MonEquivalence} />
       <SentryRoute path="/phase2/equivalence" component={EditEquivalence} />
       <SentryRoute path="/phase2/mes-engagements" component={MesEngagements} />
+      <SentryRoute path="/phase2/program/:id" component={Program} />
       <SentryRoute path="/phase2" component={Home} />
     </Switch>
   );

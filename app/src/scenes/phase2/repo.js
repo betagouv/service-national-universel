@@ -9,6 +9,13 @@ export async function fetchPrograms() {
   return data;
 }
 
+export async function fetchProgram(id) {
+  const res = await fetch(`${apiURL}/program/public/engagement/${id}`);
+  const { ok, data, error } = await res.json();
+  if (!ok) throw new Error(error.message);
+  return data;
+}
+
 export async function fetchApplications(youngId) {
   const res = await fetch(`${apiURL}/young/${youngId}/application`, {
     headers: { Authorization: `JWT ${API.getToken()}` },
@@ -50,4 +57,15 @@ export async function fetchAttestation(youngId, template, sendEmail) {
   if (sendEmail) return;
   const file = await res.blob();
   return file;
+}
+
+export async function fetchMissionsFromApiEngagement(filters, page, size, sort) {
+  const res = await fetch(`${apiURL}/elasticsearch/missionapi/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `JWT ${API.getToken()}` },
+    body: JSON.stringify({ filters, page, size, sort }),
+  });
+  const { ok, data, error } = await res.json();
+  if (!ok) throw new Error(error.message);
+  return data;
 }

@@ -119,7 +119,7 @@ export default function HomePhase2() {
         <hr className="mt-[2rem] md:mt-[3rem]" />
       </header>
 
-      <section className="bg-gradient-to-b from-white to-gray-100 pb-2">
+      <section id="mes-engagements" className="bg-gradient-to-b from-white to-gray-100 pb-2">
         <div className="mx-auto max-w-6xl px-3 mt-[1rem] md:mt-[3rem] mb-[0.5rem] md:mb-[1.5rem] flex justify-between items-center">
           <h2 className="font-bold m-0 text-2xl md:text-4xl">Mes engagements</h2>
           <Link to="/phase2/mes-engagements" className="text-blue-600">
@@ -129,7 +129,7 @@ export default function HomePhase2() {
         <MesEngagements />
       </section>
 
-      <section className="mt-12 md:mt-24 px-4 md:px-24">
+      <section id="les-programmes" className="mt-12 md:mt-24 px-4 md:px-24">
         {young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? (
           <h2 className="text-center font-bold text-2xl md:text-4xl md:leading-snug m-0 max-w-3xl mx-auto">Tous les programmes d'engagement possibles après le SNU</h2>
         ) : (
@@ -171,7 +171,7 @@ export default function HomePhase2() {
 
       <hr className="mt-[1rem] md:mt-[3rem] md:max-w-6xl mx-[1rem] md:mx-auto" />
 
-      <section className="px-4 md:px-24 mt-12">
+      <section id="questions-frequentes" className="px-4 md:px-24 mt-12">
         <h2 className="text-center font-bold text2xl md:text-4xl m-0 mt-12">Questions fréquentes</h2>
         <FAQ />
       </section>
