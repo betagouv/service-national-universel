@@ -106,7 +106,11 @@ export default function GeneralInfos({
             active={edit}
             error={errors.estimatedSeats}
           />
-          <Label title="Effectif ajusté" name="totalSeats" tooltip="Nombre d'élèves attendu sur la classe. Vous ne pouvez le modifier qu'à la baisse" />
+          <Label
+            title="Effectif ajusté"
+            name="totalSeats"
+            tooltip="Estimation de l’effectif au plus proche de la réalité. L’effectif ajusté ne peut pas dépasser l’effectif prévisionnel"
+          />
           <InputText
             name="totalSeats"
             className="flex-1 mb-3"
@@ -119,7 +123,7 @@ export default function GeneralInfos({
           />
           <Label title="Effectif inscrit" name="validatedYoung" tooltip="Nombre d'élèves validés inscrit sur la classe" />
           <InputText name="validatedYoung" className="flex-1 mb-3" value={validatedYoung.toString()} disabled />
-          <Label title="Coloration souhaitée" name="coloration" tooltip="Les colorations définitives seront confirmées au moment des affectations." />
+          <Label title="Coloration" name="coloration" />
           <Select
             className="mb-3"
             isActive={edit && rights.canEditColoration}
@@ -184,7 +188,7 @@ export default function GeneralInfos({
           <Label
             title="Situation scolaire"
             name="class-situation"
-            tooltip="C'est la situation de la classe. Une exception au niveau d'un élève qui viendrait d'une autres filière ou d'un autre niveau peut être gérer au niveau du profil de l'élève concerné."
+            tooltip="C'est la situation de la classe. Une exception au niveau d'un élève qui viendrait d'une autre filière ou d'un autre niveau peut être gérée au niveau du profil de l'élève concerné."
           />
           <Select
             className="mb-3"
