@@ -11,5 +11,6 @@ const secrets = getSecrets(secretKey, CI_PROJECT_ID, secretName);
 
 module.exports = {
   ENVIRONMENT: "custom",
+  TASK_QUEUE_PREFIX: "ci",
   ...secrets,
 };

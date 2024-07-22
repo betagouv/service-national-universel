@@ -1,8 +1,10 @@
 import { YOUNG_STATUS } from "snu-lib";
 
-import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/young.service";
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
+import ClasseModel from "../../models/cle/classe";
+import YoungModel from "../../models/young";
 
-import { ClasseModel, ClasseDocument, IClasse, YoungModel, EtablissementDocument, IEtablissement } from "../../models";
+import { ClasseDocument, IClasse, EtablissementDocument, IEtablissement } from "../../models";
 import { mapRegionToTrigramme } from "../../services/regionService";
 import crypto from "crypto";
 
