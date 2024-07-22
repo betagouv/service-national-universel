@@ -5,6 +5,11 @@ const { capture } = require("./sentry");
 let client = null;
 
 async function initRedisClient() {
+  if (config.get("ENVIRONMENT") === "test") {
+    client = redis.createClient();
+    return await client.connect();
+  }
+
   if (!config.get("REDIS_URL")) {
     throw new Error("ERROR CONNECTION. REDIS URL EMPTY");
   }
@@ -30,6 +35,9 @@ async function initRedisClient() {
 }
 
 async function closeRedisClient() {
+  if (config.get("ENVIRONMENT") === "test") {
+    return await client.disconnect();
+  }
   return await client.quit();
 }
 

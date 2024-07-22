@@ -9,6 +9,8 @@ const fileUtils = require("../utils/file");
 
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
+const { initRedisClient, closeRedisClient } = require("../redis");
+
 //application
 const { getNewApplicationFixture } = require("./fixtures/application");
 const { createApplication } = require("./helpers/application");
@@ -23,7 +25,7 @@ const { createCohortHelper } = require("./helpers/cohort");
 const getNewCohortFixture = require("./fixtures/cohort");
 //referent
 const { createReferentHelper } = require("./helpers/referent");
-const { getNewReferentFixture }= require("./fixtures/referent");
+const { getNewReferentFixture } = require("./fixtures/referent");
 //classe
 const { createClasse } = require("./helpers/classe");
 const { createFixtureClasse } = require("./fixtures/classe");
@@ -60,8 +62,13 @@ jest.mock("../utils/virusScanner", () => jest.fn().mockResolvedValue({ isInfecte
 
 const getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 
-beforeAll(dbConnect);
-afterAll(dbClose);
+beforeAll(() => {
+  return Promise.all([dbConnect(), initRedisClient()]);
+});
+
+afterAll(() => {
+  return Promise.all([dbClose(), closeRedisClient()]);
+});
 
 describe("Young", () => {
   describe("PUT /young/:id/soft-delete", () => {
