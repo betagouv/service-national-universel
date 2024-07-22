@@ -7,7 +7,7 @@ import EquivalenceCard from "../../components/EquivalenceCard";
 import ApplicationCard from "../../components/ApplicationCard";
 import { APPLICATION_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS_PHASE2 } from "snu-lib";
 
-export function MesEngagements() {
+export function EngagementList() {
   const { young } = useSelector((state) => state.Auth);
   const applications = useQuery({ queryKey: ["application"], queryFn: () => fetchApplications(young._id) });
   const equivalences = useQuery({ queryKey: ["equivalence"], queryFn: () => fetchEquivalences(young._id) });

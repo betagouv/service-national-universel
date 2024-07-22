@@ -14,6 +14,7 @@ import ApplicationCard from "../components/ApplicationCard";
 import { fetchApplications, fetchEquivalences } from "../repo";
 import { statusColors } from "../engagement.utils";
 import { translateStatusMilitaryPreparationFiles } from "../../../utils";
+import Loader from "@/components/Loader";
 
 const Tooltip = ({ className }) => (
   <span className={className}>
@@ -24,7 +25,7 @@ const Tooltip = ({ className }) => (
       effect="solid"
       delayHide={1000}
       id="info"
-      className="w-[527px] bg-white shadow-xl custom-tooltip-radius !opacity-100 !shadow-md"
+      className="w-[527px] bg-white custom-tooltip-radius !opacity-100 !shadow-md"
       tooltipRadius="6"
       arrowColor="white">
       <div className="list-outside bg-white text-left text-[15px] text-[#414458]">
@@ -49,24 +50,32 @@ export default function View() {
   const applications = useQuery({ queryKey: ["application"], queryFn: () => fetchApplications(young._id) });
   const equivalences = useQuery({ queryKey: ["equivalence"], queryFn: () => fetchEquivalences(young._id) });
 
-  const missionDoneCards =
-    applications.data &&
-    equivalences.data &&
-    [
-      ...applications.data.filter(({ status }) => [APPLICATION_STATUS.DONE].includes(status)),
-      ...equivalences.data.filter(({ status }) => [EQUIVALENCE_STATUS.VALIDATED, EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(status)),
-    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const missionCandidateCards =
-    applications.data && applications.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).filter(({ status }) => status !== APPLICATION_STATUS.DONE);
+  if (equivalences.isPending || applications.isPending) {
+    return <Loader />;
+  }
+
+  const missionDoneCards = [
+    ...applications.data.filter(({ status }) => [APPLICATION_STATUS.DONE, APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(status)),
+    ...equivalences.data.filter(({ status }) => [EQUIVALENCE_STATUS.VALIDATED].includes(status)),
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const missionCandidateCards = [
+    ...applications.data.filter(({ status }) =>
+      [APPLICATION_STATUS.WAITING_ACCEPTATION, APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION].includes(status),
+    ),
+    ...equivalences.data.filter(({ status }) =>
+      [EQUIVALENCE_STATUS.WAITING_VALIDATION, EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(status),
+    ),
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const hasAnyApplicationsOrEquivalences = missionDoneCards?.length || missionCandidateCards?.length;
 
   return (
-    <div className="p-4 md:p-8 bg-white flex flex-col">
-      <div className="flex flex-col md:flex-row border rounded-2xl border-gray-200 justify-center relative items-center">
-        <Tooltip className="absolute top-4 right-4" />
-        <span className="p-4 justify-center md:basis-6/12 flex">
+    <div className="mt-[3rem]">
+      <div className="flex flex-col md:flex-row border-2 rounded-2xl border-gray-200 justify-center items-center">
+        <span className="w-full relative">
           <SemiCircleProgress current={phase2NumberHoursDone} total={PHASE2_TOTAL_HOURS}></SemiCircleProgress>
+          <Tooltip className="absolute top-4 right-4" />
         </span>
         {!hasAnyApplicationsOrEquivalences && (
           <span className="p-4 md:p-8 md:basis-6/12 flex flex-col sm:border-t-2 md:border-t-0 md:border-l-2 text-center">
@@ -119,10 +128,10 @@ export default function View() {
       {hasAnyApplicationsOrEquivalences && (
         <div className="pt-8 mt-8">
           <span className="font-bold text-2xl">Candidatures</span>
-          <div className="flex flex-col md:flex-row gap-4 pb-3 flex-wrap pt-4">
-            {missionCandidateCards.map((data) => (
-              <ApplicationCard key={data._id} application={data} />
-            ))}
+          <div className="flex flex-col md:flex-row gap-3 pb-3 flex-wrap pt-4">
+            {missionCandidateCards.map((data) =>
+              data.engagementType === "mig" ? <ApplicationCard key={data._id} application={data} /> : <EquivalenceCard key={data._id} equivalence={data} />,
+            )}
           </div>
         </div>
       )}

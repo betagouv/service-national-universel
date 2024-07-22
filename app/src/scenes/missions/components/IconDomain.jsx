@@ -30,7 +30,7 @@ const icon = {
 
 export default function IconDomain({ domain, disabled = false }) {
   return (
-    <div className={`flex items-center justify-center rounded-lg w-8 h-16 ${disabled ? "bg-gray-300" : "bg-[#212B44]"}`}>
+    <div className={`flex-none flex items-center justify-center rounded-lg w-8 h-16 ${disabled ? "bg-gray-300" : "bg-[#212B44]"}`}>
       {icon[domain] || <img src={Img2} className="h-6 w-6" />}
     </div>
   );

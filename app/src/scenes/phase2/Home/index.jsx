@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
 import { YOUNG_STATUS_PHASE2 } from "../../../utils";
 import { HiChevronDown, HiExternalLink, HiPlus, HiSearch } from "react-icons/hi";
-import { MesEngagements } from "./components/MesEngagement";
+import { EngagementList } from "./components/EngagementList";
 import { Programs } from "./components/Programs";
 import { FAQ } from "./components/FAQ";
 import { RiAttachmentLine } from "react-icons/ri";
@@ -126,7 +126,7 @@ export default function HomePhase2() {
             Voir
           </Link>
         </div>
-        <MesEngagements />
+        <EngagementList />
       </section>
 
       <section id="les-programmes" className="mt-12 md:mt-24 px-4 md:px-24">
