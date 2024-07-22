@@ -10,12 +10,12 @@ import { useSelector } from "react-redux";
 import { Col, CustomInput, Row } from "reactstrap";
 import MissionCard from "./components/missionCard";
 import Pagination from "../../components/nav/Pagination";
-import { Link, useLocation, useParams } from "react-router-dom";
-import { HeroContainer } from "@/components/Content";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { RiArrowLeftSLine } from "react-icons/ri";
 
 export default function MissionsComponent() {
   const young = useSelector((state) => state.Auth.young);
+  const history = useHistory();
   const location = useLocation();
   const urlParams = new URLSearchParams(location.search);
   const publisherName = urlParams.get("publisherName") || "";
@@ -34,8 +34,9 @@ export default function MissionsComponent() {
   const [size, setSize] = React.useState(20);
   const [sort, setSort] = React.useState("geo");
   const [data, setData] = React.useState({});
+
   const domainOptions = Object.entries(JVA_MISSION_DOMAINS).map(([key, value]) => ({ value: key, label: value }));
-  console.log(filters);
+
   const updateOnFilterChange = useCallback(
     debounce(async (filters, page, size, sort, setData) => {
       try {
@@ -57,14 +58,12 @@ export default function MissionsComponent() {
   }, [filters, page, size, sort]);
 
   return (
-    <HeroContainer>
-      <div className="pt-2 pb-4 sm:px-4 md:px-16 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
-        <Link to="/autres-engagements">
-          <button className="mt-4 mb-6 flex py-2 px-2 border rounded-lg text-xs leading-4 font-medium">
-            <RiArrowLeftSLine className="mr-2 text-lg" />
-            Retour
-          </button>
-        </Link>
+    <div className="bg-white">
+      <div className="py-10 max-w-6xl mx-auto">
+        <button onClick={() => history.goBack()} className="mb-6 flex py-2 px-2 border rounded-lg text-xs leading-4 font-medium">
+          <RiArrowLeftSLine className="mr-2 text-lg" />
+          Retour
+        </button>
         <Heading>
           <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
           <h1>Missions disponibles près de chez vous ou à distance</h1>
@@ -142,7 +141,7 @@ export default function MissionsComponent() {
           </>
         ) : null}
       </div>
-    </HeroContainer>
+    </div>
   );
 }
 
