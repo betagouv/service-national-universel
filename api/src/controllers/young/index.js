@@ -9,9 +9,9 @@ const Joi = require("joi");
 const mime = require("mime-types");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
-const redis = require("redis");
 
 const { decrypt, encrypt } = require("../../cryptoUtils");
+const { getRedisClient } = require("../../redis");
 const config = require("config");
 const { capture, captureMessage } = require("../../sentry");
 const YoungObject = require("../../models/young");
@@ -731,16 +731,9 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       nonce: crypto.randomBytes(20).toString("hex"),
       acr_values: "eidas1",
     };
-    const redisClient = redis.createClient({
-      url: config.REDIS_URL,
-      pingInterval: 60_000,
-    });
-    await redisClient.connect();
-
+    const redisClient = getRedisClient();
     await redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce);
     await redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state);
-
-    await redisClient.disconnect();
 
     const url = `${config.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
     return res.status(200).send({ ok: true, data: { url } });
@@ -789,16 +782,9 @@ router.post("/france-connect/user-info", async (req, res) => {
     let storedState;
     let storedNonce;
 
-    const redisClient = redis.createClient({
-      url: config.REDIS_URL,
-      pingInterval: 60_000,
-    });
-    await redisClient.connect();
-
+    const redisClient = getRedisClient();
     storedState = await redisClient.get(`franceConnectState:${value.state}`);
     storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
-
-    await redisClient.disconnect();
 
     if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {
       capture(`France Connect User Information failed: ${JSON.stringify({ storedNonce, storedState, token })}`);
