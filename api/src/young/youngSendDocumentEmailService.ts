@@ -3,7 +3,7 @@ import { YoungDto } from "snu-lib/src/dto/youngDto";
 import { ContractDto } from "snu-lib/src/dto/contractDto";
 
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
-import { sendTemplate } from "../sendinblue";
+import { sendTemplate } from "../brevo";
 import { ERRORS, getCcOfYoung } from "../utils";
 import { YoungModel, ContractModel } from "../models";
 
