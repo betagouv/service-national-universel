@@ -5,5 +5,5 @@ module.exports = {
   ENABLE_FLATTEN_ERROR_LOGS: false,
   TASK_MONITOR_ENABLE_AUTH: false,
   ENABLE_ANTIVIRUS: false,
-  TASK_QUEUE_PREFIX: "ci",
+  TASK_QUEUE_PREFIX: "dev",
 };
