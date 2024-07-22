@@ -50,7 +50,7 @@ export default function MissionList({ publisherName }) {
   if (isError) return <div>Erreur lors du chargement des missions.</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-[1rem] md:p-[2.5rem]">
+    <div className="mb-12">
       <Filters style={{ marginBottom: 20 }}>
         <SearchBox md={4}>
           <input
@@ -62,7 +62,7 @@ export default function MissionList({ publisherName }) {
           />
         </SearchBox>
         <Col md={4}>
-          <CustomInput type="select" id="dist" defaultValue="50" onChange={(e) => setParams("distance", e.target.value)}>
+          <CustomInput type="select" id="dist" defaultValue="50" onChange={(e) => setParams("distance", e.target.value)} value={distance}>
             <option value="null" disabled>
               Rayon de recherche maximum
             </option>
@@ -76,7 +76,7 @@ export default function MissionList({ publisherName }) {
           </CustomInput>
         </Col>
         <DomainsFilter md={4}>
-          <CustomInput type="select" id="dist" defaultValue="" onChange={(e) => setParams("domain", e.target.value)}>
+          <CustomInput type="select" id="dist" defaultValue="" onChange={(e) => setParams("domain", e.target.value)} value={domain}>
             <option value="">Filtrer par domaines</option>
             {JvaDomainOptions.map(({ value, label }) => (
               <option key={value} value={value}>
@@ -106,7 +106,7 @@ export default function MissionList({ publisherName }) {
             <p>
               {data?.total.value} mission{data?.total.value > 1 ? "s" : ""}
             </p>
-            <select name="selectedSort" onChange={(e) => setParams("sort", e.target.value)}>
+            <select name="selectedSort" onChange={(e) => setParams("sort", e.target.value)} value={sort}>
               <option value="geo" defaultValue>
                 La plus proche
               </option>
