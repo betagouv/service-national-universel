@@ -8,5 +8,5 @@ export const statusColors = {
   IN_PROGRESS: "bg-blue-600 text-white",
   VALIDATED: "bg-[#B8FEC9] text-[#0F4B26]",
   DONE: "bg-[#B8FEC9] text-[#0F4B26]",
-  ABANDON: "bg-[#B8FEC9] text-[#0F4B26]",
+  ABANDON: "bg-gray-100 text-gray-700",
 };
