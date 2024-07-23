@@ -3,7 +3,7 @@ const EtablissementModel = require("../../models/cle/etablissement");
 const ReferentModel = require("../../models/referent");
 const { capture } = require("../../sentry");
 const config = require("config");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../brevo");
 const { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } = require("../../cle/classe/classeService");
 
 module.exports = (emailsEmitter) => {

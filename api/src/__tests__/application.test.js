@@ -15,8 +15,8 @@ const { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 
 jest.setTimeout(60_000);
 
-jest.mock("../sendinblue", () => ({
-  ...jest.requireActual("../sendinblue"),
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
 }));
 

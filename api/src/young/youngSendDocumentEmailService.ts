@@ -3,7 +3,7 @@ import { YoungDto } from "snu-lib/src/dto/youngDto";
 import { ContractDto } from "snu-lib/src/dto/contractDto";
 
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
-import { sendTemplate } from "../sendinblue";
+import { sendTemplate } from "../brevo";
 import { ERRORS, getCcOfYoung } from "../utils";
 import { YoungModel, ContractModel } from "../models";
 
@@ -79,7 +79,7 @@ export async function sendDocumentEmail(options: SendDocumentEmailOptions) {
   }
 
   await sendTemplate(emailTemplate, {
-    emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+    emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email! }],
     attachment: [{ content, name: options.fileName }],
     params,
     cc: getCcOfYoung({ template: emailTemplate, young }),

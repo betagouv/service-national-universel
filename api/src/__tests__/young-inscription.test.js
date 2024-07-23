@@ -10,8 +10,8 @@ const { fakerFR: faker } = require("@faker-js/faker");
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-jest.mock("../sendinblue", () => ({
-  ...jest.requireActual("../sendinblue"),
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
 }));
 

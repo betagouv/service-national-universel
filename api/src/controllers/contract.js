@@ -10,7 +10,7 @@ const ApplicationObject = require("../models/application");
 const ReferentObject = require("../models/referent");
 const StructureObject = require("../models/structure");
 const { ERRORS, isYoung, isReferent } = require("../utils");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const config = require("config");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
@@ -438,7 +438,6 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     }
 
     await generatePdfIntoStream(res, { type: "contract", template: "2", contract });
-
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

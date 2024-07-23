@@ -4,7 +4,7 @@ const Joi = require("joi");
 
 const { capture, captureMessage } = require("./sentry");
 const config = require("config");
-const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
+const { sendTemplate, regexp_exception_staging } = require("./brevo");
 const {
   JWT_SIGNIN_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC,

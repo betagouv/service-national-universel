@@ -18,8 +18,8 @@ const SchemaDeRepartitionModel = require("../models/PlanDeTransport/schemaDeRepa
 const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
 const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
 
-jest.mock("../sendinblue", () => ({
-  ...jest.requireActual("../sendinblue"),
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
 }));
 

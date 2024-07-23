@@ -6,7 +6,7 @@ import config from "config";
 import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType } from "snu-lib";
 
 import { ERRORS } from "../../utils";
-import { sendTemplate } from "../../sendinblue";
+import { sendTemplate } from "../../brevo";
 import { inSevenDays } from "../../utils";
 import { capture } from "../../sentry";
 

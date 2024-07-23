@@ -23,8 +23,8 @@ mockEsClient({
   sessionphase1: [{ _id: "sessionId" }],
 });
 
-jest.mock("../sendinblue", () => ({
-  ...jest.requireActual("../sendinblue"),
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
 }));
 

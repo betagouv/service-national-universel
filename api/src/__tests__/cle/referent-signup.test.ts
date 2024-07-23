@@ -5,7 +5,7 @@ import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 
 import { ReferentModel, EtablissementModel } from "../../models";
 import { ReferentDocument } from "../../models/referentType";
-import sendinblue from "../../sendinblue";
+import * as brevo from "../../brevo";
 
 import { dbConnect, dbClose } from "../helpers/db";
 
@@ -20,7 +20,7 @@ import { createClasse } from "../helpers/classe";
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-const sendTemplateSpy = jest.spyOn(sendinblue, "sendTemplate");
+const sendTemplateSpy = jest.spyOn(brevo, "sendTemplate");
 
 describe("Referent Signup", () => {
   beforeEach(async () => {

@@ -4,7 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_STATUS } = require("snu-lib");
 const esClient = require("../es");
-const sendinblue = require("../sendinblue");
+const brevo = require("../brevo");
 const config = require("config");
 const anonymize = require("../anonymization/young");
 
@@ -2053,7 +2053,7 @@ Schema.methods.anonymise = function () {
   return anonymize(this);
 };
 
-//Sync with sendinblue
+//Sync with brevo
 Schema.post("save", async function (doc) {
   //TODO ajouter la transaction
   if (doc.source === YOUNG_SOURCE.CLE && doc.status === YOUNG_STATUS.VALIDATED) {
@@ -2061,13 +2061,13 @@ Schema.post("save", async function (doc) {
   }
 
   if (config.ENVIRONMENT === "test") return;
-  sendinblue.sync(doc, MODELNAME);
+  brevo.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
-  sendinblue.sync(doc, MODELNAME);
+  brevo.sync(doc, MODELNAME);
 });
 Schema.post("remove", function (doc) {
-  sendinblue.unsync(doc);
+  brevo.unsync(doc);
 });
 
 Schema.pre("save", function (next, params) {

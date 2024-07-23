@@ -10,8 +10,8 @@ const { dbConnect, dbClose } = require("./helpers/db");
 const { createYoungHelper } = require("./helpers/young");
 const { ROLES } = require("snu-lib");
 
-jest.mock("../sendinblue", () => ({
-  ...jest.requireActual("../sendinblue"),
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
 }));
 

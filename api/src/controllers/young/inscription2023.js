@@ -23,7 +23,7 @@ const {
   REGLEMENT_INTERIEUR_VERSION,
   COHORTS,
 } = require("snu-lib");
-const { sendTemplate } = require("./../../sendinblue");
+const { sendTemplate } = require("./../../brevo");
 const config = require("config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");

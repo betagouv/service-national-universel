@@ -3,7 +3,7 @@ const path = require("path");
 
 const { capture } = require("../sentry");
 const Young = require("../models/young");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, translate, formatStringDate, END_DATE_PHASE1 } = require("snu-lib");
 const config = require("config");

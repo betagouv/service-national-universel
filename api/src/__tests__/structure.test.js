@@ -9,8 +9,8 @@ const { getNewReferentFixture } = require("./fixtures/referent");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 const { ROLES } = require("snu-lib");
 
-jest.mock("../sendinblue", () => ({
-  ...jest.requireActual("../sendinblue"),
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
 }));
 
