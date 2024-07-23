@@ -2,17 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { translate } from "@/utils";
 import { Badge, Button, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
-import { HiPlus, HiUsers, HiOutlineOfficeBuilding, HiHome } from "react-icons/hi";
+import { HiUsers, HiHome } from "react-icons/hi";
 import { IoFlashOutline } from "react-icons/io5";
-import { useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { YOUNG_STATUS, getAge, youngCleExportFields } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import api from "@/services/api";
 import { getFilterArray, transformVolontairesCLE } from "./utils/list";
 
-export default function list() {
-  const user = useSelector((state) => state.Auth.user);
+export default function List() {
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
   const [classes, setClasses] = useState(null);
@@ -27,6 +25,10 @@ export default function list() {
   const [size, setSize] = useState(10);
 
   const filterArray = getFilterArray(sessionsPhase1, bus, classes);
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const currentTab = queryParams.get("tab") || "general";
 
   useEffect(() => {
     (async () => {
@@ -62,23 +64,15 @@ export default function list() {
       <Header
         title="Liste de mes élèves"
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes élèves" }]}
-        actions={
-          students
-            ? [<Button key="export" title="Exporter" type="primary" onClick={() => setIsExportOpen(true)} />]
-            : [
-                <Link key="list" to="/classes/create" className="ml-2">
-                  <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
-                </Link>,
-              ]
-        }
+        actions={students && [<Button key="export" title="Exporter" type="primary" onClick={() => setIsExportOpen(true)} />]}
       />
       {!students && (
         <Container className="!p-8">
           <div className="py-6 bg-gray-50">
-            <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore créé de classe engagée</div>
+            <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore d'élèves inscrit</div>
             <div className="flex items-start justify-center h-[136px]">
-              <Link to="/classes/create">
-                <Button type="wired" leftIcon={<HiPlus />} title="Créer une première classe engagée" />
+              <Link to="/classes">
+                <Button type="wired" title="Voir mes classes" />
               </Link>
             </div>
           </div>
