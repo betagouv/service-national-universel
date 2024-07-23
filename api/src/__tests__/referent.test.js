@@ -4,18 +4,21 @@ const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
 const { getNewReferentFixture } = require("./fixtures/referent");
 const getNewStructureFixture = require("./fixtures/structure");
+const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
+const { getNewApplicationFixture } = require("./fixtures/application");
+const getNewMissionFixture = require("./fixtures/mission");
+
 const { getYoungByIdHelper, deleteYoungByIdHelper, createYoungHelper, expectYoungToEqual, notExistingYoungId } = require("./helpers/young");
 const { getReferentsHelper, deleteReferentByIdHelper, notExistingReferentId, createReferentHelper, expectReferentToEqual, getReferentByIdHelper } = require("./helpers/referent");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
 const { createStructureHelper } = require("./helpers/structure");
-const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
-const { getNewApplicationFixture } = require("./fixtures/application");
 const { createApplication, getApplicationsHelper } = require("./helpers/application");
 const { createMissionHelper, getMissionsHelper } = require("./helpers/mission");
-const getNewMissionFixture = require("./fixtures/mission");
-const { ROLES } = require("snu-lib");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { ERRORS } = require("../utils");
+const { getInscriptionGoalStats } = require("../services/inscription-goal");
+
+const { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -68,14 +71,18 @@ describe("Referent", () => {
   });
 
   describe("PUT /referent/young/:id", () => {
-    async function createYoungThenUpdate(params, fields) {
+    async function createYoungThenUpdate(updateYoungFields, newYoungFields, { keepYoung, queryParam } = {}) {
       const youngFixture = getNewYoungFixture();
-      const originalYoung = await createYoungHelper({ ...youngFixture, ...fields });
-      const modifiedYoung = { ...youngFixture, ...fields, ...params };
-      const response = await request(getAppHelper()).put(`/referent/young/${originalYoung._id}`).send(modifiedYoung);
+      const originalYoung = await createYoungHelper({ ...youngFixture, ...newYoungFields });
+      const modifiedYoung = { ...youngFixture, ...newYoungFields, ...updateYoungFields };
+      const response = await request(getAppHelper())
+        .put(`/referent/young/${originalYoung._id}${queryParam || ""}`)
+        .send(modifiedYoung);
       const young = await getYoungByIdHelper(originalYoung._id);
-      await deleteYoungByIdHelper(originalYoung._id);
-      return { young, modifiedYoung, response };
+      if (!keepYoung) {
+        await deleteYoungByIdHelper(originalYoung._id);
+      }
+      return { young, modifiedYoung, response, id: originalYoung._id };
     }
     it("should return 404 if young not found", async () => {
       const res = await request(getAppHelper()).put(`/referent/young/${notExistingYoungId}`).send();
@@ -85,6 +92,61 @@ describe("Referent", () => {
       const { young, modifiedYoung, response } = await createYoungThenUpdate({ name: faker.company.name() });
       expect(response.statusCode).toEqual(200);
       expectYoungToEqual(young, modifiedYoung);
+    });
+    it("should not update young if goal reached", async () => {
+      const testName = "Juillet 2023";
+      const { count } = await getInscriptionGoalStats(testName, testName);
+      // ajout d'un objectif à 1
+      const res = await request(getAppHelper())
+        .post(`/inscription-goal/${testName}`)
+        .send([{ department: testName, region: testName, max: count + 1 }]);
+      expect(res.statusCode).toEqual(200);
+      // ajout d'un jeune au departement sans depassement
+      const passport = require("passport");
+      passport.user.role = ROLES.HEAD_CENTER;
+      const { response: responseSuccessed, id: youngId } = await createYoungThenUpdate(
+        {
+          status: YOUNG_STATUS.VALIDATED,
+        },
+        { region: testName, department: testName, cohort: testName },
+        { keepYoung: true },
+      );
+      expect(responseSuccessed.statusCode).toEqual(200);
+      // ajout d'un jeune au departement avec depassement
+      let response = (
+        await createYoungThenUpdate(
+          {
+            status: YOUNG_STATUS.VALIDATED,
+          },
+          { region: testName, department: testName },
+        )
+      ).response;
+      expect(response.statusCode).not.toEqual(200);
+      expect(response.body.code).toBe(ERRORS.INSCRIPTION_GOAL_REACHED);
+      // admin: ajout d'un jeune au departement avec depassement
+      passport.user.role = ROLES.ADMIN;
+      response = (
+        await createYoungThenUpdate(
+          {
+            status: YOUNG_STATUS.VALIDATED,
+          },
+          { region: testName, department: testName },
+        )
+      ).response;
+      expect(response.statusCode).not.toEqual(200);
+      expect(response.body.code).toBe(ERRORS.INSCRIPTION_GOAL_REACHED);
+      // admin: force l'ajout d'un jeune au departement meme si depassement
+      response = (
+        await createYoungThenUpdate(
+          {
+            status: YOUNG_STATUS.VALIDATED,
+          },
+          { region: testName, department: testName },
+          { queryParam: "?forceGoal=1" },
+        )
+      ).response;
+      expect(response.statusCode).toEqual(200);
+      await deleteYoungByIdHelper(youngId);
     });
     it("should cascade young statuses when sending status WITHDRAWN", async () => {
       const { young, response } = await createYoungThenUpdate(
