@@ -474,7 +474,6 @@ export default function MissionFilters({ filters, setFilters }) {
               placeholder="Rechercher une mission..."
             />
             <div
-              // className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
               className={`flex ${
                 dropdownControlDistanceOpen ? "text-blue-600" : "text-gray-700"
               } w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm  placeholder:text-gray-400`}
@@ -482,7 +481,7 @@ export default function MissionFilters({ filters, setFilters }) {
                 setDropdownControlDistanceOpen((e) => !e);
                 setDropdownControlWhenOpen(false);
               }}>
-              Distance max. {filters.distance}km
+              {cityFilter?.city ? `${cityFilter.city} - ` : null}Distance max. {filters.distance}km
             </div>
             <div
               className={`flex ${

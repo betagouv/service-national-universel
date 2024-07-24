@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import { capture } from "../../../sentry";
@@ -9,9 +9,12 @@ import MissionList from "./components/MissionList";
 import Loader from "../../../components/Loader";
 import { RiHeartFill } from "react-icons/ri";
 import useAuth from "@/services/useAuth";
+import Header from "@/scenes/phase2/components/Header";
+import { HiArrowLeft } from "react-icons/hi";
 
 export default function List() {
   const { young } = useAuth();
+  const history = useHistory();
   const [data, setData] = useState();
   const urlParams = new URLSearchParams(window.location.search);
   const canDoMilitaryPreparation = young?.frenchNationality === "true";
@@ -62,23 +65,29 @@ export default function List() {
 
   return (
     <>
-      <div className="bg-white p-[1rem] md:p-[3rem] md:m-10 md:pb-[2rem] md:rounded-xl md:shadow-xl">
-        {/* BEGIN HEADER */}
-        <div className="space-y-6">
-          <h1 className="text-2xl md:text-4xl text-center font-bold text-gray-800">Trouvez un Engagement</h1>
-          <div className="flex items-center justify-center">
-            <Link className="block" to="/preferences">
-              <div className="group flex items-center gap-1 py-2.5 px-3">
-                <RiHeartFill className="text-[#111827]" />
-                <div className="flex-1 text-md leading-4 text-[#111827] underline">Mes préférences</div>
-              </div>
-            </Link>
-          </div>
+      <div className="bg-white pb-12">
+        <Header
+          title="Trouvez un engagement"
+          backAction={
+            <button onClick={() => history.goBack()} className="flex items-center gap-1 row-start-1 md:row-start-2">
+              <HiArrowLeft className="text-2xl text-gray-500" />
+            </button>
+          }
+        />
+
+        <Link className="block" to="/phase2/mes-engagements?tab=settings">
+          <p className="group flex justify-center items-center gap-1 py-2.5 px-3 text-center underline">
+            <RiHeartFill className="text-[#111827] inline-block align-text-bottom mr-1" />
+            Mes préférences
+          </p>
+        </Link>
+
+        <div className="max-w-6xl mx-auto px-[1rem] md:px-[2.5rem]">
+          <MissionFilters filters={filters} setFilters={setFilters} />
+          {data ? <MissionList data={data} location={filters.location} page={page} setPage={setPage} size={size} setSize={setSize} setSort={setSort} /> : <Loader />}
         </div>
-        {/* END HEADER */}
-        <MissionFilters filters={filters} setFilters={setFilters} />
-        {data ? <MissionList data={data} location={filters.location} page={page} setPage={setPage} size={size} setSize={setSize} setSort={setSort} /> : <Loader />}
       </div>
+
       <div className="px-4 py-1 flex flex-col justify-center items-center h-[300px] bg-[#000091] w-full">
         <p className="text-4xl">🔍</p>
         <p className="uppercase px-2 bg-[#E8EDFF] text-[#0063CB] font-bold text-xs leading-5 w-fit rounded-md mt-4 text-center">Vous ne trouvez pas d'engagement ?</p>
