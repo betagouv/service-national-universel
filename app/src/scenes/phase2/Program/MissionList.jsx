@@ -47,7 +47,7 @@ export default function MissionList({ publisherName }) {
   });
 
   return (
-    <div className="mb-12">
+    <div className="mt-4 mb-12">
       <Filters style={{ marginBottom: 20 }}>
         <SearchBox md={4}>
           <input
