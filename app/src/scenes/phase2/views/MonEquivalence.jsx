@@ -96,6 +96,13 @@ export default function Equivalence() {
             </>
           ) : null}
 
+          {data.desc ? (
+            <>
+              <p className="text-gray-500 mt-3">Engagement réalisé</p>
+              <p>{data.desc}</p>
+            </>
+          ) : null}
+
           <p className="text-gray-500 mt-3">Structure d&apos;accueil</p>
           <p>{data.structureName}</p>
 

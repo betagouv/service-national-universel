@@ -74,7 +74,7 @@ export default function View() {
 
   return (
     <div className="mt-[3rem]">
-      <div className="flex flex-col md:flex-row border shadow-sm rounded-2xl border-gray-200 justify-center items-center">
+      <div className="grid grid-cols-2 border shadow-sm rounded-2xl border-gray-200 justify-center items-center">
         <span className="w-full relative">
           <SemiCircleProgress current={phase2NumberHoursDone} total={PHASE2_TOTAL_HOURS}></SemiCircleProgress>
           <Tooltip className="absolute top-4 right-4" />
@@ -84,11 +84,13 @@ export default function View() {
             <span className="font-bold">C'est parti !</span>
             <span className="text-gray-400 text-sm">Engagez vous au service de la nation.</span>
             <div className="flex flex-col justify-center gap-4 my-6">
-              <Link to="/mission" className="text-sm bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center">
+              <Link to="/mission" className="text-sm bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center mx-auto w-72">
                 <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
                 Trouver un engagement
               </Link>
-              <Link to="/phase2/equivalence" className="text-sm border rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center">
+              <Link
+                to="/phase2/equivalence"
+                className="text-sm border rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center mx-auto w-72">
                 <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
                 Ajouter un engagement réalisé
               </Link>
