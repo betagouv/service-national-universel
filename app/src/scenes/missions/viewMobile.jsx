@@ -39,6 +39,7 @@ import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
 import { apiEngagement } from "./utils";
+import ApplicationStatusBadge from "../phase2/components/ApplicationStatusBadge";
 
 export default function ViewMobile() {
   const [mission, setMission] = useState();
@@ -550,9 +551,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, co
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="flex items-center gap-6">
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
-            {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
-          </div>
+          <ApplicationStatusBadge status={application.status} />
         </div>
         <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} hebergement={mission.hebergement} hebergementPayant={mission.hebergementPayant} />
       </div>
@@ -562,9 +561,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, co
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="align-items flex justify-between gap-6">
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
-            {translateApplication(application.status)}
-          </div>
+          <ApplicationStatusBadge status={application.status} />
           {contract && contractHasAllValidation(contract, young) && (
             <div className="relative" ref={refContractButton}>
               <button

@@ -1,19 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
-import { fetchEquivalence, fetchEquivalenceFile } from "../repo";
+import { fetchEquivalence, fetchEquivalenceFile } from "../engagement.repository";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
-import { HiArrowLeft, HiDownload, HiPaperClip, HiPencil } from "react-icons/hi";
-import EngagementStatusBadge from "../components/EngagementStatusBadge";
+import { HiArrowLeft, HiChat, HiDownload, HiPaperClip, HiPencil } from "react-icons/hi";
+import EngagementStatusBadge from "../components/EquivalenceStatusBadge";
 import CopyButton from "@/components/buttons/CopyButton";
 import { EQUIVALENCE_STATUS } from "snu-lib";
 import { toastr } from "react-redux-toastr";
+import Header from "../components/Header";
 
 export default function Equivalence() {
   const { young } = useAuth();
-  const { equivalenceId } = useParams();
-  const { data, isError, isPending } = useQuery({ queryKey: ["equivalence", equivalenceId], queryFn: () => fetchEquivalence(young._id, equivalenceId) });
+  const { id } = useParams();
+  const { data, isError, isPending } = useQuery({ queryKey: ["equivalence", id], queryFn: () => fetchEquivalence(young._id, id) });
+  console.log("🚀 ~ Equivalence ~ data:", data);
   const history = useHistory();
 
   async function handleClick(fileName) {
@@ -28,33 +30,60 @@ export default function Equivalence() {
   if (isError) return <div>Erreur lors du chargement de l'équivalence</div>;
   return (
     <div className="bg-white">
-      <header className="max-w-6xl pt-[1rem] md:pt-[3rem] px-[1rem] md:px-[2rem] mx-auto md:grid md:grid-cols-[8rem_auto_8rem] gap-4">
-        <div>
-          <button onClick={() => history.goBack()} className="flex items-center gap-1">
-            <HiArrowLeft className="text-xl text-gray-400" />
-          </button>
-        </div>
-        <div>
-          <p className="w-fit mx-auto text-xs font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">AJOUT D'UN ENGAGEMENT REALISE</p>
-          <h1 className="mt-2 text-3xl md:text-5xl text-center font-bold md:leading-tight">{data.type === "Autre" ? data.desc : data.type}</h1>
-        </div>
-        <div className="mt-[1rem] md:mt-0">
-          {[EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(data.status) ? (
-            <Link to={`${data._id}/edit`}>
-              <div className="w-full border-[1px] border-gray-400 px-2 py-1.5 bg-white rounded-lg text-sm text-gray-500 text-center">
+      <Header
+        title={data.type === "Autre" ? data.desc : data.type}
+        subtitle="AJOUT D'UN ENGAGEMENT REALISE"
+        action={
+          [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(data.status) ? (
+            <Link to={`${data._id}/edit`} className="w-full hover:bg-gray-50">
+              <div className="w-full border px-2 py-1.5 bg-white rounded-lg text-sm text-gray-500 text-center">
                 <HiPencil className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
                 Modifier
               </div>
             </Link>
-          ) : null}
-        </div>
-      </header>
+          ) : null
+        }
+        backAction={
+          <button onClick={() => history.goBack()} className="flex items-center gap-1">
+            <HiArrowLeft className="text-2xl text-gray-400" />
+          </button>
+        }
+      />
 
-      <div className="max-w-3xl mx-auto px-[1rem] pb-[6rem]">
-        <h2 className="text-2xl md:text-3xl font-bold">Statut</h2>
+      <div className="mt-[2rem] md:mt-0 max-w-3xl mx-auto px-[1rem] pb-[6rem]">
+        <h2 className="text-2xl md:text-3xl font-bold m-0">Statut</h2>
         <div className="mt-4 px-4 py-3 border rounded-xl w-full">
           <EngagementStatusBadge status={data.status} />
           <p className="mt-2 text-gray-500">Engagement ajouté le {new Date(data.createdAt).toLocaleDateString("fr-FR")}</p>
+          {data.status === EQUIVALENCE_STATUS.WAITING_CORRECTION && (
+            <div className="mt-3 bg-gray-100 rounded-lg p-3 flex gap-2 text-sm">
+              <div>
+                <HiChat className="text-xl" />
+              </div>
+              <div className="w-full">
+                <p className="font-bold">Message de la part de votre référent&nbsp;:</p>
+                <p className="mt-3">"{data.message}"</p>
+                <div className="mt-3 w-full md:w-fit bg-blue-600 rounded-lg text-white hover:text-white hover:bg-blue-800 px-3 py-2.5">
+                  <Link to={`${data._id}/edit`} className="text-white hover:text-white">
+                    <HiPencil className="inline-block text-lg mr-2 text-white align-text-bottom" />
+                    Corriger ma demande
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {data.status === EQUIVALENCE_STATUS.REFUSED && (
+            <div className="mt-3 bg-gray-100 rounded-lg p-3 flex gap-2 text-sm">
+              <div>
+                <HiChat className="text-xl" />
+              </div>
+              <div className="w-full">
+                <p className="font-bold">Motif du refus&nbsp;:</p>
+                <p className="mt-3">"{data.message}"</p>
+              </div>
+            </div>
+          )}
         </div>
 
         <h2 className="mt-[2rem] md:mt-[3rem] text-2xl md:text-3xl font-bold">Informations générales</h2>

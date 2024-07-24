@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import IconDomain from "@/scenes/missions/components/IconDomain";
 import { EQUIVALENCE_STATUS } from "snu-lib";
-import EngagementStatusBadge from "./EngagementStatusBadge";
+import EquivalenceStatusBadge from "./EquivalenceStatusBadge";
 
 export default function EquivalenceCard({ equivalence }) {
   return (
@@ -10,7 +10,7 @@ export default function EquivalenceCard({ equivalence }) {
       <p className="h-8 p-2 text-xs bg-gray-50 border-b-[1px] rounded-t-xl text-gray-800">✏️ Vous avez ajouté cet engagement</p>
 
       <div className="h-40 p-3 flex flex-col justify-between">
-        <EngagementStatusBadge status={equivalence.status} />
+        <EquivalenceStatusBadge status={equivalence.status} />
         <p className="text-xs leading-5 text-gray-500">{equivalence.structureName}</p>
 
         <div className="flex items-center gap-4">

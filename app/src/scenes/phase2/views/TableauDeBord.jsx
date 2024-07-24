@@ -11,7 +11,7 @@ import InfobulleIcon from "../../../assets/infobulleIcon.svg";
 import SemiCircleProgress from "../components/SemiCircleProgress";
 import EquivalenceCard from "../components/EquivalenceCard";
 import ApplicationCard from "../components/ApplicationCard";
-import { fetchApplications, fetchEquivalences } from "../repo";
+import { fetchApplications, fetchEquivalences } from "../engagement.repository";
 import { statusColors } from "../engagement.utils";
 import { translateStatusMilitaryPreparationFiles } from "../../../utils";
 import Loader from "@/components/Loader";
@@ -56,17 +56,14 @@ export default function View() {
 
   const missionDoneCards = [
     ...applications.data.filter(({ status }) => [APPLICATION_STATUS.DONE, APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(status)),
-    ...equivalences.data.filter(({ status }) => [EQUIVALENCE_STATUS.VALIDATED].includes(status)),
+    ...equivalences.data,
   ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  const missionCandidateCards = [
-    ...applications.data.filter(({ status }) =>
-      [APPLICATION_STATUS.WAITING_ACCEPTATION, APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION].includes(status),
-    ),
-    ...equivalences.data.filter(({ status }) =>
-      [EQUIVALENCE_STATUS.WAITING_VALIDATION, EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(status),
-    ),
-  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const missionCandidateCards = applications.data
+    .filter(({ status }) =>
+      [APPLICATION_STATUS.WAITING_ACCEPTATION, APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION, APPLICATION_STATUS.REFUSED].includes(status),
+    )
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const hasAnyApplicationsOrEquivalences = missionDoneCards?.length || missionCandidateCards?.length;
 

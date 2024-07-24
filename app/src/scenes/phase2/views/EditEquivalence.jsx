@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory, useParams } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import AddImage from "../../../assets/icons/AddImage";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import InformationCircle from "../../../assets/icons/InformationCircle";
@@ -14,11 +14,13 @@ import { capture } from "../../../sentry";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
 import { GrClose } from "react-icons/gr";
 import { queryClient } from "@/services/react-query";
+import Header from "../components/Header";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
   const keyList = ["type", "desc", "structureName", "address", "zip", "city", "startDate", "endDate", "contactFullName", "contactEmail", "files", "missionDuration"];
   const [data, setData] = useState();
+  console.log("🚀 ~ EditEquivalence ~ data:", data);
   const [openType, setOpenType] = useState(false);
   const [openSousType, setOpenSousType] = React.useState(false);
   const [error, setError] = useState(false);
@@ -28,12 +30,13 @@ export default function EditEquivalence() {
   const [errorMail, setErrorMail] = useState(false);
   const [duration, setDuration] = useState(null);
   const [errorDuration, setErrorDuration] = useState(false);
+  console.log("🚀 ~ EditEquivalence ~ errorDuration:", errorDuration);
   const [unit, setUnit] = useState("heures");
   const refType = useRef(null);
   const refSousType = React.useRef(null);
   const history = useHistory();
-  const { equivalenceId } = useParams();
-  const mode = equivalenceId ? "edit" : "create";
+  const { id } = useParams();
+  const mode = id ? "edit" : "create";
 
   const hiddenFileInput = useRef(null);
 
@@ -84,19 +87,20 @@ export default function EditEquivalence() {
   }, []);
 
   useEffect(() => {
-    if (young && equivalenceId)
+    if (young && id)
       (async () => {
-        const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`);
+        const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalence/${id}`);
         if (ok) {
           setData(data);
           setDuration(data.missionDuration);
           return;
         }
       })();
-  }, [young, equivalenceId]);
+  }, [young, id]);
 
   const handleSubmit = async () => {
-    setLoading(true);
+    setErrorMail(false);
+    setErrorDuration(false);
     let error = false;
     for (const key of keyList) {
       if (key === "files" && !data[key]?.length) {
@@ -129,6 +133,7 @@ export default function EditEquivalence() {
       }
     }
     setError(error);
+    console.log("🚀 ~ handleSubmit ~ error:", error);
 
     try {
       if (!error) {
@@ -142,8 +147,9 @@ export default function EditEquivalence() {
 
         data.status = "WAITING_VERIFICATION";
         let ok = false;
+        setLoading(true);
         if (mode === "create") ok = (await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data)).ok;
-        if (mode === "edit") ok = (await api.put(`/young/${young._id.toString()}/phase2/equivalence/${equivalenceId}`, data)).ok;
+        if (mode === "edit") ok = (await api.put(`/young/${young._id.toString()}/phase2/equivalence/${id}`, data)).ok;
 
         if (!ok) {
           toastr.error("Oups, une erreur est survenue");
@@ -152,7 +158,7 @@ export default function EditEquivalence() {
         }
         queryClient.invalidateQueries({ queryKey: ["equivalence"] });
         toastr.success("Votre modification d'équivalence a bien été envoyée");
-        history.push("/phase2");
+        history.push(`/phase2/equivalence/${id}`);
       }
       setLoading(false);
     } catch (error) {
@@ -195,17 +201,17 @@ export default function EditEquivalence() {
   if (data?._id && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data?.status)) history.push("/phase2");
 
   return (
-    <>
-      <div className="mt-10 grid grid-cols-[10%_80%_10%] px-4">
-        <div className="flex items-center">
-          <button onClick={() => history.goBack()} className="flex items-center gap-1">
-            <GrClose className="text-gray-600 hover:text-gray-800 text-xl" />
-          </button>
-        </div>
-        <h1 className="text-center text-xl md:text-5xl font-bold">{mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}</h1>
-      </div>
+    <div className="bg-white pb-12">
+      <Header
+        title={mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}
+        backAction={
+          <Link to={data?._id ? `/phase2/equivalence/${data._id}` : "/phase2"} className="flex items-center gap-1">
+            <GrClose className="text-xl text-gray-500" />
+          </Link>
+        }
+      />
 
-      <div className="mt-8 p-4 max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         <div className="rounded-lg border-[1px] border-blue-400 bg-blue-50">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />
@@ -229,7 +235,7 @@ export default function EditEquivalence() {
             </div>
           </div>
         ) : null}
-        <div className="mt-4 rounded-lg bg-white p-6">
+        <div className="mt-4 rounded-lg bg-white p-4 border">
           <h2 className="text-lg font-bold leading-7 mt-0">Informations générales</h2>
           <p className="mt-2 text-sm font-normal leading-5 text-gray-500">Veuillez compléter le formulaire ci-dessous.</p>
           <p className="mt-6 text-xs font-medium leading-4">Quoi ?</p>
@@ -446,7 +452,7 @@ export default function EditEquivalence() {
             {errorDuration ? <div className="text-xs font-normal leading-4 text-red-500">Veuillez rentrer un nombre supérieur à 0</div> : null}
           </div>
         </div>
-        <div className="mt-4 rounded-lg bg-white p-6">
+        <div className="mt-4 rounded-lg bg-white p-4 border">
           <div className="text-lg font-bold leading-7">Personne contact au sein de la structure d’accueil</div>
           <div className="mt-2 text-sm font-normal leading-5 text-gray-500">
             Cette personne doit vous connaître et pourra être contactée par l’administration sur votre dossier.
@@ -473,7 +479,7 @@ export default function EditEquivalence() {
           </div>
           {errorMail ? <div className="mt-2 text-center text-sm font-normal leading-5 text-red-500">L&apos;adresse email n&apos;est pas valide.</div> : null}
         </div>
-        <div className="mt-4 rounded-lg bg-white p-6">
+        <div className="mt-4 rounded-lg bg-white p-4 border">
           <div className="text-lg font-bold leading-7">Document justificatif d’engagement</div>
 
           {data?.sousType === "Elu au sein du conseil des délégués pour la vie lycéenne (CVL)" && (
@@ -541,7 +547,7 @@ export default function EditEquivalence() {
           {loading ? "Chargement" : mode === "edit" ? "Modifier ma demande" : "Soumettre ma demande"}
         </button>
       </div>
-    </>
+    </div>
   );
 }
 

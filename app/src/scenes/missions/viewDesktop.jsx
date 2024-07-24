@@ -40,6 +40,7 @@ import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
 import { apiEngagement } from "./utils";
+import ApplicationStatusBadge from "../phase2/components/ApplicationStatusBadge";
 
 export default function ViewDesktop() {
   const [mission, setMission] = useState();
@@ -515,9 +516,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
                 <div className={`text-xs font-normal leading-none underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
               </button>
             ) : null}
-            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
-              {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
-            </div>
+            <ApplicationStatusBadge status={application.status} />
           </div>
           <div className="text-xs font-normal leading-none text-gray-500">Places restantes : {mission.placesLeft}</div>
         </div>

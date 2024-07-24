@@ -2,14 +2,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HiLocationMarker } from "react-icons/hi";
 import IconDomain from "@/scenes/missions/components/IconDomain";
-import EngagementStatusBadge from "./EngagementStatusBadge";
+import ApplicationStatusBadge from "./ApplicationStatusBadge";
 
 export default function ApplicationCard({ application }) {
   return (
     <Link
       to={`/mission/${application.missionId}`}
       className="bg-white rounded-xl border p-3 w-72 md:w-96 only:w-full only:md:w-96 h-48 flex flex-col justify-between flex-none snap-always snap-center shadow-sm">
-      <EngagementStatusBadge status={application.status} />
+      <ApplicationStatusBadge status={application.status} />
 
       <p className="text-xs leading-5 text-gray-500 line-clamp-1">{application.mission.structureName}</p>
 

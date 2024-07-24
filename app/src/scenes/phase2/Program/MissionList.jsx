@@ -3,7 +3,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { fetchMissionsFromApiEngagement } from "../repo";
+import { fetchMissionsFromApiEngagement } from "../engagement.repository";
 import Loader from "@/components/Loader";
 import { Col, CustomInput, Row } from "reactstrap";
 import { JvaDomainOptions } from "../engagement.utils";

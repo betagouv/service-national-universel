@@ -20,8 +20,8 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/phase2/equivalence/:equivalenceId/edit" component={EditEquivalence} />
-      <SentryRoute path="/phase2/equivalence/:equivalenceId" component={MonEquivalence} />
+      <SentryRoute path="/phase2/equivalence/:id/edit" component={EditEquivalence} />
+      <SentryRoute path="/phase2/equivalence/:id" component={MonEquivalence} />
       <SentryRoute path="/phase2/equivalence" component={EditEquivalence} />
       <SentryRoute path="/phase2/mes-engagements" component={MesEngagements} />
       <SentryRoute path="/phase2/program/:id" component={Program} />
