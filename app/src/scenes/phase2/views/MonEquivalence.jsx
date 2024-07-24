@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { fetchEquivalence, fetchEquivalenceFile } from "../engagement.repository";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
@@ -15,8 +15,6 @@ export default function Equivalence() {
   const { young } = useAuth();
   const { id } = useParams();
   const { data, isError, isPending } = useQuery({ queryKey: ["equivalence", id], queryFn: () => fetchEquivalence(young._id, id) });
-  console.log("🚀 ~ Equivalence ~ data:", data);
-  const history = useHistory();
 
   async function handleClick(fileName) {
     try {
@@ -44,9 +42,9 @@ export default function Equivalence() {
           ) : null
         }
         backAction={
-          <button onClick={() => history.goBack()} className="flex items-center gap-1">
+          <Link to="/phase2/mes-engagements" className="flex items-center gap-1">
             <HiArrowLeft className="text-2xl text-gray-400" />
-          </button>
+          </Link>
         }
       />
 

@@ -54,27 +54,32 @@ export default function View() {
     return <Loader />;
   }
 
-  const missionDoneCards = [
-    ...applications.data.filter(({ status }) => [APPLICATION_STATUS.DONE, APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(status)),
-    ...equivalences.data,
-  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const missionDoneCards = [...applications.data.filter(({ status }) => [APPLICATION_STATUS.DONE, APPLICATION_STATUS.IN_PROGRESS].includes(status)), ...equivalences.data].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+  );
 
   const missionCandidateCards = applications.data
     .filter(({ status }) =>
-      [APPLICATION_STATUS.WAITING_ACCEPTATION, APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION, APPLICATION_STATUS.REFUSED].includes(status),
+      [
+        APPLICATION_STATUS.WAITING_ACCEPTATION,
+        APPLICATION_STATUS.WAITING_VALIDATION,
+        APPLICATION_STATUS.WAITING_VERIFICATION,
+        APPLICATION_STATUS.VALIDATED,
+        APPLICATION_STATUS.REFUSED,
+        APPLICATION_STATUS.ABANDON,
+        APPLICATION_STATUS.CANCEL,
+      ].includes(status),
     )
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  const hasAnyApplicationsOrEquivalences = missionDoneCards?.length || missionCandidateCards?.length;
-
   return (
     <div className="mt-[3rem]">
-      <div className="flex flex-col md:flex-row border-2 rounded-2xl border-gray-200 justify-center items-center">
+      <div className="flex flex-col md:flex-row border shadow-sm rounded-2xl border-gray-200 justify-center items-center">
         <span className="w-full relative">
           <SemiCircleProgress current={phase2NumberHoursDone} total={PHASE2_TOTAL_HOURS}></SemiCircleProgress>
           <Tooltip className="absolute top-4 right-4" />
         </span>
-        {!hasAnyApplicationsOrEquivalences && (
+        {!missionDoneCards.length ? (
           <span className="p-4 md:p-8 md:basis-6/12 flex flex-col sm:border-t-2 md:border-t-0 md:border-l-2 text-center">
             <span className="font-bold">C'est parti !</span>
             <span className="text-gray-400 text-sm">Engagez vous au service de la nation.</span>
@@ -89,7 +94,7 @@ export default function View() {
               </Link>
             </div>
           </span>
-        )}
+        ) : null}
       </div>
 
       {equivalences.isError ||
@@ -101,9 +106,9 @@ export default function View() {
           </div>
         ))}
 
-      {hasAnyApplicationsOrEquivalences && (
-        <div className="pt-8 mt-8">
-          <span className="font-bold text-2xl">
+      {missionDoneCards.length ? (
+        <>
+          <h2 className="font-bold text-2xl md:text-3xl mt-[1rem] md:mt-[3rem]">
             Engagements réalisés
             {phase2NumberHoursDone < PHASE2_TOTAL_HOURS && (
               <Link
@@ -113,40 +118,38 @@ export default function View() {
                 <span className="hidden md:inline">Ajouter</span>
               </Link>
             )}
-          </span>
+          </h2>
           <div className="flex flex-col md:flex-row gap-4 pb-3 flex-wrap pt-4">
             {missionDoneCards.map((data) =>
               data.engagementType === "mig" ? <ApplicationCard key={data._id} application={data} /> : <EquivalenceCard key={data._id} equivalence={data} />,
             )}
           </div>
-        </div>
-      )}
+        </>
+      ) : null}
 
-      {hasAnyApplicationsOrEquivalences && (
-        <div className="pt-8 mt-8">
-          <span className="font-bold text-2xl">Candidatures</span>
+      {missionCandidateCards.length ? (
+        <>
+          <h2 className="mt-[1rem] md:mt-[3rem] font-bold text-2xl md:text-3xl">Candidatures</h2>
           <div className="flex flex-col md:flex-row gap-3 pb-3 flex-wrap pt-4">
             {missionCandidateCards.map((data) =>
               data.engagementType === "mig" ? <ApplicationCard key={data._id} application={data} /> : <EquivalenceCard key={data._id} equivalence={data} />,
             )}
           </div>
-        </div>
-      )}
+        </>
+      ) : null}
 
-      <div className="pt-8 mt-8">
-        <span className="font-bold text-2xl">Préparations Militaires</span>
-        <span className="mt-4 flex justify-center md:justify-start flex-row p-4 bg-gray-50 border rounded-2xl border-gray-200 items-center">
-          <RiMedal2Line className="text-5xl md:text-4xl p-1 md:p-2 bg-gray-200 rounded-full" />
-          <span className="flex flex-col ml-4">
-            <MilitaryStatusBadge className="md:hidden w-20" young={young}></MilitaryStatusBadge>
-            <span>Mon dossier d'éligibilité</span>
+      <h2 className="font-bold text-2xl md:text-3xl mt-[1rem] md:mt-3rem]">Préparations Militaires</h2>
+      <div className="mt-4 flex justify-center md:justify-start flex-row p-4 bg-gray-50 border shadow-sm rounded-2xl border-gray-200 items-center">
+        <RiMedal2Line className="text-5xl md:text-4xl p-1 md:p-2 bg-gray-200 rounded-full" />
+        <span className="flex flex-col ml-4">
+          <MilitaryStatusBadge className="md:hidden w-20" young={young}></MilitaryStatusBadge>
+          <span>Mon dossier d'éligibilité</span>
 
-            <Link className="text-blue-600" to="/ma-preparation-militaire">
-              {young.statusMilitaryPreparationFiles ? "Consulter" : "Compléter"}
-            </Link>
-          </span>
-          <MilitaryStatusBadge className="sm:hidden md:flex" young={young}></MilitaryStatusBadge>
+          <Link className="text-blue-600" to="/ma-preparation-militaire">
+            {young.statusMilitaryPreparationFiles ? "Consulter" : "Compléter"}
+          </Link>
         </span>
+        <MilitaryStatusBadge className="sm:hidden md:flex" young={young}></MilitaryStatusBadge>
       </div>
     </div>
   );

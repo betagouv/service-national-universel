@@ -7,7 +7,7 @@ import { HiArrowLeft } from "react-icons/hi";
 export default function View() {
   const params = new URLSearchParams(window.location.search);
   return (
-    <div className="bg-white">
+    <div className="bg-white pb-12">
       <div className="px-[1rem] md:px-[3rem] max-w-7xl mx-auto bg-white flex flex-col">
         <header className="mt-[3rem] grid grid-cols-[15%_auto_15%]">
           <Link to="/phase2" className="flex items-center gap-1">
