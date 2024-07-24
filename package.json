@@ -10,6 +10,9 @@
     "clean": "turbo run clean"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^5.16.4",
     "classnames": "^2.5.1",
     "dotenv-cli": "latest",
     "heic2any": "^0.0.4",

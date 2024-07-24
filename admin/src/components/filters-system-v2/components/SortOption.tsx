@@ -66,6 +66,7 @@ const SortOption = ({ sortOptions, pagination, onPaginationChange, selectedFilte
         onChange={(option) => {
           handleClick(option.value);
         }}
+        closeMenuOnSelect={true}
         size="sm"
         controlCustomStyle={{
           background: "rgb(243 244 246)",

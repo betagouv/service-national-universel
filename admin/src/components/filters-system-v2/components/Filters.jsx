@@ -29,6 +29,7 @@ export default function Filters({
   defaultUrlParam = undefined,
   size,
   intermediateFilters = undefined,
+  disabled = false,
 }) {
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState({});
@@ -170,6 +171,8 @@ export default function Filters({
     updateFiltersFromParams(params);
     setIsShowing(false);
   };
+
+  if (disabled) return null;
 
   return (
     <div>

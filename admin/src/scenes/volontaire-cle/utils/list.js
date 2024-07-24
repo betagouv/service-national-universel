@@ -29,7 +29,13 @@ export const getFilterArray = (bus, session, classes) => {
       },
     },
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
-    { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus },
+    {
+      title: "Statut",
+      name: "status",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: translateInscriptionStatus,
+    },
     { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     {
       title: "Région",
@@ -48,6 +54,13 @@ export const getFilterArray = (bus, session, classes) => {
     {
       title: "Classe",
       name: "grade", //numero de la classe
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Étape de l'inscription",
+      name: "reinscriptionStep2023",
       parentGroup: "Dossier",
       missingLabel: "Non renseigné",
       translate: translate,
