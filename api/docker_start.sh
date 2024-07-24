@@ -11,5 +11,8 @@ else
   pm2 --no-daemon multiset "pm2-slack:slack_url $PM2_SLACK_URL pm2-slack:servername PM2-ERROR-API pm2-slack:error false"
 fi
 
+touch /var/log/api.error.log /var/log/api.output.log
 
-exec pm2-runtime api/src/index.js
+rsyslogd -f api/docker_rsyslog.conf
+
+exec pm2-runtime --error=/var/log/api.error.log --output=/var/log/api.output.log api/src/index.js
