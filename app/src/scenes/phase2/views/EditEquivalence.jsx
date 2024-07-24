@@ -133,24 +133,22 @@ export default function EditEquivalence() {
       }
     }
     setError(error);
-    console.log("🚀 ~ handleSubmit ~ error:", error);
+
+    if (error) return;
+
+    delete data._id;
+    delete data.youngId;
+    delete data.createdAt;
+    delete data.__v;
+
+    if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === "" || data?.sousType)) delete data.sousType;
+
+    data.status = "WAITING_VERIFICATION";
 
     try {
-      if (!error) {
-        delete data._id;
-        delete data.youngId;
-        delete data.createdAt;
-        delete data.__v;
-
-        if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === "" || data?.sousType))
-          delete data.sousType;
-
-        data.status = "WAITING_VERIFICATION";
-        let ok = false;
-        setLoading(true);
-        if (mode === "create") ok = (await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data)).ok;
-        if (mode === "edit") ok = (await api.put(`/young/${young._id.toString()}/phase2/equivalence/${id}`, data)).ok;
-
+      setLoading(true);
+      if (mode === "create") {
+        const { ok, data: newEquivalence } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
         if (!ok) {
           toastr.error("Oups, une erreur est survenue");
           setLoading(false);
@@ -158,8 +156,21 @@ export default function EditEquivalence() {
         }
         queryClient.invalidateQueries({ queryKey: ["equivalence"] });
         toastr.success("Votre modification d'équivalence a bien été envoyée");
-        history.push(`/phase2/equivalence/${id}`);
+        history.push(`/phase2/equivalence/${newEquivalence._id}`);
       }
+
+      if (mode === "edit") {
+        const { ok, data: equivalence } = await api.put(`/young/${young._id.toString()}/phase2/equivalence/${id}`, data);
+        if (!ok) {
+          toastr.error("Oups, une erreur est survenue");
+          setLoading(false);
+          return;
+        }
+        queryClient.invalidateQueries({ queryKey: ["equivalence", id] });
+        toastr.success("Votre modification d'équivalence a bien été envoyée");
+        history.push(`/phase2/equivalence/${equivalence._id}`);
+      }
+
       setLoading(false);
     } catch (error) {
       capture(error);
