@@ -6,15 +6,7 @@ import DoubleDayTile from "../../components/DoubleDayTile";
 import Loader from "../../components/Loader";
 import WithTooltip from "../../components/WithTooltip";
 import api from "../../services/api";
-import {
-  formatStringDateTimezoneUTC,
-  translate,
-  translateApplication,
-  copyToClipboard,
-  APPLICATION_STATUS,
-  SENDINBLUE_TEMPLATES,
-  translateAddFilePhase2WithoutPreposition,
-} from "../../utils";
+import { formatStringDateTimezoneUTC, translate, copyToClipboard, APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translateAddFilePhase2WithoutPreposition } from "../../utils";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import ApplyModal from "./components/ApplyModal";
@@ -470,31 +462,6 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
   const application = mission?.application;
   const tutor = mission?.tutor;
 
-  const theme = {
-    background: {
-      WAITING_VALIDATION: "bg-sky-100",
-      WAITING_VERIFICATION: "bg-sky-100",
-      WAITING_ACCEPTATION: "bg-orange-500",
-      VALIDATED: "bg-[#71C784]",
-      DONE: "bg-[#2094FF]",
-      REFUSED: "bg-red-500",
-      CANCEL: "bg-[#F4F4F4]",
-      IN_PROGRESS: "bg-indigo-600",
-      ABANDON: "bg-gray-50",
-    },
-    text: {
-      WAITING_VALIDATION: "text-sky-600",
-      WAITING_VERIFICATION: "text-sky-600",
-      WAITING_ACCEPTATION: "text-white",
-      VALIDATED: "text-white",
-      DONE: "text-white",
-      REFUSED: "text-white",
-      CANCEL: "text-[#6B6B6B]",
-      IN_PROGRESS: "text-white",
-      ABANDON: "text-gray-400",
-    },
-  };
-
   if (["WAITING_VALIDATION", "WAITING_VERIFICATION", "REFUSED", "CANCEL"].includes(application.status)) {
     return (
       <>
@@ -554,9 +521,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
                 <div className={`text-xs font-normal leading-none underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
               </button>
             ) : null}
-            <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
-              {translateApplication(application.status)}
-            </div>
+            <ApplicationStatusBadge status={application.status} />
           </div>
           {tutor ? (
             <div className="mb-4 flex gap-6 rounded-lg border border-gray-200 py-2 px-3">

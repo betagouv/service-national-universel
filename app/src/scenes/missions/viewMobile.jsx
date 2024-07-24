@@ -18,15 +18,7 @@ import Loader from "../../components/Loader";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import { capture } from "../../sentry";
 import api from "../../services/api";
-import {
-  APPLICATION_STATUS,
-  copyToClipboard,
-  formatStringDateTimezoneUTC,
-  SENDINBLUE_TEMPLATES,
-  translate,
-  translateAddFilePhase2WithoutPreposition,
-  translateApplication,
-} from "../../utils";
+import { APPLICATION_STATUS, copyToClipboard, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate, translateAddFilePhase2WithoutPreposition } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
 import FileCard from "../militaryPreparation/components/FileCard";
@@ -523,30 +515,6 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, co
     }
   };
 
-  const theme = {
-    background: {
-      WAITING_VALIDATION: "bg-sky-100",
-      WAITING_VERIFICATION: "bg-sky-100",
-      WAITING_ACCEPTATION: "bg-orange-500",
-      VALIDATED: "bg-[#71C784]",
-      DONE: "bg-[#2094FF]",
-      REFUSED: "bg-red-500",
-      CANCEL: "bg-[#F4F4F4]",
-      IN_PROGRESS: "bg-indigo-600",
-      ABANDON: "bg-gray-50",
-    },
-    text: {
-      WAITING_VALIDATION: "text-sky-600",
-      WAITING_VERIFICATION: "text-sky-600",
-      WAITING_ACCEPTATION: "text-white",
-      VALIDATED: "text-white",
-      DONE: "text-white",
-      REFUSED: "text-white",
-      CANCEL: "text-[#6B6B6B]",
-      IN_PROGRESS: "text-white",
-      ABANDON: "text-gray-400",
-    },
-  };
   if (["WAITING_VALIDATION", "WAITING_VERIFICATION", "REFUSED", "CANCEL"].includes(application.status)) {
     return (
       <div className="flex flex-col items-center justify-center gap-4">
