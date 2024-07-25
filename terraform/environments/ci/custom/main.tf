@@ -115,9 +115,6 @@ resource "scaleway_container" "api" {
   }
 }
 
-
-
-
 resource "scaleway_container" "admin" {
   name            = "${local.env}-admin"
   namespace_id    = data.scaleway_container_namespace.main.id

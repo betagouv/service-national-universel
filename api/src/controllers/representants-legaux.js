@@ -21,7 +21,7 @@ const { serializeYoung } = require("../utils/serializer");
 const { ERRORS } = require("../utils");
 
 const { validateFirstName, validateString } = require("../utils/validator");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const config = require("config");
 
 function tokenParentValidMiddleware(req, res, next) {

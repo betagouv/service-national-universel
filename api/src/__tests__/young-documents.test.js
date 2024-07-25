@@ -31,8 +31,8 @@ jest.mock("node-fetch", () =>
   ),
 );
 
-jest.mock("../sendinblue", () => ({
-  ...jest.requireActual("../sendinblue"),
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
   sendTemplate: () => Promise.resolve(),
 }));

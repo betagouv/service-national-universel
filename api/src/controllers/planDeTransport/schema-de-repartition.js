@@ -47,7 +47,7 @@ const CohortModel = require("../../models/cohort");
 const cohesionCenterModel = require("../../models/cohesionCenter");
 const { getTransporter } = require("../../utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../brevo");
 
 const schemaRepartitionBodySchema = Joi.object({
   cohort: Joi.string()

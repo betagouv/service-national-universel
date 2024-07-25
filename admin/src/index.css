@@ -493,3 +493,28 @@ h4 {
     scrollbar-width: none; /* Firefox */
   }
 }
+
+/* react-redux-toastr */
+.redux-toastr .rrt-holder {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+}
+.redux-toastr .toastr .rrt-left-container {
+  width: 50px;
+}
+.redux-toastr .toastr .rrt-middle-container {
+  margin-left: 50px;
+  width: 75%;
+}
+.redux-toastr .toastr .rrt-left-container .rrt-holder {
+  width: auto;
+  left: 15px;
+  top: 35px;
+}
+.redux-toastr .toastr .rrt-left-container .toastr-icon {
+  margin: auto;
+}
+.redux-toastr .toastr .close-toastr {
+  color: white;
+}

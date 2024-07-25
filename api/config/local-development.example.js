@@ -13,4 +13,5 @@ const secrets = getSecrets(secretKey, CI_PROJECT_ID, "snu-ci");
 module.exports = {
   ENABLE_SENDINBLUE: false,
   ...secrets,
+  // REDIS_URL: "redis://127.0.0.1:6379",
 };

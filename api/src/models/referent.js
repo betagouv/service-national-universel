@@ -3,19 +3,33 @@ const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
-const sendinblue = require("../sendinblue");
+const brevo = require("../brevo");
 const anonymize = require("../anonymization/referent");
 
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
-const { ReferentCreatedBy } = require("snu-lib");
+const { ReferentCreatedBy, InvitationType } = require("snu-lib");
 
 const MODELNAME = "referent";
 
 const referentMetadataSchema = {
   createdBy: {
-    type: ReferentCreatedBy,
+    type: String,
+    enum: ReferentCreatedBy,
     documentation: {
       description: "Par quel workflow a été créé le référent",
+    },
+  },
+  isFirstInvitationPending: {
+    type: Boolean,
+    documentation: {
+      description: "Indique si une invitation est en attente de première envoi",
+    },
+  },
+  invitationType: {
+    type: String,
+    enum: InvitationType,
+    documentation: {
+      description: "Indique si le référent doit recevoir un email d'inscription ou de reinscription",
     },
   },
 };
@@ -294,13 +308,13 @@ Schema.methods.anonymise = function () {
 
 //Sync with Sendinblue
 Schema.post("save", function (doc) {
-  sendinblue.sync(doc, MODELNAME);
+  brevo.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
-  sendinblue.sync(doc, MODELNAME);
+  brevo.sync(doc, MODELNAME);
 });
 Schema.post("remove", function (doc) {
-  sendinblue.unsync(doc);
+  brevo.unsync(doc);
 });
 
 Schema.virtual("user").set(function (user) {

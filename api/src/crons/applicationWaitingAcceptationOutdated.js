@@ -5,7 +5,7 @@ const StructureModel = require("../models/structure");
 const YoungModel = require("../models/young");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const config = require("config");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const { getCcOfYoung } = require("../utils");
 
 const clean = async () => {

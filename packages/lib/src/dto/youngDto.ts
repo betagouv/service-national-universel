@@ -37,7 +37,7 @@ interface Note {
   updatedAt?: Date;
 }
 
-export interface YoungType {
+export interface YoungDto {
   _id?: string;
   id?: string;
   sqlId?: string;

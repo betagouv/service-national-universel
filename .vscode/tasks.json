@@ -178,6 +178,29 @@
       "options": {
         "cwd": "./api"
       }
+    },
+    {
+      "label": "Run local containers",
+      "dependsOn": ["Run local mongo", "Run local ES"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Run local ES",
+      "command": "docker-compose -f ./docker-compose.dev.yml up -d elasticsearch && docker-compose -f ./docker-compose.dev.yml logs -f elasticsearch",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./api"
+      }
+    },
+    {
+      "label": "Run local mongo",
+      "command": "docker-compose -f ./docker-compose.dev.yml up -d mongo && docker-compose -f ./docker-compose.dev.yml logs -f mongo",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./api"
+      }
     }
   ]
 }

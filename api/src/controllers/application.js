@@ -17,7 +17,7 @@ const CohortObject = require("../models/cohort");
 const ReferentObject = require("../models/referent");
 const { decrypt, encrypt } = require("../cryptoUtils");
 
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
 const config = require("config");
 const {

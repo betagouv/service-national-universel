@@ -21,7 +21,7 @@ const {
   SENDINBLUE_TEMPLATES,
 } = require("snu-lib");
 const patches = require("./patches");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
 const { serializeMissions, serializeReferents } = require("../utils/es-serializer");

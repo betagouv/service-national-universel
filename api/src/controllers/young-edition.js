@@ -39,7 +39,7 @@ const {
   canAllowSNU,
 } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const { format } = require("date-fns");
 const config = require("config");
 const YoungObject = require("../models/young");

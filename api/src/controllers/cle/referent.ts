@@ -1,20 +1,22 @@
 import { isSuperAdmin } from "snu-lib";
-import { UserRequest } from "../request";
+import express from "express";
+import passport from "passport";
+import Joi from "joi";
 import { Response } from "express";
-import { doInviteMultipleChefsEtablissements, InvitationType } from "../../services/cle/referent";
+
+import { ROLES, SUB_ROLES, canInviteCoordinateur } from "snu-lib";
+
+import { doInviteMultipleChefsEtablissements } from "../../services/cle/referent";
 import { uploadFile } from "../../utils";
+import { UserRequest } from "../request";
+import { capture } from "../../sentry";
+import { ERRORS } from "../../utils";
+import { EtablissementModel } from "../../models";
+import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 
-const express = require("express");
-const passport = require("passport");
 const router = express.Router();
-const Joi = require("joi");
-const { ROLES, SUB_ROLES, canInviteCoordinateur } = require("snu-lib");
-const { capture } = require("../../sentry");
-const { ERRORS } = require("../../utils");
-const EtablissementModel = require("../../models/cle/etablissement");
-const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 
-router.post("/invite-coordonnateur", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/invite-coordonnateur", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),

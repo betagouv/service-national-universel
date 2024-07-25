@@ -1,6 +1,6 @@
 const { fakerFR: faker } = require("@faker-js/faker");
 
-function getNewCohesionCenterFixture() {
+function getNewCohesionCenterFixture(object = {}) {
   const placesLeft = 15;
   return {
     name: faker.lorem.word(),
@@ -24,6 +24,7 @@ function getNewCohesionCenterFixture() {
       placesLeft: placesLeft,
       placesTotal: placesLeft,
     },
+    ...object,
   };
 }
 

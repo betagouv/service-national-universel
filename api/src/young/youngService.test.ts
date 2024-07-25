@@ -1,4 +1,4 @@
-import * as youngService from "./young.service";
+import * as youngService from "./youngService";
 // import * as documentService from "../document/document.service";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 

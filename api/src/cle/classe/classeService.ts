@@ -1,13 +1,12 @@
-import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/young.service";
-import ClasseModel from "../../models/cle/classe";
-import YoungModel from "../../models/young";
 import { YOUNG_STATUS } from "snu-lib";
 
-import { EtablissementDocument, IEtablissement } from "../../models/cle/etablissementType";
-import { ClasseDocument, IClasse } from "../../models/cle/classeType";
-import { CleClasseModel } from "../../models";
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
+import ClasseModel from "../../models/cle/classe";
+import YoungModel from "../../models/young";
+
+import { ClasseDocument, IClasse, EtablissementDocument, IEtablissement } from "../../models";
 import { mapRegionToTrigramme } from "../../services/regionService";
-const crypto = require("crypto");
+import crypto from "crypto";
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
@@ -72,14 +71,14 @@ export const buildUniqueClasseKey = (etablissement: IEtablissement): string => {
 };
 
 export const findClasseByUniqueKeyAndUniqueId = async (uniqueKey: string | undefined | null, uniqueId: string): Promise<ClasseDocument | null> => {
-  return await CleClasseModel.findOne({ uniqueKey, uniqueId });
+  return await ClasseModel.findOne({ uniqueKey, uniqueId });
 };
 
 export const getNumberOfClassesByEtablissement = async (etablissement: EtablissementDocument): Promise<number> => {
-  return await CleClasseModel.countDocuments({ etablissementId: etablissement._id });
+  return await ClasseModel.countDocuments({ etablissementId: etablissement._id });
 };
 
 export const getEstimatedSeatsByEtablissement = async (etablissement: EtablissementDocument): Promise<number> => {
-  const classes = await CleClasseModel.find({ etablissementId: etablissement._id });
+  const classes = await ClasseModel.find({ etablissementId: etablissement._id });
   return classes.reduce((classeNumberAcc: number, classe: ClasseDocument) => classeNumberAcc + classe.estimatedSeats, 0);
 };

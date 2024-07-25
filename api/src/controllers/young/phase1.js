@@ -22,7 +22,7 @@ const {
 
 const config = require("config");
 const { capture } = require("../../sentry");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../brevo");
 
 const YoungModel = require("../../models/young");
 const SessionPhase1Model = require("../../models/sessionPhase1");

@@ -3,7 +3,7 @@ const slack = require("../slack");
 const ContractModel = require("../models/contract");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const config = require("config");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const { getReferentManagerPhase2 } = require("../utils");
 
 const trigger = async () => {

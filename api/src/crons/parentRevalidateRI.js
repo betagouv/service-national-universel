@@ -1,7 +1,7 @@
 const { capture } = require("../sentry");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { YOUNG_STATUS, SENDINBLUE_TEMPLATES, REGLEMENT_INTERIEUR_VERSION } = require("snu-lib");
 const config = require("config");
