@@ -15,18 +15,15 @@
  *                                                -> Relance la notification de consentement au droit à l'image pour le parent 1 ou 2
  */
 
-const express = require("express");
-const router = express.Router({ mergeParams: true });
-const Joi = require("joi");
-const YoungModel = require("../models/young");
-const ClasseModel = require("../models/cle/classe");
-const ApplicationObject = require("../models/application");
-const { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } = require("../utils");
-const { capture } = require("../sentry");
-const { validateFirstName } = require("../utils/validator");
-const { serializeYoung } = require("../utils/serializer");
-const passport = require("passport");
-const {
+import express, { Response } from "express";
+import Joi from "joi";
+import { YoungModel, ApplicationModel } from "../../models";
+import { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } from "../../utils";
+import { capture } from "../../sentry";
+import { validateFirstName } from "../../utils/validator";
+import { serializeYoung } from "../../utils/serializer";
+import passport from "passport";
+import {
   PHONE_ZONES_NAMES_ARR,
   formatPhoneNumberFromPhoneZone,
   YOUNG_SITUATIONS,
@@ -37,15 +34,20 @@ const {
   YOUNG_STATUS,
   canEditYoung,
   canAllowSNU,
-} = require("snu-lib");
-const { getDensity, getQPV } = require("../geo");
-const { sendTemplate } = require("../brevo");
-const { format } = require("date-fns");
-const config = require("config");
-const YoungObject = require("../models/young");
-const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
-const SessionPhase1Model = require("../models/sessionPhase1");
-const CohortModel = require("../models/cohort");
+} from "snu-lib";
+import { getDensity, getQPV } from "../../geo";
+import { sendTemplate } from "../../brevo";
+import { format } from "date-fns";
+import config from "config";
+import YoungObject from "../../models/young";
+import LigneDeBusModel from "../../models/PlanDeTransport/ligneBus";
+import SessionPhase1Model from "../../models/sessionPhase1";
+import CohortModel from "../../models/cohort";
+import { validateId, idSchema } from "../../utils/validator";
+import { UserRequest } from "../../controllers/request";
+import { canEditYoungConsent, updateYoungConsent } from "./youngEditionService";
+
+const router = express.Router({ mergeParams: true });
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -56,7 +58,7 @@ const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.APPRENTICESHIP,
 ];
 
-router.put("/:id/identite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/identite", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
     if (error_id) {
@@ -148,7 +150,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     }
 
     //update applications
-    const applications = await ApplicationObject.find({ youngId: young._id });
+    const applications = await ApplicationModel.find({ youngId: young._id });
 
     const updatePromises = applications.map((application) => {
       application.set({ youngCity: value.city, youngDepartment: value.department });
@@ -171,7 +173,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
   }
 });
 
-router.put("/:id/situationparents", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/situationparents", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
     if (error_id) {
@@ -274,7 +276,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
   }
 });
 
-router.put("/:id/phasestatus", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/phasestatus", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -371,7 +373,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
   }
 });
 
-router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -402,7 +404,7 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
       [`parent${value.parent}AllowSNU`]: value.allow ? "true" : "false",
     };
 
-    let notification = null;
+    let notification: string | null = null;
     const futureYoung = { ...young, ...changes };
     if (futureYoung.parent1AllowSNU === "false" || futureYoung.parent2AllowSNU === "false") {
       if (young.parentAllowSNU !== "false") {
@@ -442,9 +444,46 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
   }
 });
 
-router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/ref-allow-snu", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    const result = Joi.object()
+      .keys({
+        youngIds: Joi.array().items(idSchema()).min(1).required(),
+        consent: Joi.boolean(),
+        imageRights: Joi.boolean(),
+      })
+      .validate(req.body, { stripUnknown: true });
+    const { error, value: payload } = result;
+    if (error || (payload.consent === undefined && payload.imageRights === undefined)) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canAllowSNU(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // multi-update uniquement pour les CLE
+    const youngs = await YoungModel.find({ _id: { $in: payload.youngIds }, source: "CLE" });
+    if (youngs.length !== payload.youngIds.length) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    // TODO: use transaction when ready for ES
+    for (const young of youngs) {
+      if (!(await canEditYoungConsent(young, req.user))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+    for (const young of youngs) {
+      await updateYoungConsent(young, req.user, payload);
+    }
+
+    return res.status(200).send({ ok: true, data: payload.youngIds });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    const { error: error_id, value: id } = validateId(req.params.id);
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // --- validate data
@@ -467,47 +506,10 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungConsent(young, req.user))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
-    const classe = await ClasseModel.findById(young.classeId).populate({
-      path: "etablissement",
-      options: { select: { coordinateurIds: 1, referentEtablissementIds: 1 } },
-    });
-
-    if (!classe) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-
-    //check si le ref est bien lié au jeune
-    if (
-      !classe.referentClasseIds.includes(req.user._id) &&
-      !classe.etablissement.coordinateurIds.includes(req.user._id) &&
-      !classe.etablissement.referentEtablissementIds.includes(req.user._id)
-    ) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const changes = generateChanges(value, young);
-
-    young.set(changes);
-    await young.save({ fromUser: req.user });
-
-    if (value.consent) {
-      try {
-        const emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
-        await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
-          emailTo,
-          params: {
-            cta: `${config.APP_URL}/`,
-            SOURCE: young.source,
-          },
-        });
-      } catch (e) {
-        capture(e);
-      }
-    }
+    await updateYoungConsent(young, req.user, value);
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (err) {
@@ -516,33 +518,7 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
   }
 });
 
-function generateChanges(value, young) {
-  const changes = {};
-
-  const setIfTrue = (condition, field, value) => {
-    if (condition) {
-      changes[field] = value;
-    }
-  };
-
-  setIfTrue(value.consent, "status", YOUNG_STATUS.WAITING_VALIDATION);
-  setIfTrue(value.consent && young.inscriptionStep2023 === "WAITING_CONSENT", "inscriptionStep2023", "DONE");
-  setIfTrue(value.consent && young.reinscriptionStep2023 === "WAITING_CONSENT", "reinscriptionStep2023", "DONE");
-  setIfTrue(value.consent, "parentAllowSNU", "true");
-
-  //Parent 1
-  setIfTrue(value.consent, "parent1AllowSNU", "true");
-  setIfTrue(value.consent, "parent1ValidationDate", new Date());
-  setIfTrue(value.imageRights, "parent1AllowImageRights", "true");
-  //Parent 2
-  setIfTrue(young.parent2Status && value.consent, "parent2AllowSNU", "true");
-  setIfTrue(young.parent2Status && value.imageRights, "parent2AllowImageRights", "true");
-  setIfTrue(young.parent2Status && value.imageRights, "parent2ValidationDate", new Date());
-
-  return changes;
-}
-
-router.get("/:id/remider/:idParent", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/remider/:idParent", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
     if (error_id) {
@@ -607,7 +583,7 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
   }
 });
 
-router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // checks data
     const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
@@ -659,7 +635,7 @@ router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", {
   }
 });
 
-router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // checks data
     const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
@@ -714,7 +690,7 @@ router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { se
   }
 });
 
-router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // checks data
     const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
@@ -764,4 +740,4 @@ router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent"
   }
 });
 
-module.exports = router;
+export default router;

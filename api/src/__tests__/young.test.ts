@@ -3,7 +3,8 @@ import fetch from "node-fetch";
 const request = require("supertest");
 const jwt = require("jsonwebtoken");
 
-const { ROLES, COHORTS, YOUNG_SOURCE } = require("snu-lib");
+const { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { sendTemplate } = require("../brevo");
 
 const fileUtils = require("../utils/file");
 
@@ -47,6 +48,7 @@ jest.mock("../redis", () => {
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
+  sendTemplate: jest.fn(),
 }));
 
 jest.mock("../geo", () => ({
@@ -677,7 +679,7 @@ describe("Young", () => {
     });
   });
 
-  describe("POST /young/:id/:email/:template", () => {
+  describe("POST /young/:id/email/:template", () => {
     const validTemplate = "1229";
     it("should return 400 if template not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
@@ -696,6 +698,34 @@ describe("Young", () => {
         .post("/young/" + young._id + "/email/" + validTemplate)
         .send({ message: "hello" });
       expect(res.statusCode).toEqual(200);
+    });
+    it("should return 200 when VALIDATED", async () => {
+      sendTemplate.mockClear();
+      const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
+      const young = await createYoungHelper(getNewYoungFixture({ source: "CLE" }));
+      const passport = require("passport");
+      passport.user = tutor;
+      const res = await request(getAppHelper()).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`).send({ status: "VALIDATED" });
+      expect(res.statusCode).toEqual(200);
+      expect(sendTemplate).toHaveBeenCalledTimes(1);
+      expect(sendTemplate).toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, {
+        cc: [
+          { name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email },
+          { name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email },
+        ],
+        emailTo: [{ email: young.email, name: `${young.firstName} ${young.lastName}` }],
+        params: {
+          cta: "http://localhost:8081",
+          firstName: young.firstName,
+          lastName: young.lastName,
+          link: undefined,
+          message: undefined,
+          missionName: undefined,
+          object: undefined,
+          structureName: undefined,
+          type_document: undefined,
+        },
+      });
     });
   });
 

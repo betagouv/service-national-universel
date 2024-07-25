@@ -1,21 +1,30 @@
-const { fakerFR: faker } = require("@faker-js/faker");
-const request = require("supertest");
-const getAppHelper = require("./helpers/app");
-const getNewYoungFixture = require("./fixtures/young");
-const { getNewReferentFixture } = require("./fixtures/referent");
-const getNewStructureFixture = require("./fixtures/structure");
-const { getYoungByIdHelper, deleteYoungByIdHelper, createYoungHelper, expectYoungToEqual, notExistingYoungId } = require("./helpers/young");
-const { getReferentsHelper, deleteReferentByIdHelper, notExistingReferentId, createReferentHelper, expectReferentToEqual, getReferentByIdHelper } = require("./helpers/referent");
-const { dbConnect, dbClose } = require("./helpers/db");
-const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
-const { createStructureHelper } = require("./helpers/structure");
-const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
-const { getNewApplicationFixture } = require("./fixtures/application");
-const { createApplication, getApplicationsHelper } = require("./helpers/application");
-const { createMissionHelper, getMissionsHelper } = require("./helpers/mission");
-const getNewMissionFixture = require("./fixtures/mission");
-const { ROLES } = require("snu-lib");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+import { fakerFR as faker } from "@faker-js/faker";
+import request from "supertest";
+
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
+
+import { YoungModel, ClasseDocument } from "../models";
+
+import getAppHelper from "./helpers/app";
+import getNewYoungFixture from "./fixtures/young";
+import { getNewReferentFixture } from "./fixtures/referent";
+import getNewStructureFixture from "./fixtures/structure";
+import { getYoungByIdHelper, deleteYoungByIdHelper, createYoungHelper, expectYoungToEqual, notExistingYoungId } from "./helpers/young";
+import { getReferentsHelper, deleteReferentByIdHelper, notExistingReferentId, createReferentHelper, expectReferentToEqual, getReferentByIdHelper } from "./helpers/referent";
+import { dbConnect, dbClose } from "./helpers/db";
+import { createSessionPhase1, getSessionPhase1ById } from "./helpers/sessionPhase1";
+import { createStructureHelper } from "./helpers/structure";
+import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
+import { getNewApplicationFixture } from "./fixtures/application";
+import { createApplication, getApplicationsHelper } from "./helpers/application";
+import { createMissionHelper, getMissionsHelper } from "./helpers/mission";
+import getNewMissionFixture from "./fixtures/mission";
+import { createClasse } from "./helpers/classe";
+import { createEtablissement } from "./helpers/etablissement";
+import { createFixtureClasse } from "./fixtures/classe";
+import { createFixtureEtablissement } from "./fixtures/etablissement";
+import { createCohortHelper } from "./helpers/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -68,7 +77,7 @@ describe("Referent", () => {
   });
 
   describe("PUT /referent/young/:id", () => {
-    async function createYoungThenUpdate(params, fields) {
+    async function createYoungThenUpdate(params, fields = {}) {
       const youngFixture = getNewYoungFixture();
       const originalYoung = await createYoungHelper({ ...youngFixture, ...fields });
       const modifiedYoung = { ...youngFixture, ...fields, ...params };
@@ -133,7 +142,7 @@ describe("Referent", () => {
       expect(young.cohesionStayPresence).toEqual("false");
     });
     it("should remove places when sending to cohesion center", async () => {
-      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
+      const sessionPhase1: any = await createSessionPhase1(getNewSessionPhase1Fixture());
       const placesLeft = sessionPhase1.placesLeft;
       const { young, response } = await createYoungThenUpdate({
         sessionPhase1Id: sessionPhase1._id,
@@ -145,10 +154,44 @@ describe("Referent", () => {
       expect(updatedSessionPhase1.placesLeft).toEqual(placesLeft - 1);
     });
   });
+  describe("PUT /referent/youngs", () => {
+    it("should return 400 if body is not valid", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED }));
+      const youngIds = [young._id];
+      let res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds });
+      expect(res.statusCode).toEqual(400);
+      res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds, status: "NOT_VALID" });
+      expect(res.statusCode).toEqual(400);
+      res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds, status: YOUNG_STATUS.WITHDRAWN });
+      expect(res.statusCode).toEqual(400);
+      res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds: [], status: YOUNG_STATUS.VALIDATED });
+      expect(res.statusCode).toEqual(400);
+    });
+    it("should return 404 if young not found", async () => {
+      const youngIds = [notExistingYoungId];
+      const res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds, status: YOUNG_STATUS.VALIDATED });
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if youngs updated", async () => {
+      const userId = "123";
+      const etablissement = await createEtablissement(createFixtureEtablissement());
+      const classe: any = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: "Juillet 2023" }));
+      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort }));
+      await createCohortHelper(getNewCohortFixture({ name: classe.cohort }));
+      const youngIds = [young._id.toString()];
+      const res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds, status: YOUNG_STATUS.VALIDATED });
+      expect(res.statusCode).toEqual(200);
+      for (const updatedYoungId of res.body.data) {
+        expect(youngIds.includes(updatedYoungId)).toBe(true);
+        const updatedYoung = await YoungModel.findById(updatedYoungId);
+        expect(updatedYoung.status).toEqual(YOUNG_STATUS.VALIDATED);
+      }
+    });
+  });
 
   describe("POST /referent/:tutorId/email/:template", () => {
     it("should return 404 if tutor not found", async () => {
-      const res = await request(getAppHelper()).post(`/referent/${notExistingReferentId}/email/test`).send({ message: "hello", subject: "hi" });
+      const res = await request(getAppHelper(ROLES.ADMIN)).post(`/referent/${notExistingReferentId}/email/test`).send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if tutor found", async () => {
@@ -216,8 +259,8 @@ describe("Referent", () => {
     });
     it("should contain applications", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const structure = await createStructureHelper({ ...getNewStructureFixture() });
-      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, structureId: structure._id });
+      const structure: any = await createStructureHelper({ ...getNewStructureFixture() });
+      const application: any = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, structureId: structure._id });
       const res = await request(getAppHelper())
         .get("/referent/young/" + young._id)
         .send();
@@ -245,7 +288,7 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should return 403 if not admin", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture());
+      const referent: any = await createReferentHelper(getNewReferentFixture());
       referent.firstName = "MY NEW NAME";
       await referent.save();
       const passport = require("passport");
@@ -255,7 +298,7 @@ describe("Referent", () => {
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if referent found with patches", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture());
+      const referent: any = await createReferentHelper(getNewReferentFixture());
       referent.firstName = "MY NEW NAME";
       await referent.save();
       const res = await request(getAppHelper()).get(`/referent/${referent._id}/patches`).send();
@@ -334,9 +377,9 @@ describe("Referent", () => {
       const firstName = "MY NEW NAME";
       const lastName = "MY NEW LAST NAME";
       const fullName = `My New Name MY NEW LAST NAME`;
-      const referent = await createReferentHelper(getNewReferentFixture());
-      const mission = await createMissionHelper(getNewMissionFixture());
-      const application = await createApplication(getNewApplicationFixture());
+      const referent: any = await createReferentHelper(getNewReferentFixture());
+      const mission: any = await createMissionHelper(getNewMissionFixture());
+      const application: any = await createApplication(getNewApplicationFixture());
       mission.tutorId = referent._id;
       application.tutorId = referent._id;
       application.missionId = mission._id;
@@ -397,7 +440,7 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if referent found", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture());
+      const referent: any = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper())
         .post("/referent/signin_as/referent/" + referent._id)
         .send();

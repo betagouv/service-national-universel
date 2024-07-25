@@ -5,7 +5,7 @@ const passport = require("passport");
 
 const { injectRoutes } = require("../../routes");
 
-function getAppHelper(role) {
+function getAppHelper(role, userId) {
   const app = express();
   app.use(bodyParser.json());
   app.use(bodyParser.text({ type: "application/x-ndjson" }));
@@ -18,6 +18,9 @@ function getAppHelper(role) {
       passport.user = { _id: "123" };
     }
     passport.user.role = role;
+    if (userId) {
+      passport.user._id = userId;
+    }
   }
   return app;
 }
