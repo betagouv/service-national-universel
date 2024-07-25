@@ -158,18 +158,28 @@ describe("Referent", () => {
     it("should return 400 if body is not valid", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED }));
       const youngIds = [young._id];
-      let res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds });
+      let res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds });
       expect(res.statusCode).toEqual(400);
-      res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds, status: "NOT_VALID" });
+      res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds, status: "NOT_VALID" });
       expect(res.statusCode).toEqual(400);
-      res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds, status: YOUNG_STATUS.WITHDRAWN });
+      res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds, status: YOUNG_STATUS.WITHDRAWN });
       expect(res.statusCode).toEqual(400);
-      res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds: [], status: YOUNG_STATUS.VALIDATED });
+      res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds: [], status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(400);
     });
     it("should return 404 if young not found", async () => {
       const youngIds = [notExistingYoungId];
-      const res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds, status: YOUNG_STATUS.VALIDATED });
+      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if youngs updated", async () => {
@@ -179,7 +189,9 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort }));
       await createCohortHelper(getNewCohortFixture({ name: classe.cohort }));
       const youngIds = [young._id.toString()];
-      const res = await request(getAppHelper(ROLES.ADMINISTRATEUR_CLE)).put(`/referent/youngs`).send({ youngIds, status: YOUNG_STATUS.VALIDATED });
+      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(200);
       for (const updatedYoungId of res.body.data) {
         expect(youngIds.includes(updatedYoungId)).toBe(true);
@@ -191,7 +203,9 @@ describe("Referent", () => {
 
   describe("POST /referent/:tutorId/email/:template", () => {
     it("should return 404 if tutor not found", async () => {
-      const res = await request(getAppHelper(ROLES.ADMIN)).post(`/referent/${notExistingReferentId}/email/test`).send({ message: "hello", subject: "hi" });
+      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post(`/referent/${notExistingReferentId}/email/test`)
+        .send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if tutor found", async () => {

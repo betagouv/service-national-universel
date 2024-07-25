@@ -5,22 +5,21 @@ import { toastr } from "react-redux-toastr";
 import { Button, ModalConfirmation, Select } from "@snu/ds/admin";
 import { ProfilePic } from "@snu/ds";
 import { ROLES, SUB_ROLES, translate } from "snu-lib";
+import { ReferentDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 
-import { ContactType } from "./types";
-
 interface Props {
-  contacts: ContactType[];
+  contacts: ReferentDto[];
   etablissementId: string;
-  getEtablissement: () => void;
+  onChange: () => void;
 }
 
-export default function ButtonModalContact({ contacts, etablissementId, getEtablissement }: Props) {
+export default function ButtonEditChefEtablissement({ contacts, etablissementId, onChange }: Props) {
   const [modalChangeContacts, setModalChangeContacts] = useState(false);
   const [errors, setErrors] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [contactsToUpdate, setContactsToUpdate] = useState<ContactType[]>([]);
+  const [contactsToUpdate, setContactsToUpdate] = useState<ReferentDto[]>([]);
 
   const saveContacts = async () => {
     try {
@@ -37,7 +36,7 @@ export default function ButtonModalContact({ contacts, etablissementId, getEtabl
       const { ok, code } = await api.put(`/cle/etablissement/${etablissementId}/referents`, { referentEtablissementIds: contactsToUpdate.map((c) => c._id) });
       if (!ok) throw new Error(translate(code));
 
-      await getEtablissement();
+      await onChange();
       setModalChangeContacts(false);
       setIsLoading(false);
       setErrors("");

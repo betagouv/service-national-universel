@@ -5,13 +5,13 @@ import { HiHome, HiPlus } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
 import { Page, Header, Button } from "@snu/ds/admin";
-import { SUB_ROLES, ROLES, translate } from "snu-lib";
+import { ROLES, translate, isCoordinateurEtablissement, isChefEtablissement } from "snu-lib";
+import { ReferentDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 import Loader from "@/components/Loader";
 import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
 import { AuthState } from "@/redux/auth/reducer";
-import { ContactType } from "./components/types";
 
 import Contact from "./components/Contact";
 import GeneralInfos from "./components/GeneralInfos";
@@ -25,11 +25,11 @@ export default function View() {
   const { id } = useParams<{ id: string }>();
   const [classeId, setClasseId] = useState("");
   const [etablissement, setEtablissement] = useState<EtablissementDto | null>(null);
-  const [contacts, setContacts] = useState<ContactType[]>([]);
+  const [contacts, setContacts] = useState<ReferentDto[]>([]);
 
   const history = useHistory();
 
-  const getEtablissement = async () => {
+  const loadEtablissement = async () => {
     try {
       const url = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/cle/etablissement/from-user" : `/cle/etablissement/${id}`;
       const { ok, code, data: response } = await api.get(url);
@@ -49,7 +49,7 @@ export default function View() {
   };
 
   useEffect(() => {
-    getEtablissement();
+    loadEtablissement();
   }, []);
 
   if (!etablissement) return <Loader />;
@@ -69,10 +69,12 @@ export default function View() {
               disabled={true}
             />
           ),
-          user.subRole === SUB_ROLES.referent_etablissement && <ButtonAddCoordinator etablissement={etablissement} />,
+          isChefEtablissement(user) && contacts.filter(isCoordinateurEtablissement).length < 2 && (
+            <ButtonAddCoordinator etablissement={etablissement} onChange={loadEtablissement} />
+          ),
         ]}
       />
-      <Contact contacts={contacts} user={user} etablissementId={etablissement?._id} getEtablissement={getEtablissement} />
+      <Contact contacts={contacts} user={user} etablissementId={etablissement?._id} onChange={loadEtablissement} />
 
       <GeneralInfos etablissement={etablissement} onUpdateEtab={setEtablissement} user={user} />
 

@@ -12,6 +12,7 @@ import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
 
 interface Props {
   etablissement: EtablissementDto;
+  onChange: () => void;
 }
 interface Errors {
   firstName?: string;
@@ -25,7 +26,7 @@ interface NewCoordinator {
   email: string;
 }
 
-export default function ButtonAddCoordinator({ etablissement }: Props) {
+export default function ButtonAddCoordinator({ etablissement, onChange }: Props) {
   const [modalAddCoordinator, setModalAddCoordinator] = useState(false);
   const [newCoordinator, setNewCoordinator] = useState<NewCoordinator>({ firstName: "", lastName: "", email: "" });
   const [errors, setErrors] = useState<Errors>({});
@@ -56,6 +57,7 @@ export default function ButtonAddCoordinator({ etablissement }: Props) {
       setErrors({});
       setNewCoordinator({ firstName: "", lastName: "", email: "" });
       setModalAddCoordinator(false);
+      onChange();
       return toastr.success("Succès", "Invitation envoyée");
     } catch (e) {
       capture(e);

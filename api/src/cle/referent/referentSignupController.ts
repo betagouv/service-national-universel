@@ -1,18 +1,21 @@
-const express = require("express");
+import express, { Response } from "express";
+import Joi from "joi";
+import crypto from "crypto";
+import config from "config";
+
+import { SENDINBLUE_TEMPLATES, ROLES, InvitationType, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } from "snu-lib";
+
+import emailsEmitter from "../../emails";
+import { capture } from "../../sentry";
+import { ERRORS, validatePassword } from "../../utils";
+import { sendTemplate } from "../../brevo";
+import { ReferentModel, EtablissementModel, ClasseModel } from "../../models";
+import { serializeReferent } from "../../utils/serializer";
+import { UserRequest } from "../../controllers/request";
+
 const router = express.Router();
-const Joi = require("joi");
-const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, ROLES, InvitationType, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } = require("snu-lib");
 
-const emailsEmitter = require("../../emails");
-const config = require("config");
-const { capture } = require("../../sentry");
-const { ERRORS, validatePassword } = require("../../utils");
-const { sendTemplate } = require("../../brevo");
-const { ReferentModel, EtablissementModel, ClasseModel } = require("../../models");
-const { serializeReferent } = require("../../utils/serializer");
-
-router.get("/token/:token", async (req, res) => {
+router.get("/token/:token", async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       token: Joi.string().required(),
@@ -46,7 +49,7 @@ router.get("/token/:token", async (req, res) => {
   }
 });
 
-router.put("/request-confirmation-email", async (req, res) => {
+router.put("/request-confirmation-email", async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       email: Joi.string().trim().lowercase().email().required(),
@@ -91,7 +94,7 @@ router.put("/request-confirmation-email", async (req, res) => {
   }
 });
 
-router.post("/confirm-email", async (req, res) => {
+router.post("/confirm-email", async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       code: Joi.string().required().trim(),
@@ -130,7 +133,7 @@ router.post("/confirm-email", async (req, res) => {
   }
 });
 
-router.post("/confirm-signup", async (req, res) => {
+router.post("/confirm-signup", async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       invitationToken: Joi.string().required(),
@@ -178,7 +181,7 @@ router.post("/confirm-signup", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       firstName: Joi.string().required(),
@@ -220,4 +223,4 @@ router.post("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
