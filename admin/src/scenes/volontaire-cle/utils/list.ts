@@ -233,17 +233,45 @@ export const getFilterArray = (bus, session, classes) => {
 };
 
 export async function transformVolontairesCLE(data, values) {
-  let all = data;
+  const all = data;
+
+  interface Center {
+    _id?: string;
+    code?: string;
+    code2022?: string;
+    name?: string;
+    city?: string;
+    department?: string;
+    region?: string;
+  }
+
+  interface Bus {
+    busId?: string;
+    departuredDate?: string;
+    returnDate?: string;
+  }
+
+  interface LigneToPoint {
+    departureHour?: string;
+    meetingHour?: string;
+    returnHour?: string;
+  }
+
+  interface MeetingPoint {
+    name?: string;
+    address?: string;
+    city?: string;
+  }
 
   return all.map((data) => {
-    let center = {};
+    let center: Center = {};
     if (data.cohesionCenterId && data.sessionPhase1Id) {
       center = data?.center;
       if (!center) center = {};
     }
-    let meetingPoint = {};
-    let bus = {};
-    let ligneToPoint = {};
+    let meetingPoint: MeetingPoint = {};
+    let bus: Bus = {};
+    let ligneToPoint: LigneToPoint = {};
     if (data.meetingPointId && data.ligneId) {
       bus = data?.bus || {};
       ligneToPoint = data?.ligneToPoint || {};
@@ -411,7 +439,7 @@ export async function transformVolontairesCLE(data, values) {
       },
     };
 
-    let fields = { ID: data._id };
+    const fields = { ID: data._id };
     for (const element of values) {
       let key;
       for (key in allFields[element]) fields[key] = allFields[element][key];

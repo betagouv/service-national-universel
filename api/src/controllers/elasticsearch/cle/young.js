@@ -67,7 +67,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "reinscriptionStep2023.keyword",
     ];
 
-    const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
+    const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt", "classeId.keyword"];
 
     // Authorization
     if (!canSearchInElasticSearch(user, "youngCle")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

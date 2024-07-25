@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { HiHome, HiOutlineClipboardCheck } from "react-icons/hi";
 import { Link, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
@@ -9,19 +9,25 @@ import { youngCleExportFields, YOUNG_STATUS } from "snu-lib";
 import api from "@/services/api";
 
 import { getFilterArray, transformVolontairesCLE } from "./utils/list";
-import YoungListHeader from "./components/YoungListHeader";
 import YoungRowGeneral from "./components/YoungRowGeneral";
-import YoungRowConsent from "./components/YoungRowConsent";
-import YoungRowValidation from "./components/YoungRowValidation";
-import YoungRowImageRight from "./components/YoungRowImageRight";
-import ButtonActionGroup from "./components/ButtonActionGroup";
+import YoungRowConsent from "./consent/YoungRowConsent";
+import YoungRowValidation from "./validation/YoungRowValidation";
+import YoungRowImageRight from "./imageRight/YoungRowImageRight";
 import NavbarList from "./components/NavbarList";
+import Loader from "@/components/Loader";
+
+import ButtonActionGroupConsent from "./consent/ButtonActionGroupConsent";
+import YoungListHeaderConsent from "./consent/YoungListHeaderConsent";
+import ButtonActionGroupValidation from "./validation/ButtonActionGroupValidation";
+import YoungListHeaderValidation from "./validation/YoungListHeaderValidation";
+import ButtonActionGroupImageRight from "./imageRight/ButtonActionGroupImageRight";
+import YoungListHeaderImageRight from "./imageRight/YoungListHeaderImageRight";
 
 export default function List() {
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
   const [classes, setClasses] = useState(null);
-  const [data, setData] = useState([]);
+  const [youngList, setYoungList] = useState([]);
   const [students, setStudents] = useState(null);
   const [studentsWaitingConsent, setStudentsWaitingConsent] = useState(0);
   const [studentsWaitingValidation, setStudentsWaitingValidation] = useState(0);
@@ -54,6 +60,25 @@ export default function List() {
 
   const getData = async () => {
     try {
+      const res = await api.post(`/elasticsearch/cle/young/search`, {
+        filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
+          if (key === "searchbar" || (value.filter.length === 1 && value.filter[0] === "")) {
+            return e;
+          }
+          return { ...e, [key]: value.filter.map((e) => String(e)) };
+        }, {}),
+      });
+
+      setStudentsWaitingConsent(res.responses[1].aggregations?.reinscriptionStep2023?.names?.buckets.find((e) => e.key === "WAITING_CONSENT")?.doc_count || 0);
+      setStudentsWaitingValidation(res.responses[1].aggregations?.status?.names?.buckets.find((e) => e.key === YOUNG_STATUS.WAITING_VALIDATION)?.doc_count || 0);
+      setStudentsWaitingImageRights(res.responses[1].aggregations?.imageRight?.names?.buckets.find((e) => e.key === "N/A")?.doc_count || 0);
+    } catch (e) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+    }
+  };
+
+  const getDataForExport = async () => {
+    try {
       const { data: sessions } = await api.post(`/elasticsearch/sessionphase1/export`, {
         filters: {},
         exportFields: ["codeCentre", "cohesionCenterId"],
@@ -66,45 +91,53 @@ export default function List() {
         filters: {},
         exportFields: ["name", "uniqueKeyAndId"],
       });
-      const res = await api.post(`/elasticsearch/cle/young/search`, { filters: {} });
 
+      const res = await api.post(`/elasticsearch/cle/young/search`, {
+        filters: {},
+      });
+
+      setStudents(res.responses[0].hits.total.value > 0);
       setSessionsPhase1(sessions);
       setBus(bus);
       setClasses(classes);
-      setStudents(res.responses[0].hits.total.value > 0);
-
-      setStudentsWaitingConsent(res.responses[1].aggregations?.reinscriptionStep2023?.names?.buckets.find((e) => e.key === "WAITING_CONSENT")?.doc_count || 0);
-      setStudentsWaitingValidation(res.responses[1].aggregations?.status?.names?.buckets.find((e) => e.key === YOUNG_STATUS.WAITING_VALIDATION)?.doc_count || 0);
-      setStudentsWaitingImageRights(res.responses[1].aggregations?.imageRight?.names?.buckets.find((e) => e.key === "N/A")?.doc_count || 0);
     } catch (e) {
       toastr.error("Oups, une erreur est survenue lors de la récupération des données");
     }
   };
 
   useEffect(() => {
-    getData();
+    getDataForExport();
   }, []);
 
   useEffect(() => {
+    getData();
+    console.log("je suis dans le use effect qui set la classe");
     setClasseId(selectedFilters?.classeId?.filter[0]);
+    console.log(classeId);
   }, [selectedFilters]);
 
   useEffect(() => {
+    console.log("je suis dans le use effect qui set les filtre");
     if (currentTab === "consent") {
       setSelectedFilters({ ...selectedFilters, ["reinscriptionStep2023"]: { filter: ["WAITING_CONSENT"] } });
     } else if (currentTab === "validation") {
       setSelectedFilters({ ...selectedFilters, ["status"]: { filter: [YOUNG_STATUS.WAITING_VALIDATION] } });
     } else if (currentTab === "image") {
+      console.log("je suis dans le use effect qui set les filtre image");
       setSelectedFilters({ ...selectedFilters, ["imageRight"]: { filter: ["N/A"] } });
     } else {
       if (!classeId) {
+        console.log("je ne devrais pas etre ici");
         const defaultFilters = getDefaultFilters(filterArray);
         setSelectedFilters(defaultFilters);
       }
     }
+    console.log(selectedFilters);
   }, [currentTab]);
+  //console.log(classeId);
+  //console.log(selectedFilters);
 
-  if (!sessionsPhase1 || !bus || !classes) return null;
+  if (!sessionsPhase1 || !bus || !classes) return <Loader />;
 
   return (
     <Page>
@@ -171,7 +204,7 @@ export default function List() {
                     <Filters
                       pageId={pageId}
                       route="/elasticsearch/cle/young/search?needClasseInfo=true"
-                      setData={(value) => setData(value)}
+                      setData={(value) => setYoungList(value)}
                       filters={filterArray}
                       searchPlaceholder="Rechercher par mots clés, ville, code postal..."
                       selectedFilters={selectedFilters}
@@ -181,7 +214,9 @@ export default function List() {
                       size={size}
                       disabled={currentTab !== "general"}
                     />
-                    {currentTab !== "general" && <ButtonActionGroup />}
+                    {currentTab === "consent" && <ButtonActionGroupConsent />}
+                    {currentTab === "validation" && <ButtonActionGroupValidation />}
+                    {currentTab === "image" && <ButtonActionGroupImageRight />}
 
                     <SortOption
                       sortOptions={[
@@ -189,8 +224,7 @@ export default function List() {
                         { label: "Nom (Z > A)", field: "lastName.keyword", order: "desc" },
                         { label: "Prénom (A > Z)", field: "firstName.keyword", order: "asc" },
                         { label: "Prénom (Z > A)", field: "firstName.keyword", order: "desc" },
-                        { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
-                        { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
+                        { label: "Classes", field: "classeId.keyword" },
                       ]}
                       selectedFilters={selectedFilters}
                       pagination={paramData}
@@ -208,24 +242,49 @@ export default function List() {
                       disabled={currentTab !== "general"}
                     />
                   </div>
-
                   <ResultTable
                     paramData={paramData}
                     setParamData={setParamData}
-                    currentEntryOnPage={data?.length}
+                    currentEntryOnPage={youngList?.length}
                     size={size}
                     setSize={setSize}
                     render={
                       <table className="mt-6 mb-2 flex w-full flex-col divide-y table-auto divide-gray-100 border-gray-100">
                         <thead>
-                          <YoungListHeader currentTab={currentTab} />
+                          {currentTab === "general" && (
+                            <tr className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 bg-gray-50">
+                              <th className="w-[30%]">Élèves</th>
+                              <th className="w-[20%]">Cohortes</th>
+                              <th className="w-[20%]">Classes</th>
+                              <th className="w-[20%] flex justify-center">Statuts</th>
+                              <th className="w-[10%]">Actions</th>
+                            </tr>
+                          )}
+                          {currentTab === "consent" && <YoungListHeaderConsent />}
+                          {currentTab === "validation" && <YoungListHeaderValidation />}
+                          {currentTab === "image" && <YoungListHeaderImageRight />}
                         </thead>
                         <tbody>
-                          {currentTab === "general" && data.map((young) => <YoungRowGeneral key={young._id} young={young} />)}
-                          {currentTab === "consent" && data.map((young) => <YoungRowConsent key={young._id} young={young} />)}
-                          {currentTab === "validation" && data.map((young) => <YoungRowValidation key={young._id} young={young} />)}
-                          {currentTab === "image" && data.map((young) => <YoungRowImageRight key={young._id} young={young} />)}
-                          <YoungListHeader currentTab={currentTab} />
+                          {youngList.map((young) => (
+                            <Fragment key={young._id}>
+                              {currentTab === "general" && <YoungRowGeneral young={young} />}
+                              {currentTab === "consent" && <YoungRowConsent young={young} />}
+                              {currentTab === "validation" && <YoungRowValidation young={young} />}
+                              {currentTab === "image" && <YoungRowImageRight young={young} />}
+                            </Fragment>
+                          ))}
+                          {currentTab === "general" && (
+                            <tr className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 bg-gray-50">
+                              <th className="w-[30%]">Élèves</th>
+                              <th className="w-[20%]">Cohortes</th>
+                              <th className="w-[20%]">Classes</th>
+                              <th className="w-[20%] flex justify-center">Statuts</th>
+                              <th className="w-[10%]">Actions</th>
+                            </tr>
+                          )}
+                          {currentTab === "consent" && <YoungListHeaderConsent />}
+                          {currentTab === "validation" && <YoungListHeaderValidation />}
+                          {currentTab === "image" && <YoungListHeaderImageRight />}
                         </tbody>
                       </table>
                     }

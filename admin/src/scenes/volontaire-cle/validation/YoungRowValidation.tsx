@@ -1,36 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { HiOutlineX, HiOutlineCheck } from "react-icons/hi";
-import { Checkbox } from "@mui/material";
+import { HiOutlineX, HiOutlineCheck, HiOutlineClipboardCheck } from "react-icons/hi";
 
 import { YOUNG_STATUS, getAge } from "snu-lib";
-import { Badge } from "@snu/ds/admin";
+import { Badge, ModalConfirmation } from "@snu/ds/admin";
 import { translate } from "@/utils";
 
 export default function YoungRowValidation({ young }) {
   const history = useHistory();
+  const [showModale, setShowModale] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
 
   return (
-    <div className="flex">
-      <Checkbox
-        sx={{
-          "& .MuiSvgIcon-root": {
-            fontSize: 24,
-            color: "#d1d5db",
-            marginLeft: "10px",
-          },
-          "&.Mui-checked .MuiSvgIcon-root": {
-            color: "#2563eb",
-          },
-          "&:hover": {
-            backgroundColor: "transparent",
-          },
-          "& .MuiTouchRipple-root": {
-            display: "none",
-          },
-        }}
-      />
+    <>
       <tr className="flex items-center py-3 px-4 hover:bg-gray-50 mr-5">
+        <td className="w-[5%]">
+          <input type="checkbox" className="w-5 h-5 ml-1" />
+        </td>
         <td className="w-[30%] table-cell truncate cursor-pointer" onClick={() => history.push(`/volontaire/${young._id}`)}>
           <span className="font-bold text-gray-900 text-base leading-5">{young.status !== YOUNG_STATUS.DELETED ? `${young.firstName} ${young.lastName}` : "Compte supprimé"}</span>
           <p className="text-xs text-gray-500 leading-5">
@@ -54,14 +40,62 @@ export default function YoungRowValidation({ young }) {
         <td className="flex w-[10%] gap-2">
           <Badge
             title={<HiOutlineX size={20} />}
+            mode="editable"
             className="rounded-[50%] !p-0 !w-10 !h-10 border text-gray-500 border-gray-300 !bg-white hover:!bg-gray-200 hover:!border-red-400 hover:text-red-600"
+            onClick={() => {
+              setAuthorized(false);
+              setShowModale(true);
+            }}
           />
           <Badge
             title={<HiOutlineCheck size={20} />}
+            mode="editable"
             className="rounded-[50%] !p-0 !w-10 !h-10 text-white !bg-blue-600 hover:!bg-white hover:!text-blue-600 hover:!border hover:!border-blue-600"
+            onClick={() => {
+              setAuthorized(true);
+              setShowModale(true);
+            }}
           />
         </td>
       </tr>
-    </div>
+      <ModalConfirmation
+        isOpen={showModale}
+        onClose={() => {
+          setShowModale(false);
+        }}
+        className="md:max-w-[600px]"
+        icon={<HiOutlineClipboardCheck className="text-gray-900 bg-gray-100 rounded-full p-2" size={40} />}
+        title="Validation des inscriptions"
+        text={
+          authorized ? (
+            <p className="text-base leading-6 font-normal text-gray-900">
+              Vous souhaitez accepter l’inscription à la classe <span className="font-bold">{young.classe.name}</span> de&nbsp;
+              <span className="font-bold">
+                {young.firstName} {young.lastName}
+              </span>
+              . Une notification lui sera envoyée par email.
+            </p>
+          ) : (
+            <p className="text-base leading-6 font-normal text-gray-900">
+              Vous souhaitez refuser l’inscription à la classe <span className="font-bold">{young.classe.name}</span> de&nbsp;
+              <span className="font-bold">
+                {young.firstName} {young.lastName}
+              </span>
+              . Une notification lui sera envoyée par email.
+            </p>
+          )
+        }
+        actions={[
+          { title: "Annuler", isCancel: true },
+          {
+            title: "Confirmer",
+            onClick: () => {
+              console.log("confirmed");
+              setShowModale(false);
+            },
+          },
+        ]}
+      />
+    </>
   );
 }

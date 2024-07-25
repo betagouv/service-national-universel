@@ -4,7 +4,9 @@ import { HiSortAscending } from "react-icons/hi";
 
 interface Option {
   label: string;
-  value: string;
+  value?: string;
+  field?: string;
+  order?: "asc" | "desc";
 }
 
 interface Pagnination {

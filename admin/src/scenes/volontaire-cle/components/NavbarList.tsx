@@ -92,8 +92,10 @@ export default function NavbarList({
           isActive: currentTab === "image",
           onClick: () => {
             if (classeId) {
+              console.log("je suis la");
               setSelectedFilters({ ["classeId"]: { filter: [classeId] } });
             } else {
+              console.log("NOOOOO");
               setSelectedFilters({});
             }
             setSize(10);
