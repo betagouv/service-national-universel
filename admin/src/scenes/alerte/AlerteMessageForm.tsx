@@ -39,6 +39,8 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
     { value: ROLES.SUPERVISOR, label: "Superviseurs" },
     { value: ROLES.RESPONSIBLE, label: "Responsables" },
     { value: ROLES.HEAD_CENTER, label: "Chefs de centre" },
+    { value: ROLES.ADMINISTRATEUR_CLE, label: "Administrateurs CLE" },
+    { value: ROLES.REFERENT_CLASSE, label: "Référents de classe" },
   ];
 
   const selectCustomStyles = {
