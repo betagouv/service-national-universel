@@ -38,7 +38,7 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-RUN apk --no-cache add bash mongodb-tools jq curl util-linux rsyslog
+RUN apk --no-cache add bash mongodb-tools jq curl util-linux rsyslog rsyslog-elasticsearch rsyslog-mmjsonparse
 
 COPY --from=installer /app .
 

@@ -1,5 +1,3 @@
-const logfmt = require("logfmt");
-
 const loggingMiddleware = async (req, res, next) => {
   const startTime = new Date();
   res.on("finish", async () => {
@@ -21,7 +19,7 @@ const loggingMiddleware = async (req, res, next) => {
 
       const hasPayload = req.body && Object.keys(req.body).length > 0;
       if (hasPayload) {
-        log.payload = JSON.stringify(req.body);
+        log.payload = req.body;
       }
 
       if (req.user) {
@@ -31,7 +29,7 @@ const loggingMiddleware = async (req, res, next) => {
           log.userRole = req.user?.role;
         }
       }
-      console.log(logfmt.stringify(log));
+      console.log("@cee:" + JSON.stringify(log));
     } catch (error) {
       console.error("Error in logging middleware:", error);
     }
