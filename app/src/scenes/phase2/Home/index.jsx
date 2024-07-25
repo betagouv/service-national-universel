@@ -129,7 +129,9 @@ export default function HomePhase2() {
             Voir
           </Link>
         </div>
-        <EngagementList />
+        <div className="md:mt-[1rem] max-w-6xl mx-auto">
+          <EngagementList />
+        </div>
       </section>
 
       <section id="les-programmes" className="mt-12 md:mt-24 px-4 md:px-24">

@@ -18,18 +18,18 @@ export const SemiCircleProgress = ({ current, total }) => {
         strokeDashoffset={198 - (progress * 198) / 100}
         d="M30,90 A40,40 0 1,1 80,90"
       />
-      <text x="50%" y="47%" fontSize=".3em" dominantBaseline="middle" textAnchor="middle">
+      <text x="50%" y="48%" fontSize=".3em" dominantBaseline="middle" textAnchor="middle">
         {current == 0 ? "Vous avez" : "Vous avez réalisé"}
       </text>
       {current > 0 && (
-        <text x="42%" y="57%" fontSize=".7em" fill="url(#gradient)" dominantBaseline="middle" textAnchor="middle">
+        <text x="42%" y="60%" fontSize=".7em" fontWeight={550} fill="url(#gradient)" dominantBaseline="middle" textAnchor="middle">
           {current}h
         </text>
       )}
-      <text x={current == 0 ? "50%" : "60%"} y="57%" fontSize=".7em" dominantBaseline="middle" textAnchor="middle">
+      <text x={current == 0 ? "50%" : current > 99 ? "62%" : "60%"} y="60%" fontSize=".7em" fontWeight={550} dominantBaseline="middle" textAnchor="middle">
         {current == 0 ? `${total}h` : `/${total}`}
       </text>
-      <text x="50%" y="65%" fontSize=".3em" fill="gray" dominantBaseline="middle" textAnchor="middle">
+      <text x="50%" y="70%" fontSize=".3em" fill="gray" dominantBaseline="middle" textAnchor="middle">
         {current == 0 && "à réaliser"}
         {current >= total && "félicitations"}
         {current != 0 && current < total && `Plus que ${total - current}h`}

@@ -90,7 +90,7 @@ export default function List() {
         <div className="mt-[2rem] mx-auto md:max-w-6xl md:px-[1rem]">
           <div id="par-vous-meme" className="px-4 pt-8 pb-10 text-center bg-blue-france-sun-113 md:rounded-lg">
             <p className="text-4xl">🔍</p>
-            <p className="text-white font-medium text-2xl md:text-3xl mt-3 text-center">Trouvez un engagement par vous même</p>
+            <p className="text-white font-medium text-2xl md:text-3xl mt-3 text-center">Trouvez un engagement par vous-même</p>
             <p className="text-white font-light mt-2 text-center">Candidatez en autonomie à un programme d'engagement pour valider votre SNU.</p>
             <Link className="text-white font-light underline underline-offset-2 hover:underline" to="/phase2#sectionEngagement">
               <p className="mt-4">Comment ça marche ?</p>

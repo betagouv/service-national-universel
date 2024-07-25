@@ -40,8 +40,12 @@ export function EngagementList() {
     .filter((e, i) => i < 5);
 
   return (
-    <div className="md:max-w-6xl mx-auto px-3 flex gap-4 snap-x snap-mandatory overflow-x-auto overflow-y-hidden pb-3 mt-[1rem] md:mt-[2rem]">
-      {cards.map((data) => (data.engagementType === "mig" ? <ApplicationCard key={data._id} application={data} /> : <EquivalenceCard key={data._id} equivalence={data} />))}
+    <div className="p-3 flex gap-3 snap-x snap-mandatory overflow-x-auto overflow-y-hidden">
+      {cards.map((data) => (
+        <div key={data._id} className="w-72 md:w-[24rem] only:w-full only:md:w-96 flex-none snap-always snap-center">
+          {data.engagementType === "mig" ? <ApplicationCard application={data} /> : <EquivalenceCard equivalence={data} />}
+        </div>
+      ))}
     </div>
   );
 }
