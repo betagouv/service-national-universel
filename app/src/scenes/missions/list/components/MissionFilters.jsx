@@ -232,7 +232,7 @@ export default function MissionFilters({ filters, setFilters }) {
                       setDropdownControlWhenOpen(false);
                       setKeyWordOpen(true);
                     }}>
-                    <div className="font-bold">Mot clé</div>
+                    <div className="font-bold text-left">Mot clé</div>
                     <div className="text-md text-gray-500">{filters?.searchbar || "Aucun"}</div>
                   </button>
                 )}
@@ -272,13 +272,13 @@ export default function MissionFilters({ filters, setFilters }) {
                       setKeyWordOpen(false);
                     }}
                     className="w-full flex justify-between">
-                    <div className="font-bold">Distance maximum</div>
-                    <div className="text-md text-gray-500">{filters?.distance || 100}km max</div>
+                    <div className="font-bold text-left line-clamp-1">{cityFilter.city ? cityFilter.city : "Distance"}</div>
+                    <div className="text-md text-gray-500 text-right line-clamp-1">{filters?.distance || 100}km max</div>
                   </button>
                 )}
                 {dropdownControlDistanceOpen && (
                   <div>
-                    <div className="mb-2 text-center font-bold ">Distance maximum</div>
+                    <div className="mb-2 text-center font-bold ">Distance</div>
 
                     <div className="text-center text-xs text-gray-500">
                       Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré.{" "}

@@ -222,7 +222,7 @@ export default function EditEquivalence() {
         }
       />
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto px-[1rem]">
         <div className="rounded-lg border-[1px] border-blue-400 bg-blue-50">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />

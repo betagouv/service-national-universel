@@ -11,7 +11,7 @@ export default function EquivalenceCard({ equivalence }) {
 
       <div className="h-40 p-3 flex flex-col justify-between">
         <EquivalenceStatusBadge status={equivalence.status} />
-        <p className="text-xs leading-5 text-gray-500">{equivalence.structureName}</p>
+        <p className="text-xs leading-5 text-gray-500 line-clamp-1">{equivalence.structureName}</p>
 
         <div className="flex items-center gap-4">
           <IconDomain domain={"EQUIVALENCE"} disabled={equivalence.status !== EQUIVALENCE_STATUS.VALIDATED} />

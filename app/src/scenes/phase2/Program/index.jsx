@@ -59,9 +59,11 @@ function ToutSavoir({ data }) {
     <section id="tout-savoir" className="mt-4 rounded-xl border p-3">
       <div className="flex justify-between">
         <h2 className="m-0 text-2xl font-bold">Tout savoir sur ce programme</h2>
-        <button onClick={() => setOpen(!open)} className="text-gray-600 text-sm underline underline-offset-2">
-          {open ? "Réduire" : "Afficher"}
-        </button>
+        {data.publisherName ? (
+          <button onClick={() => setOpen(!open)} className="text-gray-600 text-sm underline underline-offset-2">
+            {open ? "Réduire" : "Afficher"}
+          </button>
+        ) : null}
       </div>
       {open ? (
         <>

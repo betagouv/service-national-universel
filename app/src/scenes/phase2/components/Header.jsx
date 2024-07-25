@@ -19,7 +19,7 @@ export default function Header({ title, subtitle, action, backAction, imgSrc }) 
         <div className="flex items-center">{backAction}</div>
         <div className="flex flex-col justify-center">
           {subtitle ? <p className="w-fit mx-auto text-xs font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded uppercase">{subtitle}</p> : null}
-          <h1 className="m-0 text-3xl md:text-5xl text-center font-bold md:leading-tight line-clamp-2 pb-8">{title}</h1>
+          <h1 className="m-0 text-3xl md:text-5xl text-center font-bold md:leading-tight">{title}</h1>
         </div>
         <div className="flex items-center justify-end">{action}</div>
       </header>

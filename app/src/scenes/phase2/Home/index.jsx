@@ -37,10 +37,10 @@ export default function HomePhase2() {
 
         {young?.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED ? (
           <>
-            <h1 className="mt-6 mx-auto text-center font-bold text-4xl md:text-5xl max-w-xl leading-tight md:leading-tight">
+            <h1 className="mt-6 mx-auto text-center font-bold text-3xl md:text-5xl max-w-xl leading-tight md:leading-tight">
               👏 {young?.firstName}, vous avez validé votre phase Engagement&nbsp;!
             </h1>
-            <h2 className="font-bold text-2xl md:text-4xl mx-0 mt-12">Mes attestations</h2>
+            <h2 className="font-bold text-2xl md:text-3xl mx-0 mt-12">Mes attestations</h2>
 
             <div className="mt-[1rem] md:mt-[2rem] border rounded-xl p-3 mx-auto">
               <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2">
@@ -88,7 +88,10 @@ export default function HomePhase2() {
               </div>
               <div>
                 <p className="text-gray-900 w-fit md:w-full mx-auto font-bold">N&apos;oubliez pas&nbsp;!</p>
-                <p className="text-gray-500 w-fit md:w-full mx-auto mt-1 text-sm">
+                <p className="text-gray-500 w-fit md:w-full mx-auto mt-1 text-sm text-center md:hidden">
+                  Vous bénéficiez d'une première présentation gratuite à l'examen du code de la route (sous condition d'avoir également validé votre phase 1).
+                </p>
+                <p className="text-gray-500 w-fit md:w-full mx-auto mt-1 text-sm text-left hidden md:block">
                   Vous bénéficiez d'une première présentation gratuite à l'examen du code de la route (sous condition d'avoir également validé votre phase 1).
                 </p>
               </div>
@@ -99,7 +102,7 @@ export default function HomePhase2() {
           </>
         ) : (
           <>
-            <h1 className="mt-6 mx-auto text-center font-bold text-4xl md:text-5xl max-w-xl leading-tight md:leading-tight">Engagez-vous au service de la Nation&nbsp;!</h1>
+            <h1 className="mt-6 mx-auto text-center font-bold text-3xl md:text-5xl max-w-xl leading-tight md:leading-tight">Engagez-vous au service de la Nation&nbsp;!</h1>
             <div className="flex flex-col md:flex-row justify-center gap-4 my-6">
               <Link
                 to="/mission"
@@ -169,7 +172,7 @@ export default function HomePhase2() {
         <Programs />
       </section>
 
-      <hr className="mt-[1rem] md:mt-[3rem] md:max-w-6xl mx-[1rem] md:mx-auto" />
+      <hr className="mt-[3rem] md:max-w-6xl mx-[1rem] md:mx-auto" />
 
       <section id="questions-frequentes" className="px-4 md:px-24 mt-12">
         <h2 className="text-center font-bold text2xl md:text-4xl m-0 mt-12">Questions fréquentes</h2>

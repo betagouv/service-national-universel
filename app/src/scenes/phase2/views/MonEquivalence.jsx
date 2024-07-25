@@ -26,21 +26,22 @@ export default function Equivalence() {
 
   if (isPending) return <Loader />;
   if (isError) return <div>Erreur lors du chargement de l'équivalence</div>;
+
+  const action = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(data.status) ? (
+    <Link to={`${data._id}/edit`} className="w-full hover:bg-gray-50">
+      <div className="w-full border px-2 py-1.5 bg-white rounded-lg text-sm text-gray-500 text-center">
+        <HiPencil className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
+        Modifier
+      </div>
+    </Link>
+  ) : null;
+
   return (
     <div className="bg-white">
       <Header
         title={data.type === "Autre" ? data.desc : data.type}
-        subtitle="AJOUT D'UN ENGAGEMENT REALISE"
-        action={
-          [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(data.status) ? (
-            <Link to={`${data._id}/edit`} className="w-full hover:bg-gray-50">
-              <div className="w-full border px-2 py-1.5 bg-white rounded-lg text-sm text-gray-500 text-center">
-                <HiPencil className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
-                Modifier
-              </div>
-            </Link>
-          ) : null
-        }
+        subtitle="Engagement ajouté"
+        action={action}
         backAction={
           <Link to="/phase2/mes-engagements" className="flex items-center gap-1">
             <HiArrowLeft className="text-2xl text-gray-400" />
@@ -141,12 +142,12 @@ export default function Equivalence() {
         <div className="mt-4 p-3 border rounded-xl bg-gray-50">
           {data?.files?.length ? (
             data.files.map((fileName) => (
-              <div key={fileName}>
+              <div key={fileName} className="md:flex justify-between">
                 <div className="flex flex-row items-center gap-2">
                   <HiPaperClip className="text-lg text-blue-600" />
                   <p className="text-sm font-normal leading-5 text-gray-800">{fileName}</p>
                 </div>
-                <button onClick={() => handleClick(fileName)} className="mt-3 w-full text-center border-[1px] bg-white p-2 text-sm rounded-lg">
+                <button onClick={() => handleClick(fileName)} className="mt-[0.75rem] md:mt-[0rem] w-full md:w-fit text-center border-[1px] bg-white p-2 text-sm rounded-lg">
                   <HiDownload className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
                   Télécharger
                 </button>

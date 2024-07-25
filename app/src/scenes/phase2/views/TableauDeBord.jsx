@@ -2,7 +2,7 @@ import React from "react";
 import ReactTooltip from "react-tooltip";
 import { Link } from "react-router-dom";
 import { supportURL } from "@/config";
-import { PHASE2_TOTAL_HOURS, APPLICATION_STATUS, EQUIVALENCE_STATUS } from "snu-lib";
+import { PHASE2_TOTAL_HOURS, APPLICATION_STATUS } from "snu-lib";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/services/useAuth";
 import { HiPlus, HiSearch } from "react-icons/hi";
@@ -74,13 +74,14 @@ export default function View() {
 
   return (
     <div className="mt-[3rem]">
-      <div className="grid grid-cols-2 border shadow-sm rounded-2xl border-gray-200 justify-center items-center">
-        <span className="w-full relative">
+      <div className="grid md:grid-flow-col border shadow-sm rounded-2xl border-gray-200 items-center">
+        <div className="w-full relative">
           <SemiCircleProgress current={phase2NumberHoursDone} total={PHASE2_TOTAL_HOURS}></SemiCircleProgress>
           <Tooltip className="absolute top-4 right-4" />
-        </span>
-        {!missionDoneCards.length ? (
-          <span className="p-4 md:p-8 md:basis-6/12 flex flex-col sm:border-t-2 md:border-t-0 md:border-l-2 text-center">
+        </div>
+
+        {missionDoneCards.length === 0 ? (
+          <div className="p-4 md:p-8 flex flex-col sm:border-t-2 md:border-t-0 md:border-l-2 text-center">
             <span className="font-bold">C'est parti !</span>
             <span className="text-gray-400 text-sm">Engagez vous au service de la nation.</span>
             <div className="flex flex-col justify-center gap-4 my-6">
@@ -95,7 +96,7 @@ export default function View() {
                 Ajouter un engagement réalisé
               </Link>
             </div>
-          </span>
+          </div>
         ) : null}
       </div>
 

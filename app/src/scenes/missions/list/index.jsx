@@ -76,26 +76,27 @@ export default function List() {
         />
 
         <Link className="block" to="/phase2/mes-engagements?tab=settings">
-          <p className="group flex justify-center items-center gap-1 py-2.5 px-3 text-center underline">
+          <p className="group flex justify-center items-center gap-1 text-center underline">
             <RiHeartFill className="text-[#111827] inline-block align-text-bottom mr-1" />
             Mes préférences
           </p>
         </Link>
 
-        <div className="max-w-6xl mx-auto px-[1rem] md:px-[2.5rem]">
+        <div className="max-w-6xl mx-auto px-[1rem]">
           <MissionFilters filters={filters} setFilters={setFilters} />
           {data ? <MissionList data={data} location={filters.location} page={page} setPage={setPage} size={size} setSize={setSize} setSort={setSort} /> : <Loader />}
         </div>
-      </div>
 
-      <div className="px-4 py-1 flex flex-col justify-center items-center h-[300px] bg-[#000091] w-full">
-        <p className="text-4xl">🔍</p>
-        <p className="uppercase px-2 bg-[#E8EDFF] text-[#0063CB] font-bold text-xs leading-5 w-fit rounded-md mt-4 text-center">Vous ne trouvez pas d'engagement ?</p>
-        <h1 className="text-white font-medium text-xl md:text-3xl mt-2 text-center">Touvez un engagement par vous même</h1>
-        <p className="text-white text-xs font-light mt-1 text-center">Candidatez en autonomie à un programme d'engagement pour valider votre SNU.</p>
-        <Link className="text-white text-xs font-light mt-4 underline" to="/phase2#sectionEngagement">
-          Comment ça marche ?
-        </Link>
+        <div className="mt-[2rem] mx-auto md:max-w-6xl md:px-[1rem]">
+          <div id="par-vous-meme" className="px-4 pt-8 pb-10 text-center bg-blue-france-sun-113 md:rounded-lg">
+            <p className="text-4xl">🔍</p>
+            <p className="text-white font-medium text-2xl md:text-3xl mt-3 text-center">Trouvez un engagement par vous même</p>
+            <p className="text-white font-light mt-2 text-center">Candidatez en autonomie à un programme d'engagement pour valider votre SNU.</p>
+            <Link className="text-white font-light underline underline-offset-2 hover:underline" to="/phase2#sectionEngagement">
+              <p className="mt-4">Comment ça marche ?</p>
+            </Link>
+          </div>
+        </div>
       </div>
     </>
   );
