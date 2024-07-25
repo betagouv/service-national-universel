@@ -15,7 +15,7 @@ export default function EquivalenceCard({ equivalence }) {
 
         <div className="flex items-center gap-4">
           <IconDomain domain={"EQUIVALENCE"} disabled={equivalence.status !== EQUIVALENCE_STATUS.VALIDATED} />
-          <p className="text-lg leading-tight font-bold line-clamp-2 text-gray-800">{equivalence.type}</p>
+          <p className="text-lg leading-tight font-bold line-clamp-2 text-gray-800">{equivalence.type === "Autre" ? equivalence.desc : equivalence.type}</p>
         </div>
       </div>
     </Link>
