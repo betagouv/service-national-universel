@@ -112,6 +112,9 @@ resource "scaleway_container" "api" {
 
   secret_environment_variables = {
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+    "ES_HOST" = local.secrets.ES_HOST
+    "ES_USER" = local.secrets.ES_USER
+    "ES_PASSWORD" = local.secrets.ES_PASSWORD
   }
 }
 
