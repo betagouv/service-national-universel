@@ -67,14 +67,14 @@ export default function View() {
 
   return (
     <>
-      <section id="compteur" className="mt-[3rem] grid md:grid-cols-2 border shadow-sm rounded-2xl border-gray-200 items-center p-3">
+      <section id="compteur" className="mt-[3rem] grid md:grid-flow-col border shadow-sm rounded-2xl border-gray-200 items-center p-3">
         <div className="w-full relative">
           <SemiCircleProgress current={phase2NumberHoursDone} total={PHASE2_TOTAL_HOURS}></SemiCircleProgress>
           <Tooltip className="absolute top-0 right-4" />
         </div>
 
-        <div className="flex flex-col sm:border-t md:h-full md:border-t-0 md:border-l text-center">
-          {missionsDone.length === 0 ? (
+        {missionsDone.length === 0 ? (
+          <div className="flex flex-col sm:border-t md:h-full md:border-t-0 md:border-l text-center">
             <div className="mx-auto w-full md:w-auto">
               <p className="mt-[1rem] md:mt-14 text-2xl font-bold">C'est parti !</p>
               <p className="mt-1 text-gray-400 text-sm">Engagez vous au service de la nation.</p>
@@ -91,8 +91,8 @@ export default function View() {
                 </p>
               </Link>
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </section>
 
       {equivalences.isError || applications.isError ? (
