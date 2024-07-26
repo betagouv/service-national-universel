@@ -2,13 +2,13 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Switch, useHistory } from "react-router-dom";
 import { permissionPhase2 } from "../../utils";
-import MesEngagements from "./MesEngagements";
-import Home from "./Home";
-import EditEquivalence from "./views/EditEquivalence";
-import MonEquivalence from "./views/MonEquivalence";
+import MesEngagements from "./scenes/MesEngagements";
+import Home from "./scenes/Home";
+import EditEquivalence from "./scenes/MonEquivalence/EditEquivalence";
+import MonEquivalence from "./scenes/MonEquivalence/MonEquivalence";
+import Program from "./scenes/Program";
 import { SentryRoute } from "../../sentry";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import Program from "./Program";
 
 export default function Index() {
   useDocumentTitle("Phase 2 - MIG");

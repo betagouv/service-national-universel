@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import React from "react";
 import { useSelector } from "react-redux";
-import { fetchAttestation } from "../../engagement.repository";
+import { fetchAttestation } from "../../../engagement.repository";
 import { download } from "snu-lib";
 import { PopoverPanel } from "@headlessui/react";
 import { HiDownload, HiMail } from "react-icons/hi";

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
-import TableauDeBord from "./views/TableauDeBord";
-import Preferences from "../preferences";
+import TableauDeBord from "./components/TableauDeBord";
+import Preferences from "./components/Preferences";
 import { HiArrowLeft } from "react-icons/hi";
 import plausibleEvent from "@/services/plausible";
 

@@ -1,18 +1,18 @@
 import React from "react";
 import { Spinner } from "reactstrap";
 import { FORMAT, MISSION_DOMAINS, PERIOD, translate } from "snu-lib";
-import Sante from "../../assets/mission-domaines/sante";
-import Sport from "../../assets/mission-domaines/sport";
-import Solidarite from "../../assets/mission-domaines/solidarite";
-import Environment from "../../assets/mission-domaines/environment";
-import Citoyennete from "../../assets/mission-domaines/citoyennete";
-import Securite from "../../assets/mission-domaines/securite";
-import Education from "../../assets/mission-domaines/education";
-import Culture from "../../assets/mission-domaines/culture";
-import DefenseEtMemoire from "../../assets/mission-domaines/defense-et-memoire";
-import PreparationMilitaire from "../../assets/mission-domaines/preparation-militaire";
-import AcademicCap from "../../assets/icons/AcademicCap";
-import Sun from "../../assets/icons/Sun";
+import Sante from "@/assets/mission-domaines/sante";
+import Sport from "@/assets/mission-domaines/sport";
+import Solidarite from "@/assets/mission-domaines/solidarite";
+import Environment from "@/assets/mission-domaines/environment";
+import Citoyennete from "@/assets/mission-domaines/citoyennete";
+import Securite from "@/assets/mission-domaines/securite";
+import Education from "@/assets/mission-domaines/education";
+import Culture from "@/assets/mission-domaines/culture";
+import DefenseEtMemoire from "@/assets/mission-domaines/defense-et-memoire";
+import PreparationMilitaire from "@/assets/mission-domaines/preparation-militaire";
+import AcademicCap from "@/assets/icons/AcademicCap";
+import Sun from "@/assets/icons/Sun";
 
 // --- COMPONENTS
 

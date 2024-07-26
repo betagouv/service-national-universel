@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { fetchProgram } from "../engagement.repository";
+import { fetchProgram } from "../../engagement.repository";
 import Loader from "@/components/Loader";
 import { useHistory } from "react-router-dom";
 import { HiArrowLeft, HiExternalLink } from "react-icons/hi";
 import MissionList from "./MissionList";
-import Header from "../components/Header";
+import Header from "../../components/Header";
 
 export default function Program() {
   const { id } = useParams();

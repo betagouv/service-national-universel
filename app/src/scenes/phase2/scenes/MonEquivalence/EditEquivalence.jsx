@@ -3,18 +3,18 @@ import { BsCheck2 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory, useParams } from "react-router-dom";
-import AddImage from "../../../assets/icons/AddImage";
-import ChevronDown from "../../../assets/icons/ChevronDown";
-import InformationCircle from "../../../assets/icons/InformationCircle";
-import PaperClip from "../../../assets/icons/PaperClip";
-import api from "../../../services/api";
+import AddImage from "../../../../assets/icons/AddImage";
+import ChevronDown from "../../../../assets/icons/ChevronDown";
+import InformationCircle from "../../../../assets/icons/InformationCircle";
+import PaperClip from "../../../../assets/icons/PaperClip";
+import api from "../../../../services/api";
 import validator from "validator";
-import { slugifyFileName, UNSS_TYPE, translate } from "../../../utils";
-import { capture } from "../../../sentry";
+import { slugifyFileName, UNSS_TYPE, translate } from "../../../../utils";
+import { capture } from "../../../../sentry";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
 import { GrClose } from "react-icons/gr";
 import { queryClient } from "@/services/react-query";
-import Header from "../components/Header";
+import Header from "../../components/Header";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);

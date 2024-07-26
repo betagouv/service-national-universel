@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
-import { fetchPrograms } from "../../engagement.repository";
+import { fetchPrograms } from "../../../engagement.repository";
 import plausibleEvent from "@/services/plausible";
 
 export function Programs() {

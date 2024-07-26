@@ -7,13 +7,13 @@ import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/services/useAuth";
 import { HiPlus, HiSearch } from "react-icons/hi";
 import { RiMedal2Line } from "react-icons/ri";
-import InfobulleIcon from "../../../assets/infobulleIcon.svg";
-import SemiCircleProgress from "../components/SemiCircleProgress";
-import EquivalenceCard from "../components/EquivalenceCard";
-import ApplicationCard from "../components/ApplicationCard";
-import { fetchApplications, fetchEquivalences } from "../engagement.repository";
+import InfobulleIcon from "@/assets/infobulleIcon.svg";
+import SemiCircleProgress from "./SemiCircleProgress";
+import EquivalenceCard from "./../../../components/EquivalenceCard";
+import ApplicationCard from "./../../../components/ApplicationCard";
+import { fetchApplications, fetchEquivalences } from "../../../engagement.repository";
 import Loader from "@/components/Loader";
-import MilitaryStatusBadge from "../components/MilitaryStatusBadge";
+import MilitaryStatusBadge from "./../../../components/MilitaryStatusBadge";
 import plausibleEvent from "@/services/plausible";
 
 const Tooltip = ({ className }) => (

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import ChevronDown from "../../../assets/icons/ChevronDown";
+import ChevronDown from "@/assets/icons/ChevronDown";
 
 export default function SimpleSelect({ value, title, transformer, options, onChange, placeholder = "Choisissez une valeur", className = "" }) {
   const [selectOptionsOpened, setSelectOptionsOpened] = useState(false);
