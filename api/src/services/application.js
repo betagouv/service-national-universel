@@ -170,7 +170,7 @@ const getAuthorizationToApply = async (mission, young) => {
   }
 
   const isMilitaryApplicationIncomplete =
-    !young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length;
+    !young.files.militaryPreparationFilesIdentity?.length || !young.files.militaryPreparationFilesAuthorization?.length || !young.files.militaryPreparationFilesCertificate?.length;
 
   if (isMilitaryPreparation && isMilitaryApplicationIncomplete) {
     refusalMessages.push("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");

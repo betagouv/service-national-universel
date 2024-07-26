@@ -7,27 +7,27 @@ import FileCard from "./FileCard";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
 
+export const theme = {
+  background: {
+    WAITING_VALIDATION: "bg-sky-100",
+    WAITING_CORRECTION: "bg-[#FD7A02]",
+    VALIDATED: "bg-[#71C784]",
+    REFUSED: "bg-red-500",
+  },
+  text: {
+    WAITING_VALIDATION: "text-sky-600",
+    WAITING_CORRECTION: "text-white",
+    VALIDATED: "text-white",
+    REFUSED: "text-white",
+  },
+};
+
 export default function DocumentsPM({ docRef = null, showHelp = true }) {
   const young = useSelector((state) => state.Auth.young);
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalInform, setModalInform] = React.useState({ isOpen: false });
   const [open, setOpen] = React.useState();
   const [showFolder, setShowFolder] = React.useState(false);
-
-  const theme = {
-    background: {
-      WAITING_VALIDATION: "bg-sky-100",
-      WAITING_CORRECTION: "bg-[#FD7A02]",
-      VALIDATED: "bg-[#71C784]",
-      REFUSED: "bg-red-500",
-    },
-    text: {
-      WAITING_VALIDATION: "text-sky-600",
-      WAITING_CORRECTION: "text-white",
-      VALIDATED: "text-white",
-      REFUSED: "text-white",
-    },
-  };
 
   React.useEffect(() => {
     if (showHelp === true) {
@@ -123,9 +123,9 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
             <FileCard
               name="Pièce d’identité"
               icon="reglement"
-              filled={young.files?.militaryPreparationFilesIdentity.length}
-              color={young.files?.militaryPreparationFilesIdentity.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.files?.militaryPreparationFilesIdentity.length ? "Modifier" : "À renseigner"}
+              filled={young.files?.militaryPreparationFilesIdentity?.length}
+              color={young.files?.militaryPreparationFilesIdentity?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+              status={young.files?.militaryPreparationFilesIdentity?.length ? "Modifier" : "À renseigner"}
               onClick={() =>
                 setModalDocument({
                   isOpen: true,
@@ -138,9 +138,9 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
             <FileCard
               name="Autorisation parentale"
               icon="image"
-              filled={young.files?.militaryPreparationFilesAuthorization.length}
-              color={young.files?.militaryPreparationFilesAuthorization.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.files?.militaryPreparationFilesAuthorization.length ? "Modifier" : "À renseigner"}
+              filled={young.files?.militaryPreparationFilesAuthorization?.length}
+              color={young.files?.militaryPreparationFilesAuthorization?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+              status={young.files?.militaryPreparationFilesAuthorization?.length ? "Modifier" : "À renseigner"}
               onClick={() =>
                 setModalDocument({
                   isOpen: true,
@@ -154,9 +154,9 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
             <FileCard
               name="Certificat médical de non contre-indication..."
               icon="autotest"
-              filled={young.files?.militaryPreparationFilesCertificate.length}
-              color={young.files?.militaryPreparationFilesCertificate.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.files?.militaryPreparationFilesCertificate.length ? "Modifier" : "À renseigner"}
+              filled={young.files?.militaryPreparationFilesCertificate?.length}
+              color={young.files?.militaryPreparationFilesCertificate?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+              status={young.files?.militaryPreparationFilesCertificate?.length ? "Modifier" : "À renseigner"}
               onClick={() =>
                 setModalDocument({
                   isOpen: true,
@@ -170,9 +170,9 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
             <FileCard
               name="Attestation de recensement"
               icon="sanitaire"
-              filled={young.files?.militaryPreparationFilesCensus.length}
-              color={young.files?.militaryPreparationFilesCensus.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.files?.militaryPreparationFilesCensus.length ? "Modifier" : "À renseigner"}
+              filled={young.files?.militaryPreparationFilesCensus?.length}
+              color={young.files?.militaryPreparationFilesCensus?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+              status={young.files?.militaryPreparationFilesCensus?.length ? "Modifier" : "À renseigner"}
               description="Facultatif"
               onClick={() =>
                 setModalDocument({
