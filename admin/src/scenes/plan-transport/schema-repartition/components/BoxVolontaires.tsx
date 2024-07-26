@@ -13,7 +13,7 @@ export default function BoxVolontaires({ summary, className, loading }: BoxProps
     <Box className="flex flex-row justify-between">
       <div className="flex items-start flex-col">
         <div className={cx("mb-[10px] flex items-center", className)}>
-          <MiniTitle>Volontaires</MiniTitle>
+          <MiniTitle>Volontaires en LP</MiniTitle>
           {!loading && summary.intradepartmental > 0 && (
             <>
               <Badge className="mx-[8px]">{formatRate(summary.assigned, summary.total)} affectés</Badge>
