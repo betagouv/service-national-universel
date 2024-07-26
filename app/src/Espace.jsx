@@ -41,7 +41,6 @@ const Missions = lazy(() => import("./scenes/missions"));
 const Phase1 = lazy(() => import("./scenes/phase1"));
 const Phase2 = lazy(() => import("./scenes/phase2"));
 const Phase3 = lazy(() => import("./scenes/phase3"));
-const Preferences = lazy(() => import("./scenes/preferences"));
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
@@ -103,7 +102,6 @@ const Espace = () => {
             <SentryRoute path="/phase3" component={Phase3} />
             <SentryRoute path="/autres-engagements" component={AutresEngagements} />
             <SentryRoute path="/les-programmes" component={Engagement} />
-            <SentryRoute path="/preferences" component={Preferences} />
             <SentryRoute path="/mission" component={Missions} />
             <SentryRoute path="/candidature" component={Candidature} />
             {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}

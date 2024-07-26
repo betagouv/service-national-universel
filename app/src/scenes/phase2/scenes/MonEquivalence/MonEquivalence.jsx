@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { fetchEquivalence, fetchEquivalenceFile } from "../engagement.repository";
+import { fetchEquivalence, fetchEquivalenceFile } from "../../engagement.repository";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
 import { HiArrowLeft, HiChat, HiDownload, HiPaperClip, HiPencil } from "react-icons/hi";
-import EngagementStatusBadge from "../components/EquivalenceStatusBadge";
+import EngagementStatusBadge from "../../components/EquivalenceStatusBadge";
 import CopyButton from "@/components/buttons/CopyButton";
 import { EQUIVALENCE_STATUS } from "snu-lib";
 import { toastr } from "react-redux-toastr";
-import Header from "../components/Header";
+import Header from "../../components/Header";
 
 export default function Equivalence() {
   const { young } = useAuth();

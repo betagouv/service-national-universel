@@ -1,10 +1,10 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
-import { fetchApplications, fetchEquivalences } from "../../engagement.repository";
+import { fetchApplications, fetchEquivalences } from "../../../engagement.repository";
 import Loader from "@/components/Loader";
-import EquivalenceCard from "../../components/EquivalenceCard";
-import ApplicationCard from "../../components/ApplicationCard";
+import EquivalenceCard from "../../../components/EquivalenceCard";
+import ApplicationCard from "../../../components/ApplicationCard";
 import { APPLICATION_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS_PHASE2 } from "snu-lib";
 
 export function EngagementList() {

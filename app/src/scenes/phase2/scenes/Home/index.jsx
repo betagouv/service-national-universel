@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import EngagementSrc from "../../../assets/engagement/engagement-home.png";
+import EngagementSrc from "@/assets/engagement/engagement-home.png";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import plausibleEvent from "../../../services/plausible";
-import { YOUNG_STATUS_PHASE2 } from "../../../utils";
+import plausibleEvent from "@/services/plausible";
+import { YOUNG_STATUS_PHASE2 } from "../../../../utils";
 import { HiChevronDown, HiExternalLink, HiPlus, HiSearch } from "react-icons/hi";
 import { EngagementList } from "./components/EngagementList";
 import { Programs } from "./components/Programs";
