@@ -163,7 +163,7 @@ function EngagementList({ cards }) {
       </div>
       {cards.length > 3 ? (
         <div className="mt-2 flex justify-center">
-          <button onClick={() => setOpen(!open)} className="text-center underline underline-offset-2 mt-4">
+          <button onClick={() => setOpen(!open)} className="text-center underline underline-offset-2 mt-4 text-gray-600 text-sm">
             {open ? "Réduire" : "Afficher tout"}
           </button>
         </div>

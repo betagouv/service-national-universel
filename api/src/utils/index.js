@@ -456,7 +456,11 @@ const updateStatusPhase2 = async (young, fromUser) => {
 
     young.set({ statusPhase2UpdatedAt: Date.now() });
 
-    if (Number(young.phase2NumberHoursDone) >= 84) {
+    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
+      // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
+      young.set({ statusPhase2ValidatedAt: Date.now() });
+      await cancelPendingApplications(pendingApplication, fromUser);
+    } else if (Number(young.phase2NumberHoursDone) >= 84) {
       // We change young status to DONE if he has 84 hours of phase 2 done.
       young.set({
         statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
@@ -477,25 +481,11 @@ const updateStatusPhase2 = async (young, fromUser) => {
         },
         cc,
       });
-    } else if (Number(young.phase2NumberHoursDone) < 84) {
-      young.set({
-        statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
-        statusPhase2ValidatedAt: null,
-        "files.militaryPreparationFilesIdentity": [],
-        "files.militaryPreparationFilesCensus": [],
-        "files.militaryPreparationFilesAuthorization": [],
-        "files.militaryPreparationFilesCertificate": [],
-        statusMilitaryPreparationFiles: undefined,
-      });
-    } else if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
-      // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
-      young.set({ statusPhase2: young.statusPhase2, statusPhase2ValidatedAt: Date.now() });
-      await cancelPendingApplications(pendingApplication, fromUser);
     } else if (activeApplication.length) {
       // We change young status to IN_PROGRESS if he has an 'active' application.
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
+      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
     } else {
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
+      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
     }
 
     const applications_v2 = await ApplicationModel.find({ youngId: young._id });
