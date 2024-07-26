@@ -28,7 +28,8 @@ import DeleteButton from "./components/DeleteButton";
 import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleCohort from "./components/modale/modaleCohort";
 import ButtonInvite from "./components/ButtonInvite";
-import { InfoBus, TStatus, Rights } from "./components/types";
+import { InfoBus, Rights } from "./components/types";
+import { TStatus } from "@/types";
 import ButtonRelanceVerif from "./components/ButtonRelanceVerif";
 import VerifClassButton from "./components/VerifClassButton";
 

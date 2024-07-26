@@ -35,7 +35,7 @@ export default function YoungRowGeneral({ young }) {
       <td className="w-[20%] flex justify-center">
         <Badge title={translate(YOUNG_STATUS[young.status])} status={young.status} />
       </td>
-      <td className="flex w-[10%] flex-col gap-2 justify-center">
+      <td className="flex w-[10%] justify-center">
         <DropdownButton
           title={<IoFlashOutline size={20} />}
           mode={"badge"}

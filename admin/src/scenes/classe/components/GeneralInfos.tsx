@@ -235,6 +235,9 @@ export default function GeneralInfos({
               </Link>
             </>
           )}
+          <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
+            <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
+          </Link>
 
           {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? (
             <div className="flex items-center justify-end mt-6">

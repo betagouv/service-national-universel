@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 import { HiOutlineClipboardCheck } from "react-icons/hi";
 
-export default function ButtonActionGroupConsent() {
+export default function ButtonActionGroupConsent({ selectedYoungs, setSelectedYoungs, setSelectAll, reCountYoungs }) {
   const [showModale, setShowModale] = useState(false);
   const [authorized, setAuthorized] = useState(false);
   return (
@@ -11,6 +11,7 @@ export default function ButtonActionGroupConsent() {
         key="edit"
         type="secondary"
         title="Actions groupées"
+        disabled={selectedYoungs.length === 0}
         optionsGroup={[
           {
             key: "actions",
@@ -60,12 +61,12 @@ export default function ButtonActionGroupConsent() {
           authorized ? (
             <p className="text-base leading-6 font-normal text-gray-900">
               Vous souhaitez déclarer que vous avez reçu les autorisations écrites des représentants légaux pour le consentement à la participation de&nbsp;
-              <span className="font-bold">X élèves</span>. Conservez bien ces autorisations écrites dans le dossier des élèves au sein de l’établissement.
+              <span className="font-bold">{selectedYoungs.length} élèves</span>. Conservez bien ces autorisations écrites dans le dossier des élèves au sein de l’établissement.
             </p>
           ) : (
             <p className="text-base leading-6 font-normal text-gray-900">
               Vous souhaitez déclarer que vous avez reçu les refus écrits des représentants légaux pour le consentement à la participation de&nbsp;
-              <span className="font-bold">X élèves</span>. Conservez bien ces refus écrits dans le dossier des élèves au sein de l’établissement.
+              <span className="font-bold">{selectedYoungs.length} élèves</span>. Conservez bien ces refus écrits dans le dossier des élèves au sein de l’établissement.
             </p>
           )
         }
@@ -76,6 +77,9 @@ export default function ButtonActionGroupConsent() {
             onClick: () => {
               console.log("confirmed");
               setShowModale(false);
+              setSelectedYoungs([]);
+              setSelectAll(false);
+              reCountYoungs();
             },
           },
         ]}

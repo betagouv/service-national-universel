@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 import { HiOutlineClipboardCheck } from "react-icons/hi";
 
-export default function ButtonActionGroupValidation() {
+export default function ButtonActionGroupValidation({ selectedYoungs, setSelectedYoungs, setSelectAll, reCountYoungs }) {
   const [showModale, setShowModale] = useState(false);
   const [authorized, setAuthorized] = useState(false);
   return (
@@ -11,6 +11,7 @@ export default function ButtonActionGroupValidation() {
         key="edit"
         type="secondary"
         title="Actions groupées"
+        disabled={selectedYoungs.length === 0}
         optionsGroup={[
           {
             key: "actions",
@@ -59,11 +60,11 @@ export default function ButtonActionGroupValidation() {
         text={
           authorized ? (
             <p className="text-base leading-6 font-normal text-gray-900">
-              Vous souhaitez accepter les inscriptions de <span className="font-bold">X élèves</span>. Un mail leur sera envoyé pour les en informer.
+              Vous souhaitez accepter les inscriptions de <span className="font-bold">{selectedYoungs.length} élèves</span>. Un mail leur sera envoyé pour les en informer.
             </p>
           ) : (
             <p className="text-base leading-6 font-normal text-gray-900">
-              Vous souhaitez refuser les inscriptions de <span className="font-bold">X élèves</span>. Un mail leur sera envoyé pour les en informer.
+              Vous souhaitez refuser les inscriptions de <span className="font-bold">{selectedYoungs.length} élèves</span>. Un mail leur sera envoyé pour les en informer.
             </p>
           )
         }
@@ -74,6 +75,9 @@ export default function ButtonActionGroupValidation() {
             onClick: () => {
               console.log("confirmed");
               setShowModale(false);
+              setSelectedYoungs([]);
+              setSelectAll(false);
+              reCountYoungs();
             },
           },
         ]}
