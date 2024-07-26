@@ -17,11 +17,11 @@ export default function BoxCentres({ summary, className, loading, isNational, is
       <MiniTitle className="mb-[10px] flex items-center">
         {isDepartmental ? (
           <>
-            <span className="mr-[8px]">Régions d&apos;accueil</span>
-            {loading ? <Loading width="w-1/3" /> : <Badge>{summary.centers} CENTRES</Badge>}
+            <span className="mr-[8px]">Région(s) d&apos;accueil</span>
+            {loading ? <Loading width="w-1/3" /> : <Badge>{summary.centers} CENTRE(S)</Badge>}
           </>
         ) : (
-          "Centres"
+          "Centre(s)"
         )}
       </MiniTitle>
       {!isDepartmental && <>{loading ? <Loading width="w-1/3" /> : <BigDigits>{summary.centers}</BigDigits>}</>}
