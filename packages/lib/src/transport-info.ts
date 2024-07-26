@@ -16,7 +16,7 @@ const TRANSPORT_TIMES = {
  * 2. If not, the session if it has a specific date
  * 3. If not, the default date for the cohort.
  */
-function getDepartureDate(young, session, cohort, meetingPoint = null) {
+function getDepartureDate(young, session, cohort, meetingPoint: any = null) {
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointDepartureDate(meetingPoint);
   if (young?.status && young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterArrivalDate(young, session, cohort);
   return getGlobalDepartureDate(young, cohort);
@@ -51,7 +51,7 @@ function getGlobalDepartureDate(young, cohort) {
  * 2. If not, the session if it has a specific date.
  * 3. If not, the default date for the cohort.
  */
-function getReturnDate(young, session, cohort, meetingPoint = null) {
+function getReturnDate(young, session, cohort, meetingPoint: any = null) {
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointReturnDate(meetingPoint);
   if (young?.status && young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterReturnDate(young, session, cohort);
   return getGlobalReturnDate(young, cohort);
@@ -81,7 +81,7 @@ function getGlobalReturnDate(young, cohort) {
  * @returns {string} the hour of the departure of the young from the meeting point if they have one,
  * or a default hour if they don't (local transport or traveling by own means).
  */
-function getMeetingHour(meetingPoint = null) {
+function getMeetingHour(meetingPoint: any = null) {
   if (meetingPoint?.meetingHour) return meetingPoint.meetingHour;
   if (meetingPoint?.ligneToPoint?.meetingHour) return meetingPoint.ligneToPoint.meetingHour;
   return TRANSPORT_TIMES.ALONE_ARRIVAL_HOUR;
@@ -92,7 +92,7 @@ function getMeetingHour(meetingPoint = null) {
  * @returns {string} the hour of the return of the young to the meeting point if they have one,
  * or a default hour if they don't (local transport or traveling by own means).
  */
-function getReturnHour(meetingPoint = null) {
+function getReturnHour(meetingPoint: any = null) {
   if (meetingPoint?.returnHour) return meetingPoint.returnHour;
   if (meetingPoint?.ligneToPoint?.returnHour) return meetingPoint.ligneToPoint.returnHour;
   return TRANSPORT_TIMES.ALONE_DEPARTURE_HOUR;

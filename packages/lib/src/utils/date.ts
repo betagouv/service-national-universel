@@ -97,7 +97,7 @@ function getAge(d) {
   now.setHours(0, 0, 0, 0);
   const date = new Date(d);
   date.setHours(0, 0, 0, 0);
-  const diffTime = Math.abs(date - now);
+  const diffTime = Math.abs(date.getTime() - now.getTime());
   const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365.25));
   if (!age || isNaN(age)) return "?";
   return age;
@@ -158,7 +158,7 @@ const isNowBetweenDates = (from, to) => {
 
 const formatDateTimeZone = (date) => {
   //set timezone to UTC
-  let d = new Date(date);
+  const d = new Date(date);
   d.toISOString();
   return d;
 };

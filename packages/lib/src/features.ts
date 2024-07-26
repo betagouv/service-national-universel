@@ -1,11 +1,4 @@
-const ENVS = [
-  "test",
-  "development",
-  "ci",
-  "custom",
-  "staging",
-  "production",
-];
+const ENVS = ["test", "development", "ci", "custom", "staging", "production"];
 
 // List of features
 const FEATURES_NAME = {
@@ -19,20 +12,17 @@ const FEATURES_NAME = {
 // If the environment is not defined then the feature is enabled
 const features = {
   [FEATURES_NAME.FORCE_REDIRECT]: {
-    "production": [],
-    "staging": [],
-    "custom": [],
-    "ci": [],
+    production: [],
+    staging: [],
+    custom: [],
+    ci: [],
   },
   [FEATURES_NAME.EMAIL_VALIDATION]: {
     // "staging": [],
     // "development": [],
   },
-  [FEATURES_NAME.YOUNG_INSCRIPTION]: {
-    "production": [],
-  },
   [FEATURES_NAME.DEVELOPERS_MODE]: {
-    "production": [],
+    production: [],
     // Allow developers mode in staging and development
   },
 };
