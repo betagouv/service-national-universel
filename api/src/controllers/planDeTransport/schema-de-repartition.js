@@ -851,6 +851,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     let youngValues = youngResult && youngResult.length > 0 ? youngResult[0] : { total: 0, intradepartmental: 0 };
 
     const schemas = await schemaRepartitionModel.find({ cohort, fromDepartment: department }).populate({ path: "cohesionCenter" }).lean();
+
     let groups = {
       intra: [],
       extra: [],
