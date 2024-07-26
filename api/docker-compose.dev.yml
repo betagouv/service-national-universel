@@ -13,6 +13,11 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch_data:/data/elastic
+  mailcatcher:
+    image: schickling/mailcatcher
+    ports:
+      - "1025:1025"
+      - "1080:1080"
 
 volumes:
   mongodb_data:
