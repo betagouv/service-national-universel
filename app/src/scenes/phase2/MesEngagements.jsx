@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import TableauDeBord from "./views/TableauDeBord";
 import Preferences from "../preferences";
 import { HiArrowLeft } from "react-icons/hi";
+import plausibleEvent from "@/services/plausible";
 
 export default function View() {
   const params = new URLSearchParams(window.location.search);
@@ -34,7 +35,8 @@ export default function View() {
               return params.get("tab") === "settings";
             }}
             className="pr-1 pl-1 pb-2 hover:text-blue-600 hover:border-b-2 border-blue-600 text-gray-400"
-            activeClassName="!text-blue-600 border-b-2">
+            activeClassName="!text-blue-600 border-b-2"
+            onClick={() => plausibleEvent("Phase2/Engagement/CTA - Mes préférences")}>
             Mes préférences
           </NavLink>
         </nav>

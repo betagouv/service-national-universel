@@ -106,12 +106,15 @@ export default function HomePhase2() {
             <div className="flex flex-col md:flex-row justify-center gap-4 my-6">
               <Link
                 to="/mission"
-                onClick={() => plausibleEvent("Phase 2/CTA - Realiser ma mission")}
+                onClick={() => plausibleEvent("Phase2/CTA - Trouver un engagement")}
                 className="bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center line-clamp-1">
                 <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
                 Trouver un engagement
               </Link>
-              <Link to="/phase2/equivalence" className="border rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center">
+              <Link
+                to="/phase2/equivalence"
+                onClick={() => plausibleEvent("Phase2/CTA - Ajouter un engagement")}
+                className="border rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center">
                 <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
                 Ajouter un engagement réalisé
               </Link>
@@ -125,7 +128,7 @@ export default function HomePhase2() {
       <section id="mes-engagements" className="bg-gradient-to-b from-white to-gray-100 pb-2">
         <div className="mx-auto max-w-6xl px-3 mt-[1rem] md:mt-[3rem] mb-[0.5rem] md:mb-[1.5rem] flex justify-between items-center">
           <h2 className="font-bold m-0 text-2xl md:text-3xl">Mes engagements</h2>
-          <Link to="/phase2/mes-engagements" className="text-blue-600">
+          <Link to="/phase2/mes-engagements" onClick={() => plausibleEvent("Phase2/CTA - Voir")} className="text-blue-600">
             Voir
           </Link>
         </div>

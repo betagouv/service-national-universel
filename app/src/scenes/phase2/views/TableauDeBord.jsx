@@ -14,6 +14,7 @@ import ApplicationCard from "../components/ApplicationCard";
 import { fetchApplications, fetchEquivalences } from "../engagement.repository";
 import Loader from "@/components/Loader";
 import MilitaryStatusBadge from "../components/MilitaryStatusBadge";
+import plausibleEvent from "@/services/plausible";
 
 const Tooltip = ({ className }) => (
   <span className={className}>
@@ -70,7 +71,11 @@ export default function View() {
       <section id="compteur" className="mt-[3rem] grid md:grid-flow-col border shadow-sm rounded-2xl border-gray-200 items-center p-3">
         <div className="w-full relative">
           <SemiCircleProgress current={phase2NumberHoursDone} total={PHASE2_TOTAL_HOURS}></SemiCircleProgress>
-          <Tooltip className="absolute top-0 right-4" />
+          <Tooltip
+            className="absolute top-0 right-4"
+            onMouseEnter={() => plausibleEvent("Phase2/Engagement/info-compteur")}
+            onClick={() => plausibleEvent("Phase2/Engagement/info-compteur")}
+          />
         </div>
 
         {missionsDone.length === 0 ? (
@@ -108,7 +113,7 @@ export default function View() {
           <div className="flex gap-4">
             <h2 className="font-bold text-2xl md:text-3xl ">Engagements réalisés</h2>
             {phase2NumberHoursDone < PHASE2_TOTAL_HOURS && (
-              <Link to="/phase2/equivalence">
+              <Link to="/phase2/equivalence" onClick={() => plausibleEvent("Phase2/Engagement/CTA - Ajouter un engagement")}>
                 <p className="text-sm font-normal bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-full md:rounded-md w-8 h-8 md:w-auto md:h-auto py-1.5 md:px-3 md:py-2.5 text-center">
                   <HiPlus className="inline-block text-lg align-text-bottom md:mr-1" />
                   <span className="hidden md:inline">Ajouter</span>

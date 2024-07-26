@@ -11,6 +11,7 @@ import { RiHeartFill } from "react-icons/ri";
 import useAuth from "@/services/useAuth";
 import Header from "@/scenes/phase2/components/Header";
 import { HiArrowLeft } from "react-icons/hi";
+import plausibleEvent from "@/services/plausible";
 
 export default function List() {
   const { young } = useAuth();
@@ -75,7 +76,7 @@ export default function List() {
           }
         />
 
-        <Link className="block" to="/phase2/mes-engagements?tab=settings">
+        <Link className="block" to="/phase2/mes-engagements?tab=settings" onClick={() => plausibleEvent("Phase2/Missions/CTA - Mes préférences")}>
           <p className="group flex justify-center items-center gap-1 text-center underline">
             <RiHeartFill className="text-[#111827] inline-block align-text-bottom mr-1" />
             Mes préférences
@@ -92,7 +93,10 @@ export default function List() {
             <p className="text-4xl">🔍</p>
             <p className="text-white font-medium text-2xl md:text-3xl mt-3 text-center">Trouvez un engagement par vous-même</p>
             <p className="text-white font-light mt-2 text-center">Candidatez en autonomie à un programme d'engagement pour valider votre SNU.</p>
-            <Link className="text-white font-light underline underline-offset-2 hover:underline" to="/phase2#sectionEngagement">
+            <Link
+              to="/phase2#sectionEngagement"
+              onClick={() => plausibleEvent("Phase2/Missions/CTA - Comment ça marche")}
+              className="text-white font-light underline underline-offset-2 hover:underline">
               <p className="mt-4">Comment ça marche ?</p>
             </Link>
           </div>

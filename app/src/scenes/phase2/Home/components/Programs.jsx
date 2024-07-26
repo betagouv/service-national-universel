@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
 import { fetchPrograms } from "../../engagement.repository";
+import plausibleEvent from "@/services/plausible";
 
 export function Programs() {
   const [open, setOpen] = useState(false);
@@ -10,6 +11,11 @@ export function Programs() {
 
   if (isPending) return <Loader />;
   if (error) return <div>Erreur lors du chargement des données.</div>;
+
+  function handleClick() {
+    if (open) plausibleEvent("Phase2/CTA - Afficher tout");
+    setOpen(!open);
+  }
 
   const programs = open ? data : data.slice(0, 6);
   return (
@@ -21,7 +27,7 @@ export function Programs() {
       </div>
 
       <div className="mt-20 md:mt-12 text-center">
-        <button onClick={() => setOpen(!open)} className="text-gray-600 text-sm underline underline-offset-2">
+        <button onClick={handleClick} className="text-gray-600 text-sm underline underline-offset-2">
           {open ? "Afficher moins" : "Afficher tout"}
         </button>
       </div>
