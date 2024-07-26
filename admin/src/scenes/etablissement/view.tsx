@@ -5,7 +5,7 @@ import { HiHome, HiPlus } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
 import { Page, Header, Button } from "@snu/ds/admin";
-import { ROLES, translate, isCoordinateurEtablissement, isChefEtablissement } from "snu-lib";
+import { ROLES, translate, isCoordinateurEtablissement, isChefEtablissement, isReferentOrAdmin } from "snu-lib";
 import { ReferentDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { capture } from "@/sentry";
@@ -69,7 +69,7 @@ export default function View() {
               disabled={true}
             />
           ),
-          isChefEtablissement(user) && contacts.filter(isCoordinateurEtablissement).length < 2 && (
+          (isChefEtablissement(user) || isReferentOrAdmin(user)) && contacts.filter(isCoordinateurEtablissement).length < 2 && (
             <ButtonAddCoordinator etablissement={etablissement} onChange={loadEtablissement} />
           ),
         ]}
