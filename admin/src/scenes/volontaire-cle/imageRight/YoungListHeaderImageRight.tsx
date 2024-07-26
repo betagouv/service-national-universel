@@ -1,17 +1,26 @@
 import React, { useEffect } from "react";
+import { YoungDto } from "snu-lib/src/dto";
 
-export default function YoungListHeaderImageRight({ selectAll, setSelectAll, selectedYoungs, setSelectedYoungs, youngList }) {
+interface Props {
+  selectAll: boolean;
+  onSelectAllChange: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedYoungs: YoungDto[];
+  onSelectedYoungsChange: React.Dispatch<React.SetStateAction<YoungDto[]>>;
+  youngList: YoungDto[];
+}
+
+export default function YoungListHeaderImageRight({ selectAll, onSelectAllChange, selectedYoungs, onSelectedYoungsChange, youngList }: Props) {
   const handleSelectAll = () => {
     if (selectAll) {
-      setSelectedYoungs([]);
+      onSelectedYoungsChange([]);
     } else {
-      setSelectedYoungs(youngList);
+      onSelectedYoungsChange(youngList);
     }
-    setSelectAll(!selectAll);
+    onSelectAllChange(!selectAll);
   };
 
   useEffect(() => {
-    setSelectAll(selectedYoungs.length === youngList.length && youngList.length > 0);
+    onSelectAllChange(selectedYoungs.length === youngList.length && youngList.length > 0);
   }, [selectedYoungs, youngList.length]);
   return (
     <tr className="flex items-center py-3 px-4 text-xs font-[500] leading-5 uppercase text-gray-500 bg-gray-50 cursor-default">

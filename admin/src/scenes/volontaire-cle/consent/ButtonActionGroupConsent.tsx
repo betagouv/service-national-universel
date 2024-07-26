@@ -1,10 +1,47 @@
 import React, { useState } from "react";
-import { DropdownButton, ModalConfirmation } from "@snu/ds/admin";
+import { toastr } from "react-redux-toastr";
 import { HiOutlineClipboardCheck } from "react-icons/hi";
+import { useMutation } from "@tanstack/react-query";
 
-export default function ButtonActionGroupConsent({ selectedYoungs, setSelectedYoungs, setSelectAll, reCountYoungs }) {
+import { translate } from "snu-lib";
+import { YoungDto } from "snu-lib/src/dto";
+import { DropdownButton, ModalConfirmation } from "@snu/ds/admin";
+
+import { capture } from "@/sentry";
+import API from "@/services/api";
+
+interface Props {
+  selectedYoungs: YoungDto[];
+  setSelectedYoungs: React.Dispatch<React.SetStateAction<any[]>>;
+  setSelectAll: React.Dispatch<React.SetStateAction<boolean>>;
+  onYoungsChange: () => void;
+}
+
+export default function ButtonActionGroupConsent({ selectedYoungs, setSelectedYoungs, setSelectAll, onYoungsChange }: Props) {
   const [showModale, setShowModale] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+
+  const { isPending, mutate: updateConsent } = useMutation({
+    mutationFn: async () => {
+      const youngIds = selectedYoungs.map((young) => young._id);
+      const { ok, code, data } = await API.put(`/young-edition/ref-allow-snu`, { youngIds, consent: authorized });
+      if (!ok) throw new Error(translate(code));
+      return data;
+    },
+    onSuccess: () => {
+      toastr.success("Le consentement a bien été enregistré", "");
+      setShowModale(false);
+      setShowModale(false);
+      setSelectedYoungs([]);
+      setSelectAll(false);
+      onYoungsChange();
+    },
+    onError: (e: any) => {
+      capture(e);
+      toastr.error("Une erreur est survenue", translate(e.code));
+    },
+  });
+
   return (
     <>
       <DropdownButton
@@ -74,13 +111,8 @@ export default function ButtonActionGroupConsent({ selectedYoungs, setSelectedYo
           { title: "Annuler", isCancel: true },
           {
             title: "Confirmer",
-            onClick: () => {
-              console.log("confirmed");
-              setShowModale(false);
-              setSelectedYoungs([]);
-              setSelectAll(false);
-              reCountYoungs();
-            },
+            disabled: isPending,
+            onClick: () => updateConsent(),
           },
         ]}
       />

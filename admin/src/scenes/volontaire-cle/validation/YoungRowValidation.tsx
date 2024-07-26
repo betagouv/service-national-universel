@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 import { HiOutlineX, HiOutlineCheck, HiOutlineClipboardCheck } from "react-icons/hi";
+import { useMutation } from "@tanstack/react-query";
 
 import { YOUNG_STATUS, getAge } from "snu-lib";
+import { YoungDto, ClasseDto } from "snu-lib/src/dto";
 import { Badge, ModalConfirmation } from "@snu/ds/admin";
 import { translate } from "@/utils";
-import { YoungDto, ClasseDto } from "snu-lib/src/dto";
 import { TStatus } from "@/types";
+import API from "@/services/api";
+import { capture } from "@/sentry";
 
 interface YoungDtoWithClasse extends YoungDto {
   classe?: ClasseDto;
@@ -15,16 +19,34 @@ interface YoungDtoWithClasse extends YoungDto {
 interface Props {
   young: YoungDtoWithClasse;
   selectedYoungs: YoungDtoWithClasse[];
-  setSelectedYoungs: React.Dispatch<React.SetStateAction<YoungDtoWithClasse[]>>;
+  onYoungSelected: React.Dispatch<React.SetStateAction<YoungDtoWithClasse[]>>;
+  onChange: () => void;
 }
 
-export default function YoungRowValidation({ young, selectedYoungs, setSelectedYoungs }: Props) {
+export default function YoungRowValidation({ young, selectedYoungs, onYoungSelected, onChange }: Props) {
   const history = useHistory();
   const [showModale, setShowModale] = useState(false);
   const [authorized, setAuthorized] = useState(false);
 
+  const { isPending, mutate: validateYoung } = useMutation({
+    mutationFn: async () => {
+      const { ok, code, data } = await API.put(`/referent/youngs`, { youngIds: [young._id], status: authorized ? YOUNG_STATUS.VALIDATED : YOUNG_STATUS.REFUSED });
+      if (!ok) throw new Error(translate(code));
+      return data;
+    },
+    onSuccess: () => {
+      toastr.success("La validation a bien été enregistré", "");
+      setShowModale(false);
+      onChange();
+    },
+    onError: (e: any) => {
+      capture(e);
+      toastr.error("Une erreur est survenue", translate(e.code));
+    },
+  });
+
   const handleSelectYoung = (young: YoungDtoWithClasse) => {
-    setSelectedYoungs((prevSelected) => (prevSelected.some((y) => y._id === young._id) ? prevSelected.filter((y) => y._id !== young._id) : [...prevSelected, young]));
+    onYoungSelected((prevSelected) => (prevSelected.some((y) => y._id === young._id) ? prevSelected.filter((y) => y._id !== young._id) : [...prevSelected, young]));
   };
 
   return (
@@ -105,10 +127,8 @@ export default function YoungRowValidation({ young, selectedYoungs, setSelectedY
           { title: "Annuler", isCancel: true },
           {
             title: "Confirmer",
-            onClick: () => {
-              console.log("confirmed");
-              setShowModale(false);
-            },
+            disabled: isPending,
+            onClick: () => validateYoung(),
           },
         ]}
       />

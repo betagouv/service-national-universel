@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { HiOutlineX, HiOutlineCheck, HiOutlineClipboardCheck } from "react-icons/hi";
 
-import { YOUNG_STATUS, getAge } from "snu-lib";
+import { YOUNG_STATUS, getAge, translate } from "snu-lib";
 import { Badge, ModalConfirmation } from "@snu/ds/admin";
 import { YoungDto, ClasseDto } from "snu-lib/src/dto";
+import { useMutation } from "@tanstack/react-query";
+import API from "@/services/api";
+import { toastr } from "react-redux-toastr";
+import { capture } from "@/sentry";
 
 interface YoungDtoWithClasse extends YoungDto {
   classe?: ClasseDto;
@@ -13,16 +17,34 @@ interface YoungDtoWithClasse extends YoungDto {
 interface Props {
   young: YoungDtoWithClasse;
   selectedYoungs: YoungDtoWithClasse[];
-  setSelectedYoungs: React.Dispatch<React.SetStateAction<YoungDtoWithClasse[]>>;
+  onYoungSelected: React.Dispatch<React.SetStateAction<YoungDtoWithClasse[]>>;
+  onChange: () => void;
 }
 
-export default function YoungRowImageRight({ young, selectedYoungs, setSelectedYoungs }: Props) {
+export default function YoungRowImageRight({ young, selectedYoungs, onYoungSelected, onChange }: Props) {
   const history = useHistory();
   const [showModale, setShowModale] = useState(false);
   const [authorized, setAuthorized] = useState(false);
 
+  const { isPending, mutate: updateImageRight } = useMutation({
+    mutationFn: async () => {
+      const { ok, code, data } = await API.put(`/young-edition/ref-allow-snu`, { youngIds: [young._id], imageRights: authorized });
+      if (!ok) throw new Error(translate(code));
+      return data;
+    },
+    onSuccess: () => {
+      toastr.success("La modification du droit à l'image a bien été enregistrée", "");
+      setShowModale(false);
+      onChange();
+    },
+    onError: (e: any) => {
+      capture(e);
+      toastr.error("Une erreur est survenue", translate(e.code));
+    },
+  });
+
   const handleSelectYoung = (young: YoungDtoWithClasse) => {
-    setSelectedYoungs((prevSelected) => (prevSelected.some((y) => y._id === young._id) ? prevSelected.filter((y) => y._id !== young._id) : [...prevSelected, young]));
+    onYoungSelected((prevSelected) => (prevSelected.some((y) => y._id === young._id) ? prevSelected.filter((y) => y._id !== young._id) : [...prevSelected, young]));
   };
 
   return (
@@ -100,10 +122,8 @@ export default function YoungRowImageRight({ young, selectedYoungs, setSelectedY
           { title: "Annuler", isCancel: true },
           {
             title: "Confirmer",
-            onClick: () => {
-              console.log("confirmed");
-              setShowModale(false);
-            },
+            disabled: isPending,
+            onClick: () => updateImageRight(),
           },
         ]}
       />

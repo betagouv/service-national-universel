@@ -1,20 +1,17 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import { HiOutlineClipboardList, HiOutlineClipboardCheck } from "react-icons/hi";
-import { Navbar } from "@snu/ds/admin";
-import { YOUNG_STATUS } from "snu-lib";
 
-export default function NavbarList({
-  currentTab,
-  setSelectedFilters,
-  setSize,
-  setParamData,
-  studentsWaitingConsent,
-  studentsWaitingValidation,
-  studentsWaitingImageRights,
-  setSelectedYoungs,
-  setSelectAll,
-}) {
+import { Navbar } from "@snu/ds/admin";
+
+interface Props {
+  currentTab: "general" | "consent" | "validation" | "image";
+  studentsWaitingConsent: number;
+  studentsWaitingValidation: number;
+  studentsWaitingImageRights: number;
+}
+
+export default function NavbarList({ currentTab, studentsWaitingConsent, studentsWaitingValidation, studentsWaitingImageRights }: Props) {
   const history = useHistory();
   return (
     <Navbar
@@ -24,14 +21,6 @@ export default function NavbarList({
           leftIcon: <HiOutlineClipboardList size={20} className="mt-0.5 ml-2.5" />,
           isActive: currentTab === "general",
           onClick: () => {
-            setSelectedFilters((prevFilters) => {
-              const { reinscriptionStep2023, status, imageRight, ...rest } = prevFilters;
-              return rest;
-            });
-            setSelectedYoungs([]);
-            setSelectAll(false);
-            setSize(10);
-            setParamData({ page: 0 });
             history.push(`/mes-eleves`);
           },
         },
@@ -48,18 +37,7 @@ export default function NavbarList({
           leftIcon: <HiOutlineClipboardCheck size={20} className="mt-0.5 ml-2.5" />,
           isActive: currentTab === "consent",
           onClick: () => {
-            setSelectedFilters((prevFilters) => {
-              const { status, imageRight, ...rest } = prevFilters;
-              return {
-                ...rest,
-                reinscriptionStep2023: { filter: ["WAITING_CONSENT"] },
-              };
-            });
-            setSelectedYoungs([]);
-            setSelectAll(false);
-            setSize(10);
-            setParamData({ page: 0 });
-            history.push(`/mes-eleves?tab=consent`);
+            history.push(`/mes-eleves/consent`);
           },
         },
         {
@@ -75,18 +53,7 @@ export default function NavbarList({
           leftIcon: <HiOutlineClipboardCheck size={20} className="mt-0.5 ml-2.5" />,
           isActive: currentTab === "validation",
           onClick: () => {
-            setSelectedFilters((prevFilters) => {
-              const { reinscriptionStep2023, imageRight, ...rest } = prevFilters;
-              return {
-                ...rest,
-                status: { filter: [YOUNG_STATUS.WAITING_VALIDATION] },
-              };
-            });
-            setSelectedYoungs([]);
-            setSelectAll(false);
-            setSize(10);
-            setParamData({ page: 0 });
-            history.push(`/mes-eleves?tab=validation`);
+            history.push(`/mes-eleves/validation`);
           },
         },
         {
@@ -102,18 +69,7 @@ export default function NavbarList({
           leftIcon: <HiOutlineClipboardCheck size={20} className="mt-0.5 ml-2.5" />,
           isActive: currentTab === "image",
           onClick: () => {
-            setSelectedFilters((prevFilters) => {
-              const { reinscriptionStep2023, status, ...rest } = prevFilters;
-              return {
-                ...rest,
-                imageRight: { filter: ["N/A"] },
-              };
-            });
-            setSelectedYoungs([]);
-            setSelectAll(false);
-            setSize(10);
-            setParamData({ page: 0 });
-            history.push(`/mes-eleves?tab=image`);
+            history.push(`/mes-eleves/image`);
           },
         },
       ]}

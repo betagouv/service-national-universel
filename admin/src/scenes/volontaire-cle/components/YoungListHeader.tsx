@@ -1,10 +1,21 @@
 import React from "react";
 
+import { YoungDto } from "snu-lib/src/dto";
+
 import YoungListHeaderConsent from "../consent/YoungListHeaderConsent";
 import YoungListHeaderValidation from "../validation/YoungListHeaderValidation";
 import YoungListHeaderImageRight from "../imageRight/YoungListHeaderImageRight";
 
-export default function YoungListHeader({ currentTab, selectAll, setSelectAll, selectedYoungs, setSelectedYoungs, youngList }) {
+interface Props {
+  currentTab: "general" | "consent" | "validation" | "image";
+  selectAll: boolean;
+  onSelectAllChange: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedYoungs: YoungDto[];
+  onSelectedYoungsChange: React.Dispatch<React.SetStateAction<YoungDto[]>>;
+  youngList: YoungDto[];
+}
+
+export default function YoungListHeader({ currentTab, selectAll, onSelectAllChange, selectedYoungs, onSelectedYoungsChange, youngList }: Props) {
   switch (currentTab) {
     case "general":
       return (
@@ -18,15 +29,33 @@ export default function YoungListHeader({ currentTab, selectAll, setSelectAll, s
       );
     case "consent":
       return (
-        <YoungListHeaderConsent selectAll={selectAll} setSelectAll={setSelectAll} selectedYoungs={selectedYoungs} setSelectedYoungs={setSelectedYoungs} youngList={youngList} />
+        <YoungListHeaderConsent
+          selectAll={selectAll}
+          onSelectAllChange={onSelectAllChange}
+          selectedYoungs={selectedYoungs}
+          onSelectedYoungsChange={onSelectedYoungsChange}
+          youngList={youngList}
+        />
       );
     case "validation":
       return (
-        <YoungListHeaderValidation selectAll={selectAll} setSelectAll={setSelectAll} selectedYoungs={selectedYoungs} setSelectedYoungs={setSelectedYoungs} youngList={youngList} />
+        <YoungListHeaderValidation
+          selectAll={selectAll}
+          onSelectAllChange={onSelectAllChange}
+          selectedYoungs={selectedYoungs}
+          onSelectedYoungsChange={onSelectedYoungsChange}
+          youngList={youngList}
+        />
       );
     case "image":
       return (
-        <YoungListHeaderImageRight selectAll={selectAll} setSelectAll={setSelectAll} selectedYoungs={selectedYoungs} setSelectedYoungs={setSelectedYoungs} youngList={youngList} />
+        <YoungListHeaderImageRight
+          selectAll={selectAll}
+          onSelectAllChange={onSelectAllChange}
+          selectedYoungs={selectedYoungs}
+          onSelectedYoungsChange={onSelectedYoungsChange}
+          youngList={youngList}
+        />
       );
     default:
       return null;

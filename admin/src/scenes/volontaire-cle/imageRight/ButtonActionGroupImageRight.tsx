@@ -1,10 +1,46 @@
 import React, { useState } from "react";
-import { DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 import { HiOutlineClipboardCheck } from "react-icons/hi";
+import { toastr } from "react-redux-toastr";
+import { useMutation } from "@tanstack/react-query";
 
-export default function ButtonActionGroupImageRight({ selectedYoungs, setSelectedYoungs, setSelectAll, reCountYoungs }) {
+import { translate } from "snu-lib";
+import { YoungDto } from "snu-lib/src/dto";
+import { DropdownButton, ModalConfirmation } from "@snu/ds/admin";
+
+import { capture } from "@/sentry";
+import API from "@/services/api";
+
+interface Props {
+  selectedYoungs: YoungDto[];
+  setSelectedYoungs: React.Dispatch<React.SetStateAction<any[]>>;
+  setSelectAll: React.Dispatch<React.SetStateAction<boolean>>;
+  onYoungsChange: () => void;
+}
+
+export default function ButtonActionGroupImageRight({ selectedYoungs, setSelectedYoungs, setSelectAll, onYoungsChange }: Props) {
   const [showModale, setShowModale] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+
+  const { isPending, mutate: updateImageRight } = useMutation({
+    mutationFn: async () => {
+      const youngIds = selectedYoungs.map((young) => young._id);
+      const { ok, code, data } = await API.put(`/young-edition/ref-allow-snu`, { youngIds, imageRights: authorized });
+      if (!ok) throw new Error(translate(code));
+      return data;
+    },
+    onSuccess: () => {
+      toastr.success("La modification du droit à l'image a bien été enregistrée", "");
+      setShowModale(false);
+      setSelectedYoungs([]);
+      setSelectAll(false);
+      onYoungsChange();
+    },
+    onError: (e: any) => {
+      capture(e);
+      toastr.error("Une erreur est survenue", translate(e.code));
+    },
+  });
+
   return (
     <>
       <DropdownButton
@@ -74,13 +110,8 @@ export default function ButtonActionGroupImageRight({ selectedYoungs, setSelecte
           { title: "Annuler", isCancel: true },
           {
             title: "Confirmer",
-            onClick: () => {
-              console.log("confirmed");
-              setShowModale(false);
-              setSelectedYoungs([]);
-              setSelectAll(false);
-              reCountYoungs();
-            },
+            disabled: isPending,
+            onClick: () => updateImageRight(),
           },
         ]}
       />

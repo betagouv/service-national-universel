@@ -10,6 +10,7 @@ export default function Index() {
 
   return (
     <Switch>
+      <SentryRoute path="/mes-eleves/:tabId" component={List} />
       <SentryRoute path="/mes-eleves" component={List} />
     </Switch>
   );

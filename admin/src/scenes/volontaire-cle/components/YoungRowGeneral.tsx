@@ -4,10 +4,16 @@ import { IoFlashOutline } from "react-icons/io5";
 import { HiUsers } from "react-icons/hi";
 
 import { YOUNG_STATUS, getAge } from "snu-lib";
+import { ClasseDto, YoungDto } from "snu-lib/src/dto";
 import { Badge, DropdownButton } from "@snu/ds/admin";
+
 import { translate } from "@/utils";
 
-export default function YoungRowGeneral({ young }) {
+interface Props {
+  young: YoungDto & { classe: ClasseDto };
+}
+
+export default function YoungRowGeneral({ young }: Props) {
   const history = useHistory();
 
   return (
@@ -33,7 +39,7 @@ export default function YoungRowGeneral({ young }) {
         </div>
       </td>
       <td className="w-[20%] flex justify-center">
-        <Badge title={translate(YOUNG_STATUS[young.status])} status={young.status} />
+        <Badge title={translate(YOUNG_STATUS[young.status])} status={young.status as any} />
       </td>
       <td className="flex w-[10%] justify-center">
         <DropdownButton
