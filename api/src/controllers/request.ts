@@ -3,4 +3,5 @@ import { UserDto } from "snu-lib/src/dto";
 
 export interface UserRequest extends Request {
   user: UserDto;
+  files?: any;
 }

@@ -197,7 +197,7 @@ async function simulateTemplate(id: string, emailTo: Email[] = [], params: Email
 }
 
 interface EmailParams {
-  [key: string]: string | number;
+  [key: string]: string | number | undefined;
 }
 
 interface SendTemplateParameters {
