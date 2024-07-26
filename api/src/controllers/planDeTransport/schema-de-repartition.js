@@ -772,6 +772,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
 
     // --- find to regions from departments
     const regionsResult = await tableRepartitionModel.find({ cohort, fromRegion: region, fromDepartment: department });
+    console.log("regionsResult", regionsResult);
     const toRegionsSet = {};
     let toDepartments = [];
     for (const repart of regionsResult) {
@@ -817,6 +818,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       },
     ];
     const toCenterResult = await sessionPhase1Model.aggregate(toCenterPipeline).exec();
+    console.log("toCenterResult", toCenterResult);
     let toCenterSet = {};
     for (const line of toCenterResult) {
       toCenterSet[line._id] = { centers: line.centers, capacity: line.capacity };
@@ -851,7 +853,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
     let youngValues = youngResult && youngResult.length > 0 ? youngResult[0] : { total: 0, intradepartmental: 0 };
 
     const schemas = await schemaRepartitionModel.find({ cohort, fromDepartment: department }).populate({ path: "cohesionCenter" }).lean();
-
+    console.log("schemas", schemas);
     let groups = {
       intra: [],
       extra: [],
