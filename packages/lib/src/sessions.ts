@@ -207,15 +207,15 @@ const getCohortPeriod = (cohort, withBold = false) => {
   const endDate = getZonedDate(cohort.dateEnd);
 
   const endDateformatOptions = { year: "numeric", month: "long", day: "numeric" };
-  const startDateformatOptions = { day: "numeric" };
+  const startDateformatOptions: Partial<typeof endDateformatOptions> = { day: "numeric" };
   if (startDate.getMonth() !== endDate.getMonth()) {
     startDateformatOptions.month = "long";
   }
   if (startDate.getFullYear() !== endDate.getFullYear()) {
     startDateformatOptions.year = "numeric";
   }
-  const formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions).format(startDate);
-  const formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
+  const formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions as any).format(startDate);
+  const formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions as any).format(endDate);
 
   if (withBold) return `du <b>${formattedStart} au ${formattedEnd}</b>`;
 
@@ -227,18 +227,18 @@ const formatShortCohortPeriod = (cohort) => {
   const startDate = getZonedDate(cohort.dateStart);
   const endDate = getZonedDate(cohort.dateEnd);
 
-  var startDateformatOptions = {
+  const startDateformatOptions = {
     day: "numeric",
     month: "numeric",
   };
 
-  var endDateformatOptions = {
+  const endDateformatOptions = {
     day: "numeric",
     month: "numeric",
   };
 
-  var formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions).format(startDate);
-  var formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
+  const formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions as any).format(startDate);
+  const formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions as any).format(endDate);
 
   return formattedStart + " > " + formattedEnd;
 };

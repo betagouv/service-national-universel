@@ -55,8 +55,8 @@ const getFilterLabel = (selected, placeholder = "Choisissez un filtre", prelabel
 const getSelectedFilterLabel = (selected, prelabel) => {
   if (Array.isArray(selected)) {
     if (selected[0] === "FROMDATE" && selected[2] === "TODATE") {
-      let formatedFROMDATE = selected[1].split("-").reverse().join("/");
-      let formatedTODATE = selected[3].split("-").reverse().join("/");
+      const formatedFROMDATE = selected[1].split("-").reverse().join("/");
+      const formatedTODATE = selected[3].split("-").reverse().join("/");
       return "Date de debut : " + formatedFROMDATE + " • Date de fin : " + formatedTODATE;
     }
   }
@@ -142,7 +142,10 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id, source, 
 };
 
 const youngCanWithdraw = (young) => {
-  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && [YOUNG_STATUS_PHASE2.VALIDATED].includes(young.statusPhase2) || [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status)) {
+  if (
+    ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && [YOUNG_STATUS_PHASE2.VALIDATED].includes(young.statusPhase2)) ||
+    [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status)
+  ) {
     return false;
   }
   return true;

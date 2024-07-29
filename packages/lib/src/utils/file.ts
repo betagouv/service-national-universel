@@ -1,6 +1,8 @@
 function download(file, fileName) {
+  // @ts-expect-error msSaveOrOpenBlob exists
   if (window.navigator.msSaveOrOpenBlob) {
-    //IE11 & Edge
+    // IE11 & Edge
+    // @ts-expect-error msSaveOrOpenBlob exists
     window.navigator.msSaveOrOpenBlob(file, fileName);
   } else {
     //Other browsers
@@ -17,14 +19,14 @@ function download(file, fileName) {
  * @param [File]
  * @returns FormData
  **/
-function createFormDataForFileUpload(arr, properties) {
-  let files = [];
+function createFormDataForFileUpload(arr: any[], properties) {
+  let files: any[] = [];
   if (Array.isArray(arr)) files = arr.filter((e) => typeof e === "object");
   else files = [arr];
-  let formData = new FormData();
+  const formData = new FormData();
 
   // File object name property is read-only, so we need to change it with Object.defineProperty
-  for (let file of files) {
+  for (const file of files) {
     // eslint-disable-next-line no-control-regex
     const name = encodeURIComponent(file.name.replace(/['/:*?"<>|\x00-\x1F\x80-\x9F]/g, "_").trim());
     Object.defineProperty(file, "name", { value: name });
@@ -33,7 +35,7 @@ function createFormDataForFileUpload(arr, properties) {
   }
 
   const names = files.map((e) => e.name || e);
-  let allData = { names, ...properties || {} };
+  const allData = { names, ...(properties || {}) };
   formData.append("body", JSON.stringify(allData));
   return formData;
 }
