@@ -7,6 +7,7 @@ import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
 
 import { capture, captureMessage } from "./sentry";
 import { rateLimiterContactSIB } from "./rateLimiters";
+import { sendMailCatcher } from "./mailcatcher";
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -104,10 +105,14 @@ export async function sendSMS(phoneNumber, content, tag) {
 }
 
 // https://developers.sendinblue.com/reference#sendtransacemail
-export async function sendEmail(to: Email[], subject: string, htmlContent, { params, attachment, cc, bcc }: any = {}) {
+export async function sendEmail(to: Email[], subject: string, htmlContent, { params, attachment, cc, bcc }: Omit<SendMailParameters, "emailTo"> = {}) {
   try {
     const body: any = {};
     if (config.ENVIRONMENT !== "production") {
+      if (config.MAILCATCHER_PORT && config.MAILCATCHER_HOST) {
+        // TODO: faire un return après le simulate
+        await sendMailCatcher(subject, htmlContent, { emailTo: to, cc, bcc, attachment });
+      }
       console.log("to before filter:", to);
       to = to.filter((e) => e.email.match(regexp_exception_staging));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
@@ -169,7 +174,7 @@ export async function getEmailContent(uuid) {
   }
 }
 
-interface EmailTemplate {
+interface BrevoEmailTemplate {
   id: number;
   name: string;
   subject: string;
@@ -179,47 +184,54 @@ interface EmailTemplate {
   doiTemplate: boolean;
 }
 
-function replaceTemplateParams(content: string, params: EmailParams) {
+function replaceTemplateParams(content: string, params: SendMailParameters["params"] = {}) {
   let hydratedContent = content;
   for (const paramKey of Object.keys(params)) {
-    hydratedContent = hydratedContent.replace(new RegExp(`{{ params.${paramKey} }}`, "g"), String(params[paramKey]));
+    hydratedContent = hydratedContent.replace(new RegExp(`{{ *params.${paramKey} *}}`, "g"), String(params[paramKey]));
   }
   return hydratedContent;
 }
 
-async function simulateTemplate(id: string, emailTo: Email[] = [], params: EmailParams = {}) {
-  if (!config.ENABLE_SENDINBLUE_SIMULATE_TEMPLATE || !config.SENDINBLUEKEY) return null;
-  const template: EmailTemplate = await api(`/smtp/templates/${id}`, undefined, true);
-  const subject = `<!-- EMAIL (${id}) TO ${emailTo?.map(({ email }) => email).join(",")}. SUBJECT: ${replaceTemplateParams(template.subject, params)} -->`;
-  let content = replaceTemplateParams(template.htmlContent, params);
-  // TODO: send to mailcatcher
-  fs.writeFileSync(`${new Date().toISOString()}-${id}.email.html`, subject + content);
+async function simulateTemplate(id: string, { params, emailTo, cc, bcc, attachment }: SendMailParameters) {
+  if ((!config.ENABLE_SENDINBLUE_SIMULATE_TEMPLATE && (!config.MAILCATCHER_PORT || !config.MAILCATCHER_HOST)) || !config.SENDINBLUEKEY) return null;
+  const template: BrevoEmailTemplate = await api(`/smtp/templates/${id}`, undefined, true);
+  const subject = replaceTemplateParams(template.subject, params);
+  const html = replaceTemplateParams(template.htmlContent, params);
+  if (config.MAILCATCHER_PORT && config.MAILCATCHER_HOST) {
+    await sendMailCatcher(subject, html, {
+      emailTo,
+      cc,
+      bcc,
+      attachment,
+    });
+  } else {
+    fs.writeFileSync(`${new Date().toISOString()}-${id}.email.html`, `<!-- EMAIL (${id}) TO ${emailTo?.map(({ email }) => email).join(",")}. SUBJECT: ${subject} -->` + html);
+  }
 }
 
-interface EmailParams {
-  [key: string]: string | number | undefined;
-}
-
-interface SendTemplateParameters {
-  params?: EmailParams;
-  emailTo?: Email[];
+export type SendMailParameters = {
+  emailTo: Email[];
   cc?: Email[];
   bcc?: Email[];
-  attachment?: any;
-}
+  attachment?: Array<{ content: string; name: string }>;
+  params?: {
+    [key: string]: string | number | undefined;
+  };
+};
 
 interface SendTemplateOptions {
   force?: boolean;
 }
 
 // https://developers.sendinblue.com/reference#sendtransacemail
-export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attachment }: SendTemplateParameters = {}, options: SendTemplateOptions = {}) {
+export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attachment }: SendMailParameters, options: SendTemplateOptions = {}) {
   try {
     if (!id) throw new Error("No template id provided");
 
     const body: any = { templateId: parseInt(id) };
     if (!options.force && config.ENVIRONMENT !== "production") {
-      await simulateTemplate(id, emailTo, params);
+      // TODO: faire un return après le simulate
+      await simulateTemplate(id, { params, emailTo, cc, bcc, attachment });
       console.log("emailTo before filter:", emailTo);
       emailTo = emailTo?.filter((e) => e.email.match(regexp_exception_staging));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
