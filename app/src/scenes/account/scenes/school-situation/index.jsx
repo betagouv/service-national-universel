@@ -41,6 +41,21 @@ const AccountSchoolSituationPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3">
           {isCLE ? (
             <>
+              <div className="pt-4 pb-0 md:py-6 pl-6 lg:col-start-1 lg:block">
+                <h2 className="m-0 mb-1 text-lg font-medium leading-6 text-gray-900">Situation scolaire</h2>
+                <FormDescription>Ma situation scolaire au moment de mon inscription.</FormDescription>
+              </div>
+              <div className="px-4 pt-6 pb-2 lg:col-span-2 lg:col-start-2">
+                <SectionTitle>Scolarité</SectionTitle>
+                <Select label="Niveau de scolarité" name="grade" value={values.grade} disabled>
+                  {getSchoolGradesOptions().map(({ label, value }) => (
+                    <option value={value} key={value}>
+                      {label}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <hr className="col-span-full mx-4 my-2 md:my-6" />
               <div className="py-6 pl-6 lg:col-start-1 lg:block">
                 <h2 className="m-0 mb-1 text-lg font-medium leading-6 text-gray-900">Classe engagée</h2>
               </div>
