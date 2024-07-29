@@ -48,7 +48,9 @@ export default function StepEligibilite() {
     { value: "1ereGT", label: "1ère générale et technologique" },
     { value: "TermPro", label: "Terminale professionnelle" },
     { value: "TermGT", label: "Terminale générale et technologique" },
-    { value: "CAP", label: "CAP" },
+    { value: "1ereCAP", label: "CAP 1ère année" },
+    { value: "2ndeCAP", label: "CAP 2ème année" },
+    // { value: "CAP", label: "CAP" },
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
