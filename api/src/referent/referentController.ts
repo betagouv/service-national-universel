@@ -7,20 +7,26 @@ import Joi from "joi";
 import fs from "fs";
 import fileUpload from "express-fileupload";
 
-import ReferentModel from "../models/referent";
-import YoungModel from "../models/young";
-import MissionModel from "../models/mission";
-import ApplicationModel from "../models/application";
-import SessionPhase1 from "../models/sessionPhase1";
-import StructureModel from "../models/structure";
-import MissionEquivalenceModel from "../models/missionEquivalence";
 import AuthObject from "../auth";
 import patches from "../controllers/patches";
-import CohesionCenterModel from "../models/cohesionCenter";
-import LigneDeBusModel from "../models/PlanDeTransport/ligneBus";
-import EtablissementModel from "../models/cle/etablissement";
-import ClasseModel from "../models/cle/classe";
 import ClasseStateManager from "../cle/classe/stateManager";
+
+import {
+  YoungModel,
+  ClasseModel,
+  EtablissementModel,
+  ReferentModel,
+  LigneBusModel,
+  MissionModel,
+  ApplicationModel,
+  SessionPhase1Model,
+  StructureModel,
+  MissionEquivalenceModel,
+  CohesionCenterModel,
+  EtablissementDocument,
+  ClasseDocument,
+} from "../models";
+
 import emailsEmitter from "../emails";
 import { sendEmailToYoung } from "../young/email/youngEmailService";
 
@@ -374,7 +380,7 @@ router.post("/signup_retry", async (req: UserRequest, res: Response) => {
     const cohesionCenterName = referent.cohesionCenterName;
     const region = referent.region;
     const department = referent.department;
-    const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId)).name : "";
+    const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId))?.name : "";
 
     await referent.save({ fromUser: req.user });
     await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role], {
@@ -518,8 +524,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
 
     if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
-      let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
-      if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+      const emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }];
+      if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! });
 
       await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
         emailTo,
@@ -574,12 +580,12 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     if (young.ligneId) {
-      const bus = await LigneDeBusModel.findById(young.ligneId);
+      const bus = await LigneBusModel.findById(young.ligneId);
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
@@ -639,7 +645,7 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
 
     for (let key of MILITARY_FILE_KEYS) {
       young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
-      delete young.files[key];
+      delete young.files![key];
     }
 
     young.set(newYoung);
@@ -825,13 +831,13 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     // if they had a session, we check if we need to update the places taken / left
     if (oldSessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1.findById(oldSessionPhase1Id);
+      const sessionPhase1 = await SessionPhase1Model.findById(oldSessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
     if (oldBusId) {
-      const bus = await LigneDeBusModel.findById(oldBusId);
+      const bus = await LigneBusModel.findById(oldBusId);
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
@@ -963,7 +969,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     switch (req.user.role) {
       case ROLES.HEAD_CENTER: {
-        const sessionPhase1 = await SessionPhase1.findById(young.sessionPhase1Id);
+        const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
         if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const center = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
         if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -1181,8 +1187,8 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
       applications.push({ ...application._doc, structure: structure ? serializeStructure(structure, req.user) : null });
     }
 
-    let etablissement = undefined;
-    let classe = undefined;
+    let etablissement: EtablissementDocument | null = null;
+    let classe: ClasseDocument | null = null;
 
     if (data.source === YOUNG_SOURCE.CLE) {
       etablissement = await EtablissementModel.findById(data.etablissementId);
@@ -1454,11 +1460,12 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    let sessions = await SessionPhase1.find({ headCenterId: checkedId });
-    const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId.toString()) } });
+    let sessions = await SessionPhase1Model.find({ headCenterId: checkedId });
+    const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId?.toString()) } });
     if (JoiQueryWithCohesionCenter.value === "true") {
       sessions = sessions.map((s) => {
-        s._doc.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId.toString());
+        // @ts-expect-error FIXME: populate cohesionCenter does not exist in SessionPhase1Type
+        s._doc.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId?.toString());
         return s;
       });
     }
@@ -1514,7 +1521,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const session = await SessionPhase1.findById(young.sessionPhase1Id);
+    const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
 
     if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

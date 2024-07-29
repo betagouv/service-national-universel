@@ -3,10 +3,10 @@ import { ReferentCreatedBy, ClasseSchoolYear } from "snu-lib";
 import { IAppelAProjet, IAppelAProjetOptions } from "./appelAProjetType";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 import { mapEtablissementFromAnnuaireToEtablissement } from "../etablissement/etablissementMapper";
-import { EtablissementModel, IEtablissement } from "../../models";
+import { EtablissementModel, EtablissementType } from "../../models";
 
 export class AppelAProjetEtablissementService {
-  etablissements: (IEtablissement & { operation: "create" | "update" })[] = [];
+  etablissements: (EtablissementType & { operation: "create" | "update" })[] = [];
 
   getEtablissementFromAnnuaire(appelAProjet: IAppelAProjet, etablissements: EtablissementProviderDto[]) {
     const uai = appelAProjet.etablissement?.uai;
@@ -19,7 +19,7 @@ export class AppelAProjetEtablissementService {
     referentEtablissementId,
     save: boolean,
     appelAProjetOptions: IAppelAProjetOptions,
-  ): Promise<IEtablissement | undefined> {
+  ): Promise<EtablissementType | undefined> {
     const uai = appelAProjet.etablissement?.uai;
     const useExistingEtablissement = appelAProjetOptions.fixes?.find(({ numberDS }) => numberDS === appelAProjet.numberDS)?.useExistingEtablissement;
 
@@ -63,8 +63,8 @@ export class AppelAProjetEtablissementService {
         ...formattedEtablissement,
         schoolYears: schoolYears,
         operation: "update",
-      });
-      return { ...existingEtablissement.toObject(), ...formattedEtablissement, schoolYears: schoolYears };
+      } as any);
+      return { ...existingEtablissement.toObject(), ...formattedEtablissement, schoolYears: schoolYears } as any;
     }
 
     let createdEtablissement;

@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 import querystring from "querystring";
 import { capture } from "./sentry";
 import config from "config";
-import AreaModel from "./models/areas";
+import { AreasModel } from "./models";
 
 type GeoReferenceurResponse = {
   code_reponse?: string;
@@ -72,7 +72,7 @@ export async function getDensity(cityCode: string): Promise<string | undefined> 
       console.log("City Code is not set");
       return "";
     }
-    const area = await AreaModel.findOne({ cityCode });
+    const area = await AreasModel.findOne({ cityCode });
     if (!area) {
       console.log(`cityCode not found ${cityCode}`);
       return "";

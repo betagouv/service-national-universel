@@ -7,7 +7,7 @@ const { createFixtureClasse } = require("./fixtures/classe");
 const { COHORT_TYPE, ROLES, STATUS_CLASSE } = require("snu-lib");
 const passport = require("passport");
 const { dbConnect, dbClose } = require("./helpers/db");
-const ClasseModel = require("../models/cle/classe");
+const { ClasseModel } = require("../models");
 
 jest.mock("../emails", () => ({
   emit: jest.fn(),

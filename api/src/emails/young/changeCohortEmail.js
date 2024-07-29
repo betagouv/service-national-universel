@@ -1,6 +1,6 @@
 const { SENDINBLUE_TEMPLATES, getCohortPeriod, YOUNG_SOURCE } = require("snu-lib");
-const CohortModel = require("../../models/cohort");
-const ReferentModel = require("../../models/referent");
+const { CohortModel } = require("../../models");
+const { ReferentModel } = require("../../models");
 const { capture } = require("../../sentry");
 const { sendTemplate } = require("../../brevo");
 const config = require("config");

@@ -31,8 +31,7 @@ const {
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
-const ClasseEngagee = require("./models/cle/classe");
-const Etablissement = require("./models/cle/etablissement");
+const { ClasseModel, EtablissementModel } = require("./models");
 
 class Auth {
   constructor(model) {
@@ -231,7 +230,7 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      const classe = await ClasseEngagee.findOne({ _id: classeId });
+      const classe = await ClasseModel.findOne({ _id: classeId });
       if (!classe) {
         return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
@@ -241,7 +240,7 @@ class Auth {
         return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
-      const etablissement = await Etablissement.findById(classe.etablissementId);
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
       if (!etablissement) {
         return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
       }

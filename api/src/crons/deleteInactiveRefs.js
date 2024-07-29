@@ -1,4 +1,4 @@
-const ReferentModel = require("../models/referent");
+const { ReferentModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const { capture } = require("../sentry");
 const slack = require("../slack");

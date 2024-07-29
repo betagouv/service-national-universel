@@ -1,8 +1,11 @@
-import { IEtablissement } from "../../models";
+import { EtablissementType } from "../../models";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 import { ClasseSchoolYear, CLE_SECTOR, CLE_TYPE } from "snu-lib";
 
-export function mapEtablissementFromAnnuaireToEtablissement(etablissement: EtablissementProviderDto, referentIds: string[]): Omit<IEtablissement, "coordinateurIds"> {
+export function mapEtablissementFromAnnuaireToEtablissement(
+  etablissement: EtablissementProviderDto,
+  referentIds: string[],
+): Omit<EtablissementType, "coordinateurIds" | "updatedAt" | "createdAt" | "_id"> {
   return {
     uai: etablissement.identifiant_de_l_etablissement,
     name: etablissement.nom_etablissement,

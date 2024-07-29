@@ -1,11 +1,11 @@
-const StructureObject = require("../../models/structure");
+const { StructureModel } = require("../../models");
 
 async function getStructuresHelper() {
-  return await StructureObject.find({});
+  return await StructureModel.find({});
 }
 
 async function getStructureByIdHelper(structureId) {
-  return await StructureObject.findById(structureId);
+  return await StructureModel.findById(structureId);
 }
 
 async function deleteStructureByIdHelper(structureId) {
@@ -14,7 +14,7 @@ async function deleteStructureByIdHelper(structureId) {
 }
 
 async function createStructureHelper(mission) {
-  return await StructureObject.create(mission);
+  return await StructureModel.create(mission);
 }
 
 function expectStructureToEqual(structure, expectedStructure) {

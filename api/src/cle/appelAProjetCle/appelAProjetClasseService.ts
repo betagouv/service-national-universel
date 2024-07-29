@@ -1,16 +1,15 @@
 import { ClasseSchoolYear, ReferentCreatedBy, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 
-import {} from "../../models/cle/classeType";
-import { ClasseModel, IClasse, IEtablissement } from "../../models";
+import { ClasseModel, ClasseType, EtablissementType } from "../../models";
 
 import { buildUniqueClasseId, buildUniqueClasseKey, findClasseByUniqueKeyAndUniqueId } from "../classe/classeService";
 
 import { IAppelAProjet } from "./appelAProjetType";
 
 export class AppelAProjetClasseService {
-  classes: Partial<IClasse & { numberDS: number; uai: string; operation: "create" | "none" }>[] = [];
+  classes: Partial<ClasseType & { numberDS: number; uai: string; operation: "create" | "none" }>[] = [];
 
-  async processClasse(appelAProjet: IAppelAProjet, savedEtablissement: IEtablissement, referentClasseId, save: boolean) {
+  async processClasse(appelAProjet: IAppelAProjet, savedEtablissement: EtablissementType, referentClasseId, save: boolean) {
     const uniqueClasseId = buildUniqueClasseId(
       savedEtablissement,
       {
@@ -21,7 +20,7 @@ export class AppelAProjetClasseService {
       String(appelAProjet.numberDS),
     );
     const uniqueClasseKey = buildUniqueClasseKey(savedEtablissement);
-    let formattedClasse: Partial<IClasse>;
+    let formattedClasse: Partial<ClasseType>;
     const classeFound = await findClasseByUniqueKeyAndUniqueId(uniqueClasseKey, uniqueClasseId);
     if (classeFound) {
       console.log("AppelAProjetClasseService - processClasse() - classe found : ", classeFound?._id);
@@ -43,11 +42,11 @@ export class AppelAProjetClasseService {
 
   private mapAppelAProjetToClasse = (
     classeFromAppelAProjet: IAppelAProjet["classe"],
-    etablissement: IEtablissement,
+    etablissement: EtablissementType,
     uniqueClasseId: string,
     uniqueClasseKey: string,
     referentClasseIds: string[],
-  ): IClasse => {
+  ): Partial<ClasseType> => {
     return {
       academy: etablissement.academy,
       department: etablissement.department,

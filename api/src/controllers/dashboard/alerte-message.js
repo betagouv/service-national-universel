@@ -5,7 +5,7 @@ const Joi = require("joi");
 const { ROLES, canReadAlerteMessage, canCreateAlerteMessage } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { serializeAlerteMessage } = require("../../utils/serializer");
-const AlerteMessageModel = require("../../models/alerteMessage");
+const { AlerteMessageModel } = require("../../models");
 const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");
 

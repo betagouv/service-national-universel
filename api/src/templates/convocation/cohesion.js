@@ -5,13 +5,13 @@ const dayjs = require("dayjs");
 require("dayjs/locale/fr");
 const { withPipeStream } = require("../utils");
 
-const CohesionCenterModel = require("../../models/cohesionCenter");
-const SessionPhase1 = require("../../models/sessionPhase1");
-const CohortModel = require("../../models/cohort");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const DepartmentServiceModel = require("../../models/departmentService");
+const { CohesionCenterModel } = require("../../models");
+const { SessionPhase1Model } = require("../../models");
+const { CohortModel } = require("../../models");
+const { LigneBusModel } = require("../../models");
+const { LigneToPointModel } = require("../../models");
+const { PointDeRassemblementModel } = require("../../models");
+const { DepartmentServiceModel } = require("../../models");
 const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
 const { formatStringDate, formatStringDateTimezoneUTC, transportDatesToString, YOUNG_STATUS, FUNCTIONAL_ERRORS } = require("snu-lib");
 const { capture } = require("../../sentry");
@@ -36,7 +36,7 @@ const getMeetingAddress = (young, meetingPoint, center) => {
 };
 
 async function fetchDataForYoung(young) {
-  const session = await SessionPhase1.findById(young.sessionPhase1Id);
+  const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
   if (!session) throw new Error(`session ${young.sessionPhase1Id} not found for young ${young._id}`);
   const center = await CohesionCenterModel.findById(session.cohesionCenterId);
   if (!center) throw new Error(`center ${session.cohesionCenterId} not found for young ${young._id} - session ${session._id}`);

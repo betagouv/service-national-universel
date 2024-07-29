@@ -129,8 +129,8 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     for (const updatedYoungId of res.body.data) {
       expect(youngIds.includes(updatedYoungId)).toBe(true);
       const updatedYoung = await YoungModel.findById(updatedYoungId);
-      expect(updatedYoung.inscriptionStep2023).toEqual("DONE");
-      expect(updatedYoung.status).toEqual("WAITING_VALIDATION");
+      expect(updatedYoung?.inscriptionStep2023).toEqual("DONE");
+      expect(updatedYoung?.status).toEqual("WAITING_VALIDATION");
     }
   });
 
@@ -146,8 +146,8 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     for (const updatedYoungId of res.body.data) {
       expect(youngIds.includes(updatedYoungId)).toBe(true);
       const updatedYoung = await YoungModel.findById(updatedYoungId);
-      expect(updatedYoung.inscriptionStep2023).toEqual("WAITING_CONSENT");
-      expect(updatedYoung.status).toEqual(YOUNG_STATUS.IN_PROGRESS);
+      expect(updatedYoung?.inscriptionStep2023).toEqual("WAITING_CONSENT");
+      expect(updatedYoung?.status).toEqual(YOUNG_STATUS.IN_PROGRESS);
     }
   });
 
@@ -163,8 +163,8 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     for (const updatedYoungId of res.body.data) {
       expect(youngIds.includes(updatedYoungId)).toBe(true);
       const updatedYoung = await YoungModel.findById(updatedYoungId);
-      expect(updatedYoung.parent1AllowImageRights).toEqual("true");
-      expect(updatedYoung.status).toEqual(YOUNG_STATUS.IN_PROGRESS);
+      expect(updatedYoung?.parent1AllowImageRights).toEqual("true");
+      expect(updatedYoung?.status).toEqual(YOUNG_STATUS.IN_PROGRESS);
     }
   });
 
@@ -180,8 +180,8 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     for (const updatedYoungId of res.body.data) {
       expect(youngIds.includes(updatedYoungId)).toBe(true);
       const updatedYoung = await YoungModel.findById(updatedYoungId);
-      expect(updatedYoung.parent1AllowImageRights).toBeUndefined();
-      expect(updatedYoung.status).toEqual(YOUNG_STATUS.IN_PROGRESS);
+      expect(updatedYoung?.parent1AllowImageRights).toBeUndefined();
+      expect(updatedYoung?.status).toEqual(YOUNG_STATUS.IN_PROGRESS);
     }
   });
 });

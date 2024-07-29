@@ -5,12 +5,8 @@ const Joi = require("joi");
 const config = require("config");
 
 const { capture } = require("../../sentry");
-const YoungModel = require("../../models/young");
-const CohortModel = require("../../models/cohort");
-const ReferentModel = require("../../models/referent");
-const MissionEquivalenceModel = require("../../models/missionEquivalence");
-const ApplicationModel = require("../../models/application");
-const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2, getSignedUrl, getFile, isYoung } = require("../../utils");
+const { YoungModel, CohortModel, ReferentModel, MissionEquivalenceModel, ApplicationModel } = require("../../models");
+const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2, getFile } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../brevo");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");

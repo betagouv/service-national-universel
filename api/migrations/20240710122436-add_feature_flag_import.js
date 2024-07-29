@@ -1,4 +1,4 @@
-const { featureFlagDocumentModel } = require("../src/models/featureFlag");
+const { FeatureFlagModel } = require("../src/models");
 module.exports = {
   async up() {
     const CLEBeforeJuly_15_FeatureFlag = {
@@ -7,6 +7,6 @@ module.exports = {
       enabled: true,
       date: { from: new Date("2024-07-10").toISOString(), to: new Date("2024-07-15").toISOString() },
     };
-    await featureFlagDocumentModel.create(CLEBeforeJuly_15_FeatureFlag);
+    await FeatureFlagModel.create(CLEBeforeJuly_15_FeatureFlag);
   },
 };

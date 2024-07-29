@@ -1,11 +1,11 @@
-const ProgramObject = require("../../models/program");
+const { ProgramModel } = require("../../models");
 
 async function getProgramsHelper() {
-  return await ProgramObject.find({});
+  return await ProgramModel.find({});
 }
 
 async function getProgramByIdHelper(programId) {
-  return await ProgramObject.findById(programId);
+  return await ProgramModel.findById(programId);
 }
 
 async function deleteProgramByIdHelper(programId) {
@@ -14,11 +14,11 @@ async function deleteProgramByIdHelper(programId) {
 }
 
 async function createProgramHelper(program) {
-  return await ProgramObject.create(program);
+  return await ProgramModel.create(program);
 }
 
 async function deleteAllProgram() {
-  await ProgramObject.deleteMany({});
+  await ProgramModel.deleteMany({});
 }
 
 function expectProgramToEqual(program, expectedProgram) {

@@ -1,7 +1,7 @@
-const InscriptionGoalObject = require("../../models/inscriptionGoal");
+const { InscriptionGoalModel } = require("../../models");
 
 async function createInscriptionGoal(e) {
-  return await InscriptionGoalObject.create(e);
+  return await InscriptionGoalModel.create(e);
 }
 
 module.exports = {

@@ -9,9 +9,7 @@ const config = require("config");
 const { capture } = require("../../sentry");
 const { ERRORS, validatePassword } = require("../../utils");
 const { sendTemplate } = require("../../brevo");
-const ReferentModel = require("../../models/referent");
-const EtablissementModel = require("../../models/cle/etablissement");
-const ClasseModel = require("../../models/cle/classe");
+const { ReferentModel, EtablissementModel, ClasseModel } = require("../../models");
 const { serializeReferent } = require("../../utils/serializer");
 
 router.get("/token/:token", async (req, res) => {

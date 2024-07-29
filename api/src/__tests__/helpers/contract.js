@@ -1,11 +1,11 @@
-const ContractObject = require("../../models/contract");
+const { ContractModel } = require("../../models");
 
 async function getContractsHelper(params = {}) {
-  return await ContractObject.find(params);
+  return await ContractModel.find(params);
 }
 
 async function getContractByIdHelper(contractId) {
-  return await ContractObject.findById(contractId);
+  return await ContractModel.findById(contractId);
 }
 
 async function deleteContractByIdHelper(contractId) {
@@ -14,7 +14,7 @@ async function deleteContractByIdHelper(contractId) {
 }
 
 async function createContractHelper(contract) {
-  return await ContractObject.create(contract);
+  return await ContractModel.create(contract);
 }
 
 function expectContractToEqual(contract, expectedContract) {

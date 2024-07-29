@@ -1,4 +1,4 @@
-const ClasseModel = require("../src/models/cle/classe");
+const { ClasseModel } = require("../src/models");
 const { STATUS_CLASSE } = require("snu-lib");
 module.exports = {
   async up() {

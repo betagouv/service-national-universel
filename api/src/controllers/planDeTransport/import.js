@@ -8,15 +8,15 @@ const { canSendPlanDeTransport, MIME_TYPES, COHORT_TYPE } = require("snu-lib");
 const fs = require("fs");
 const { parse: parseDate } = require("date-fns");
 const fileUpload = require("express-fileupload");
-const CohesionCenterModel = require("../../models/cohesionCenter");
-const PdrModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPlanTransport");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const ClasseModel = require("../../models/cle/classe");
-const CohorteModel = require("../../models/cohort");
+const { CohesionCenterModel } = require("../../models");
+const { PointDeRassemblementModel } = require("../../models");
+const { ImportPlanTransportModel } = require("../../models");
+const { LigneBusModel } = require("../../models");
+const { SessionPhase1Model } = require("../../models");
+const { LigneToPointModel } = require("../../models");
+const { PlanTransportModel } = require("../../models");
+const { ClasseModel } = require("../../models");
+const { CohortModel } = require("../../models");
 const scanFile = require("../../utils/virusScanner");
 const { getMimeFromFile } = require("../../utils/file");
 const { validateId } = require("../../utils/validator");
@@ -64,7 +64,7 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.FILE_INFECTED });
       }
 
-      const cohort = await CohorteModel.findOne({ name: value.cohortName });
+      const cohort = await CohortModel.findOne({ name: value.cohortName });
       if (!cohort) {
         return res.status(404).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
@@ -224,7 +224,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         let pointDeRassemblements = [];
         for (let i = 0, n = lineToPointWithCorrespondance.length; i < n; ++i) {
           const ltp = lineToPointWithCorrespondance[i];
-          const pdr = await PdrModel.findById(ltp.meetingPointId);
+          const pdr = await PointDeRassemblementModel.findById(ltp.meetingPointId);
           if (pdr) {
             pointDeRassemblements.push({
               ...pdr.toObject(),

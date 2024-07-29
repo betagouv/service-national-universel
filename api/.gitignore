@@ -7,6 +7,6 @@
 /public/images/certificates/
 /public/images/convocation/
 /dist
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 !/src/scripts
 *.email.html

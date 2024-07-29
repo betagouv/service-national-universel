@@ -4,8 +4,7 @@ const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
-const StructureModel = require("../../models/structure");
-const MissionEquivalenceModel = require("../../models/missionEquivalence");
+const { StructureModel, MissionEquivalenceModel } = require("../../models");
 const MissionEquivalencePatchModel = require("./models/missionEquivalencePatch");
 
 const config = require("config");

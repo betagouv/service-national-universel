@@ -6,9 +6,7 @@ import { ReferentDto } from "snu-lib/src/dto";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
-import EtablissementModel from "../../models/cle/etablissement";
-import ClasseModel from "../../models/cle/classe";
-import ReferentModel from "../../models/referent";
+import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
 const router = express.Router();
 
@@ -18,7 +16,7 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
 
     const searchField = req.user.role === ROLES.REFERENT_CLASSE ? "_id" : req.user.subRole === SUB_ROLES.referent_etablissement ? "referentEtablissementIds" : "coordinateurIds";
     const query = {};
-    let valueField = { $in: [req.user._id] };
+    let valueField: any = { $in: [req.user._id] };
     if (req.user.role === ROLES.REFERENT_CLASSE) {
       const classe = await ClasseModel.findOne({ referentClasseIds: { $in: req.user._id } });
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

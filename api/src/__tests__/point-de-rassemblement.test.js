@@ -14,9 +14,7 @@ const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createYoungHelper } = require("./helpers/young");
 
-const SchemaDeRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
-const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
+const { SchemaDeRepartitionModel, PointDeRassemblementModel, LigneToPointModel } = require("../models");
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),

@@ -1,6 +1,6 @@
 import { COHORT_TYPE } from "snu-lib";
 
-const CohortModel = require("../models/cohort");
+const { CohortModel } = require("../models");
 
 const isInscriptionOpenOnSomeCohorts = async (): Promise<Boolean> => {
   const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });

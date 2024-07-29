@@ -1,7 +1,4 @@
-const PointDeRassemblementModel = require("../../../models/PlanDeTransport/pointDeRassemblement");
-const BusModel = require("../../../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../../../models/PlanDeTransport/ligneToPoint");
-const CohortModel = require("../../../models/cohort");
+const { LigneBusModel, LigneToPointModel, CohortModel, PointDeRassemblementModel } = require("../../../models");
 
 const getNewLigneBusFixture = require("../../fixtures/PlanDeTransport/ligneBus");
 const getNewLigneToPointFixture = require("../../fixtures/PlanDeTransport/ligneToPoint");
@@ -13,7 +10,7 @@ async function createPointDeRassemblementHelper(PointDeRassemblement) {
 async function createPointDeRassemblementWithBus(PointDeRassemblement, centerId, sessionId) {
   await CohortModel.create({ ...getNewCohortFixture(), name: PointDeRassemblement.cohorts[0] });
   const pdr = await PointDeRassemblementModel.create(PointDeRassemblement);
-  const bus = await BusModel.create({ ...getNewLigneBusFixture(), meetingPointsIds: [pdr._id], cohort: pdr.cohorts[0], centerId, sessionId });
+  const bus = await LigneBusModel.create(getNewLigneBusFixture({ meetingPointsIds: [pdr._id], cohort: pdr.cohorts[0], centerId, sessionId }));
   const ligneToPoint = await LigneToPointModel.create({ ...getNewLigneToPointFixture(), lineId: bus._id, meetingPointId: pdr._id });
 
   return { pdr, bus, ligneToPoint };

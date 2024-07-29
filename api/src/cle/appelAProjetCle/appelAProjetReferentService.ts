@@ -1,17 +1,16 @@
 import { ReferentCreatedBy, ROLES, SUB_ROLES, InvitationType } from "snu-lib";
-import { ReferentModel, IEtablissement } from "../../models";
-import { IReferent, ReferentMetadata } from "../../models/referentType";
+import { ReferentModel, ReferentType, EtablissementType } from "../../models";
 import { IAppelAProjet } from "./appelAProjetType";
 
 export class AppelAProjetReferentService {
-  referents: Partial<IReferent & { operation: "create" | "none"; uai?: string }>[] = [];
-  etablissements: Partial<IEtablissement>[] = [];
+  referents: Partial<ReferentType & { operation: "create" | "none"; uai?: string }>[] = [];
+  etablissements: Partial<EtablissementType>[] = [];
 
   async processReferentEtablissement(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
     const referentEtablissement = await ReferentModel.findOne({ email: appelAProjet.referentEtablissement.email });
     const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentEtablissement.email);
     const alreadyProcessedEtablissement = this.etablissements.find((etablissement) => etablissement.uai === appelAProjet.etablissement.uai);
-    const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
+    const referentMetadata: ReferentType["metadata"] = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (referentEtablissement) {
       if (save && referentEtablissement.metadata.createdBy !== ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
@@ -65,7 +64,7 @@ export class AppelAProjetReferentService {
   async processReferentClasse(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
     const existingReferentClasse = await ReferentModel.findOne({ email: appelAProjet.referentClasse.email });
     const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentClasse.email);
-    const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
+    const referentMetadata: ReferentType["metadata"] = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (existingReferentClasse) {
       if (!hasAlreadyBeenProcessed) {

@@ -3,7 +3,7 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
-const YoungObject = require("../../models/young");
+const { YoungModel } = require("../../models");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023 } = require("../../utils");
@@ -18,7 +18,7 @@ const { getFilteredSessions } = require("../../utils/cohort");
 
 router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -43,7 +43,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
         .trim()
         .valid(...getCohortNames(true, false, false))
         .required(),
-      source: Joi.string().required()
+      source: Joi.string().required(),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -111,7 +111,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
 router.put("/not-eligible", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.status = YOUNG_STATUS.NOT_ELIGIBLE;
