@@ -1,14 +1,17 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const Joi = require("joi");
-const { validateId } = require("../../utils/validator");
-const { ERRORS } = require("../../utils");
-const { capture } = require("../../sentry");
-const { ClasseModel, YoungModel, EtablissementModel } = require("../../models");
-const { canSearchStudent, ROLES, YOUNG_STATUS } = require("snu-lib");
+import express, { Response } from "express";
+import passport from "passport";
 
-router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+import { canSearchStudent, ROLES, YOUNG_STATUS } from "snu-lib";
+
+import { validateId } from "../../utils/validator";
+import { ERRORS } from "../../utils";
+import { capture } from "../../sentry";
+import { ClasseModel, YoungModel, EtablissementModel } from "../../models";
+import { UserRequest } from "../../controllers/request";
+
+const router = express.Router();
+
+router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = validateId(req.params.idClasse);
     if (error) {
@@ -51,4 +54,4 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
   }
 });
 
-module.exports = router;
+export default router;

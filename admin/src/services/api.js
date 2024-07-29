@@ -266,7 +266,7 @@ class api {
     });
   }
 
-  remove(path) {
+  remove(path, body) {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -277,6 +277,7 @@ class api {
           credentials: "include",
           method: "DELETE",
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+          body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
         });
         if (response.status === 401) {
           if (window?.location?.pathname !== "/auth") {

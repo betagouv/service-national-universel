@@ -27,29 +27,39 @@ describe("PUT /young-edition/:id/ref-allow-snu", () => {
   });
 
   it("should return 400 when id is invalid", async () => {
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE)).put(`/young-edition/invalid_id/ref-allow-snu`).send({ consent: true, imageRights: true });
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE }))
+      .put(`/young-edition/invalid_id/ref-allow-snu`)
+      .send({ consent: true, imageRights: true });
     expect(res.statusCode).toEqual(400);
   });
 
   it("should return 403 if the user is not an referent_classe", async () => {
-    const res = await request(getAppHelper(ROLES.ADMIN)).put(`/young-edition/${notExistingYoungId}/ref-allow-snu`).send({ consent: true, imageRights: true });
+    const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .put(`/young-edition/${notExistingYoungId}/ref-allow-snu`)
+      .send({ consent: true, imageRights: true });
     expect(res.statusCode).toEqual(403);
   });
 
   it("should return 404 when young does not exist", async () => {
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE)).put(`/young-edition/${notExistingYoungId}/ref-allow-snu`).send({ consent: true, imageRights: true });
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE }))
+      .put(`/young-edition/${notExistingYoungId}/ref-allow-snu`)
+      .send({ consent: true, imageRights: true });
     expect(res.statusCode).toEqual(404);
   });
 
   it("should return 403 if the young is not CLE", async () => {
     const young = await createYoungHelper(getNewYoungFixture());
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE)).put(`/young-edition/${young._id}/ref-allow-snu`).send({ consent: true, imageRights: true });
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE }))
+      .put(`/young-edition/${young._id}/ref-allow-snu`)
+      .send({ consent: true, imageRights: true });
     expect(res.statusCode).toEqual(403);
   });
 
   it("should return 400 if the request body is invalid", async () => {
     const young = await createYoungHelper(getNewYoungFixture());
-    const res = await request(getAppHelper(ROLES.ADMIN)).put(`/young-edition/${young._id}/ref-allow-snu`).send({ consent: "invalid", imageRights: "invalid" });
+    const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .put(`/young-edition/${young._id}/ref-allow-snu`)
+      .send({ consent: "invalid", imageRights: "invalid" });
 
     expect(res.statusCode).toEqual(400);
   });
@@ -59,7 +69,9 @@ describe("PUT /young-edition/:id/ref-allow-snu", () => {
     const etablissement = await createEtablissement(createFixtureEtablissement());
     const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId] }));
     const young = await createYoungHelper(getNewYoungFixture({ inscriptionStep2023: "WAITING_CONSENT", source: "CLE", classeId: classe._id }));
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE, userId)).put(`/young-edition/${young._id}/ref-allow-snu`).send({ consent: true, imageRights: true });
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE, _id: userId }))
+      .put(`/young-edition/${young._id}/ref-allow-snu`)
+      .send({ consent: true, imageRights: true });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.inscriptionStep2023).toEqual("DONE");
@@ -75,21 +87,21 @@ describe("PUT /young-edition/ref-allow-snu", () => {
   });
 
   it("should return 400 when id is invalid", async () => {
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE))
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE }))
       .put(`/young-edition/ref-allow-snu`)
       .send({ youngIds: ["invalidId"], consent: true, imageRights: true });
     expect(res.statusCode).toEqual(400);
   });
 
   it("should return 403 if the user is not an referent_classe", async () => {
-    const res = await request(getAppHelper(ROLES.ADMIN))
+    const res = await request(getAppHelper({ role: ROLES.ADMIN }))
       .put(`/young-edition/ref-allow-snu`)
       .send({ youngIds: [notExistingYoungId], consent: true, imageRights: true });
     expect(res.statusCode).toEqual(403);
   });
 
   it("should return 404 when young does not exist", async () => {
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE))
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE }))
       .put(`/young-edition/ref-allow-snu`)
       .send({ youngIds: [notExistingYoungId], consent: true, imageRights: true });
     expect(res.statusCode).toEqual(404);
@@ -97,7 +109,7 @@ describe("PUT /young-edition/ref-allow-snu", () => {
 
   it("should return 403 if the young is not CLE", async () => {
     const young = await createYoungHelper(getNewYoungFixture());
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE))
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE }))
       .put(`/young-edition/ref-allow-snu`)
       .send({ youngIds: [young._id], consent: true, imageRights: true });
     expect(res.statusCode).toEqual(404);
@@ -105,15 +117,19 @@ describe("PUT /young-edition/ref-allow-snu", () => {
 
   it("should return 400 if the request body is invalid", async () => {
     const young = await createYoungHelper(getNewYoungFixture());
-    let res = await request(getAppHelper(ROLES.ADMIN))
+    let res = await request(getAppHelper({ role: ROLES.ADMIN }))
       .put(`/young-edition/ref-allow-snu`)
       .send({ youngs: [young._id], consent: "invalid", imageRights: "invalid" });
     expect(res.statusCode).toEqual(400);
 
-    res = await request(getAppHelper(ROLES.ADMIN)).put(`/young-edition/ref-allow-snu`).send({ youngs: [], consent: true });
+    res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .put(`/young-edition/ref-allow-snu`)
+      .send({ youngs: [], consent: true });
     expect(res.statusCode).toEqual(400);
 
-    res = await request(getAppHelper(ROLES.ADMIN)).put(`/young-edition/ref-allow-snu`).send({ imageRights: false });
+    res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .put(`/young-edition/ref-allow-snu`)
+      .send({ imageRights: false });
     expect(res.statusCode).toEqual(400);
   });
 
@@ -123,7 +139,9 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId] }));
     const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.IN_PROGRESS, inscriptionStep2023: "WAITING_CONSENT", source: "CLE", classeId: classe._id }));
     const youngIds = [young._id.toString()];
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE, userId)).put(`/young-edition/ref-allow-snu`).send({ youngIds, consent: true });
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE, _id: userId }))
+      .put(`/young-edition/ref-allow-snu`)
+      .send({ youngIds, consent: true });
 
     expect(res.statusCode).toEqual(200);
     for (const updatedYoungId of res.body.data) {
@@ -140,7 +158,9 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId] }));
     const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.IN_PROGRESS, inscriptionStep2023: "WAITING_CONSENT", source: "CLE", classeId: classe._id }));
     const youngIds = [young._id.toString()];
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE, userId)).put(`/young-edition/ref-allow-snu`).send({ youngIds, consent: false });
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE, _id: userId }))
+      .put(`/young-edition/ref-allow-snu`)
+      .send({ youngIds, consent: false });
 
     expect(res.statusCode).toEqual(200);
     for (const updatedYoungId of res.body.data) {
@@ -157,7 +177,9 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId] }));
     const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.IN_PROGRESS, inscriptionStep2023: "WAITING_CONSENT", source: "CLE", classeId: classe._id }));
     const youngIds = [young._id.toString()];
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE, userId)).put(`/young-edition/ref-allow-snu`).send({ youngIds, imageRights: true });
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE, _id: userId }))
+      .put(`/young-edition/ref-allow-snu`)
+      .send({ youngIds, imageRights: true });
 
     expect(res.statusCode).toEqual(200);
     for (const updatedYoungId of res.body.data) {
@@ -174,7 +196,9 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId] }));
     const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.IN_PROGRESS, inscriptionStep2023: "WAITING_CONSENT", source: "CLE", classeId: classe._id }));
     const youngIds = [young._id.toString()];
-    const res = await request(getAppHelper(ROLES.REFERENT_CLASSE, userId)).put(`/young-edition/ref-allow-snu`).send({ youngIds, imageRights: false });
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE, _id: userId }))
+      .put(`/young-edition/ref-allow-snu`)
+      .send({ youngIds, imageRights: false });
 
     expect(res.statusCode).toEqual(200);
     for (const updatedYoungId of res.body.data) {

@@ -1,4 +1,11 @@
+const { ObjectId } = require("mongoose").Types;
 const request = require("supertest");
+const passport = require("passport");
+
+const { ROLES, SUB_ROLES } = require("snu-lib");
+
+const { ClasseModel, ReferentModel, EtablissementModel } = require("../../models");
+
 const getAppHelper = require("../helpers/app");
 const { createEtablissement } = require("../helpers/etablissement");
 const { createFixtureEtablissement } = require("../fixtures/etablissement");
@@ -6,11 +13,7 @@ const { createClasse } = require("../helpers/classe");
 const { createFixtureClasse } = require("../fixtures/classe");
 const { getNewReferentFixture } = require("../fixtures/referent");
 const { createReferentHelper } = require("../helpers/referent");
-const { ROLES, SUB_ROLES } = require("snu-lib");
-const passport = require("passport");
 const { dbConnect, dbClose } = require("../helpers/db");
-const { ObjectId } = require("mongoose").Types;
-const { ClasseModel } = require("../../models");
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -214,7 +217,6 @@ describe("GET /from-user", () => {
     const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE })))._id;
     const etablissement = await createEtablissement(createFixtureEtablissement({}));
     const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [referentId] }));
-    const classeBis = await createClasse(createFixtureClasse({ etablissementId: etablissement._id }));
     passport.user.role = ROLES.REFERENT_CLASSE;
     const previousId = passport.user._id;
     passport.user._id = referentId;
@@ -268,5 +270,144 @@ describe("GET /:id", () => {
     expect(res.body.data.coordinateurs[0]._id).toBe(String(coordinatorId));
     expect(res.body.data.referents.length).toBe(1);
     expect(res.body.data.referents[0]._id).toBe(String(referentId));
+  });
+});
+
+describe("PUT /cle/etablissement/:id/referents", () => {
+  it("should return 400 if the request body is invalid", async () => {
+    let res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .put(`/cle/etablissement/${new ObjectId()}/referents`)
+      .send({ referentEtablissementIds: "invalid" });
+    expect(res.statusCode).toEqual(400);
+
+    res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .put(`/cle/etablissement/${new ObjectId()}/referents`)
+      .send({ referentEtablissementIds: [new ObjectId().toString(), new ObjectId().toString()] });
+    expect(res.statusCode).toEqual(400);
+  });
+
+  it("should return 403 if the user is not an admin", async () => {
+    const res = await request(getAppHelper({ role: ROLES.VISITOR }))
+      .put(`/cle/etablissement/${new ObjectId()}/referents`)
+      .send({ referentEtablissementIds: [new ObjectId().toString()] });
+
+    expect(res.statusCode).toEqual(403);
+  });
+
+  it("should return 404 if the etablissement is not found", async () => {
+    const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .put(`/cle/etablissement/${new ObjectId()}/referents`)
+      .send({ referentEtablissementIds: [new ObjectId().toString()] });
+
+    expect(res.statusCode).toEqual(404);
+  });
+
+  it("should update the referents of an etablissement", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
+    const etablissement = await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referent._id] }));
+    const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .put(`/cle/etablissement/${etablissement._id}/referents`)
+      .send({ referentEtablissementIds: [] });
+
+    expect(res.statusCode).toEqual(200);
+    const updatedEtablissement = await EtablissementModel.findById(etablissement._id).lean();
+    expect(updatedEtablissement.referentEtablissementIds).toEqual([]);
+  });
+});
+
+describe("DELETE /cle/etablissement/:id/referents", () => {
+  it("should return 400 if the request body is invalid", async () => {
+    let res = await request(getAppHelper()).delete(`/cle/etablissement/${new ObjectId()}/referents`).send({ invalid: "body" });
+    expect(res.statusCode).toEqual(400);
+    res = await request(getAppHelper()).delete(`/cle/etablissement/${new ObjectId()}/referents`).send({ referentIds: "body" });
+    expect(res.statusCode).toEqual(400);
+    res = await request(getAppHelper()).delete(`/cle/etablissement/${new ObjectId()}/referents`).send({ referentIds: [] });
+    expect(res.statusCode).toEqual(400);
+  });
+
+  it("should return 403 if the user is not a chef etablissement", async () => {
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE }))
+      .delete(`/cle/etablissement/${new ObjectId()}/referents`)
+      .send({ referentIds: [new ObjectId().toString()] });
+    expect(res.statusCode).toEqual(403);
+  });
+
+  it("should return 404 if the etablissement is not found", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle }));
+    const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
+      .delete(`/cle/etablissement/${new ObjectId()}/referents`)
+      .send({ referentIds: [referent._id] });
+    expect(res.statusCode).toEqual(404);
+  });
+
+  it("should return 404 if any of the referents do not exist", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle }));
+    const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [referent._id] }));
+    const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
+      .delete(`/cle/etablissement/${etablissement._id}/referents`)
+      .send({ referentIds: [referent._id, new ObjectId().toString()] });
+
+    expect(res.statusCode).toEqual(404);
+  });
+
+  it("should return 404 if any of the referents are not coordinateur de l'établissement", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle }));
+    const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [] }));
+    const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
+      .delete(`/cle/etablissement/${etablissement._id}/referents`)
+      .send({ referentIds: [referent._id] });
+
+    expect(res.statusCode).toEqual(404);
+  });
+
+  it("should return 403 when not cooridinateur on this etablissement", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle }));
+    const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [referent._id] }));
+    const etablissement2 = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [] }));
+    await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [referent._id] }));
+
+    const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
+      .delete(`/cle/etablissement/${etablissement2._id}/referents`)
+      .send({ referentIds: [referent._id] });
+
+    expect(res.statusCode).toEqual(403);
+  });
+
+  it("should update the role of the referent if they are also a referent de classe", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle }));
+    const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [referent._id] }));
+    await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [referent._id] }));
+
+    const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
+      .delete(`/cle/etablissement/${etablissement._id}/referents`)
+      .send({ referentIds: [referent._id] });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.ok).toBe(true);
+
+    const updatedReferent = await ReferentModel.findById(referent._id);
+    expect(updatedReferent.role).toEqual(ROLES.REFERENT_CLASSE);
+    expect(updatedReferent.subRole).toEqual(SUB_ROLES.none);
+    const updatedEtablissement = await EtablissementModel.findById(etablissement._id).lean();
+    expect(updatedEtablissement.coordinateurIds).toEqual([]);
+  });
+
+  it("should delete the referent if they are not a referent de classe", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle }));
+    const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [referent._id] }));
+
+    const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
+      .delete(`/cle/etablissement/${etablissement._id}/referents`)
+      .send({ referentIds: [referent._id] });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.ok).toBe(true);
+
+    const updatedReferent = await ReferentModel.findById(referent._id);
+    expect(updatedReferent.role).toEqual(ROLES.ADMINISTRATEUR_CLE);
+    expect(updatedReferent.subRole).toEqual(SUB_ROLES.coordinateur_cle);
+    expect(updatedReferent.deletedAt).toBeDefined();
+    const updatedEtablissement = await EtablissementModel.findById(etablissement._id).lean();
+    expect(updatedEtablissement.coordinateurIds).toEqual([]);
   });
 });

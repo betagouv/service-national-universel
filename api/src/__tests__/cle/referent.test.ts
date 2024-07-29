@@ -1,11 +1,14 @@
 import request from "supertest";
 import passport from "passport";
+
 import { ROLES, SUB_ROLES, InvitationType } from "snu-lib";
 import { UserDto } from "snu-lib/src/dto";
-import { dbClose, dbConnect } from "../helpers/db";
+
 import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
-import getAppHelper from "../helpers/app";
 import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult } from "../../services/cle/referent";
+
+import { dbClose, dbConnect } from "../helpers/db";
+import getAppHelper from "../helpers/app";
 
 jest.mock("../../brevo", () => ({
   ...jest.requireActual("../../brevo"),
@@ -14,7 +17,7 @@ jest.mock("../../brevo", () => ({
 
 const user = {} as UserDto;
 
-describe("Referent Service", () => {
+describe("Cle Referent", () => {
   beforeAll(dbConnect);
   afterAll(dbClose);
 
@@ -146,7 +149,7 @@ describe("Referent Service", () => {
   });
 });
 
-describe("POST /api/cle/referent/send-invitation-chef-etablissement", () => {
+describe("POST /cle/referent/send-invitation-chef-etablissement", () => {
   beforeAll(dbConnect);
   afterAll(dbClose);
   beforeEach(async () => {

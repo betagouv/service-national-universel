@@ -43,16 +43,22 @@ describe("POST /plan-de-transport/import/:cohort", () => {
     ]);
   });
   it("should return 400 if no files", async () => {
-    const response = await request(getAppHelper(ROLES.ADMIN)).post("/plan-de-transport/import/Avril 2023 - A").send();
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/plan-de-transport/import/Avril 2023 - A")
+      .send();
     expect(response.status).toBe(400);
     expect(response.body.code).toBe("INVALID_BODY");
   });
   it("should return 403 if user is not authenticated", async () => {
-    const response = await request(getAppHelper(ROLES.VISITOR)).post("/plan-de-transport/import/Avril 2023 - A").attach("file", Buffer.from("test"), { filename: "test.xslx" });
+    const response = await request(getAppHelper({ role: ROLES.VISITOR }))
+      .post("/plan-de-transport/import/Avril 2023 - A")
+      .attach("file", Buffer.from("test"), { filename: "test.xslx" });
     expect(response.status).toBe(403);
   });
   it("should return 404 if cohort does not exists", async () => {
-    const response = await request(getAppHelper(ROLES.ADMIN)).post("/plan-de-transport/import/Avril 2023 - A").attach("file", Buffer.from("test"), { filename: "test.xslx" });
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/plan-de-transport/import/Avril 2023 - A")
+      .attach("file", Buffer.from("test"), { filename: "test.xslx" });
     expect(response.status).toBe(404);
   });
   it("should return 200 if import plan created successfully", async () => {
@@ -60,7 +66,9 @@ describe("POST /plan-de-transport/import/:cohort", () => {
     const importPlanTransport = await ImportPlanTransportModel.create(getNewImportPlanTransportFixture());
     await initPlanTransport(importPlanTransport);
     const xlsxFile = await getXlsxBufferPlanTransport(importPlanTransport);
-    const response = await request(getAppHelper(ROLES.ADMIN)).post("/plan-de-transport/import/Avril 2023 - A").attach("file", xlsxFile, { filename: "test.xslx" });
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/plan-de-transport/import/Avril 2023 - A")
+      .attach("file", xlsxFile, { filename: "test.xslx" });
     expect(response.status).toBe(200);
   });
 });
@@ -79,17 +87,23 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
     ]);
   });
   it("should return 400 if import plan id is not a valid ObjectId", async () => {
-    const response = await request(getAppHelper(ROLES.ADMIN)).post("/plan-de-transport/import/invalid-id/execute").send();
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/plan-de-transport/import/invalid-id/execute")
+      .send();
     expect(response.status).toBe(400);
   });
 
   it("sgould return 403 if user is not authenticated", async () => {
-    const response = await request(getAppHelper(ROLES.VISITOR)).post(`/plan-de-transport/import/${new ObjectId()}/execute`).send();
+    const response = await request(getAppHelper({ role: ROLES.VISITOR }))
+      .post(`/plan-de-transport/import/${new ObjectId()}/execute`)
+      .send();
     expect(response.status).toBe(403);
   });
 
   it("should return 404 if import plan not found", async () => {
-    const response = await request(getAppHelper(ROLES.ADMIN)).post(`/plan-de-transport/import/${new ObjectId()}/execute`).send();
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post(`/plan-de-transport/import/${new ObjectId()}/execute`)
+      .send();
     expect(response.status).toBe(404);
   });
 
@@ -97,7 +111,9 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
     const importPlanTransport = await ImportPlanTransportModel.create(getNewImportPlanTransportFixture());
     await initPlanTransport(importPlanTransport);
 
-    const response = await request(getAppHelper(ROLES.ADMIN)).post(`/plan-de-transport/import/${importPlanTransport._id}/execute`).send();
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post(`/plan-de-transport/import/${importPlanTransport._id}/execute`)
+      .send();
 
     expect(response.status).toBe(200);
     expect(response.body.ok).toBe(true);

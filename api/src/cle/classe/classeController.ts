@@ -534,4 +534,4 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
   }
 });
 
-module.exports = router;
+export default router;

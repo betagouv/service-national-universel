@@ -1,14 +1,13 @@
-import { isSuperAdmin } from "snu-lib";
 import express from "express";
 import passport from "passport";
 import Joi from "joi";
 import { Response } from "express";
 
-import { ROLES, SUB_ROLES, canInviteCoordinateur } from "snu-lib";
+import { ROLES, SUB_ROLES, canInviteCoordinateur, isSuperAdmin } from "snu-lib";
 
 import { doInviteMultipleChefsEtablissements } from "../../services/cle/referent";
 import { uploadFile } from "../../utils";
-import { UserRequest } from "../request";
+import { UserRequest } from "../../controllers/request";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { EtablissementModel } from "../../models";
@@ -90,4 +89,4 @@ router.post("/send-invitation-chef-etablissement", passport.authenticate("refere
   }
 });
 
-module.exports = router;
+export default router;
