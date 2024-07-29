@@ -944,7 +944,7 @@ function canUpdateMyself({ actor, modifiedTarget }) {
 
 //CLE
 function canInviteCoordinateur(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
+  return isChefEtablissement(actor) || isReferentOrAdmin(actor);
 }
 
 function canCreateClasse(actor) {
