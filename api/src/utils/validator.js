@@ -126,6 +126,7 @@ function validateProgram(program) {
       department: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
       visibility: Joi.string().allow(null, ""),
+      order: Joi.number().allow(null),
     })
     .validate(program, { stripUnknown: true });
 }

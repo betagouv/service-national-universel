@@ -17,16 +17,7 @@ export function Programs() {
     setOpen(!open);
   }
 
-  const sortPrograms = (programs) => {
-    return programs.sort((a, b) => {
-      if (a.publisherName && !b.publisherName) return -1;
-      if (!a.publisherName && b.publisherName) return 1;
-      return a.name.localeCompare(b.name);
-    });
-  };
-
-  const sortedPrograms = sortPrograms(data);
-  const programs = open ? sortedPrograms : sortedPrograms.slice(0, 6);
+  const programs = open ? data : data.slice(0, 6);
   return (
     <>
       <div className="mt-12 md:mt-20 mx-auto gap-x-4 md:gap-x-24 md:gap-y-20 grid grid-cols-2 md:grid-cols-3 w-fit">
