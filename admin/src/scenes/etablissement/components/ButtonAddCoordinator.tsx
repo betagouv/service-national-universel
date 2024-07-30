@@ -46,7 +46,7 @@ export default function ButtonAddCoordinator({ etablissement, onChange }: Props)
         return;
       }
 
-      const { ok, code } = await api.post(`/cle/referent/invite-coordonnateur`, newCoordinator);
+      const { ok, code } = await api.post(`/cle/referent/invite-coordonnateur`, { ...newCoordinator, etablissementId: etablissement._id });
 
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));

@@ -943,9 +943,6 @@ function canUpdateMyself({ actor, modifiedTarget }) {
 }
 
 //CLE
-function canInviteCoordinateur(actor) {
-  return isChefEtablissement(actor) || isReferentOrAdmin(actor);
-}
 
 function canCreateClasse(actor) {
   return [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
@@ -1154,7 +1151,6 @@ export {
   canSeeDashboardEngagementStatus,
   canSeeDashboardSejourHeadCenter,
   canUpdateMyself,
-  canInviteCoordinateur,
   canCreateClasse,
   canUpdateClasse,
   canUpdateClasseStay,
