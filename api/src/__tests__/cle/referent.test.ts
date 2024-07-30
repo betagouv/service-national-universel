@@ -1,5 +1,6 @@
 import request from "supertest";
 import passport from "passport";
+import { fakerFR as faker } from "@faker-js/faker";
 
 import { ROLES, SUB_ROLES, InvitationType } from "snu-lib";
 import { UserDto } from "snu-lib/src/dto";
@@ -9,6 +10,10 @@ import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, Invitat
 
 import { dbClose, dbConnect } from "../helpers/db";
 import getAppHelper from "../helpers/app";
+import { createReferentHelper } from "../helpers/referent";
+import { getNewSignupReferentFixture } from "../fixtures/referent";
+import { createEtablissement } from "../helpers/etablissement";
+import { createFixtureEtablissement } from "../fixtures/etablissement";
 
 jest.mock("../../brevo", () => ({
   ...jest.requireActual("../../brevo"),
@@ -182,5 +187,60 @@ describe("POST /cle/referent/send-invitation-chef-etablissement", () => {
 
     expect(res.statusCode).toEqual(403);
     expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });
+  });
+});
+
+describe("POST /cle/referent/invite-coordonnateur", () => {
+  beforeAll(dbConnect);
+  afterAll(dbClose);
+  it("should return 200 OK when invite is successful (chef etablissement)", async () => {
+    const referent = await createReferentHelper(getNewSignupReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
+    await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referent._id] }));
+    const res = await request(getAppHelper({ _id: referent._id, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
+      .post("/cle/referent/invite-coordonnateur")
+      .send({
+        email: faker.internet.email().toLowerCase(),
+        firstName: "Chef",
+        lastName: "Etab",
+      });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty("ok", true);
+  });
+
+  it("should return 200 OK when invite is successful (admin)", async () => {
+    const referent = await createReferentHelper(getNewSignupReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
+    const etablissement = await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referent._id] }));
+    const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/referent/invite-coordonnateur")
+      .send({
+        email: faker.internet.email().toLowerCase(),
+        firstName: "Admin",
+        lastName: "Admin",
+        etablissementId: etablissement._id,
+      });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty("ok", true);
+  });
+
+  it("should return 400 Bad Request when request body is invalid", async () => {
+    let res = await request(getAppHelper()).post("/cle/referent/invite-coordonnateur").send({
+      invalid: "invalid",
+    });
+    expect(res.statusCode).toEqual(400);
+
+    res = await request(getAppHelper()).post("/cle/referent/invite-coordonnateur").send({
+      firstName: "firstName",
+      lastName: "lastName",
+      email: "invalid-email",
+    });
+    expect(res.statusCode).toEqual(400);
+
+    res = await request(getAppHelper()).post("/cle/referent/invite-coordonnateur").send({
+      lastName: "lastName",
+      email: faker.internet.email().toLowerCase(),
+    });
+    expect(res.statusCode).toEqual(400);
   });
 });
