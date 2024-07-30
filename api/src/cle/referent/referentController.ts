@@ -64,7 +64,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
     await etablissement.save({ fromUser: req.user });
 
     // We send the email invitation once we are sure both the referent and the classe are created
-    await inviteReferent(referent, { role: SUB_ROLES.coordinateur_cle, user: req.user }, etablissement);
+    await inviteReferent(referent, { role: SUB_ROLES.coordinateur_cle, from: req.user }, etablissement);
 
     return res.status(200).send({ ok: true });
   } catch (error) {

@@ -6,7 +6,7 @@ export type Young = { _id: string };
 
 export type BusLine = { _id: string };
 
-export type User = ReferentDto;
+export type User = ReferentDto & { featureFlags?: { [key: string]: boolean } };
 
 export type Center = {
   academy: string;
