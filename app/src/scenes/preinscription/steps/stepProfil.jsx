@@ -23,6 +23,7 @@ import { capture } from "@/sentry";
 import { RiInformationLine } from "react-icons/ri";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
+import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -39,11 +40,27 @@ export default function StepProfil() {
   const trimmedEmail = data?.email?.trim();
   const trimmedEmailConfirm = data?.emailConfirm?.trim();
 
+  const optionsScolarite = [
+    { value: "4eme", label: "4ème" },
+    { value: "3eme", label: "3ème" },
+    { value: "2ndePro", label: "2de professionnelle" },
+    { value: "2ndeGT", label: "2de générale et technologique" },
+    { value: "1erePro", label: "1ère professionnelle" },
+    { value: "1ereGT", label: "1ère générale et technologique" },
+    { value: "TermPro", label: "Terminale professionnelle" },
+    { value: "TermGT", label: "Terminale générale et technologique" },
+    { value: "CAP", label: "CAP" },
+    { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
+  ];
+
   const validate = () => {
     let errors = {};
 
     if (isCLE && !data?.frenchNationality) {
       errors.frenchNationality = "Ce champ est obligatoire";
+    }
+    if (isCLE && !data?.grade) {
+      errors.grade = "Ce champ est obligatoire";
     }
     if (isCLE && (!data?.birthDate || !validateBirthDate(data?.birthDate))) {
       errors.birthDate = "Vous devez saisir une date de naissance valide";
@@ -110,6 +127,7 @@ export default function StepProfil() {
       lastName: data.lastName,
       birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
       frenchNationality: data.frenchNationality,
+      grade: data.grade,
       phone: data.phone,
       phoneZone: data.phoneZone,
       source: YOUNG_SOURCE.CLE,
@@ -200,6 +218,20 @@ export default function StepProfil() {
             </div>
             <ErrorMessage>{error?.frenchNationality}</ErrorMessage>
           </>
+        )}
+        {isCLE && (
+          <div className="flex w-full flex-col">
+            <SearchableSelect
+              label="Niveau de scolarité"
+              value={data.grade}
+              options={optionsScolarite}
+              onChange={(value) => {
+                setData({ ...data, grade: value });
+              }}
+              placeholder="Sélectionnez une option"
+            />
+            {error.grade ? <span className="text-sm text-red-500">{error.grade}</span> : null}
+          </div>
         )}
 
         <div className="space-y-5">

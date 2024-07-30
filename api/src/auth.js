@@ -203,6 +203,7 @@ class Auth {
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().required(),
         birthdateAt: Joi.date().required(),
+        grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
         frenchNationality: Joi.string().trim().required(),
         source: Joi.string()
           .trim()
@@ -219,7 +220,7 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality, classeId } = value;
+      const { email, phone, phoneZone, firstName, lastName, password, grade, birthdateAt, frenchNationality, classeId } = value;
 
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
@@ -256,6 +257,7 @@ class Auth {
         firstName,
         lastName,
         password,
+        grade,
         birthdateAt: formatedDate,
         frenchNationality,
         inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
