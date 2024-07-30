@@ -1,8 +1,8 @@
 import fetch from "node-fetch";
 
-const request = require("supertest");
-const getAppHelper = require("./helpers/app");
-const { dbConnect, dbClose } = require("./helpers/db");
+import request from "supertest";
+import getAppHelper from "./helpers/app";
+import { dbConnect, dbClose } from "./helpers/db";
 
 jest.mock("node-fetch");
 
@@ -13,6 +13,7 @@ describe("Diagoriente", () => {
   describe("POST /diagoriente/generateUrl", () => {
     it("should return 200", async () => {
       const jsonResponse = jest.fn().mockReturnValueOnce(Promise.resolve({ data: { generateUrl: "foo" } }));
+      // @ts-ignore
       fetch.mockReturnValueOnce(Promise.resolve({ status: 200, json: jsonResponse }));
       const res = await request(getAppHelper()).get("/diagoriente/generateUrl");
       expect(res.status).toBe(200);
@@ -22,6 +23,7 @@ describe("Diagoriente", () => {
   describe("POST /diagoriente/getCard", () => {
     it("should return 200", async () => {
       const jsonResponse = jest.fn().mockReturnValueOnce(Promise.resolve({ data: { getCard: "foo" } }));
+      // @ts-ignore
       fetch.mockReturnValueOnce(Promise.resolve({ status: 200, json: jsonResponse }));
       const res = await request(getAppHelper()).get("/diagoriente/getCard");
       expect(res.status).toBe(200);
