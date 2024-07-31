@@ -109,7 +109,7 @@ export async function sendEmail(to: Email[], subject: string, htmlContent, { par
   try {
     const body: any = {};
     if (config.ENVIRONMENT !== "production") {
-      if (config.MAILCATCHER_PORT && config.MAILCATCHER_HOST) {
+      if (config.SMTP_PORT && config.SMTP_HOST) {
         // TODO: faire un return après le simulate
         await sendMailCatcher(subject, htmlContent, { emailTo: to, cc, bcc, attachment });
       }
@@ -197,7 +197,7 @@ async function simulateTemplate(id: string, { params, emailTo, cc, bcc, attachme
   const template: BrevoEmailTemplate = await api(`/smtp/templates/${id}`, undefined, true);
   const subject = replaceTemplateParams(template.subject, params);
   const html = replaceTemplateParams(template.htmlContent, params);
-  if (config.MAILCATCHER_PORT && config.MAILCATCHER_HOST) {
+  if (config.SMTP_PORT && config.SMTP_HOST) {
     await sendMailCatcher(subject, html, {
       emailTo,
       cc,
