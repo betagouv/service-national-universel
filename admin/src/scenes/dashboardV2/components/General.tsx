@@ -4,8 +4,7 @@ import { useSelector } from "react-redux";
 import { HiHome } from "react-icons/hi";
 import { useQuery } from "@tanstack/react-query";
 
-import { ROLES, translate } from "snu-lib";
-import { AlerteMessageDto } from "snu-lib/src/dto";
+import { ROLES, translate, AlerteMessageDto } from "snu-lib";
 import { Page, Header } from "@snu/ds/admin";
 
 import api from "@/services/api";

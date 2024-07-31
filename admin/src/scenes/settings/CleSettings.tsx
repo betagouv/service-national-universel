@@ -1,6 +1,6 @@
 import React from "react";
 import { Container } from "@snu/ds/admin";
-import { CohortDto } from "snu-lib/src/dto";
+import { CohortDto } from "snu-lib";
 import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 
 type CleSettingsData = Partial<CohortDto>;
@@ -32,14 +32,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
               value={!!cleSettingsData?.cleUpdateCohortForReferentRegion}
               onChange={() => handleChange({ cleUpdateCohortForReferentRegion: !cleSettingsData?.cleUpdateCohortForReferentRegion })}
               range={{
-                from: cleSettingsData?.cleUpdateCohortForReferentRegionDate?.from || null,
-                to: cleSettingsData?.cleUpdateCohortForReferentRegionDate?.to || null,
+                from: cleSettingsData?.cleUpdateCohortForReferentRegionDate?.from?.toISOString() || null,
+                to: cleSettingsData?.cleUpdateCohortForReferentRegionDate?.to?.toISOString() || null,
               }}
               onChangeRange={(range) => {
                 handleChange({
                   cleUpdateCohortForReferentRegionDate: {
-                    from: range.from ? new Date(range.from).toISOString() : null,
-                    to: range.to ? new Date(range.to).toISOString() : null,
+                    from: range.from ? new Date(range.from) : null,
+                    to: range.to ? new Date(range.to) : null,
                   },
                 });
               }}
@@ -51,14 +51,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
               value={!!cleSettingsData?.cleUpdateCohortForReferentDepartment}
               onChange={() => handleChange({ cleUpdateCohortForReferentDepartment: !cleSettingsData?.cleUpdateCohortForReferentDepartment })}
               range={{
-                from: cleSettingsData?.cleUpdateCohortForReferentDepartmentDate?.from || null,
-                to: cleSettingsData?.cleUpdateCohortForReferentDepartmentDate?.to || null,
+                from: cleSettingsData?.cleUpdateCohortForReferentDepartmentDate?.from?.toISOString() || null,
+                to: cleSettingsData?.cleUpdateCohortForReferentDepartmentDate?.to?.toISOString() || null,
               }}
               onChangeRange={(range) => {
                 handleChange({
                   cleUpdateCohortForReferentDepartmentDate: {
-                    from: range.from ? new Date(range.from).toISOString() : null,
-                    to: range.to ? new Date(range.to).toISOString() : null,
+                    from: range.from ? new Date(range.from) : null,
+                    to: range.to ? new Date(range.to) : null,
                   },
                 });
               }}
@@ -75,14 +75,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
               value={!!cleSettingsData?.cleDisplayCohortsForAdminCLE}
               onChange={() => handleChange({ cleDisplayCohortsForAdminCLE: !cleSettingsData?.cleDisplayCohortsForAdminCLE })}
               range={{
-                from: cleSettingsData?.cleDisplayCohortsForAdminCLEDate?.from || null,
-                to: cleSettingsData?.cleDisplayCohortsForAdminCLEDate?.to || null,
+                from: cleSettingsData?.cleDisplayCohortsForAdminCLEDate?.from?.toISOString() || null,
+                to: cleSettingsData?.cleDisplayCohortsForAdminCLEDate?.to?.toISOString() || null,
               }}
               onChangeRange={(range) => {
                 handleChange({
                   cleDisplayCohortsForAdminCLEDate: {
-                    from: range.from ? new Date(range.from).toISOString() : null,
-                    to: range.to ? new Date(range.to).toISOString() : null,
+                    from: range.from ? new Date(range.from) : null,
+                    to: range.to ? new Date(range.to) : null,
                   },
                 });
               }}
@@ -94,14 +94,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
               value={!!cleSettingsData?.cleDisplayCohortsForReferentClasse}
               onChange={() => handleChange({ cleDisplayCohortsForReferentClasse: !cleSettingsData?.cleDisplayCohortsForReferentClasse })}
               range={{
-                from: cleSettingsData?.cleDisplayCohortsForReferentClasseDate?.from || null,
-                to: cleSettingsData?.cleDisplayCohortsForReferentClasseDate?.to || null,
+                from: cleSettingsData?.cleDisplayCohortsForReferentClasseDate?.from?.toISOString() || null,
+                to: cleSettingsData?.cleDisplayCohortsForReferentClasseDate?.to?.toISOString() || null,
               }}
               onChangeRange={(range) => {
                 handleChange({
                   cleDisplayCohortsForReferentClasseDate: {
-                    from: range.from ? new Date(range.from).toISOString() : null,
-                    to: range.to ? new Date(range.to).toISOString() : null,
+                    from: range.from ? new Date(range.from) : null,
+                    to: range.to ? new Date(range.to) : null,
                   },
                 });
               }}
@@ -124,14 +124,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
                 value={!!cleSettingsData?.cleUpdateCentersForReferentRegion}
                 onChange={() => handleChange({ cleUpdateCentersForReferentRegion: !cleSettingsData?.cleUpdateCentersForReferentRegion })}
                 range={{
-                  from: cleSettingsData?.cleUpdateCentersForReferentRegionDate?.from || null,
-                  to: cleSettingsData?.cleUpdateCentersForReferentRegionDate?.to || null,
+                  from: cleSettingsData?.cleUpdateCentersForReferentRegionDate?.from?.toISOString() || null,
+                  to: cleSettingsData?.cleUpdateCentersForReferentRegionDate?.to?.toISOString() || null,
                 }}
                 onChangeRange={(range) => {
                   handleChange({
                     cleUpdateCentersForReferentRegionDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
+                      from: range.from ? new Date(range.from) : null,
+                      to: range.to ? new Date(range.to) : null,
                     },
                   });
                 }}
@@ -143,14 +143,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
                 value={!!cleSettingsData?.cleUpdateCentersForReferentDepartment}
                 onChange={() => handleChange({ cleUpdateCentersForReferentDepartment: !cleSettingsData?.cleUpdateCentersForReferentDepartment })}
                 range={{
-                  from: cleSettingsData?.cleUpdateCentersForReferentDepartmentDate?.from || null,
-                  to: cleSettingsData?.cleUpdateCentersForReferentDepartmentDate?.to || null,
+                  from: cleSettingsData?.cleUpdateCentersForReferentDepartmentDate?.from?.toISOString() || null,
+                  to: cleSettingsData?.cleUpdateCentersForReferentDepartmentDate?.to?.toISOString() || null,
                 }}
                 onChangeRange={(range) => {
                   handleChange({
                     cleUpdateCentersForReferentDepartmentDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
+                      from: range.from ? new Date(range.from) : null,
+                      to: range.to ? new Date(range.to) : null,
                     },
                   });
                 }}
@@ -167,14 +167,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
                 value={!!cleSettingsData?.cleDisplayCentersForAdminCLE}
                 onChange={() => handleChange({ cleDisplayCentersForAdminCLE: !cleSettingsData?.cleDisplayCentersForAdminCLE })}
                 range={{
-                  from: cleSettingsData?.cleDisplayCentersForAdminCLEDate?.from || null,
-                  to: cleSettingsData?.cleDisplayCentersForAdminCLEDate?.to || null,
+                  from: cleSettingsData?.cleDisplayCentersForAdminCLEDate?.from?.toISOString() || null,
+                  to: cleSettingsData?.cleDisplayCentersForAdminCLEDate?.to?.toISOString() || null,
                 }}
                 onChangeRange={(range) => {
                   handleChange({
                     cleDisplayCentersForAdminCLEDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
+                      from: range.from ? new Date(range.from) : null,
+                      to: range.to ? new Date(range.to) : null,
                     },
                   });
                 }}
@@ -186,14 +186,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
                 value={!!cleSettingsData?.cleDisplayCentersForReferentClasse}
                 onChange={() => handleChange({ cleDisplayCentersForReferentClasse: !cleSettingsData?.cleDisplayCentersForReferentClasse })}
                 range={{
-                  from: cleSettingsData?.cleDisplayCentersForReferentClasseDate?.from || null,
-                  to: cleSettingsData?.cleDisplayCentersForReferentClasseDate?.to || null,
+                  from: cleSettingsData?.cleDisplayCentersForReferentClasseDate?.from?.toISOString() || null,
+                  to: cleSettingsData?.cleDisplayCentersForReferentClasseDate?.to?.toISOString() || null,
                 }}
                 onChangeRange={(range) => {
                   handleChange({
                     cleDisplayCentersForReferentClasseDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
+                      from: range.from ? new Date(range.from) : null,
+                      to: range.to ? new Date(range.to) : null,
                     },
                   });
                 }}
@@ -210,14 +210,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
                 value={!!cleSettingsData?.cleDisplayPDRForAdminCLE}
                 onChange={() => handleChange({ cleDisplayPDRForAdminCLE: !cleSettingsData?.cleDisplayPDRForAdminCLE })}
                 range={{
-                  from: cleSettingsData?.cleDisplayPDRForAdminCLEDate?.from || null,
-                  to: cleSettingsData?.cleDisplayPDRForAdminCLEDate?.to || null,
+                  from: cleSettingsData?.cleDisplayPDRForAdminCLEDate?.from?.toISOString() || null,
+                  to: cleSettingsData?.cleDisplayPDRForAdminCLEDate?.to?.toISOString() || null,
                 }}
                 onChangeRange={(range) => {
                   handleChange({
                     cleDisplayPDRForAdminCLEDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
+                      from: range.from ? new Date(range.from) : null,
+                      to: range.to ? new Date(range.to) : null,
                     },
                   });
                 }}
@@ -229,14 +229,14 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
                 value={!!cleSettingsData?.cleDisplayPDRForReferentClasse}
                 onChange={() => handleChange({ cleDisplayPDRForReferentClasse: !cleSettingsData?.cleDisplayPDRForReferentClasse })}
                 range={{
-                  from: cleSettingsData?.cleDisplayPDRForReferentClasseDate?.from || null,
-                  to: cleSettingsData?.cleDisplayPDRForReferentClasseDate?.to || null,
+                  from: cleSettingsData?.cleDisplayPDRForReferentClasseDate?.from?.toISOString() || null,
+                  to: cleSettingsData?.cleDisplayPDRForReferentClasseDate?.to?.toISOString() || null,
                 }}
                 onChangeRange={(range) => {
                   handleChange({
                     cleDisplayPDRForReferentClasseDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
+                      from: range.from ? new Date(range.from) : null,
+                      to: range.to ? new Date(range.to) : null,
                     },
                   });
                 }}

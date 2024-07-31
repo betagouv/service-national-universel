@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: plugins,
     build: {
-      sourcemap: mode === "development" ? false : true,
+      sourcemap: mode !== "development",
       outDir: "build",
       rollupOptions: {
         output: {

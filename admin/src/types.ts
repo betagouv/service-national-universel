@@ -1,4 +1,4 @@
-import { ReferentDto } from "snu-lib/src/dto";
+import { ReferentDto } from "snu-lib";
 
 export type RouteResponse<T> = { ok: boolean; code?: string; data: T };
 
