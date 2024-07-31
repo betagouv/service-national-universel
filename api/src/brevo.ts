@@ -193,7 +193,7 @@ function replaceTemplateParams(content: string, params: SendMailParameters["para
 }
 
 async function simulateTemplate(id: string, { params, emailTo, cc, bcc, attachment }: SendMailParameters) {
-  if ((!config.ENABLE_SENDINBLUE_SIMULATE_TEMPLATE && (!config.MAILCATCHER_PORT || !config.MAILCATCHER_HOST)) || !config.SENDINBLUEKEY) return null;
+  if (!config.SENDINBLUEKEY) return null;
   const template: BrevoEmailTemplate = await api(`/smtp/templates/${id}`, undefined, true);
   const subject = replaceTemplateParams(template.subject, params);
   const html = replaceTemplateParams(template.htmlContent, params);
@@ -228,15 +228,14 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
   try {
     if (!id) throw new Error("No template id provided");
 
-    const body: any = { templateId: parseInt(id) };
-    if (!options.force && config.ENVIRONMENT !== "production") {
-      // TODO: faire un return après le simulate
+    if (!options.force && config.get("MAIL_TRANSPORT") === "SMTP") {
       await simulateTemplate(id, { params, emailTo, cc, bcc, attachment });
-      console.log("emailTo before filter:", emailTo);
-      emailTo = emailTo?.filter((e) => e.email.match(regexp_exception_staging));
-      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
-      if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp_exception_staging));
+      return;
     }
+    if (!options.force && config.get("MAIL_TRANSPORT") !== "BREVO") {
+      return;
+    }
+    const body: any = { templateId: parseInt(id) };
     if (emailTo) body.to = emailTo;
     if (cc?.length) body.cc = cc;
     if (bcc?.length) body.bcc = bcc;

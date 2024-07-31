@@ -8,9 +8,9 @@ module.exports = {
   FONT_ROOTDIR: `${__dirname}/../src/assets/fonts`,
   RUN_CRONS: false,
   ENABLE_SENDINBLUE: true, // TODO: default false
-  ENABLE_SENDINBLUE_SIMULATE_TEMPLATE: false,
-  MAILCATCHER_HOST: undefined,
-  MAILCATCHER_PORT: undefined,
+  MAIL_TRANSPORT: null, // BREVO / SMTP / null (pas d'envoi d'email)
+  SMTP_HOST: undefined,
+  SMTP_PORT: undefined,
   ENABLE_ANTIVIRUS: true,
   ENABLE_FLATTEN_ERROR_LOGS: true, // Print error stack without newlines on stderr
   API_URL: "http://localhost:8080",

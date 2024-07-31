@@ -13,6 +13,9 @@ const secrets = getSecrets(secretKey, CI_PROJECT_ID, "snu-ci");
 module.exports = {
   ENABLE_SENDINBLUE: false,
   ...secrets,
+  // MAIL_TRANSPORT: "STMP", // BREVO / SMTP
+  // SMTP_HOST: "localhost",
+  // SMTP_PORT: 1025,
   // REDIS_URL: "redis://127.0.0.1:6379",
   // MAILCATCHER_HOST: "localhost",
   // MAILCATCHER_PORT: 1025,
