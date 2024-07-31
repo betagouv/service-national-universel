@@ -5,9 +5,9 @@ import None from "../../../assets/icons/None";
 import Badge from "../../../components/Badge";
 import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import api from "../../../services/api";
-import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "../../../utils";
+import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "snu-lib";
 import Panel from "../../volontaires/panel";
-import { COHORTS_BEFORE_JULY_2023 } from "../../../utils";
+import { COHORTS_BEFORE_JULY_2023 } from "snu-lib";
 import { captureMessage } from "../../../sentry";
 
 export default function General({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {

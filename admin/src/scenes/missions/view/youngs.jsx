@@ -23,7 +23,7 @@ import {
   translate,
   translateApplication,
   translateApplicationFileType,
-} from "../../../utils";
+} from "snu-lib";
 import Panel from "../../volontaires/panel";
 import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import MissionView from "./wrapper";

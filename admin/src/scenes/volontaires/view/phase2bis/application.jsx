@@ -5,7 +5,8 @@ import { Link, useHistory, useParams } from "react-router-dom";
 import api from "../../../../services/api";
 import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
-import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition, copyToClipboard } from "../../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition } from "snu-lib";
+import { copyToClipboard } from "../../../../utils";
 import downloadPDF from "../../../../utils/download-pdf";
 import ReactLoading from "react-loading";
 

@@ -3,7 +3,7 @@ import { Modal } from "reactstrap";
 import styled from "styled-components";
 
 import { ModalContainer, Content, Footer } from "./Modal";
-import { colors } from "../../utils";
+import { colors } from "snu-lib";
 import ModalButton from "../buttons/ModalButton";
 import YellowWarning from "../../assets/YellowWarning";
 

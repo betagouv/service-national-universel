@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { translate, copyToClipboard, YOUNG_STATUS_COLORS, formatPhoneNumberFR, translatePhase1 } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatPhoneNumberFR, translatePhase1 } from "snu-lib";
+import { copyToClipboard } from "../../../utils";
 import Badge from "../../../components/Badge";
 import FilterSvg from "../../../assets/icons/Filter";
 

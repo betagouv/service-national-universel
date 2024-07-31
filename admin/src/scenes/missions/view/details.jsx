@@ -11,7 +11,8 @@ import { AddressForm } from "@snu/ds/common";
 import { useDebounce } from "@uidotdev/usehooks";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 
-import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES, ENABLE_PM } from "@/utils";
+import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { ENABLE_PM } from "@/utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "@/components/ui/forms/Field";

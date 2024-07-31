@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import { AiOutlineCheck } from "react-icons/ai";
-import { translateAddFilePhase2WithoutPreposition } from "../../../../../utils";
+import { translateAddFilePhase2WithoutPreposition } from "snu-lib";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");

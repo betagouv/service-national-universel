@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
-import { translate } from "../../utils";
+import { translate } from "snu-lib";
 import Header from "./components/header";
 
 export default function Forgot() {

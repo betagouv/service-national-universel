@@ -3,7 +3,7 @@ import { Row } from "reactstrap";
 import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 
-import { translate as t, translateStatusMilitaryPreparationFiles, APPLICATION_STATUS_COLORS } from "../../../utils";
+import { translate as t, translateStatusMilitaryPreparationFiles, APPLICATION_STATUS_COLORS } from "snu-lib";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle } from "../../../components/box";
 import DownloadButton from "../../../components/buttons/DownloadButton";

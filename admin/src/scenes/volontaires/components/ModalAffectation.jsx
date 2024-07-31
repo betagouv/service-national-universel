@@ -13,7 +13,8 @@ import { MultiLine } from "../../../components/list";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import api from "../../../services/api";
-import { debounce, formatDateFR, getZonedDate, translate } from "../../../utils";
+import { debounce } from "../../../utils";
+import { formatDateFR, getZonedDate, translate } from "snu-lib";
 import RightArrow from "./RightArrow";
 import MeetingInfo from "./phase1/MeetingInfo";
 

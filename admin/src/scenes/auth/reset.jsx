@@ -9,7 +9,7 @@ import { Redirect } from "react-router-dom";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import PasswordEye from "../../components/PasswordEye";
-import { translate } from "../../utils";
+import { translate } from "snu-lib";
 
 export default function ResetPassword({ location }) {
   const [redirect, setRedirect] = useState(false);

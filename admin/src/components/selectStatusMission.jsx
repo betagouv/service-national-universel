@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../services/api";
-import { translate, MISSION_STATUS_COLORS, MISSION_STATUS, ROLES, colors } from "../utils";
+import { translate, MISSION_STATUS_COLORS, MISSION_STATUS, ROLES, colors } from "snu-lib";
 import MailCorrectionMission from "../scenes/missions/components/MailCorrectionMission";
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 import Chevron from "./Chevron";

@@ -6,7 +6,7 @@ import { Formik, Field } from "formik";
 import close from "../../assets/cancel.png";
 
 import api from "../../services/api";
-import { translate, departmentList, department2region } from "../../utils";
+import { translate, departmentList, department2region } from "snu-lib";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import FileUpload, { useFileUpload } from "../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";

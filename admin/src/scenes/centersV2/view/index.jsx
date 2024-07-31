@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 
 import { COHESION_STAY_START } from "snu-lib";
 import api from "@/services/api";
-import { ROLES, translate } from "@/utils";
+import { ROLES, translate } from "snu-lib";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Loader from "@/components/Loader";

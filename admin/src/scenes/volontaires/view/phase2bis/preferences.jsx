@@ -5,7 +5,7 @@ import Calendar from "../../../../assets/icons/Calendar";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import Sun from "../../../../assets/icons/Sun";
 import IconDomainRounded from "../../../../components/IconDomainRounded";
-import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, translate as t, TRANSPORT } from "../../../../utils";
+import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, translate as t, TRANSPORT } from "snu-lib";
 import RankingPeriod from "../../components/rankingPeriod";
 import Pencil from "../../../../assets/icons/Pencil";
 import Loader from "../../../../components/Loader";

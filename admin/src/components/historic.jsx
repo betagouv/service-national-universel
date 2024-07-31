@@ -1,7 +1,7 @@
 import Img2 from "../assets/pencil.svg";
 import React, { useState } from "react";
 import styled from "styled-components";
-import { translate, formatStringLongDate, YOUNG_STATUS_COLORS, colors } from "../utils";
+import { translate, formatStringLongDate, YOUNG_STATUS_COLORS, colors } from "snu-lib";
 import Badge from "../components/Badge";
 
 export default function HistoricComponent({ value }) {

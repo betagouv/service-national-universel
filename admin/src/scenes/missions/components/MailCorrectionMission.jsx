@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { SENDINBLUE_TEMPLATES } from "../../../utils";
+import { SENDINBLUE_TEMPLATES } from "snu-lib";
 
 export default function MailCorrectionMission({ value, onChange, onSend }) {
   const [message, setMessage] = useState();

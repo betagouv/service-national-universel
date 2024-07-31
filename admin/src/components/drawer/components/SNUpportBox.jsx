@@ -2,7 +2,7 @@ import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import api from "@/services/api";
-import { translate } from "@/utils";
+import { translate } from "snu-lib";
 import Mail from "../icons/Mail";
 import Separator from "./Separator";
 import { capture, captureMessage } from "../../../sentry";

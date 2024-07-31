@@ -7,7 +7,8 @@ import Header from "./components/header";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { translate, classNames } from "../../utils";
+import { translate } from "snu-lib";
+import { classNames } from "../../utils";
 
 export default function InvitationExpired() {
   const urlParams = new URLSearchParams(window.location.search);

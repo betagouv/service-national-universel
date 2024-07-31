@@ -7,7 +7,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { translate, REFERENT_ROLES, departmentList, regionList, region2department, department2region } from "../../utils";
+import { translate, REFERENT_ROLES, departmentList, regionList, region2department, department2region } from "snu-lib";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { Box, BoxTitle } from "../../components/box";

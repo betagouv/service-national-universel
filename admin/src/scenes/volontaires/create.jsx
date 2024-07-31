@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import validator from "validator";
 
-import { translate } from "@/utils";
+import { translate } from "snu-lib";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";

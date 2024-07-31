@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
-import { colors, translate } from "../../utils";
+import { colors, translate } from "snu-lib";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import { capture } from "../../sentry";
 

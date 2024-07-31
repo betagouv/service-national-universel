@@ -22,7 +22,7 @@ import {
   ROLES,
   translate,
   VISITOR_SUBROLES,
-} from "@/utils";
+} from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 import UserHeader from "../composants/UserHeader";
 import { Session, CohortSelect, AddButton, SubRoleAndRegionOrDep } from "../composants";
@@ -30,7 +30,7 @@ import Field from "../../phase0/components/Field";
 import { RoundButton, PlainButton, BorderButton } from "../../phase0/components/Buttons";
 import ConfirmationModal from "../../phase0/components/ConfirmationModal";
 import CustomSelect from "../composants/CustomSelect";
-import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRoleOptions } from "../utils";
+import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRoleOptions } from "snu-lib";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { Container, Button, Badge, Label, InputText } from "@snu/ds/admin";

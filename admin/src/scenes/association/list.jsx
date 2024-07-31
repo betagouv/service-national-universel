@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
-import { ES_NO_LIMIT, ROLES, getDepartmentNumber, translate } from "../../utils";
+import { ES_NO_LIMIT, ROLES, getDepartmentNumber, translate } from "snu-lib";
 import Association from "./components/Association";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { BsDownload } from "react-icons/bs";
