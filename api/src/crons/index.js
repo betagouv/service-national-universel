@@ -29,6 +29,7 @@ const reminderWaitingCorrection = require("./reminderWaitingCorrection");
 const dsnjExport = require("./dsnjExport");
 const clotureMissionReminder = require("./clotureInscriptionReminder");
 const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
+const mongoMonitoring = require("./mongoMonitoring");
 
 // doubt ? -> https://crontab.guru/
 
@@ -168,6 +169,8 @@ function scheduleCrons() {
   schedule("45 2 * * *", "syncReferentSupport", syncReferentSupport.handler);
 
   schedule("15 1 * * *", "syncContactSupport", syncContactSupport.handler);
+
+  schedule("*/5 * * * *", "mongoMonitoring", mongoMonitoring.handler);
 }
 
 module.exports = {
