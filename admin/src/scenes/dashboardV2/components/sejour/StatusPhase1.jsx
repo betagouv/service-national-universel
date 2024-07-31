@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { getNewLink, ROLES } from "@/utils";
+import { getNewLink } from "@/utils";
+import { ROLES } from "snu-lib";
 import queryString from "query-string";
 
 export default function StatusPhase1({ statusPhase1, total, filter, role, sessionId, centerId }) {

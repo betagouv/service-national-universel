@@ -1,4 +1,4 @@
-import { ROLES, translate } from "../../utils";
+import { ROLES, translate } from "snu-lib";
 
 // @todo : supervisor has structure ?
 export const roleOptions = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.DSNJ].map(

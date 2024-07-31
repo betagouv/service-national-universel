@@ -8,7 +8,7 @@ import Pencil from "../../../assets/icons/Pencil";
 import XCircleFull from "../../../assets/icons/XCircleFull";
 import CheckCircleFull from "../../../assets/icons/CheckCircleFull";
 import Clock from "../../../assets/icons/Clock";
-import { MISSION_STATUS, translate } from "../../../utils";
+import { MISSION_STATUS, translate } from "snu-lib";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");

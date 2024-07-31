@@ -7,7 +7,7 @@ import NoteEditModal from "./components/NoteEditModal";
 import { phaseOptions } from "./utils";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../../utils";
+import { translate } from "snu-lib";
 import Note from "./components/Note";
 import ConfirmationModal from "../../../phase0/components/ConfirmationModal";
 

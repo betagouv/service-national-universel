@@ -3,7 +3,7 @@ import Img from "../../assets/pencil.svg";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, translate as t, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate } from "../../utils";
+import { YOUNG_SITUATIONS, translate as t, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate } from "snu-lib";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import { Info, Details } from "../../components/Panel";

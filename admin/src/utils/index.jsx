@@ -6,7 +6,6 @@ import api from "../services/api";
 import { translateModelFields } from "./translateFieldsModel";
 import { environment } from "../config";
 import dayjs from "dayjs";
-export * from "snu-lib"; // TODO: remove
 export * from "./translateFieldsModel"; // TODO: remove
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];

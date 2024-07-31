@@ -9,7 +9,7 @@ import { translate, translateMission, translateVisibilty } from "snu-lib";
 import Loader from "../../../components/Loader";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../../components/filters-system-v2";
 import api from "../../../services/api";
-import { formatStringDateTimezoneUTC } from "../../../utils";
+import { formatStringDateTimezoneUTC } from "snu-lib";
 import SelectStatusMissionV2 from "../../missions/components/SelectStatusMissionV2";
 
 export default function Mission({ ...props }) {

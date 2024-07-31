@@ -20,7 +20,7 @@ import SelectAction from "@/components/SelectAction";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import DateFilter from "@/components/filters-system-v2/components/customComponent/DateFilter";
 import api from "@/services/api";
-import { ROLES, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, translate, translateVisibilty } from "@/utils";
+import { ROLES, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, translate, translateVisibilty } from "snu-lib";
 import SelectStatusMissionV2 from "./components/SelectStatusMissionV2";
 
 const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];

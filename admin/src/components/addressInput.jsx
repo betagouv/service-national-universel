@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Row, Col, Spinner } from "reactstrap";
 import { Field, useField } from "formik";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
-import { department2region, departmentLookUp, departmentToAcademy, departmentList, regionList } from "../utils";
+import { department2region, departmentLookUp, departmentToAcademy, departmentList, regionList } from "snu-lib";
 import InfoIcon from "./InfoIcon";
 import countries from "i18n-iso-countries";
 import { toastr } from "react-redux-toastr";
@@ -332,7 +332,9 @@ const PrimaryButton = styled.button`
   margin-top: 10px;
   display: block;
   outline: 0;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -2px rgb(0 0 0 / 5%);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 10%),
+    0 4px 6px -2px rgb(0 0 0 / 5%);
   width: fit-content;
   :hover {
     opacity: 0.9;

@@ -13,7 +13,7 @@ import { AddressForm } from "@snu/ds/common";
 
 import { AuthState } from "@/redux/auth/reducer";
 import { capture } from "@/sentry";
-import { canCreateOrUpdateCohesionCenter, ROLES } from "@/utils";
+import { canCreateOrUpdateCohesionCenter, ROLES } from "snu-lib";
 import Pencil from "@/assets/icons/Pencil";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import api from "@/services/api";

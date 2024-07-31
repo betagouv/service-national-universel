@@ -10,7 +10,7 @@ import { Filters, ResultTable, Save, SelectedFilters } from "../../../components
 import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, isInRuralArea, translate } from "../../../utils";
+import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, isInRuralArea, translate } from "snu-lib";
 import MissionView from "./wrapper";
 
 export default function ProposeMission({ mission, updateMission }) {

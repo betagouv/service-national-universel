@@ -5,7 +5,7 @@ import ArrowNarrowLeft from "../../../../assets/icons/ArrowNarrowLeft";
 import ViewList from "../../../../assets/icons/ViewList";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../../utils";
+import { translate } from "snu-lib";
 
 export default function ModalPointagePresenceJDM({ isOpen, onSubmit, onCancel, values }) {
   const [isLoading, setIsLoading] = React.useState(false);

@@ -10,7 +10,7 @@ import Panel, { Details, Info } from "../../components/Panel";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
-import { MISSION_STATUS_COLORS, formatStringDateTimezoneUTC, translate } from "../../utils";
+import { MISSION_STATUS_COLORS, formatStringDateTimezoneUTC, translate } from "snu-lib";
 
 export default function PanelView({ onChange, mission }) {
   const [tutor, setTutor] = useState();

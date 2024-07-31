@@ -2,7 +2,7 @@ import Img from "../../assets/pencil.svg";
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-import { formatStringLongDate, translate, YOUNG_STATUS_COLORS, colors } from "../../utils";
+import { formatStringLongDate, translate, YOUNG_STATUS_COLORS, colors } from "snu-lib";
 import Loader from "../Loader";
 import Badge from "../Badge";
 import api from "../../services/api";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
-import { translate } from "../../utils";
+import { translate } from "snu-lib";
 
 import { toastr } from "react-redux-toastr";
 import { formatStringDateTimezoneUTC } from "snu-lib";

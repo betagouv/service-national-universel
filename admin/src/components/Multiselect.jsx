@@ -1,7 +1,7 @@
 import React from "react";
 import MultiSelect from "react-multi-select-component";
 import styled from "styled-components";
-import { translate } from "../utils";
+import { translate } from "snu-lib";
 
 export default function MultiSelectComponent({ value, name, onChange, options, placeholder, valueToExclude, valueRenderer = () => {}, filterOptions = (options) => options }) {
   const filteredOptions = options.filter((o) => o !== valueToExclude);

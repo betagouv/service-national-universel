@@ -3,7 +3,7 @@ import ModalForm from "../../../../components/modals/ModalForm";
 import ShieldCheck from "../../../../assets/icons/ShieldCheck";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../../utils";
+import { translate } from "snu-lib";
 
 export default function ModalPointageFicheSanitaire({ isOpen, onSubmit, onCancel, value, young }) {
   const [isLoading, setIsLoading] = React.useState(false);

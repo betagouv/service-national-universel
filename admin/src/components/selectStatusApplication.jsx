@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, translateApplication, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES } from "../utils";
+import { translate, translateApplication, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import Chevron from "./Chevron";
 import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";

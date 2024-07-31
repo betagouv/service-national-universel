@@ -7,7 +7,8 @@ import Loader from "../../components/Loader";
 import api from "../../services/api";
 
 //import { HeroContainer } from "../../components/Content";
-import { colors, urlWithScheme } from "../../utils";
+import { urlWithScheme } from "../../utils";
+import { colors } from "snu-lib";
 import { adminURL, environment, supportURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
 import SNUpportForm from "./form";

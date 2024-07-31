@@ -1,7 +1,7 @@
 import Img2 from "../../assets/left.svg";
 import Img from "../../assets/right.svg";
 import styled from "styled-components";
-import { colors } from "../../utils";
+import { colors } from "snu-lib";
 
 export const Help = styled.div`
   margin-left: auto;

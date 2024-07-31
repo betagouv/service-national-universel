@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import FileIcon from "../../../../assets/FileIcon";
 import api from "../../../../services/api";
-import { SENDINBLUE_TEMPLATES, translate } from "../../../../utils";
+import { SENDINBLUE_TEMPLATES, translate } from "snu-lib";
 import { capture, captureMessage } from "../../../../sentry";
 import Select from "../../../../components/TailwindSelect";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";

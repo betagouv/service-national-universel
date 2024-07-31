@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { Formik, Field } from "formik";
 import validator from "validator";
 
-import { CENTER_ROLES, ROLES, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { CENTER_ROLES, ROLES, translate, SENDINBLUE_TEMPLATES } from "snu-lib";
 import { Box } from "../../../components/box";
 import api from "../../../services/api";
 import Trash from "../../../assets/icons/Trash";

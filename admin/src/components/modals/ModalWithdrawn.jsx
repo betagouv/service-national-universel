@@ -3,7 +3,7 @@ import { Modal } from "reactstrap";
 
 import { ModalContainer, Content, Footer } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
-import { WITHRAWN_REASONS } from "../../utils";
+import { WITHRAWN_REASONS } from "snu-lib";
 import RoundWarning from "../../assets/RoundWarning";
 import CloseSvg from "../../assets/Close";
 

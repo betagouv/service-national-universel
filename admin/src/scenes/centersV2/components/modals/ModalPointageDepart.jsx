@@ -3,7 +3,7 @@ import ModalForm from "../../../../components/modals/ModalForm";
 import ArrowCircleRight from "../../../../assets/icons/ArrowCircleRight";
 import api from "../../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../../utils";
+import { translate } from "snu-lib";
 import Trash from "../../../../assets/icons/Trash";
 
 export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young }) {
