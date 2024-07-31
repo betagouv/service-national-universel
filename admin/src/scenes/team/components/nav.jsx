@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import InfoDepartement from "./InfoDepartment";
 import FilterDepartment from "./filter/FilterDepartment";
 import { useSelector } from "react-redux";
-import { ROLES, getDepartmentNumber, department2region } from "../../../utils";
+import { ROLES, getDepartmentNumber, department2region } from "snu-lib";
 
 export default function Nav({ filter, updateFilter, currentTab, setCurrentTab }) {
   const user = useSelector((state) => state.Auth.user);

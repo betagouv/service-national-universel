@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import validator from "validator";
 import InformationCircle from "../../../assets/icons/InformationCircle";
-import { slugifyFileName } from "../../../utils";
+import { slugifyFileName } from "snu-lib";
 import { capture } from "../../../sentry";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES, UNSS_TYPE } from "snu-lib";

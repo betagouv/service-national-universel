@@ -8,7 +8,7 @@ import ProgramCard from "./components/programCard";
 import api from "../../services/api";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
-import { translate, ROLES } from "../../utils";
+import { translate, ROLES } from "snu-lib";
 
 const images = import.meta.globEager("../../assets/programmes-engagement/*");
 

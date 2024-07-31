@@ -13,7 +13,7 @@ import Phase2Contract from "./phase2Contract";
 import History from "./history";
 import Notifications from "./notifications";
 import Notes from "./notes";
-import { YOUNG_STATUS } from "../../../utils";
+import { YOUNG_STATUS } from "snu-lib";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import FormEquivalence from "./FormEquivalence";
 import VolontairePhase0View from "../../phase0/view";

@@ -2,7 +2,7 @@ import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
-import { translate as t } from "../../../utils";
+import { translate as t } from "snu-lib";
 import { Box, BoxTitle } from "../../../components/box";
 
 export default function DetailsVolontaires({ young }) {

@@ -4,7 +4,7 @@ import { Modal } from "reactstrap";
 import { IoWarningOutline } from "react-icons/io5";
 import { ModalContainer } from "../../../components/modals/Modal";
 import ModalButton from "../../../components/buttons/ModalButton";
-import { ROLES, SUB_ROLES } from "@/utils";
+import { ROLES, SUB_ROLES } from "snu-lib";
 
 export default function ModalUniqueResponsable({ isOpen, onConfirm, responsable }) {
   if (!responsable) return null;

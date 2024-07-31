@@ -14,7 +14,7 @@ import { MultiLine, Table } from "@/components/list";
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import ModalReferentDeleted from "@/components/modals/ModalReferentDeleted";
 import api from "@/services/api";
-import { ROLES, canDeleteReferent, canUpdateReferent, formatStringLongDate, translate } from "@/utils";
+import { ROLES, canDeleteReferent, canUpdateReferent, formatStringLongDate, translate } from "snu-lib";
 import Nav from "./components/nav";
 import Panel from "./panel";
 

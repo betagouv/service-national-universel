@@ -1,7 +1,7 @@
 import React from "react";
 import { Spinner, Button } from "reactstrap";
 import styled from "styled-components";
-import { colors } from "../../utils";
+import { colors } from "snu-lib";
 
 export default function LoadingButton({ loading, children, disabled = false, loadingText = null, ...rest }) {
   return (

@@ -57,7 +57,7 @@ import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
-import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
+import { COHESION_STAY_END, ROLES, ROLES_LIST } from "snu-lib";
 
 import ModalCGU from "./components/modals/ModalCGU";
 import "./index.css";

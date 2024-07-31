@@ -6,7 +6,7 @@ import { SentryRoute } from "../../../sentry";
 import api from "../../../services/api";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import { toastr } from "react-redux-toastr";
-import { ROLES } from "../../../utils";
+import { ROLES } from "snu-lib";
 import { useSelector } from "react-redux";
 import Details from "./details";
 import Notifications from "./notifications";

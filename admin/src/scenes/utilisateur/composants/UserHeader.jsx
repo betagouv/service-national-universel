@@ -10,7 +10,7 @@ import { setUser as setUserInRedux } from "../../../redux/auth/actions";
 import TabList from "../../../components/views/TabList";
 import plausibleEvent from "../../../services/plausible";
 import Tab from "../../phase0/components/Tab";
-import { ROLES, translate } from "../../../utils";
+import { ROLES, translate } from "snu-lib";
 import { Badge } from "@snu/ds/admin";
 import { signinAs } from "@/utils/signinAs";
 

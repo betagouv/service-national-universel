@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import ModalServiceDepartment from "../modal/ModalServiceDepartment";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../services/api";
-import { translate } from "../../../../utils";
+import { translate } from "snu-lib";
 import timbre from "../../../../assets/timbre.svg";
 
 export default function CardDepartement({ servicesDep, department, getService }) {

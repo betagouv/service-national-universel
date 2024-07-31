@@ -17,7 +17,7 @@ import SelectStatus from "../../components/selectStatus";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import { ROLES, YOUNG_STATUS, formatStringLongDate, translate, translateInscriptionStatus } from "../../utils";
+import { ROLES, YOUNG_STATUS, formatStringLongDate, translate, translateInscriptionStatus } from "snu-lib";
 import { Title } from "../pointDeRassemblement/components/common";
 import { transformInscription, transformVolontairesSchool } from "../volontaires/utils";
 import DeletedInscriptionPanel from "./deletedPanel";

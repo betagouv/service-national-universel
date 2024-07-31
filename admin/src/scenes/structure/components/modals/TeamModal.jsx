@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 import validator from "validator";
-import { copyToClipboard, formatPhoneNumberFR, getInitials, translate } from "@/utils";
+import { formatPhoneNumberFR, translate } from "snu-lib";
+import { copyToClipboard, getInitials } from "@/utils";
 import { AiOutlineClose } from "react-icons/ai";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle, HiOutlineTrash, HiPencil, HiPhone, HiPlus } from "react-icons/hi";
@@ -240,7 +241,7 @@ const AddContact = ({ setResponsible, isSupervisor = false }) => {
   return (
     <div
       className="border-grey-200 flex h-28 flex-row items-center justify-center rounded-lg border-[1px] border-dashed border-blue-600 bg-[#ffffff] px-2 hover:cursor-pointer hover:bg-[#eff6ff]"
-      onClick={() => setResponsible({ role: ROLES.RESPONSIBLE  })}>
+      onClick={() => setResponsible({ role: ROLES.RESPONSIBLE })}>
       <HiPlus className="text-indigo-300" />
       <div className="pl-2 text-sm text-blue-600">Ajouter un {isSupervisor ? "membre" : "responsable"}</div>{" "}
     </div>

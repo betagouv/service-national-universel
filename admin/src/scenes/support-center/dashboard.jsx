@@ -7,7 +7,8 @@ import { HiSearch, HiX } from "react-icons/hi";
 
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { colors, translateState, urlWithScheme } from "../../utils";
+import { urlWithScheme } from "../../utils";
+import { colors, translateState } from "snu-lib";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";

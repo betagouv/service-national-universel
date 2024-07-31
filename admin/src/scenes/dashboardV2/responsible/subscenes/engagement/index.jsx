@@ -6,7 +6,8 @@ import { useSelector } from "react-redux";
 import queryString from "query-string";
 import { Link } from "react-router-dom";
 
-import { APPLICATION_STATUS, ROLES, getNewLink } from "@/utils";
+import { APPLICATION_STATUS, ROLES } from "snu-lib";
+import { getNewLink } from "@/utils";
 import InformationCircle from "@/assets/icons/InformationCircle";
 import API from "@/services/api";
 import Loader from "@/components/Loader";

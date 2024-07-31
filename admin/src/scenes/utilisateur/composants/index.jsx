@@ -1,7 +1,7 @@
 import React from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 
-import { translate } from "../../../utils";
+import { translate } from "snu-lib";
 import Eye from "../../../assets/icons/Eye";
 import Bin from "../../../assets/Bin";
 import Plus from "../../../assets/icons/Plus";

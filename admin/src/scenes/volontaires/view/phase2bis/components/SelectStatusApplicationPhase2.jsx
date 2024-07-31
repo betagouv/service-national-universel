@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
 import ModalConfirm from "../../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../../components/modals/ModalConfirmWithMessage";
-import { APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../../utils";
+import { APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES, translate, translateApplication } from "snu-lib";
 import { BiChevronDown } from "react-icons/bi";
 
 export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dropdownClassName = "" }) => {

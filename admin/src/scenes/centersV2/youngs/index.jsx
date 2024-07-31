@@ -30,8 +30,8 @@ import {
   translate,
   translateFileStatusPhase1,
   translatePhase1,
-  youngCheckinField,
-} from "@/utils";
+} from "snu-lib";
+import { youngCheckinField } from "@/utils";
 
 import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";

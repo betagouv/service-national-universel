@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, formatDateFR, getZonedDate } from "../../../utils";
+import { translate, formatDateFR, getZonedDate } from "snu-lib";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import RightArrow from "./RightArrow";

@@ -17,7 +17,7 @@ import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import { ROLES, canDeleteReferent, translate } from "../../utils";
+import { ROLES, canDeleteReferent, translate } from "snu-lib";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
 import { signinAs } from "@/utils/signinAs";

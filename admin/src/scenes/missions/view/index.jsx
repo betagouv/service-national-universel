@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { translate } from "snu-lib";
 import Details from "./details";
 import Historic from "./history";
 import ProposeMission from "./propose-mission";

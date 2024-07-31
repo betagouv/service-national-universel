@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, translate as t, getAge, formatDateFRTimezoneUTC } from "../../utils";
+import { YOUNG_SITUATIONS, translate as t, getAge, formatDateFRTimezoneUTC } from "snu-lib";
 import api from "../../services/api";
 import SelectStatusApplication from "../../components/selectStatusApplication";
 import PanelActionButton from "../../components/buttons/PanelActionButton";

@@ -13,7 +13,8 @@ import SimpleFileIcon from "../../../assets/icons/SimpleFileIcon";
 import XCircle from "../../../assets/icons/XCircle";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { copyToClipboard, formatDateFR, translate, translateEquivalenceStatus } from "../../../utils";
+import { formatDateFR, translate, translateEquivalenceStatus } from "snu-lib";
+import { copyToClipboard } from "../../../utils";
 import ModalChangeStatus from "./ModalChangeStatus";
 import ModalFilesEquivalence from "./ModalFilesEquivalence";
 

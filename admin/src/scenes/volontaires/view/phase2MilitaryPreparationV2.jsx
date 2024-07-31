@@ -13,7 +13,7 @@ import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate, translateStatusMilitaryPreparationFiles } from "../../../utils";
+import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate, translateStatusMilitaryPreparationFiles } from "snu-lib";
 import ModalFilesPM from "../components/ModalFilesPM";
 import { capture } from "../../../sentry";
 

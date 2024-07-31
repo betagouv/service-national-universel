@@ -45,6 +45,7 @@ export default defineConfig(({ mode }) => {
       sourcemap: mode === "development" ? false : true,
       outDir: "build",
       rollupOptions: {
+        external: ["snu-lib"],
         output: {
           manualChunks: {
             "react-dom": ["react-dom"],

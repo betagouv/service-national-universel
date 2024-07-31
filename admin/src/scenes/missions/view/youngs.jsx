@@ -4,8 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 
-import { getDepartmentNumber } from "snu-lib";
-import { applicationExportFields } from "snu-lib";
+import { getDepartmentNumber, applicationExportFields } from "snu-lib";
 import CursorClick from "../../../assets/icons/CursorClick";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Eye from "../../../assets/icons/Eye";
@@ -24,7 +23,7 @@ import {
   translate,
   translateApplication,
   translateApplicationFileType,
-} from "../../../utils";
+} from "snu-lib";
 import Panel from "../../volontaires/panel";
 import { SelectStatusApplicationPhase2 } from "../../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import MissionView from "./wrapper";

@@ -17,7 +17,7 @@ import {
   ROLES,
   SENDINBLUE_TEMPLATES,
   VISITOR_SUBROLES,
-} from "../../../utils";
+} from "snu-lib";
 
 import { Footer } from "../../modals/Modal";
 import ModalButton from "../../buttons/ModalButton";
@@ -398,7 +398,9 @@ const Invitation = styled.div`
     background-clip: padding-box;
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+      border-color 0.15s ease-in-out,
+      box-shadow 0.15s ease-in-out;
   }
   h3 {
     border: 1px solid ${colors.red};

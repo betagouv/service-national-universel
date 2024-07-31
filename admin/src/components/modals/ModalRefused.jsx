@@ -7,7 +7,7 @@ import ModalButton from "../buttons/ModalButton";
 import CloseSvg from "../../assets/Close";
 
 import { toastr } from "react-redux-toastr";
-import { SENDINBLUE_TEMPLATES } from "../../utils";
+import { SENDINBLUE_TEMPLATES } from "snu-lib";
 
 export default function ModalRefused({ isOpen, value, onChange, onSend, topTitle = "alerte" }) {
   const [message, setMessage] = useState();

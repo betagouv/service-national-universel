@@ -15,7 +15,7 @@ import PatchHistoric from "../../components/views/PatchHistoric";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import { formatPhoneNumberFR, getAge, isInRuralArea, translate as t, YOUNG_STATUS } from "../../utils";
+import { formatPhoneNumberFR, getAge, isInRuralArea, translate as t, YOUNG_STATUS } from "snu-lib";
 import styled from "styled-components";
 import PanelV2 from "../../components/PanelV2";
 import { toastr } from "react-redux-toastr";

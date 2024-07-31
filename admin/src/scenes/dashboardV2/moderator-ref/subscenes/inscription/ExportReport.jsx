@@ -2,9 +2,8 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
-import { YOUNG_STATUS, department2region, departmentLookUp, departmentToAcademy, region2department, translate, translateInscriptionStatus } from "snu-lib";
+import { REFERENT_ROLES, YOUNG_STATUS, department2region, departmentLookUp, departmentToAcademy, region2department, translate, translateInscriptionStatus } from "snu-lib";
 import { translateModelFields } from "../../../../../utils";
-import { REFERENT_ROLES } from "snu-lib";
 
 export default async function ExportReport({ filter, user, setLoading, setLoadingText }) {
   if (!filter?.cohort?.length) return toastr.error("Merci de selectionner au moins une cohorte ");

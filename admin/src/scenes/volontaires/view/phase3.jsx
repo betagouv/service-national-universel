@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
-import { YOUNG_PHASE, YOUNG_STATUS_PHASE3 } from "../../../utils";
+import { YOUNG_PHASE, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import SelectStatus from "../../../components/selectStatus";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";

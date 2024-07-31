@@ -18,7 +18,7 @@ import {
   SENDINBLUE_TEMPLATES,
   WITHRAWN_REASONS,
   ROLES,
-} from "../utils";
+} from "snu-lib";
 import { toastr } from "react-redux-toastr";
 
 import ModalCorrection from "./modals/ModalCorrection";

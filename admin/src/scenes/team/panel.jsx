@@ -6,7 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, ROLES, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR } from "../../utils";
+import { translate, ROLES, canUpdateReferent, canDeleteReferent, formatPhoneNumberFR } from "snu-lib";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";

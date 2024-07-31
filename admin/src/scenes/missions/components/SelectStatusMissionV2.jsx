@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import api from "../../../services/api";
-import { MISSION_STATUS, ROLES, translate } from "../../../utils";
+import { MISSION_STATUS, ROLES, translate } from "snu-lib";
 import MailCorrectionMission from "./MailCorrectionMission";
 import MailRefusedMission from "./MailRefusedMission";
 import Select from "./Select";

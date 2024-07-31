@@ -4,8 +4,7 @@ import { toastr } from "react-redux-toastr";
 
 import { Button, ModalConfirmation, Select } from "@snu/ds/admin";
 import { ProfilePic } from "@snu/ds";
-import { ROLES, SUB_ROLES, translate } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
+import { ROLES, SUB_ROLES, translate, ReferentDto } from "snu-lib";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 

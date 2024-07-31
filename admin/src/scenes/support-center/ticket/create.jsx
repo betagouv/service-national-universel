@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { NavLink, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES } from "snu-lib";
 import { capture } from "../../../sentry";
 
 import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesStructure, subjectsStructure, step1Public } from "./workflow";

@@ -4,11 +4,10 @@ import SpeakerPhone from "../../../../assets/icons/SpeakerPhone";
 import BadgeCheck from "../../../../assets/icons/BadgeCheck";
 import ArrowCircleRight from "../../../../assets/icons/ArrowCircleRight";
 import Warning from "../../../../assets/icons/Warning";
-import { formatDateFR } from "../../../../utils";
+import { formatDateFR, COHORTS_BEFORE_JULY_2023 } from "snu-lib";
 import ModalChangePresenceOnArrival from "../../../../components/modals/young/ModalChangePresenceOnArrival";
 import ModalChangePresenceJDM from "../../../../components/modals/young/ModalChangePresenceJDM";
 import ModalPointageDepart from "../../../centersV2/components/modals/ModalPointageDepart";
-import { COHORTS_BEFORE_JULY_2023 } from "../../../../utils";
 
 const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, setValues, setYoung, editing = false, setLoading, isYoungCheckinOpen }) => {
   const [isPresenceOnArrivalModalOpen, setIsPresenceOnArrivalModalOpen] = useState(false);

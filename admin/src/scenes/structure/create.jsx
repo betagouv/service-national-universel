@@ -12,7 +12,8 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import MultiSelect from "../../components/Multiselect";
 import api from "../../services/api";
-import { ENABLE_PM, legalStatus, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
+import { ROLES, SENDINBLUE_TEMPLATES, translate } from "snu-lib";
+import { ENABLE_PM, typesStructure, sousTypesStructure, legalStatus } from "../../utils";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import validator from "validator";
 

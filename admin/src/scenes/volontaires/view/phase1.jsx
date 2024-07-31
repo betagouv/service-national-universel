@@ -13,7 +13,8 @@ import { adminURL } from "@/config";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { getCohortByName } from "@/services/cohort.service";
-import { YOUNG_STATUS_PHASE1, canAssignManually, translate, youngCheckinField } from "@/utils";
+import { youngCheckinField } from "@/utils";
+import { YOUNG_STATUS_PHASE1, canAssignManually, translate } from "snu-lib";
 
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 import YoungHeader from "../../phase0/components/YoungHeader";

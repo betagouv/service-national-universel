@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
-import { formatStringLongDate, translateModelFields, translate, translatePhase1, translatePhase2, translateApplication, translateEngagement, ROLES } from "../../utils";
+import { formatStringLongDate, translate, translatePhase1, translatePhase2, translateApplication, translateEngagement, ROLES } from "snu-lib";
+import { translateModelFields } from "../../utils";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-icons/hi";

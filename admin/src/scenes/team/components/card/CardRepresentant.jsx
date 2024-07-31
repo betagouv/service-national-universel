@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle, HiPhone, HiPlus } from "react-icons/hi";
-import { copyToClipboard, translate, formatPhoneNumberFR } from "../../../../utils";
+import { translate, formatPhoneNumberFR } from "snu-lib";
+import { copyToClipboard } from "../../../../utils";
 import ModalRepresentant from "../modal/ModalRepresentant";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../services/api";

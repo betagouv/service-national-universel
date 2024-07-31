@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import api from "@/services/api";
-import { department2region, departmentList, region2department } from "@/utils";
+import { department2region, departmentList, region2department } from "snu-lib";
 
 import Loader from "@/components/Loader";
 import LoadingButton from "@/components/buttons/LoadingButton";

@@ -13,6 +13,7 @@
     "outDir": "./src",
     "rootDir": "./src"
   },
+  "references": [{ "path": "../packages/lib" }],
   "include": ["src/**/*.ts"],
   "exclude": ["**/node_modules/*", "src/__tests__/*"]
 }

@@ -7,7 +7,8 @@ import validator from "validator";
 
 import Field from "@/components/ui/forms/Field";
 import Toggle from "@/components/Toggle";
-import { ENABLE_PM, MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, ROLES, SENDINBLUE_TEMPLATES, translate } from "@/utils";
+import { MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, ROLES, SENDINBLUE_TEMPLATES, translate } from "snu-lib";
+import { ENABLE_PM } from "@/utils";
 import VerifyAddress from "../phase0/components/VerifyAddress";
 
 import Breadcrumbs from "@/components/Breadcrumbs";

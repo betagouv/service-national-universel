@@ -13,7 +13,8 @@ import PasswordEye from "../../components/PasswordEye";
 import Header from "./components/header";
 import { adminURL } from "../../config";
 
-import { translate, ROLES, classNames } from "../../utils";
+import { translate, ROLES } from "snu-lib";
+import { classNames } from "../../utils";
 import Loader from "../../components/Loader";
 import { requiredMessage } from "../../components/errorMessage";
 

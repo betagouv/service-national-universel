@@ -5,7 +5,7 @@ import { useAddress, canCreateStructure, translate } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 import { useDebounce } from "@uidotdev/usehooks";
 import API from "../../../services/api";
-import { ROLES, getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
+import { ROLES, getNetworkOptions, legalStatus, typesStructure } from "snu-lib";
 
 import AsyncSelect from "react-select/async";
 import Loader from "../../../components/Loader";

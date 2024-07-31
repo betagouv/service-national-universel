@@ -11,7 +11,7 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Loader from "../../components/Loader";
 import Done from "./done";
-import { colors } from "../../utils";
+import { colors } from "snu-lib";
 
 export default function Index() {
   const [young, setYoung] = useState(null);
@@ -200,12 +200,16 @@ const Submit = styled(LoadingButton)`
   margin-top: 30px;
   margin-bottom: 30px;
   border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+  box-shadow:
+    rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   cursor: pointer;
   :hover {
     background-color: #42389d;
   }
   :focus {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    box-shadow:
+      rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+      rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   }
 `;

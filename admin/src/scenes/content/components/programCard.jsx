@@ -5,7 +5,8 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { translate, ROLES, urlWithScheme } from "../../../utils";
+import { urlWithScheme } from "../../../utils";
+import { translate, ROLES } from "snu-lib";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default function ProgramCard({ program, image, enableToggle = true, onDelete }) {
@@ -181,7 +182,9 @@ const Card = styled.div`
       width: 100%;
       height: 200px;
       object-fit: cover;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
   }
 `;
@@ -204,5 +207,7 @@ const Badge = styled.div`
   top: 0;
   right: 0;
   margin: 0.5rem 1.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;

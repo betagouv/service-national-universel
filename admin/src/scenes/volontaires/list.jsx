@@ -15,7 +15,7 @@ import { ExportComponent, Filters, ModalExport, ResultTable, Save, SelectedFilte
 import { appURL } from "../../config";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import { ROLES, YOUNG_STATUS, YOUNG_STATUS_COLORS, getAge, translate, translatePhase1, translatePhase2 } from "../../utils";
+import { ROLES, YOUNG_STATUS, YOUNG_STATUS_COLORS, getAge, translate, translatePhase1, translatePhase2 } from "snu-lib";
 import { Title } from "../pointDeRassemblement/components/common";
 import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";

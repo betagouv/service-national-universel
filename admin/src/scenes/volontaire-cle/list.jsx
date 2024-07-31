@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
-import { translate } from "@/utils";
+import { translate } from "snu-lib";
 import { Badge, Button, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
 import { HiPlus, HiUsers, HiOutlineOfficeBuilding, HiHome } from "react-icons/hi";
 import { IoFlashOutline } from "react-icons/io5";

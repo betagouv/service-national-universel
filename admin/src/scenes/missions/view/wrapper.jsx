@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES } from "snu-lib";
 import Badge from "../../../components/Badge";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";

@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { HiX, HiCheck } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import SelectTable from "./components/SelectTable";
 import TooltipAddress from "./components/TooltipAddress";
 import { IoLocationOutline, IoTrashBin, IoArrowRedoOutline } from "react-icons/io5";
-import { replaceSpacesNewList } from "../../../utils";
 import { environment } from "../../../config";
 
 const transportTypeList = [

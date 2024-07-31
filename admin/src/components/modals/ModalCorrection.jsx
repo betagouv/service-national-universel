@@ -3,7 +3,7 @@ import { Modal } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
-import { SENDINBLUE_TEMPLATES } from "../../utils";
+import { SENDINBLUE_TEMPLATES } from "snu-lib";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 import CloseSvg from "../../assets/Close";

@@ -7,7 +7,7 @@ import Loader from "../../../../components/Loader";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, translate, SENDINBLUE_TEMPLATES } from "../../../../utils";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC, translate, SENDINBLUE_TEMPLATES } from "snu-lib";
 import { SelectStatusApplicationPhase2 } from "./components/SelectStatusApplicationPhase2";
 import Tag from "../../../../components/Tag";
 import ReactTooltip from "react-tooltip";

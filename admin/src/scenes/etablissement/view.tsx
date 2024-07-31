@@ -5,12 +5,10 @@ import { HiHome, HiPlus } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
 import { Page, Header, Button } from "@snu/ds/admin";
-import { ROLES, translate, isCoordinateurEtablissement, isChefEtablissement, isReferentOrAdmin } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
+import { ROLES, translate, isCoordinateurEtablissement, isChefEtablissement, isReferentOrAdmin, ReferentDto, EtablissementDto } from "snu-lib";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 import Loader from "@/components/Loader";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
 import { AuthState } from "@/redux/auth/reducer";
 
 import Contact from "./components/Contact";

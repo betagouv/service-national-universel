@@ -20,7 +20,7 @@ import {
   translateContractStatus,
   translateApplicationFileType,
   formatStringDateTimezoneUTC,
-} from "@/utils";
+} from "snu-lib";
 import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import Panel from "./panel";
 
@@ -29,7 +29,7 @@ import CursorClick from "../../assets/icons/CursorClick";
 import ExclamationCircle from "../../assets/icons/ExclamationCircle";
 import SelectAction from "../../components/SelectAction";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
-import { currentFilterAsUrl } from "../../components/filters-system-v2/components/filters/utils";
+import { currentFilterAsUrl } from "snu-lib";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import { captureMessage } from "../../sentry";
 
