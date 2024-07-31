@@ -1,10 +1,12 @@
 import fetch from "node-fetch";
 import config from "config";
 
+import { CLE_COLORATION, TYPE_CLASSE } from "snu-lib";
+
+import { ClasseType } from "../../models";
 import { IAppelAProjet, IAppelAProjetOptions } from "../../cle/appelAProjetCle/appelAProjetType";
 import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
 import { DemarcheSimplifieeDto, DossierState } from "./demarcheSimplifieeDto";
-import { CLE_COLORATION, TYPE_CLASSE } from "snu-lib";
 
 const DEMARCHE_SIMPLIFIEE_API = "https://www.demarches-simplifiees.fr/api/v2/graphql ";
 
@@ -41,7 +43,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     const etablissement: IAppelAProjet["etablissement"] = {} as IAppelAProjet["etablissement"];
     const referentEtablissement: IAppelAProjet["referentEtablissement"] = {} as IAppelAProjet["referentEtablissement"];
     const classe: IAppelAProjet["classe"] = {} as IAppelAProjet["classe"];
-    const referentClasse: IAppelAProjet["referentClasse"] = {} as IAppelAProjet["referentClasse"];
+    const referentClasse: Partial<IAppelAProjet["referentClasse"]> = {};
 
     const champDescriptorValueMap = new Map(formulaire.champs.map((champ) => [champ.champDescriptorId, champ.stringValue]));
 
@@ -72,7 +74,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
       etablissement,
       referentEtablissement,
       classe,
-      referentClasse,
+      referentClasse: referentClasse as IAppelAProjet["referentClasse"],
     };
     const fixe = appelAProjetOptions.fixes?.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
     if (fixe?.etablissement?.uai) {
@@ -92,7 +94,7 @@ export const getUaiFromString = (value: string | undefined) => {
   return match ? match[1] : "";
 };
 
-const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: string | undefined): string | undefined => {
+const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: string | undefined): ClasseType["coloration"] => {
   switch (colorationFromAppelAProjet) {
     case "Environnement":
       return CLE_COLORATION.ENVIRONMENT;
@@ -108,7 +110,7 @@ const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: s
   }
 };
 
-const mapClasseTypeFromAppelAProjetToClasseType = (classeType: string | undefined): string | undefined => {
+const mapClasseTypeFromAppelAProjetToClasseType = (classeType: string | undefined): ClasseType["type"] => {
   switch (classeType) {
     case "Un groupe d’élèves issus de plusieurs classes":
       return TYPE_CLASSE.GROUP;

@@ -7,7 +7,7 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 
 import { patternEmailAcademy, translate } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
+import { ReferentDto } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 
 import api from "@/services/api";

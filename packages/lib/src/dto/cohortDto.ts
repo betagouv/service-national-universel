@@ -6,8 +6,8 @@ export type CohortDto = {
   dateEnd: Date;
   inscriptionStartDate: Date;
   inscriptionEndDate: Date;
-  reInscriptionStartDate: Date | null;
-  reInscriptionEndDate: Date | null;
+  reInscriptionStartDate?: Date | null;
+  reInscriptionEndDate?: Date | null;
   inscriptionModificationEndDate?: Date;
   instructionEndDate: Date;
   sessionEditionOpenForReferentRegion?: boolean;
@@ -67,6 +67,6 @@ export type CohortDto = {
 export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId">;
 
 type ToFromDate = {
-  from: string | null;
-  to: string | null;
+  from?: Date | null;
+  to?: Date | null;
 };

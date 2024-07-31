@@ -6,10 +6,9 @@ import { MdOutlineDangerous } from "react-icons/md";
 import { HiOutlineExclamation } from "react-icons/hi";
 
 import { ModalConfirmation } from "@snu/ds/admin";
-import { translate } from "snu-lib";
+import { translate, ClasseDto } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
 
 interface Props {
   classe: ClasseDto;

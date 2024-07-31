@@ -6,9 +6,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 
-import { isAdminCle, translate } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+import { isAdminCle, translate, EtablissementDto, ReferentDto } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 
 import api from "@/services/api";

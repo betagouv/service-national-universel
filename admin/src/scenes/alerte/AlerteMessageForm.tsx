@@ -4,8 +4,7 @@ import Select, { components } from "react-select";
 import { toastr } from "react-redux-toastr";
 import { MdInfoOutline } from "react-icons/md";
 
-import { AlerteMessageDto } from "snu-lib/src/dto/alerteMessageDto";
-import { ROLES, translate, formatStringLongDate } from "snu-lib";
+import { ROLES, translate, formatStringLongDate, AlerteMessageDto } from "snu-lib";
 
 import api from "@/services/api";
 import { capture } from "@/sentry";

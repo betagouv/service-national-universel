@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, InputText } from "@snu/ds/admin";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
+import { ClasseDto } from "snu-lib";
 
 export default function ReferentInfos({ classe }: { classe: ClasseDto }) {
   return (

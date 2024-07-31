@@ -241,7 +241,7 @@ function canViewReferent(actor, target) {
 type CanUpdateReferent = {
   actor: any;
   originalTarget: any;
-  modifiedTarget: any | null;
+  modifiedTarget?: any | null;
   structure: any;
 };
 
@@ -323,7 +323,7 @@ function canRefuseMilitaryPreparation(actor, young) {
   return canViewYoungMilitaryPreparationFile(actor, young) || [ROLES.RESPONSIBLE, ROLES.REFERENT_REGION].includes(actor.role);
 }
 
-function canViewYoungFile(actor, target, targetCenter = null) {
+function canViewYoungFile(actor, target, targetCenter?) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
   const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
@@ -555,7 +555,7 @@ function canViewMeetingPoints(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER].includes(actor.role);
 }
 
-function canUpdateMeetingPoint(actor, meetingPoint) {
+function canUpdateMeetingPoint(actor, meetingPoint = null) {
   if (isAdmin(actor)) return true;
   if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     if (!meetingPoint) return true;

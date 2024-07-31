@@ -28,7 +28,7 @@ const ClasseStateManager = {
     const isInscriptionClosed = now >= inscriptionEndDate;
 
     // Open
-    if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status) && isInscriptionOpen) {
+    if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status as any) && isInscriptionOpen) {
       classe.set({ status: STATUS_CLASSE.OPEN });
       classe = await classe.save({ fromUser });
       return classe;

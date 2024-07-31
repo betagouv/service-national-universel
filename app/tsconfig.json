@@ -9,5 +9,5 @@
   },
   "include": ["src", "./globals.d.ts"],
   "exclude": ["**/dist/**/*", "**/build/**/*", "node_modules", "**/node_modules/*"],
-  "references": [{ "path": "../packages/ds" }]
+  "references": [{ "path": "../packages/ds" }, { "path": "../packages/lib" }]
 }

@@ -4,8 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 
-import { getDepartmentNumber } from "snu-lib";
-import { applicationExportFields } from "snu-lib";
+import { getDepartmentNumber, applicationExportFields } from "snu-lib";
 import CursorClick from "../../../assets/icons/CursorClick";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import Eye from "../../../assets/icons/Eye";

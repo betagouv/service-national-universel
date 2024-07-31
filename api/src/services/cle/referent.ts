@@ -12,13 +12,13 @@ import { capture } from "../../sentry";
 
 import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument } from "../../models";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
-import { UserDto } from "snu-lib/src/dto";
+import { UserDto } from "snu-lib";
 
 export interface InvitationResult {
   to: string;
   status: string;
   details?: string;
-  type?: typeof InvitationType;
+  type?: ReferentType["metadata"]["invitationType"];
 }
 
 export const findOrCreateReferent = async (referent, { etablissement, role, subRole }) => {

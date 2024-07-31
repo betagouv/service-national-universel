@@ -3,9 +3,7 @@ import { useHistory, useLocation } from "react-router-dom";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 
-import { translate, isChefEtablissement, isCoordinateurEtablissement, isAdminCle } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+import { translate, isChefEtablissement, isCoordinateurEtablissement, isAdminCle, ReferentDto, EtablissementDto } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 
 import Stepper from "./components/Stepper";

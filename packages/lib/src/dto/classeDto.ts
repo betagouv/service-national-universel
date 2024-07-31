@@ -1,4 +1,4 @@
-import { STATUS_PHASE1_CLASSE_LIST } from "../constants/constants";
+import { STATUS_CLASSE, STATUS_PHASE1_CLASSE_LIST } from "../constants/constants";
 
 import { ReferentDto } from "./referentDto";
 
@@ -34,7 +34,7 @@ export type ClasseDto = {
   ligneId?: string;
   pointDeRassemblementId?: string;
   pointDeRassemblement?: any;
-  status: string;
+  status: keyof typeof STATUS_CLASSE;
   statusPhase1: (typeof STATUS_PHASE1_CLASSE_LIST)[keyof typeof STATUS_PHASE1_CLASSE_LIST];
   createdAt: Date;
   updatedAt?: Date;

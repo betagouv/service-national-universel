@@ -9,8 +9,7 @@ import api from "@/services/api";
 import { capture } from "@/sentry";
 import { Button, Container, InputText, Label, Select } from "@snu/ds/admin";
 import { AddressForm, Input } from "@snu/ds/common";
-import { ROLES, SUB_ROLES, CLE_TYPE_LIST, CLE_SECTOR_LIST, useAddress, translate } from "snu-lib";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+import { ROLES, SUB_ROLES, CLE_TYPE_LIST, CLE_SECTOR_LIST, useAddress, translate, EtablissementDto } from "snu-lib";
 import { User } from "@/types";
 
 interface Props {

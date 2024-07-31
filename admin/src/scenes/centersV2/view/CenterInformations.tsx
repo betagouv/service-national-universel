@@ -257,7 +257,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                   department: data.department,
                   region: data.region,
                 }}
-                updateData={(newData) => setData({ ...data, ...newData, academy: departmentToAcademy[newData.department] })}
+                updateData={(newData) => setData({ ...data, ...newData, academy: departmentToAcademy[newData.department!] })}
                 query={query}
                 setQuery={setQuery}
                 options={results}

@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { MdInfoOutline } from "react-icons/md";
-import ReactTooltip from "react-tooltip";
 import { Link } from "react-router-dom";
 import { Button } from "@snu/ds/admin";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib";
-
 import { FieldsGroup } from "../FieldsGroup";
 import Field from "../Field";
-import { translate, translateGrade, YOUNG_STATUS, GRADES, getAge, YOUNG_SOURCE, translateEtbalissementSector, translateColoration } from "snu-lib";
+import {
+  isPhoneNumberWellFormated,
+  PHONE_ZONES,
+  translate,
+  translateGrade,
+  YOUNG_STATUS,
+  GRADES,
+  getAge,
+  YOUNG_SOURCE,
+  translateEtbalissementSector,
+  translateColoration,
+} from "snu-lib";
 import { filterDataForYoungSection } from "../../utils";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "../../commons";
 import api from "@/services/api";

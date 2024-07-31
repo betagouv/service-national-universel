@@ -6,7 +6,7 @@ import Markdown from "react-markdown";
 // @ts-expect-error CommonJS module
 import remarkGfm from "remark-gfm";
 
-import { AlerteMessageDto } from "snu-lib/src/dto/alerteMessageDto";
+import { AlerteMessageDto } from "snu-lib";
 
 interface Props {
   title?: AlerteMessageDto["title"];

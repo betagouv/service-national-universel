@@ -8,8 +8,7 @@ import api from "@/services/api";
 import logo from "@/assets/logo-snu.png";
 import { AuthState } from "@/redux/auth/reducer";
 
-import { translate, ROLES } from "snu-lib";
-import { AlerteMessageDto } from "snu-lib/src/dto";
+import { translate, ROLES, AlerteMessageDto } from "snu-lib";
 
 import AlerteMessageForm from "./AlerteMessageForm";
 import { useQuery } from "@tanstack/react-query";

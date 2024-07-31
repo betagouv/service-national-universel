@@ -5,7 +5,7 @@ const { ObjectId } = Types;
 import { dbConnect, dbClose } from "../helpers/db";
 import { mockEsClient } from "../helpers/es";
 import getAppHelper from "../helpers/app";
-import * as snuLib from "snu-lib";
+import snuLib from "snu-lib";
 import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES } from "snu-lib";
 
 // classe

@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 const ObjectId = Types.ObjectId;
 
-import { ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE, isNowBetweenDates, canEditEstimatedSeats, canEditTotalSeats } from "snu-lib";
+import { ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE, isNowBetweenDates, canEditEstimatedSeats, canEditTotalSeats, CLE_COLORATION } from "snu-lib";
 
 import { ClasseModel, CohortModel, YoungModel, EtablissementDocument, EtablissementType } from "../../models";
 
@@ -496,7 +496,7 @@ describe("buildUniqueClasseId and key", () => {
   it("should return the correct unique classe ID", () => {
     const classe = {
       name: "une classe",
-      coloration: "SPORT",
+      coloration: CLE_COLORATION.SPORT,
       estimatedSeats: 22,
     };
     const etablissement: EtablissementType = {

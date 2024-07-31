@@ -1,16 +1,16 @@
 module.exports = {
   globals: {
-    "js-jest": {
+    "ts-jest": {
       isolatedModules: true,
     },
   },
   moduleFileExtensions: ["js", "json", "ts"],
-  modulePaths: ["<rootDir>"],
+  modulePaths: ["<rootDir>/src"],
   testRegex: ".*.spec.(js|ts)$",
-  testPathIgnorePatterns: ["/(common-js|node_modules)/"],
+  testPathIgnorePatterns: ["/(dist|common-js|node_modules)/"],
   testEnvironment: "node",
   preset: "ts-jest",
   transform: {
-    "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
+    "^.+\\.(js|jsx|ts|tsx)$": "ts-jest",
   },
 };

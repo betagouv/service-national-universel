@@ -4,10 +4,9 @@ import { HiOutlineCheck } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
 
 import { ModalConfirmation, Button } from "@snu/ds/admin";
-import { translate } from "snu-lib";
+import { translate, ClasseDto } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
 
 interface Props {
   classe: ClasseDto;

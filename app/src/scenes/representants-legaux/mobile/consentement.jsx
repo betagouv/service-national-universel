@@ -8,7 +8,7 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/dsfr/forms/toggle";
-import { translate, getCohortYear } from "snu-lib";
+import { translate, getCohortYear, PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -20,7 +20,6 @@ import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress, getDataForConsentStep } from "../utils";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
-import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
 import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Consentement({ step, parentId }) {

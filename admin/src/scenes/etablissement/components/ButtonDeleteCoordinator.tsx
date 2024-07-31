@@ -3,8 +3,7 @@ import { HiOutlinePencil, HiOutlineX } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 import { useBoolean } from "react-use";
 
-import { SUB_ROLES, translate } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
+import { SUB_ROLES, translate, ReferentDto } from "snu-lib";
 import { Button, ModalConfirmation } from "@snu/ds/admin";
 import { ProfilePic } from "@snu/ds";
 

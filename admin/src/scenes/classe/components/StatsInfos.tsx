@@ -1,9 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Container, Button } from "@snu/ds/admin";
-import { ROLES, YOUNG_STATUS } from "snu-lib";
+import { ROLES, YOUNG_STATUS, ClasseDto } from "snu-lib";
 import { User } from "@/types";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
 
 interface Props {
   classe: ClasseDto;
