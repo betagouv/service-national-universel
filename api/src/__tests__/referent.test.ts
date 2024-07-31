@@ -3,7 +3,7 @@ import request from "supertest";
 
 import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
 
-import { YoungModel, ClasseDocument } from "../models";
+import { YoungModel } from "../models";
 
 import getAppHelper from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
@@ -69,7 +69,7 @@ describe("Referent", () => {
     });
     it("should return 409 when user already exists", async () => {
       const fixture = getNewReferentFixture();
-      const email = fixture.email.toLowerCase();
+      const email = fixture.email?.toLowerCase();
       await createReferentHelper({ ...fixture, email });
       let res = await request(getAppHelper()).post("/referent/signup_invite/001").send(fixture);
       expect(res.status).toBe(409);
@@ -156,7 +156,7 @@ describe("Referent", () => {
   });
   describe("PUT /referent/youngs", () => {
     it("should return 400 if body is not valid", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED }));
+      const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED as any }));
       const youngIds = [young._id];
       let res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
