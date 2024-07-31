@@ -64,8 +64,10 @@ export default function StepDocuments() {
   }
 
   function handleClick(doc) {
-    plausibleEvent(doc.event);
-    history.push(`televersement/${doc.category}`);
+    if (!disabledUpload) {
+      plausibleEvent(doc.event);
+      history.push(`televersement/${doc.category}`);
+    }
   }
 
   function goBack() {
@@ -102,7 +104,7 @@ export default function StepDocuments() {
         )}
 
         {disabledUpload && (
-          <Info text="Vous ne pouvez téléverser que trois fichiers maximum." subText="Si vous devez en ajouter un, merci de supprimer d'abord un document ci-dessous." />
+          <Info text="Vous ne pouvez téléverser que deux fichiers maximum." subText="Si vous devez en ajouter un, merci de supprimer d'abord un document ci-dessous." />
         )}
 
         <div className="mt-2 text-sm text-gray-800">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
@@ -110,14 +112,15 @@ export default function StepDocuments() {
           {IDs.map((doc) => (
             <span
               key={doc.category}
-              disabled={disabledUpload}
               onClick={() => handleClick(doc)}
-              className="cursor-pointer hover:bg-[#FAFAFA] disabled:cursor-not-allowed disabled:bg-[#FAFAFA] w-full flex items-center justify-between border p-4 group">
+              className={`cursor-pointer hover:bg-[#FAFAFA] w-full flex items-center justify-between border p-4 group ${
+                disabledUpload ? "cursor-not-allowed bg-[#FAFAFA] text-gray-400" : ""
+              }`}>
               <div className="text-left flex flex-col">
                 <span>{doc.title}</span>
                 {doc.subtitle && <span className="text-sm text-gray-500">{doc.subtitle}</span>}
               </div>
-              <div className="w-10 h-10 bg-blue-france-sun-113 group-hover:bg-blue-france-sun-113-hover group-disabled:bg-gray-400">
+              <div className={`w-10 h-10 ${disabledUpload ? "bg-gray-400" : "bg-blue-france-sun-113 group-hover:bg-blue-france-sun-113-hover"}`}>
                 <RiArrowRightLine className="text-white w-6 h-6 mx-auto my-2" />
               </div>
             </span>
