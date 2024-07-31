@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const config = require("config");
 const slack = require("../slack");
+const { capture } = require("../sentry");
 
 exports.handler = async () => {
   try {
@@ -30,17 +31,19 @@ exports.handler = async () => {
         text: `High number of active connections: ${connections.active}`,
       });
     }
-  } catch (err) {
-    console.error("Erreur lors de la surveillance des connexions:", err);
+  } catch (e) {
+    capture(e);
+    console.error("Erreur lors de la surveillance des connexions:", e);
     await slack.error({
       title: "Mongo DB connection monitor - Error",
-      text: `Erreur lors de la surveillance des connexions: ${err.message}`,
+      text: `Erreur lors de la surveillance des connexions: ${e.message}`,
     });
   } finally {
     try {
       await mongoose.disconnect();
-    } catch (disconnectErr) {
-      console.error("Erreur lors de la déconnexion de MongoDB:", disconnectErr);
+    } catch (e) {
+      capture(e);
+      console.error("Erreur lors de la déconnexion de MongoDB:", e);
     }
   }
 };
