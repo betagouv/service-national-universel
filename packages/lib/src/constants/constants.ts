@@ -459,6 +459,8 @@ const GRADES = {
   TermGT: "TermGT",
   TermPro: "TermPro",
   CAP: "CAP",
+  "2ndeCAP": "2ndeCAP",
+  "1ereCAP": "1ereCAP",
   Autre: "Autre",
 };
 
