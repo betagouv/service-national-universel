@@ -60,6 +60,11 @@ import emailsEmitter from "../../emails";
 import ClasseStateManager from "./stateManager";
 import { validateId } from "../../utils/validator";
 
+const querySchema = Joi.object({
+  withDetail: Joi.boolean().default(true),
+  // Ajoutez d'autres paramètres si nécessaire
+});
+
 const router = express.Router();
 router.post(
   "/:id/convocations",
@@ -356,8 +361,13 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const withPopulate = req.query.withPopulate === "true";
-    const data = await getClasseById(value, withPopulate);
+    // Validate and transform query parameters
+    const { error: queryError, value: queryParams } = querySchema.validate(req.query);
+    if (queryError) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
+    }
+
+    const data = await getClasseById(value, queryParams);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {

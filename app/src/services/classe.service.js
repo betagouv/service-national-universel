@@ -1,8 +1,8 @@
 import { apiURL } from "@/config";
 import { translateColoration } from "snu-lib";
 
-export const fetchClass = (id, withPopulate = true) =>
-  fetch(`${apiURL}/cle/classe/${id}?withPopulate=${withPopulate}`)
+export const fetchClass = (id, params = {}) =>
+  fetch(`${apiURL}/cle/classe/${id}?${new URLSearchParams(params).toString()}`)
     .then((res) => res.json())
     .then((res) => {
       if (!res.ok) throw new Error(res.code);
