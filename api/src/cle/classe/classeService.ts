@@ -95,12 +95,11 @@ export const getClasseById = async (classeId, withDetail = true) => {
       .populate({ path: "cohortDetails", options: { select: { dateStart: 1 } } });
   }
 
-  const data = await query.exec();
+  const classe = await query.exec();
 
-  if (!data) {
-    captureMessage("Error finding classe with id : " + JSON.stringify(classeId));
-    throw new Error("Classe not found");
+  if (!classe) {
+    return null;
   }
 
-  return data;
+  return classe;
 };
