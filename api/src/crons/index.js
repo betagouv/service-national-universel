@@ -126,7 +126,7 @@ function test_cron() {
 }
 
 const CRONS = [
-  _build("testCron", "* * * * *", test_cron),
+  _build("testCron", "0 * * * *", test_cron),
   // _build("missionPatches", "0 2 * * *", missionPatches.handler),
   // _build("applicationPatches", "30 2 * * *", applicationPatches.handler),
   // _build("youngPatches", "0 3 * * *", youngPatches.handler),
