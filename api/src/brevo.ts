@@ -15,8 +15,6 @@ const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 //https://my.sendinblue.com/lists/add-attributes
 
-const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports|snu)\.gouv\.fr|lexfo\.fr/;
-
 type ContactAttribute = {
   FIRSTNAME: string;
   PRENOM: string;
@@ -107,17 +105,16 @@ export async function sendSMS(phoneNumber, content, tag) {
 // https://developers.sendinblue.com/reference#sendtransacemail
 export async function sendEmail(to: Email[], subject: string, htmlContent, { params, attachment, cc, bcc }: Omit<SendMailParameters, "emailTo"> = {}) {
   try {
-    const body: any = {};
-    if (config.ENVIRONMENT !== "production") {
-      if (config.SMTP_PORT && config.SMTP_HOST) {
-        // TODO: faire un return après le simulate
-        await sendMailCatcher(subject, htmlContent, { emailTo: to, cc, bcc, attachment });
-      }
-      console.log("to before filter:", to);
-      to = to.filter((e) => e.email.match(regexp_exception_staging));
-      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
-      if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp_exception_staging));
+    if (config.get("MAIL_TRANSPORT") === "SMTP") {
+      await sendMailCatcher(subject, htmlContent, { emailTo: to, cc, bcc, attachment });
+      return;
     }
+
+    if (config.get("MAIL_TRANSPORT") !== "BREVO") {
+      return;
+    }
+
+    const body: any = {};
     body.to = [to];
     if (cc?.length) body.cc = cc;
     if (bcc?.length) body.bcc = bcc;
