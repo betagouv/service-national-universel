@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import { YOUNG_STATUS } from "snu-lib";
-import { captureMessage } from "../../sentry";
 
 import { YoungModel, ClasseModel, ClasseDocument, ClasseType, EtablissementDocument, EtablissementType } from "../../models";
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
