@@ -47,13 +47,7 @@ const AccountSchoolSituationPage = () => {
               </div>
               <div className="px-4 pt-6 pb-2 lg:col-span-2 lg:col-start-2">
                 <SectionTitle>Scolarité</SectionTitle>
-                <Select label="Niveau de scolarité" name="grade" value={values.grade} disabled>
-                  {getSchoolGradesOptions().map(({ label, value }) => (
-                    <option value={value} key={value}>
-                      {label}
-                    </option>
-                  ))}
-                </Select>
+                <Input label="Niveau de scolarité" name="classeName" value={values.grade} disabled />
               </div>
               <hr className="col-span-full mx-4 my-2 md:my-6" />
               <div className="py-6 pl-6 lg:col-start-1 lg:block">
@@ -61,7 +55,20 @@ const AccountSchoolSituationPage = () => {
               </div>
               <div className="px-4 pt-6 pb-2 lg:col-span-2 lg:col-start-2">
                 <Input label="Nom de la classe" name="classeName" value={classe.name} disabled />
-                <Input label="Niveau scolaire" name="classegrade" value={translateGrade(classe.grade)} disabled />
+                <div className="mb-[1rem]">
+                  <label
+                    className="m-0 flex min-h-[54px] w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 bg-white py-2 px-3 focus-within:border-blue-600 disabled:border-gray-200"
+                    htmlFor="classegrade">
+                    <p className=" text-xs leading-4 text-gray-500">Niveau scolaire</p>
+                    <div className="flex flex-wrap flex-col gap-2">
+                      {classe.grades.map((grade, index) => (
+                        <span disabled key={index} className="w-full bg-white text-sm text-gray-400 pl-1">
+                          {translateGrade(grade)}
+                        </span>
+                      ))}
+                    </div>
+                  </label>
+                </div>
                 <Input label="Coloration" name="schoolName" value={classe.coloration} disabled />
                 <Input label="Nom de l'établissement" name="schoolCity" value={classe.etablissement.name} disabled />
                 <Input label="Commune de l'établissement" name="schoolCity" value={classe.etablissement.city} disabled />
