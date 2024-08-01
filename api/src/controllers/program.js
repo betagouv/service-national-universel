@@ -83,7 +83,19 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
 
 router.get("/public/engagements", async (req, res) => {
   try {
-    const data = await ProgramModel.find({ visibility: "NATIONAL" });
+    const data = await ProgramModel.aggregate([
+      {
+        $match: { visibility: "NATIONAL" },
+      },
+      {
+        $addFields: {
+          order: { $ifNull: ["$order", Number.MAX_SAFE_INTEGER] },
+        },
+      },
+      {
+        $sort: { order: 1 },
+      },
+    ]);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

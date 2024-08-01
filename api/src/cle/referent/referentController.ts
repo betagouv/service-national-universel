@@ -3,7 +3,7 @@ import passport from "passport";
 import Joi from "joi";
 import { Response } from "express";
 
-import { ROLES, SUB_ROLES, canInviteCoordinateur, isSuperAdmin } from "snu-lib";
+import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin } from "snu-lib";
 
 import { doInviteMultipleChefsEtablissements } from "../../services/cle/referent";
 import { uploadFile } from "../../utils";
@@ -21,6 +21,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
       email: Joi.string().lowercase().trim().email().required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
+      etablissementId: Joi.string(),
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
@@ -29,14 +30,21 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
-
-    if (!canInviteCoordinateur(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let etablissement;
+    if (isChefEtablissement(req.user)) {
+      //for now, only one chef per etablissement
+      etablissement = await EtablissementModel.findOne({ referentEtablissementIds: req.user._id });
+    } else if (isReferentOrAdmin(req.user)) {
+      if (!value.etablissementId) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
+      etablissement = await EtablissementModel.findById(value.etablissementId);
+    } else {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const { email, firstName, lastName } = value;
-
-    //for now, only one chef per etablissement
-    const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: req.user._id });
-    if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     //for now, only 2 coordinateurs per etablissement
     if (etablissement.coordinateurIds.length >= 2) {

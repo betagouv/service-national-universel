@@ -1,36 +1,26 @@
 import fetch from "node-fetch";
 
-const request = require("supertest");
-const jwt = require("jsonwebtoken");
-
-const { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { sendTemplate } = require("../brevo");
-
-const fileUtils = require("../utils/file");
-
-const getAppHelper = require("./helpers/app");
-const { dbConnect, dbClose } = require("./helpers/db");
-const { initRedisClient, closeRedisClient } = require("../redis");
-
-//application
-const { getNewApplicationFixture } = require("./fixtures/application");
-const { createApplication } = require("./helpers/application");
-//mission
-const getNewMissionFixture = require("./fixtures/mission");
-const { createMissionHelper } = require("./helpers/mission");
-//young
-const getNewYoungFixture = require("./fixtures/young");
-const { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
-//cohort
-const { createCohortHelper } = require("./helpers/cohort");
-const getNewCohortFixture = require("./fixtures/cohort");
-//referent
-const { createReferentHelper } = require("./helpers/referent");
-const { getNewReferentFixture } = require("./fixtures/referent");
-//classe
-const { createClasse } = require("./helpers/classe");
-const { createFixtureClasse } = require("./fixtures/classe");
-const { ClasseModel } = require("../models");
+import request from "supertest";
+import jwt from "jsonwebtoken";
+import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { sendTemplate } from "../brevo";
+import * as fileUtils from "../utils/file";
+import getAppHelper from "./helpers/app";
+import { dbConnect, dbClose } from "./helpers/db";
+import { initRedisClient, closeRedisClient } from "../redis";
+import { getNewApplicationFixture } from "./fixtures/application";
+import { createApplication } from "./helpers/application";
+import getNewMissionFixture from "./fixtures/mission";
+import { createMissionHelper } from "./helpers/mission";
+import getNewYoungFixture from "./fixtures/young";
+import { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } from "./helpers/young";
+import { createCohortHelper } from "./helpers/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
+import { createReferentHelper } from "./helpers/referent";
+import { getNewReferentFixture } from "./fixtures/referent";
+import { createClasse } from "./helpers/classe";
+import { createFixtureClasse } from "./fixtures/classe";
+import { ClasseModel } from "../models";
 
 jest.mock("../redis", () => {
   const redis = require("redis");
@@ -136,7 +126,7 @@ describe("Young", () => {
           if (key === "status") {
             expect(updatedYoung[key]).toEqual("DELETED");
           } else if (key === "email") {
-            expect(updatedYoung[key]).toEqual(`${young._doc["_id"]}@delete.com`);
+            expect(updatedYoung[key]).toEqual(`${young._doc?.["_id"]}@delete.com`);
           } else if (key === "_id") {
             expect(updatedYoung[key]).toEqual(young[key].toString());
           } else if (key === "phase2ApplicationStatus") {
@@ -267,6 +257,7 @@ describe("Young", () => {
           }),
         )
         .mockReturnValue(Promise.resolve({}));
+      // @ts-ignore
       fetch.mockReturnValue(
         Promise.resolve({
           status: 200,
@@ -700,6 +691,7 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(200);
     });
     it("should return 200 when VALIDATED", async () => {
+      // @ts-ignore
       sendTemplate.mockClear();
       const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
       const young = await createYoungHelper(getNewYoungFixture({ source: "CLE" }));
@@ -797,7 +789,7 @@ describe("Young", () => {
       expect(res.body.data.status).toBe("VALIDATED");
 
       const updatedClasse = await ClasseModel.findById(classeId);
-      expect(updatedClasse.seatsTaken).toBe(1);
+      expect(updatedClasse?.seatsTaken).toBe(1);
       passport.user.role = previous;
     });
   });

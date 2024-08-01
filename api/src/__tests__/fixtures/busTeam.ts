@@ -1,10 +1,11 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
+import { LigneBusType } from "../../models";
 const { ObjectId } = Types;
 
-const getBusTeamFixture = (object) => ({
+const getBusTeamFixture = (object): Partial<LigneBusType["team"]> => ({
   role: faker.person.jobTitle(),
-  idTeam: ObjectId(),
+  idTeam: new ObjectId().toHexString(),
   lastName: faker.person.lastName(),
   firstName: faker.person.firstName(),
   birthdate: faker.date.past({ years: 20 }).toISOString(), // Ensure a reasonable age
