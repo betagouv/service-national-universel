@@ -5,13 +5,14 @@ import { Response } from "express";
 
 import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin } from "snu-lib";
 
-import { doInviteMultipleChefsEtablissements } from "../../services/cle/referent";
+import { deleteOldReferentClasse, doInviteMultipleChefsEtablissements, doInviteMultipleReferentClasse } from "../../services/cle/referent";
 import { uploadFile } from "../../utils";
 import { UserRequest } from "../../controllers/request";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { EtablissementModel } from "../../models";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
+import { generateCSVStream } from "../../services/fileService";
 
 const router = express.Router();
 
@@ -91,6 +92,37 @@ router.post("/send-invitation-chef-etablissement", passport.authenticate("refere
     uploadFile(`file/appelAProjet/${timestamp}-send-invitation-chef-etablissement.json`, file);
 
     return res.status(200).send({ ok: true, data: referentInvitationSent });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/send-invitation-referent-classe", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    console.log("Controller - send-invitation-referent-classe");
+
+    if (!isSuperAdmin(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+
+    const referentInvitationSent = await doInviteMultipleReferentClasse(req.user);
+    uploadFile(`file/appelAProjet/${timestamp}-send-invitation-referent-classe.csv`, {
+      data: generateCSVStream(referentInvitationSent),
+      encoding: "",
+      mimetype: "text/csv",
+    });
+
+    const referentDeleted = await deleteOldReferentClasse(req.user);
+    uploadFile(`file/appelAProjet/${timestamp}-delete-old-referent-classe.csv`, {
+      data: generateCSVStream(referentDeleted),
+      encoding: "",
+      mimetype: "text/csv",
+    });
+
+    return res.status(200).send({ ok: true, data: { referentInvitationSent, referentDeleted } });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
