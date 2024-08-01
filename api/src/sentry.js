@@ -8,6 +8,7 @@ const {
   Handlers,
   autoDiscoverNodePerformanceMonitoringIntegrations,
 } = require("@sentry/node");
+const { ProfilingIntegration } = require("@sentry/profiling-node");
 
 const config = require("config");
 
@@ -25,57 +26,54 @@ addGlobalEventProcessor((event) => {
 });
 
 function initSentry() {
-  const { ProfilingIntegration } = require("@sentry/profiling-node");
-  init({
-    enabled: Boolean(config.SENTRY_URL),
-    dsn: config.SENTRY_URL,
-    environment: "api",
-    release: config.RELEASE,
-    normalizeDepth: 16,
-    integrations: [
-      new ExtraErrorData({ depth: 16 }),
-      new RewriteFrames({ root: process.cwd() }),
-      new NodeIntegrations.Http({ tracing: true }),
-      new NodeIntegrations.Modules(),
-      new ProfilingIntegration(),
-      ...autoDiscoverNodePerformanceMonitoringIntegrations(),
-    ],
-    tracesSampleRate: Number(config.SENTRY_TRACING_SAMPLE_RATE) || 0.01,
-    profilesSampleRate: Number(config.SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
-    ignoreErrors: [
-      /^No error$/,
-      /__show__deepen/,
-      /_avast_submit/,
-      /Access is denied/,
-      /anonymous function: captureException/,
-      /Blocked a frame with origin/,
-      /can't redefine non-configurable property "userAgent"/,
-      /change_ua/,
-      /console is not defined/,
-      /cordova/,
-      /DataCloneError/,
-      /Error: AccessDeny/,
-      /event is not defined/,
-      /feedConf/,
-      /ibFindAllVideos/,
-      /myGloFrameList/,
-      /SecurityError/,
-      /MyIPhoneApp/,
-      /snapchat.com/,
-      /vid_mate_check is not defined/,
-      /win\.document\.body/,
-      /window\._sharedData\.entry_data/,
-      /window\.regainData/,
-      /ztePageScrollModule/,
-    ],
-  });
+  if (config.get("ENABLE_SENTRY")) {
+    init({
+      dsn: config.get("SENTRY_URL"),
+      environment: "api",
+      release: config.get("RELEASE"),
+      normalizeDepth: 16,
+      integrations: [
+        new ExtraErrorData({ depth: 16 }),
+        new RewriteFrames({ root: process.cwd() }),
+        new NodeIntegrations.Http({ tracing: true }),
+        new NodeIntegrations.Modules(),
+        new ProfilingIntegration(),
+        ...autoDiscoverNodePerformanceMonitoringIntegrations(),
+      ],
+      tracesSampleRate: Number(config.get("SENTRY_TRACING_SAMPLE_RATE")) || 0.01,
+      profilesSampleRate: Number(config.get("SENTRY_PROFILE_SAMPLE_RATE")) || 0.1, // Percent of Transactions profiled
+      ignoreErrors: [
+        /^No error$/,
+        /__show__deepen/,
+        /_avast_submit/,
+        /Access is denied/,
+        /anonymous function: captureException/,
+        /Blocked a frame with origin/,
+        /can't redefine non-configurable property "userAgent"/,
+        /change_ua/,
+        /console is not defined/,
+        /cordova/,
+        /DataCloneError/,
+        /Error: AccessDeny/,
+        /event is not defined/,
+        /feedConf/,
+        /ibFindAllVideos/,
+        /myGloFrameList/,
+        /SecurityError/,
+        /MyIPhoneApp/,
+        /snapchat.com/,
+        /vid_mate_check is not defined/,
+        /win\.document\.body/,
+        /window\._sharedData\.entry_data/,
+        /window\.regainData/,
+        /ztePageScrollModule/,
+      ],
+    });
+  }
 }
 
 function initSentryMiddlewares(app) {
-  if (config.ENVIRONMENT !== "development") {
-    // Evite le spam sentry en local
-    initSentry();
-  }
+  initSentry();
 
   // The request handler must be the first middleware on the app
   app.use(Handlers.requestHandler());
@@ -91,11 +89,11 @@ function initSentryMiddlewares(app) {
 
 function _flattenStack(stack) {
   // Remove new lines and merge spaces to get 1 line log output
-  return stack.replace(/\n/g, " | ").replace(/\s+/g, ' ');
+  return stack.replace(/\n/g, " | ").replace(/\s+/g, " ");
 }
 
 function captureError(err, contexte) {
-  if (err.stack && config.ENABLE_FLATTEN_ERROR_LOG) {
+  if (err.stack && config.get("ENABLE_FLATTEN_ERROR_LOG")) {
     console.error("capture", _flattenStack(err.stack));
   } else {
     console.error("capture", err);
@@ -105,7 +103,7 @@ function captureError(err, contexte) {
 
 function capture(err, contexte) {
   if (!err) {
-    const msg = "Error not defined"
+    const msg = "Error not defined";
     console.error("capture", msg);
     sentryCaptureMessage(msg);
     return;
@@ -119,7 +117,7 @@ function capture(err, contexte) {
     console.error("capture", err.message);
     sentryCaptureMessage(err.message, contexte);
   } else {
-    const msg = "Error not defined well"
+    const msg = "Error not defined well";
     console.error("capture", msg);
     sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
@@ -129,7 +127,7 @@ function captureMessage(mess, contexte) {
     console.error("captureMessage", mess);
     sentryCaptureMessage(mess, contexte);
   } else {
-    const msg = "Message not defined"
+    const msg = "Message not defined";
     console.error("captureMessage", msg);
     sentryCaptureMessage(msg);
   }
