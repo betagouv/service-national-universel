@@ -22,11 +22,15 @@ function initRedisConnection() {
 export function initQueues() {
   const connection = initRedisConnection();
   queues.push(sendMailQueue.initQueue(connection));
-  queues.push(cronsQueue.initQueue(connection));
+  if (config.get("RUN_CRONS")) {
+    queues.push(cronsQueue.initQueue(connection));
+  }
 }
 
 export function scheduleRepeatableTasks() {
-  cronsQueue.scheduleCrons();
+  if (config.get("RUN_CRONS")) {
+    cronsQueue.scheduleCrons();
+  }
 }
 
 export async function closeQueues() {
@@ -36,7 +40,9 @@ export async function closeQueues() {
 export function initWorkers() {
   const connection = initRedisConnection();
   workers.push(sendMailQueue.initWorker(connection));
-  workers.push(cronsQueue.initWorker(connection));
+  if (config.get("RUN_CRONS")) {
+    workers.push(cronsQueue.initWorker(connection));
+  }
 }
 
 export async function closeWorkers() {

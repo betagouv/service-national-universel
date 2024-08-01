@@ -31,9 +31,7 @@ async function runTasks() {
 
   initQueues();
   initWorkers();
-  if (config.get("RUN_CRONS")) {
-    scheduleRepeatableTasks();
-  }
+  scheduleRepeatableTasks();
 
   const app = express();
 
