@@ -22,7 +22,7 @@ export default function MyClass({ classe }) {
     },
     {
       label: "Date de séjour",
-      value: formatDate(classe?.cohortData?.dateStart),
+      value: formatDate(classe?.cohortDetails?.dateStart),
     },
   ];
 

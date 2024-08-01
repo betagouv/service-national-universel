@@ -67,7 +67,7 @@ export default function View() {
 
   const getClasse = async () => {
     try {
-      const { ok, code, data: classe } = await api.get(`/cle/classe/${id}`);
+      const { ok, code, data: classe } = await api.get(`/cle/classe/${id}`, { withPopulate: true });
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }

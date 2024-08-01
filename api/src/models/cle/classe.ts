@@ -299,7 +299,7 @@ schema.virtual("ligne", {
   justOne: true,
 });
 
-schema.virtual("cohortData", {
+schema.virtual("cohortDetails", {
   ref: "cohort",
   localField: "cohort",
   foreignField: "name",
@@ -345,7 +345,7 @@ export type ClasseDocument<T = {}> = DocumentExtended<
     session?: SessionPhase1Document;
     pointDeRassemblement?: PointDeRassemblementDocument;
     ligne?: LigneBusDocument;
-    cohortData?: CohortDocument;
+    cohortDetails?: CohortDocument;
   } & T
 >;
 type SchemaExtended = ClasseDocument & UserExtension;
