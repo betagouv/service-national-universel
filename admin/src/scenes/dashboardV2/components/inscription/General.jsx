@@ -4,7 +4,7 @@ import { HorizontalBar } from "../../components/graphs";
 
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { academyList, getCohortNames, departmentToAcademy, REFERENT_ROLES, region2department, regionList, ROLES, getDepartmentNumber } from "snu-lib";
+import { academyList, departmentToAcademy, REFERENT_ROLES, region2department, regionList, ROLES, getDepartmentNumber } from "snu-lib";
 import api from "@/services/api";
 import { FilterDashBoard } from "../../components/FilterDashBoard";
 import StatutPhase from "../../components/inscription/StatutPhase";
@@ -70,7 +70,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
         id: "cohort",
         name: "Cohorte",
         fullValue: "Toutes",
-        options: getCohortNames().map((cohort) => ({ key: cohort, label: cohort })),
+        options: getCohortNameList(cohorts).map((cohort) => ({ key: cohort, label: cohort })),
         sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);

@@ -1,7 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
-import { getCohortNames } from "snu-lib";
 
 import esClient from "../../es";
 import anonymize from "../../anonymization/PlanDeTransport/ligneBus";
@@ -72,7 +71,6 @@ const schema = new Schema({
   cohort: {
     type: String,
     required: true,
-    enum: getCohortNames(),
     documentation: {
       description: "Cohorte de la ligne de bus",
     },

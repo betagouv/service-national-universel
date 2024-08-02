@@ -1,15 +1,13 @@
-const { YOUNG_STATUS, region2zone, oldSessions, getRegionForEligibility, regionsListDROMS, START_DATE_PHASE1, END_DATE_PHASE1, COHORT_TYPE } = require("snu-lib");
-const { InscriptionGoalModel } = require("../models");
-const { YoungModel } = require("../models");
-const { CohortModel } = require("../models");
+const { YOUNG_STATUS, region2zone, getRegionForEligibility, regionsListDROMS, START_DATE_PHASE1, END_DATE_PHASE1, COHORT_TYPE } = require("snu-lib");
+const { YoungModel, CohortModel, InscriptionGoalModel } = require("../models");
 
 async function getFilteredSessions(young, timeZoneOffset = null) {
-  const sessions2023 = await CohortModel.find();
+  const cohorts = await CohortModel.find({});
   const region = getRegionForEligibility(young);
 
-  const currentCohortYear = young.cohort ? new Date(sessions2023.find((c) => c.name === young.cohort)?.dateStart)?.getFullYear() : undefined;
+  const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart)?.getFullYear() : undefined;
 
-  const sessions = sessions2023.filter(
+  const sessions = cohorts.filter(
     (session) =>
       // if the young has already a cohort, he can only apply for the cohorts of the same year
       (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
@@ -28,9 +26,9 @@ async function getFilteredSessions(young, timeZoneOffset = null) {
 }
 
 async function getAllSessions(young) {
-  const sessions2023 = await CohortModel.find({});
+  const cohorts = await CohortModel.find({});
   const region = getRegionForEligibility(young);
-  const sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
+  const sessionsWithPlaces = await getPlaces(cohorts, region);
   const availableSessions = await getFilteredSessions(young);
   for (let session of sessionsWithPlaces) {
     session.isEligible = availableSessions.some((e) => e.name === session.name);
@@ -51,7 +49,7 @@ async function getFilteredSessionsForCLE() {
 }
 
 async function getPlaces(sessions, region) {
-  const sessions2023 = await CohortModel.find({});
+  const cohorts = await CohortModel.find({});
   const sessionNames = sessions.map(({ name }) => name);
   const goals = await InscriptionGoalModel.aggregate([{ $match: { region, cohort: { $in: sessionNames } } }, { $group: { _id: "$cohort", total: { $sum: "$max" } } }]);
   const agg = await YoungModel.aggregate([
@@ -73,16 +71,16 @@ async function getPlaces(sessions, region) {
     },
   ]);
 
-  const session2023Ids = sessions2023.map((s) => s._id.toString());
+  const cohortIds = cohorts.map((s) => s._id.toString());
   const sessionObj = sessions.map((session) => {
-    if (sessions2023.map((e) => e.name).includes(session.name)) {
+    if (cohorts.map((e) => e.name).includes(session.name)) {
       return { ...session.toObject() };
     }
     return session;
   });
 
   for (let session of sessionObj) {
-    if (session._id && session2023Ids.includes(session._id.toString())) {
+    if (session._id && cohortIds.includes(session._id.toString())) {
       session.numberOfCandidates = agg.find(({ _id }) => _id === session.name)?.candidates || 0;
       session.numberOfValidated = agg.find(({ _id }) => _id === session.name)?.validated || 0;
       session.goal = goals.find(({ _id }) => _id === session.name)?.total;

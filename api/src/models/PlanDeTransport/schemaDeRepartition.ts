@@ -1,8 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { getCohortNames } from "snu-lib";
-
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "../types";
 
 const MODELNAME = "schemaderepartition";
@@ -11,7 +9,6 @@ const schema = new Schema({
   cohort: {
     type: String,
     required: true,
-    enum: getCohortNames(),
     documentation: {
       description: "Cohorte",
     },

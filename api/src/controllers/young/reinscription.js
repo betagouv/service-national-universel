@@ -7,7 +7,7 @@ const { YoungModel } = require("../../models");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023 } = require("../../utils");
-const { canUpdateYoungStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1, getCohortNames, hasAccessToReinscription } = require("snu-lib");
+const { canUpdateYoungStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1, hasAccessToReinscription } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 
 /**
@@ -39,10 +39,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       schoolCountry: Joi.string().trim().allow(null, ""),
       schoolId: Joi.string().trim().allow(null, ""),
       zip: Joi.string().trim().allow(null, ""),
-      cohort: Joi.string()
-        .trim()
-        .valid(...getCohortNames(true, false, false))
-        .required(),
+      cohort: Joi.string().trim().required(),
       source: Joi.string().required(),
     }).validate({ ...req.body }, { stripUnknown: true });
 

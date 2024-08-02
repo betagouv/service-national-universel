@@ -26,16 +26,7 @@ const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const config = require("config");
-const {
-  canViewSchemaDeRepartition,
-  YOUNG_STATUS,
-  region2department,
-  getCohortNames,
-  canCreateSchemaDeRepartition,
-  canDeleteSchemaDeRepartition,
-  canEditSchemaDeRepartition,
-  getDepartmentNumber,
-} = require("snu-lib");
+const { canViewSchemaDeRepartition, YOUNG_STATUS, region2department, canCreateSchemaDeRepartition, canDeleteSchemaDeRepartition, canEditSchemaDeRepartition } = require("snu-lib");
 const { filteredRegionList } = require("./commons");
 const Joi = require("joi");
 const { YoungModel } = require("../../models");
@@ -50,9 +41,7 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { sendTemplate } = require("../../brevo");
 
 const schemaRepartitionBodySchema = Joi.object({
-  cohort: Joi.string()
-    .valid(...getCohortNames())
-    .required(),
+  cohort: Joi.string().required(),
   intradepartmental: Joi.string().valid("true", "false"),
   fromDepartment: Joi.string().trim().required(),
   fromRegion: Joi.string().trim().required(),
@@ -903,9 +892,7 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
   try {
     // --- vérification
     const bodySchema = Joi.object({
-      cohort: Joi.string()
-        .valid(...getCohortNames())
-        .required(),
+      cohort: Joi.string().required(),
       intradepartmental: Joi.string().valid("true", "false"),
       fromDepartment: Joi.string().trim().required(),
       fromRegion: Joi.string().trim().required(),

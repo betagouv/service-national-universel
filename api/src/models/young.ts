@@ -2,7 +2,7 @@ import mongoose, { Schema, Types, InferSchemaType } from "mongoose";
 import bcrypt from "bcryptjs";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
-import { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { ROLES_LIST, PHONE_ZONES_NAMES_ARR, YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 import esClient from "../es";
 import * as brevo from "../brevo";
 import config from "config";
@@ -216,7 +216,6 @@ const schema = new Schema({
   },
   cohort: {
     type: String,
-    enum: getCohortNames(),
     documentation: {
       description: "Cohorte",
     },

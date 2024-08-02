@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch, department2region, departmentList, getCohortNames, ES_NO_LIMIT } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, department2region, departmentList, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
@@ -190,10 +190,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     //Query params validation
     const { error: errorQuery, value: query } = Joi.object({
-      cohort: Joi.string()
-        .trim()
-        .allow(null)
-        .valid(...getCohortNames()),
+      cohort: Joi.string().trim().allow(null),
     }).validate(req.query, { stripUnknown: true });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 

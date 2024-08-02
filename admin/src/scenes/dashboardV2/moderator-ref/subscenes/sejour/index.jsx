@@ -9,7 +9,6 @@ import { getNewLink } from "@/utils";
 import { getCohortNameList } from "@/services/cohort.service";
 import { Page, Header, DropdownButton } from "@snu/ds/admin";
 import {
-  getCohortNames,
   ROLES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
@@ -104,7 +103,7 @@ export default function Index() {
         id: "cohort",
         name: "Cohorte",
         fullValue: "Toutes",
-        options: getCohortNames().map((cohort) => ({ key: cohort, label: cohort })),
+        options: getCohortNameList(cohorts).map((cohort) => ({ key: cohort, label: cohort })),
         sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);

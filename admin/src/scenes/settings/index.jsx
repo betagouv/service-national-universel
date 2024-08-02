@@ -33,7 +33,7 @@ export default function Settings() {
 
   const urlParams = new URLSearchParams(window.location.search);
 
-  const [cohort, setCohort] = useState(urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : null);
+  const cohort = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : "Février 2024 - C";
   const [isLoading, setIsLoading] = useState(true);
   const readOnly = !isSuperAdmin(user);
   const [noChange, setNoChange] = useState(true);
@@ -45,6 +45,7 @@ export default function Settings() {
     ...uselessSettings,
   });
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const getCohort = async () => {
     try {
@@ -71,12 +72,6 @@ export default function Settings() {
       toastr.error("Oups, une erreur est survenue lors de la récupération du séjour");
     }
   };
-
-  useEffect(() => {
-    if (!cohort) {
-      setCohort("Février 2024 - C");
-    }
-  }, []);
 
   useEffect(() => {
     if (!cohort) return;
@@ -149,14 +144,9 @@ export default function Settings() {
       <div className="flex w-full flex-col px-8 pb-8">
         <div className="flex items-center justify-between py-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrage dynamique</div>
-          <SelectCohort
-            cohort={cohort}
-            onChange={(cohortName) => {
-              setCohort(cohortName);
-              history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` });
-            }}
-          />
+          <SelectCohort cohort={cohort} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} />
         </div>
+        <button onClick={() => setCreateOpen(true)}>Créer une cohorte</button>
         <div className="flex w-full flex-col gap-8">
           {/* Informations générales */}
           <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">

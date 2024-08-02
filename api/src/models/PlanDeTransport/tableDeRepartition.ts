@@ -2,7 +2,6 @@ import mongoose, { Schema, InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import esClient from "../../es";
 import patchHistory from "mongoose-patch-history";
-import { getCohortNames } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "../types";
 
@@ -12,7 +11,6 @@ const schema = new Schema({
   cohort: {
     type: String,
     required: true,
-    enum: getCohortNames(),
     documentation: {
       description: "Cohorte",
     },
