@@ -1,8 +1,8 @@
 import { apiURL } from "@/config";
 import { translateColoration } from "snu-lib";
 
-export const fetchClass = (id) =>
-  fetch(`${apiURL}/cle/classe/${id}`)
+export const fetchClass = (id, params = {}) =>
+  fetch(`${apiURL}/cle/classe/${id}?${new URLSearchParams(params).toString()}`)
     .then((res) => res.json())
     .then((res) => {
       if (!res.ok) throw new Error(res.code);
@@ -10,7 +10,7 @@ export const fetchClass = (id) =>
     });
 
 export function formatClass(data) {
-  const { name, status, coloration, grades, referents, etablissement, cohort } = data;
+  const { name, status, coloration, grades, referents, etablissement, cohort, cohortDetails } = data;
   const [{ fullName: referent }] = referents;
   const classe = {
     id: data._id,
@@ -21,6 +21,7 @@ export function formatClass(data) {
     grades,
     referent,
     etablissement,
+    cohortDetails,
   };
   return classe;
 }

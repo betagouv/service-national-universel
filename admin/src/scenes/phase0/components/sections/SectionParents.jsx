@@ -340,7 +340,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                     transformer={translateEtbalissementSector}
                   />
                   <Field name="etablissementCity" label="Ville de l'établissement" value={data?.etablissement?.city} mode="readonly" className="mb-[16px]" young={young} />
-                  <Field name="classeGrade" label="Classe" value={data?.classe?.grade} mode="readonly" className="mb-[16px]" young={young} transformer={translateGrade} />
+                  <Field name="classeGrade" label="Classe" value={young?.grade} mode="readonly" className="mb-[16px]" young={young} transformer={translateGrade} />
                   <div className="flex items-center">
                     <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} className="mr-2" />
                     <p className="text-xs font-base text-gray-900 mr-1">Situation de l’élève différente de celle de la Classe engagée</p>

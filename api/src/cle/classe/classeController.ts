@@ -47,7 +47,7 @@ import {
 
 import { UserRequest } from "../../controllers/request";
 
-import { deleteClasse, generateConvocationsByClasseId } from "./classeService";
+import { deleteClasse, generateConvocationsByClasseId, getClasseById } from "./classeService";
 import {
   findCohesionCentersForClasses,
   findPdrsForClasses,
@@ -59,6 +59,11 @@ import { findOrCreateReferent, inviteReferent } from "../../services/cle/referen
 import emailsEmitter from "../../emails";
 import ClasseStateManager from "./stateManager";
 import { validateId } from "../../utils/validator";
+
+const querySchema = Joi.object({
+  withDetail: Joi.boolean().default(true),
+  // Ajoutez d'autres paramètres si nécessaire
+});
 
 const router = express.Router();
 router.post(
@@ -356,21 +361,20 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    // We need to populate the model with the 2 virtuals etablissement and referents
-    const data = await ClasseModel.findById(value)
-      .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
-      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })
-      .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
-      .populate({ path: "session", options: { select: { _id: 1 } } })
-      .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } });
-    if (!data) {
-      captureMessage("Error finding classe with id : " + JSON.stringify(value));
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // Validate and transform query parameters
+    const { error: queryError, value: queryParams } = querySchema.validate(req.query);
+    if (queryError) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
     }
+
+    const data = await getClasseById(value, queryParams?.withDetails);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
+    if (error.message === "Classe not found") {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });

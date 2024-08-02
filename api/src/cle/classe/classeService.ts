@@ -80,3 +80,25 @@ export const getEstimatedSeatsByEtablissement = async (etablissement: Etablissem
   const classes = await ClasseModel.find({ etablissementId: etablissement._id });
   return classes.reduce((classeNumberAcc: number, classe: ClasseDocument) => classeNumberAcc + classe.estimatedSeats, 0);
 };
+
+export const getClasseById = async (classeId, withPopulate = true) => {
+  let query = ClasseModel.findById(classeId);
+
+  if (withPopulate) {
+    query = query
+      .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
+      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })
+      .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
+      .populate({ path: "session", options: { select: { _id: 1 } } })
+      .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
+      .populate({ path: "cohortDetails", options: { select: { dateStart: 1 } } });
+  }
+
+  const classe = await query.exec();
+
+  if (!classe) {
+    return null;
+  }
+
+  return classe;
+};

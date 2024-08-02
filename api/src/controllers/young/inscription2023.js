@@ -93,6 +93,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       schoolRegion: "",
       schoolCountry: "",
       schoolId: "",
+      grade: "",
       zip: "",
       ...value,
       ...(value.livesInFrance === "true"
