@@ -1,4 +1,5 @@
 export type CohortDto = {
+  _id?: string;
   snuId: string;
   name: string;
   type: string;

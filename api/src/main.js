@@ -48,8 +48,7 @@ async function runTasks() {
       }),
     );
   }
-  const monitor = await initMonitor();
-  app.use("/", monitor.router);
+  app.use("/", initMonitor());
 
   // * Use Terminus for graceful shutdown when using Docker
   const server = http.createServer(app);

@@ -2,7 +2,7 @@ import Joi from "joi";
 import { UpdateCohortDto } from "snu-lib";
 
 export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<UpdateCohortDto> => {
-  return Joi.object<UpdateCohortDto, true, UpdateCohortDto>({
+  return Joi.object<UpdateCohortDto, true, Omit<UpdateCohortDto, "_id">>({
     // Informations générales
     dateStart: Joi.date().required(),
     dateEnd: Joi.date().required(),

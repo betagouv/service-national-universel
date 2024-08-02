@@ -66,7 +66,7 @@ export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
     subRole: SUB_ROLES.referent_etablissement,
   });
   const invitations: InvitationResult[] = [];
-  let processCounter = 0;
+  let processCounter = 1;
   for (const chefEtablissement of chefsEtablissementsToSendInvitation) {
     try {
       console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", chefsEtablissementsToSendInvitation.length);
