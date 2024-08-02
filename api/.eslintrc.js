@@ -19,6 +19,7 @@ module.exports = {
     "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/ban-ts-comment": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
+    "jest/no-mocks-import": "warn",
   },
   plugins: ["@typescript-eslint", "eslint-plugin-import", "jest", "prettier"],
 };

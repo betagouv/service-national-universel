@@ -1,6 +1,7 @@
 import config from "config";
-import { BullMonitorExpress } from "@bull-monitor/express";
-import { BullAdapter } from "@bull-monitor/root/dist/bull-adapter";
+import { createBullBoard } from "@bull-board/api";
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+import { ExpressAdapter } from "@bull-board/express";
 import { initQueue, initWorker } from "./sendMailQueue";
 import { Queue, Worker } from "bullmq";
 import Redis from "ioredis";
@@ -34,14 +35,13 @@ export async function closeWorkers() {
   return Promise.all(workers.map((w) => w.close()));
 }
 
-export async function initMonitor() {
-  const monitor = new BullMonitorExpress({
-    queues: queues.map((q: any) => new BullAdapter(q)),
-    metrics: {
-      collectInterval: { hours: 1 },
-      maxMetrics: 100,
-    },
+export function initMonitor() {
+  const serverAdapter = new ExpressAdapter();
+
+  createBullBoard({
+    queues: queues.map((q) => new BullMQAdapter(q)),
+    serverAdapter: serverAdapter,
   });
-  await monitor.init();
-  return monitor;
+
+  return serverAdapter.getRouter();
 }
