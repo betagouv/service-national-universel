@@ -81,10 +81,10 @@ export const getEstimatedSeatsByEtablissement = async (etablissement: Etablissem
   return classes.reduce((classeNumberAcc: number, classe: ClasseDocument) => classeNumberAcc + classe.estimatedSeats, 0);
 };
 
-export const getClasseById = async (classeId, withDetail = true) => {
+export const getClasseById = async (classeId, withPopulate = true) => {
   let query = ClasseModel.findById(classeId);
 
-  if (withDetail) {
+  if (withPopulate) {
     query = query
       .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
       .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })

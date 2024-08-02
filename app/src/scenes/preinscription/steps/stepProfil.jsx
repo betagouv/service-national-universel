@@ -9,7 +9,7 @@ import plausibleEvent from "../../../services/plausible";
 import { getPasswordErrorMessage } from "../../../utils";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
-import { PHONE_ZONES, isPhoneNumberWellFormated, FEATURES_NAME, isFeatureEnabled, translate, YOUNG_SOURCE } from "snu-lib";
+import { PHONE_ZONES, isPhoneNumberWellFormated, FEATURES_NAME, isFeatureEnabled, translate, YOUNG_SOURCE, translateGrade } from "snu-lib";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import IconFrance from "@/assets/IconFrance";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
@@ -60,19 +60,6 @@ export default function StepProfil() {
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
   const trimmedEmail = data?.email?.trim();
   const trimmedEmailConfirm = data?.emailConfirm?.trim();
-
-  // const optionsScolarite = [
-  //   { value: "4eme", label: "4ème" },
-  //   { value: "3eme", label: "3ème" },
-  //   { value: "2ndePro", label: "2de professionnelle" },
-  //   { value: "2ndeGT", label: "2de générale et technologique" },
-  //   { value: "1erePro", label: "1ère professionnelle" },
-  //   { value: "1ereGT", label: "1ère générale et technologique" },
-  //   { value: "TermPro", label: "Terminale professionnelle" },
-  //   { value: "TermGT", label: "Terminale générale et technologique" },
-  //   { value: "CAP", label: "CAP" },
-  //   { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
-  // ];
 
   const validate = () => {
     let errors = {};
@@ -242,7 +229,7 @@ export default function StepProfil() {
           <SearchableSelect
             label="Niveau de scolarité"
             value={data.grade}
-            options={classe?.grades.map((grade) => ({ value: grade, label: grade }))}
+            options={classe?.grades.map((grade) => ({ value: grade, label: translateGrade(grade) }))}
             onChange={(value) => {
               setData({ ...data, grade: value });
             }}

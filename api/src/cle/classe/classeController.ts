@@ -367,7 +367,7 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
     }
 
-    const data = await getClasseById(value, queryParams);
+    const data = await getClasseById(value, queryParams?.withDetails);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
