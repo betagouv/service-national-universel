@@ -2,14 +2,14 @@ export type CohortDto = {
   snuId: string;
   name: string;
   type: string;
-  dateStart: string;
-  dateEnd: string;
-  inscriptionStartDate: string;
-  inscriptionEndDate: string;
-  reInscriptionStartDate?: string | null;
-  reInscriptionEndDate?: string | null;
-  inscriptionModificationEndDate?: string;
-  instructionEndDate: string;
+  dateStart: Date;
+  dateEnd: Date;
+  inscriptionStartDate: Date;
+  inscriptionEndDate: Date;
+  reInscriptionStartDate?: Date | null;
+  reInscriptionEndDate?: Date | null;
+  inscriptionModificationEndDate?: Date;
+  instructionEndDate: Date;
   sessionEditionOpenForReferentRegion?: boolean;
   sessionEditionOpenForReferentDepartment?: boolean;
   sessionEditionOpenForTransporter?: boolean;
@@ -54,8 +54,8 @@ export type CohortDto = {
   youngCheckinForDepartmentReferent?: boolean;
   daysToValidate?: number | null;
   uselessInformation?: Record<string, any> | null;
-  validationDate?: string | null;
-  validationDateForTerminaleGrade?: string | null;
+  validationDate?: Date | null;
+  validationDateForTerminaleGrade?: Date | null;
   daysToValidateForTerminalGrade?: number | null;
   informationsConvoyage?: {
     editionOpenForReferentRegion?: boolean;
@@ -67,6 +67,6 @@ export type CohortDto = {
 export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId">;
 
 type ToFromDate = {
-  from?: string | null;
-  to?: string | null;
+  from?: string | Date | null;
+  to?: string | Date | null;
 };
