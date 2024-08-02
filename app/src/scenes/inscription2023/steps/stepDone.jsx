@@ -16,6 +16,7 @@ import EngagementPrograms from "@/scenes/preinscription/components/EngagementPro
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
 import JDMA from "@/components/JDMA";
+import { FaClock } from "react-icons/fa6";
 import { Button, SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepWaitingConsent() {
@@ -87,49 +88,49 @@ export default function StepWaitingConsent() {
         </DSFRContainer>
       ) : (
         <>
-          <DSFRContainer title="Bravo, vous avez terminé votre inscription.">
+          <DSFRContainer title={`${young?.parent1FirstName} ${young?.parent1LastName} a reçu un mail pour approuver votre demande d'inscription.`}>
             {error?.text && <Error {...error} onClose={() => setError({})} />}
             <p className="mt-2 text-sm text-[#666666]">
               {isCLE
-                ? "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à votre établissement scolaire pour le valider."
-                : "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider."}
+                ? "Lorsque votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à votre établissement scolaire pour le valider."
+                : "Lorsque votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider."}
             </p>
 
             <div className="mt-4 flex flex-col gap-1 border-[1px] border-b-4 border-[#E5E5E5] border-b-[#000091] p-4">
-              <div className="text-base font-bold text-[#161616]">En attente du consentement de :</div>
-              <div className="text-base text-[#3A3A3A] ">
-                {young?.parent1FirstName} {young.parent1LastName}
+              <div className="flex text-base w-fit rounded-md px-2 py-1 font-bold bg-[#E8EDFF] text-[#0063CB] mb-2">
+                <FaClock className="mt-1 mr-2" />
+                Consentement en attente
               </div>
-              <div className="text-sm text-[#666666] ">{young?.parent1Email}</div>
+              <div className="text-sm text-[#666666]">
+                Un email à été envoyé à <strong className="text-black">{young?.parent1Email}</strong>
+              </div>
               <div className="mt-2 flex justify-between">
                 <Button
                   className="mt-2 h-10 w-32 bg-[#000091] text-base text-white disabled:bg-[#E5E5E5]  disabled:text-[#929292] "
                   disabled={disabled}
                   onClick={() => handleClick()}>
-                  Relancer
+                  Renvoyer l'email
                 </Button>
                 <img className="translate-y-4" src={Avatar} />
               </div>
             </div>
-
-            {!isCLE && (
-              <div className="my-6 p-8 flex flex-col md:flex-row gap-6 justify-between bg-[#F5F5FD]">
-                <div>
-                  <p className="font-semibold">Comment s'est passé votre inscription ?</p>
-                  <p className="mt-2 text-sm">Partagez votre expérience et contribuez à l'amélioration de nos services</p>
-                </div>
-                <JDMA id={3504} />
-              </div>
-            )}
-
             <span className="flex items-center justify-end">
               <Link className="mt-6 flex items-center justify-end" to="/inscription2023/confirm">
                 <RiEditFill className="h-5 w-5" />
                 Modifier mes informations
               </Link>
             </span>
+            {!isCLE && (
+              <div className="flex flex-col md:flex-row gap-6 justify-between mt-4 md:mb-4 p-4 bg-[#F5F5FD]">
+                <div className="flex flex-col justify-start items-start">
+                  <p className=" mb-1 font-semibold">Comment s'est passé votre inscription ?</p>
+                  <p className="text-sm">Partagez votre expérience et contribuez à l'amélioration de nos services</p>
+                </div>
+                <JDMA id={3504} />
+              </div>
+            )}
 
-            <SignupButtons labelNext="Revenir à l'accueil" onClickNext={logout} />
+            {/* <SignupButtons labelNext="Revenir à l'accueil" onClickNext={logout} /> */}
           </DSFRContainer>
         </>
       )}
