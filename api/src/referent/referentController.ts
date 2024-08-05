@@ -608,7 +608,7 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
     const { error, value: payload } = Joi.object()
       .keys({
         youngIds: Joi.array().items(idSchema()).min(1).required(),
-        status: Joi.string().valid("VALIDATED").required(),
+        status: Joi.string().valid(YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED).required(),
       })
       .validate(req.body);
 

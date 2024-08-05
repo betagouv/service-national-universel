@@ -17,7 +17,7 @@ export default function StatsInfos({ classe, user, studentStatus, totalSeatsTake
       title="Suivi de la classe"
       actions={[
         <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
-          <Button type="tertiary" title="Voir les élèves" />
+          <Button type="tertiary" title="Voir la liste des élèves" />
         </Link>,
       ]}>
       <div className="flex justify-between">
