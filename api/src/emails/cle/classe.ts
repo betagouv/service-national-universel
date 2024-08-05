@@ -114,7 +114,7 @@ export default function (emailsEmitter) {
         }
         const nbreClasseAValider = await getNumberOfClassesByEtablissement(etablissement);
         const effectifPrevisionnel = await getEstimatedSeatsByEtablissement(etablissement);
-        await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE, {
+        await sendTemplate(SENDINBLUE_TEMPLATES.CLE.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE, {
           emailTo: [{ name: `${chefEtablissement.firstName} ${chefEtablissement.lastName}`, email: chefEtablissement.email }],
           params: {
             cta: `${config.ADMIN_URL}/creer-mon-compte?token=${chefEtablissement.invitationToken}`,
