@@ -1,19 +1,31 @@
 import { ReferentCreatedBy, ROLES, SUB_ROLES, InvitationType } from "snu-lib";
-import { ReferentModel, IEtablissement } from "../../models";
-import { IReferent, ReferentMetadata } from "../../models/referentType";
+import { ReferentModel, ReferentType, EtablissementType } from "../../models";
 import { IAppelAProjet } from "./appelAProjetType";
 
 export class AppelAProjetReferentService {
-  referents: Partial<IReferent & { operation: "create" | "none"; uai?: string }>[] = [];
-  etablissements: Partial<IEtablissement>[] = [];
+  referents: Partial<ReferentType & { operation: "create" | "none"; uai?: string }>[] = [];
+  etablissements: Partial<EtablissementType>[] = [];
 
   async processReferentEtablissement(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
     const referentEtablissement = await ReferentModel.findOne({ email: appelAProjet.referentEtablissement.email });
     const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentEtablissement.email);
     const alreadyProcessedEtablissement = this.etablissements.find((etablissement) => etablissement.uai === appelAProjet.etablissement.uai);
-    const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
+    const referentMetadata: ReferentType["metadata"] = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
+
+    if (alreadyProcessedEtablissement) {
+      console.log(
+        "AppelAProjetReferentService - processReferentEtablissement() - alreadyProcessedEtablissement: ",
+        appelAProjet.referentEtablissement.email,
+        alreadyProcessedEtablissement.referentEtablissementIds![0],
+        alreadyProcessedEtablissement.uai,
+      );
+      return alreadyProcessedEtablissement.referentEtablissementIds![0];
+    }
 
     if (referentEtablissement) {
+      if (referentEtablissement.role !== ROLES.ADMINISTRATEUR_CLE || referentEtablissement.subRole !== SUB_ROLES.referent_etablissement) {
+        throw new Error(`Le référent ${referentEtablissement.email} n'a pas le role de chef établissement`);
+      }
       if (save && referentEtablissement.metadata.createdBy !== ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
         referentEtablissement.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
         await referentEtablissement.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
@@ -30,15 +42,6 @@ export class AppelAProjetReferentService {
         this.etablissements.push({ uai: appelAProjet.etablissement?.uai, referentEtablissementIds: [referentEtablissement.id] });
       }
       return referentEtablissement.id;
-    }
-    if (alreadyProcessedEtablissement) {
-      console.log(
-        "AppelAProjetReferentService - processReferentEtablissement() - alreadyProcessedEtablissement: ",
-        appelAProjet.referentEtablissement.email,
-        alreadyProcessedEtablissement.referentEtablissementIds![0],
-        alreadyProcessedEtablissement.uai,
-      );
-      return alreadyProcessedEtablissement.referentEtablissementIds![0];
     }
 
     let newReferent = {
@@ -65,14 +68,18 @@ export class AppelAProjetReferentService {
   async processReferentClasse(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
     const existingReferentClasse = await ReferentModel.findOne({ email: appelAProjet.referentClasse.email });
     const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentClasse.email);
-    const referentMetadata: ReferentMetadata = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
+    const referentMetadata: ReferentType["metadata"] = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (existingReferentClasse) {
+      if (existingReferentClasse.role !== ROLES.REFERENT_CLASSE || !!existingReferentClasse.subRole) {
+        throw new Error(`Le référent ${existingReferentClasse.email} n'a pas le role referent de classe`);
+      }
       if (!hasAlreadyBeenProcessed) {
         this.referents.push({
           _id: existingReferentClasse._id,
           email: existingReferentClasse.email,
           role: existingReferentClasse.role,
+          subRole: existingReferentClasse.subRole,
           operation: "none",
           uai: appelAProjet.etablissement?.uai,
         });

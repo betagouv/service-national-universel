@@ -6,7 +6,6 @@ import ChevronDown from "../../../../assets/icons/ChevronDown";
 import Sun from "../../../../assets/icons/Sun";
 import IconDomainRounded from "../../../../components/IconDomainRounded";
 import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, translate as t, TRANSPORT } from "../../../../utils";
-import ModalPreference from "../../components/ModalPreference";
 import RankingPeriod from "../../components/rankingPeriod";
 import Pencil from "../../../../assets/icons/Pencil";
 import Loader from "../../../../components/Loader";
@@ -70,7 +69,7 @@ export default function Preferences({
   return savePreference ? (
     <Loader />
   ) : (
-    <div className="mx-5 flex flex-col">
+    <div className="mx-5 flex flex-col pb-16">
       <div className="mt-3 flex w-full flex-row items-start gap-4">
         {!editPreference ? (
           <div className="w-1/2 rounded-lg border-[1px] border-gray-300 px-3 py-2 ">
@@ -377,82 +376,6 @@ export default function Preferences({
       <div className="flex justify-center">
         {editPreference && errorMessage.transport && <div className="mt-1 flex w-1/3 justify-start text-xs text-red-500">{errorMessage.transport}</div>}
       </div>
-
-      <div className="mt-5 flex w-full flex-col items-center justify-center gap-4 pb-14">
-        <div className="text-sm font-bold leading-5">Périmètre de recherche</div>
-        <div className="mt-3 flex items-center justify-center gap-10">
-          <div className="flex items-center justify-center gap-4">
-            <input
-              type="checkbox"
-              className={`h-4 w-4 ${!editPreference ? "cursor-not-allowed" : "cursor-pointer"}`}
-              checked={data.mobilityNearHome === "true"}
-              disabled={!editPreference && data.mobilityNearHome !== "true"}
-              onChange={(e) => editPreference && setData({ ...data, mobilityNearHome: e.target.checked ? "true" : "false" })}
-            />
-            <div className="flex flex-col">
-              <div className={`text-sm ${data.mobilityNearHome === "true" ? "text-gray-700" : "text-gray-400"}`}>Autour de l’adresse principale</div>
-              <div className={`text-sm ${data.mobilityNearHome === "true" ? "text-gray-700" : "text-gray-400"}`}>{young.city}</div>
-            </div>
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <input
-              type="checkbox"
-              className={`h-4 w-4 ${!editPreference ? "cursor-not-allowed" : "cursor-pointer"}`}
-              disabled={!editPreference && data.mobilityNearSchool !== "true"}
-              checked={data.mobilityNearSchool === "true"}
-              onChange={(e) => editPreference && setData({ ...data, mobilityNearSchool: e.target.checked ? "true" : "false" })}
-            />
-            <div className="flex flex-col">
-              <div className={`text-sm ${data.mobilityNearSchool === "true" ? "text-gray-700" : "text-gray-400"}`}>Autour de l’établissement</div>
-              <div className={`text-sm ${data.mobilityNearSchool === "true" ? "text-gray-700" : "text-gray-400"}`}>{young.schoolCity}</div>
-            </div>
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <input
-              type="checkbox"
-              className={`h-4 w-4 ${!editPreference ? "cursor-not-allowed" : "cursor-pointer"}`}
-              disabled={!editPreference && data.mobilityNearRelative !== "true"}
-              checked={data.mobilityNearRelative === "true"}
-              onChange={(e) => {
-                if (!editPreference) return;
-                setData({ ...data, mobilityNearRelative: e.target.checked ? "true" : "false" });
-                if (e.target.checked && !hasRelativeAddress) setModal({ isOpen: true });
-              }}
-            />
-            <div className="flex flex-col">
-              <div className={`text-sm ${data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"}`}>Autour de l’adresse d’un proche</div>
-              {hasRelativeAddress ? (
-                <div className={`text-sm ${data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"}`}>
-                  {data.mobilityNearRelativeCity}{" "}
-                  {editPreference ? (
-                    <span className="cursor-pointer text-xs hover:text-blue-600 hover:underline hover:decoration-blue-600" onClick={() => setModal({ isOpen: true })}>
-                      (Modifier)
-                    </span>
-                  ) : null}
-                </div>
-              ) : (
-                <div
-                  className={`text-sm ${editPreference ? "cursor-pointer hover:text-blue-600 hover:underline hover:decoration-blue-600" : ""} ${
-                    data.mobilityNearRelative === "true" ? "text-gray-700" : "text-gray-400"
-                  }`}
-                  onClick={() => editPreference && setModal({ isOpen: true })}>
-                  {editPreference ? "Renseigner une adresse" : "Aucune adresse renseignée"}
-                </div>
-              )}
-              {editPreference && errorMessage.mobilityNearRelative && <div className="mt-1 flex justify-start text-xs text-red-500">{errorMessage.mobilityNearRelative}</div>}
-            </div>
-          </div>
-        </div>
-      </div>
-      {editPreference ? (
-        <div className="flex items-center justify-end gap-4 pb-14">
-          <div className="flex h-[32px] items-center gap-2 rounded-[28px] bg-blue-100 px-[9px] py-[7px] hover:scale-105" onClick={() => onSubmit()}>
-            <Pencil className="h-4 w-4 text-blue-600" />
-            <div className="cursor-pointer text-xs font-medium text-blue-600">Enregistrer les changements</div>
-          </div>
-        </div>
-      ) : null}
-      <ModalPreference isOpen={modal?.isOpen} onCancel={() => setModal({ isOpen: false })} data={data} setData={setData} setModal={setModal} />
     </div>
   );
 }

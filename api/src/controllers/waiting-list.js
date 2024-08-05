@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { capture } = require("../sentry");
-const WaitingListModel = require("../models/waitingList");
+const { WaitingListModel } = require("../models");
 const { ERRORS } = require("../utils");
 const { validateWaitingList } = require("../utils/validator");
 const { sendTemplate } = require("../brevo");

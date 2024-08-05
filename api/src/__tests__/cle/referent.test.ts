@@ -1,12 +1,19 @@
-import { dbClose, dbConnect } from "../helpers/db";
-import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
-import { ROLES, InvitationType } from "snu-lib";
-import { UserDto } from "snu-lib/src/dto";
-import getAppHelper from "../helpers/app";
 import request from "supertest";
-import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult } from "../../services/cle/referent";
 import passport from "passport";
-import { SUB_ROLES } from "snu-lib";
+import { fakerFR as faker } from "@faker-js/faker";
+
+import { ROLES, SUB_ROLES, InvitationType } from "snu-lib";
+import { UserDto } from "snu-lib/src/dto";
+
+import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
+import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult } from "../../services/cle/referent";
+
+import { dbClose, dbConnect } from "../helpers/db";
+import getAppHelper from "../helpers/app";
+import { createReferentHelper } from "../helpers/referent";
+import { getNewSignupReferentFixture } from "../fixtures/referent";
+import { createEtablissement } from "../helpers/etablissement";
+import { createFixtureEtablissement } from "../fixtures/etablissement";
 
 jest.mock("../../brevo", () => ({
   ...jest.requireActual("../../brevo"),
@@ -15,7 +22,7 @@ jest.mock("../../brevo", () => ({
 
 const user = {} as UserDto;
 
-describe("Referent Service", () => {
+describe("Cle Referent", () => {
   beforeAll(dbConnect);
   afterAll(dbClose);
 
@@ -37,7 +44,7 @@ describe("Referent Service", () => {
 
       const etablissement = await EtablissementModel.create({
         name: "Example School",
-        referentEtablissementIds: [referent._id],
+        referentEtablissementIds: [referent!._id],
         department: "Example Department",
         region: "Example Region",
         academy: "Example Academy",
@@ -50,9 +57,9 @@ describe("Referent Service", () => {
       await ClasseModel.create({
         name: "Mock Class",
         uniqueKeyAndId: "MOCK123",
-        etablissementId: etablissement._id,
+        etablissementId: etablissement!._id,
         cohort: "2022",
-        referentClasseIds: [referent._id],
+        referentClasseIds: [referent!._id],
         uniqueKey: "UAI_DATE_123",
         uniqueId: "DATE_1234",
         estimatedSeats: 30,
@@ -66,12 +73,12 @@ describe("Referent Service", () => {
         type: "FULL",
       });
 
-      await doInviteChefEtablissement(referent, user);
-      const updatedReferent = await ReferentModel.findOne({ email: referent.email });
+      await doInviteChefEtablissement(referent!, user);
+      const updatedReferent = await ReferentModel.findOne({ email: referent!.email });
 
-      expect(updatedReferent.invitationToken).toBeDefined();
-      expect(updatedReferent.invitationToken.length).toBeGreaterThanOrEqual(36);
-      expect(updatedReferent.invitationExpires).toBeDefined();
+      expect(updatedReferent!.invitationToken).toBeDefined();
+      expect(updatedReferent!.invitationToken.length).toBeGreaterThanOrEqual(36);
+      expect(updatedReferent!.invitationExpires).toBeDefined();
     });
   });
 
@@ -138,20 +145,21 @@ describe("Referent Service", () => {
 
       for (const referent of referents) {
         const updatedReferent = await ReferentModel.findOne({ email: referent.email });
-        expect(updatedReferent.invitationToken).toBeDefined();
-        expect(updatedReferent.invitationToken.length).toBeGreaterThanOrEqual(36);
-        expect(updatedReferent.invitationExpires).toBeDefined();
+        expect(updatedReferent!.invitationToken).toBeDefined();
+        expect(updatedReferent!.invitationToken.length).toBeGreaterThanOrEqual(36);
+        expect(updatedReferent!.invitationExpires).toBeDefined();
       }
       expect(result).toEqual(expect.arrayContaining(expectedInvitation));
     });
   });
 });
 
-describe("POST /api/cle/referent/send-invitation-chef-etablissement", () => {
+describe("POST /cle/referent/send-invitation-chef-etablissement", () => {
   beforeAll(dbConnect);
   afterAll(dbClose);
   beforeEach(async () => {
     jest.clearAllMocks();
+    // @ts-ignore
     passport.user.subRole = null;
     jest.mock("../../services/cle/referent", () => ({
       ...jest.requireActual("../../services/cle/referent"),
@@ -164,7 +172,9 @@ describe("POST /api/cle/referent/send-invitation-chef-etablissement", () => {
   });
 
   it("should return 200 OK and the list of sent invitations", async () => {
+    // @ts-ignore
     passport.user.role = ROLES.ADMIN;
+    // @ts-ignore
     passport.user.subRole = "god";
 
     const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();
@@ -177,5 +187,60 @@ describe("POST /api/cle/referent/send-invitation-chef-etablissement", () => {
 
     expect(res.statusCode).toEqual(403);
     expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });
+  });
+});
+
+describe("POST /cle/referent/invite-coordonnateur", () => {
+  beforeAll(dbConnect);
+  afterAll(dbClose);
+  it("should return 200 OK when invite is successful (chef etablissement)", async () => {
+    const referent = await createReferentHelper(getNewSignupReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
+    await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referent._id] }));
+    const res = await request(getAppHelper({ _id: referent._id, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
+      .post("/cle/referent/invite-coordonnateur")
+      .send({
+        email: faker.internet.email().toLowerCase(),
+        firstName: "Chef",
+        lastName: "Etab",
+      });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty("ok", true);
+  });
+
+  it("should return 200 OK when invite is successful (admin)", async () => {
+    const referent = await createReferentHelper(getNewSignupReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
+    const etablissement = await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referent._id] }));
+    const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/referent/invite-coordonnateur")
+      .send({
+        email: faker.internet.email().toLowerCase(),
+        firstName: "Admin",
+        lastName: "Admin",
+        etablissementId: etablissement._id,
+      });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty("ok", true);
+  });
+
+  it("should return 400 Bad Request when request body is invalid", async () => {
+    let res = await request(getAppHelper()).post("/cle/referent/invite-coordonnateur").send({
+      invalid: "invalid",
+    });
+    expect(res.statusCode).toEqual(400);
+
+    res = await request(getAppHelper()).post("/cle/referent/invite-coordonnateur").send({
+      firstName: "firstName",
+      lastName: "lastName",
+      email: "invalid-email",
+    });
+    expect(res.statusCode).toEqual(400);
+
+    res = await request(getAppHelper()).post("/cle/referent/invite-coordonnateur").send({
+      lastName: "lastName",
+      email: faker.internet.email().toLowerCase(),
+    });
+    expect(res.statusCode).toEqual(400);
   });
 });

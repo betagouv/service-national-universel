@@ -9,7 +9,7 @@ import { capture } from "../../sentry";
 import { generateCSVStream } from "../../services/fileService";
 import archiver from "archiver";
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
-import { FeatureFlagName } from "../../models/featureFlagType";
+import { FeatureFlagName } from "../../models/featureFlag";
 import { uploadFile } from "../../utils";
 
 const router = express.Router();
@@ -120,4 +120,5 @@ router.post(
     }
   },
 );
-module.exports = router;
+
+export default router;

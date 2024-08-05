@@ -4,11 +4,8 @@ import passport from "passport";
 
 import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone } from "snu-lib";
 
-import CohortModel from "../models/cohort";
-import ClasseModel from "../models/cle/classe";
-import YoungModel from "../models/young";
+import { CohortModel, ClasseModel, YoungModel, SessionPhase1Model } from "../models";
 import ClasseStateManager from "../cle/classe/stateManager";
-import SessionPhase1Model from "../models/sessionPhase1";
 import { capture } from "../sentry";
 import { ERRORS, getFile, deleteFile } from "../utils";
 import { decrypt } from "../cryptoUtils";
@@ -189,8 +186,8 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey].setHours(0, 0, 0, 0));
-    const exportAvailableUntil = new Date(cohort.dsnjExportDates[exportKey]);
+    const exportAvailableFrom = new Date(cohort.dsnjExportDates![exportKey].setHours(0, 0, 0, 0));
+    const exportAvailableUntil = new Date(cohort.dsnjExportDates![exportKey]);
     exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
     const now = new Date();
 

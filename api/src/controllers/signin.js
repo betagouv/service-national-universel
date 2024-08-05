@@ -8,8 +8,7 @@ const config = require("config");
 const { serializeYoung, serializeReferent } = require("../utils/serializer");
 const { ERRORS } = require("../utils");
 
-const Young = require("../models/young");
-const Referent = require("../models/referent");
+const { YoungModel, ReferentModel } = require("../models");
 const { capture } = require("../sentry");
 const { checkJwtSigninVersion } = require("../jwt-options");
 
@@ -56,13 +55,13 @@ router.get("/token", async (req, res) => {
     if (error || !checkJwtSigninVersion(value)) return res.status(401).json({ ok: false, user: { restriction: "public" } });
     delete value.__v;
 
-    const young = await Young.findOne(value);
+    const young = await YoungModel.findOne(value);
     if (young) {
       young.set({ lastActivityAt: Date.now() });
       await young.save();
       return res.status(200).send({ ok: true, user: { ...serializeYoung(young, young), allowedRole: "young" } });
     }
-    const referent = await Referent.findOne(value);
+    const referent = await ReferentModel.findOne(value);
     if (referent) {
       referent.set({ lastActivityAt: Date.now() });
       await referent.save();

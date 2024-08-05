@@ -1,10 +1,11 @@
 import { appURL, environment } from "@/config";
 import React from "react";
+import LogoSNU from "../assets/logo-snu.png";
 
 export default function FallbackComponent({ error, componentStack }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-1 text-gray-800 text-center p-1">
-      <p className="text-4xl">😓</p>
+      <img src={LogoSNU} alt="logo" className="w-36" />
       <p className="mt-4 font-bold text-2xl">Oups... une erreur s’est produite&nbsp;!</p>
       <p className="mt-2">Toutes nos excuses pour la gêne occasionnée.</p>
       <p>

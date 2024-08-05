@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const config = require("config");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const SchemaDeRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const YoungModel = require("../../models/young");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const CohortModel = require("../../models/cohort");
+const { PointDeRassemblementModel } = require("../../models");
+const { SchemaDeRepartitionModel } = require("../../models");
+const { LigneBusModel } = require("../../models");
+const { YoungModel } = require("../../models");
+const { LigneToPointModel } = require("../../models");
+const { PlanTransportModel } = require("../../models");
+const { CohortModel } = require("../../models");
 const {
   getCohortNames,
   SENDINBLUE_TEMPLATES,

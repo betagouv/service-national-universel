@@ -1,5 +1,4 @@
-const ClasseModel = require("../src/models/cle/classe");
-const YoungModel = require("../src/models/young");
+const { ClasseModel, YoungModel } = require("../src/models");
 
 module.exports = {
   async up() {

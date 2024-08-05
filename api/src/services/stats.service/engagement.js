@@ -1,6 +1,6 @@
 const { ES_NO_LIMIT, ROLES, YOUNG_STATUS_PHASE2, CONTRACT_STATUS, END_DATE_PHASE1, APPLICATION_STATUS, MISSION_STATUS, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
-const CohortModel = require("../../models/cohort");
+const { CohortModel } = require("../../models");
 const config = require("config");
 
 async function getAccessToken(endpoint, apiKey) {

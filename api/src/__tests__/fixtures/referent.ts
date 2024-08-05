@@ -1,8 +1,9 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
 import { ROLES } from "snu-lib";
+import { ReferentType } from "../../models";
 
-export function getNewReferentFixture(object = {}) {
+export function getNewReferentFixture(object: Partial<ReferentType> = {}): Partial<ReferentType> {
   return {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),

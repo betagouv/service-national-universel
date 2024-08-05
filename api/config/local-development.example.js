@@ -14,4 +14,6 @@ module.exports = {
   ENABLE_SENDINBLUE: false,
   ...secrets,
   // REDIS_URL: "redis://127.0.0.1:6379",
+  // MAILCATCHER_HOST: "localhost",
+  // MAILCATCHER_PORT: 1025,
 };

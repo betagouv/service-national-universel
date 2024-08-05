@@ -2,9 +2,9 @@ const XLSX = require("xlsx");
 const { getDepartmentNumber, getDepartureDate, PHONE_ZONES } = require("snu-lib");
 const dayjs = require("dayjs");
 
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const CohesionCenterModel = require("../../models/cohesionCenter");
-const YoungModel = require("../../models/young");
+const { SessionPhase1Model } = require("../../models");
+const { CohesionCenterModel } = require("../../models");
+const { YoungModel } = require("../../models");
 
 const { uploadFile } = require("../../utils");
 const { encrypt } = require("../../cryptoUtils");

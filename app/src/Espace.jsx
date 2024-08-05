@@ -41,7 +41,6 @@ const Missions = lazy(() => import("./scenes/missions"));
 const Phase1 = lazy(() => import("./scenes/phase1"));
 const Phase2 = lazy(() => import("./scenes/phase2"));
 const Phase3 = lazy(() => import("./scenes/phase3"));
-const Preferences = lazy(() => import("./scenes/preferences"));
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
@@ -80,7 +79,7 @@ const Espace = () => {
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  if (shouldForceRedirectToReinscription(young) && new Date(young.createdAt) < new Date(2023, 9, 1)) return <Redirect to="/reinscription" />;
+  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
   if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
 
@@ -103,7 +102,6 @@ const Espace = () => {
             <SentryRoute path="/phase3" component={Phase3} />
             <SentryRoute path="/autres-engagements" component={AutresEngagements} />
             <SentryRoute path="/les-programmes" component={Engagement} />
-            <SentryRoute path="/preferences" component={Preferences} />
             <SentryRoute path="/mission" component={Missions} />
             <SentryRoute path="/candidature" component={Candidature} />
             {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}

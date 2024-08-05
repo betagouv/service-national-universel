@@ -195,8 +195,8 @@ output "api_image_tag" {
 output "api_container_status" {
   value = scaleway_container.api.status
 }
-output "crons_container_status" {
-  value = scaleway_container.crons.status
+output "tasks_container_status" {
+  value = scaleway_container.tasks.status
 }
 
 output "app_endpoint" {

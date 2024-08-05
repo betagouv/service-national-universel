@@ -5,9 +5,9 @@ const { ERRORS } = require("../../utils");
 const Joi = require("joi");
 const { ROLES, YOUNG_STATUS, MISSION_STATUS } = require("snu-lib");
 const router = express.Router();
-const YoungModel = require("../../models/young");
-const MissionModel = require("../../models/mission");
-const MissionEquivalenceModel = require("../../models/missionEquivalence");
+const { YoungModel } = require("../../models");
+const { MissionModel } = require("../../models");
+const { MissionEquivalenceModel } = require("../../models");
 
 const filtersJoi = Joi.object({
   status: Joi.array().items(Joi.string().valid(...Object.values(YOUNG_STATUS))),

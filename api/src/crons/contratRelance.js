@@ -1,6 +1,6 @@
 const { capture } = require("../sentry");
 const slack = require("../slack");
-const ContractModel = require("../models/contract");
+const { ContractModel } = require("../models");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const config = require("config");
 const { sendTemplate } = require("../brevo");

@@ -7,8 +7,7 @@ const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
-const EtablissementModel = require("../../../models/cle/etablissement");
-const ClasseModel = require("../../../models/cle/classe");
+const { EtablissementModel, ClasseModel } = require("../../../models");
 const { populateYoungExport, populateYoungWithClasse } = require("../populate/populateYoung");
 const { serializeYoungs } = require("../../../utils/es-serializer");
 

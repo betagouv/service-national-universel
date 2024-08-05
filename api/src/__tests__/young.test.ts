@@ -1,35 +1,26 @@
 import fetch from "node-fetch";
 
-const request = require("supertest");
-const jwt = require("jsonwebtoken");
-
-const { ROLES, COHORTS, YOUNG_SOURCE } = require("snu-lib");
-
-const fileUtils = require("../utils/file");
-
-const getAppHelper = require("./helpers/app");
-const { dbConnect, dbClose } = require("./helpers/db");
-const { initRedisClient, closeRedisClient } = require("../redis");
-
-//application
-const { getNewApplicationFixture } = require("./fixtures/application");
-const { createApplication } = require("./helpers/application");
-//mission
-const getNewMissionFixture = require("./fixtures/mission");
-const { createMissionHelper } = require("./helpers/mission");
-//young
-const getNewYoungFixture = require("./fixtures/young");
-const { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
-//cohort
-const { createCohortHelper } = require("./helpers/cohort");
-const getNewCohortFixture = require("./fixtures/cohort");
-//referent
-const { createReferentHelper } = require("./helpers/referent");
-const { getNewReferentFixture } = require("./fixtures/referent");
-//classe
-const { createClasse } = require("./helpers/classe");
-const { createFixtureClasse } = require("./fixtures/classe");
-const ClasseModel = require("../models/cle/classe");
+import request from "supertest";
+import jwt from "jsonwebtoken";
+import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { sendTemplate } from "../brevo";
+import * as fileUtils from "../utils/file";
+import getAppHelper from "./helpers/app";
+import { dbConnect, dbClose } from "./helpers/db";
+import { initRedisClient, closeRedisClient } from "../redis";
+import { getNewApplicationFixture } from "./fixtures/application";
+import { createApplication } from "./helpers/application";
+import getNewMissionFixture from "./fixtures/mission";
+import { createMissionHelper } from "./helpers/mission";
+import getNewYoungFixture from "./fixtures/young";
+import { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } from "./helpers/young";
+import { createCohortHelper } from "./helpers/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
+import { createReferentHelper } from "./helpers/referent";
+import { getNewReferentFixture } from "./fixtures/referent";
+import { createClasse } from "./helpers/classe";
+import { createFixtureClasse } from "./fixtures/classe";
+import { ClasseModel } from "../models";
 
 jest.mock("../redis", () => {
   const redis = require("redis");
@@ -47,6 +38,7 @@ jest.mock("../redis", () => {
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
+  sendTemplate: jest.fn(),
 }));
 
 jest.mock("../geo", () => ({
@@ -134,7 +126,7 @@ describe("Young", () => {
           if (key === "status") {
             expect(updatedYoung[key]).toEqual("DELETED");
           } else if (key === "email") {
-            expect(updatedYoung[key]).toEqual(`${young._doc["_id"]}@delete.com`);
+            expect(updatedYoung[key]).toEqual(`${young._doc?.["_id"]}@delete.com`);
           } else if (key === "_id") {
             expect(updatedYoung[key]).toEqual(young[key].toString());
           } else if (key === "phase2ApplicationStatus") {
@@ -265,6 +257,7 @@ describe("Young", () => {
           }),
         )
         .mockReturnValue(Promise.resolve({}));
+      // @ts-ignore
       fetch.mockReturnValue(
         Promise.resolve({
           status: 200,
@@ -677,7 +670,7 @@ describe("Young", () => {
     });
   });
 
-  describe("POST /young/:id/:email/:template", () => {
+  describe("POST /young/:id/email/:template", () => {
     const validTemplate = "1229";
     it("should return 400 if template not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
@@ -696,6 +689,35 @@ describe("Young", () => {
         .post("/young/" + young._id + "/email/" + validTemplate)
         .send({ message: "hello" });
       expect(res.statusCode).toEqual(200);
+    });
+    it("should return 200 when VALIDATED", async () => {
+      // @ts-ignore
+      sendTemplate.mockClear();
+      const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
+      const young = await createYoungHelper(getNewYoungFixture({ source: "CLE" }));
+      const passport = require("passport");
+      passport.user = tutor;
+      const res = await request(getAppHelper()).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`).send({ status: "VALIDATED" });
+      expect(res.statusCode).toEqual(200);
+      expect(sendTemplate).toHaveBeenCalledTimes(1);
+      expect(sendTemplate).toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, {
+        cc: [
+          { name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email },
+          { name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email },
+        ],
+        emailTo: [{ email: young.email, name: `${young.firstName} ${young.lastName}` }],
+        params: {
+          cta: "http://localhost:8081",
+          firstName: young.firstName,
+          lastName: young.lastName,
+          link: undefined,
+          message: undefined,
+          missionName: undefined,
+          object: undefined,
+          structureName: undefined,
+          type_document: undefined,
+        },
+      });
     });
   });
 
@@ -767,7 +789,7 @@ describe("Young", () => {
       expect(res.body.data.status).toBe("VALIDATED");
 
       const updatedClasse = await ClasseModel.findById(classeId);
-      expect(updatedClasse.seatsTaken).toBe(1);
+      expect(updatedClasse?.seatsTaken).toBe(1);
       passport.user.role = previous;
     });
   });

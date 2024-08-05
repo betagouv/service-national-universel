@@ -3,12 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../sentry");
 
-const CohesionCenterModel = require("../models/cohesionCenter");
-const SessionPhase1 = require("../models/sessionPhase1");
-const YoungModel = require("../models/young");
-const MeetingPointObject = require("../models/meetingPoint");
-const BusObject = require("../models/bus");
-const CohortModel = require("../models/cohort");
+const { YoungModel, CohesionCenterModel, CohortModel, SessionPhase1Model } = require("../models");
 const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { SENDINBLUE_TEMPLATES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib");
 const { sendTemplate } = require("../brevo");
@@ -71,7 +66,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       complement: value.complement,
       centerDesignation: value.centerDesignation,
     });
-    await SessionPhase1.create({
+    await SessionPhase1Model.create({
       cohesionCenterId: cohesionCenter._id,
       cohort: value.cohort,
       placesTotal: value.placesTotal,
@@ -119,7 +114,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     const newCohorts = center.cohorts;
     newCohorts.push(value.cohort);
 
-    const session = await SessionPhase1.create({
+    const session = await SessionPhase1Model.create({
       cohesionCenterId,
       cohort: value.cohort,
       placesTotal: value.placesTotal,
@@ -183,7 +178,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       delete value.centerDesignation;
     }
     value.pmr = value.pmr ? "true" : "false";
-    const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });
+    const sessions = await SessionPhase1Model.find({ cohesionCenterId: center._id });
     const canUpdateSession = sessions.filter((s) => s.placesTotal > value.placesTotal).length === 0;
     if (!canUpdateSession) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -257,7 +252,7 @@ router.get("/:id/cohort/:cohort/session-phase1", passport.authenticate("referent
     const center = await CohesionCenterModel.findById(value.id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const sessionPhase1 = await SessionPhase1.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
+    const sessionPhase1 = await SessionPhase1Model.findOne({ cohesionCenterId: center._id, cohort: value.cohort });
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
@@ -280,7 +275,7 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
+    const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: center._id });
     if (!sessionsPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: sessionsPhase1.map(serializeSessionPhase1) });
@@ -337,7 +332,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const sessionsPhase1 = await SessionPhase1.find({ cohesionCenterId: center._id });
+    const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: center._id });
     if (sessionsPhase1.length !== 0) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     await center.remove();
@@ -368,7 +363,7 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
     if (value.code2022?.length) filterCenter.code2022 = { $in: value.code2022 };
     if (value.cohorts?.length) filterCenter.cohorts = { $in: value.cohorts };
 
-    const allSessionsPhase1 = await SessionPhase1.find();
+    const allSessionsPhase1 = await SessionPhase1Model.find();
     const cursorCenters = await CohesionCenterModel.find(filterCenter).cursor();
 
     let result = [];

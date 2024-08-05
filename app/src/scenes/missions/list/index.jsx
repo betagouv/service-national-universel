@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import { capture } from "../../../sentry";
@@ -8,11 +7,15 @@ import { debounce } from "../../../utils";
 import MissionFilters from "./components/MissionFilters";
 import MissionList from "./components/MissionList";
 import Loader from "../../../components/Loader";
-import { HiOutlineAdjustments } from "react-icons/hi";
+import { RiHeartFill } from "react-icons/ri";
 import useAuth from "@/services/useAuth";
+import Header from "@/scenes/phase2/components/Header";
+import { HiArrowLeft } from "react-icons/hi";
+import plausibleEvent from "@/services/plausible";
 
 export default function List() {
   const { young } = useAuth();
+  const history = useHistory();
   const [data, setData] = useState();
   const urlParams = new URLSearchParams(window.location.search);
   const canDoMilitaryPreparation = young?.frenchNationality === "true";
@@ -62,39 +65,43 @@ export default function List() {
   }, [filters, page, size, sort]);
 
   return (
-    <div className="bg-white p-[1rem] md:p-[3rem] md:m-10 md:pb-[2rem] md:rounded-xl md:shadow-xl">
-      {/* BEGIN HEADER */}
-      <div className="space-y-6">
-        <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Trouvez une mission d&apos;intérêt général</h1>
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-normal text-gray-700">
-            Vous disposez d’un an pour débuter votre phase d’engagement et de deux ans pour la terminer.{" "}
-            <a
-              className="font-medium underline hover:text-gray-700 hover:underline"
-              href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"
-              target="_blank"
-              rel="noreferrer">
-              En savoir plus
-            </a>
-            .
-            <br />
-            Astuce : si les missions proposées ne correspondent pas à votre zone géographique, pensez à{" "}
-            <Link className="font-medium underline hover:text-gray-700 hover:underline" to="/account">
-              vérifier votre adresse
-            </Link>
-            .
+    <>
+      <div className="bg-white pb-12">
+        <Header
+          title="Trouvez un engagement"
+          backAction={
+            <button onClick={() => history.goBack()} className="flex items-center gap-1 row-start-1 md:row-start-2">
+              <HiArrowLeft className="text-2xl text-gray-500" />
+            </button>
+          }
+        />
+
+        <Link className="block" to="/phase2/mes-engagements?tab=settings" onClick={() => plausibleEvent("Phase2/Missions/CTA - Mes préférences")}>
+          <p className="group flex justify-center items-center gap-1 text-center underline">
+            <RiHeartFill className="text-[#111827] inline-block align-text-bottom mr-1" />
+            Mes préférences
           </p>
-          <Link className="hidden md:block" to="/preferences">
-            <div className="group flex items-center gap-1 rounded-[10px] border-[1px] border-blue-700 py-2.5 px-3 hover:bg-blue-700 hover:text-[#ffffff]">
-              <HiOutlineAdjustments className="text-blue-700 group-hover:text-[#ffffff]" />
-              <div className="flex-1 text-sm text-blue-700 group-hover:text-[#ffffff]">Renseigner mes préférences</div>
-            </div>
-          </Link>
+        </Link>
+
+        <div className="max-w-6xl mx-auto px-[1rem]">
+          <MissionFilters filters={filters} setFilters={setFilters} />
+          {data ? <MissionList data={data} location={filters.location} page={page} setPage={setPage} size={size} setSize={setSize} setSort={setSort} /> : <Loader />}
+        </div>
+
+        <div className="mt-[2rem] mx-auto md:max-w-6xl md:px-[1rem]">
+          <div id="par-vous-meme" className="px-4 pt-8 pb-10 text-center bg-blue-france-sun-113 md:rounded-lg">
+            <p className="text-4xl">🔍</p>
+            <p className="text-white font-medium text-2xl md:text-3xl mt-3 text-center">Trouvez un engagement par vous-même</p>
+            <p className="text-white font-light mt-2 text-center">Candidatez en autonomie à un programme d'engagement pour valider votre SNU.</p>
+            <Link
+              to="/phase2#sectionEngagement"
+              onClick={() => plausibleEvent("Phase2/Missions/CTA - Comment ça marche")}
+              className="text-white font-light underline underline-offset-2 hover:underline">
+              <p className="mt-4">Comment ça marche ?</p>
+            </Link>
+          </div>
         </div>
       </div>
-      {/* END HEADER */}
-      <MissionFilters filters={filters} setFilters={setFilters} />
-      {data ? <MissionList data={data} location={filters.location} page={page} setPage={setPage} size={size} setSize={setSize} setSort={setSort} /> : <Loader />}
-    </div>
+    </>
   );
 }

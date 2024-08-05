@@ -1,13 +1,12 @@
 const path = require("path");
 const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
-const Referent = require("../models/referent");
-const Young = require("../models/young");
+const { ReferentModel, YoungModel } = require("../models");
 const slack = require("../slack");
 
 exports.handler = async () => {
-  await clean(Referent);
-  await clean(Young);
+  await clean(ReferentModel);
+  await clean(YoungModel);
 };
 
 const clean = async (model) => {

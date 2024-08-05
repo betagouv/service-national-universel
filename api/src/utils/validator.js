@@ -5,12 +5,14 @@ const { isYoung } = require("../utils");
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
 const idRegex = /^[0-9a-fA-F]{24}$/;
 
+const idSchema = () => Joi.string().regex(idRegex, "id");
+
 function validateId(id) {
-  return Joi.string().regex(idRegex, "id").required().validate(id, { stripUnknown: true });
+  return idSchema().required().validate(id, { stripUnknown: true });
 }
 
 function validateOptionalId(id) {
-  return Joi.string().regex(idRegex, "id").optional().validate(id, { stripUnknown: true });
+  return idSchema().optional().validate(id, { stripUnknown: true });
 }
 
 function validateString(string) {
@@ -124,6 +126,7 @@ function validateProgram(program) {
       department: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
       visibility: Joi.string().allow(null, ""),
+      order: Joi.number().allow(null),
     })
     .validate(program, { stripUnknown: true });
 }
@@ -812,6 +815,7 @@ const needRequired = (joi, isRequired) => {
 };
 
 module.exports = {
+  idSchema,
   validateId,
   validateString,
   validateArray,

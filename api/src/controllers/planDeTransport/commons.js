@@ -1,4 +1,4 @@
-const SessionPhase1Model = require("../../models/sessionPhase1");
+const { SessionPhase1Model } = require("../../models");
 const mongoose = require("mongoose");
 
 const filteredRegionList = [

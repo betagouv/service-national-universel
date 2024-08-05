@@ -1,6 +1,4 @@
-const EtablissementModel = require("../src/models/cle/etablissement");
-const ClasseModel = require("../src/models/cle/classe");
-const YoungModel = require("../src/models/young");
+const { EtablissementModel, ClasseModel, YoungModel } = require("../src/models");
 
 module.exports = {
   async up(db, client) {

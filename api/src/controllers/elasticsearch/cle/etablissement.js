@@ -9,7 +9,7 @@ const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const { populateWithReferentInfo, populateEtablissementWithNumber } = require("../populate/populateEtablissement");
 const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
-const { FeatureFlagName } = require("../../../models/featureFlagType");
+const { FeatureFlagName } = require("../../../models/featureFlag");
 
 async function buildEtablisssementContext(user) {
   const contextFilters = [];

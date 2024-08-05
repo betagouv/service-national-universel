@@ -4,7 +4,7 @@ const { isInRuralArea, getAge } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const YoungModel = require("../../models/young");
+const { YoungModel } = require("../../models");
 const YoungPatchModel = require("./models/youngPatch");
 const config = require("config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");

@@ -3,10 +3,7 @@ const passport = require("passport");
 const Joi = require("joi");
 const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
-const YoungObject = require("../../models/young");
-const CohortObject = require("../../models/cohort");
-const ContractObject = require("../../models/contract");
-const ApplicationObject = require("../../models/application");
+const { YoungModel, CohortModel, ContractModel, ApplicationModel } = require("../../models");
 const { ERRORS, isYoung, isReferent, uploadFile, deleteFile, getFile } = require("../../utils");
 const { FILE_KEYS, MILITARY_FILE_KEYS, COHORTS, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const fs = require("fs");
@@ -31,7 +28,7 @@ router.post("/:type/:template", async (req, res) => {
     }
     const { id, type, template } = value;
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only download their own documents.
@@ -39,7 +36,7 @@ router.post("/:type/:template", async (req, res) => {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    const applications = await ApplicationModel.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, type, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
@@ -69,7 +66,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     }
     const { id, type, template, fileName, contract_id, switchToCle } = value;
 
-    const young = await YoungObject.findById(id).select({ region: 1, department: 1 }); // used by canSendFileByMailToYoung
+    const young = await YoungModel.findById(id).select({ region: 1, department: 1 }); // used by canSendFileByMailToYoung
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only send to them their own documents.
@@ -84,7 +81,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     if (type === "contract") {
       if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-      contract = await ContractObject.exists({ _id: contract_id });
+      contract = await ContractModel.exists({ _id: contract_id });
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
@@ -153,7 +150,7 @@ router.post(
 
       // Check permissions
 
-      const young = await YoungObject.findById(id);
+      const young = await YoungModel.findById(id);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
       if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
@@ -219,7 +216,7 @@ router.post(
         if (key === "cniFiles") {
           young.latestCNIFileExpirationDate = body.expirationDate;
           if (young.cohort !== COHORTS.AVENIR) {
-            const cohort = await CohortObject.findOne({ name: young.cohort });
+            const cohort = await CohortModel.findOne({ name: young.cohort });
             young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
           }
           young.latestCNIFileCategory = body.category;
@@ -260,7 +257,7 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
 
     // Check permissions
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
@@ -308,12 +305,12 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
 
     // Check permissions
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    const applications = await ApplicationModel.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
@@ -346,12 +343,12 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     }
     const { id, key, fileId } = value;
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    const applications = await ApplicationModel.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }

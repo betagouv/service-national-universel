@@ -2,7 +2,7 @@ const fetch = require("node-fetch");
 const config = require("config");
 const { capture, captureMessage } = require("../sentry");
 const slack = require("../slack");
-const MissionApiModel = require("../models/missionAPI");
+const { MissionAPIModel } = require("../models");
 
 const SIZE = 1000;
 let startTime = new Date();
@@ -20,9 +20,9 @@ const sync = async (result) => {
   for (let i = 0; i < result.data.length; i++) {
     const t = result.data[i];
     t.lastSyncAt = Date.now();
-    const m = await MissionApiModel.findById(t._id);
+    const m = await MissionAPIModel.findById(t._id);
     if (!m) {
-      await MissionApiModel.create(t);
+      await MissionAPIModel.create(t);
     } else {
       m.set({ ...t });
       await m.save();
@@ -34,7 +34,7 @@ const sync = async (result) => {
 
 const cleanData = async () => {
   try {
-    await MissionApiModel.deleteMany({ lastSyncAt: { $lte: startTime } });
+    await MissionAPIModel.deleteMany({ lastSyncAt: { $lte: startTime } });
     slack.success({ title: "sync with missions api-engagement" });
   } catch (error) {
     capture(error);

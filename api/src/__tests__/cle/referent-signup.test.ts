@@ -3,14 +3,13 @@ import { addDays } from "date-fns";
 
 import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 
-import { ReferentModel, EtablissementModel } from "../../models";
-import { ReferentDocument } from "../../models/referentType";
+import { ReferentModel, ReferentDocument, EtablissementModel } from "../../models";
 import * as brevo from "../../brevo";
 
 import { dbConnect, dbClose } from "../helpers/db";
 
-import { createReferentHelper } from "../helpers/referent";
 import getAppHelper from "../helpers/app";
+import { createReferentHelper } from "../helpers/referent";
 import { getNewReferentFixture, getNewSignupReferentFixture, getReinscriptionSignupReferentFixture } from "../fixtures/referent";
 import { createEtablissement } from "../helpers/etablissement";
 import { createFixtureEtablissement } from "../fixtures/etablissement";
@@ -22,7 +21,7 @@ afterAll(dbClose);
 
 const sendTemplateSpy = jest.spyOn(brevo, "sendTemplate");
 
-describe("Referent Signup", () => {
+describe("Cle Referent Signup", () => {
   beforeEach(async () => {
     await ReferentModel.deleteMany();
     await EtablissementModel.deleteMany();

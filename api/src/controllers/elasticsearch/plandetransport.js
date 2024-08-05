@@ -8,8 +8,7 @@ const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const { ROLES } = require("snu-lib");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const SessionPhase1Object = require("../../models/sessionPhase1");
+const { LigneBusModel, SessionPhase1Model } = require("../../models");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -49,7 +48,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // A head center can only see bus line rattached to his center.
     if (user.role === ROLES.HEAD_CENTER) {
-      const centers = await SessionPhase1Object.find({ headCenterId: user._id, cohort: queryFilters.cohort[0] });
+      const centers = await SessionPhase1Model.find({ headCenterId: user._id, cohort: queryFilters.cohort[0] });
       if (!centers.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort: queryFilters.cohort[0] });
       if (!lignebus.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
