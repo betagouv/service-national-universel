@@ -74,7 +74,7 @@ export default function YoungRowConsent({ young, selectedYoungs, onYoungSelected
           </div>
         </td>
         <td className="w-[30%] flex">
-          <Badge title={translate(YOUNG_STATUS[young.status])} status={young.status as TStatus} />
+          <Badge title={translate(YOUNG_STATUS[young.status!])} status={young.status as TStatus} />
         </td>
         <td className="flex w-[10%] gap-2">
           <Badge

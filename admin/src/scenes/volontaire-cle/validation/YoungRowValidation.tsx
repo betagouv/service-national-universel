@@ -73,7 +73,7 @@ export default function YoungRowValidation({ young, selectedYoungs, onYoungSelec
           </div>
         </td>
         <td className="w-[30%]">
-          <Badge title={translate(YOUNG_STATUS[young.status])} status={young.status as TStatus} />
+          <Badge title={translate(YOUNG_STATUS[young.status!])} status={young.status as TStatus} />
         </td>
         <td className="flex w-[10%] gap-2">
           <Badge

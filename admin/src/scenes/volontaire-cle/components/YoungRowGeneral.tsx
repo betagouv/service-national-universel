@@ -39,7 +39,7 @@ export default function YoungRowGeneral({ young }: Props) {
         </div>
       </td>
       <td className="w-[20%] flex justify-center">
-        <Badge title={translate(YOUNG_STATUS[young.status])} status={young.status as any} />
+        <Badge title={translate(YOUNG_STATUS[young.status!])} status={young.status as any} />
       </td>
       <td className="flex w-[10%] justify-center">
         <DropdownButton
