@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": true,
+    "lib": ["dom", "es2017", "esnext", "es2019", "es2019.object"],
+    "declaration": true,
+    "declarationMap": true,
+    "noEmitOnError": true,
+    "skipLibCheck": true,
+    "noErrorTruncation": true,
+    "noUnusedLocals": true,
+    "module": "ESNext",
+    "jsx": "react",
+    "target": "ES2021",
+    "strictFunctionTypes": false,
+    "types": ["node", "jest"]
+  },
+  "exclude": [
+    "**/dist/**/*",
+    "node_modules",
+    "**/node_modules/*",
+    "**/.rollup.cache/*"
+  ]
+}

@@ -9,10 +9,7 @@ import { Header } from "@codegouvfr/react-dsfr/Header";
 import { Footer } from "@codegouvfr/react-dsfr/Footer";
 import { Page, Section, Container } from "@snu/ds/dsfr";
 
-import { ROLES } from "snu-lib";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
-
-import { ReferentDto } from "snu-lib/src/dto";
+import { ROLES, ReferentDto, EtablissementDto } from "snu-lib";
 import { SentryRoute } from "@/sentry";
 import api from "@/services/api";
 import useDocumentTitle from "@/hooks/useDocumentTitle";

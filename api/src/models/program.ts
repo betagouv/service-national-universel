@@ -86,6 +86,11 @@ const schema = new Schema({
     documentation: "Ce champ nous sert à filtrer les mission JVA et serviceCivique sur la phase 2 engagement, à ne pas modifier",
   },
 
+  order: {
+    type: Number,
+    documentation: "champ utilisé pour ordonner l'affichage des programmes",
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

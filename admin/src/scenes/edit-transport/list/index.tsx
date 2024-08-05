@@ -179,7 +179,6 @@ const ReactiveList = ({ cohort }) => {
         setParamData={setParamData}
         currentEntryOnPage={lines?.length}
         size={size}
-        // @ts-expect-error update ResultTable types
         setSize={setSize}
         render={
           <div className="overflow-x-scroll w-full mt-2">

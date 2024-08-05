@@ -542,7 +542,7 @@ describe("Young", () => {
         date: new Date(),
       };
 
-      const CNIFileNotValidOnStart = documentObj.date < START_DATE_SESSION_PHASE1[user.cohort];
+      const CNIFileNotValidOnStart = documentObj.date < START_DATE_SESSION_PHASE1[user.cohort!];
 
       let res = await request(getAppHelper()).put("/young/inscription2023/documents/next").send(documentObj);
       const nextResponseData = res.body.data;
@@ -617,7 +617,7 @@ describe("Young", () => {
         latestCNIFileCategory: "cniNew",
       };
 
-      const CNIFileNotValidOnStart = fileObj.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[user.cohort];
+      const CNIFileNotValidOnStart = fileObj.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[user.cohort!];
 
       let res = await request(getAppHelper()).put("/young/inscription2023/documents/correction").send(fileObj);
       const correctionResponseData = res.body.data;

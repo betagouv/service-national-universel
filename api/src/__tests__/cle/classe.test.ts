@@ -9,8 +9,6 @@ import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, 
 import { dbConnect, dbClose } from "../helpers/db";
 import { mockEsClient } from "../helpers/es";
 import getAppHelper from "../helpers/app";
-
-import emailsEmitter from "../../emails";
 import * as featureService from "../../featureFlag/featureFlagService";
 
 // classe

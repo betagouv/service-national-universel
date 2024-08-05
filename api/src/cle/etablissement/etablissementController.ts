@@ -14,7 +14,7 @@ import {
   isReferentOrAdmin,
   SENDINBLUE_TEMPLATES,
 } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
+import { ReferentDto } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";

@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
-import { translateApplication } from "snu-lib";
+import { translateApplication, canApplyToPhase2 } from "snu-lib";
 import validator from "validator";
 import Toggle from "../../../components/Toggle";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
@@ -17,7 +17,6 @@ import Field from "@/components/ui/forms/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
-import { canApplyToPhase2 } from "snu-lib";
 import { useSelector } from "react-redux";
 
 export default function CustomMission({ young, onChange }) {
