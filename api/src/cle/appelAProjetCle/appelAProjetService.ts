@@ -7,7 +7,7 @@ import { IAppelAProjet, IAppelAProjetOptions } from "./appelAProjetType";
 import { buildUniqueClasseId } from "../classe/classeService";
 
 type IRemovedAppelAProjet = IAppelAProjet & {
-  removedReason: "sameUaiDifferentEmail" | "noUaiOrEmail" | "sameClasseUniqueId" | "invalidUAI" | "excluded";
+  removedReason: "sameUaiDifferentEmail" | "sameEmailDifferentUai" | "noUaiOrEmail" | "sameClasseUniqueId" | "invalidUAI" | "excluded" | "invalidReferent";
 };
 export class AppelAProjetService {
   public sync = async (save: boolean = false, appelAProjetOptions: IAppelAProjetOptions = {}) => {
@@ -36,10 +36,15 @@ export class AppelAProjetService {
       console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", appelAProjetsRetained.length, `(${appelAProjet.etablissement?.uai})`);
       const option = appelAProjetOptions.fixes?.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
       if (option?.useExistingEtablissement || appelAProjetEtablissementService.getEtablissementFromAnnuaire(appelAProjet, etablissements)) {
-        const referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
-        const savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save, appelAProjetOptions);
-        const referentClasseId = await appelAProjetReferentService.processReferentClasse(appelAProjet, save);
-        await appelAProjetClasseService.processClasse(appelAProjet, savedEtablissement!, referentClasseId, save);
+        try {
+          const referentEtablissementId = await appelAProjetReferentService.processReferentEtablissement(appelAProjet, save);
+          const savedEtablissement = await appelAProjetEtablissementService.processEtablissement(appelAProjet, etablissements, referentEtablissementId, save, appelAProjetOptions);
+          const referentClasseId = await appelAProjetReferentService.processReferentClasse(appelAProjet, save);
+          await appelAProjetClasseService.processClasse(appelAProjet, savedEtablissement!, referentClasseId, save);
+        } catch (error) {
+          appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "invalidReferent" });
+          console.log("AppelAProjetService.sync() - Referent with error - ", appelAProjet.etablissement?.uai, " - ", error);
+        }
       } else {
         appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "invalidUAI" });
         console.log("AppelAProjetService.sync() - Etablissement not found: ", appelAProjet.etablissement?.uai);
@@ -112,6 +117,7 @@ export class AppelAProjetService {
       const hasSameUaiButDifferentEmail = appelAProjets.some(
         (appelAProjetSub) => appelAProjetSub.etablissement?.uai === uai && appelAProjetSub.referentEtablissement.email !== email,
       );
+      // TODO: check sameEmailDifferentUai
       if (hasSameUaiButDifferentEmail) {
         appelAProjetsWarning.push({ ...appelAProjet, removedReason: "sameUaiDifferentEmail" });
         appelAProjetsRetained.push(appelAProjet);

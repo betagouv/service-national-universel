@@ -26,6 +26,7 @@ import {
   canEditTotalSeats,
   canVerifyClasse,
   canNotifyAdminCleForVerif,
+  CohortDto,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -278,7 +279,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (classe.cohort !== value.cohort) {
       const cohort = await CohortModel.findOne({ name: value.cohort });
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (!canUpdateCohort(cohort, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canUpdateCohort(cohort as CohortDto, req.user as any)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       youngs = await YoungModel.find({ classeId: classe._id });
       // * Impossible to change cohort if a young has already completed phase1
       const youngWithStatusPhase1Done = youngs.find((y) => y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE);
@@ -495,11 +496,11 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
     }
 
     if (!canVerifyClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let classe: ClasseDocument<{ referents: ReferentDocument[] }> | null = await ClasseModel.findById(value.id).populate({
+    let classe = await ClasseModel.findById(value.id).populate({
       path: "referents",
       options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } },
     });
-    if (!classe || !classe.referents.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!classe || !classe.referents?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);

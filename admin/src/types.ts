@@ -1,4 +1,4 @@
-import { ReferentDto } from "snu-lib/src/dto";
+import { ReferentDto } from "snu-lib";
 
 export type RouteResponse<T> = { ok: boolean; code?: string; data: T };
 
@@ -44,3 +44,16 @@ export type Session = {
   canBeDeleted?: boolean;
   sanitaryContactEmail: string;
 };
+
+export type TStatus =
+  | "none"
+  | "DRAFT"
+  | "CANCEL"
+  | "REFUSED"
+  | "IN_PROGRESS"
+  | "WAITING_VALIDATION"
+  | "WAITING_CORRECTION"
+  | "VALIDATED"
+  | "WAITING_LIST"
+  | "secondary"
+  | "primary";

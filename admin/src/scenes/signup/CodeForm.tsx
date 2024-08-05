@@ -6,8 +6,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 
-import { translate } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
+import { translate, ReferentDto } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 
 import { User } from "@/types";

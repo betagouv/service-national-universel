@@ -1,6 +1,6 @@
 import React from "react";
 import { Container } from "@snu/ds/admin";
-import { CohortDto } from "snu-lib/src/dto";
+import { CohortDto } from "snu-lib";
 import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 
 type CleSettingsData = Partial<CohortDto>;

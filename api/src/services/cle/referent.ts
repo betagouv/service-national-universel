@@ -12,13 +12,13 @@ import { capture } from "../../sentry";
 
 import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument } from "../../models";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
-import { UserDto } from "snu-lib/src/dto";
+import { UserDto } from "snu-lib";
 
 export interface InvitationResult {
   to: string;
   status: string;
   details?: string;
-  type?: typeof InvitationType;
+  type?: ReferentType["metadata"]["invitationType"];
 }
 
 export const findOrCreateReferent = async (referent, { etablissement, role, subRole }) => {
@@ -66,7 +66,7 @@ export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
     subRole: SUB_ROLES.referent_etablissement,
   });
   const invitations: InvitationResult[] = [];
-  let processCounter = 0;
+  let processCounter = 1;
   for (const chefEtablissement of chefsEtablissementsToSendInvitation) {
     try {
       console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", chefsEtablissementsToSendInvitation.length);
