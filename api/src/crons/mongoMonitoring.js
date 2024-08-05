@@ -1,18 +1,10 @@
-const mongoose = require("mongoose");
-const config = require("config");
 const slack = require("../slack");
 const { capture } = require("../sentry");
+const { getDb } = require("../mongo");
 
 exports.handler = async () => {
   try {
-    const mongoUrl = config.MONGO_URL;
-    const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    };
-
-    await mongoose.connect(mongoUrl, options);
-    const db = mongoose.connection.db;
+    const db = getDb().db;
     const serverStatus = await db.command({ serverStatus: 1 });
     const connections = serverStatus.connections;
 
@@ -38,12 +30,5 @@ exports.handler = async () => {
       title: "Mongo DB connection monitor - Error",
       text: `Erreur lors de la surveillance des connexions: ${e.message}`,
     });
-  } finally {
-    try {
-      await mongoose.disconnect();
-    } catch (e) {
-      capture(e);
-      console.error("Erreur lors de la déconnexion de MongoDB:", e);
-    }
   }
 };
