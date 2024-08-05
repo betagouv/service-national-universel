@@ -25,7 +25,7 @@ export function initQueue(connection) {
 export function scheduleCrons() {
   for (const cron of CRONS) {
     console.log(`Schedule task ${cron.name}`);
-    return queue?.add(
+    queue?.add(
       cron.name,
       {},
       {
