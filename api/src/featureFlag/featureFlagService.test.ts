@@ -1,18 +1,19 @@
 import { FeatureFlagModel } from "../models";
 
 import { isFeatureAvailable, getFeatureFlagsAvailable } from "./featureFlagService";
+import { FeatureFlagName } from "snu-lib";
 
 describe("featureFlagService", () => {
   describe("isFeatureAvailable", () => {
     it("should return false if feature does not exist", async () => {
       jest.spyOn(FeatureFlagModel, "findOne").mockResolvedValueOnce(null);
-      const result = await isFeatureAvailable("nonExistentFeature");
+      const result = await isFeatureAvailable("nonExistentFeature" as FeatureFlagName);
       expect(result).toBe(false);
     });
 
     it("should return true if feature is enabled", async () => {
       jest.spyOn(FeatureFlagModel, "findOne").mockResolvedValueOnce({ name: "enabledFeature", enabled: true });
-      const result = await isFeatureAvailable("enabledFeature");
+      const result = await isFeatureAvailable("enabledFeature" as FeatureFlagName);
       expect(result).toBe(true);
     });
 
@@ -20,7 +21,7 @@ describe("featureFlagService", () => {
       const from = new Date(Date.now() - 1000 * 60 * 60); // 1 hour ago
       const to = new Date(Date.now() + 1000 * 60 * 60); // 1 hour from now
       jest.spyOn(FeatureFlagModel, "findOne").mockResolvedValueOnce({ name: "dateFeature", date: { from, to } });
-      const result = await isFeatureAvailable("dateFeature");
+      const result = await isFeatureAvailable("dateFeature" as FeatureFlagName);
       expect(result).toBe(true);
     });
 
@@ -28,7 +29,7 @@ describe("featureFlagService", () => {
       const from = new Date(Date.now() - 1000 * 60 * 60 * 2); // 2 hours ago
       const to = new Date(Date.now() - 1000 * 60 * 60); // 1 hour ago
       jest.spyOn(FeatureFlagModel, "findOne").mockResolvedValueOnce({ name: "dateFeature", date: { from, to } });
-      const result = await isFeatureAvailable("dateFeature");
+      const result = await isFeatureAvailable("dateFeature" as FeatureFlagName);
       expect(result).toBe(false);
     });
   });
