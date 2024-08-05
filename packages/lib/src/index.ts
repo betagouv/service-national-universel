@@ -11,6 +11,7 @@ export * from "./constants/functionalErrors";
 export * from "./constants/plan-de-transport";
 export * from "./constants/referentConstants";
 export * from "./constants/todo.constants";
+export * from "./constants/featureFlags";
 export * from "./dto";
 export * from "./excelExports";
 export * from "./features";

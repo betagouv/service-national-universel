@@ -2,7 +2,7 @@ import request from "supertest";
 import passport from "passport";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
-
+import emailsEmitter from "../../emails";
 import * as snuLib from "snu-lib";
 import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS } from "snu-lib";
 
