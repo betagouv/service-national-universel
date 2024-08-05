@@ -13,7 +13,7 @@ const loggingMiddleware = async (req, res, next) => {
         method: req.method,
         url: req.originalUrl,
         status: res.statusCode,
-        responseTime: `${req.responseTimeMs}ms`,
+        responseTime: req.responseTimeMs,
         ip,
       };
 

@@ -108,6 +108,7 @@ resource "scaleway_container" "api" {
     "ADMIN_URL"      = "https://${local.admin_hostname}"
     "APP_URL"        = "https://${local.app_hostname}"
     "SECRET_NAME"    = scaleway_secret.custom.name
+    "ENABLE_FLATTEN_ERROR_LOGS" = "false"
   }
 
   secret_environment_variables = {
