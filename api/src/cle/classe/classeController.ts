@@ -495,11 +495,11 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
     }
 
     if (!canVerifyClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let classe: ClasseDocument<{ referents: ReferentDocument[] }> | null = await ClasseModel.findById(value.id).populate({
+    let classe = await ClasseModel.findById(value.id).populate({
       path: "referents",
       options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } },
     });
-    if (!classe || !classe.referents.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!classe || !classe.referents?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
