@@ -93,7 +93,7 @@ function _flattenStack(stack) {
 }
 
 function captureError(err, contexte) {
-  if (err.stack && config.get("ENABLE_FLATTEN_ERROR_LOG")) {
+  if (err.stack && config.get("ENABLE_FLATTEN_ERROR_LOGS")) {
     console.error("capture", _flattenStack(err.stack));
   } else {
     console.error("capture", err);
