@@ -77,6 +77,7 @@ function _buildHandler(name, crontab, handlers) {
         type: "crontab",
         value: crontab,
       },
+      timezone: "Etc/UTC",
     };
 
     const checkInId = captureCheckIn(
