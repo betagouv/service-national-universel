@@ -64,7 +64,6 @@ export default function View() {
               title="Créer une classe"
               leftIcon={<HiPlus size={20} />}
               onClick={() => history.push("/classes/create?etablissementId=" + etablissement._id)}
-              disabled={true}
             />
           ),
           (isChefEtablissement(user) || isReferentOrAdmin(user)) && contacts.filter(isCoordinateurEtablissement).length < 2 && (

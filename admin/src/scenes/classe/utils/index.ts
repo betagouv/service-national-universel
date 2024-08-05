@@ -1,4 +1,20 @@
-import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE, canEditEstimatedSeats, canEditTotalSeats, CohortDto } from "snu-lib";
+import {
+  canUpdateCenter,
+  canUpdateCohort,
+  isNowBetweenDates,
+  ROLES,
+  STATUS_CLASSE,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
+  TYPE_CLASSE_LIST,
+  CLE_GRADE_LIST,
+  CLE_FILIERE_LIST,
+  translateColoration,
+  translateGrade,
+  CLE_COLORATION_LIST,
+  translate,
+} from "snu-lib";
+import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { User } from "@/types";
 
@@ -139,3 +155,23 @@ export const searchPointDeRassemblements = async ({ q, cohort }) => {
     };
   });
 };
+
+export const colorOptions: {
+  value: string;
+  label: string;
+}[] = Object.keys(CLE_COLORATION_LIST).map((value) => ({
+  value: CLE_COLORATION_LIST[value],
+  label: translateColoration(CLE_COLORATION_LIST[value]),
+}));
+export const filiereOptions = Object.keys(CLE_FILIERE_LIST).map((value) => ({
+  value: CLE_FILIERE_LIST[value],
+  label: CLE_FILIERE_LIST[value],
+}));
+export const gradeOptions = CLE_GRADE_LIST.filter((value) => value !== "CAP").map((value) => ({
+  value: value,
+  label: translateGrade(value),
+}));
+export const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
+  value: TYPE_CLASSE_LIST[value],
+  label: translate(TYPE_CLASSE_LIST[value]),
+}));
