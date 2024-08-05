@@ -29,7 +29,8 @@ const loggingMiddleware = async (req, res, next) => {
           log.userRole = req.user?.role;
         }
       }
-      console.log("@cee:" + JSON.stringify(log));
+      // console.log("@cee:" + JSON.stringify(log));
+      console.log(JSON.stringify(log));
     } catch (error) {
       console.error("Error in logging middleware:", error);
     }
