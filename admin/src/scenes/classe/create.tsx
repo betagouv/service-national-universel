@@ -35,7 +35,7 @@ export default function Create() {
   const history = useHistory();
 
   const user = useSelector((state: AuthState) => state.Auth.user);
-  const cohorts = useSelector((state: CohortState) => state.Cohorts).filter((cohort) => cohort.type === COHORT_TYPE.CLE && canUpdateCohort(user, cohort));
+  const cohorts = useSelector((state: CohortState) => state.Cohorts).filter((cohort) => cohort.type === COHORT_TYPE.CLE && canUpdateCohort(cohort, user));
 
   const [classe, setClasse] = useState<Partial<ClasseDto & { referent?: Partial<ReferentDto> }>>({
     name: "",
