@@ -1,5 +1,5 @@
 import { COHORTS_ACTIONS } from "./actions";
-import { CohortDto } from "snu-lib/src/dto/cohortDto";
+import { CohortDto } from "snu-lib";
 
 const INITIAL_STATE: CohortDto[] = [];
 

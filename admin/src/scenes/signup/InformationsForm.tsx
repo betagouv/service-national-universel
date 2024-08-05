@@ -8,9 +8,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { PasswordInput } from "@codegouvfr/react-dsfr/blocks/PasswordInput";
 
-import { isChefEtablissement, translate } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+import { isChefEtablissement, translate, ReferentDto, EtablissementDto } from "snu-lib";
 
 import { Section, Container } from "@snu/ds/dsfr";
 

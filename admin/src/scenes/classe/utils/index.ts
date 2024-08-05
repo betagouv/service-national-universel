@@ -1,5 +1,4 @@
-import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE, canEditEstimatedSeats, canEditTotalSeats } from "snu-lib";
-import { CohortDto } from "snu-lib/src/dto";
+import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE, canEditEstimatedSeats, canEditTotalSeats, CohortDto } from "snu-lib";
 import api from "@/services/api";
 import { User } from "@/types";
 

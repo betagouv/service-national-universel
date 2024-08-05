@@ -1,6 +1,6 @@
 import { SENDINBLUE_TEMPLATES } from "snu-lib";
-import { YoungDto } from "snu-lib/src/dto/youngDto";
-import { ContractDto } from "snu-lib/src/dto/contractDto";
+import { YoungDto } from "snu-lib";
+import { ContractDto } from "snu-lib";
 
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 import { sendTemplate } from "../brevo";

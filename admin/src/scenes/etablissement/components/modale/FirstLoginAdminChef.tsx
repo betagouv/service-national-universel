@@ -5,8 +5,7 @@ import { useHistory } from "react-router-dom";
 import { ProfilePic } from "@snu/ds";
 import { ModalConfirmation } from "@snu/ds/admin";
 import { User } from "@/types";
-import { isChefEtablissement } from "snu-lib";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+import { isChefEtablissement, EtablissementDto } from "snu-lib";
 
 import { REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY } from "@/services/cle";
 

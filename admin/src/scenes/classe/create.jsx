@@ -6,9 +6,8 @@ import { Link, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, canCreateClasse } from "snu-lib";
+import { translate, canCreateClasse, ERRORS } from "snu-lib";
 import validator from "validator";
-import { ERRORS } from "snu-lib";
 import Loader from "@/components/Loader";
 import { useSelector } from "react-redux";
 
