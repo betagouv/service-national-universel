@@ -19,6 +19,7 @@ import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
 import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
+import { BooleanRadioButtons, Button } from "@snu/ds/dsfr";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -181,7 +182,28 @@ const AccountGeneralPage = () => {
               )}
             </div>
           </div>
-
+          <hr className="ml-4"></hr>
+          <div className="grid grid-cols-1 lg:grid-cols-3">
+            <div className="hidden py-6 pl-6 lg:col-start-1 lg:block">
+              <h2 className="m-0 text-lg font-medium leading-6 text-gray-900">Formation PSC1</h2>
+            </div>
+            <div className="px-4 py-6 lg:col-span-2 lg:col-start-2">
+              <section className="mb-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="m-0 text-base font-normal leading-6 align-left">Avez-vous validé le PSC1 (Prévention et Secours Civiques de niveau 1) ?</h2>
+                </div>
+                <BooleanRadioButtons
+                  hintText=""
+                  value={"true"}
+                  options={[{ value: "true" }, { value: "false" }]}
+                  // onChange={(e) => updateData("psc1Info")(e.target.value)}
+                  orientation="horizontal"
+                  // state={(corrections?.psc1Info || errors.psc1Info) && "error"}
+                  // stateRelatedMessage={errors.psc1Info}
+                />
+              </section>
+            </div>
+          </div>
           <div className="flex flex-col gap-3 bg-gray-50 py-3 px-4 lg:flex-row lg:justify-end">
             <ButtonLight className="w-full bg-white lg:w-fit" onClick={handleResetForm}>
               Annuler
