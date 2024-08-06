@@ -19,16 +19,3 @@ export type InfoBus = {
   returnDate: string;
   returnHour: string;
 };
-
-export type TStatus =
-  | "none"
-  | "DRAFT"
-  | "CANCEL"
-  | "REFUSED"
-  | "IN_PROGRESS"
-  | "WAITING_VALIDATION"
-  | "WAITING_CORRECTION"
-  | "VALIDATED"
-  | "WAITING_LIST"
-  | "secondary"
-  | "primary";

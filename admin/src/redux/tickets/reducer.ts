@@ -13,14 +13,14 @@ export type TicketsState = {
   };
 };
 
-const initialState = {
+const INITIAL_STATE = {
   tickets: null,
   new: 0,
   open: 0,
   closed: 0,
 };
 
-const reducer = (oldState = initialState, action) => {
+const reducer = (oldState = INITIAL_STATE, action) => {
   switch (action.type) {
     case TICKETS_ACTIONS.FETCH_TICKETS:
       return {

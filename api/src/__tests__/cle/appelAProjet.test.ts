@@ -183,7 +183,7 @@ describe("Appel A Projet Controller", () => {
       expect(etablissementAfterSync!.name).toEqual("Lycée Jean Monnet");
     });
 
-    it("should persist data and link existing referent to created etablissement", async () => {
+    it("should persist data and link existing referent to created etablissement (coordinateur)", async () => {
       const mockEtablissement = {
         uai: "UAI_42",
         name: "Example School",
@@ -208,6 +208,56 @@ describe("Appel A Projet Controller", () => {
         password: "password",
         role: "administrateur_cle",
         subRole: "coordinateur_cle",
+        etablissementIds: [],
+        classeIds: [],
+      };
+
+      await ReferentModel.create(mockReferent);
+
+      // @ts-ignore
+      passport.user.subRole = "god";
+      const responseAppelAProjetMock = Promise.resolve({
+        json: () => {
+          return getMockAppelAProjetDto(false);
+        },
+      });
+
+      // @ts-ignore
+      fetch.mockImplementation(() => responseAppelAProjetMock);
+      await responseAppelAProjetMock;
+
+      await request(getAppHelper()).post("/cle/appel-a-projet/real").send({});
+      const etablissementAfterSync = await EtablissementModel.findOne({ uai: "UAI_42" });
+
+      // une erreur de cohérense est levé lors de l'import, l'établissement n'est donc pas créé
+      expect([...etablissementAfterSync!.referentEtablissementIds]).toEqual([]);
+    });
+
+    it("should persist data and link existing referent to created etablissement (chef etab)", async () => {
+      const mockEtablissement = {
+        uai: "UAI_42",
+        name: "Example School",
+        referentEtablissementIds: [],
+        coordinateurIds: ["coordinateurId1", "coordinateurId2"],
+        department: "Example Department",
+        region: "Example Region",
+        zip: "12345",
+        city: "Example City",
+        country: "France",
+        state: "inactive",
+        academy: "Example Academy",
+        schoolYears: ["2021-2022", "2022-2023"],
+      };
+      await EtablissementModel.create(mockEtablissement);
+
+      const mockReferent = {
+        email: "mail@etablissement.fr",
+        firstName: "John",
+        lastName: "Doe",
+        phoneNumber: "1234567890",
+        password: "password",
+        role: "administrateur_cle",
+        subRole: "referent_etablissement",
         etablissementIds: [],
         classeIds: [],
       };

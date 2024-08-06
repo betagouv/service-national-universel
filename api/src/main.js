@@ -18,23 +18,20 @@ const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
 const { initDB, closeDB } = require("./mongo");
 const { initRedisClient, closeRedisClient } = require("./redis");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
-const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
 const basicAuth = require("express-basic-auth");
-const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers } = require("./queues/redisQueue");
+const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers, scheduleRepeatableTasks } = require("./queues/redisQueue");
 
 async function runTasks() {
   initSentry();
   await Promise.all([initDB(), getAllPdfTemplates()]);
 
-  if (config.get("RUN_CRONS")) {
-    scheduleCrons();
-  }
   initQueues();
   initWorkers();
+  scheduleRepeatableTasks();
 
   const app = express();
 

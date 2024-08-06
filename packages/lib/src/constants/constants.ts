@@ -11,7 +11,7 @@ const YOUNG_STATUS = {
   NOT_ELIGIBLE: "NOT_ELIGIBLE",
   ABANDONED: "ABANDONED",
   NOT_AUTORISED: "NOT_AUTORISED",
-};
+} as const;
 
 const YOUNG_STATUS_PHASE1 = {
   WAITING_AFFECTATION: "WAITING_AFFECTATION",
@@ -21,41 +21,41 @@ const YOUNG_STATUS_PHASE1 = {
   NOT_DONE: "NOT_DONE",
   WITHDRAWN: "WITHDRAWN",
   WAITING_LIST: "WAITING_LIST",
-};
+} as const;
 
 const YOUNG_STATUS_PHASE1_MOTIF = {
   ILLNESS: "ILLNESS",
   DEATH: "DEATH",
   ADMINISTRATION_CANCEL: "ADMINISTRATION_CANCEL",
   OTHER: "OTHER",
-};
+} as const;
 
 const YOUNG_STATUS_PHASE2 = {
   WAITING_REALISATION: "WAITING_REALISATION",
   IN_PROGRESS: "IN_PROGRESS",
   VALIDATED: "VALIDATED",
   WITHDRAWN: "WITHDRAWN",
-};
+} as const;
 
 const CONTRACT_STATUS = {
   DRAFT: "DRAFT",
   SENT: "SENT",
   VALIDATED: "VALIDATED",
-};
+} as const;
 
 const YOUNG_STATUS_PHASE3 = {
   WAITING_REALISATION: "WAITING_REALISATION",
   WAITING_VALIDATION: "WAITING_VALIDATION",
   VALIDATED: "VALIDATED",
   WITHDRAWN: "WITHDRAWN",
-};
+} as const;
 
 const YOUNG_PHASE = {
   INSCRIPTION: "INSCRIPTION",
   COHESION_STAY: "COHESION_STAY",
   INTEREST_MISSION: "INTEREST_MISSION",
   CONTINUE: "CONTINUE",
-};
+} as const;
 
 const PHASE_STATUS = {
   IN_PROGRESS: "IN_PROGRESS",
@@ -63,12 +63,12 @@ const PHASE_STATUS = {
   VALIDATED: "VALIDATED",
   CANCEL: "CANCEL",
   WAITING_AFFECTATION: "WAITING_AFFECTATION",
-};
+} as const;
 
 const SESSION_STATUS = {
   VALIDATED: "VALIDATED",
   DRAFT: "DRAFT",
-};
+} as const;
 
 const APPLICATION_STATUS = {
   WAITING_VALIDATION: "WAITING_VALIDATION",
@@ -80,26 +80,26 @@ const APPLICATION_STATUS = {
   IN_PROGRESS: "IN_PROGRESS",
   DONE: "DONE",
   ABANDON: "ABANDON",
-};
+} as const;
 
 const EQUIVALENCE_STATUS = {
   WAITING_VERIFICATION: "WAITING_VERIFICATION",
   WAITING_CORRECTION: "WAITING_CORRECTION",
   VALIDATED: "VALIDATED",
   REFUSED: "REFUSED",
-};
+} as const;
 
 const PROFESSIONNAL_PROJECT = {
   UNIFORM: "UNIFORM",
   OTHER: "OTHER",
   UNKNOWN: "UNKNOWN",
-};
+} as const;
 
 const PROFESSIONNAL_PROJECT_PRECISION = {
   FIREFIGHTER: "FIREFIGHTER",
   POLICE: "POLICE",
   ARMY: "ARMY",
-};
+} as const;
 
 const MISSION_DOMAINS = {
   CITIZENSHIP: "CITIZENSHIP",
@@ -112,7 +112,7 @@ const MISSION_DOMAINS = {
   SOLIDARITY: "SOLIDARITY",
   SPORT: "SPORT",
   MILITARY: "MILITARY",
-};
+} as const;
 
 const JVA_MISSION_DOMAINS = {
   education: "éducation",
@@ -124,7 +124,7 @@ const JVA_MISSION_DOMAINS = {
   sante: "santé",
   "benevolat-competences": "bénévolat/compétences",
   "prevention-protection": "prévention/protection",
-};
+} as const;
 
 const YOUNG_SITUATIONS = {
   GENERAL_SCHOOL: "GENERAL_SCHOOL",
@@ -140,7 +140,7 @@ const YOUNG_SITUATIONS = {
   MISSION_LOCALE: "MISSION_LOCALE",
   CAP_EMPLOI: "CAP_EMPLOI",
   NOTHING: "NOTHING", // @todo find a better key --'
-};
+} as const;
 
 const YOUNG_SCHOOLED_SITUATIONS = {
   GENERAL_SCHOOL: YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -148,13 +148,13 @@ const YOUNG_SCHOOLED_SITUATIONS = {
   // AGRICULTURAL_SCHOOL: constants.YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
   SPECIALIZED_SCHOOL: YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
   APPRENTICESHIP: YOUNG_SITUATIONS.APPRENTICESHIP,
-};
+} as const;
 
 const FORMAT = {
   CONTINUOUS: "CONTINUOUS",
   DISCONTINUOUS: "DISCONTINUOUS",
   AUTONOMOUS: "AUTONOMOUS",
-};
+} as const;
 
 const MISSION_STATUS = {
   WAITING_VALIDATION: "WAITING_VALIDATION",
@@ -164,13 +164,13 @@ const MISSION_STATUS = {
   REFUSED: "REFUSED",
   CANCEL: "CANCEL",
   ARCHIVED: "ARCHIVED",
-};
+} as const;
 
 const PERIOD = {
   WHENEVER: "WHENEVER",
   DURING_HOLIDAYS: "DURING_HOLIDAYS",
   DURING_SCHOOL: "DURING_SCHOOL",
-};
+} as const;
 
 const TRANSPORT = {
   PUBLIC_TRANSPORT: "PUBLIC_TRANSPORT",
@@ -178,7 +178,7 @@ const TRANSPORT = {
   MOTOR: "MOTOR",
   CARPOOLING: "CARPOOLING",
   OTHER: "OTHER",
-};
+} as const;
 
 const MISSION_PERIOD_DURING_HOLIDAYS = {
   SUMMER: "SUMMER",
@@ -186,20 +186,20 @@ const MISSION_PERIOD_DURING_HOLIDAYS = {
   DECEMBER: "DECEMBER",
   WINTER: "WINTER",
   SPRING: "SPRING",
-};
+} as const;
 
 const MISSION_PERIOD_DURING_SCHOOL = {
   EVENING: "EVENING",
   END_DAY: "END_DAY",
   WEEKEND: "WEEKEND",
-};
+} as const;
 
 const STRUCTURE_STATUS = {
   WAITING_VALIDATION: "WAITING_VALIDATION",
   WAITING_CORRECTION: "WAITING_CORRECTION",
   VALIDATED: "VALIDATED",
   DRAFT: "DRAFT",
-};
+} as const;
 
 const DEFAULT_STRUCTURE_NAME = "Ma nouvelle Structure";
 
@@ -207,7 +207,7 @@ const INTEREST_MISSION_LIMIT_DATE = {
   2019: "23 mars 2021",
   2020: "31 décembre 2021",
   2021: "30 juin 2022",
-};
+} as const;
 
 const ES_NO_LIMIT = 10_000;
 
@@ -306,7 +306,7 @@ const FILE_STATUS_PHASE1 = {
   WAITING_VERIFICATION: "WAITING_VERIFICATION",
   WAITING_CORRECTION: "WAITING_CORRECTION",
   VALIDATED: "VALIDATED",
-};
+} as const;
 
 const ACADEMIQUE_DOMAINS = [
   "ac-clermont.fr",
@@ -462,7 +462,7 @@ const GRADES = {
   "2ndeCAP": "2ndeCAP",
   "1ereCAP": "1ereCAP",
   Autre: "Autre",
-};
+} as const;
 
 const TEMPLATE_DESCRIPTIONS = {
   1: "Le contact favori est le SMS + clic sur le bouton “confirmer” à la fin de l’inscription",
@@ -681,14 +681,14 @@ const TEMPLATE_DESCRIPTIONS = {
 
 const MIME_TYPES = {
   EXCEL: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-};
+} as const;
 
 const STRUCTURE_LEGAL_STATUS = {
   PUBLIC: "PUBLIC",
   ASSOCIATION: "ASSOCIATION",
   PRIVATE: "PRIVATE",
   OTHER: "OTHER",
-};
+} as const;
 
 //CLE
 const STATUS_CLASSE = {
@@ -698,14 +698,14 @@ const STATUS_CLASSE = {
   VERIFIED: "VERIFIED",
   OPEN: "OPEN",
   CLOSED: "CLOSED",
-};
+} as const;
 
 const STATUS_PHASE1_CLASSE = {
   WAITING_AFFECTATION: "WAITING_AFFECTATION",
   AFFECTED: "AFFECTED",
   NOT_DONE: "NOT_DONE",
   DONE: "DONE",
-};
+} as const;
 
 const CLE_TYPE = {
   GENERAL_HIGHSCHOOL: "Lycée Général",
@@ -715,19 +715,19 @@ const CLE_TYPE = {
   AGRICULTURAL_HIGHSCHOOL: "Lycée Agricole (EPLEFPA)",
   MILITARY_HIGHSCHOOL: "Lycée Militaire",
   OTHER: "Autre",
-};
+} as const;
 
 const CLE_SECTOR = {
   PUBLIC: "Statut public",
   PRIVATE: " Statut privé",
-};
+} as const;
 
 const CLE_COLORATION = {
   SPORT: "SPORT",
   ENVIRONMENT: "ENVIRONMENT",
   DEFENSE: "DEFENSE",
   RESILIENCE: "RESILIENCE",
-};
+} as const;
 
 const CLE_GRADE = {
   "4eme": "4eme",
@@ -742,30 +742,30 @@ const CLE_GRADE = {
   "2ndeCAP": "2ndeCAP",
   CAP: "CAP",
   Autre: "Autre",
-};
+} as const;
 
-const CLE_FILIERE = {
+export const CLE_FILIERE = {
   GENERAL_AND_TECHNOLOGIC: "Générale et technologique",
   PROFESSIONAL: "Professionnelle",
   APPRENTICESHIP: "Apprentissage",
   ADAPTED: "Enseignement adapté",
   MIXED: "Mixte",
-};
+} as const;
 
 const YOUNG_SOURCE = {
   VOLONTAIRE: "VOLONTAIRE",
   CLE: "CLE",
-};
+} as const;
 
 const COHORT_TYPE = {
   VOLONTAIRE: "VOLONTAIRE",
   CLE: "CLE",
-};
+} as const;
 
 const TYPE_CLASSE = {
   GROUP: "GROUP",
   FULL: "FULL",
-};
+} as const;
 
 const LIMIT_DATE_ESTIMATED_SEATS = new Date("2024-08-28");
 const LIMIT_DATE_TOTAL_SEATS = new Date("2024-09-30");

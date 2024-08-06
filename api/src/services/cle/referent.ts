@@ -10,18 +10,18 @@ import { sendTemplate } from "../../brevo";
 import { inSevenDays } from "../../utils";
 import { capture } from "../../sentry";
 
-import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument } from "../../models";
+import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument, EtablissementType } from "../../models";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
-import { UserDto } from "snu-lib/src/dto";
+import { UserDto } from "snu-lib";
 
 export interface InvitationResult {
   to: string;
   status: string;
   details?: string;
-  type?: typeof InvitationType;
+  type?: ReferentType["metadata"]["invitationType"];
 }
 
-export const findOrCreateReferent = async (referent, { etablissement, role, subRole }) => {
+export const findOrCreateReferent = async (referent, { etablissement, role, subRole }: { etablissement: EtablissementType; role: string; subRole?: string }) => {
   try {
     // Return if already exists
     if (referent._id) return referent;
@@ -43,17 +43,22 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
   } catch (error) {
     if (error.code === 11000) return ERRORS.USER_ALREADY_REGISTERED;
     capture(error);
+    return null;
   }
 };
 
-export const inviteReferent = async (referent, { role, user }, etablissement) => {
+export const inviteReferent = async (
+  referent: Pick<ReferentType, "firstName" | "lastName" | "email" | "invitationToken">,
+  { role, from }: { role: UserDto["role"]; from: UserDto | null },
+  etablissement: EtablissementType,
+) => {
   // Send invite
   const cta = `${config.ADMIN_URL}/creer-mon-compte?token=${referent.invitationToken}`;
-  const fromName = `${user.firstName} ${user.lastName}`;
+  const fromName = `${from?.firstName || null} ${from?.lastName || null}`;
   const toName = `${referent.firstName} ${referent.lastName}`;
   const name_school = `${etablissement.name}`;
 
-  await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[role], {
+  return await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[role], {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
     params: { cta, fromName, toName, name_school },
   });
@@ -66,7 +71,7 @@ export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
     subRole: SUB_ROLES.referent_etablissement,
   });
   const invitations: InvitationResult[] = [];
-  let processCounter = 0;
+  let processCounter = 1;
   for (const chefEtablissement of chefsEtablissementsToSendInvitation) {
     try {
       console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", chefsEtablissementsToSendInvitation.length);
