@@ -6,7 +6,7 @@ if (!secretKey) {
   throw new Error("SCW_SECRET_KEY is required to get configuration secrets");
 }
 
-const REVISION = 6;
+const REVISION = 7;
 const secrets = getSecrets(secretKey, CI_PROJECT_ID, "snu-ci", REVISION);
 
 module.exports = {
@@ -15,5 +15,6 @@ module.exports = {
   APP_URL: "https://moncompte.ci.beta-snu.dev",
   ADMIN_URL: "https://admin.ci.beta-snu.dev",
   TASK_QUEUE_PREFIX: "ci",
+  MAIL_TRANSPORT: "SMTP",
   ...secrets,
 };
