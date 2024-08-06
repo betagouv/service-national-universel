@@ -131,6 +131,7 @@ export default function StepConfirm() {
           ) : (
             <Details title="Situation particulière" value="Non" />
           )}
+          {young.cohort !== "Toussaint 2024" && <Details title="PSC1" value={young.psc1Info} />}
         </div>
         <hr className="mt-4" />
         <div className="flex flex-col gap-3">
