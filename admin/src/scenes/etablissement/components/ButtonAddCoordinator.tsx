@@ -7,8 +7,7 @@ import { ProfilePic } from "@snu/ds";
 import validator from "validator";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { ERRORS, translate } from "snu-lib";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+import { ERRORS, translate, EtablissementDto } from "snu-lib";
 
 interface Props {
   etablissement: EtablissementDto;

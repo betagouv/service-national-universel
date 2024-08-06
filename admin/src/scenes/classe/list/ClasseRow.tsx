@@ -2,8 +2,7 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import { HiUsers } from "react-icons/hi";
 
-import { ClasseDto } from "snu-lib/src/dto";
-import { translateStatusClasse } from "snu-lib";
+import { ClasseDto, translateStatusClasse } from "snu-lib";
 import { Badge } from "@snu/ds/admin";
 
 import { statusClassForBadge } from "../utils";

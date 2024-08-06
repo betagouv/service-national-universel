@@ -7,6 +7,7 @@ module.exports = {
   IMAGES_ROOTDIR: `${__dirname}/../public/images`,
   FONT_ROOTDIR: `${__dirname}/../src/assets/fonts`,
   RUN_CRONS: false,
+  ENABLE_SENTRY: true,
   ENABLE_SENDINBLUE: true, // TODO: default false
   MAIL_TRANSPORT: null, // BREVO / SMTP / null (pas d'envoi d'email)
   SMTP_HOST: undefined,

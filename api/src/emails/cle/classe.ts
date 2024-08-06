@@ -1,13 +1,13 @@
-const { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES } = require("snu-lib");
-const { EtablissementModel, ReferentModel } = require("../../models");
-const { capture } = require("../../sentry");
-const config = require("config");
-const { sendTemplate } = require("../../brevo");
-const { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } = require("../../cle/classe/classeService");
+import { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, isChefEtablissement } from "snu-lib";
+import { ClasseType, EtablissementModel, ReferentDocument, ReferentModel } from "../../models";
+import { capture } from "../../sentry";
+import config from "config";
+import { sendTemplate } from "../../brevo";
+import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 
-module.exports = (emailsEmitter) => {
+export default function (emailsEmitter) {
   // Classe created
-  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_CREATED, async (classe) => {
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_CREATED, async (classe: ClasseType) => {
     try {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
       if (!etablissement) throw new Error("Etablissement not found");
@@ -15,9 +15,12 @@ module.exports = (emailsEmitter) => {
       const referents = await ReferentModel.find({ _id: { $in: [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds] } });
       if (!referents?.length) throw new Error("Referents not found");
 
+      const chefEtab = referents.find((referent) => isChefEtablissement(referent));
+
       await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_CREATED, {
         emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
         params: {
+          toName: `${chefEtab?.firstName || ""} ${chefEtab?.lastName || ""}`,
           class_name: classe.name,
           class_code: classe.uniqueKeyAndId,
           cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
@@ -29,7 +32,7 @@ module.exports = (emailsEmitter) => {
   });
 
   // Cohort updated
-  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, async (classe) => {
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, async (classe: ClasseType) => {
     try {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
       if (!etablissement) throw new Error("Etablissement not found");
@@ -52,7 +55,7 @@ module.exports = (emailsEmitter) => {
   });
 
   //classe verified
-  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, async (classe) => {
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, async (classe: ClasseType) => {
     try {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
       if (!etablissement) throw new Error("Etablissement not found");
@@ -86,7 +89,7 @@ module.exports = (emailsEmitter) => {
   });
 
   // Notify admin CLE Verif
-  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, async (classe) => {
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, async (classe: ClasseType) => {
     try {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
       if (!etablissement) throw new Error("Etablissement not found");
@@ -95,7 +98,7 @@ module.exports = (emailsEmitter) => {
       if (!referents?.length) throw new Error("Referents not found");
 
       const chefEtablissement = referents.find((referent) => referent.subRole === SUB_ROLES.referent_etablissement);
-      const isRegistered = chefEtablissement.lastLoginAt;
+      const isRegistered = chefEtablissement?.lastLoginAt;
       if (isRegistered) {
         await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_NOTIFY_VERIF, {
           emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
@@ -106,6 +109,9 @@ module.exports = (emailsEmitter) => {
           },
         });
       } else {
+        if (!chefEtablissement) {
+          throw new Error("Chef d'établissement not found");
+        }
         const nbreClasseAValider = await getNumberOfClassesByEtablissement(etablissement);
         const effectifPrevisionnel = await getEstimatedSeatsByEtablissement(etablissement);
         await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_CHEF_ETABLISSEMENT_TO_INSCRIPTION_TEMPLATE, {
@@ -126,7 +132,7 @@ module.exports = (emailsEmitter) => {
   });
 
   //classe increase objective
-  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_INCREASE_OBJECTIVE, async (classe) => {
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_INCREASE_OBJECTIVE, async (classe: ClasseType) => {
     try {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
       if (!etablissement) throw new Error("Etablissement not found");
@@ -146,12 +152,36 @@ module.exports = (emailsEmitter) => {
       capture(error);
     }
   });
-};
+
+  // Classe created
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, async (classe: ClasseType) => {
+    try {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) throw new Error("Etablissement not found");
+
+      if (classe.referentClasseIds.length !== 1) throw new Error("Referent not found");
+      const referent = await ReferentModel.findById(classe.referentClasseIds[0]);
+      if (!referent) throw new Error("Referents not found");
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, {
+        emailTo: [{ email: referent.email, name: `${referent.firstName} ${referent.lastName}` }],
+        params: {
+          toName: `${referent.firstName || ""} ${referent.lastName || ""}`,
+          class_name: classe.name,
+          class_code: classe.uniqueKeyAndId,
+          cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
+        },
+      });
+    } catch (error) {
+      capture(error);
+    }
+  });
+}
 
 //We want to send emails to the right referents department
 //manager_department -> if not assistant_manager_department -> if not secretariat -> if not manager_phase2
 //end case -> all referent_department (never happens)
-const getReferentDep = async (department) => {
+const getReferentDep = async (department: string): Promise<ReferentDocument[]> => {
   let toReferent = [];
   toReferent = await ReferentModel.find({
     subRole: SUB_ROLES.manager_department,
@@ -195,7 +225,7 @@ const getReferentDep = async (department) => {
 //We want to send emails to the right referents region
 //coordinator -> if not assistant_coordinator -> if not secretariat
 //end case -> all referent_region (never happens)
-const getReferentReg = async (region) => {
+const getReferentReg = async (region: string): Promise<ReferentDocument[]> => {
   let toReferent = [];
   toReferent = await ReferentModel.find({
     subRole: SUB_ROLES.coordinator,

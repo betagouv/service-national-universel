@@ -43,8 +43,8 @@ describe("Application", () => {
     it.skip("should only allow young to apply for themselves", async () => {
       const lastYear = new Date().getFullYear() - 1;
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE as any }));
-      const secondYoung = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE as any }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const secondYoung = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
@@ -67,7 +67,7 @@ describe("Application", () => {
       passport.user = previous;
     });
     it.skip("should create an application when priority is given", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE as any }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -77,7 +77,7 @@ describe("Application", () => {
       expect(res.body.data.youngId).toBe(young._id.toString());
     });
     it.skip("should create an application when no priority is given", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE as any }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission1 = await createMissionHelper(getNewMissionFixture());
       await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission1._id });
       const mission2 = await createMissionHelper(getNewMissionFixture());
@@ -90,7 +90,7 @@ describe("Application", () => {
       expect(res.body.data.youngId).toBe(young._id.toString());
     });
     it.skip("should update young status", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE as any }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -103,7 +103,7 @@ describe("Application", () => {
       expect([...updatedYoung!.phase2ApplicationStatus]).toStrictEqual(["WAITING_VALIDATION"]);
     });
     it.skip("should update mission places left status", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE as any }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 100, placesTotal: 100 });
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -146,7 +146,7 @@ describe("Application", () => {
     it("should return 403 when young has not finished phase1", async () => {
       const year = new Date().getFullYear();
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATIO as any }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION }));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;

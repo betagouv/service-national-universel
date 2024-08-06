@@ -29,7 +29,6 @@ export function sendDocumentEmailTask(options: SendDocumentEmailOptions) {
 }
 
 export function initWorker(connection) {
-  console.log("Worker");
   worker = new Worker(
     MAIL_QUEUE,
     async (job) => {

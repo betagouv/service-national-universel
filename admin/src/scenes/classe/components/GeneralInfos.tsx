@@ -3,19 +3,18 @@ import { BsTrash3 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
-import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, translateGrade, translateColoration, formatDateFRTimezoneUTC } from "snu-lib";
-import { TYPE_CLASSE_LIST } from "snu-lib/src/constants/constants";
+import {
+  translate,
+  ROLES,
+  translateGrade,
+  formatDateFRTimezoneUTC,
+  CohortDto,
+  ClasseDto,
+} from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
-import { CohortDto } from "snu-lib/src/dto/cohortDto";
 import { User } from "@/types";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
 import { Rights } from "./types";
-
-type SelectOption = {
-  value: string;
-  label: string;
-};
-
+import { colorOptions, filiereOptions, gradeOptions, typeOptions } from "../utils";
 interface Props {
   classe: ClasseDto;
   setClasse: (classe: ClasseDto) => void;
@@ -47,23 +46,6 @@ export default function GeneralInfos({
   onCheckInfo,
   validatedYoung,
 }: Props) {
-  const colorOptions: SelectOption[] = Object.keys(CLE_COLORATION_LIST).map((value) => ({
-    value: CLE_COLORATION_LIST[value],
-    label: translateColoration(CLE_COLORATION_LIST[value]),
-  }));
-  const filiereOptions = Object.keys(CLE_FILIERE_LIST).map((value) => ({
-    value: CLE_FILIERE_LIST[value],
-    label: CLE_FILIERE_LIST[value],
-  }));
-  const gradeOptions = CLE_GRADE_LIST.filter((value) => value !== "CAP").map((value) => ({
-    value: value,
-    label: translateGrade(value),
-  }));
-  const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
-    value: TYPE_CLASSE_LIST[value],
-    label: translate(TYPE_CLASSE_LIST[value]),
-  }));
-
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
       return [
@@ -226,6 +208,9 @@ export default function GeneralInfos({
               </Link>
             </>
           )}
+          <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
+            <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
+          </Link>
 
           {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? (
             <div className="flex items-center justify-end mt-6">
