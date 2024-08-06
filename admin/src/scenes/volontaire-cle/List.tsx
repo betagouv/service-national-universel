@@ -48,7 +48,7 @@ export default function List() {
 
   const { value: studentsCount } = useAsync(async () => {
     try {
-      const { reinscriptionStep2023, status, imageRight, ...countFilter } = selectedFilters;
+      const { inscriptionStep2023, status, imageRight, ...countFilter } = selectedFilters;
       const res = await api.post(`/elasticsearch/cle/young/search`, {
         filters: Object.entries(countFilter).reduce(
           (acc, [key, value]) => {
@@ -64,7 +64,7 @@ export default function List() {
         ),
       });
       return {
-        studentsWaitingConsent: res.responses[1].aggregations?.reinscriptionStep2023?.names?.buckets.find((e) => e.key === "WAITING_CONSENT")?.doc_count || 0,
+        studentsWaitingConsent: res.responses[1].aggregations?.inscriptionStep2023?.names?.buckets.find((e) => e.key === "WAITING_CONSENT")?.doc_count || 0,
         studentsWaitingValidation: res.responses[1].aggregations?.status?.names?.buckets.find((e) => e.key === YOUNG_STATUS.WAITING_VALIDATION)?.doc_count || 0,
         studentsWaitingImageRights: res.responses[1].aggregations?.imageRight?.names?.buckets.find((e) => e.key === "N/A")?.doc_count || 0,
       };

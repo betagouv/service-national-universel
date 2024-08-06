@@ -64,7 +64,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "youngPhase1Agreement.keyword",
       "classeId.keyword",
       "etablissementId.keyword",
-      "reinscriptionStep2023.keyword",
+      "inscriptionStep2023.keyword",
     ];
 
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt", "classeId.keyword"];
