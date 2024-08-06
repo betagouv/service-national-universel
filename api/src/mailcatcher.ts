@@ -16,8 +16,8 @@ export async function sendMailCatcher(subject, html, { emailTo, cc, bcc, attachm
 
 const sendMail = async (mailOptions: SendMailOptions) => {
   const transporter = nodemailer.createTransport({
-    host: config.MAILCATCHER_HOST,
-    port: Number(config.MAILCATCHER_PORT),
+    host: config.SMTP_HOST,
+    port: Number(config.SMTP_PORT),
     secure: false,
   });
 
