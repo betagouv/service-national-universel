@@ -19,5 +19,6 @@ module.exports = {
   SENTRY_TRACING_SAMPLE_RATE: 0.01,
   TASK_QUEUE_PREFIX: "production",
   MAIL_TRANSPORT: "BREVO",
+  ENABLE_2FA: true,
   ...secrets,
 };
