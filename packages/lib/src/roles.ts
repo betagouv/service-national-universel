@@ -645,7 +645,7 @@ function canViewStructureChildren(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
-function canDownloadYoungDocuments(actor: UserDto, target: UserDto, type?: string) {
+function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: string) {
   if (type === "certificate" || type === "convocation") {
     return [
       ROLES.REFERENT_DEPARTMENT,

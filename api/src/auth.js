@@ -4,7 +4,7 @@ const Joi = require("joi");
 
 const { capture, captureMessage } = require("./sentry");
 const config = require("config");
-const { sendTemplate, regexp_exception_staging } = require("./brevo");
+const { sendTemplate } = require("./brevo");
 const {
   JWT_SIGNIN_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC,
@@ -32,6 +32,7 @@ const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
 const { ClasseModel, EtablissementModel } = require("./models");
+const { getFeatureFlagsAvailable } = require("./featureFlag/featureFlagService");
 
 class Auth {
   constructor(model) {
@@ -364,8 +365,7 @@ class Auth {
 
       const shouldUse2FA = async () => {
         try {
-          if (config.ENVIRONMENT === "development") return false;
-          if (["staging", "ci", "custom"].includes(config.ENVIRONMENT) && !user.email.match(regexp_exception_staging)) return false;
+          if (!config.ENABLE_2FA) return false;
 
           const trustToken = req.cookies[`trust_token-${user._id}`];
           if (!trustToken) return true;
@@ -418,6 +418,7 @@ class Auth {
       else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      data.featureFlags = await getFeatureFlagsAvailable();
       return res.status(200).send({
         ok: true,
         token,
@@ -482,6 +483,7 @@ class Auth {
       }
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      data.featureFlags = await getFeatureFlagsAvailable();
       return res.status(200).send({
         ok: true,
         token,
@@ -612,6 +614,7 @@ class Auth {
       await user.save();
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      data.featureFlags = await getFeatureFlagsAvailable();
 
       return res.status(200).send({
         ok: true,
@@ -670,6 +673,7 @@ class Auth {
       }
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      data.featureFlags = await getFeatureFlagsAvailable();
       return res.status(200).send({
         ok: true,
         token,
@@ -742,6 +746,7 @@ class Auth {
       user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      data.featureFlags = await getFeatureFlagsAvailable();
       const token = isYoung(user) ? value.token_young : value.token_ref;
       if (!data || !token) {
         captureMessage("PB with signin_token", { extra: { data: data, token: token } });
@@ -763,6 +768,7 @@ class Auth {
       user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      data.featureFlags = await getFeatureFlagsAvailable();
 
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,

@@ -5,26 +5,16 @@ import { HiOutlinePencil } from "react-icons/hi";
 
 import {
   translate,
-  CLE_COLORATION_LIST,
-  CLE_GRADE_LIST,
-  CLE_FILIERE_LIST,
   ROLES,
   translateGrade,
-  translateColoration,
   formatDateFRTimezoneUTC,
   CohortDto,
   ClasseDto,
-  TYPE_CLASSE_LIST,
 } from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
 import { Rights } from "./types";
-
-type SelectOption = {
-  value: string;
-  label: string;
-};
-
+import { colorOptions, filiereOptions, gradeOptions, typeOptions } from "../utils";
 interface Props {
   classe: ClasseDto;
   setClasse: (classe: ClasseDto) => void;
@@ -56,23 +46,6 @@ export default function GeneralInfos({
   onCheckInfo,
   validatedYoung,
 }: Props) {
-  const colorOptions: SelectOption[] = Object.keys(CLE_COLORATION_LIST).map((value) => ({
-    value: CLE_COLORATION_LIST[value],
-    label: translateColoration(CLE_COLORATION_LIST[value]),
-  }));
-  const filiereOptions = Object.keys(CLE_FILIERE_LIST).map((value) => ({
-    value: CLE_FILIERE_LIST[value],
-    label: CLE_FILIERE_LIST[value],
-  }));
-  const gradeOptions = CLE_GRADE_LIST.filter((value) => value !== "CAP").map((value) => ({
-    value: value,
-    label: translateGrade(value),
-  }));
-  const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
-    value: TYPE_CLASSE_LIST[value],
-    label: translate(TYPE_CLASSE_LIST[value]),
-  }));
-
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
       return [
