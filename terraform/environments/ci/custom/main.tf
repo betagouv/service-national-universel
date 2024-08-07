@@ -137,7 +137,7 @@ resource "scaleway_container" "tasks" {
     "APP_URL"        = "https://${local.app_hostname}"
     "SECRET_NAME"    = scaleway_secret.custom.name
     "RUN_TASKS"      = "true"
-    "RUN_CRONS"      = "true"
+    "RUN_CRONS"      = "false"
   }
 
   secret_environment_variables = {
