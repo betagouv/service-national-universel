@@ -36,7 +36,7 @@ exports.handler = async () => {
       slack.success({ title: `Successfully synced ${type} contacts to SNUpport` });
     };
 
-    await processContacts({ YoungModel }, "young");
+    await processContacts(YoungModel, "young");
     await processContacts(ReferentModel, "referent");
   } catch (e) {
     capture(e);

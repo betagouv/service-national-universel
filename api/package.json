@@ -67,7 +67,6 @@
     "mongoose-patch-history": "^2.0.0",
     "nanoid": "^2.1.11",
     "netmask": "^2.0.2",
-    "node-cron": "^3.0.2",
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.9.14",
     "passport": "^0.6.0",

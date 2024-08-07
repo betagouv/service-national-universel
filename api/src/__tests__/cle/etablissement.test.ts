@@ -185,6 +185,7 @@ describe("GET /from-user", () => {
     expect(res.status).toBe(200);
     expect(res.body.data._id).toBe(String(etablissement._id));
     expect(res.body.data.coordinateurIds).toStrictEqual([String(coordinatorId)]);
+    expect(res.body.data.uniqueKey).toBe("C-PDLL072");
     // @ts-ignore
     passport.user.subRole = previousSubRole;
     // @ts-ignore
@@ -298,6 +299,7 @@ describe("GET /:id", () => {
     expect(res.status).toBe(200);
     expect(res.body.data._id).toBe(String(validId));
     expect(res.body.data.name).toBe(etablissement.name);
+    expect(res.body.data.uniqueKey).toBe("C-PDLL072");
   });
 
   it("should return 200 and populate referent and coordinator  when successful", async () => {

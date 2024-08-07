@@ -166,6 +166,7 @@ const isPhoneNumberWellFormated = (phoneNumberValue, zoneKey) => {
     const hasPhoneNumberAZero = phoneNumberValue.charAt(0) === "0";
     return (shouldPhoneNumberStartWithZero && hasPhoneNumberAZero) || (!shouldPhoneNumberStartWithZero && phoneNumberValue.length === 9 && !hasPhoneNumberAZero);
   }
+  return false;
 };
 
 const concatPhoneNumberWithZone = (phoneNumber, zoneKey) => {

@@ -4,7 +4,7 @@ import { DropDown } from "./filters/FilterPopOver";
 import { Popover } from "@headlessui/react";
 import Trash from "../../../assets/icons/Trash";
 
-export default function SelectedFilters({ filterArray, selectedFilters, setSelectedFilters, paramData, setParamData }) {
+export default function SelectedFilters({ filterArray, selectedFilters, setSelectedFilters, paramData, setParamData, disabled }) {
   // check if all filters are defaultValue if yes, we don't show the delete button
   const hasOnlyDefaultFiltersSelected = useMemo(
     () =>
@@ -32,8 +32,13 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
           <div key={filter.title} className="relative">
             <div className={`border-[2px] p-0.5 ${paramData?.isShowing === filter.name ? "  rounded-xl border-blue-600" : "border-transparent"}`}>
               <div
-                onClick={() => setParamData((oldValue) => ({ ...oldValue, isShowing: filter.name }))}
-                className="flex w-fit cursor-pointer flex-row items-center gap-1 rounded-md border-[1px] border-gray-200 py-1.5 pr-1.5 pl-[12px] hover:border-gray-300">
+                onClick={() => {
+                  if (disabled) return;
+                  setParamData((oldValue) => ({ ...oldValue, isShowing: filter.name }));
+                }}
+                className={`flex w-fit flex-row items-center gap-1 rounded-md border-[1px] border-gray-200 py-1.5 pr-1.5 pl-[12px] hover:border-gray-300 ${
+                  !disabled && "cursor-pointer"
+                }`}>
                 <div className="text-xs font-medium text-gray-700">{filter.title} :</div>
                 {selectedFilters[filter.name].filter.map((item, index) => {
                   // on affiche que les 2 premiers filtres, apres on affiche "+x"
@@ -58,21 +63,22 @@ export default function SelectedFilters({ filterArray, selectedFilters, setSelec
                 })}
               </div>
             </div>
-
-            <Popover className="absolute">
-              <DropDown
-                filter={filter}
-                selectedFilters={selectedFilters}
-                setSelectedFilters={setSelectedFilters}
-                data={filter?.disabledBaseQuery ? filter.options : paramData?.filters ? paramData.filters[filter.name] : []}
-                isShowing={paramData?.isShowing === filter.name}
-                setParamData={setParamData}
-                inListFilter={false}
-              />
-            </Popover>
+            {!disabled && (
+              <Popover className="absolute">
+                <DropDown
+                  filter={filter}
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                  data={filter?.disabledBaseQuery ? filter.options : paramData?.filters ? paramData.filters[filter.name] : []}
+                  isShowing={paramData?.isShowing === filter.name}
+                  setParamData={setParamData}
+                  inListFilter={false}
+                />
+              </Popover>
+            )}
           </div>
         ))}
-      {!hasOnlyDefaultFiltersSelected && (
+      {!hasOnlyDefaultFiltersSelected && !disabled && (
         <div onClick={() => deleteFilters()} className="ml-1 flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded bg-gray-100 p-2 hover:bg-gray-200">
           <Trash className="h-[13.5px] w-3 font-light text-red-500 " />
         </div>

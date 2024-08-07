@@ -3,7 +3,7 @@ import passport from "passport";
 import { fakerFR as faker } from "@faker-js/faker";
 
 import { ROLES, SUB_ROLES, InvitationType } from "snu-lib";
-import { UserDto } from "snu-lib/src/dto";
+import { UserDto } from "snu-lib";
 
 import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult } from "../../services/cle/referent";

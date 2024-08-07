@@ -16,7 +16,7 @@ import Loader from "@/components/Loader";
 import plausibleEvent from "@/services/plausible";
 import { downloadCertificatesByClassId } from "@/services/convocation.service";
 import { usePendingAction } from "@/hooks/usePendingAction";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
+import { ClasseDto } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
@@ -28,7 +28,8 @@ import DeleteButton from "./components/DeleteButton";
 import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleCohort from "./components/modale/modaleCohort";
 import ButtonInvite from "./components/ButtonInvite";
-import { InfoBus, TStatus, Rights } from "./components/types";
+import { InfoBus, Rights } from "./components/types";
+import { TStatus } from "@/types";
 import ButtonRelanceVerif from "./components/ButtonRelanceVerif";
 import VerifClassButton from "./components/VerifClassButton";
 
@@ -243,7 +244,7 @@ export default function View() {
     if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
       actionsList.push(<VerifClassButton key="verify" classe={classe} setClasse={setClasse} isLoading={isLoading} setLoading={setIsLoading} />);
     }
-    if (classe?.status && [STATUS_CLASSE.OPEN].includes(classe.status)) {
+    if (classe?.status && STATUS_CLASSE.OPEN === classe.status) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} type="wired" title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
         <ButtonInvite key="invite" url={url} />,
@@ -331,7 +332,7 @@ export default function View() {
         />
       )}
 
-      {![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status) && (
+      {![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status as any) && (
         <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />
       )}
 

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { UpdateCohortDto } from "snu-lib/src/dto";
+import { UpdateCohortDto } from "snu-lib";
 
 export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<UpdateCohortDto> => {
   return Joi.object<UpdateCohortDto, true, Omit<UpdateCohortDto, "_id">>({

@@ -14,7 +14,7 @@ import {
   isReferentOrAdmin,
   SENDINBLUE_TEMPLATES,
 } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
+import { ReferentDto } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
@@ -22,6 +22,7 @@ import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
 import { idSchema } from "../../utils/validator";
 import { sendTemplate } from "../../brevo";
+import { buildUniqueClasseKey } from "../classe/classeService";
 
 const router = express.Router();
 
@@ -45,7 +46,9 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
     await populateEtablissementWithReferent(etablissement);
     if (req.user.role === ROLES.REFERENT_CLASSE) await populateEtablissementWithClasse(etablissement, req.user);
 
-    return res.status(200).send({ ok: true, data: etablissement });
+    const uniqueKey = buildUniqueClasseKey(etablissement);
+
+    return res.status(200).send({ ok: true, data: { ...etablissement, uniqueKey } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -68,7 +71,9 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     await populateEtablissementWithCoordinateur(etablissement);
     await populateEtablissementWithReferent(etablissement);
 
-    return res.status(200).send({ ok: true, data: etablissement });
+    const uniqueKey = buildUniqueClasseKey(etablissement);
+
+    return res.status(200).send({ ok: true, data: { ...etablissement, uniqueKey } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

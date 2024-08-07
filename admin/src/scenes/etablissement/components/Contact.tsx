@@ -4,8 +4,7 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 import { Button, Container } from "@snu/ds/admin";
-import { translate, isAdminCle, isReferentClasse, isChefEtablissement, isReferentOrAdmin, isCoordinateurEtablissement } from "snu-lib";
-import { ReferentDto } from "snu-lib/src/dto";
+import { translate, isAdminCle, isReferentClasse, isChefEtablissement, isReferentOrAdmin, isCoordinateurEtablissement, ReferentDto } from "snu-lib";
 import { copyToClipboard } from "@/utils";
 import { User } from "@/types";
 

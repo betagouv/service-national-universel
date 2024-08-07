@@ -26,7 +26,7 @@ type TStatus =
   | "primary";
 
 type OwnProps = {
-  title: string;
+  title: React.ReactNode;
   optionsGroup: Array<{
     key: string;
     title: string | React.ReactNode;
@@ -105,7 +105,9 @@ export default function DropdownButton({
           <Button
             title={loading ? loadingLabel : title}
             type={type}
-            className={`${buttonClassName} ${loading && "cursor-wait"}`}
+            className={`${buttonClassName} ${loading && "cursor-wait"} ${
+              open && "!text-blue-600"
+            }`}
             leftIcon={icon}
             rightIcon={
               rightIcon && (

@@ -1,4 +1,5 @@
 import React from "react";
+import cx from "classnames";
 import { HiOutlineInformationCircle } from "react-icons/hi";
 import ReactTooltip, { TooltipProps } from "react-tooltip";
 
@@ -24,10 +25,10 @@ export default function Label({
   return (
     <label
       htmlFor={name}
-      className={
-        "flex items-center justify-start mb-2 text-xs font-bold text-ds-gray-900 " +
-        className
-      }
+      className={cx(
+        "flex items-center justify-start mb-2 text-xs font-bold text-ds-gray-900",
+        className,
+      )}
     >
       {title}
       {tooltip && (
@@ -47,10 +48,10 @@ export default function Label({
             {...(tooltipProps || {})}
           >
             <div
-              className={
-                "w-[275px] list-outside !px-1 !py-2 text-left text-xs font-normal text-gray-600 " +
-                tooltipClassName
-              }
+              className={cx(
+                "w-[275px] list-outside !px-1 !py-2 text-left text-xs font-normal text-gray-600",
+                tooltipClassName,
+              )}
             >
               {tooltip}
             </div>

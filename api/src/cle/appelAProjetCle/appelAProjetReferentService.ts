@@ -28,7 +28,7 @@ export class AppelAProjetReferentService {
       }
       if (save && referentEtablissement.metadata.createdBy !== ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
         referentEtablissement.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
-        await referentEtablissement.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
+        await referentEtablissement.save({ fromUser: { firstName: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 } });
       }
       if (!hasAlreadyBeenProcessed) {
         this.referents.push({
@@ -66,8 +66,8 @@ export class AppelAProjetReferentService {
   }
 
   async processReferentClasse(appelAProjet: IAppelAProjet, save: boolean): Promise<string> {
-    const existingReferentClasse = await ReferentModel.findOne({ email: appelAProjet.referentClasse.email });
-    const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentClasse.email);
+    const existingReferentClasse = await ReferentModel.findOne({ email: appelAProjet.referentClasse?.email });
+    const hasAlreadyBeenProcessed = this.referents.some((referent) => referent.email === appelAProjet.referentClasse?.email);
     const referentMetadata: ReferentType["metadata"] = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (existingReferentClasse) {
@@ -85,10 +85,11 @@ export class AppelAProjetReferentService {
         });
       }
       if (save) {
+        // @ts-expect-error enum type ?
         if (!existingReferentClasse.metadata.createdBy === ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025) {
           existingReferentClasse.set({ metadata: { ...referentMetadata, invitationType: InvitationType.CONFIRMATION } });
         }
-        await existingReferentClasse.save({ fromUser: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 });
+        await existingReferentClasse.save({ fromUser: { firstName: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 } });
       }
       return existingReferentClasse._id;
     }

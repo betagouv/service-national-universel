@@ -29,7 +29,13 @@ export const getFilterArray = (bus, session, classes) => {
       },
     },
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
-    { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus },
+    {
+      title: "Statut",
+      name: "status",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: translateInscriptionStatus,
+    },
     { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     {
       title: "Région",
@@ -48,6 +54,13 @@ export const getFilterArray = (bus, session, classes) => {
     {
       title: "Classe",
       name: "grade", //numero de la classe
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Étape de l'inscription",
+      name: "inscriptionStep2023",
       parentGroup: "Dossier",
       missingLabel: "Non renseigné",
       translate: translate,
@@ -220,17 +233,45 @@ export const getFilterArray = (bus, session, classes) => {
 };
 
 export async function transformVolontairesCLE(data, values) {
-  let all = data;
+  const all = data;
+
+  interface Center {
+    _id?: string;
+    code?: string;
+    code2022?: string;
+    name?: string;
+    city?: string;
+    department?: string;
+    region?: string;
+  }
+
+  interface Bus {
+    busId?: string;
+    departuredDate?: string;
+    returnDate?: string;
+  }
+
+  interface LigneToPoint {
+    departureHour?: string;
+    meetingHour?: string;
+    returnHour?: string;
+  }
+
+  interface MeetingPoint {
+    name?: string;
+    address?: string;
+    city?: string;
+  }
 
   return all.map((data) => {
-    let center = {};
+    let center: Center = {};
     if (data.cohesionCenterId && data.sessionPhase1Id) {
       center = data?.center;
       if (!center) center = {};
     }
-    let meetingPoint = {};
-    let bus = {};
-    let ligneToPoint = {};
+    let meetingPoint: MeetingPoint = {};
+    let bus: Bus = {};
+    let ligneToPoint: LigneToPoint = {};
     if (data.meetingPointId && data.ligneId) {
       bus = data?.bus || {};
       ligneToPoint = data?.ligneToPoint || {};
@@ -398,7 +439,7 @@ export async function transformVolontairesCLE(data, values) {
       },
     };
 
-    let fields = { ID: data._id };
+    const fields = { ID: data._id };
     for (const element of values) {
       let key;
       for (key in allFields[element]) fields[key] = allFields[element][key];
