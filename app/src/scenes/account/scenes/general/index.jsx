@@ -30,7 +30,7 @@ const getInitialFormValues = (young) => ({
     phoneNumber: young.phone || "",
     phoneZone: young.phoneZone || "",
   },
-  psc1Info: young.psc1Info || "false",
+  psc1Info: young.psc1Info || "",
 });
 
 const AccountGeneralPage = () => {
