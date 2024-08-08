@@ -62,6 +62,14 @@ function anonymize(item) {
 
   item.files && (item.files = undefined);
 
+  item.token2FA = "";
+  item.tokenEmailValidation = "";
+  item.forgotPasswordResetToken = "";
+  item.invitationToken = "";
+  item.phase3Token = "";
+  item.parent1Inscription2023Token = "";
+  item.parent2Inscription2023Token = "";
+
   return item;
 }
 
