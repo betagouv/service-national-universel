@@ -205,6 +205,8 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     sportInterest: faker.lorem.sentences(),
     environmentInterest: faker.lorem.sentences(),
     citizenshipInterest: faker.lorem.sentences(),
+    cohortId: "1",
+    originalCohortId: "1",
     ...fields,
   };
 }

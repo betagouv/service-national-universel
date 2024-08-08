@@ -11,6 +11,12 @@ const schema = new Schema({
       description: "Cohorte",
     },
   },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
+    },
+  },
   idExcel: {
     type: String,
   },

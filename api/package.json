@@ -26,7 +26,8 @@
     "build": "tsc -b ./build.tsconfig.json",
     "migrate-status": "migrate-mongo status",
     "migrate-create": "migrate-mongo create",
-    "migrate-down": "tsx node_modules/.bin/migrate-mongo down"
+    "migrate-down": "tsx --max-old-space-size=4096 node_modules/.bin/migrate-mongo down",
+    "migrate-up": "tsx --max-old-space-size=4096 node_modules/.bin/migrate-mongo up"
   },
   "author": "SELEGO",
   "license": "MIT",
