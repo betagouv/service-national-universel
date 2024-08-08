@@ -10,7 +10,7 @@ import { redirectToCorrection } from "../../utils/navigation";
 import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 
-export default function WaitingCorrectionV2() {
+export default function WaitingCorrection() {
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
   const history = useHistory();
