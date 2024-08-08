@@ -45,6 +45,13 @@ const BOOLEAN_OPTIONS = [
   { value: "false", label: translate("false") },
 ];
 
+const psc1Options = [
+  { value: "true", label: "Oui" },
+  { value: "false", label: "Non" },
+  { value: null, label: "Non renseigné" },
+];
+
+
 export default function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, oldCohort, readonly }) {
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
@@ -65,7 +72,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
       }
     }
     if (young) {
-      setData({ ...young });
+      setData({ ...young, psc1Info: young.psc1Info });
       setHasSpecificSituation(SPECIFIC_SITUATIONS_KEY.findIndex((key) => young[key] === "true") >= 0);
       setYoungAge(getAge(young.birthdateAt));
     } else {
@@ -78,6 +85,8 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
   function onSectionChangeMode(mode) {
     setSectionMode(mode === "default" ? globalMode : mode);
   }
+
+  console.log(data.psc1Info);
 
   function onLocalChange(field, value) {
     const newData = { ...data, [field]: value };
@@ -384,6 +393,22 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 )}
               </div>
             )}
+            <MiniTitle>Titulaire du PSC1</MiniTitle>
+            <Field
+              name="psc1Info"
+              value={data?.psc1Info || "Non renseigné"}
+              transformer={translate}
+              mode={sectionMode}
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "psc1Info")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+              type="select"
+              options={psc1Options}
+              onChange={(value) => onLocalChange("psc1Info", value)}
+              young={young}
+              className="flex-[1_1_50%]"
+            />
           </div>
           <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-[56px]">

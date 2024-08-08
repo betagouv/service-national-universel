@@ -1667,6 +1667,14 @@ const schema = new Schema({
     },
   },
 
+  psc1Info: {
+    type: String,
+    enum: ["true", "false", null],
+    documentation: {
+      description: "Le volontaire mention si il a obtenu son diplome PSC1 ou non",
+    },
+  },
+
   imageRightFilesComment: {
     type: String,
     documentation: {
