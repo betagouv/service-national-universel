@@ -7,7 +7,7 @@ import Chevron from "../../../components/Chevron";
 import plausibleEvent from "../../../services/plausible";
 import { urlWithScheme } from "../../../utils";
 
-export default function Association({ hit, missionsInfo }) {
+export default function Association({ hit }) {
   const tabs = ["Informations", "Contacts", "Missions"];
   const [show, setShow] = useState(false);
   const [tab, setTab] = useState("Informations");
@@ -103,26 +103,6 @@ export default function Association({ hit, missionsInfo }) {
             </svg>
           </ContactButton>
         </ContactButtons>
-        <MissionButton
-          style={{ marginLeft: "2rem" }}
-          onClick={() => {
-            setShow(true);
-            setTab("Missions");
-            sendEventToBackend("MISSIONS_CLICK", association.id);
-          }}>
-          {missionsInfo.countMissions ? (
-            <>
-              <div className="title">
-                {missionsInfo.countMissions} mission{missionsInfo.countMissions > 1 && "s"} disponible{missionsInfo.countMissions > 1 && "s"}
-              </div>
-              <div className="subtitle">
-                {missionsInfo.countPlaces} volontaire{missionsInfo.countPlaces > 1 && "s"} recherché{missionsInfo.countPlaces > 1 && "s"}
-              </div>
-            </>
-          ) : (
-            <div className="title">Aucune mission disponible</div>
-          )}
-        </MissionButton>
       </AssociationHeader>
       {show && (
         <AssociationBody>
@@ -204,92 +184,12 @@ export default function Association({ hit, missionsInfo }) {
                   ))}
               </TabContact>
             )}
-            {tab === "Missions" && (
-              <TabMissions>
-                {!missionsInfo.countMissions ? (
-                  <p style={{ textAlign: "center", padding: "2rem", width: "100%", margin: 0 }}>Aucune mission référencée actuellement</p>
-                ) : (
-                  missionsInfo.missions.map((mission) => (
-                    <MissionInfo key={mission.id}>
-                      <div className="wrapper">
-                        <b className="category">Mission</b>
-                        <p className="description">{mission.description.trim()}</p>
-                      </div>
-                      <div className="wrapper">
-                        <b className="category">Disponibilité{mission.places > 1 && "s"}</b>
-                        <p className="description">{mission.places || 0} places restantes</p>
-                      </div>
-                      <MissionButton style={{ maginInline: "auto" }}>
-                        <div className="title">
-                          <a href={urlWithScheme(mission.applicationUrl)} target="_blank" style={{ decoration: "none", color: "#22252A" }} rel="noreferrer">
-                            Consulter
-                          </a>
-                        </div>
-                      </MissionButton>
-                    </MissionInfo>
-                  ))
-                )}
-              </TabMissions>
-            )}
           </TabContainer>
         </AssociationBody>
       )}
     </div>
   );
 }
-
-const MissionButton = styled.div`
-  border: solid 1px #dcdcdc;
-  background-color: #fff;
-  border-radius: 10px;
-  white-space: nowrap;
-  padding: 0.5rem 2rem;
-  margin: auto;
-  text-align: center;
-  cursor: pointer;
-  @media (max-width: 1240px) {
-    display: none;
-  }
-  &:hover {
-    background-color: #e7e7e7;
-  }
-  .title {
-    margin: 0;
-    font-weight: 500;
-    color: #111;
-  }
-  .subtitle {
-    margin: 0;
-    font-size: 0.75rem;
-    color: #a7a7b0;
-  }
-`;
-
-const TabMissions = styled.div`
-  width: 100%;
-  color: #696974;
-`;
-
-const MissionInfo = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 0.25fr 0.25fr;
-  grid-gap: 1rem;
-  align-items: center;
-  border-bottom: 1px dashed rgba(0, 0, 0, 0.2);
-  padding: 2rem 0;
-  .category {
-    text-transform: uppercase;
-  }
-  .description {
-    margin: 1rem 0 0;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-  .wrapper {
-    min-width: 0;
-  }
-`;
 
 const AssociationHeader = styled.div`
   border-radius: 10px 10px 10px 10px;
