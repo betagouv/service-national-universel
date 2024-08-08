@@ -21,7 +21,7 @@ const Eligibility = new Schema({
   },
   schoolLevels: {
     type: [String],
-    enum: ["4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE"],
+    enum: ["4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "1ereCAP", "2ndeCAP", "Autre", "NOT_SCOLARISE"],
     required: true,
   },
   bornAfter: { type: Date, required: true },

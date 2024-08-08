@@ -19,7 +19,7 @@ import { youngCanWithdraw } from "snu-lib";
 
 const Account = () => {
   useDocumentTitle("Mon profil");
-  const { isCLE, young } = useAuth();
+  const { young } = useAuth();
 
   const ACCOUNT_PAGES = {
     general: {
@@ -35,7 +35,7 @@ const Account = () => {
       key: "/account/representants",
     },
     "school-situation": {
-      title: isCLE ? "Classe engagée" : "Situation scolaire",
+      title: "Situation scolaire",
       key: "/account/school-situation",
     },
     "special-situations": {

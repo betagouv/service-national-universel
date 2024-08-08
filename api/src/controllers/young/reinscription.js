@@ -28,7 +28,10 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // Validate request body
     const { error, value } = Joi.object({
       schooled: Joi.string().trim().required(),
-      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE").required(),
+      grade: Joi.string()
+        .trim()
+        .valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "1ereCAP", "2ndeCAP", "Autre", "NOT_SCOLARISE")
+        .required(),
       schoolName: Joi.string().trim(),
       schoolType: Joi.string().trim().allow(null, ""),
       schoolAddress: Joi.string().trim().allow(null, ""),
