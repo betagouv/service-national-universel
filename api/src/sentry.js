@@ -98,38 +98,37 @@ function captureError(err, contexte) {
   } else {
     console.error("capture", err);
   }
-  sentryCaptureException(err, contexte);
+  return sentryCaptureException(err, contexte);
 }
 
 function capture(err, contexte) {
   if (!err) {
     const msg = "Error not defined";
     console.error("capture", msg);
-    sentryCaptureMessage(msg);
-    return;
+    return sentryCaptureMessage(msg);
   }
 
   if (err instanceof Error) {
-    captureError(err, contexte);
+    return captureError(err, contexte);
   } else if (err.error instanceof Error) {
-    captureError(err.error, contexte);
+    return captureError(err.error, contexte);
   } else if (err.message) {
     console.error("capture", err.message);
-    sentryCaptureMessage(err.message, contexte);
+    return sentryCaptureMessage(err.message, contexte);
   } else {
     const msg = "Error not defined well";
     console.error("capture", msg);
-    sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
+    return sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
 }
 function captureMessage(mess, contexte) {
   if (mess) {
     console.error("captureMessage", mess);
-    sentryCaptureMessage(mess, contexte);
+    return sentryCaptureMessage(mess, contexte);
   } else {
     const msg = "Message not defined";
     console.error("captureMessage", msg);
-    sentryCaptureMessage(msg);
+    return sentryCaptureMessage(msg);
   }
 }
 

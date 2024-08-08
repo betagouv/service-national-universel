@@ -27,9 +27,9 @@ export function initQueues() {
   }
 }
 
-export function scheduleRepeatableTasks() {
+export async function scheduleRepeatableTasks() {
   if (config.get("RUN_CRONS")) {
-    cronsQueue.scheduleCrons();
+    await cronsQueue.scheduleCrons();
   }
 }
 
