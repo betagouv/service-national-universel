@@ -6,6 +6,11 @@ function anonymize(item) {
   item.email && (item.email = generateRandomEmail());
   item.firstName && (item.firstName = generateRandomName());
   item.lastName && (item.lastName = generateRandomName());
+
+  item.invitationToken = "";
+  item.forgotPasswordResetToken = "";
+  item.token2FA = "";
+
   return item;
 }
 
