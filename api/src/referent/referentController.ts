@@ -153,6 +153,67 @@ function cleanReferentData(referent) {
 router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
 router.post("/signin-2fa", (req, res) => ReferentAuth.signin2FA(req, res));
 router.post("/logout", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.logout(req, res));
+router.post("/signup", async (req: UserRequest, res: Response) => {
+  try {
+    const { error, value } = Joi.object({
+      // referent
+      email: Joi.string().lowercase().trim().email().required(),
+      firstName: Joi.string().lowercase().trim().required(),
+      lastName: Joi.string().uppercase().trim().required(),
+      password: Joi.string().required(),
+      acceptCGU: Joi.string().required(),
+      phone: Joi.string().required(),
+      // structure
+      name: Joi.string().required(),
+      description: Joi.string().allow(null, ""),
+      legalStatus: Joi.string().required(),
+      types: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      zip: Joi.string().required(),
+      region: Joi.string().required(),
+      department: Joi.string().required(),
+      sousType: Joi.string().allow(null, ""),
+    })
+      .unknown()
+      .validate(req.body);
+
+    if (error) {
+      if (error.details.find((e) => e.path.find((p) => p === "email"))) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const { email, lastName, password, acceptCGU, phone } = value;
+    if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+    const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
+    const role = ROLES.RESPONSIBLE; // responsible by default
+
+    const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+
+    //Create structure
+    const { name, description, legalStatus, types, zip, region, department, sousType } = value;
+    const structure = await StructureModel.create({
+      name,
+      description,
+      legalStatus,
+      types,
+      zip,
+      region,
+      department,
+      sousType,
+    });
+
+    //Update user with structureId
+    user.set({ structureId: structure._id });
+    await user.save({ fromUser: user });
+
+    return res.status(200).send({ user, token, ok: true });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 router.get("/signin_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.signinToken(req, res));
 router.get("/refresh_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.refreshToken(req, res));
 router.post("/forgot_password", async (req: UserRequest, res: Response) => ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`));
