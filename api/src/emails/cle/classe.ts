@@ -1,9 +1,11 @@
-import { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, isChefEtablissement } from "snu-lib";
+import { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, isChefEtablissement, UserDto, FeatureFlagName } from "snu-lib";
 import { ClasseType, EtablissementModel, ReferentDocument, ReferentModel } from "../../models";
 import { capture } from "../../sentry";
 import config from "config";
 import { sendTemplate } from "../../brevo";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
+import { doInviteReferentClasse } from "../../services/cle/referent";
+import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 
 export default function (emailsEmitter) {
   // Classe created
@@ -55,7 +57,7 @@ export default function (emailsEmitter) {
   });
 
   //classe verified
-  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, async (classe: ClasseType) => {
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, async (classe: ClasseType, user: ReferentDocument) => {
     try {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
       if (!etablissement) throw new Error("Etablissement not found");
@@ -83,6 +85,14 @@ export default function (emailsEmitter) {
           cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
         },
       });
+
+      if (await isFeatureAvailable(FeatureFlagName.INVITE_REFERENT_CLASSE_EACH_CLASSE_VERIFIED)) {
+        const referentsClasse = await ReferentModel.find({ _id: { $in: classe.referentClasseIds } });
+        for (const referent of referentsClasse) {
+          console.log(`emails/cle/classe - emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED) - invite referent classe : ${referent.email}`);
+          await doInviteReferentClasse(referent, { ...user, departement: user.department[0] } as UserDto);
+        }
+      }
     } catch (error) {
       capture(error);
     }
