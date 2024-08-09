@@ -22,6 +22,12 @@ const referentMetadataSchema = {
       description: "Par quel workflow a été créé le référent",
     },
   },
+  updatedBy: {
+    type: String,
+    documentation: {
+      description: "Par quel workflow a été modifié le référent",
+    },
+  },
   isFirstInvitationPending: {
     type: Boolean,
     documentation: {
