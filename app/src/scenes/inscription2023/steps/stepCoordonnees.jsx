@@ -20,6 +20,7 @@ import useAuth from "@/services/useAuth";
 import { useDebounce } from "@uidotdev/usehooks";
 import { fr } from "@codegouvfr/react-dsfr";
 import { SignupButtons, BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -105,6 +106,8 @@ export default function StepCoordonnees() {
   const [situationOptions, setSituationOptions] = useState([]);
   const [birthCitySuggestionsOpen, setBirthCitySuggestionsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -236,10 +239,6 @@ export default function StepCoordonnees() {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
-
   const updateWasBornInFrance = (newWasBornInFrance) => {
     if (newWasBornInFrance === "true") {
       setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), birthCountry: FRANCE });
@@ -341,6 +340,15 @@ export default function StepCoordonnees() {
     errors = { ...errors, ...getErrors() };
 
     setErrors(errors);
+
+    if (data.region === "Occitanie") {
+      setModalMessage(
+        "Le séjour d'octobre 2024 est déjà complet pour votre région, nous ne pouvons donc pas prendre en compte votre inscription. Nous avons vos coordonnées, vous serez donc averti en priorité dès l'ouverture des inscriptions pour les séjours 2025",
+      );
+      setShowModal(true);
+      setLoading(false);
+      return;
+    }
 
     if (!Object.keys(errors).length) {
       const updates = {};
@@ -740,6 +748,16 @@ export default function StepCoordonnees() {
         )}
         <SignupButtons onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />
       </DSFRContainer>
+      <ModalConfirm
+        isOpen={showModal}
+        topTitle="Alerte"
+        title="Objectifs atteints"
+        message={modalMessage}
+        onCancel={() => setShowModal(false)}
+        onConfirm={() => setShowModal(false)}
+        confirmText="Ok"
+        cancelText="Annuler"
+      />
     </>
   );
 }

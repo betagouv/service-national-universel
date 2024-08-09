@@ -26,6 +26,13 @@ export default function StepSejour() {
     <>
       <ProgressBar isReinscription={isLoggedIn} />
       <DSFRContainer title="Choisissez la date du séjour" supportLink={supportURL + `/base-de-connaissance/${bdcURI}`} supportEvent="Phase0/aide preinscription - sejour">
+        <div className="flex flex-col text-base w-fit rounded-md px-2 py-1 font-bold bg-[#E8EDFF] text-[#0063CB] px-4 py-2 mb-4">
+          <p className="mb-2 mt-2 font-bold">Attention !</p>
+          <p className="mb-2">
+            Dans la région Occitanie, compte tenu du nombre très élevé de candidatures, nous ne pouvons pas garantir votre participation au séjour de Toussaint 2024. Si vous vous
+            inscrivez, vous serez en liste d’attente. Nous vous invitons à reporter votre inscription à l’année 2025.
+          </p>
+        </div>
         <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
         <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
         <div className="my-4">
