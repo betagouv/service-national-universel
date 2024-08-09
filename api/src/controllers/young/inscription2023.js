@@ -145,14 +145,6 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     const young = await YoungModel.findById(req.user._id);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    console.log(young.region, young.department);
-    if (young.region === "Occitanie") {
-      return res.status(422).send({
-        ok: false,
-        code: "FILLING_RATE_LIMIT_REACHED",
-        message: "blocage des inscription pour Toussaint",
-      });
-    }
 
     let coordonneeSchema = {
       gender: Joi.string().trim().valid("female", "male").required(),
