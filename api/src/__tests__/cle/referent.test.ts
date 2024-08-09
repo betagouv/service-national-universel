@@ -2,23 +2,22 @@ import request from "supertest";
 import passport from "passport";
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { ROLES, SUB_ROLES, InvitationType } from "snu-lib";
-import { UserDto } from "snu-lib";
+import { InvitationType, ROLES, STATUS_CLASSE, SUB_ROLES, UserDto } from "snu-lib";
 
-import { ClasseModel, EtablissementModel, ReferentDocument, ReferentModel, ReferentType } from "../../models";
+import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import {
-  doInviteMultipleChefsEtablissements,
-  doInviteChefEtablissement,
-  InvitationResult,
-  doInviteMultipleReferentClasse,
   deleteOldReferentClasse,
   DeletionResult,
+  doInviteChefEtablissement,
+  doInviteMultipleChefsEtablissements,
+  doInviteMultipleReferentClasseVerifiee,
+  InvitationResult,
 } from "../../services/cle/referent";
 
 import { dbClose, dbConnect } from "../helpers/db";
 import getAppHelper from "../helpers/app";
 import { createReferentHelper } from "../helpers/referent";
-import { getNewSignupReferentFixture } from "../fixtures/referent";
+import getNewReferentFixture, { getNewSignupReferentFixture } from "../fixtures/referent";
 import { createEtablissement } from "../helpers/etablissement";
 import { createFixtureEtablissement } from "../fixtures/etablissement";
 import { createFixtureClasse } from "../fixtures/classe";
@@ -164,47 +163,53 @@ describe("Cle Referent", () => {
 
   describe("doInviteMultipleReferentsClasseToInscription", () => {
     it("should send an invitation to multiple valid Referent Classe", async () => {
-      const referents = await ReferentModel.create([
-        {
+      const referentsWithInvitation = await ReferentModel.create([
+        getNewReferentFixture({
           email: "referent1@classe.fr",
-          firstName: "referent1",
-          lastName: "Classe1",
           role: ROLES.REFERENT_CLASSE,
           metadata: { isFirstInvitationPending: true, invitationType: InvitationType.INSCRIPTION },
-        },
-        {
+        }),
+        getNewReferentFixture({
           email: "referent2@classe.fr",
-          firstName: "referent2",
-          lastName: "Classe2",
           role: ROLES.REFERENT_CLASSE,
           metadata: { isFirstInvitationPending: true, invitationType: InvitationType.CONFIRMATION },
-        },
+        }),
       ]);
 
-      const referentsWontReceiveInvitation = await ReferentModel.create([
-        {
+      const referentsWithoutInvitation = await ReferentModel.create([
+        getNewReferentFixture({
           email: "referent3@classe.fr",
-          firstName: "referent3",
-          lastName: "Classe3",
           role: ROLES.REFERENT_CLASSE,
           metadata: { isFirstInvitationPending: false, invitationType: InvitationType.CONFIRMATION },
-        },
-        {
-          email: "referent4@classe.fr",
-          firstName: "referent4",
-          lastName: "Classe4",
+        }),
+        getNewReferentFixture({
+          email: "referentClasse4NoMetadataIsFirstInvitationPending@classe.fr",
           role: ROLES.REFERENT_CLASSE,
-        },
+        }),
+        getNewReferentFixture({
+          email: "referentClasse5NotVerified@classe.fr",
+          role: ROLES.REFERENT_CLASSE,
+          metadata: { isFirstInvitationPending: true, invitationType: InvitationType.INSCRIPTION },
+        }),
       ]);
 
       const etablissements = await EtablissementModel.create([
-        createFixtureEtablissement({ referentEtablissementIds: [referents[0]._id] }),
-        createFixtureEtablissement({ referentEtablissementIds: [referents[1]._id] }),
+        createFixtureEtablissement({ referentEtablissementIds: [referentsWithInvitation[0]._id] }),
+        createFixtureEtablissement({ referentEtablissementIds: [referentsWithInvitation[1]._id] }),
       ]);
 
       await ClasseModel.create([
-        createFixtureClasse({ name: "Classe 1", referentClasseIds: [referents[0]._id], etablissementId: etablissements[0]._id }),
-        createFixtureClasse({ name: "Classe 2", referentClasseIds: [referents[1]._id], etablissementId: etablissements[1]._id }),
+        createFixtureClasse({ name: "Classe 1", referentClasseIds: [referentsWithInvitation[0]._id], etablissementId: etablissements[0]._id, status: STATUS_CLASSE.VERIFIED }),
+        createFixtureClasse({ name: "Classe 2", referentClasseIds: [referentsWithInvitation[1]._id], etablissementId: etablissements[1]._id, status: STATUS_CLASSE.VERIFIED }),
+        createFixtureClasse({ name: "Classe 3", referentClasseIds: [referentsWithoutInvitation[0]._id], etablissementId: etablissements[1]._id, status: STATUS_CLASSE.VERIFIED }),
+        createFixtureClasse({ name: "Classe 4", referentClasseIds: [referentsWithoutInvitation[1]._id], etablissementId: etablissements[1]._id, status: STATUS_CLASSE.VERIFIED }),
+        createFixtureClasse({ name: "Classe 5", referentClasseIds: [referentsWithoutInvitation[2]._id], etablissementId: etablissements[1]._id, status: STATUS_CLASSE.CREATED }),
+        createFixtureClasse({
+          name: "Classe 6 with same referent",
+          referentClasseIds: [referentsWithInvitation[0]._id],
+          etablissementId: etablissements[0]._id,
+          status: STATUS_CLASSE.VERIFIED,
+        }),
       ]);
 
       const expectedInvitation: InvitationResult[] = [
@@ -220,18 +225,19 @@ describe("Cle Referent", () => {
         },
       ];
 
-      const result = await doInviteMultipleReferentClasse(user);
+      const result = await doInviteMultipleReferentClasseVerifiee(user);
 
-      for (const referent of referents) {
+      for (const referent of referentsWithInvitation) {
         const updatedReferent = await ReferentModel.findOne({ email: referent.email });
         expect(updatedReferent!.invitationToken).toBeDefined();
         expect(updatedReferent!.invitationToken.length).toBeGreaterThanOrEqual(36);
         expect(updatedReferent!.invitationExpires).toBeDefined();
       }
 
-      for (const referent of referentsWontReceiveInvitation) {
+      for (const referent of referentsWithoutInvitation) {
         const updatedReferent = await ReferentModel.findOne({ email: referent.email });
         expect(updatedReferent!.invitationToken).toEqual("");
+        expect(updatedReferent!.invitationExpires).toBeUndefined();
       }
       expect(result).toEqual(expect.arrayContaining(expectedInvitation));
     });
@@ -359,13 +365,13 @@ describe("POST /cle/referent/send-invitation-referent-classe", () => {
     // @ts-ignore
     passport.user.subRole = "god";
 
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-referent-classe").send();
+    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-referent-classe-verifiee").send();
 
     expect(res.statusCode).toEqual(200);
   });
 
   it("should return 403 Forbidden if the user is not a super admin", async () => {
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-referent-classe").send();
+    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-referent-classe-verifiee").send();
 
     expect(res.statusCode).toEqual(403);
     expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });

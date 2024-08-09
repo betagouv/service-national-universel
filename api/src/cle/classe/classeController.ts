@@ -564,7 +564,7 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
       status: STATUS_CLASSE.VERIFIED,
     });
 
-    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, classe);
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, classe, req.user);
 
     classe = await classe.save({ fromUser: req.user });
 

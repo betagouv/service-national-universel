@@ -3,7 +3,7 @@ import { addDays } from "date-fns";
 import crypto from "crypto";
 import config from "config";
 
-import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ClasseSchoolYear } from "snu-lib";
+import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ClasseSchoolYear, STATUS_CLASSE } from "snu-lib";
 
 import { ERRORS } from "../../utils";
 import { sendTemplate } from "../../brevo";
@@ -13,6 +13,7 @@ import { capture } from "../../sentry";
 import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument, ClasseModel, EtablissementType } from "../../models";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { UserDto } from "snu-lib";
+import { findReferentsClasseToSendInvitationByClasseStatus } from "../../cle/referent/referentRepository";
 
 export interface InvitationResult {
   to: string;
@@ -135,27 +136,24 @@ async function generateInvitationTokenAndSaveReferent(referent: ReferentDocument
   return referent;
 }
 
-export const doInviteMultipleReferentClasse = async (user: UserDto) => {
-  const referentsClasseToSendInvitation = await ReferentModel.find({
-    "metadata.isFirstInvitationPending": true,
-    role: ROLES.REFERENT_CLASSE,
-  });
+export const doInviteMultipleReferentClasseVerifiee = async (user: UserDto) => {
+  const referentsClasseToSendInvitation = await findReferentsClasseToSendInvitationByClasseStatus(STATUS_CLASSE.VERIFIED);
   const invitations: InvitationResult[] = [];
   let processCounter = 1;
   for (const referentClasse of referentsClasseToSendInvitation) {
     try {
-      console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", referentsClasseToSendInvitation.length);
+      console.log("doInviteMultipleReferentClasse - processCounter: ", processCounter++, "/", referentsClasseToSendInvitation.length);
       console.log("doInviteMultipleReferentClasse() - creating invitation for :", referentClasse.email);
       const mailResponse = await doInviteReferentClasse(referentClasse, user);
-      referentClasse.set({ metadata: { ...referentClasse.metadata, isFirstInvitationPending: false } });
+      referentClasse.set({ "metadata.isFirstInvitationPending": false });
       await referentClasse.save({ fromUser: user });
       if (mailResponse) {
-        invitations.push({ to: referentClasse.email, status: "ok", type: referentClasse.metadata.invitationType });
+        invitations.push({ to: referentClasse.email, status: "ok", type: referentClasse.metadata?.invitationType });
       } else {
-        invitations.push({ to: referentClasse.email, status: "notSent", details: mailResponse, type: referentClasse.metadata.invitationType });
+        invitations.push({ to: referentClasse.email, status: "notSent", details: mailResponse, type: referentClasse.metadata?.invitationType });
       }
     } catch (error) {
-      invitations.push({ to: referentClasse.email, status: "error", details: error.message, type: referentClasse.metadata.invitationType });
+      invitations.push({ to: referentClasse.email, status: "error", details: error.message, type: referentClasse.metadata?.invitationType });
       capture(error, "failed sending invitations inscription");
     }
   }

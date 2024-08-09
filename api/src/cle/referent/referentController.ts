@@ -5,7 +5,7 @@ import { Response } from "express";
 
 import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin, FeatureFlagName } from "snu-lib";
 
-import { deleteOldReferentClasse, doInviteMultipleChefsEtablissements, doInviteMultipleReferentClasse } from "../../services/cle/referent";
+import { deleteOldReferentClasse, doInviteMultipleChefsEtablissements, doInviteMultipleReferentClasseVerifiee } from "../../services/cle/referent";
 import { uploadFile } from "../../utils";
 import { UserRequest } from "../../controllers/request";
 import { capture } from "../../sentry";
@@ -99,7 +99,35 @@ router.post("/send-invitation-chef-etablissement", passport.authenticate("refere
   }
 });
 
-router.post("/send-invitation-referent-classe", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.post("/send-invitation-referent-classe-verifiee", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    console.log("Controller - send-invitation-referent-classe-verifiee");
+
+    if (!isSuperAdmin(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (!(await isFeatureAvailable(FeatureFlagName.INVITE_REFERENT_CLASSE))) {
+      return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
+    }
+
+    const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+
+    const referentInvitationSent = await doInviteMultipleReferentClasseVerifiee(req.user);
+    uploadFile(`file/appelAProjet/${timestamp}-send-invitation-referent-classe.csv`, {
+      data: generateCSVStream(referentInvitationSent),
+      encoding: "",
+      mimetype: "text/csv",
+    });
+
+    return res.status(200).send({ ok: true, data: { referentInvitationSent } });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/delete-old-referent-classe", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     console.log("Controller - send-invitation-referent-classe");
 
@@ -113,13 +141,6 @@ router.post("/send-invitation-referent-classe", passport.authenticate("referent"
 
     const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
 
-    const referentInvitationSent = await doInviteMultipleReferentClasse(req.user);
-    uploadFile(`file/appelAProjet/${timestamp}-send-invitation-referent-classe.csv`, {
-      data: generateCSVStream(referentInvitationSent),
-      encoding: "",
-      mimetype: "text/csv",
-    });
-
     const referentDeleted = await deleteOldReferentClasse(req.user);
     uploadFile(`file/appelAProjet/${timestamp}-delete-old-referent-classe.csv`, {
       data: generateCSVStream(referentDeleted),
@@ -127,7 +148,7 @@ router.post("/send-invitation-referent-classe", passport.authenticate("referent"
       mimetype: "text/csv",
     });
 
-    return res.status(200).send({ ok: true, data: { referentInvitationSent, referentDeleted } });
+    return res.status(200).send({ ok: true, data: { referentDeleted } });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
