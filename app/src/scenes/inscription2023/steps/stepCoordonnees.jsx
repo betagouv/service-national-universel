@@ -354,7 +354,9 @@ export default function StepCoordonnees() {
         const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/next", updates);
         if (!ok) {
           if (code == "FILLING_RATE_LIMIT_REACHED") {
-            setModalMessage("Les objectifs de ce département sont déjà atteints. L'inscription est bloquée.");
+            setModalMessage(
+              "Le séjour d'octobre 2024 est déjà complet pour votre région, nous ne pouvons donc pas prendre en compte votre inscription. Nous avons vos coordonnées, vous serez donc averti en priorité dès l'ouverture des inscriptions pour les séjours 2025",
+            );
             setShowModal(true);
             setLoading(false);
             return;
