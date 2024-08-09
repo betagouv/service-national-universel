@@ -3,7 +3,7 @@ import passport from "passport";
 import Joi from "joi";
 import { Response } from "express";
 
-import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin } from "snu-lib";
+import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin, FeatureFlagName } from "snu-lib";
 
 import { deleteOldReferentClasse, doInviteMultipleChefsEtablissements, doInviteMultipleReferentClasse } from "../../services/cle/referent";
 import { uploadFile } from "../../utils";
@@ -13,6 +13,7 @@ import { ERRORS } from "../../utils";
 import { EtablissementModel } from "../../models";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 import { generateCSVStream } from "../../services/fileService";
+import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 
 const router = express.Router();
 
@@ -104,6 +105,10 @@ router.post("/send-invitation-referent-classe", passport.authenticate("referent"
 
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (!(await isFeatureAvailable(FeatureFlagName.INVITE_REFERENT_CLASSE))) {
+      return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
     }
 
     const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;

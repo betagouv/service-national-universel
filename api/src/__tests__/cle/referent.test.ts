@@ -5,8 +5,15 @@ import { fakerFR as faker } from "@faker-js/faker";
 import { ROLES, SUB_ROLES, InvitationType } from "snu-lib";
 import { UserDto } from "snu-lib";
 
-import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
-import { doInviteMultipleChefsEtablissements, doInviteChefEtablissement, InvitationResult } from "../../services/cle/referent";
+import { ClasseModel, EtablissementModel, ReferentDocument, ReferentModel, ReferentType } from "../../models";
+import {
+  doInviteMultipleChefsEtablissements,
+  doInviteChefEtablissement,
+  InvitationResult,
+  doInviteMultipleReferentClasse,
+  deleteOldReferentClasse,
+  DeletionResult,
+} from "../../services/cle/referent";
 
 import { dbClose, dbConnect } from "../helpers/db";
 import getAppHelper from "../helpers/app";
@@ -14,6 +21,8 @@ import { createReferentHelper } from "../helpers/referent";
 import { getNewSignupReferentFixture } from "../fixtures/referent";
 import { createEtablissement } from "../helpers/etablissement";
 import { createFixtureEtablissement } from "../fixtures/etablissement";
+import { createFixtureClasse } from "../fixtures/classe";
+import * as featureService from "../../featureFlag/featureFlagService";
 
 jest.mock("../../brevo", () => ({
   ...jest.requireActual("../../brevo"),
@@ -152,6 +161,138 @@ describe("Cle Referent", () => {
       expect(result).toEqual(expect.arrayContaining(expectedInvitation));
     });
   });
+
+  describe("doInviteMultipleReferentsClasseToInscription", () => {
+    it("should send an invitation to multiple valid Referent Classe", async () => {
+      const referents = await ReferentModel.create([
+        {
+          email: "referent1@classe.fr",
+          firstName: "referent1",
+          lastName: "Classe1",
+          role: ROLES.REFERENT_CLASSE,
+          metadata: { isFirstInvitationPending: true, invitationType: InvitationType.INSCRIPTION },
+        },
+        {
+          email: "referent2@classe.fr",
+          firstName: "referent2",
+          lastName: "Classe2",
+          role: ROLES.REFERENT_CLASSE,
+          metadata: { isFirstInvitationPending: true, invitationType: InvitationType.CONFIRMATION },
+        },
+      ]);
+
+      const referentsWontReceiveInvitation = await ReferentModel.create([
+        {
+          email: "referent3@classe.fr",
+          firstName: "referent3",
+          lastName: "Classe3",
+          role: ROLES.REFERENT_CLASSE,
+          metadata: { isFirstInvitationPending: false, invitationType: InvitationType.CONFIRMATION },
+        },
+        {
+          email: "referent4@classe.fr",
+          firstName: "referent4",
+          lastName: "Classe4",
+          role: ROLES.REFERENT_CLASSE,
+        },
+      ]);
+
+      const etablissements = await EtablissementModel.create([
+        createFixtureEtablissement({ referentEtablissementIds: [referents[0]._id] }),
+        createFixtureEtablissement({ referentEtablissementIds: [referents[1]._id] }),
+      ]);
+
+      await ClasseModel.create([
+        createFixtureClasse({ name: "Classe 1", referentClasseIds: [referents[0]._id], etablissementId: etablissements[0]._id }),
+        createFixtureClasse({ name: "Classe 2", referentClasseIds: [referents[1]._id], etablissementId: etablissements[1]._id }),
+      ]);
+
+      const expectedInvitation: InvitationResult[] = [
+        {
+          to: "referent1@classe.fr",
+          status: "ok",
+          type: InvitationType.INSCRIPTION,
+        },
+        {
+          to: "referent2@classe.fr",
+          status: "ok",
+          type: InvitationType.CONFIRMATION,
+        },
+      ];
+
+      const result = await doInviteMultipleReferentClasse(user);
+
+      for (const referent of referents) {
+        const updatedReferent = await ReferentModel.findOne({ email: referent.email });
+        expect(updatedReferent!.invitationToken).toBeDefined();
+        expect(updatedReferent!.invitationToken.length).toBeGreaterThanOrEqual(36);
+        expect(updatedReferent!.invitationExpires).toBeDefined();
+      }
+
+      for (const referent of referentsWontReceiveInvitation) {
+        const updatedReferent = await ReferentModel.findOne({ email: referent.email });
+        expect(updatedReferent!.invitationToken).toEqual("");
+      }
+      expect(result).toEqual(expect.arrayContaining(expectedInvitation));
+    });
+  });
+
+  describe("deleteOldReferentClasse", () => {
+    it("should delete referent not linked with 2024_2025 classe", async () => {
+      const referents = await ReferentModel.create([
+        {
+          email: "referent1@classe.fr",
+          firstName: "referent1",
+          lastName: "Classe1",
+          role: ROLES.REFERENT_CLASSE,
+        },
+        {
+          email: "referent2@classe.fr",
+          firstName: "referent2",
+          lastName: "Classe2",
+          role: ROLES.REFERENT_CLASSE,
+        },
+        {
+          email: "referent3@classe.fr",
+          firstName: "referent3",
+          lastName: "Classe3",
+          role: ROLES.REFERENT_CLASSE,
+        },
+      ]);
+      const etablissements = await EtablissementModel.create([
+        createFixtureEtablissement({ referentEtablissementIds: [referents[0]._id] }),
+        createFixtureEtablissement({ referentEtablissementIds: [referents[1]._id] }),
+      ]);
+
+      await ClasseModel.create([
+        createFixtureClasse({ name: "Classe 1", referentClasseIds: [referents[0]._id], etablissementId: etablissements[0]._id, schoolYear: "2024-2025" }),
+        createFixtureClasse({ name: "Classe 2", referentClasseIds: [referents[1]._id, referents[2]._id], etablissementId: etablissements[1]._id, schoolYear: "2023-2024" }),
+      ]);
+
+      const referentDeleted = await deleteOldReferentClasse(user);
+
+      const expectedInvitation: DeletionResult[] = [
+        {
+          id: referents[1]._id,
+          email: referents[1].email,
+          mailSent: true,
+        },
+        {
+          id: referents[2]._id,
+          email: referents[2].email,
+          mailSent: true,
+        },
+      ];
+
+      const notDeletedReferent0 = await ReferentModel.findOne({ email: referents[0].email });
+      const deletedReferent1 = await ReferentModel.findOne({ email: referents[1].email });
+      const deletedReferent2 = await ReferentModel.findOne({ email: referents[2].email });
+      expect(notDeletedReferent0?.deletedAt).toBeUndefined();
+      expect(deletedReferent1?.deletedAt).toBeDefined();
+      expect(deletedReferent2?.deletedAt).toBeDefined();
+      expect(referentDeleted).toEqual(expect.arrayContaining(expectedInvitation));
+    });
+  });
 });
 
 describe("POST /cle/referent/send-invitation-chef-etablissement", () => {
@@ -205,7 +346,12 @@ describe("POST /cle/referent/send-invitation-referent-classe", () => {
       ...jest.requireActual("../../utils"),
       uploadFile: () => Promise.resolve(),
     }));
+    await ReferentModel.deleteMany();
+    await EtablissementModel.deleteMany();
+    await ClasseModel.deleteMany();
   });
+
+  jest.spyOn(featureService, "isFeatureAvailable").mockResolvedValueOnce(true);
 
   it("should return 200 OK and the list of sent invitations", async () => {
     // @ts-ignore
