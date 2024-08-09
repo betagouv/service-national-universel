@@ -252,6 +252,12 @@ const youngExportFields = [
     desc: ["Raison du désistement", "Message de désistement"],
     fields: ["withdrawnReason", "withdrawnMessage"],
   },
+  {
+    id: "psc1Info",
+    title: "Information sur le PSC1",
+    desc: ["PSC1"],
+    fields: ["psc1Info"],
+  },
 ];
 
 const missionExportFields = [

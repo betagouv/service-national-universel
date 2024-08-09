@@ -155,6 +155,13 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       translate: translateCniExpired,
     },
     {
+      title: "PSC1",
+      name: "psc1Info",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
       title: "Statut phase 1",
       name: "statusPhase1",
       parentGroup: "Phase 1",
@@ -343,6 +350,9 @@ export async function transformVolontaires(data, values) {
     if (!data.domains) data.domains = [];
     if (!data.periodRanking) data.periodRanking = [];
     const allFields = {
+      psc1Info: {
+        PSC1: translate(data?.psc1Info) || "Non renseigné",
+      },
       identity: {
         Prénom: data.firstName,
         Nom: data.lastName,
