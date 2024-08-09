@@ -41,7 +41,7 @@ const addressFields = ["address", "zip", "city", "cityCode", "region", "departme
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [...birthPlaceFields, ...addressFields, "gender", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
+const commonFields = [...birthPlaceFields, ...addressFields, "gender", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary", "psc1Info"];
 
 const commonRequiredFields = [
   ...birthPlaceFields,
@@ -58,6 +58,7 @@ const commonRequiredFields = [
   "allergies",
   "ppsBeneficiary",
   "paiBeneficiary",
+  "psc1Info",
 ];
 
 const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
@@ -95,6 +96,7 @@ const defaultState = {
   specificAmenagmentType: "",
   reducedMobilityAccess: "",
   handicapInSameDepartment: "",
+  psc1Info: "",
 };
 
 export default function StepCoordonnees() {
@@ -141,6 +143,7 @@ export default function StepCoordonnees() {
     specificAmenagmentType,
     reducedMobilityAccess,
     handicapInSameDepartment,
+    psc1Info,
   } = data;
 
   const debouncedBirthCity = useDebounce(birthCity, 200);
@@ -194,6 +197,7 @@ export default function StepCoordonnees() {
         specificAmenagmentType: young.specificAmenagmentType || data.specificAmenagmentType,
         reducedMobilityAccess: young.reducedMobilityAccess || data.reducedMobilityAccess,
         handicapInSameDepartment: young.handicapInSameDepartment || data.handicapInSameDepartment,
+        psc1Info: young.psc1Info || data.psc1Info,
       });
     }
     if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
@@ -235,10 +239,6 @@ export default function StepCoordonnees() {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   const updateWasBornInFrance = (newWasBornInFrance) => {
     if (newWasBornInFrance === "true") {
@@ -437,6 +437,8 @@ export default function StepCoordonnees() {
     }
     setLoading(false);
   };
+
+  console.log(data);
 
   return (
     <>
@@ -736,6 +738,31 @@ export default function StepCoordonnees() {
                 />
               </>
             )}
+          </>
+        )}
+        {young.cohort !== "Toussaint 2024" && (
+          <>
+            <hr className="my-2" />
+            <div className="flex mt-4 items-center gap-3 mb-4">
+              <h2 className="m-0 text-lg font-semibold leading-6 align-left">Avez-vous validé le PSC1 ?</h2>
+              <Button
+                className="cursor-pointer"
+                iconId={fr.cx("fr-icon-information-fill")}
+                onClick={() => window.open(`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`, "_blank")?.focus()}
+                priority="tertiary no outline"
+                title="Information"
+              />
+            </div>
+            <BooleanRadioButtons
+              legend="Avez-vous validé le PSC1 (Prévention et Secours Civiques de niveau 1) ?"
+              hintText=""
+              value={psc1Info}
+              options={[{ value: "true" }, { value: "false" }]}
+              onChange={(e) => updateData("psc1Info")(e.target.value)}
+              orientation="horizontal"
+              state={(corrections?.psc1Info || errors.psc1Info) && "error"}
+              stateRelatedMessage={errors.psc1Info}
+            />
           </>
         )}
         <SignupButtons onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />
