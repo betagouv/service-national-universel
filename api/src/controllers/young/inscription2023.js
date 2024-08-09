@@ -26,6 +26,7 @@ const { sendTemplate } = require("./../../brevo");
 const config = require("config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
+const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -145,6 +146,17 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     const young = await YoungModel.findById(req.user._id);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log(young.region, young.department);
+    if (young.region === "Occitanie") {
+      const fillingRate = await getFillingRate(young.department, young.cohort);
+      if (fillingRate >= FILLING_RATE_LIMIT) {
+        return res.status(400).send({
+          ok: false,
+          code: "FILLING_RATE_LIMIT_REACHED",
+          message: "Les objectifs d'inscription pour votre région sont atteints.",
+        });
+      }
+    }
 
     let coordonneeSchema = {
       gender: Joi.string().trim().valid("female", "male").required(),

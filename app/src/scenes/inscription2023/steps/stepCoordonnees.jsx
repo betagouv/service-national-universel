@@ -20,6 +20,7 @@ import useAuth from "@/services/useAuth";
 import { useDebounce } from "@uidotdev/usehooks";
 import { fr } from "@codegouvfr/react-dsfr";
 import { SignupButtons, BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -105,6 +106,8 @@ export default function StepCoordonnees() {
   const [situationOptions, setSituationOptions] = useState([]);
   const [birthCitySuggestionsOpen, setBirthCitySuggestionsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -236,10 +239,6 @@ export default function StepCoordonnees() {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
-
   const updateWasBornInFrance = (newWasBornInFrance) => {
     if (newWasBornInFrance === "true") {
       setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), birthCountry: FRANCE });
@@ -354,9 +353,16 @@ export default function StepCoordonnees() {
       try {
         const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/next", updates);
         if (!ok) {
-          setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-          setLoading(false);
-          return;
+          if (code == "FILLING_RATE_LIMIT_REACHED") {
+            setModalMessage("Les objectifs de ce département sont déjà atteints. L'inscription est bloquée.");
+            setShowModal(true);
+            setLoading(false);
+            return;
+          } else {
+            setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+            setLoading(false);
+            return;
+          }
         }
         const eventName = isCLE ? "CLE/CTA inscription - profil" : "Phase0/CTA inscription - profil";
         plausibleEvent(eventName);
@@ -620,7 +626,7 @@ export default function StepCoordonnees() {
                 onChange: (e) => updateData("hostRelationship")(e.target.value),
               }}
               state={(corrections?.hostRelationship || errors.hostRelationship) && "error"}
-              stateRelatedMessage={corrections?.hostRelationship || errors.hostRelationship}
+              stateRelatedMessage={corrections?.hostRelationship}
             />
             <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections?.address} />
           </>
@@ -740,6 +746,16 @@ export default function StepCoordonnees() {
         )}
         <SignupButtons onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />
       </DSFRContainer>
+      <ModalConfirm
+        isOpen={showModal}
+        topTitle="Alerte"
+        title="Objectifs atteints"
+        message={modalMessage}
+        onCancel={() => setShowModal(false)}
+        onConfirm={() => setShowModal(false)}
+        confirmText="Ok"
+        cancelText="Annuler"
+      />
     </>
   );
 }
