@@ -626,7 +626,7 @@ export default function StepCoordonnees() {
                 onChange: (e) => updateData("hostRelationship")(e.target.value),
               }}
               state={(corrections?.hostRelationship || errors.hostRelationship) && "error"}
-              stateRelatedMessage={corrections?.hostRelationship}
+              stateRelatedMessage={corrections?.hostRelationship || errors.hostRelationship}
             />
             <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections?.address} />
           </>
