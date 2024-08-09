@@ -86,8 +86,6 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     setSectionMode(mode === "default" ? globalMode : mode);
   }
 
-  console.log(data.psc1Info);
-
   function onLocalChange(field, value) {
     const newData = { ...data, [field]: value };
     if (field === "grade") {
