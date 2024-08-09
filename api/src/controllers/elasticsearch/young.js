@@ -63,6 +63,7 @@ function getYoungsFilters(user) {
     "source.keyword",
     "classeId.keyword",
     "etablissementId.keyword",
+    "psc1Info.keyword",
   ].filter(Boolean);
 }
 
