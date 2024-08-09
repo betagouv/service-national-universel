@@ -34,12 +34,6 @@ const referentMetadataSchema = {
       description: "Indique si une invitation est en attente de première envoi",
     },
   },
-  isConfirmationPending: {
-    type: Boolean,
-    documentation: {
-      description: "Indique si une invitation de confirmation est en attente",
-    },
-  },
   invitationType: {
     type: String,
     enum: InvitationType,

@@ -21,6 +21,12 @@ export interface InvitationResult {
   type?: ReferentType["metadata"]["invitationType"];
 }
 
+export interface DeletionResult {
+  id: string;
+  email: string;
+  mailSent: boolean;
+}
+
 export const findOrCreateReferent = async (referent, { etablissement, role, subRole }: { etablissement: EtablissementType; role: string; subRole?: string }) => {
   try {
     // Return if already exists
@@ -193,23 +199,27 @@ export async function deleteOldReferentClasse(user: UserDto) {
   }, []);
 
   // on récupère tous les ids des referent de classe non rattachés à une classe 2024-2025
-  const referentsNotInClasses = await ReferentModel.find({
+  const referentsNotInClassesIds = await ReferentModel.find({
     role: ROLES.REFERENT_CLASSE,
     deletedAt: { $exists: false },
     _id: { $nin: referentIdsInClasses },
   }).distinct("_id");
-
-  const updatedReferents: InvitationResult[] = [];
+  const deletedReferents: DeletionResult[] = [];
   // on soft delete tous les rérérents de classes non rattachés à une classe 2024-2025
-  for (const referentClasse of referentsNotInClasses) {
+  for (const referentClasseId of referentsNotInClassesIds) {
+    const referentClasse = await ReferentModel.findById(referentClasseId);
+    if (!referentClasse) {
+      continue;
+    }
+    console.log(`Referent - deleteOldReferentClasse(): deleting ${referentClasse?._id} - ${referentClasse?.email}`);
     referentClasse.set({ deletedAt: new Date() });
     referentClasse.save({ fromUser: user });
     const mailResponse = await sendTemplate(SENDINBLUE_TEMPLATES.CLE.SUPPRESSION_ANCIEN_REFERENT_CLASSE_TEMPLATE, {
       emailTo: [{ name: `${referentClasse.firstName} ${referentClasse.lastName}`, email: referentClasse.email }],
       params: {},
     });
-    updatedReferents.push({ to: referentClasse.email, status: mailResponse ? "ok" : "notSent", details: mailResponse || "" });
+    deletedReferents.push({ id: referentClasse._id, email: referentClasse.email, mailSent: mailResponse });
   }
 
-  return updatedReferents;
+  return deletedReferents;
 }
