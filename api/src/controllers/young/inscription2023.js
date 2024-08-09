@@ -150,7 +150,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       return res.status(422).send({
         ok: false,
         code: "FILLING_RATE_LIMIT_REACHED",
-        message: "Les objectifs d'inscription pour votre région sont atteints. Vous ne pouvez pas finaliser votre inscription",
+        message: "Les objectifs d'inscription pour votre région sont atteints. Vous ne pouvez pas finaliser votre inscription? Nous avons vos coordonnées, nous vous tiendrons informés pour les inscriptions 2025",
       });
     }
 
