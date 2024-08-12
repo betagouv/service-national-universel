@@ -63,6 +63,12 @@ const Schema = new mongoose.Schema({
       description: "Cohorte",
     },
   },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
+    },
+  },
   young_phase: {
     type: String,
     default: "INSCRIPTION",

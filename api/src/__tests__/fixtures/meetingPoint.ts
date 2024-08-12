@@ -18,6 +18,7 @@ function getNewMeetingPointFixture(): Partial<MeetingPointType> {
     departureAtString: faker.lorem.words(),
     returnAt: faker.date.past(),
     returnAtString: faker.lorem.words(),
+    cohortId: "1",
   };
 }
 
