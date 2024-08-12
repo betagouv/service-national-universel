@@ -12,10 +12,10 @@ exports.handler = async () => {
     console.log("MongoMonitoring - Connexions actuelles:", connections.current);
     console.log("MongoMonitoring - Connexions disponibles:", connections.available);
     console.log("MongoMonitoring - Total des connexions créées:", connections.totalCreated);
-    console.log("MongoMonitoring - Threaded:", connections.threaded);
-    console.log("MongoMonitoring - Exhaust Is Master:", connections.exhaustIsMaster);
-    console.log("MongoMonitoring - Exhaust Hello:", connections.exhaustHello);
-    console.log("MongoMonitoring - Awaiting Topology Changes:", connections.awaitingTopologyChanges);
+    // console.log("MongoMonitoring - Threaded:", connections.threaded);
+    // console.log("MongoMonitoring - Exhaust Is Master:", connections.exhaustIsMaster);
+    // console.log("MongoMonitoring - Exhaust Hello:", connections.exhaustHello);
+    // console.log("MongoMonitoring - Awaiting Topology Changes:", connections.awaitingTopologyChanges);
 
     if (connections.active > 50) {
       await slack.info({
