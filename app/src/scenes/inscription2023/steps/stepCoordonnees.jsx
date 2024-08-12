@@ -758,7 +758,7 @@ export default function StepCoordonnees() {
       <ModalConfirm
         isOpen={showModal}
         topTitle="Alerte"
-        title="Objectifs atteints"
+        title="Séjour complet pour votre région"
         message={modalMessage}
         onCancel={() => setShowModal(false)}
         onConfirm={() => setShowModal(false)}
