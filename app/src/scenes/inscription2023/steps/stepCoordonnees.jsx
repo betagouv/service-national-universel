@@ -452,6 +452,13 @@ export default function StepCoordonnees() {
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
         supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
         supportEvent="Phase0/aide inscription - coordonnees">
+        <div className="flex flex-col text-base w-fit rounded-md px-2 py-1 font-bold bg-[#E8EDFF] text-[#0063CB] px-4 py-2 mb-4">
+          <p className="mb-2 mt-2 font-bold">Attention !</p>
+          <p className="mb-2 text-sm md:text-base">
+            Dans la région Occitanie, compte tenu du nombre très élevé d'inscriptions, nous ne pouvons pas garantir votre participation au séjour d'octobre 2024. Vous serez informé
+            en priorité lors de l'ouverture des inscriptions pour les séjours 2025.
+          </p>
+        </div>
         <BooleanRadioButtons
           options={inFranceOrAbroadOptions}
           legend="Je suis né(e)..."
