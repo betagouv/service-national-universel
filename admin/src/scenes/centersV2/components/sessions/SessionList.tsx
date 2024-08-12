@@ -212,26 +212,24 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                   />
                 </div>
               </div>
-              {center?.region === "Provence-Alpes-Côte d'Azur" && cohort?.name === "Juin 2024 - 2" && (
-                <div className="flex flex-call justify-start items-center w-full mt-2">
-                  <div className="w-full mt-3">
-                    <Label
-                      className="text-xs leading-5 font-medium"
-                      title="Réception des fiches sanitaires (facultatif)"
-                      name="sanitaryContactEmail"
-                      tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
-                    />
-                    <InputText
-                      label="Adresse email académique"
-                      name="sanitaryContactEmail"
-                      value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
-                      onChange={(e) => {
-                        if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
-                      }}
-                    />
-                  </div>
+              <div className="flex flex-call justify-start items-center w-full mt-2">
+                <div className="w-full mt-3">
+                  <Label
+                    className="text-xs leading-5 font-medium"
+                    title="Réception des fiches sanitaires (facultatif)"
+                    name="sanitaryContactEmail"
+                    tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
+                  />
+                  <InputText
+                    label="Adresse email académique"
+                    name="sanitaryContactEmail"
+                    value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
+                    onChange={(e) => {
+                      if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
+                    }}
+                  />
                 </div>
-              )}
+              </div>
             </div>
             <div className="flex w-[10%] items-center justify-center">
               <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
