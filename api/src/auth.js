@@ -4,7 +4,7 @@ const Joi = require("joi");
 
 const { capture, captureMessage } = require("./sentry");
 const config = require("config");
-const { sendTemplate, regexp_exception_staging } = require("./brevo");
+const { sendTemplate } = require("./brevo");
 const {
   JWT_SIGNIN_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC,
@@ -365,8 +365,7 @@ class Auth {
 
       const shouldUse2FA = async () => {
         try {
-          if (config.ENVIRONMENT === "development") return false;
-          if (["staging", "ci", "custom"].includes(config.ENVIRONMENT) && !user.email.match(regexp_exception_staging)) return false;
+          if (!config.ENABLE_2FA) return false;
 
           const trustToken = req.cookies[`trust_token-${user._id}`];
           if (!trustToken) return true;

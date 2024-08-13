@@ -48,7 +48,7 @@ export default function List() {
 
   const { value: studentsCount } = useAsync(async () => {
     try {
-      const { reinscriptionStep2023, status, imageRight, ...countFilter } = selectedFilters;
+      const { inscriptionStep2023, status, imageRight, ...countFilter } = selectedFilters;
       const res = await api.post(`/elasticsearch/cle/young/search`, {
         filters: Object.entries(countFilter).reduce(
           (acc, [key, value]) => {
@@ -64,7 +64,7 @@ export default function List() {
         ),
       });
       return {
-        studentsWaitingConsent: res.responses[1].aggregations?.reinscriptionStep2023?.names?.buckets.find((e) => e.key === "WAITING_CONSENT")?.doc_count || 0,
+        studentsWaitingConsent: res.responses[1].aggregations?.inscriptionStep2023?.names?.buckets.find((e) => e.key === "WAITING_CONSENT")?.doc_count || 0,
         studentsWaitingValidation: res.responses[1].aggregations?.status?.names?.buckets.find((e) => e.key === YOUNG_STATUS.WAITING_VALIDATION)?.doc_count || 0,
         studentsWaitingImageRights: res.responses[1].aggregations?.imageRight?.names?.buckets.find((e) => e.key === "N/A")?.doc_count || 0,
       };
@@ -115,7 +115,7 @@ export default function List() {
     setYoungList([]);
     if (currentTab === "general") {
       setSelectedFilters((prevFilters) => {
-        const { reinscriptionStep2023, status, imageRight, ...rest } = prevFilters;
+        const { inscriptionStep2023, status, imageRight, ...rest } = prevFilters;
         return rest;
       });
     } else if (currentTab === "consent") {
@@ -123,12 +123,12 @@ export default function List() {
         const { status, imageRight, ...rest } = prevFilters;
         return {
           ...rest,
-          reinscriptionStep2023: { filter: ["WAITING_CONSENT"] },
+          inscriptionStep2023: { filter: ["WAITING_CONSENT"] },
         };
       });
     } else if (currentTab === "validation") {
       setSelectedFilters((prevFilters) => {
-        const { reinscriptionStep2023, imageRight, ...rest } = prevFilters;
+        const { inscriptionStep2023, imageRight, ...rest } = prevFilters;
         return {
           ...rest,
           status: { filter: [YOUNG_STATUS.WAITING_VALIDATION] },
@@ -136,7 +136,7 @@ export default function List() {
       });
     } else if (currentTab === "image") {
       setSelectedFilters((prevFilters) => {
-        const { reinscriptionStep2023, status, ...rest } = prevFilters;
+        const { inscriptionStep2023, status, ...rest } = prevFilters;
         return {
           ...rest,
           imageRight: { filter: ["N/A"] },

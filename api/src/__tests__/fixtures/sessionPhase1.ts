@@ -8,6 +8,7 @@ function getNewSessionPhase1Fixture(object: Partial<SessionPhase1Type> = {}): Pa
     placesTotal: placesLeft,
     placesLeft: placesLeft,
     status: "VALIDATED",
+    cohortId: "1",
     ...object,
   };
 }
