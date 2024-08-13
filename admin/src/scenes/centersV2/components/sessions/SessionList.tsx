@@ -145,40 +145,36 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
         <Container
           title="Détails"
           actions={[
-            isSessionEditionOpen(user, cohort) && (
-              <>
-                {values ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                      onClick={() => {
-                        setValues(null);
-                        setErrors({});
-                      }}
-                      disabled={loading}>
-                      Annuler
-                    </button>
-                    <button
-                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      type="submit"
-                      form="session-form"
-                      disabled={!values || loading}>
-                      <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-                      Enregistrer les changements
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                    onClick={() => setValues(session)}
-                    disabled={loading}>
-                    <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                    Modifier
-                  </button>
-                )}
-              </>
+            values ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={() => {
+                    setValues(null);
+                    setErrors({});
+                  }}
+                  disabled={loading}>
+                  Annuler
+                </button>
+                <button
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="submit"
+                  form="session-form"
+                  disabled={!values || loading}>
+                  <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
+                  Enregistrer les changements
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setValues(session)}
+                disabled={loading}>
+                <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
+                Modifier
+              </button>
             ),
           ]}>
           <div className="flex flex-row">
@@ -209,28 +205,32 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       const parsedValue = parseInt(inputValue, 10);
                       if (values) setValues({ ...values, placesTotal: parsedValue });
                     }}
+                    readOnly={!isSessionEditionOpen(user, cohort)}
                   />
                 </div>
               </div>
               {center?.region === "Provence-Alpes-Côte d'Azur" && cohort?.name === "Juin 2024 - 2" && (
-                <div className="flex flex-call justify-start items-center w-full mt-2">
-                  <div className="w-full mt-3">
-                    <Label
-                      className="text-xs leading-5 font-medium"
-                      title="Réception des fiches sanitaires (facultatif)"
-                      name="sanitaryContactEmail"
-                      tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
-                    />
-                    <InputText
-                      label="Adresse email académique"
-                      name="sanitaryContactEmail"
-                      value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
-                      onChange={(e) => {
-                        if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
-                      }}
-                    />
+                <>
+                  <div className="flex flex-call justify-start items-center w-full mt-2">
+                    <div className="w-full mt-3">
+                      <Label
+                        className="text-xs leading-5 font-medium"
+                        title="Réception des fiches sanitaires (facultatif)"
+                        name="sanitaryContactEmail"
+                        tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
+                      />
+                      <InputText
+                        label="Adresse email académique"
+                        name="sanitaryContactEmail"
+                        value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
+                        onChange={(e) => {
+                          if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
+                        }}
+                        readOnly={cohort?.isAssignmentAnnouncementsOpenForYoung}
+                      />
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
             <div className="flex w-[10%] items-center justify-center">
@@ -267,7 +267,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                     </p>
                   }
-                  readOnly={!values || !canPutSpecificDateOnSessionPhase1(user)}
+                  readOnly={!isSessionEditionOpen(user, cohort)}
                   value={values ? !!values?.dateStart : !!session.dateStart}
                   onChange={handleToggleDate}
                   range={{
