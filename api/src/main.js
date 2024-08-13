@@ -31,7 +31,7 @@ async function runTasks() {
 
   initQueues();
   initWorkers();
-  scheduleRepeatableTasks();
+  await scheduleRepeatableTasks();
 
   const app = express();
 
@@ -202,7 +202,6 @@ async function runAPI() {
     try {
       throw new Error("Intentional error");
     } catch (error) {
-      console.log("Error ");
       capture(error);
       return res.status(500).send({ ok: false, code: "hihi" });
     }

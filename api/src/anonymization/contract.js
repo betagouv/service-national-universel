@@ -34,6 +34,13 @@ function anonymize(item) {
   item.structureManagerEmail && (item.structureManagerEmail = STAR_EMAIL);
   item.structureManagerFirstName && (item.structureManagerFirstName = starify(item.structureManagerFirstName));
   item.structureManagerLastName && (item.structureManagerLastName = starify(item.structureManagerLastName));
+
+  item.parent1Token = "";
+  item.projectManagerToken = "";
+  item.structureManagerToken = "";
+  item.parent2Token = "";
+  item.youngContractToken = "";
+
   return item;
 }
 

@@ -17,6 +17,12 @@ const schema = new Schema({
           type: String,
           documentation: "cohorte concerné par le service",
         },
+        cohortId: {
+          type: String,
+          documentation: {
+            description: "Id de la cohorte",
+          },
+        },
         contactName: {
           type: String,
           documentation: {

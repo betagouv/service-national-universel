@@ -69,6 +69,12 @@ const schema = new Schema({
       description: "Cohorte du volontaire",
     },
   },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
+    },
+  },
 
   missionId: {
     type: String,
