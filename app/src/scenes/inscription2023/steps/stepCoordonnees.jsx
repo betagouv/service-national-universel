@@ -438,8 +438,6 @@ export default function StepCoordonnees() {
     setLoading(false);
   };
 
-  console.log(data);
-
   return (
     <>
       <DSFRContainer
