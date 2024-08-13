@@ -14,7 +14,8 @@ const { createTerminus } = require("@godaddy/terminus");
 
 const config = require("config");
 
-const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
+const { capture } = require("./sentry");
+const { setupExpressErrorHandler } = require("@sentry/node");
 const { initDB, closeDB } = require("./mongo");
 const { initRedisClient, closeRedisClient } = require("./redis");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
@@ -26,7 +27,6 @@ const basicAuth = require("express-basic-auth");
 const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers, scheduleRepeatableTasks } = require("./queues/redisQueue");
 
 async function runTasks() {
-  initSentry();
   await Promise.all([initDB(), getAllPdfTemplates()]);
 
   initQueues();
@@ -46,6 +46,7 @@ async function runTasks() {
     );
   }
   app.use("/", initMonitor());
+  setupExpressErrorHandler(app);
 
   // * Use Terminus for graceful shutdown when using Docker
   const server = http.createServer(app);
@@ -101,7 +102,6 @@ async function runAPI() {
   initQueues();
 
   const app = express();
-  const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
   if (["production", "staging", "ci", "custom"].includes(config.ENVIRONMENT)) {
@@ -224,7 +224,7 @@ async function runAPI() {
     });
   }
 
-  registerSentryErrorHandler();
+  setupExpressErrorHandler(app);
   app.use(handleError);
 
   initPassport();
