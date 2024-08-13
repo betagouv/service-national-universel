@@ -1,14 +1,17 @@
-import { ExtraErrorData, ReportingObserver } from "@sentry/integrations";
 import {
+  extraErrorDataIntegration,
+  reportingObserverIntegration,
   init,
-  BrowserTracing,
-  reactRouterV5Instrumentation,
+  reactRouterV5BrowserTracingIntegration,
   withSentryRouting,
+  rewriteFramesIntegration,
+  moduleMetadataIntegration,
+  httpClientIntegration,
   captureException as sentryCaptureException,
   captureMessage as sentryCaptureMessage,
   makeBrowserOfflineTransport,
   makeFetchTransport,
-  Replay,
+  replayIntegration,
 } from "@sentry/react";
 import { environment, RELEASE, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE } from "./config";
 import { Route } from "react-router-dom";
@@ -30,17 +33,18 @@ function initSentry() {
       transportOptions: {
         maxQueueSize: 50,
       },
+      sendDefaultPii: true,
+      tracePropagationTargets: ["localhost", apiURL],
       integrations: [
-        new ExtraErrorData({ depth: 16 }),
-        new BrowserTracing({
-          routingInstrumentation: reactRouterV5Instrumentation(history),
-          // Pass tracing info to this domain
-          tracingOrigins: [apiURL].map((url) => new URL(url).host),
-        }),
-        new ReportingObserver({
+        extraErrorDataIntegration({ depth: 16 }),
+        reactRouterV5BrowserTracingIntegration({ history }),
+        httpClientIntegration(),
+        rewriteFramesIntegration({ root: process.cwd() }),
+        moduleMetadataIntegration(),
+        reportingObserverIntegration({
           types: ["crash", "deprecation", "intervention"],
         }),
-        new Replay(),
+        replayIntegration(),
       ],
       replaysSessionSampleRate: SENTRY_SESSION_SAMPLE_RATE,
       replaysOnErrorSampleRate: SENTRY_ON_ERROR_SAMPLE_RATE,
