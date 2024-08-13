@@ -26,6 +26,7 @@ import {
   EtablissementDocument,
   ClasseDocument,
   YoungType,
+  CohortModel,
 } from "../models";
 
 import emailsEmitter from "../emails";
@@ -737,7 +738,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         cohesionStayMedicalFileReceived: undefined,
       });
     }
-
+    const cohortModel = await CohortModel.findOne({ name: cohort });
     young.set({
       status: youngStatus,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
@@ -746,6 +747,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohortChangeReason: cohortChangeReason ?? young.cohortChangeReason,
       cohesionStayPresence: undefined,
       cohesionStayMedicalFileReceived: undefined,
+      cohortId: cohortModel?._id,
     });
     if (value.source === YOUNG_SOURCE.CLE) {
       const correctionRequestsFiltered = young?.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];

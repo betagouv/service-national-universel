@@ -120,22 +120,22 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
 /**
  * Récupère les points de rassemblements pour un centre de cohésion avec cohort
  */
-router.get("/center/:centerId/cohort/:cohortId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/center/:centerId/cohort/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       centerId: Joi.string().required(),
-      cohortId: Joi.string().required(),
+      cohort: Joi.string().required(),
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { centerId, cohortId } = value;
+    const { centerId, cohort } = value;
 
-    if (!canViewMeetingPoints(req.user, { centerId, cohortId })) {
+    if (!canViewMeetingPoints(req.user, { centerId, cohort })) {
       return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    const ligneBus = await LigneBusModel.find({ cohort: cohortId, centerId: centerId });
+    const ligneBus = await LigneBusModel.find({ cohort: cohort, centerId: centerId });
 
     let arrayMeetingPoints = [];
     ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
