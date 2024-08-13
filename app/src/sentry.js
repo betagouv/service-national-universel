@@ -39,7 +39,6 @@ function initSentry() {
         extraErrorDataIntegration({ depth: 16 }),
         reactRouterV5BrowserTracingIntegration({ history }),
         httpClientIntegration(),
-        rewriteFramesIntegration({ root: process.cwd() }),
         moduleMetadataIntegration(),
         reportingObserverIntegration({
           types: ["crash", "deprecation", "intervention"],
