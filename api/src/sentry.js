@@ -6,8 +6,8 @@ const config = require("config");
 function initSentry() {
   if (config.get("ENABLE_SENTRY")) {
     init({
-      dsn: config.get("SENTRY_URL"),
-      environment: "api",
+      dsn: "https://584ccb2737f20b13078d0b80b9eeacab@sentry.selego.co/160",
+      environment: config.ENVIRONMENT,
       release: config.get("RELEASE"),
       normalizeDepth: 16,
       integrations: [extraErrorDataIntegration({ depth: 16 }), rewriteFramesIntegration({ root: process.cwd() }), nodeProfilingIntegration()],
