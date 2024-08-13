@@ -1,3 +1,6 @@
+import { SentryRoute, capture, history, initSentry } from "./sentry";
+initSentry();
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import queryString from "query-string";
 import React, { useEffect, useState } from "react";
@@ -53,7 +56,6 @@ import DashboardVisitorV2 from "./scenes/dashboardV2/visitor";
 import Loader from "./components/Loader";
 import Footer from "./components/footer";
 
-import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
@@ -72,35 +74,38 @@ import ApplicationError from "./components/layout/ApplicationError";
 import NotFound from "./components/layout/NotFound";
 import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
 
-initSentry();
 initApi();
 
-export default function App() {
-  return (
-    <Sentry.ErrorBoundary fallback={ApplicationError}>
-      <QueryClientProvider client={queryClient}>
-        <Router history={history}>
-          <ScrollToTop />
-          <div className="main">
-            <Switch>
-              {/* Aucune authentification nécessaire */}
-              <SentryRoute path="/validate" component={Validate} />
-              <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-              <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
-              <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-              <SentryRoute path="/creer-mon-compte" component={Signup} />
-              <SentryRoute path="/verifier-mon-compte" component={Signup} />
-              {/* Authentification accessoire */}
-              <SentryRoute path="/auth" component={Auth} />
-              {/* Page par default (404 et Home) */}
-              <SentryRoute path="/" component={Home} />
-            </Switch>
-          </div>
-        </Router>
-      </QueryClientProvider>
-    </Sentry.ErrorBoundary>
-  );
+class App extends React.Component {
+  render() {
+    return (
+      <Sentry.ErrorBoundary fallback={ApplicationError}>
+        <QueryClientProvider client={queryClient}>
+          <Router history={history}>
+            <ScrollToTop />
+            <div className="main">
+              <Switch>
+                {/* Aucune authentification nécessaire */}
+                <SentryRoute path="/validate" component={Validate} />
+                <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+                <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
+                <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+                <SentryRoute path="/creer-mon-compte" component={Signup} />
+                <SentryRoute path="/verifier-mon-compte" component={Signup} />
+                {/* Authentification accessoire */}
+                <SentryRoute path="/auth" component={Auth} />
+                {/* Page par default (404 et Home) */}
+                <SentryRoute path="/" component={Home} />
+              </Switch>
+            </div>
+          </Router>
+        </QueryClientProvider>
+      </Sentry.ErrorBoundary>
+    );
+  }
 }
+
+export default Sentry.withProfiler(App);
 
 const Home = () => {
   const dispatch = useDispatch();

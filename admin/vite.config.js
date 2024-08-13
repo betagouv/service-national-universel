@@ -27,6 +27,7 @@ export default defineConfig(({ command, mode }) => {
           },
         },
         validate: true,
+        reactComponentAnnotation: { enabled: true },
         sourcemaps: {
           // Specify the directory containing build artifacts
           assets: "./**",
