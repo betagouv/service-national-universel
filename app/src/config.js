@@ -21,7 +21,7 @@ let adminURL = getEnv("ADMIN_URL", "http://localhost:8082");
 let supportURL = getEnv("SUPPORT_URL", "http://localhost:8083");
 let maintenance = getEnv("MAINTENANCE", false) === "true";
 let environment = getEnv("ENVIRONMENT", "development");
-let SENTRY_URL = getEnv("SENTRY_URL", "https://9f62b6f87edc757e44b10d7728db5913@sentry.selego.co/143");
+let SENTRY_URL = "https://9f62b6f87edc757e44b10d7728db5913@sentry.selego.co/143";
 let SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 0.1);
 let SENTRY_SESSION_SAMPLE_RATE = getEnv("SENTRY_SESSION_SAMPLE_RATE", 0.1);
 let SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("SENTRY_ON_ERROR_SAMPLE_RATE", 1.0);
