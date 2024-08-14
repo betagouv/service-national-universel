@@ -3,35 +3,14 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { isCle } from "./young";
 import { getZonedDate } from "./utils/date";
 
-// @todo: to be removed after adding old cohorts in bd
-const START_DATE_PHASE1 = {
-  2019: new Date("06/16/2019"),
-  2020: new Date("06/21/2021"),
-  2021: new Date("06/21/2021"),
-  "Février 2022": new Date("02/13/2022"),
-  "Juin 2022": new Date("06/12/2022"),
-  "Juillet 2022": new Date("07/03/2022"),
+const COHORTS_WITH_JDM_COUNT = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
+
+const getCohortStartDate = (cohort) => {
+  return new Date(cohort.dateStart);
 };
 
-// @todo: to be removed after adding old cohorts in bd
-const END_DATE_PHASE1 = {
-  2019: new Date("06/28/2019"),
-  2020: new Date("07/02/2021"),
-  2021: new Date("07/02/2021"),
-  "Février 2022": new Date("02/25/2022"),
-  "Juin 2022": new Date("06/24/2022"),
-  "Juillet 2022": new Date("07/15/2022"),
-};
-
-// @todo: remvove this list and use getCohortEndDate function @GuiPich91
-const COHORTS_BEFORE_JULY_2023 = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
-
-const getCohortStartDate = (young, cohort) => {
-  return cohort ? new Date(cohort.dateStart) : START_DATE_PHASE1[young.cohort];
-};
-
-const getCohortEndDate = (young, cohort) => {
-  return cohort ? new Date(cohort.dateEnd) : END_DATE_PHASE1[young.cohort];
+const getCohortEndDate = (cohort) => {
+  return new Date(cohort.dateEnd);
 };
 
 const getCohortYear = (cohort) => cohort?.dateStart?.slice(0, 4);
@@ -113,13 +92,6 @@ const getCohortPeriodTemp = (young) => {
   return getCohortPeriod(cohort);
 };
 
-function inscriptionModificationOpenForYoungs(cohort) {
-  // FIXME: remove this when all cohorts have inscriptionModificationEndDate
-  const date = cohort?.type === "CLE" ? cohort?.inscriptionEndDate : cohort?.inscriptionModificationEndDate;
-  if (!date) return false;
-  return new Date() < new Date(date);
-}
-
 function inscriptionCreationOpenForYoungs(cohort) {
   if (!cohort?.inscriptionEndDate) return false;
   return new Date() < new Date(cohort.inscriptionEndDate);
@@ -189,7 +161,7 @@ function shouldForceRedirectToInscription(young, isInscriptionModificationOpen =
 function canApplyToPhase2(young, cohort) {
   if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const now = new Date();
-  const dateEnd = getCohortEndDate(young, cohort);
+  const dateEnd = getCohortEndDate(cohort);
   return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;
 }
 
@@ -198,7 +170,6 @@ export {
   getCohortPeriod,
   formatCohortPeriod,
   getCohortPeriodTemp,
-  inscriptionModificationOpenForYoungs,
   inscriptionCreationOpenForYoungs,
   shouldForceRedirectToReinscription,
   shouldForceRedirectToInscription,
@@ -207,7 +178,5 @@ export {
   canApplyToPhase2,
   getCohortStartDate,
   getCohortEndDate,
-  START_DATE_PHASE1,
-  END_DATE_PHASE1,
-  COHORTS_BEFORE_JULY_2023,
+  COHORTS_WITH_JDM_COUNT,
 };
