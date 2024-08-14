@@ -93,7 +93,7 @@ const CRONS = [
   cron("noticePushMission", "2 9 1,16 * *", noticePushMission.handler),
   cron("apiEngagement", "10 */6 * * *", apiEngagement.handler),
   cron("deleteInactiveRefs", "0 0 * * *", deleteInactiveRefs.handler),
-  cron("jeVeuxAiderDaily", "7 */6 * * *", jeVeuxAiderDaily.handler),
+  cron("jeVeuxAiderDaily", "15 */6 * * *", jeVeuxAiderDaily.handler),
   cron("contratRelance", "0 6 * * *", contratRelance.handler),
   cron("missionOutdated", "0 8 * * *", [missionOutdated.handler, missionOutdated.handlerNotice1Week]),
   cron("applicationOutaded", "0 7 * * *", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]),
