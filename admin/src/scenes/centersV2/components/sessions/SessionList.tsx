@@ -283,7 +283,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                     </p>
                   }
-                  readOnly={!isSessionEditionOpen(user, cohort)}
+                  readOnly={!isSessionEditionOpen(user, cohort) && !canPutSpecificDateOnSessionPhase1(user)}
                   value={values ? !!values?.dateStart : !!session.dateStart}
                   onChange={handleToggleDate}
                   range={{
