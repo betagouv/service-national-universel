@@ -1,4 +1,4 @@
-const { YOUNG_STATUS, region2zone, getRegionForEligibility, regionsListDROMS, START_DATE_PHASE1, END_DATE_PHASE1, COHORT_TYPE } = require("snu-lib");
+const { YOUNG_STATUS, region2zone, getRegionForEligibility, regionsListDROMS, COHORT_TYPE } = require("snu-lib");
 const { YoungModel, CohortModel, InscriptionGoalModel } = require("../models");
 
 async function getFilteredSessions(young, timeZoneOffset = null) {
@@ -123,11 +123,6 @@ async function getCohortValidationDate(cohortName) {
 }
 
 function getDepartureDateSession(session, young, cohort) {
-  // Compatibility with legacy sessions
-  if (young.cohort in START_DATE_PHASE1) {
-    return START_DATE_PHASE1[young.cohort];
-  }
-
   if (session?.dateStart) {
     const sessionDateStart = new Date(session.dateStart);
     sessionDateStart.setHours(sessionDateStart.getHours() + 12);
@@ -142,11 +137,6 @@ function getDepartureDateSession(session, young, cohort) {
 }
 
 function getReturnDateSession(session, young, cohort) {
-  // Compatibility with legacy sessions
-  if (young.cohort in END_DATE_PHASE1) {
-    return END_DATE_PHASE1[young.cohort];
-  }
-
   if (session?.dateEnd) {
     const sessionDateEnd = new Date(session.dateEnd);
     sessionDateEnd.setHours(sessionDateEnd.getHours() + 12);
