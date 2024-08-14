@@ -31,7 +31,7 @@ const {
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
-const { ClasseModel, EtablissementModel } = require("./models");
+const { ClasseModel, EtablissementModel, CohortModel } = require("./models");
 const { getFeatureFlagsAvailable } = require("./featureFlag/featureFlagService");
 
 class Auth {
@@ -125,6 +125,8 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
+      const cohortModel = await CohortModel.findOne({ name: cohort });
+
       const user = await this.model.create({
         email,
         phone,
@@ -146,6 +148,7 @@ class Auth {
         schoolId,
         zip,
         cohort,
+        cohortId: cohortModel?._id,
         grade,
         inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
         emailVerified: "false",
@@ -250,6 +253,8 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
+      const cohort = await CohortModel.findOne({ name: classe.cohort });
+
       const userData = {
         email,
         phone,
@@ -284,6 +289,7 @@ class Auth {
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
+        cohortId: cohort?._id,
       };
 
       const user = await this.model.create(userData);
