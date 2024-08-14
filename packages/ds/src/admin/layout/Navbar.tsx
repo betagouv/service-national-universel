@@ -41,7 +41,7 @@ export default function Navbar({ tab, button }: OwnProps) {
       </div>
       {button && (
         <div className="flex gap-4 pb-3">
-          {button.map((buttonItem, index) => (
+          {button?.map((buttonItem, index) => (
             <div key={`button-${index}`}>{buttonItem}</div>
           ))}
         </div>
