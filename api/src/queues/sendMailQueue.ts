@@ -1,7 +1,8 @@
 import config from "config";
-import { Worker, Queue } from "bullmq";
-import { capture } from "../sentry";
+import { Worker, Queue, Job } from "bullmq";
+import { capture, captureMessage } from "../sentry";
 import { sendDocumentEmail, SendDocumentEmailOptions } from "../young/youngSendDocumentEmailService";
+import { logAddedTask, logStartedTask, logSucceedTask, logFailedTask } from "./taskLoggerService";
 
 const MAIL_QUEUE = `${config.get("TASK_QUEUE_PREFIX")}_send_mail`;
 const SEND_DOCUMENT_EMAIL = "send_document_mail";
@@ -23,32 +24,35 @@ export function initQueue(connection) {
   return queue;
 }
 
-export function sendDocumentEmailTask(options: SendDocumentEmailOptions) {
-  console.log(`Add task ${SEND_DOCUMENT_EMAIL}`);
-  return queue?.add(SEND_DOCUMENT_EMAIL, options);
+export async function sendDocumentEmailTask(options: SendDocumentEmailOptions) {
+  // @ts-ignore
+  const job = await queue.add(SEND_DOCUMENT_EMAIL, options);
+  logAddedTask(job);
+  return job;
 }
 
 export function initWorker(connection) {
-  console.log("Worker");
   worker = new Worker(
     MAIL_QUEUE,
     async (job) => {
-      console.log(`Start processing task ${job.name} (${job.id})`);
-      try {
-        switch (job.name) {
-          case SEND_DOCUMENT_EMAIL: {
-            await sendDocumentEmail(job.data);
-            break;
-          }
+      logStartedTask(job);
+      switch (job.name) {
+        case SEND_DOCUMENT_EMAIL: {
+          await sendDocumentEmail(job.data);
+          break;
         }
-        console.log(`End processing task ${job.name} (${job.id})`);
-      } catch (err) {
-        capture(err);
-        throw err;
       }
     },
     { connection },
   );
-  worker.on("error", (err) => console.error(err));
+  worker.on("completed", (job) => {
+    logSucceedTask(job);
+  });
+
+  worker.on("failed", (job: Job, error) => {
+    const error_id = capture(error);
+    logFailedTask(job, error_id);
+  });
+  worker.on("error", (err) => captureMessage(err));
   return worker;
 }

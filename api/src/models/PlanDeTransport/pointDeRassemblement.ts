@@ -51,6 +51,12 @@ const schema = new Schema({
             description: "Cohorte du complément d'adresse",
           },
         },
+        cohortId: {
+          type: String,
+          documentation: {
+            description: "Id de la cohorte",
+          },
+        },
         complement: {
           type: String,
           documentation: {

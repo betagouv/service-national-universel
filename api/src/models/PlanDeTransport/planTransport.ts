@@ -68,7 +68,12 @@ const schema = new Schema({
       description: "Cohorte de la ligne de bus",
     },
   },
-
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
+    },
+  },
   busId: {
     type: String,
     required: true,

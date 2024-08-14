@@ -38,6 +38,12 @@ const CorrectionRequest = new Schema({
       description: "Cohorte du jeune au moment de la dernière action sur cette demande de correction",
     },
   },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
+    },
+  },
   field: {
     type: String,
     required: true,
@@ -220,10 +226,22 @@ const schema = new Schema({
       description: "Cohorte",
     },
   },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
+    },
+  },
   originalCohort: {
     type: String,
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
+    },
+  },
+  originalCohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte d'origine",
     },
   },
   cohortChangeReason: {

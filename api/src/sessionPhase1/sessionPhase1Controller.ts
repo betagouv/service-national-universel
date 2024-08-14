@@ -20,7 +20,7 @@ router.get("/:id/plan-de-transport", passport.authenticate("referent", { session
     const session = await SessionPhase1Model.findById(id).select({ cohort: 1, cohesionCenterId: 1 });
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const lignesDeBus = await LigneBusModel.find({ cohort: session.cohort, centerId: session.cohesionCenterId }).select({ _id: 1 });
+    const lignesDeBus = await LigneBusModel.find({ cohortId: session.cohortId, centerId: session.cohesionCenterId }).select({ _id: 1 });
 
     return res.status(200).send({ ok: true, data: lignesDeBus });
   } catch (error) {

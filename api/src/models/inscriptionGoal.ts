@@ -39,6 +39,12 @@ const schema = new Schema({
       description: "Cohorte des jeunes",
     },
   },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
+    },
+  },
   fillingRate: {
     type: Number,
     documentation: {

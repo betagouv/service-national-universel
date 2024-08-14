@@ -71,6 +71,7 @@ import SideBar from "./components/drawer/SideBar";
 import ApplicationError from "./components/layout/ApplicationError";
 import NotFound from "./components/layout/NotFound";
 import { getDefaultSession } from "./utils/session";
+import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
 
 initSentry();
 initApi();
@@ -140,7 +141,7 @@ const Home = () => {
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
         const cohorts = await getCohorts();
-        if (cohorts) dispatch({ type: "SET_COHORTS", payload: cohorts });
+        if (cohorts) dispatch({ type: COHORTS_ACTIONS.SET_COHORTS, payload: cohorts });
 
         //Load session phase 1 for head center before stop loading
         if (res.user?.role !== ROLES.HEAD_CENTER) setLoading(false);

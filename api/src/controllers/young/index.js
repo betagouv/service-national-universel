@@ -446,9 +446,6 @@ router.put("/accept-ri", passport.authenticate("young", { session: false, failWi
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
-    await young.save({ fromUser: req.user });
-
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
       params: {

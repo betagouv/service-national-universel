@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
-import { getDepartmentByZip, translate, translateGrade, getCohortPeriod } from "snu-lib";
+import { getDepartmentByZip, translate, translateGrade, getCohortPeriod, YOUNG_SOURCE } from "snu-lib";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 
@@ -13,7 +13,6 @@ import Check from "../components/Check";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { supportURL } from "../../../config";
 import plausibleEvent from "@/services/plausible";
-import { YOUNG_SOURCE } from "snu-lib";
 import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Verification({ step, parentId }) {

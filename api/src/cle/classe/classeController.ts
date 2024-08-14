@@ -26,10 +26,17 @@ import {
   canEditTotalSeats,
   canVerifyClasse,
   canNotifyAdminCleForVerif,
+  CohortDto,
+  ClasseSchoolYear,
+  FeatureFlagName,
+  isAdmin,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
 import { ERRORS, isReferent } from "../../utils";
+import { validateId } from "../../utils/validator";
+import emailsEmitter from "../../emails";
+import { UserRequest } from "../../controllers/request";
 import {
   ClasseModel,
   CohortModel,
@@ -45,9 +52,10 @@ import {
   LigneBusDocument,
 } from "../../models";
 
-import { UserRequest } from "../../controllers/request";
+import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
+import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 
-import { deleteClasse, generateConvocationsByClasseId } from "./classeService";
+import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, findClasseByUniqueKeyAndUniqueId, generateConvocationsByClasseId } from "./classeService";
 import {
   findCohesionCentersForClasses,
   findPdrsForClasses,
@@ -55,10 +63,7 @@ import {
   findLigneInfoForClasses,
   findChefEtablissementInfoForClasses,
 } from "./export/classeExportService";
-import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
-import emailsEmitter from "../../emails";
 import ClasseStateManager from "./stateManager";
-import { validateId } from "../../utils/validator";
 
 const router = express.Router();
 router.post(
@@ -74,8 +79,7 @@ router.post(
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      // @ts-ignore
-      if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, null, "convocation")) {
+      if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, undefined, "convocation")) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
       const { id } = value;
@@ -170,21 +174,24 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   try {
     const { error, value } = Joi.object({
       // Classe
-      uniqueKey: Joi.string().required(),
-      uniqueId: Joi.string().alphanum().min(0).max(15).allow("").required(),
-      cohort: Joi.string().default("CLE 23-24").optional(),
+      name: Joi.string().required(),
+      cohort: Joi.string().allow("").allow(null).optional(),
+      estimatedSeats: Joi.number().required(),
+      coloration: Joi.string()
+        .valid(...CLE_COLORATION_LIST)
+        .required(),
+      filiere: Joi.string().valid(...CLE_FILIERE_LIST),
+      grades: Joi.array().items(Joi.string().valid(...CLE_GRADE_LIST)),
+      type: Joi.string()
+        .valid(...TYPE_CLASSE_LIST)
+        .required(),
       etablissementId: Joi.string().required(),
       // Referent
       referent: Joi.object({
         _id: Joi.string().optional(),
-        firstName: Joi.string(),
-        lastName: Joi.string(),
-        email: Joi.string(),
-      }).required(),
-      etablissement: Joi.object({
-        name: Joi.string(),
-        department: Joi.string(),
-        region: Joi.string(),
+        firstName: Joi.string().required(),
+        lastName: Joi.string().required(),
+        email: Joi.string().required(),
       }).required(),
     }).validate(req.body, { stripUnknown: true });
     if (error) {
@@ -194,31 +201,68 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const previousClasse = await ClasseModel.findOne({ uniqueKey: value.uniqueKey, uniqueId: value.uniqueId, etablissementId: value.etablissementId });
-    if (previousClasse) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+    const etablissement = await EtablissementModel.findById(value.etablissementId);
+    if (!etablissement) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Etablissement not found." });
+    }
 
-    // @ts-ignore
-    const referent = await findOrCreateReferent(value.referent, { etablissement: value.etablissement, role: ROLES.REFERENT_CLASSE });
+    let cohortName: string | null = null;
+    const isCleClasseCohortEnabled = await isFeatureAvailable(FeatureFlagName.CLE_CLASSE_ADD_COHORT_ENABLED);
+    if (value.cohort) {
+      if (!isCleClasseCohortEnabled) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      const defaultCleCohort = await CohortModel.findOne({ name: value.cohort });
+      if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
+      cohortName = defaultCleCohort.name;
+    }
+
+    const uniqueClasseKey = buildUniqueClasseKey(etablissement);
+    const uniqueClasseId = buildUniqueClasseId(etablissement, {
+      name: value.name,
+      coloration: value.coloration,
+      estimatedSeats: value.estimatedSeats,
+    });
+    const previousClasse = await findClasseByUniqueKeyAndUniqueId(uniqueClasseKey, uniqueClasseId);
+    if (previousClasse) {
+      return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS, message: "Classe already exists." });
+    }
+
+    const referent = await findOrCreateReferent(value.referent, { etablissement, role: ROLES.REFERENT_CLASSE });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
     if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-    const defaultCleCohort = await CohortModel.findOne({ name: value.cohort });
-    if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
+    const cohort = await CohortModel.findOne({ name: cohortName });
 
     const classe = await ClasseModel.create({
       ...value,
       status: STATUS_CLASSE.CREATED,
       statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
-      cohort: defaultCleCohort.name,
-      uniqueKeyAndId: value.uniqueKey + "_" + value.uniqueId,
+      academy: etablissement.academy,
+      region: etablissement.region,
+      department: etablissement.department,
+      cohort: cohortName,
+      schoolYear: ClasseSchoolYear.YEAR_2024_2025,
+      totalSeats: value.estimatedSeats,
+      uniqueId: uniqueClasseId,
+      uniqueKey: uniqueClasseKey,
+      uniqueKeyAndId: `${uniqueClasseKey}-${uniqueClasseId}`,
       referentClasseIds: [referent._id],
+      cohortId: cohort?._id,
     });
 
     if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
 
+    if (!etablissement.schoolYears.includes(ClasseSchoolYear.YEAR_2024_2025)) {
+      etablissement.set({ schoolYears: [...etablissement.schoolYears, ClasseSchoolYear.YEAR_2024_2025] });
+      await etablissement.save();
+    }
+
     if (!value.referent?._id) {
-      await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user }, value.etablissement);
+      // Un nouveau référent de classe a été créé
+      await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, from: isAdmin(req.user) ? null : req.user }, etablissement);
     } else {
+      // Un référent existant a été affecté à la classe
       emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, classe);
     }
 
@@ -278,7 +322,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (classe.cohort !== value.cohort) {
       const cohort = await CohortModel.findOne({ name: value.cohort });
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (!canUpdateCohort(cohort, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canUpdateCohort(cohort as CohortDto, req.user as any)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       youngs = await YoungModel.find({ classeId: classe._id });
       // * Impossible to change cohort if a young has already completed phase1
       const youngWithStatusPhase1Done = youngs.find((y) => y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE);
@@ -317,6 +361,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           pointDeRassemblementId: undefined,
         });
 
+        const cohort = await CohortModel.findOne({ name: value.cohort });
+
         const youngs = await YoungModel.find({ classeId: classe._id });
         await Promise.all(
           youngs.map((y) => {
@@ -325,6 +371,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
               sessionPhase1Id: undefined,
               cohesionCenterId: undefined,
               meetingPointId: undefined,
+              cohortId: cohort?._id,
             });
             return y.save({ fromUser: req.user });
           }),
@@ -495,11 +542,11 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
     }
 
     if (!canVerifyClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let classe: ClasseDocument<{ referents: ReferentDocument[] }> | null = await ClasseModel.findById(value.id).populate({
+    let classe = await ClasseModel.findById(value.id).populate({
       path: "referents",
       options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } },
     });
-    if (!classe || !classe.referents.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!classe || !classe.referents?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);

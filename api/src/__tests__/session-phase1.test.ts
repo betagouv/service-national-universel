@@ -141,7 +141,9 @@ describe("Session Phase 1", () => {
     });
     it("should return 403 when buses are associated with the session", async () => {
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture({ cohesionCenterId: new mongoose.Types.ObjectId().toString() }));
-      await LigneBusModel.create(getNewLigneBusFixture({ sessionId: sessionPhase1._id, centerId: sessionPhase1.cohesionCenterId, cohort: sessionPhase1.cohort }));
+      await LigneBusModel.create(
+        getNewLigneBusFixture({ sessionId: sessionPhase1._id, centerId: sessionPhase1.cohesionCenterId, cohort: sessionPhase1.cohort, cohortId: sessionPhase1.cohortId }),
+      );
 
       const res = await request(getAppHelper())
         .delete("/session-phase1/" + sessionPhase1._id)
