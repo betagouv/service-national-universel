@@ -115,34 +115,6 @@ resource "scaleway_container" "api" {
   }
 }
 
-resource "scaleway_container" "tasks" {
-  name           = "${local.env}-tasks"
-  namespace_id    = data.scaleway_container_namespace.main.id
-  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
-  port           = 8080
-  cpu_limit      = 1024
-  memory_limit   = 2048
-  min_scale      = 1
-  max_scale      = 1
-  privacy        = "public"
-  protocol       = "http1"
-  deploy         = true
-  http_option    = "redirected"
-
-  environment_variables = {
-    "NODE_ENV"       = "custom"
-    "API_URL"        = "https://${local.api_hostname}"
-    "ADMIN_URL"      = "https://${local.admin_hostname}"
-    "APP_URL"        = "https://${local.app_hostname}"
-    "SECRET_NAME"    = scaleway_secret.custom.name
-    "RUN_TASKS"      = "true"
-  }
-
-  secret_environment_variables = {
-    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
-  }
-}
-
 resource "scaleway_container" "admin" {
   name            = "${local.env}-admin"
   namespace_id    = data.scaleway_container_namespace.main.id
