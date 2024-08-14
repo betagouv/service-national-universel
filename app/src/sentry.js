@@ -4,7 +4,6 @@ import {
   init,
   reactRouterV5BrowserTracingIntegration,
   withSentryRouting,
-  rewriteFramesIntegration,
   moduleMetadataIntegration,
   httpClientIntegration,
   captureException as sentryCaptureException,
