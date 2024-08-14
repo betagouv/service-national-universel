@@ -54,7 +54,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const [showModalDelete, setShowModalDelete] = useState(false);
 
   if (!session || !cohort) return <div></div>;
-
+  console.log(isSessionEditionOpen(user, cohort));
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!values) return;
@@ -75,9 +75,25 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
       return;
     }
 
+    // Restriction d'édition en fonction du rôle de l'utilisateur et de l'état de la session
+    let dataToSend: Partial<Session> | null = values;
+
+    if (!isSessionEditionOpen(user, cohort)) {
+      // Si l'édition de la session est fermée, n'envoyez que sanitaryContactEmail
+      dataToSend = {
+        sanitaryContactEmail: values?.sanitaryContactEmail || "",
+      };
+
+      // Vérification supplémentaire pour bloquer la soumission si l'assignement est ouvert pour les jeunes
+      if (cohort.isAssignmentAnnouncementsOpenForYoung) {
+        toastr.error("Vous ne pouvez pas modifier cette session pour le moment.", "OPERATION_UNAUTHORIZED");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, values);
+      const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, dataToSend);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
         setLoading(false);
