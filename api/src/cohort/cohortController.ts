@@ -150,7 +150,7 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    const cohort = await CohortModel.findOne({ name: session.cohort });
+    const cohort = await CohortModel.findById(session.cohortId);
     if (!cohort) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }

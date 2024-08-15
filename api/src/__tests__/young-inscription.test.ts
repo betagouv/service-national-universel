@@ -6,6 +6,8 @@ import { dbConnect, dbClose } from "./helpers/db";
 import { STEPS2023, YOUNG_STATUS, YOUNG_SITUATIONS } from "../utils";
 import { COHORTS } from "snu-lib";
 import { fakerFR as faker } from "@faker-js/faker";
+import { createCohortHelper } from "./helpers/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -543,9 +545,12 @@ describe("Young", () => {
       };
 
       const passport = require("passport");
+      const cohort = await createCohortHelper(getNewCohortFixture());
+
       // @ts-ignore
-      const user = await createYoungHelper(getNewYoungFixture({ files: { cniFiles: [cniFile] } }));
+      const user = await createYoungHelper(getNewYoungFixture({ files: { cniFiles: [cniFile] }, cohort: cohort.name, cohortId: cohort._id }));
       passport.user = user;
+      console.log(user);
 
       const documentObj = {
         date: new Date(),
@@ -616,7 +621,8 @@ describe("Young", () => {
 
     it("Should return 200 otherwise using 'correction' route param", async () => {
       const passport = require("passport");
-      const user = await createYoungHelper(getNewYoungFixture());
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const user = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
       passport.user = user;
 
       const fileObj = {
@@ -645,7 +651,8 @@ describe("Young", () => {
 
     it("Should return 200 otherwise", async () => {
       const passport = require("passport");
-      const user = await createYoungHelper(getNewYoungFixture());
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const user = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
       passport.user = user;
       let res = await request(getAppHelper()).put("/young/inscription2023/relance");
       expect(res.status).toBe(200);

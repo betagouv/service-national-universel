@@ -47,7 +47,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     const isYoung = req.user.constructor.modelName === "young";
-    const cohort = await CohortModel.findOne({ name: young.cohort });
+    const cohort = await CohortModel.findById(young.cohortId);
 
     if (isYoung && !canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -154,7 +154,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    const cohort = await CohortModel.findOne({ name: young.cohort });
+    const cohort = await CohortModel.findById(young.cohortId);
 
     if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 

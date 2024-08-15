@@ -161,7 +161,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    const cohort = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!isSessionEditionOpen(req.user, cohort)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -269,7 +269,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const cohort = await CohortModel.findOne({ name: session.cohort });
+    const cohort = await CohortModel.findById(session.cohortId);
     generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
   } catch (error) {
     console.log("error", error);
@@ -330,7 +330,7 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
     if (!canShareSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     //Create token
-    const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    const cohort = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const sessionToken = await SessionPhase1TokenModel.create({
@@ -370,7 +370,7 @@ router.post("/check-token/:token", async (req, res) => {
     const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Token.sessionId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const cohortParam = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    const cohortParam = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohortParam) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (cohortParam?.busListAvailability) {
@@ -743,7 +743,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
     }
 
     // --- send template
-    const cohort = await CohortModel.findOne({ name: session.cohort });
+    const cohort = await CohortModel.findById(session.cohortId);
     let date = getCohortStartDate(cohort);
 
     await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.FILE_SESSION_REMINDER, {
