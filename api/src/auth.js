@@ -253,7 +253,7 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
-      const cohort = await CohortModel.findOne({ name: classe.cohort });
+      const cohort = await CohortModel.findById(classe.cohortId);
 
       const userData = {
         email,

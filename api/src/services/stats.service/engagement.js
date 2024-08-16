@@ -1,4 +1,4 @@
-const { ES_NO_LIMIT, ROLES, YOUNG_STATUS_PHASE2, CONTRACT_STATUS, END_DATE_PHASE1, APPLICATION_STATUS, MISSION_STATUS, formatDateForPostGre } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, YOUNG_STATUS_PHASE2, CONTRACT_STATUS, APPLICATION_STATUS, MISSION_STATUS, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
 const { CohortModel } = require("../../models");
 const config = require("config");
@@ -645,7 +645,7 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
     //check si la date de validation de contract est moins d'un an après la date de validation de phase 1 du jeune
     if (correspondingYoung) {
       const oneYearInMilliseconds = 365 * 24 * 60 * 60 * 1000;
-      const cohortEnd = allCohortEndDate[correspondingYoung.cohort] || END_DATE_PHASE1[correspondingYoung.cohort];
+      const cohortEnd = allCohortEndDate[correspondingYoung.cohort];
 
       if (minYoungContractValidationDate - cohortEnd < oneYearInMilliseconds) {
         return minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate);

@@ -11,7 +11,7 @@ const ClasseStateManager = {
     if (classe.status === STATUS_CLASSE.WITHDRAWN) return classe;
 
     // Get cohort
-    const classeCohort = await CohortModel.findOne({ name: classe.cohort });
+    const classeCohort = await CohortModel.findById(classe.cohortId);
     if (!classeCohort) throw new Error("Cohort not found");
 
     // Get students

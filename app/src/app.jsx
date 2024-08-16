@@ -16,7 +16,7 @@ import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
 import { YOUNG_STATUS } from "./utils";
-import { inscriptionModificationOpenForYoungs, isFeatureEnabled, FEATURES_NAME } from "snu-lib";
+import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { cohortsInit, getCohort } from "./utils/cohorts";
 import FallbackComponent from "./components/FallBackComponent";
@@ -182,7 +182,7 @@ const MandatoryLogIn = () => {
 
           const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
           const forceEmailValidation =
-            isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(cohort);
+            isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
           if (forceEmailValidation) return history.push("/preinscription");
         }
       } catch (e) {

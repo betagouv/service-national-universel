@@ -186,9 +186,10 @@ describe("Referent", () => {
     it("should return 200 if youngs updated", async () => {
       const userId = "123";
       const etablissement = await createEtablissement(createFixtureEtablissement());
-      const classe: any = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: "Juillet 2023" }));
-      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort }));
-      await createCohortHelper(getNewCohortFixture({ name: classe.cohort }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const classe: any = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id }));
+      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
+
       const youngIds = [young._id.toString()];
       const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)

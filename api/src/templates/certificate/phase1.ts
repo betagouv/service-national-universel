@@ -51,7 +51,7 @@ function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter)
   if (!cohesionCenter) {
     throw new Error(ERRORS.NO_COHESION_CENTER_FOUND);
   }
-  const cohortEndDate = getCohortEndDate(young, cohort);
+  const cohortEndDate = getCohortEndDate(cohort);
 
   const ministresData = getMinistres(cohortEndDate);
   if (!ministresData) throw new Error("NO_MINISTRES_FOUND");
@@ -60,7 +60,7 @@ function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter)
   const departureDate = getDepartureDateSession(session, young, cohort);
   const returnDate = getReturnDateSession(session, young, cohort);
 
-  const COHORT = cohortEndDate.getYear() + 1900;
+  const COHORT = cohortEndDate.getFullYear();
   const COHESION_DATE = transportDatesToString(departureDate, returnDate);
   const COHESION_CENTER_NAME = cohesionCenter.name || "";
   const COHESION_CENTER_LOCATION = cohesionCenterLocation;
