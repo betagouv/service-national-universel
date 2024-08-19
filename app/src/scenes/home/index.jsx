@@ -47,9 +47,9 @@ export default function Home() {
     }
   };
 
-  useEffect(async () => {
+  useEffect(() => {
     fetchReInscriptionOpen();
-    await cohortsInit();
+    cohortsInit();
   }, []);
 
   if (reinscriptionOpenLoading) return <Loader />;
