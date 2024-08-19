@@ -98,6 +98,7 @@ import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
+import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -589,6 +590,10 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (young.ligneId) {
       const bus = await LigneBusModel.findById(young.ligneId);
       if (bus) await updateSeatsTakenInBusLine(bus);
+    }
+
+    if (await shouldSwitchYoungByIdToLC(id, value.status)) {
+      await switchYoungByIdToLC(id);
     }
 
     res.status(200).send({ ok: true, data: young });
