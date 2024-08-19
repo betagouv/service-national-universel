@@ -245,7 +245,7 @@ describe("Cle Referent", () => {
 
   describe("deleteOldReferentClasse", () => {
     it("should delete referent not linked with 2024_2025 classe", async () => {
-      const referents = await ReferentModel.create([
+      await ReferentModel.create([
         {
           email: "referent1@classe.fr",
           firstName: "referent1",
@@ -265,34 +265,40 @@ describe("Cle Referent", () => {
           role: ROLES.REFERENT_CLASSE,
         },
       ]);
+
+      const referent0 = (await ReferentModel.findOne({ email: "referent1@classe.fr" }))!;
+      const referent1 = (await ReferentModel.findOne({ email: "referent2@classe.fr" }))!;
+      const referent2 = (await ReferentModel.findOne({ email: "referent3@classe.fr" }))!;
+
       const etablissements = await EtablissementModel.create([
-        createFixtureEtablissement({ referentEtablissementIds: [referents[0]._id] }),
-        createFixtureEtablissement({ referentEtablissementIds: [referents[1]._id] }),
+        createFixtureEtablissement({ referentEtablissementIds: [referent0._id] }),
+        createFixtureEtablissement({ referentEtablissementIds: [referent1._id] }),
       ]);
 
       await ClasseModel.create([
-        createFixtureClasse({ name: "Classe 1", referentClasseIds: [referents[0]._id], etablissementId: etablissements[0]._id, schoolYear: "2024-2025" }),
-        createFixtureClasse({ name: "Classe 2", referentClasseIds: [referents[1]._id, referents[2]._id], etablissementId: etablissements[1]._id, schoolYear: "2023-2024" }),
+        createFixtureClasse({ name: "Classe 1", referentClasseIds: [referent0._id], etablissementId: etablissements[0]._id, schoolYear: "2024-2025" }),
+        createFixtureClasse({ name: "Classe 2", referentClasseIds: [referent1._id, referent2._id], etablissementId: etablissements[1]._id, schoolYear: "2023-2024" }),
       ]);
 
       const referentDeleted = await deleteOldReferentClasse(user);
 
       const expectedInvitation: DeletionResult[] = [
         {
-          id: referents[1]._id,
-          email: referents[1].email,
+          id: referent1._id,
+          email: referent1.email,
           mailSent: true,
         },
         {
-          id: referents[2]._id,
-          email: referents[2].email,
+          id: referent2._id,
+          email: referent2.email,
           mailSent: true,
         },
       ];
 
-      const notDeletedReferent0 = await ReferentModel.findOne({ email: referents[0].email });
-      const deletedReferent1 = await ReferentModel.findOne({ email: referents[1].email });
-      const deletedReferent2 = await ReferentModel.findOne({ email: referents[2].email });
+      const notDeletedReferent0 = await ReferentModel.findOne({ email: referent0.email });
+      const deletedReferent1 = await ReferentModel.findOne({ email: referent1.email });
+      const deletedReferent2 = await ReferentModel.findOne({ email: referent2.email });
+
       expect(notDeletedReferent0?.deletedAt).toBeUndefined();
       expect(deletedReferent1?.deletedAt).toBeDefined();
       expect(deletedReferent2?.deletedAt).toBeDefined();

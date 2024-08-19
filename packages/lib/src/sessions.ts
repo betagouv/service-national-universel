@@ -17,6 +17,7 @@ const getCohortYear = (cohort) => cohort?.dateStart?.slice(0, 4);
 
 const getCohortPeriod = (cohort, withBold = false) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
+  if (cohort.name === "à venir") return "à venir";
   const startDate = getZonedDate(cohort.dateStart);
   const endDate = getZonedDate(cohort.dateEnd);
 
@@ -38,6 +39,7 @@ const getCohortPeriod = (cohort, withBold = false) => {
 
 const formatShortCohortPeriod = (cohort) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
+  if (cohort.name === "à venir") return "à venir";
   const startDate = getZonedDate(cohort.dateStart);
   const endDate = getZonedDate(cohort.dateEnd);
 
