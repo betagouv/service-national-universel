@@ -25,16 +25,7 @@ function renderStepResponsive(step) {
 }
 
 const Step = () => {
-  const [data, updateValue] = useContext(ReinscriptionContext);
-  const young = useSelector((state) => state.Auth.young);
-  useEffect(() => {
-    updateValue({
-      ...data,
-      birthDate: young.birthdateAt,
-      zip: young.zip,
-      frenchNationality: young.frenchNationality,
-    });
-  }, []);
+  const [data] = useContext(ReinscriptionContext);
 
   const { step } = useParams();
 
@@ -55,9 +46,9 @@ export default function ReInscription() {
   const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
   const young = useSelector((state) => state.Auth.young);
 
-  const fetchInscriptionOpen = async () => {
+  const fetchReInscriptionOpen = async () => {
     try {
-      const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen`);
+      const { ok, data, code } = await api.get(`/cohort-session/isReInscriptionOpen`);
       if (!ok) {
         capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
@@ -70,7 +61,7 @@ export default function ReInscription() {
   };
 
   useEffect(() => {
-    fetchInscriptionOpen();
+    fetchReInscriptionOpen();
   }, []);
 
   if (!hasAccessToReinscription(young)) return <Redirect to="/" />;

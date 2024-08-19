@@ -1,15 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-// const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const cohesionCenterModel = require("../../models/cohesionCenter");
-const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const ReferentModel = require("../../models/referent");
-const CohortModel = require("../../models/cohort");
+const { LigneBusModel } = require("../../models");
+const { LigneToPointModel } = require("../../models");
+const { PlanTransportModel } = require("../../models");
+const { PointDeRassemblementModel } = require("../../models");
+const { CohesionCenterModel } = require("../../models");
+const { SchemaDeRepartitionModel } = require("../../models");
+const { ReferentModel } = require("../../models");
+const { CohortModel } = require("../../models");
 const {
   canViewLigneBus,
   canEditLigneBusTeam,
@@ -25,14 +24,15 @@ const {
   canExportConvoyeur,
   isAdmin,
   SENDINBLUE_TEMPLATES,
+  isTeamLeaderOrSupervisorEditable,
 } = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { ObjectId } = require("mongoose").Types;
 const mongoose = require("mongoose");
-const { sendTemplate } = require("../../sendinblue");
-const { ADMIN_URL } = require("../../config");
+const { sendTemplate } = require("../../brevo");
+const config = require("config");
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés
@@ -66,7 +66,7 @@ router.get("/cohort/:cohort", passport.authenticate("referent", { session: false
     const ligneBus = await LigneBusModel.find({ cohort: { $in: [cohort] }, deletedAt: { $exists: false } });
     let arrayCenter = [];
     ligneBus.map((l) => (arrayCenter = arrayCenter.concat(l.centerId)));
-    const centers = await cohesionCenterModel.find({ _id: { $in: arrayCenter } });
+    const centers = await CohesionCenterModel.find({ _id: { $in: arrayCenter } });
     return res.status(200).send({ ok: true, data: { ligneBus, centers } });
   } catch (error) {
     capture(error);
@@ -184,7 +184,7 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
-      if (!canEditLigneBusTeam(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canEditLigneBusTeam(req.user) && !isTeamLeaderOrSupervisorEditable(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const NewMember = {
@@ -252,7 +252,7 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
     if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
-      if (!canEditLigneBusTeam(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canEditLigneBusTeam(req.user) && !isTeamLeaderOrSupervisorEditable(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const memberToDelete = ligne.team.id(value.idTeam);
@@ -507,7 +507,7 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
     const ligneBus = await LigneBusModel.findById(id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const listGroup = await schemaRepartitionModel.find({ centerId: ligneBus.centerId });
+    const listGroup = await SchemaDeRepartitionModel.find({ centerId: ligneBus.centerId });
 
     let idPDR = [];
     for (let group of listGroup) {
@@ -673,7 +673,7 @@ async function getInfoBus(line) {
     meetingsPointsDetail.push({ ...line._doc, ...pointDeRassemblement._doc });
   }
 
-  const centerDetail = await cohesionCenterModel.findById(line.centerId);
+  const centerDetail = await CohesionCenterModel.findById(line.centerId);
 
   return { ...line._doc, meetingsPointsDetail, centerDetail };
 }
@@ -944,7 +944,7 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     const pdrs = await PointDeRassemblementModel.find({ _id: ligne.meetingPointsIds });
     if (!pdrs?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const center = await cohesionCenterModel.findById(ligne.centerId);
+    const center = await CohesionCenterModel.findById(ligne.centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const departmentListToNotify = pdrs.map((pdr) => pdr.department);
@@ -1021,7 +1021,7 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
       })),
       params: {
         lineName: ligne.busId,
-        cta: `${ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
+        cta: `${config.ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
       },
     });
 
@@ -1093,7 +1093,7 @@ async function notifyTranporteurs(ligne, type) {
       cohort: ligne.cohort,
       ID: ligne._id.toString(),
       lineName: ligne.busId,
-      cta: `${ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
+      cta: `${config.ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
     },
   });
 }

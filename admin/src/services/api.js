@@ -2,8 +2,7 @@ import fetchRetry from "fetch-retry";
 
 import { capture } from "../sentry";
 import { apiURL } from "../config";
-import { createFormDataForFileUpload } from "snu-lib";
-import { ERRORS } from "snu-lib/errors";
+import { createFormDataForFileUpload, ERRORS } from "snu-lib";
 
 let fetch = window.fetch;
 
@@ -50,7 +49,7 @@ class api {
           console.log("Fetch request was manually reloaded, ignoring error.");
           resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
-          capture(e, { extras: { path: "CHECK TOKEN", token: this.token } });
+          capture(e, { extra: { path: "CHECK TOKEN", token: this.token } });
           reject(e);
         }
       }
@@ -267,7 +266,7 @@ class api {
     });
   }
 
-  remove(path) {
+  remove(path, body) {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -278,6 +277,7 @@ class api {
           credentials: "include",
           method: "DELETE",
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+          body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
         });
         if (response.status === 401) {
           if (window?.location?.pathname !== "/auth") {

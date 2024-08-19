@@ -4,13 +4,13 @@ const router = express.Router();
 const Joi = require("joi");
 
 const { capture } = require("../sentry");
-const ReferentModel = require("../models/referent");
-const MissionModel = require("../models/mission");
-const ApplicationModel = require("../models/application");
-const StructureModel = require("../models/structure");
-const YoungModel = require("../models/young");
-const ContractModel = require("../models/contract");
-const config = require("../config");
+const { ReferentModel } = require("../models");
+const { MissionModel } = require("../models");
+const { ApplicationModel } = require("../models");
+const { StructureModel } = require("../models");
+const { YoungModel } = require("../models");
+const { ContractModel } = require("../models");
+const config = require("config");
 const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib");
 const { JWT_SIGNIN_MAX_AGE_SEC, checkJwtSigninVersion, JWT_SIGNIN_VERSION } = require("../jwt-options");
 const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../cookie-options");
@@ -29,7 +29,7 @@ router.get("/signin", async (req, res) => {
 
     let jwtPayload;
     try {
-      jwtPayload = await jwt.verify(token_jva, config.secret);
+      jwtPayload = await jwt.verify(token_jva, config.JWT_SECRET);
     } catch (error) {
       return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
     }
@@ -56,7 +56,7 @@ router.get("/signin", async (req, res) => {
       user.set({ lastLoginAt: Date.now() });
       await user.save();
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
@@ -89,7 +89,7 @@ router.get("/getToken", async (req, res) => {
     // si l'utilisateur n'existe pas, on bloque
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
 
-    const token_jva = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user._id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+    const token_jva = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user._id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
 

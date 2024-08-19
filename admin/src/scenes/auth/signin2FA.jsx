@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Redirect, useHistory } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
@@ -11,9 +11,8 @@ import api from "../../services/api";
 import Header from "./components/header";
 import { GoTools } from "react-icons/go";
 import { BsShieldCheck } from "react-icons/bs";
-import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { captureMessage } from "../../sentry";
-import { DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS } from "snu-lib";
+import { DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS, isValidRedirectUrl } from "snu-lib";
 
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MIN = DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS / 60 / 1000;
 
@@ -111,8 +110,7 @@ export default function Signin() {
 
                 <label className="text-sm text-brand-black/80 mt-2">
                   <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} className="mr-2" />
-                  <strong>Faire confiance à ce navigateur :</strong> la double authentification vous sera demandée à nouveau dans un délai d’un mois. Ne pas cocher cette case si
-                  vous utilisez un ordinateur partagé ou public
+                  Ne plus avoir à saisir de code pendant 1 mois (Ne pas cocher si cet ordinateur est partagé ou public).
                 </label>
 
                 <div className="flex justify-end">

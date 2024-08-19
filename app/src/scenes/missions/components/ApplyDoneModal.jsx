@@ -3,21 +3,11 @@ import React from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
 
-import { Link } from "react-router-dom";
-
 export default function ApplyDoneModal({ value, onChange }) {
   if (!value) return <div />;
 
   const renderText = () => {
     return "Votre candidature sera traitée dans les prochains jours par le responsable de la structure.";
-  };
-
-  const renderRedirect = () => {
-    return (
-      <Link to="/candidature">
-        <Button>Classer mes missions</Button>
-      </Link>
-    );
   };
 
   return (
@@ -26,7 +16,6 @@ export default function ApplyDoneModal({ value, onChange }) {
         <img src={Img2} height={10} width={10} onClick={onChange} />
         <h1>Félicitations, votre candidature a bien été enregistrée.</h1>
         <h3>{renderText()}</h3>
-        {renderRedirect()}
         <CancelButton onClick={onChange}>Fermer</CancelButton>
       </ModalContainer>
     </Modal>
@@ -70,7 +59,9 @@ const Button = styled.div`
   cursor: pointer;
   background-color: #31c48d;
   border-radius: 30px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   color: #fff;
   font-size: 1rem;
   padding: 0.8rem 3rem;

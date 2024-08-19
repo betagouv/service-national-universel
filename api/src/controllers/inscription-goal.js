@@ -4,8 +4,7 @@ const passport = require("passport");
 const Joi = require("joi");
 const { canUpdateInscriptionGoals, canViewInscriptionGoals } = require("snu-lib");
 const { capture } = require("../sentry");
-const InscriptionGoalModel = require("../models/inscriptionGoal");
-const YoungModel = require("../models/young");
+const { YoungModel, InscriptionGoalModel } = require("../models");
 const { ERRORS } = require("../utils");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../services/inscription-goal");
 
@@ -103,7 +102,7 @@ router.get("/:cohort/department/:department", passport.authenticate("referent", 
     return res.status(200).send({ ok: true, data: fillingRate });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: error });
   }
 });
 

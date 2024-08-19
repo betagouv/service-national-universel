@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { COHESION_STAY_START, getCohortNames, ROLES, START_DATE_SESSION_PHASE1, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
+import { ROLES, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
 import Calendar from "../../assets/icons/Calendar";
 import ExternalLink from "../../assets/icons/ExternalLink";
@@ -15,36 +15,23 @@ import api from "../../services/api";
 import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoubleProfil";
 import { Loading, TabItem, Title } from "./components/common";
 import ModalCreation from "./components/ModalCreation";
+import { getCohortGroups } from "@/services/cohort.service";
+import { getDefaultCohort } from "@/utils/session";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const [modal, setModal] = React.useState({ isOpen: false });
-  const [firstSession, setFirstSession] = React.useState(null);
+  const firstSession = getDefaultCohort(cohorts);
   const history = useHistory();
   const { currentTab } = useParams();
   const { search } = useLocation();
   const query = new URLSearchParams(search);
 
-  const getFirstCohortAvailable = () => {
-    let firstSession = null;
-    for (const session of getCohortNames()) {
-      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        firstSession = session;
-        break;
-      }
-    }
-    if (!firstSession) firstSession = "Juillet 2023";
-    setFirstSession(firstSession);
-  };
-
   React.useEffect(() => {
     const listTab = ["liste-points", "session"];
     if (!listTab.includes(currentTab)) return history.push(`/point-de-rassemblement/liste/liste-points`);
   }, [currentTab]);
-
-  React.useEffect(() => {
-    getFirstCohortAvailable();
-  }, []);
 
   React.useEffect(() => {
     const modalCreationOpen = query.get("modal_creation_open");
@@ -107,6 +94,7 @@ export default function List() {
 
 const ListPoints = ({ user }) => {
   const [data, setData] = React.useState([]);
+  console.log("🚀 ~ ListPoints ~ data:", data);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrList";
   const [paramData, setParamData] = React.useState({ page: 0 });
@@ -138,6 +126,7 @@ const ListPoints = ({ user }) => {
             paramData={paramData}
             setParamData={setParamData}
             size={size}
+            intermediateFilters={[getCohortGroups("cohorts")]}
           />
           <ExportComponent
             title="Exporter"
@@ -150,10 +139,7 @@ const ListPoints = ({ user }) => {
                 res.push({
                   Identifiant: item._id.toString(),
                   Code: item.code,
-                  Cohortes: item?.cohorts
-                    .sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
-                    ?.map((e) => e)
-                    .join(", "),
+                  Cohortes: item?.cohorts.map((e) => e).join(", "),
                   Nom: item.name,
                   Adresse: item.address,
                   Ville: item.city,
@@ -205,6 +191,7 @@ const ListPoints = ({ user }) => {
 
 const Hit = ({ hit }) => {
   const history = useHistory();
+  const cohorts = useSelector((state) => state.Cohorts);
   return (
     <>
       <hr />
@@ -219,21 +206,20 @@ const Hit = ({ hit }) => {
           </div>
         </div>
         <div className="flex w-[60%] flex-wrap items-center gap-2">
-          {hit.cohorts
-            ?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
-            ?.map((cohort, index) => {
-              const disabled = START_DATE_SESSION_PHASE1[cohort] < new Date();
-              return (
-                <div
-                  key={cohort + hit.name + index}
-                  onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${cohort}`)}
-                  className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
-                    disabled ? "border-gray-100 bg-gray-100 text-gray-500" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF]"
-                  }`}>
-                  {cohort}
-                </div>
-              );
-            })}
+          {hit.cohorts?.map((cohortName) => {
+            const cohort = cohorts.find((e) => e.name === cohortName);
+            const disabled = new Date(cohort.startDate) < new Date();
+            return (
+              <div
+                key={cohortName}
+                onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${cohortName}`)}
+                className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                  disabled ? "border-gray-100 bg-gray-100 text-gray-500" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF]"
+                }`}>
+                {cohortName}
+              </div>
+            );
+          })}
         </div>
       </div>
     </>
@@ -315,6 +301,7 @@ const ListSessions = ({ user, firstSession }) => {
             paramData={paramData}
             setParamData={setParamData}
             size={size}
+            intermediateFilters={[getCohortGroups("cohorts")]}
           />
           <ExportComponent
             title="Exporter"

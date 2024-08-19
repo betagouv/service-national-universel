@@ -8,7 +8,7 @@ import { capture } from "@/sentry";
 import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, ROLES } from "snu-lib";
+import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -22,7 +22,6 @@ import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
 import Check from "@/assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 
 export default function Create() {
@@ -328,7 +327,7 @@ export default function Create() {
   };
 
   const getClasseCohort = async (classeId) => {
-    const { data, ok, code } = await api.get(`/classe/${classeId}`);
+    const { data, ok, code } = await api.get(`/cle/classe/${classeId}`);
     if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
     setValues((prevValues) => ({ ...prevValues, cohort: data.cohort }));
   };
@@ -1206,8 +1205,7 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
             <b>
               {young.firstName} {young.lastName}
             </b>{" "}
-            soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
-            jaune.
+            , à la date du séjour de cohésion, ait satisfait aux obligations vaccinales en vigueur.
           </CheckRead>
           <CheckRead name="rulesParent1" onClick={() => handleConsentementChange("rulesParent1")} errors={errors} value={young.rulesParent1 === "true"}>
             Reconnait avoir pris connaissance du Règlement Intérieur du séjour de cohésion.

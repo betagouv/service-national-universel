@@ -2,16 +2,15 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getCohort } from "@/utils/cohorts";
 import React from "react";
-import { YOUNG_STATUS } from "snu-lib";
-import { getCohortPeriod } from "snu-lib";
+import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
 
 export default function InscriptionClosed({ young, isCLE }) {
   const statusWording = (young, isCLE) => {
     if (isCLE) {
-      if (young.status === YOUNG_STATUS.IN_PROGRESS) {
+      if ([YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
         return "Votre inscription n'a pas été complétée à temps.";
       }
-    } else if (!isCLE && young.status === YOUNG_STATUS.IN_PROGRESS) {
+    } else if (!isCLE && [YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
       return "Vous n'avez pas complété votre dossier d'inscription à temps.";
     }
   };

@@ -64,43 +64,7 @@ export const GROUPSTEPS = {
   CONFIRM_DELETE_GROUP: "CONFIRM_DELETE_GROUP",
 };
 
-function getRegionsFromBusLine(line) {
-  let regions = [];
-  regions.push(line.centerRegion);
-  for (const pdr of line.pointDeRassemblements) {
-    regions.push(pdr.region);
-  }
-  return regions;
-}
-
-function getDepartmentsFromBusLine(line) {
-  let departments = [];
-  departments.push(line.centerDepartment);
-  for (const pdr of line.pointDeRassemblements) {
-    departments.push(pdr.department);
-  }
-  return departments;
-}
-
-function filterBusLinesByRole(lines, user) {
-  const linesWithGeography = lines.map((e) => {
-    return { ...e, regions: getRegionsFromBusLine(e), departments: getDepartmentsFromBusLine(e) };
-  });
-
-  switch (user.role) {
-    case ROLES.ADMIN:
-    case ROLES.TRANSPORTER:
-      return linesWithGeography;
-    case ROLES.REFERENT_DEPARTMENT:
-      return linesWithGeography.filter((line) => user.department.some((dep) => line.departments.includes(dep)));
-    case ROLES.REFERENT_REGION:
-      return linesWithGeography.filter((line) => line.regions.includes(user.region));
-    default:
-      return [];
-  }
-}
-
-export async function exportLigneBus(user, cohort) {
+export async function exportLigneBus(cohort) {
   try {
     const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true&needCohesionCenterInfo=true&needMeetingPointsInfo=true`, {
       filters: { cohort: [cohort] },

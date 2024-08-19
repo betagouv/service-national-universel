@@ -1,12 +1,11 @@
 const { Client } = require("@elastic/elasticsearch");
 
-const { ES_ENDPOINT, LOCAL } = require("../config");
+const config = require("config");
 
 let esClient;
-const ES_ADDRESS = LOCAL ? ES_ENDPOINT : `https://${ES_ENDPOINT}`;
 
-if (ES_ENDPOINT) {
-  esClient = new Client({ node: ES_ADDRESS });
+if (config.ES_ENDPOINT) {
+  esClient = new Client({ node: config.ES_ENDPOINT });
 } else {
   console.log("Can't initialize ES. Missing envs");
 }

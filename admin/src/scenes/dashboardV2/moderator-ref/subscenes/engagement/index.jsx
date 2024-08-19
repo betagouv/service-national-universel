@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
-import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
+import { useSelector } from "react-redux";
+import { HiHome } from "react-icons/hi";
+
+import { departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
+import { YOUNG_STATUS } from "snu-lib";
+import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib";
+import { department2region, region2department } from "snu-lib";
+import { getCohortNameList } from "@/services/cohort.service";
+import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
+
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
-import { getCohortNames, departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
-import { YOUNG_STATUS } from "snu-lib/constants";
-import { useSelector } from "react-redux";
-import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib/academy";
-import { department2region, region2department } from "snu-lib/region-and-departments";
 import Section from "../../../components/ui/Section";
 import VolontairesStatutsDePhase from "./components/VolontairesStatutsDePhase";
 import VolontairesStatutsDivers from "./components/VolontairesStatutsDivers";
@@ -16,11 +20,14 @@ import plausibleEvent from "../../../../../services/plausible";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import ExportEngagementReport from "./components/ExportEngagementReport";
 import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
-import { getCohortNameList } from "@/services/cohort.service";
+import BandeauInfo from "../../../components/BandeauInfo";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts);
+  const [modalExport, setModalExport] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("0 %");
 
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
@@ -68,7 +75,7 @@ export default function Index() {
         id: "cohorts",
         name: "Cohorte",
         fullValue: "Toutes",
-        options: getCohortNames().map((cohort) => ({ key: cohort, label: cohort })),
+        options: getCohortNameList(cohorts).map((cohort) => ({ key: cohort, label: cohort })),
         sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
@@ -115,33 +122,78 @@ export default function Index() {
 
   async function loadData() {}
 
+  const selectOptions = [
+    {
+      key: "1",
+      title: "Exporter",
+      items: [
+        {
+          key: "1.1",
+          render: (
+            <p>
+              Le rapport <span>"Engagement"</span>
+            </p>
+          ),
+          action: () => {
+            setModalExport(true);
+          },
+        },
+        {
+          key: "1.2",
+          render: (
+            <p>
+              Les statistiques <span>"Engagement"</span>
+            </p>
+          ),
+          action: () => {
+            plausibleEvent("Dashboard/CTA - Exporter statistiques engagement");
+            print();
+          },
+        },
+      ],
+    },
+  ];
+
   return (
-    <DashboardContainer
-      availableTab={["general", "engagement", "sejour", "inscription"]}
-      active="engagement"
-      navChildren={
-        <div className="flex items-center gap-2">
-          <ExportEngagementReport filter={selectedFilters} />
-          <ButtonPrimary
-            className="text-sm"
-            onClick={() => {
-              plausibleEvent("Dashboard/CTA - Exporter statistiques engagement");
-              print();
-            }}>
-            Exporter les statistiques <span className="font-bold">“Engagement”</span>
-          </ButtonPrimary>
-        </div>
-      }>
-      <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-      <Section title="Volontaires">
-        <div className="flex">
-          <VolontairesStatutsDePhase filters={selectedFilters} className="mr-4 flex-[0_0_332px]" />
-          <VolontairesStatutsDivers filters={selectedFilters} className="grow" />
-        </div>
-        <VolontairesEquivalenceMig filters={selectedFilters} />
-      </Section>
-      <SectionStructures filters={selectedFilters} />
-      <SectionMissions filters={selectedFilters} />
-    </DashboardContainer>
+    <Page>
+      <BandeauInfo />
+      <Header
+        title="Tableau de bord"
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]}
+        actions={[<DropdownButton title={"Exporter"} optionsGroup={selectOptions} key={"export"} position="right" />]}
+      />
+      <DashboardContainer availableTab={["general", "engagement", "sejour", "inscription"]} active="engagement">
+        <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
+        <Section title="Volontaires">
+          <div className="flex">
+            <VolontairesStatutsDePhase filters={selectedFilters} className="mr-4 flex-[0_0_332px]" />
+            <VolontairesStatutsDivers filters={selectedFilters} className="grow" />
+          </div>
+          <VolontairesEquivalenceMig filters={selectedFilters} />
+        </Section>
+        <SectionStructures filters={selectedFilters} />
+        <SectionMissions filters={selectedFilters} />
+      </DashboardContainer>
+      <ModalConfirmation
+        isOpen={modalExport}
+        onClose={() => {
+          setModalExport(false);
+        }}
+        className="md:max-w-[700px]"
+        title="Téléchargement"
+        text="En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)"
+        actions={[
+          { title: "Annuler", isCancel: true },
+          {
+            title: `${loading ? `Téléchargement ${loadingText}` : "Confirmer"}`,
+            disabled: loading,
+            onClick: () => {
+              plausibleEvent("Dashboard/CTA - Exporter rapport Engagement");
+              ExportEngagementReport({ filter: selectedFilters, user, setLoading, setLoadingText });
+            },
+          },
+        ]}
+      />
+    </Page>
   );
 }

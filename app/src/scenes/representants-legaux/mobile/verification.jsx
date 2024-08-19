@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
-import { getDepartmentByZip, translate, translateGrade, getCohortPeriod } from "snu-lib";
+import { getDepartmentByZip, translate, translateGrade, getCohortPeriod, YOUNG_SOURCE } from "snu-lib";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 
@@ -13,7 +13,6 @@ import Check from "../components/Check";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { supportURL } from "../../../config";
 import plausibleEvent from "@/services/plausible";
-import { YOUNG_SOURCE } from "snu-lib";
 import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Verification({ step, parentId }) {
@@ -85,11 +84,7 @@ export default function Verification({ step, parentId }) {
               <p>Veuillez vérifier la validité de ces informations.</p>
               <p>En cas d’erreur, {young.firstName} peut modifier ces informations à partir de son dossier d’inscription.</p>
               <p>
-                <a
-                  href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline hover:underline">
+                <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="">
                   Je vois des informations incorrectes
                 </a>
               </p>
@@ -103,15 +98,13 @@ export default function Verification({ step, parentId }) {
           <>
             <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-8">
               <Check checked={certified} onChange={(e) => setCertified(e)}>
-                Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
-                <a
-                  href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline hover:underline">
-                  cet article
-                </a>{" "}
-                avant de valider.
+                <span>
+                  Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez&nbsp;
+                  <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="">
+                    cet article
+                  </a>
+                  &nbsp;avant de valider.
+                </span>
               </Check>
             </div>
             {error && <div className="my-2 ml-[40px] text-[14px] leading-[19px] text-[#CE0500]">{error}</div>}
@@ -157,9 +150,9 @@ function SectionField(field, idx) {
     content = <div className="font-400 text-[16px] text-[#666666]">{field.subtitle}&nbsp;:</div>;
   } else {
     content = (
-      <div className="flex w-full justify-between">
+      <div className="flex flex-col md:flex-row w-full md:justify-between">
         <p className="font-400 text-[16px] text-[#666666]">{field.label}&nbsp;:</p>
-        <p className="font-400 text-right text-[16px] text-[#161616] break-all">{field.value ? field.value : "-"}</p>
+        <p className="font-400 md:text-right text-[16px] text-[#161616] break-all">{field.value ? field.value : "-"}</p>
       </div>
     );
   }

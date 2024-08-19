@@ -12,8 +12,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const { YoungModel, CohortModel } = require("../models");
 const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, REGLEMENT_INTERIEUR_VERSION } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
@@ -21,9 +20,8 @@ const { serializeYoung } = require("../utils/serializer");
 const { ERRORS } = require("../utils");
 
 const { validateFirstName, validateString } = require("../utils/validator");
-const { sendTemplate } = require("../sendinblue");
-const { APP_URL } = require("../config");
-const config = require("../config");
+const { sendTemplate } = require("../brevo");
+const config = require("config");
 
 function tokenParentValidMiddleware(req, res, next) {
   const { error, value: token } = validateString(req.query.token);
@@ -117,7 +115,7 @@ router.post("/accept-ri", tokenParentValidMiddleware, async (req, res) => {
     const young = await YoungModel.findById(req.body._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ parent1ValidationDate: REGLEMENT_INTERIEUR_VERSION });
+    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
     await young.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
@@ -199,7 +197,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (young.status === YOUNG_STATUS.REFUSED) {
+    if (young.status === YOUNG_STATUS.REFUSED || young.status === YOUNG_STATUS.WITHDRAWN) {
       return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
@@ -265,7 +263,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
           await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
             emailTo,
             params: {
-              cta: `${APP_URL}/`,
+              cta: `${config.APP_URL}/`,
               SOURCE: young.source,
             },
           });

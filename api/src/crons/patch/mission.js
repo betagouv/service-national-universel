@@ -3,9 +3,9 @@ const fetch = require("node-fetch");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const MissionModel = require("../../models/mission");
+const { MissionModel } = require("../../models");
 const MissionPatchModel = require("./models/missionPatch");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -55,7 +55,7 @@ async function createLog(patch, actualMission, event, value) {
 
   const anonymisedMission = new MissionModel(mission).anonymise();
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/mission`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/mission`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -102,7 +102,7 @@ const rebuildMission = (missionInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(MissionPatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -120,7 +120,7 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./mission').manualHandler('2023-08-17', '2023-08-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(MissionPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 

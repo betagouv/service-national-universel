@@ -5,7 +5,7 @@ const { capture } = require("../sentry");
 const Joi = require("joi");
 const passport = require("passport");
 
-const TagsModel = require("../models/tags");
+const { TagsModel } = require("../models");
 
 const { canCreateTags } = require("snu-lib");
 

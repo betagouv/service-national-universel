@@ -1,5 +1,5 @@
 const { deletePatches } = require("../controllers/patches");
-const ContractModel = require("../models/contract");
+const { ContractModel } = require("../models");
 
 const anonymizeContractsFromYoungId = async ({ youngId = "", anonymizedYoung = {} }) => {
   const contracts = await ContractModel.find({ youngId });

@@ -16,10 +16,10 @@ import MobileCorrectionProfil from "./steps/correction/stepProfil";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
-import { YOUNG_STATUS, inscriptionCreationOpenForYoungs, inscriptionModificationOpenForYoungs } from "snu-lib";
+import { YOUNG_STATUS, inscriptionCreationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
-import { environment, supportURL } from "../../config";
+import { supportURL } from "../../config";
 import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
@@ -136,8 +136,9 @@ export default function Index() {
   }
 
   //si la periode de modification est finie
-  if (!inscriptionModificationOpenForYoungs(cohort) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
-    return <Redirect to={{ pathname: "/" }} />;
+  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
+  if (!isInscriptionModificationOpenForYoungs && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
+    return <InscriptionClosed young={young} isCLE={isCLE} />;
   }
 
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION) {

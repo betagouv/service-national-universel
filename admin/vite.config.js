@@ -19,6 +19,9 @@ export default defineConfig(({ command, mode }) => {
         authToken: env.SENTRY_AUTH_TOKEN,
         url: "https://sentry.selego.co/",
         environment: mode,
+        release: {
+          name: env.RELEASE,
+        },
         deploy: {
           env: mode,
         },
@@ -37,7 +40,11 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
-    build: { sourcemap: mode === "development" ? false : true, outDir: "build", port: 8082 },
+    build: {
+      sourcemap: mode !== "development",
+      outDir: "build",
+      port: 8082,
+    },
     server: {
       port: 8082,
     },

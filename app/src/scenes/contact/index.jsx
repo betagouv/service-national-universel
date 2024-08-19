@@ -56,9 +56,16 @@ export default function Contact() {
   return (
     <DSFRLayout title="Formulaire de contact">
       <DSFRContainer title="Je n'ai pas trouvé de réponse à ma question">
-        <p className="leading-relaxed mb-10">
-          Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
-        </p>
+        {new Date() > new Date("2024-07-22") && new Date() < new Date("2024-08-30") ? (
+          <p className="leading-relaxed mb-10">
+            Contactez nos équipes. En raison de la période estivale, les délais de traitement de votre demande peuvent être prolongés. Votre demande sera traitée dès que possible.
+            Vous recevrez une réponse par mail.
+          </p>
+        ) : (
+          <p className="leading-relaxed mb-10">
+            Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
+          </p>
+        )}
 
         {/* Logged in users get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (

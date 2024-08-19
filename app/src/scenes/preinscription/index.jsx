@@ -18,8 +18,7 @@ import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEP
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import Loader from "@/components/Loader";
 import { toastr } from "react-redux-toastr";
-import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
-import { YOUNG_SOURCE } from "snu-lib/constants";
+import { YOUNG_SOURCE, FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { environment } from "@/config";
 import useAuth from "@/services/useAuth";
 

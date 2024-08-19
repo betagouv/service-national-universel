@@ -1,26 +1,44 @@
 import fetch from "node-fetch";
 
-const request = require("supertest");
-const getAppHelper = require("./helpers/app");
-const { dbConnect, dbClose } = require("./helpers/db");
-//application
-const { getNewApplicationFixture } = require("./fixtures/application");
-const { createApplication } = require("./helpers/application");
-//mission
-const getNewMissionFixture = require("./fixtures/mission");
-const { createMissionHelper } = require("./helpers/mission");
-//young
-const getNewYoungFixture = require("./fixtures/young");
-const { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
+import request from "supertest";
+import jwt from "jsonwebtoken";
+import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { sendTemplate } from "../brevo";
+import * as fileUtils from "../utils/file";
+import getAppHelper from "./helpers/app";
+import { dbConnect, dbClose } from "./helpers/db";
+import { initRedisClient, closeRedisClient } from "../redis";
+import { getNewApplicationFixture } from "./fixtures/application";
+import { createApplication } from "./helpers/application";
+import getNewMissionFixture from "./fixtures/mission";
+import { createMissionHelper } from "./helpers/mission";
+import getNewYoungFixture from "./fixtures/young";
+import { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } from "./helpers/young";
+import { createCohortHelper } from "./helpers/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
+import { createReferentHelper } from "./helpers/referent";
+import { getNewReferentFixture } from "./fixtures/referent";
+import { createClasse } from "./helpers/classe";
+import { createFixtureClasse } from "./fixtures/classe";
+import { ClasseModel } from "../models";
 
-const { ROLES } = require("snu-lib");
+jest.mock("../redis", () => {
+  const redis = require("redis");
+  const client = redis.createClient();
 
-const jwt = require("jsonwebtoken");
-const { createReferentHelper } = require("./helpers/referent");
-const getNewReferentFixture = require("./fixtures/referent");
-jest.mock("../sendinblue", () => ({
-  ...jest.requireActual("../sendinblue"),
+  return {
+    initRedisClient: jest.fn(async () => {
+      return await client.connect();
+    }),
+    closeRedisClient: jest.fn(async () => await client.disconnect()),
+    getRedisClient: jest.fn(() => client),
+  };
+});
+
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
+  sendTemplate: jest.fn(),
 }));
 
 jest.mock("../geo", () => ({
@@ -35,17 +53,27 @@ jest.mock("../utils", () => ({
   deleteFile: (path, file) => Promise.resolve({ path, file }),
 }));
 
+jest.mock("../emails", () => ({
+  emit: jest.fn(),
+}));
+
 jest.mock("../cryptoUtils", () => ({
   ...jest.requireActual("../cryptoUtils"),
   decrypt: () => Buffer.from("test"),
   encrypt: () => Buffer.from("test"),
 }));
 jest.mock("node-fetch");
+jest.mock("../utils/virusScanner", () => jest.fn().mockResolvedValue({ isInfected: false }));
 
-jest.setTimeout(30_000);
+const getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 
-beforeAll(dbConnect);
-afterAll(dbClose);
+beforeAll(() => {
+  return Promise.all([dbConnect(), initRedisClient()]);
+});
+
+afterAll(() => {
+  return Promise.all([dbClose(), closeRedisClient()]);
+});
 
 describe("Young", () => {
   describe("PUT /young/:id/soft-delete", () => {
@@ -98,7 +126,7 @@ describe("Young", () => {
           if (key === "status") {
             expect(updatedYoung[key]).toEqual("DELETED");
           } else if (key === "email") {
-            expect(updatedYoung[key]).toEqual(`${young._doc["_id"]}@delete.com`);
+            expect(updatedYoung[key]).toEqual(`${young._doc?.["_id"]}@delete.com`);
           } else if (key === "_id") {
             expect(updatedYoung[key]).toEqual(young[key].toString());
           } else if (key === "phase2ApplicationStatus") {
@@ -117,10 +145,10 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(404);
     });
 
-    it("should be accessible by referents or young", async () => {
+    it("should be accessible by referents only", async () => {
       const passport = require("passport");
       await request(getAppHelper()).delete("/young/" + notExistingYoungId);
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual(["referent", "young"]);
+      expect(passport.lastTypeCalledOnAuthenticate).toEqual(["referent"]);
     });
   });
 
@@ -229,6 +257,7 @@ describe("Young", () => {
           }),
         )
         .mockReturnValue(Promise.resolve({}));
+      // @ts-ignore
       fetch.mockReturnValue(
         Promise.resolve({
           status: 200,
@@ -516,31 +545,64 @@ describe("Young", () => {
 
   describe("POST /young/:youngId/documents/:key", () => {
     it("should send file for the young", async () => {
-      // This test should be improved to check the file is sent (currently no file is sent)
-      const young = await createYoungHelper(getNewYoungFixture());
+      const cohort = await createCohortHelper(
+        getNewCohortFixture({
+          name: "Juillet 2023",
+        }),
+      );
+      const young = await createYoungHelper({ ...getNewYoungFixture(), cohort: cohort.name, cohortId: cohort._id });
+
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
 
+      getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
       let res = await request(getAppHelper())
         .post(`/young/${young._id}/documents/cniFiles`)
-        .send({ body: JSON.stringify({ names: ["e"] }) });
+        .field("body", JSON.stringify({ names: ["image.jpeg"], category: "cniNew", expirationDate: "2024-06-25T09:33:21.470Z" }))
+        .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
       expect(res.status).toEqual(200);
-      // expect(res.body.data[0].name).toEqual("e");
       expect(res.body.ok).toEqual(true);
 
       // With military file.
+      getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
       res = await request(getAppHelper())
         .post(`/young/${young._id}/documents/militaryPreparationFilesIdentity`)
-        .send({ body: JSON.stringify({ names: ["e"] }) });
+        .field("body", JSON.stringify({ names: ["image.jpeg"] }))
+        .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
       expect(res.status).toEqual(200);
-      // expect(res.body.data).toEqual(["e"]);
       expect(res.body.ok).toEqual(true);
 
       passport.user = previous;
     });
 
-    it.skip("should not accept invalid body", async () => {
+    it("should send file for the young with cohort avenir", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: COHORTS.AVENIR }));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+      let res = await request(getAppHelper())
+        .post(`/young/${young._id}/documents/cniFiles`)
+        .field("body", JSON.stringify({ names: ["image.jpeg"], category: "cniNew", expirationDate: "2024-06-25T09:33:21.470Z" }))
+        .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
+      expect(res.status).toEqual(200);
+      expect(res.body.ok).toEqual(true);
+
+      // With military file.
+      getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+      res = await request(getAppHelper())
+        .post(`/young/${young._id}/documents/militaryPreparationFilesIdentity`)
+        .field("body", JSON.stringify({ names: ["image.jpeg"] }))
+        .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
+      expect(res.status).toEqual(200);
+      expect(res.body.ok).toEqual(true);
+
+      passport.user = previous;
+    });
+
+    it("should not accept invalid body", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
       const previous = passport.user;
@@ -548,12 +610,12 @@ describe("Young", () => {
 
       const res = await request(getAppHelper())
         .post(`/young/${young._id}/documents/cniFiles`)
-        .send({ body: JSON.stringify({ blablabla: ["e"] }) });
+        .send({ body: JSON.stringify({ expirationDate: null }) });
       expect(res.status).toEqual(400);
       passport.user = previous;
     });
 
-    it("should not accept invalid file name", async () => {
+    it("should not accept invalid param key", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
       const previous = passport.user;
@@ -562,6 +624,19 @@ describe("Young", () => {
       const res = await request(getAppHelper())
         .post(`/young/${young._id}/documents/thisPropertyDoesNotExists`)
         .send({ body: JSON.stringify({ names: ["e"] }) });
+      expect(res.status).toEqual(400);
+      passport.user = previous;
+    });
+
+    it("should not accept invalid file mime", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const res = await request(getAppHelper())
+        .post(`/young/${young._id}/documents/cniFiles`)
+        .field("body", JSON.stringify({ names: ["test.csv"] }))
+        .attach("file", Buffer.from("contenu"), { filename: "test.csv", contentType: "text/csv" });
       expect(res.status).toEqual(400);
       passport.user = previous;
     });
@@ -596,7 +671,7 @@ describe("Young", () => {
     });
   });
 
-  describe("POST /young/:id/:email/:template", () => {
+  describe("POST /young/:id/email/:template", () => {
     const validTemplate = "1229";
     it("should return 400 if template not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
@@ -615,6 +690,35 @@ describe("Young", () => {
         .post("/young/" + young._id + "/email/" + validTemplate)
         .send({ message: "hello" });
       expect(res.statusCode).toEqual(200);
+    });
+    it("should return 200 when VALIDATED", async () => {
+      // @ts-ignore
+      sendTemplate.mockClear();
+      const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
+      const young = await createYoungHelper(getNewYoungFixture({ source: "CLE" }));
+      const passport = require("passport");
+      passport.user = tutor;
+      const res = await request(getAppHelper()).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`).send({ status: "VALIDATED" });
+      expect(res.statusCode).toEqual(200);
+      expect(sendTemplate).toHaveBeenCalledTimes(1);
+      expect(sendTemplate).toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, {
+        cc: [
+          { name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email },
+          { name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email },
+        ],
+        emailTo: [{ email: young.email, name: `${young.firstName} ${young.lastName}` }],
+        params: {
+          cta: "http://localhost:8081",
+          firstName: young.firstName,
+          lastName: young.lastName,
+          link: undefined,
+          message: undefined,
+          missionName: undefined,
+          object: undefined,
+          structureName: undefined,
+          type_document: undefined,
+        },
+      });
     });
   });
 
@@ -663,6 +767,31 @@ describe("Young", () => {
       expect(res.status).toBe(403);
 
       passport.user = previous;
+    });
+  });
+  describe("YoungModel post save hook", () => {
+    it("should call StateManager.Classe.compute if source is CLE", async () => {
+      const cohortFixture = getNewCohortFixture({ type: "CLE" });
+      const cohort = await createCohortHelper(cohortFixture);
+      const classe = createFixtureClasse({ seatsTaken: 0, status: "OPEN", cohort: cohort.name, cohortId: cohort._id });
+      const classeId = (await createClasse(classe))._id;
+      const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId });
+      const young = await createYoungHelper(youngFixture);
+      const updatedYoung = { ...young.toObject(), status: "VALIDATED" };
+      await young.set(updatedYoung).save();
+      const passport = require("passport");
+      const previous = passport.user.role;
+      passport.user.role = ROLES.ADMIN;
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}`).send({
+        status: "VALIDATED",
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe("VALIDATED");
+
+      const updatedClasse = await ClasseModel.findById(classeId);
+      expect(updatedClasse?.seatsTaken).toBe(1);
+      passport.user.role = previous;
     });
   });
 });

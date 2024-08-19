@@ -1,10 +1,11 @@
 const path = require("path");
 const { initDocument, getMinistres, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
-const { ENVIRONMENT, IMAGES_ROOTDIR } = require("../../config");
+const config = require("config");
+const { withPipeStream } = require("../utils");
 
 function render(doc, young) {
   const d = young.statusPhase2ValidatedAt;
-  if (!d) throw "Date de validation de la phase 2 non trouvée";
+  if (!d) throw new Error("Date de validation de la phase 2 non trouvée");
   const ministresData = getMinistres(d);
   const template = ministresData.template;
 
@@ -14,8 +15,8 @@ function render(doc, young) {
 
   doc.font(FONT).fontSize(FONT_SIZE).lineGap(LINE_GAP).fillColor(FILL_COLOR);
 
-  if (ENVIRONMENT !== "testing") {
-    doc.image(path.join(IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+  if (config.ENVIRONMENT !== "test") {
+    doc.image(path.join(config.IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
   }
 
   doc
@@ -41,9 +42,9 @@ function generateCertifSNU(outStream, young) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument();
-  doc.pipe(outStream);
-  render(doc, young);
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    render(doc, young);
+  });
   console.timeEnd("RENDERING " + random);
 }
 

@@ -3,7 +3,7 @@ import queryString from "query-string";
 import { Link } from "react-router-dom";
 import { getNewLink } from "../../../../utils";
 import React from "react";
-import { ROLES } from "snu-lib/roles";
+import { ROLES } from "snu-lib";
 
 export default function OccupationBarVertical({ percentage, nbDepart, departMotif, filter, role, sessionId, centerId }) {
   let height = `h-0`;

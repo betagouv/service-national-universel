@@ -15,7 +15,6 @@ env:
   production_branch: "production"
 
 jobs:
-
   prepare:
     runs-on: ubuntu-latest
     if: github.ref_name == 'production_hotfix'
@@ -38,22 +37,9 @@ jobs:
           ref: ${{ steps.target_branch.outputs.target_branch }}
           fetch-depth: 0
 
-      - name: Check differences
-        run: |
-          git fetch origin ${{ env.production_branch }}
-          diff=$(git --no-pager diff --no-patch --raw origin/${{ env.production_branch }})
-          if [[ "$diff" ]]
-          then
-            echo "https://github.com/betagouv/service-national-universel/compare/${{ env.production_branch }}...${{ steps.target_branch.outputs.target_branch }}"
-            echo "$diff"
-          else
-            echo "No difference with ${{ env.production_branch }} branch. Aborting"
-            exit 1
-          fi
-
       - name: Prepare
         id: prepare
-        run : |
+        run: |
           api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
           echo "api_image_tag: $api_image_tag"
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
@@ -77,17 +63,35 @@ jobs:
       branch_name: ${{ needs.prepare.outputs.target_branch }}
     secrets: inherit
 
+  run_tests_front:
+    needs: prepare
+    uses: ./.github/workflows/run-tests-front.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.branch_name }}
+    secrets: inherit
+
+  run_tests_lib:
+    needs: prepare
+    uses: ./.github/workflows/run-tests-lib.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.branch_name }}
+    secrets: inherit
+
   build:
-    needs: [prepare, run_tests_api]
+    needs: [prepare, run_tests_api, run_tests_front, run_tests_lib]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [
-          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
-          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
-          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
-          {name: antivirus, tag: "${{needs.prepare.outputs.antivirus_image_tag}}" },
-        ]
+        app:
+          [
+            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+            {
+              name: antivirus,
+              tag: "${{needs.prepare.outputs.antivirus_image_tag}}",
+            },
+          ]
 
     steps:
       - uses: actions/checkout@v4
@@ -114,6 +118,7 @@ jobs:
           dockerfile_path: ${{ matrix.app.name }}/Dockerfile
           image_tag: ${{ matrix.app.tag }}
           image_tag_stable: hotfix
+          sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
   deploy_staging:
     runs-on: ubuntu-latest
@@ -153,17 +158,31 @@ jobs:
             -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
             -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
-      - name: Staging - Healthcheck API
+      - name: Healthchecks
+        shell: bash
         working-directory: ${{ env.staging_directory }}
-        run: curl -I "$(terraform output -raw api_endpoint)"
+        run: |
+          # Sleep because status can still be an error if the previous deployement failed
+          sleep 10s
 
-      - name: Staging - Healthcheck Admin
-        working-directory: ${{ env.staging_directory }}
-        run: curl -I "$(terraform output -raw admin_endpoint)"
+          failure=false
+          while read name
+          do
+            status=$(terraform output -raw ${name}_container_status)
+            echo $name $status
+            if [[ $status != "ready" ]]
+            then
+                echo "Container ${name} is on '$status' state" 1>&2
+                failure=true
+            fi
+          done <<< 'app
+          admin
+          api'
 
-      - name: Staging - Healthcheck App
-        working-directory: ${{ env.staging_directory }}
-        run: curl -I "$(terraform output -raw app_endpoint)"
+          if $failure
+          then
+            exit 1
+          fi
 
   plan_production:
     runs-on: ubuntu-latest
@@ -227,25 +246,44 @@ jobs:
             -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
             -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
 
-      - name: Production - Healthcheck API
+      - name: Healthchecks
+        shell: bash
         working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw api_endpoint)"
+        run: |
+          # Sleep because status can still be an error if the previous deployement failed
+          sleep 10s
 
-      - name: Production - Healthcheck Admin
-        working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw admin_endpoint)"
+          failure=false
+          while read name
+          do
+            status=$(terraform output -raw ${name}_container_status)
+            echo $name $status
+            if [[ $status != "ready" ]]
+            then
+                echo "Container ${name} is on '$status' state" 1>&2
+                failure=true
+            fi
+          done <<< 'app
+          admin
+          api
+          antivirus
+          tasks'
 
-      - name: Production - Healthcheck App
-        working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw app_endpoint)"
+          if $failure
+          then
+            exit 1
+          fi
+
+      - name: Update production_state branch
+        run: git push -f origin HEAD:production_state
 
   deploy_cc:
     needs: [prepare, build]
-    environment: production # Needed for manual approval before deploy
     if: ${{ vars.DEPLOY_ON_CC == 'true' }}
     uses: ./.github/workflows/cc-deploy-production.yml
     with:
       api_image_tag: ${{ needs.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ needs.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ needs.prepare.outputs.app_image_tag }}
+      antivirus_image_tag: ${{ needs.prepare.outputs.antivirus_image_tag }}
     secrets: inherit

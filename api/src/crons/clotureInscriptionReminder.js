@@ -4,13 +4,13 @@
  * Si c'est le cas, il envoit à tous les référents départementaux pour qui il reste des jeunes en attente de validation une relance mail.
  */
 const { capture } = require("../sentry");
-const ReferentModel = require("../models/referent");
-const { sendTemplate } = require("../sendinblue");
+const { ReferentModel } = require("../models");
+const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
-const { ADMIN_URL } = require("../config");
+const config = require("config");
 const { YOUNG_STATUS, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, SENDINBLUE_TEMPLATES } = require("snu-lib");
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const { YoungModel } = require("../models");
+const { CohortModel } = require("../models");
 
 // /!\ WARNING /!\ Only works if the instructionEndDate is set to midnight UTC +/- 30 minutes
 const HOURS_BEFORE_END_REMINDER = 48 - 14; // à 14h la veille
@@ -80,7 +80,7 @@ function sendReminder(referent, department, cohort) {
   return sendTemplate(SENDINBLUE_TEMPLATES.referent.INSTRUCTION_END_REMINDER, {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
     params: {
-      cta: `${ADMIN_URL}/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D&COHORT=%5B"${encodeURIComponent(cohort)}"%5D&DEPARTMENT=%5B"${encodeURIComponent(department._id)}"%5D`,
+      cta: `${config.ADMIN_URL}/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D&COHORT=%5B"${encodeURIComponent(cohort)}"%5D&DEPARTMENT=%5B"${encodeURIComponent(department._id)}"%5D`,
       department: department._id,
       cohort,
       pending_cases: department.count,

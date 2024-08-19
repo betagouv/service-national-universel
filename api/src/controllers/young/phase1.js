@@ -7,8 +7,8 @@
 
 const express = require("express");
 const passport = require("passport");
-const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
+
 const {
   canEditPresenceYoung,
   ROLES,
@@ -19,18 +19,24 @@ const {
   REFERENT_DEPARTMENT_SUBROLE,
   getDepartmentByZip,
 } = require("snu-lib");
-const { ADMIN_URL, ENVIRONMENT } = require("../../config");
+
+const config = require("config");
 const { capture } = require("../../sentry");
-const YoungModel = require("../../models/young");
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const CohortModel = require("../../models/cohort");
-const ReferentModel = require("../../models/referent");
-const DepartmentServiceModel = require("../../models/departmentService");
+const { sendTemplate } = require("../../brevo");
+
+const { YoungModel } = require("../../models");
+const { SessionPhase1Model } = require("../../models");
+const { CohesionCenterModel } = require("../../models");
+const { PointDeRassemblementModel } = require("../../models");
+const { LigneBusModel } = require("../../models");
+const { CohortModel } = require("../../models");
+const { ReferentModel } = require("../../models");
+const { DepartmentServiceModel } = require("../../models");
+
 const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
-const { sendTemplate } = require("../../sendinblue");
+
+const router = express.Router({ mergeParams: true });
 
 router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -59,7 +65,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // check if referent is allowed to edit this young --> Todo with cohort
-    if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditPresenceYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (young.status === YOUNG_STATUS.WITHDRAWN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -150,7 +156,7 @@ router.post("/dispense", passport.authenticate("referent", { session: false, fai
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canEditPresenceYoung(req.user, young)) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     // passage en dispensé unqiuement si séjour non réalisé
@@ -185,7 +191,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canEditPresenceYoung(req.user, young)) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -229,8 +235,10 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     }
     const sendContact = managers.length ? managers : secretariat.length ? secretariat : contactsConv;
 
+    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+
     let template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
-    const mail = await sendTemplate(template, {
+    await sendTemplate(template, {
       emailTo: sendContact.map((referent) => ({
         name: `${referent.firstName} ${referent.lastName}`,
         email: referent.email,
@@ -238,11 +246,11 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
       params: {
         youngFirstName: young.firstName,
         youngLastName: young.lastName,
-        centreName: young.cohesionCenterName,
-        centreDepartement: getDepartmentByZip(young.cohesionCenterZip),
+        centreName: center?.name || young.cohesionCenterName,
+        centreDepartement: center?.department || getDepartmentByZip(young.cohesionCenterZip),
         departureReason: departSejourMotif,
         departureNote: departSejourMotifComment,
-        cta: `${ADMIN_URL}/volontaire/${young._id}`,
+        cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
       },
     });
 
@@ -266,7 +274,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canEditPresenceYoung(req.user, young)) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -306,7 +314,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canEditPresenceYoung(req.user, young)) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 

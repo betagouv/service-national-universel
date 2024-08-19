@@ -1,9 +1,9 @@
 const { capture } = require("../sentry");
 const slack = require("../slack");
-const ContractModel = require("../models/contract");
+const { ContractModel } = require("../models");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { ADMIN_URL } = require("../config");
-const { sendTemplate } = require("../sendinblue");
+const config = require("config");
+const { sendTemplate } = require("../brevo");
 const { getReferentManagerPhase2 } = require("../utils");
 
 const trigger = async () => {
@@ -26,7 +26,7 @@ const trigger = async () => {
           youngFirstName: contract?.youngFirstName,
           youngLastName: contract?.youngLastName,
           missionName: contract?.missionName,
-          cta: `${ADMIN_URL}/volontaire/${contract.youngId}/phase2/application/${contract.applicationId}/contrat`,
+          cta: `${config.ADMIN_URL}/volontaire/${contract.youngId}/phase2/application/${contract.applicationId}/contrat`,
         },
       });
     }

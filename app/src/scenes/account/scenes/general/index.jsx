@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import queryString from "query-string";
 import { BiLoaderAlt } from "react-icons/bi";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { youngCanChangeSession, youngCanDeleteAccount } from "snu-lib";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { PHONE_ZONES } from "snu-lib";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "@/redux/auth/actions";
 import { validateEmail, validatePhoneNumber } from "@/utils/form-validation.utils";
@@ -15,7 +14,6 @@ import InputPhone from "@/components/forms/inputs/InputPhone";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import IdCardReader from "./components/IdCardReader";
 import SectionTitle from "../../components/SectionTitle";
-import Withdrawal from "./components/Withdrawal";
 import FormRow from "@/components/forms/layout/FormRow";
 import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
@@ -173,7 +171,7 @@ const AccountGeneralPage = () => {
                   J’ai changé d’adresse
                 </InlineButton>
               </section>
-              {young?.files.cniFiles.length > 0 && (
+              {young?.files?.cniFiles.length > 0 && (
                 <section>
                   <SectionTitle>Pièce d&apos;identité</SectionTitle>
                   <div className="flex flex-col gap-2">
@@ -194,14 +192,6 @@ const AccountGeneralPage = () => {
             </ButtonPrimary>
           </div>
         </form>
-      </div>
-      <div className="flex flex-col items-center gap-6 py-8 lg:flex-row">
-        {youngCanChangeSession(young) ? (
-          <Link to="/changer-de-sejour" className="flex items-center gap-2 text-sm text-blue-600">
-            Changer de séjour
-          </Link>
-        ) : null}
-        {youngCanDeleteAccount(young) ? <Withdrawal young={young} /> : null}
       </div>
     </>
   );

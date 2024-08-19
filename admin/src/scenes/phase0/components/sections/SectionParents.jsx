@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { MdInfoOutline } from "react-icons/md";
-import ReactTooltip from "react-tooltip";
 import { Link } from "react-router-dom";
 import { Button } from "@snu/ds/admin";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
-
 import { FieldsGroup } from "../FieldsGroup";
 import Field from "../Field";
-import { translate, translateGrade, YOUNG_STATUS, GRADES, getAge, YOUNG_SOURCE, translateEtbalissementSector, translateColoration } from "snu-lib";
+import {
+  isPhoneNumberWellFormated,
+  PHONE_ZONES,
+  translate,
+  translateGrade,
+  YOUNG_STATUS,
+  GRADES,
+  getAge,
+  YOUNG_SOURCE,
+  translateEtbalissementSector,
+  translateColoration,
+} from "snu-lib";
 import { filterDataForYoungSection } from "../../utils";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "../../commons";
 import api from "@/services/api";
@@ -344,13 +351,6 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   <div className="flex items-center">
                     <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} className="mr-2" />
                     <p className="text-xs font-base text-gray-900 mr-1">Situation de l’élève différente de celle de la Classe engagée</p>
-                    <MdInfoOutline data-tip data-for="info_sameSchool" className="h-5 w-5 cursor-pointer text-gray-400" />
-                    <ReactTooltip id="info_sameSchool" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                      <ul className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                        <li>à remplir</li>
-                        <li>blabla</li>
-                      </ul>
-                    </ReactTooltip>
                   </div>
                 </>
               )}

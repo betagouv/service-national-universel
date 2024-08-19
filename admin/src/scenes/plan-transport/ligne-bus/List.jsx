@@ -2,26 +2,30 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
+import { FiFolderPlus } from "react-icons/fi";
+import { HiHome, HiOutlineAdjustments } from "react-icons/hi";
+import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
+import { GoPlus } from "react-icons/go";
+
 import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-lib";
-import ArrowUp from "../../../assets/ArrowUp";
-import Comment from "../../../assets/comment";
-import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../../components/filters-system-v2";
-import Loader from "../../../components/Loader";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
+import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
+
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import plausibleEvent from "@/services/plausible";
+
+import ArrowUp from "@/assets/ArrowUp";
+import Comment from "@/assets/comment";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
+import Loader from "@/components/Loader";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
 import { PlainButton } from "../components/Buttons";
 import { translateStatus } from "../components/commons";
 import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import ListPanel from "./modificationPanel/List";
-import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
-import { HiOutlineChartSquareBar, HiOutlineAdjustments } from "react-icons/hi";
-import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
-import { GoPlus } from "react-icons/go";
 import Historic from "./Historic";
 import ListeDemandeModif from "./ListeDemandeModif";
-import plausibleEvent from "@/services/plausible";
-import { FiFolderPlus } from "react-icons/fi";
-import SelectCohort from "@/components/cohorts/SelectCohort";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -134,7 +138,7 @@ export default function List() {
   }, [selectedFilters]);
 
   useEffect(() => {
-    if (!cohort) setCohort(cohorts?.[0].name);
+    if (!cohort) setCohort(cohorts?.[0]?.name);
   }, []);
 
   const getPlanDetransport = async () => {
@@ -166,7 +170,7 @@ export default function List() {
     <Page>
       <Header
         title="Plan de transport"
-        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Plan de transport" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Plan de transport" }]}
         actions={
           <SelectCohort
             cohort={cohort}
@@ -235,7 +239,7 @@ export default function List() {
               type="wired"
               onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
             />,
-            returnSelect(cohort, filterArray, selectedFilters, user),
+            returnSelect(cohort, selectedFilters, user),
           ]}
         />
       )}
@@ -263,8 +267,8 @@ export default function List() {
                   { label: "Nom (Z > A)", field: "busId.keyword", order: "desc" },
                 ]}
                 selectedFilters={selectedFilters}
-                paramData={paramData}
-                setParamData={setParamData}
+                pagination={paramData}
+                onPaginationChange={setParamData}
               />
             </div>
 
@@ -332,7 +336,7 @@ export default function List() {
   );
 }
 
-const returnSelect = (cohort, filterArray, selectedFilters, user) => {
+const returnSelect = (cohort, selectedFilters, user) => {
   const selectTest = [
     {
       key: "1",
@@ -344,7 +348,6 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
               title="Plan de transport"
               exportTitle="Plan_de_transport"
               route="/elasticsearch/plandetransport/export"
-              filters={filterArray}
               selectedFilters={selectedFilters}
               setIsOpen={() => true}
               customCss={{
@@ -363,14 +366,14 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
                   for (let i = 0; i < maxPDRs; i++) {
                     const pdr = data.pointDeRassemblements?.[i];
                     const num = i + 1;
-                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
+                    pdrs[`N° DE DEPARTEMENT PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
                     pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
                     pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
                     pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                     pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
                     pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
                     pdrs[`HEURE DE CONVOCATION AU PDR ${num}`] = pdr?.meetingHour || "";
-                    pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
+                    pdrs[`HEURE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
                     pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
                   }
 
@@ -390,12 +393,13 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
                     "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
 
                     "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
-                    "CAPACITÉ TOTALE LIGNE": data.totalCapacity,
+                    "CAPACITE TOTALE LIGNE": data.totalCapacity,
                     "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
                     "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
-                    "TEMPS DE ROUTE": data.travelTime,
+                    "TEMPS DE ROUTE": data.travelTime.includes(":") ? data.travelTime : `${data.travelTime}:00`,
                     "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
                     "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
+                    "LIGNES FUSIONNÉES": data.mergedBusIds?.join(",") || "",
                   };
                 });
               }}
@@ -405,7 +409,7 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
         [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
           ? {
               action: async () => {
-                await exportLigneBus(user, cohort);
+                await exportLigneBus(cohort);
               },
               render: (
                 <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 ">

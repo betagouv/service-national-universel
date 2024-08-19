@@ -1,5 +1,6 @@
 import React from "react";
 import { getCohortPeriod, youngCanChangeSession } from "snu-lib";
+import { Link } from "react-router-dom";
 import hero2 from "../../assets/hero-2.png";
 import heroBanner from "../../assets/hero-banner.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
@@ -15,6 +16,7 @@ import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExterna
 import useAuth from "@/services/useAuth";
 import { RiInformationFill } from "react-icons/ri";
 import { getCohort } from "@/utils/cohorts";
+import plausibleEvent from "@/services/plausible";
 
 export default function WaitingAffectation() {
   const { young, isCLE } = useAuth();
@@ -22,6 +24,11 @@ export default function WaitingAffectation() {
 
   const cohort = getCohort(young.cohort);
   const cohortDate = getCohortPeriod(cohort);
+
+  function handleClick() {
+    plausibleEvent("CLE attente affectation - desistement");
+  }
+
   return (
     <>
       <div className="relative z-[1] -mb-4 block bg-white md:hidden">
@@ -58,11 +65,19 @@ export default function WaitingAffectation() {
                 </p>
               </div>
             </div>
+
             {isCLE && (
-              <div className="bg-[#EFF6FF] rounded-xl flex items-center p-3 mt-4">
-                <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
-                <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
-              </div>
+              <>
+                <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2">
+                  <div>
+                    <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
+                    <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
+                  </div>
+                  <Link to="account/withdrawn?desistement=1" className="text-blue-600 underline underline-offset-2" onClick={handleClick}>
+                    Se désister du SNU.
+                  </Link>
+                </div>
+              </>
             )}
           </div>
           <div className="flex-none hidden md:block">
@@ -72,7 +87,7 @@ export default function WaitingAffectation() {
         <Files young={young} />
         <hr className="mx-auto mt-12 mb-7 w-full" />
         <CheckYourSpamSection />
-        {!isCLE ?? <FaqSection />}
+        {!isCLE && <FaqSection />}
         <TestimonialsSection />
         <section className="mt-12 pb-32 md:mt-32">
           <h2 className="mb-8 text-center text-xl font-bold">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>

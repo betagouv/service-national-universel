@@ -1,7 +1,8 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { IMAGES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
+const config = require("config");
 const { formatDateFRTimezoneUTC } = require("snu-lib");
+const { withPipeStream } = require("../utils");
 
 const FONT = "Marianne";
 const FONT_BOLD = `${FONT}-Bold`;
@@ -32,7 +33,7 @@ function _page1(doc) {
 
   doc.moveDown(2);
   _y = doc.y;
-  doc.image(path.join(IMAGES_ROOTDIR, "logo-snu.png"), 40, _y, { width: 60, height: 60 });
+  doc.image(path.join(config.IMAGES_ROOTDIR, "logo-snu.png"), 40, _y, { width: 60, height: 60 });
 
   doc.font(FONT_BOLD).fontSize(FONT_SIZE_H1).text("Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)", 120, _y, {
     align: "center",
@@ -303,6 +304,182 @@ function render(doc, contract) {
 
   _page2(doc, contract);
 
+  if (new Date(contract.createdAt) < new Date("2024-03-14")) {
+    _page3Old(doc, contract);
+  } else {
+    _page3(doc, contract);
+  }
+
+  _signature(doc, contract);
+  doc.moveDown(2);
+
+  _pageCharte(doc);
+}
+
+function _page3Old(doc, contract) {
+  doc.addPage();
+
+  doc.font(FONT).text(`Il a été convenu ce qui suit :`);
+  doc.moveDown(2);
+
+  // A
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`a) Objet`);
+  doc.moveDown(1);
+  doc.fontSize(FONT_SIZE);
+
+  doc.font(FONT_BOLD).text(`${contract.youngLastName} ${contract.youngFirstName}`, { continued: true });
+  doc.font(FONT).text(` s’engage à réaliser une mission d’intérêt général validée par l’autorité territoriale en charge du SNU, la mission : `, { continued: true });
+  doc.font(FONT_BOLD).text(contract.missionName);
+  doc.moveDown(1);
+
+  doc.font(FONT).text(`Les objectifs de la mission sont les suivants :`);
+  doc.moveDown(0.5);
+  doc.font(FONT_BOLD).text(contract.missionObjective);
+  doc.moveDown(1);
+
+  doc.font(FONT).text(`A ce titre, le volontaire exercera les activités suivantes :`);
+  doc.moveDown(0.5);
+  doc.font(FONT_BOLD).text(contract.missionAction);
+  doc.moveDown(1);
+
+  doc
+    .font(FONT)
+    .text(
+      `La nature ou l’exercice des missions ne peuvent porter sur les activités relevant des articles D. 4153-15 à D. 4153-40 du code du travail c’est-à-dire les catégories de travaux définies en application de l’article L. 4153-8 du même code, interdites aux jeunes de moins de 18 ans, en ce qu’elles les exposeraient à des risques pour leur santé, leur sécurité, leur moralité ou excéderaient leurs forces.`,
+    );
+  doc.moveDown(2);
+
+  // B
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`b) Date d’effet et durée du contrat`);
+  doc.moveDown(1);
+  doc.fontSize(FONT_SIZE);
+
+  doc
+    .font(FONT)
+    .text(`Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties prenantes.`);
+  doc.moveDown(1);
+
+  doc.font(FONT).text(`La mission d’intérêt général débute le `, { continued: true });
+  doc.font(FONT_BOLD).text(formatDateFRTimezoneUTC(contract.missionStartAt), { continued: true });
+  doc.font(FONT).text(` jusqu'au `, { continued: true });
+  doc.font(FONT_BOLD).text(formatDateFRTimezoneUTC(contract.missionEndAt));
+  doc.moveDown(1);
+
+  doc.font(FONT).text(`Le volontaire effectuera un total de `, { continued: true });
+  doc.font(FONT_BOLD).text(`${contract.missionDuration} heures`, { continued: true });
+  doc.font(FONT).text(` de MIG.`);
+  doc.moveDown(2);
+
+  doc.addPage();
+
+  // C
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`c) Conditions d’exercice des missions`);
+  doc.moveDown(1);
+  doc.fontSize(FONT_SIZE);
+
+  doc.font(FONT).text(`La mission s’effectue à `, { continued: true });
+  doc.font(FONT_BOLD).text(`${contract.missionAddress}, ${contract.missionZip} ${contract.missionCity}`, { continued: true });
+  doc.font(FONT).text(` au sein de la structure d’accueil retenue par l’administration : `, { continued: true });
+  doc.font(FONT_BOLD).text(contract.structureName, { continued: true });
+  doc
+    .font(FONT)
+    .text(
+      `. La durée quotidienne de la mission est égale à sept heures au maximum. Une pause de trente minutes doit être appliquée pour toute période de mission ininterrompue atteignant quatre heures et demie. Les missions effectuées entre 22 heures et 6 heures sont interdites. Pour les missions effectuées de manière continue, le repos hebdomadaire est de deux jours consécutifs au minimum. Si le volontaire est scolarisé, la mission ne peut être effectuée sur le temps scolaire. Si le volontaire travaille, le temps de travail cumulé avec le temps d’accomplissement de la mission d’intérêt général ne peut excéder 7 heures par jour et 35 heures par semaine.`,
+    );
+  doc.moveDown(1);
+
+  doc.font(FONT).text(`Les horaires du volontaire pour la présente mission sont : `, { continued: true });
+  doc.font(FONT_BOLD).text(contract.missionFrequence);
+  doc.moveDown(1);
+
+  doc.font(FONT).text(`Le volontaire bénéficie, pour assurer l’accomplissement de sa mission, de l’accompagnement d’un tuteur de mission `, { continued: true });
+  doc.font(FONT_BOLD).text(`${contract.structureManagerLastName} ${contract.structureManagerFirstName}`, { continued: true });
+  doc
+    .font(FONT)
+    .text(
+      ` de la structure d’accueil. Le volontaire bénéficie, par son tuteur, d’entretiens réguliers permettant un suivi de la réalisation des missions ainsi que, le cas échéant, d’un accompagnement renforcé.`,
+    );
+  doc.moveDown(2);
+
+  // D
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`d) Obligations réciproques des parties`);
+  doc.moveDown(1);
+  doc.fontSize(FONT_SIZE).font(FONT);
+
+  doc.text(
+    `L’Etat s’engage à identifier les missions susceptibles d’être proposées au volontaire dans le cadre des missions d’intérêt général. L’Etat s’assure de la qualité des conditions de réalisation de cette mission au regard des finalités du SNU. Enfin, l’Etat valide la réalisation de la mission du volontaire. La structure d’accueil s’engage à proposer des missions permettant la mobilisation du volontaire en faveur de l’intérêt général. Un mentor est nommé au sein de la structure afin de s’assurer du suivi du volontaire et de la qualité des conditions de son accueil.`,
+  );
+  doc.moveDown(1);
+
+  doc.text(
+    `Le cas échéant, la structure d’accueil précise les frais qu’elle entend prendre en charge, totalement ou partiellement, dans le cadre de la mission d’intérêt général (frais de transports, repas, hébergement...).`,
+  );
+  doc.moveDown(1);
+  doc.moveDown(1);
+  doc.text(
+    `Le volontaire s’engage à respecter le règlement intérieur de la structure qui l’accueille, à respecter les personnes, le matériel et les locaux et à agir en conformité avec les exigences de son engagement dans le cadre du SNU : ponctualité, politesse, implication. Le volontaire est tenu à la discrétion pour les faits et informations dont il a connaissance dans l’exercice de ses missions. Il est également tenu aux obligations de convenance et de réserve inhérentes à ses fonctions.`,
+  );
+  doc.moveDown(1);
+  doc.text(`Le volontaire exécute la mission d’intérêt général à titre bénévole.`);
+  doc.moveDown(1);
+  doc.text(
+    `L'engagement, l'affectation et l'activité du volontaire ne sont régis ni par le code du travail, ni par le chapitre Ier de la loi n° 84-16 du 11 janvier 1984 portant dispositions statutaires relatives à la fonction publique de l'Etat, le chapitre Ier de la loi n° 84-53 du 26 janvier 1984 portant dispositions statutaires relatives à la fonction publique territoriale ou le chapitre Ier de la loi n° 86-33 du 9 janvier 1986 portant dispositions statutaires relatives à la fonction publique hospitalière. Le cas échéant, la structure d’accueil, directement ou par le mentor désigné, informe le représentant de l’Etat, signataire du présent contrat, des difficultés rencontrées dans l’exécution du présent contrat.`,
+  );
+  doc.moveDown(1);
+  doc.text(
+    `Conformément aux dispositions du décret n° 2020-922 du 29 juillet 2020 portant diverses dispositions relatives au service national universel, le volontaire et la structure d’accueil s’engagent à respecter les principes directeurs ainsi que les engagements et obligations des réservistes et des structures d’accueil énoncés par la charte de la réserve civique, annexée au présent contrat, dans sa version issue du décret n° 2017-930 du 9 mai 2017.`,
+  );
+  doc.moveDown(2);
+
+  //E
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`e) Journée de fin de mission d'intérêt général`);
+  doc.moveDown(1);
+  doc.fontSize(FONT_SIZE).font(FONT);
+
+  doc.text(
+    `Une journée de fin de mission d’intérêt général est organisée, en dehors des heures de MIG mentionnées au b), pour préparer une éventuelle participation du volontaire à la phase III du SNU, soit un engagement volontaire de plusieurs mois, notamment dans le cadre du service civique ou du volontariat des armées. La participation du volontaire est requise.`,
+  );
+  doc.moveDown(2);
+
+  // F
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`f) Responsabilités`);
+  doc.moveDown(1);
+  doc.fontSize(FONT_SIZE).font(FONT);
+
+  doc.text(
+    `La structure d’accueil est chargée de la surveillance et de la sécurité du volontaire accueilli. L'organisme d'accueil le couvre des dommages subis par lui ou causés à des tiers dans l'accomplissement de sa mission.`,
+  );
+  doc.moveDown(2);
+
+  // G
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`g) Résiliation du contrat`);
+  doc.moveDown(1);
+  doc.fontSize(FONT_SIZE).font(FONT);
+
+  doc.text(
+    `Le présent contrat de mission d’intérêt général peut être résilié moyennant un préavis d’une journée sauf en cas de force majeure ou de faute grave d’une des parties. Avant de résilier le contrat, la structure d’accueil prévient le représentant de l’Etat.`,
+  );
+  doc.moveDown(2);
+
+  // H
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`h) Conditions de validation de la mission d’intérêt général`);
+  doc.moveDown(1);
+  doc.fontSize(FONT_SIZE).font(FONT);
+
+  doc.text(
+    `La confirmation de la réalisation de la mission d'intérêt général est effectuée par le tuteur de mission qui, au nom de la structure d'accueil, effectue la procédure de fin de mission sur la plateforme.`,
+  );
+  doc.moveDown(1);
+  doc.text(
+    `La validation est conditionnée à la réalisation de 84 heures de mission au minimum au sein de la structure. La mission est accomplie de manière continue, ou dans la limite de la période d’une année, de manière discontinue.`,
+  );
+  doc.moveDown(1);
+  doc.text(`Réalisé le ${formatDateFRTimezoneUTC(contract.date)}.`);
+  doc.moveDown(1);
+  doc.moveDown(1);
+}
+
+function _page3(doc, contract) {
   doc.addPage();
 
   doc.font(FONT).text(`Il a été convenu ce qui suit :`);
@@ -453,11 +630,6 @@ function render(doc, contract) {
   );
   doc.moveDown(1);
   doc.moveDown(1);
-
-  _signature(doc, contract);
-  doc.moveDown(2);
-
-  _pageCharte(doc);
 }
 
 function _badge(doc, status) {
@@ -483,7 +655,7 @@ function _signature(doc, contract) {
   doc.moveDown(3);
 
   doc.font(FONT);
-  _y = doc.y;
+  let _y = doc.y;
 
   const COL1 = MARGIN;
   const COL2 = 300;
@@ -543,9 +715,9 @@ function initDocument() {
     autoFirstPage: false,
   });
 
-  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
-  doc.registerFont(FONT_ITALIC, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
+  doc.registerFont(FONT, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
+  doc.registerFont(FONT_BOLD, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
+  doc.registerFont(FONT_ITALIC, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
 
   return doc;
 }
@@ -554,9 +726,9 @@ function generateContractPhase2(outStream, contract) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument();
-  doc.pipe(outStream);
-  render(doc, contract);
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    render(doc, contract);
+  });
   console.timeEnd("RENDERING " + random);
 }
 

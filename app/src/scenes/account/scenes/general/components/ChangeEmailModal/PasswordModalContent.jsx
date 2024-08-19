@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { translate } from "snu-lib";
-import { formatToActualTime } from "snu-lib/date";
+import { formatToActualTime } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import Modal from "@/components/ui/modals/Modal";

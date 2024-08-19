@@ -1,7 +1,8 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { IMAGES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
+const config = require("config");
 const datefns = require("date-fns");
+const { withPipeStream } = require("../utils");
 
 const FONT = "Marianne";
 const FONT_BOLD = `${FONT}-Bold`;
@@ -35,8 +36,8 @@ function render(doc, young) {
 
   doc.font(FONT);
 
-  doc.image(path.join(IMAGES_ROOTDIR, "republique-francaise.png"), 0, 0);
-  doc.image(path.join(IMAGES_ROOTDIR, "logo-snu.png"), 100, 15, { width: 40, height: 40 });
+  doc.image(path.join(config.IMAGES_ROOTDIR, "republique-francaise.png"), 0, 0);
+  doc.image(path.join(config.IMAGES_ROOTDIR, "logo-snu.png"), 100, 15, { width: 40, height: 40 });
 
   doc.fontSize(11).fillColor("#385EA9").text("AUTORISATION DE PRISE DE VUES D’UN MINEUR ET D’UTILISATION D'IMAGES", {
     paragraphGap: 10,
@@ -168,9 +169,9 @@ function initDocument(options = {}) {
     ...options,
   });
 
-  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
-  doc.registerFont(FONT_ITALIC, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
+  doc.registerFont(FONT, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
+  doc.registerFont(FONT_BOLD, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
+  doc.registerFont(FONT_ITALIC, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
 
   return doc;
 }
@@ -179,9 +180,9 @@ function generateDroitImage(outStream, young) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument();
-  doc.pipe(outStream);
-  render(doc, young);
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    render(doc, young);
+  });
   console.timeEnd("RENDERING " + random);
 }
 
@@ -189,12 +190,12 @@ function generateBatchDroitImage(outStream, youngs) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument({ autoFirstPage: false });
-  doc.pipe(outStream);
-  for (const young of youngs) {
-    doc.addPage();
-    render(doc, young);
-  }
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    for (const young of youngs) {
+      doc.addPage();
+      render(doc, young);
+    }
+  });
   console.timeEnd("RENDERING " + random);
 }
 

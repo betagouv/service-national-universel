@@ -1,17 +1,15 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch, department2region, departmentList, getCohortNames, ES_NO_LIMIT } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, department2region, departmentList, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
-const StructureObject = require("../../models/structure");
+const { StructureModel, EtablissementModel, ClasseModel } = require("../../models");
 const Joi = require("joi");
 const { serializeReferents } = require("../../utils/es-serializer");
-const EtablissementModel = require("../../models/cle/etablissement");
-const ClasseModel = require("../../models/cle/classe");
 
 async function buildReferentContext(user) {
   const contextFilters = [];
@@ -19,7 +17,7 @@ async function buildReferentContext(user) {
   // A responsible cans only see their structure's referent (responsible and supervisor).
   if (user.role === ROLES.RESPONSIBLE) {
     if (!user.structureId) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const structure = await StructureObject.findById(user.structureId);
+    const structure = await StructureModel.findById(user.structureId);
     if (!structure) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     contextFilters.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
     const structureIdKeyword = [user.structureId];
@@ -30,7 +28,7 @@ async function buildReferentContext(user) {
   // A supervisor can only see their structures' referent (responsible and supervisor).
   if (user.role === ROLES.SUPERVISOR) {
     if (!user.structureId) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    const data = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
     contextFilters.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
     contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
   }
@@ -192,10 +190,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     //Query params validation
     const { error: errorQuery, value: query } = Joi.object({
-      cohort: Joi.string()
-        .trim()
-        .allow(null)
-        .valid(...getCohortNames()),
+      cohort: Joi.string().trim().allow(null),
     }).validate(req.query, { stripUnknown: true });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 

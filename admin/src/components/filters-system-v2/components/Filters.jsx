@@ -9,7 +9,8 @@ import ViewPopOver from "./filters/SavedViewPopOver";
 
 import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl, normalizeString } from "./filters/utils";
-import { debounce } from "../../../utils";
+import { debounce } from "@/utils";
+import { IntermediateFilter } from "./filters/IntermediateFilter";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -25,11 +26,13 @@ export default function Filters({
   setSelectedFilters,
   paramData,
   setParamData,
-  defaultUrlParam = false,
+  defaultUrlParam = undefined,
   size,
+  intermediateFilters = undefined,
+  disabled,
 }) {
   const [search, setSearch] = useState("");
-  const [dataFilter, setDataFilter] = useState([]);
+  const [dataFilter, setDataFilter] = useState({});
   const [filtersVisible, setFiltersVisible] = useState(filters);
   const [categories, setCategories] = useState([]);
   const [savedView, setSavedView] = useState([]);
@@ -138,19 +141,19 @@ export default function Filters({
   const updateSavedViewFromDbFilters = async () => {
     try {
       const res = await api.get("/filters/" + pageId);
-      if (!res.ok) return toastr.error("Oops, une erreur est survenue lors du chargement des filtres");
+      if (!res.ok) return toastr.error("Oops, une erreur est survenue lors du chargement des filtres", "");
       setSavedView(res.data);
     } catch (error) {
       console.log(error);
-      toastr.error("Oops, une erreur est survenue lors du chargement des filtres");
+      toastr.error("Oops, une erreur est survenue lors du chargement des filtres", "");
     }
   };
 
   const handleDeleteFilter = async (id) => {
     try {
       const res = await api.remove("/filters/" + id);
-      if (!res.ok) return toastr.error("Oops, une erreur est survenue");
-      toastr.success("Filtre supprimé avec succès");
+      if (!res.ok) return toastr.error("Oops, une erreur est survenue", "");
+      toastr.success("Filtre supprimé avec succès", "");
       updateSavedViewFromDbFilters();
       return;
     } catch (error) {
@@ -168,6 +171,8 @@ export default function Filters({
     updateFiltersFromParams(params);
     setIsShowing(false);
   };
+
+  if (disabled) return null;
 
   return (
     <div>
@@ -235,18 +240,38 @@ export default function Filters({
                               <div className="px-4 text-xs font-light leading-5 text-gray-500">{category}</div>
                               {filtersVisible
                                 ?.filter((f) => f.parentGroup === category)
-                                ?.map((item) => (
-                                  <FilterPopOver
-                                    key={item.title}
-                                    filter={item}
-                                    selectedFilters={selectedFilters}
-                                    setSelectedFilters={setSelectedFilters}
-                                    data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name] || []}
-                                    isShowing={isShowing === item.name}
-                                    setIsShowing={(value) => setIsShowing(value)}
-                                    setParamData={setParamData}
-                                  />
-                                ))}
+                                ?.map((item) => {
+                                  let customItem = item;
+                                  const intermediateFilter = intermediateFilters?.find((intermediateFilter) => intermediateFilter.key === item.name);
+                                  if (intermediateFilters && intermediateFilter && item.name === intermediateFilter?.key) {
+                                    customItem = {
+                                      ...item,
+                                      allowEmpty: false,
+                                      customComponent: (setFilter, filter) => (
+                                        <IntermediateFilter
+                                          selectedFilters={selectedFilters}
+                                          setSelectedFilters={setSelectedFilters}
+                                          setParamData={setParamData}
+                                          intermediateFilter={intermediateFilter}
+                                          dataFilter={dataFilter}
+                                          setFilter={setFilter}
+                                        />
+                                      ),
+                                    };
+                                  }
+                                  return (
+                                    <FilterPopOver
+                                      key={item.title}
+                                      filter={customItem}
+                                      selectedFilters={selectedFilters}
+                                      setSelectedFilters={setSelectedFilters}
+                                      data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name] || []}
+                                      isShowing={isShowing === item.name}
+                                      setIsShowing={(value) => setIsShowing(value)}
+                                      setParamData={setParamData}
+                                    />
+                                  );
+                                })}
                             </div>
                           ))}
                         </div>

@@ -4,13 +4,19 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  extends: "eslint:recommended",
+  extends: ["eslint:recommended", "plugin:jest/recommended", "plugin:@typescript-eslint/recommended"],
+  plugins: ["jest", "prettier", "eslint-plugin-import", "@typescript-eslint"],
+  parser: "@typescript-eslint/parser",
   overrides: [],
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
   },
   rules: {
-    "no-unused-vars": "warn",
+    "no-unused-vars": "off",
+    "import/extensions": ["warn"],
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/ban-ts-comment": "warn",
   },
 };

@@ -7,7 +7,7 @@ const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
-const StructureObject = require("../../models/structure");
+const { StructureModel } = require("../../models");
 
 async function buildStructureContext(user) {
   const contextFilters = [];
@@ -15,11 +15,11 @@ async function buildStructureContext(user) {
   // A responsible can only see their structure and parent structure (not sure why we need ES though).
   if (user.role === ROLES.RESPONSIBLE) {
     if (!user.structureId) return { structureContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const structure = await StructureObject.findById(user.structureId);
+    const structure = await StructureModel.findById(user.structureId);
     if (!structure) return { structureContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     let idsArray = [structure._id.toString()];
     if (structure.networkId !== "") {
-      const parent = await StructureObject.findById(structure.networkId);
+      const parent = await StructureModel.findById(structure.networkId);
       idsArray.push(parent?._id?.toString());
     }
     contextFilters.push({ terms: { _id: idsArray.filter((e) => e) } });
@@ -28,7 +28,7 @@ async function buildStructureContext(user) {
   // A supervisor can only see their structures (all network).
   if (user.role === ROLES.SUPERVISOR) {
     if (!user.structureId) return { structureContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    const data = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
     contextFilters.push({ terms: { _id: data.map((e) => e._id.toString()) } });
   }
 

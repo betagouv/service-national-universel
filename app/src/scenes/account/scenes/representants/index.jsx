@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { PHONE_ZONES } from "snu-lib";
 import { setYoung } from "../../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";

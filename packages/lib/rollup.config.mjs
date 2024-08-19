@@ -1,16 +1,14 @@
-import resolve from "@rollup/plugin-node-resolve";
-import babel from "@rollup/plugin-babel";
-import commonjs from "@rollup/plugin-commonjs";
+import { createRequire } from "node:module";
+import json from "@rollup/plugin-json";
 
-export default {
-  input: "index.js",
-  output: {
-    file: "common-js/index.cjs",
-    format: "cjs",
-  },
-  plugins: [
-    resolve(),
-    commonjs(), // Add this right after resolve()
-    babel({ babelHelpers: "bundled" }),
-  ],
-};
+import defaultRollupConfig from "./rollup-base.mjs";
+
+const require = createRequire(import.meta.url);
+
+const packageJson = require("./package.json");
+
+export default defaultRollupConfig({
+  packageJson,
+  exports: "named",
+  plugins: [json()],
+});

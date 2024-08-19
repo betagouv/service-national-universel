@@ -1,15 +1,16 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib");
+const { ROLES, YOUNG_STATUS, STATUS_CLASSE, FeatureFlagName, canSearchInElasticSearch } = require("snu-lib");
+
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
-const EtablissementModel = require("../../../models/cle/etablissement");
+const { EtablissementModel, CohortModel } = require("../../../models");
 const { serializeReferents } = require("../../../utils/es-serializer");
-const { YOUNG_STATUS } = require("snu-lib");
+const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -19,7 +20,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const filterFields = [
       "cohort.keyword",
       "coloration.keyword",
-      "grade.keyword",
+      "grades.keyword",
       "name.keyword",
       "sector.keyword",
       "status.keyword",
@@ -29,6 +30,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "etablissementId.keyword",
       "department.keyword",
       "region.keyword",
+      "academy.keyword",
+      "schoolYear.keyword",
     ];
 
     const sortFields = ["createdAt", "name.keyword"];
@@ -61,16 +64,27 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     if (req.params.action === "export") {
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
+      response = await populateWithReferentInfo(response, req.params.action);
+      response = await populateWithEtablissementInfo(response);
+      response = await populateWithReferentEtablissementInfo(response, req.params.action);
 
       if (req.query?.type === "schema-de-repartition") {
-        if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-        response = await populateWithEtablissementInfo(response);
+        if (user.role === ROLES.TRANSPORTER) {
+          const cohort = [...new Set(response.map((item) => item.cohort).filter(Boolean))];
+          if (cohort.length !== 1) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          const IsSchemaDownloadIsTrue = await CohortModel.findOne({ name: cohort });
+          if (!IsSchemaDownloadIsTrue) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+          if (IsSchemaDownloadIsTrue.repartitionSchemaDownloadAvailibility === false && user.role === ROLES.TRANSPORTER) {
+            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+          }
+        }
+
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
         response = await populateWithYoungsInfo(response);
         response = await populateWithLigneInfo(response);
-        response = await populateWithReferentInfo(response, req.params.action);
       }
 
       return res.status(200).send({ ok: true, data: response });
@@ -91,6 +105,11 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
 async function buildClasseContext(user) {
   const contextFilters = [];
+  if (await isFeatureAvailable(FeatureFlagName.CLE_BEFORE_JULY_15)) {
+    if (user.role !== ROLES.ADMIN) {
+      contextFilters.push({ term: { "schoolYear.keyword": "2023-2024" } });
+    }
+  }
 
   if (user.role === ROLES.ADMINISTRATEUR_CLE) {
     const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
@@ -111,8 +130,31 @@ async function buildClasseContext(user) {
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
   }
 
+  if (user.role === ROLES.TRANSPORTER) {
+    contextFilters.push({ bool: { must_not: { term: { "status.keyword": STATUS_CLASSE.WITHDRAWN } } } });
+  }
+
   return { classeContextFilters: contextFilters };
 }
+
+const populateWithReferentEtablissementInfo = async (classes, action) => {
+  const refIds =
+    action === "search"
+      ? [...new Set(classes.map((item) => item._source.etablissement?.referentEtablissementIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
+
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
+  const referentsData = serializeReferents(referents);
+
+  return classes.map((item) => {
+    if (action === "search") {
+      item._source.referentEtablissement = referentsData?.filter((e) => item._source.etablissement.referentEtablissementIds.includes(e._id.toString()));
+    } else {
+      item.referentEtablissement = referentsData?.filter((e) => item.etablissement?.referentEtablissementIds.includes(e._id.toString()));
+    }
+    return item;
+  });
+};
 
 const populateWithReferentInfo = async (classes, action) => {
   const refIds =
@@ -127,7 +169,7 @@ const populateWithReferentInfo = async (classes, action) => {
     if (action === "search") {
       item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
     } else {
-      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds.includes(e._id.toString()));
+      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
     }
     return item;
   });

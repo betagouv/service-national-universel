@@ -30,7 +30,7 @@ export default function Container({
       {title && (
         <div className="flex items-center justify-between mb-6">
           {title && (
-            <div className="text-ds-gray-900 text-lg font-medium leading-6">
+            <div className="flex items-center gap-4 text-ds-gray-900 text-lg font-medium leading-6">
               {title}
               {titleComponent}
             </div>

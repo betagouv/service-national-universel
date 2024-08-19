@@ -4,11 +4,10 @@ const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
-const StructureModel = require("../../models/structure");
-const MissionEquivalenceModel = require("../../models/missionEquivalence");
+const { StructureModel, MissionEquivalenceModel } = require("../../models");
 const MissionEquivalencePatchModel = require("./models/missionEquivalencePatch");
 
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -48,7 +47,7 @@ async function createLog(patch, actualMissionEquivalence, event, value) {
 
   const anonymisedMissionEquivalence = new MissionEquivalenceModel(missionEquivalence).anonymise();
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/mission-equivalence`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/mission-equivalence`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -89,7 +88,7 @@ const rebuildMissionEquivalence = (missionEquivalenceInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(MissionEquivalencePatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -107,7 +106,7 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./missionEquivalence').manualHandler('2023-08-17', '2023-08-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(MissionEquivalencePatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 

@@ -19,6 +19,7 @@ import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
 import { fr } from "@codegouvfr/react-dsfr";
 import { SignupButtons, BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -104,6 +105,8 @@ export default function StepCoordonnees() {
   const [situationOptions, setSituationOptions] = useState([]);
   const [birthCitySuggestionsOpen, setBirthCitySuggestionsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -233,10 +236,6 @@ export default function StepCoordonnees() {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
-
   const updateWasBornInFrance = (newWasBornInFrance) => {
     if (newWasBornInFrance === "true") {
       setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), birthCountry: FRANCE });
@@ -338,6 +337,15 @@ export default function StepCoordonnees() {
     errors = { ...errors, ...getErrors() };
 
     setErrors(errors);
+
+    if (data.region === "Occitanie") {
+      setModalMessage(
+        "Le séjour d'octobre 2024 est déjà complet pour votre région, nous ne pouvons donc pas prendre en compte votre inscription. Nous avons vos coordonnées, vous serez donc averti en priorité dès l'ouverture des inscriptions pour les séjours 2025",
+      );
+      setShowModal(true);
+      setLoading(false);
+      return;
+    }
 
     if (!Object.keys(errors).length) {
       const updates = {};
@@ -441,6 +449,13 @@ export default function StepCoordonnees() {
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
         supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
         supportEvent="Phase0/aide inscription - coordonnees">
+        <div className="flex flex-col text-base w-fit rounded-md px-2 py-1 font-bold bg-[#E8EDFF] text-[#0063CB] px-4 py-2 mb-4">
+          <p className="mb-2 mt-2 font-bold">Attention !</p>
+          <p className="mb-2 text-sm md:text-base">
+            Dans la région Occitanie, compte tenu du nombre très élevé d'inscriptions, nous ne pouvons pas garantir votre participation au séjour d'octobre 2024. Vous serez informé
+            en priorité lors de l'ouverture des inscriptions pour les séjours 2025.
+          </p>
+        </div>
         <BooleanRadioButtons
           options={inFranceOrAbroadOptions}
           legend="Je suis né(e)..."
@@ -737,6 +752,16 @@ export default function StepCoordonnees() {
         )}
         <SignupButtons onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />
       </DSFRContainer>
+      <ModalConfirm
+        isOpen={showModal}
+        topTitle="Alerte"
+        title="Séjour complet pour votre région"
+        message={modalMessage}
+        onCancel={() => setShowModal(false)}
+        onConfirm={() => setShowModal(false)}
+        confirmText="Ok"
+        cancelText="Annuler"
+      />
     </>
   );
 }
