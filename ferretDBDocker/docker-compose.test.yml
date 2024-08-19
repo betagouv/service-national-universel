@@ -1,0 +1,12 @@
+services:
+  ferretdb:
+    image: ghcr.io/ferretdb/ferretdb
+    restart: on-failure
+    ports:
+      - 27017:27017
+    environment:
+      FERRETDB_POSTGRESQL_URL: url
+
+networks:
+  default:
+    name: ferretdb
