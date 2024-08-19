@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { COHESION_STAY_START } from "snu-lib";
 import api from "@/services/api";
 import { ROLES, translate } from "@/utils";
 
@@ -37,7 +36,7 @@ export default function Index() {
         // TODO: handle this in the backend
         const populatedSessions = await populateSessions(allSessions.data);
         const sessionFiltered = filterSessions(populatedSessions, user);
-        sessionFiltered.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
+        sessionFiltered.sort((a, b) => a.startDate - b.startDate);
 
         setCenter(centerResponse.data);
         setSessions(sessionFiltered);
@@ -72,8 +71,9 @@ function filterSessions(sessions, user) {
 
 async function populateSessions(sessions) {
   for (let i = 0; i < sessions.length; i++) {
-    const { schema } = await api.get(`/session-phase1/${sessions[i]._id}/schema-repartition`);
-    if (schema?.length === 0 && sessions[i].placesTotal - sessions[i].placesLeft === 0) {
+    const { data: ligneDeBus } = await api.get(`/session-phase1/${sessions[i]._id}/plan-de-transport`);
+    // aucune ligne de bus ne dessert ce centre dans le PDT
+    if (ligneDeBus?.length === 0 && sessions[i].placesTotal - sessions[i].placesLeft === 0) {
       sessions[i].canBeDeleted = true;
     } else {
       sessions[i].canBeDeleted = false;

@@ -1,16 +1,18 @@
-const express = require("express");
+import express, { Response } from "express";
+import Joi from "joi";
+import passport from "passport";
+
+import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone } from "snu-lib";
+
+import { CohortModel, ClasseModel, YoungModel, SessionPhase1Model } from "../models";
+import ClasseStateManager from "../cle/classe/stateManager";
+import { capture } from "../sentry";
+import { ERRORS, getFile, deleteFile } from "../utils";
+import { decrypt } from "../cryptoUtils";
+import { validateCohortDto } from "./cohortValidator";
+import { UserRequest } from "../controllers/request";
+
 const router = express.Router({ mergeParams: true });
-const Joi = require("joi");
-const passport = require("passport");
-
-const { ROLES, isSuperAdmin } = require("snu-lib");
-
-const CohortModel = require("../models/cohort");
-const SessionPhase1Model = require("../models/sessionPhase1");
-const { capture } = require("../sentry");
-const { ERRORS, getFile, deleteFile } = require("../utils");
-const { decrypt } = require("../cryptoUtils");
-const { validateCohortDto } = require("./cohortValidator");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
@@ -19,7 +21,7 @@ const exportDateKeys = [EXPORT_COHESION_CENTERS, EXPORT_YOUNGS_BEFORE_SESSION, E
 
 const xlsxMimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: exportDateKeyError, value: exportDateKey } = Joi.string()
       .valid(...exportDateKeys)
@@ -74,12 +76,12 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    if (cohort.dsnjExportDates[exportDateKey]) {
-      await deleteFile(`dsnj/${cohort.snuId}/${exportDateKey}.xlsx`);
-    }
-
     if (!cohort.dsnjExportDates) {
       cohort.dsnjExportDates = {};
+    }
+
+    if (cohort.dsnjExportDates[exportDateKey]) {
+      await deleteFile(`dsnj/${cohort.snuId}/${exportDateKey}.xlsx`);
     }
 
     cohort.dsnjExportDates[exportDateKey] = date;
@@ -93,7 +95,7 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
   }
 });
 
-router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       type: Joi.string(),
@@ -114,7 +116,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
   }
 });
 
-router.get("/:cohort", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/:cohort", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -133,7 +135,7 @@ router.get("/:cohort", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
-router.get("/bysession/:sessionId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/bysession/:sessionId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       sessionId: Joi.string().required(),
@@ -148,7 +150,7 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    const cohort = await CohortModel.findOne({ name: session.cohort });
+    const cohort = await CohortModel.findById(session.cohortId);
     if (!cohort) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
@@ -160,7 +162,7 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
   }
 });
 
-router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req, res) => {
+router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req: UserRequest, res: Response) => {
   try {
     const { error: exportDateKeyError, value: exportKey } = Joi.string()
       .valid(...exportDateKeys)
@@ -184,8 +186,8 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey].setHours(0, 0, 0, 0));
-    const exportAvailableUntil = new Date(cohort.dsnjExportDates[exportKey]);
+    const exportAvailableFrom = new Date(cohort.dsnjExportDates![exportKey].setHours(0, 0, 0, 0));
+    const exportAvailableUntil = new Date(cohort.dsnjExportDates![exportKey]);
     exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
     const now = new Date();
 
@@ -210,7 +212,7 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       fileName = `DSNJ - Fichier volontaire avec validation-${cohort.snuId}-${formattedDate}.xlsx`;
     }
 
-    const decryptedBuffer = decrypt(file.Body);
+    const decryptedBuffer = decrypt(file.Body) as any;
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
@@ -224,7 +226,7 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
   }
 });
 
-router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }), async (req, res) => {
+router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
   try {
     const { error: idError, value: cohortName } = Joi.string().required().validate(req.params.cohort, { stripUnknown: true });
     if (idError) {
@@ -252,11 +254,15 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
         body[key] = date;
       }
     });
+    const oldCohort = {
+      inscriptionStartDate: cohort.inscriptionStartDate,
+      inscriptionEndDate: cohort.inscriptionEndDate,
+    };
 
     cohort.set({
+      ...body,
       dateStart: formatDateTimeZone(body.dateStart),
       dateEnd: formatDateTimeZone(body.dateEnd),
-      ...body,
     });
 
     if (body.pdrChoiceLimitDate) cohort.pdrChoiceLimitDate = formatDateTimeZone(body.pdrChoiceLimitDate);
@@ -264,18 +270,18 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     if (body.validationDateForTerminaleGrade) cohort.validationDateForTerminaleGrade = formatDateTimeZone(body.validationDateForTerminaleGrade);
 
     await cohort.save({ fromUser: req.user });
+
+    if (cohort.type === COHORT_TYPE.CLE && (oldCohort.inscriptionStartDate !== cohort.inscriptionStartDate || oldCohort.inscriptionEndDate !== cohort.inscriptionEndDate)) {
+      const classes = await ClasseModel.find({ cohortId: cohort._id });
+      for (const c of classes) {
+        await ClasseStateManager.compute(c._id, req.user, { YoungModel });
+      }
+    }
     return res.status(200).send({ ok: true, data: cohort });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-const formatDateTimeZone = (date) => {
-  //set timezone to UTC
-  let d = new Date(date);
-  d.toISOString();
-  return d;
-};
 
 module.exports = router;

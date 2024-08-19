@@ -67,7 +67,7 @@ resource "scaleway_registry_namespace" "main" {
   is_public   = false
 }
 
-# Application user
+# Deploy application user
 resource "scaleway_iam_application" "main" {
   name        = "snu-deploy-${local.env}"
   description = "Application allowed to deploy apps in '${local.env}'"
@@ -93,6 +93,26 @@ resource "scaleway_iam_policy" "deploy" {
   }
 }
 
+# GetSecret application user
+resource "scaleway_iam_application" "get_secret" {
+  name        = "snu-get-secret-${local.env}"
+  description = "Application allowed to retrieve secrets in '${local.env}'"
+}
+
+# GetSecret policy
+resource "scaleway_iam_policy" "get_secret" {
+  name           = "snu-get-secret-${local.env}-policy"
+  description    = "Allow to retrieve secrets in '${local.env}'"
+  application_id = scaleway_iam_application.get_secret.id
+  rule {
+    project_ids = [scaleway_account_project.main.id]
+    permission_set_names = [
+      "SecretManagerReadOnly",
+      "SecretManagerSecretAccess",
+    ]
+  }
+}
+
 # Containers namespace
 resource "scaleway_container_namespace" "main" {
   project_id  = scaleway_account_project.main.id
@@ -108,13 +128,6 @@ resource "scaleway_container_namespace" "custom" {
 
 # Containers
 
-# DNS zone
-resource "scaleway_domain_zone" "main" {
-  project_id = scaleway_account_project.main.id
-  domain     = local.domain
-  subdomain  = ""
-}
-
 resource "scaleway_container" "api" {
   name            = "${local.env}-api"
   namespace_id    = scaleway_container_namespace.main.id
@@ -129,27 +142,45 @@ resource "scaleway_container" "api" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
-    "NODE_ENV"    = "ci"
+    "NODE_ENV"       = "ci"
   }
 
   secret_environment_variables = {
-    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
-
-resource "scaleway_domain_record" "api" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "api"
-  type     = "CNAME"
-  data     = "${scaleway_container.api.domain_name}."
-  ttl      = 3600
 }
 
 resource "scaleway_container_domain" "api" {
   container_id = scaleway_container.api.id
   hostname     = local.api_hostname
+}
+
+
+resource "scaleway_container" "tasks" {
+  name           = "${local.env}-tasks"
+  namespace_id   = scaleway_container_namespace.main.id
+  registry_image = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
+  port           = 8080
+  cpu_limit      = 1024
+  memory_limit   = 2048
+  min_scale      = 1
+  max_scale      = 1
+  privacy        = "public"
+  protocol       = "http1"
+  deploy         = true
+  http_option    = "redirected"
+
+  environment_variables = {
+    "NODE_ENV"       = "ci"
+    "RUN_TASKS"      = "true"
+  }
+
+  secret_environment_variables = {
+    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  }
 }
 
 
@@ -168,19 +199,12 @@ resource "scaleway_container" "admin" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NGINX_HOSTNAME" = local.admin_hostname
     "ENVIRONMENT"    = "ci"
   }
-}
-
-resource "scaleway_domain_record" "admin" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "admin"
-  type     = "CNAME"
-  data     = "${scaleway_container.admin.domain_name}."
-  ttl      = 3600
 }
 
 resource "scaleway_container_domain" "admin" {
@@ -202,19 +226,12 @@ resource "scaleway_container" "app" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NGINX_HOSTNAME" = local.app_hostname
     "ENVIRONMENT"    = "ci"
   }
-}
-
-resource "scaleway_domain_record" "app" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "moncompte"
-  type     = "CNAME"
-  data     = "${scaleway_container.app.domain_name}."
-  ttl      = 3600
 }
 
 resource "scaleway_container_domain" "app" {

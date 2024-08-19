@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat
 RUN apk update
 # Set working directory
 WORKDIR /app
-RUN npm install --global turbo
+RUN npm install --global turbo@^1.13.3
 COPY . .
 ENV APP_NAME api
 RUN turbo prune $APP_NAME --docker
@@ -38,11 +38,9 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-RUN addgroup --system --gid 1001 expressjs
-RUN adduser --system --uid 1001 expressjs
-USER expressjs
+RUN apk --no-cache add bash mongodb-tools jq curl util-linux rsyslog rsyslog-elasticsearch rsyslog-mmjsonparse
 
-COPY --chown=expressjs:expressjs --from=installer /app .
+COPY --from=installer /app .
 
 LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel" \
       org.opencontainers.image.description="This image provides a consistent and reproducible environment for the backend, ensuring it deploys faster and runs the same way regardless of the deployment environment."
@@ -52,8 +50,12 @@ ENV PORT 8080
 ENV HOST 0.0.0.0
 ARG RELEASE=""
 ENV RELEASE=${RELEASE}
-ENV NODE_CONFIG_DIR=./api/config
+ENV NODE_CONFIG_DIR=/app/api/config
+
+ENV PATH=/app/node_modules/pm2/bin/:$PATH
 
 EXPOSE $PORT
 
-CMD ["node", "api/src/index.js"]
+RUN pm2 install --docker pm2-slack
+
+CMD ["api/docker_start.sh"]

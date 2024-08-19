@@ -20,7 +20,6 @@ import DesignSystemPage from "./scenes/develop/DesignSystemPage";
 import DSNJExport from "./scenes/dsnj-export";
 import EditTransport from "./scenes/edit-transport";
 import Goal from "./scenes/goal";
-import Inbox from "./scenes/inbox";
 import Inscription from "./scenes/inscription";
 import Missions from "./scenes/missions";
 import LigneBus from "./scenes/plan-transport/ligne-bus";
@@ -58,7 +57,7 @@ import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
-import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
+import { ROLES, ROLES_LIST } from "./utils";
 
 import ModalCGU from "./components/modals/ModalCGU";
 import "./index.css";
@@ -71,6 +70,8 @@ import useRefreshToken from "./hooks/useRefreshToken";
 import SideBar from "./components/drawer/SideBar";
 import ApplicationError from "./components/layout/ApplicationError";
 import NotFound from "./components/layout/NotFound";
+import { getDefaultSession } from "./utils/session";
+import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
 
 initSentry();
 initApi();
@@ -89,6 +90,7 @@ export default function App() {
               <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
               <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
               <SentryRoute path="/creer-mon-compte" component={Signup} />
+              <SentryRoute path="/verifier-mon-compte" component={Signup} />
               {/* Authentification accessoire */}
               <SentryRoute path="/auth" component={Auth} />
               {/* Page par default (404 et Home) */}
@@ -104,6 +106,7 @@ export default function App() {
 const Home = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Auth.cohorts);
   const { pathname, search } = useLocation();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
@@ -138,10 +141,10 @@ const Home = () => {
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
         const cohorts = await getCohorts();
-        if (cohorts) dispatch({ type: "SET_COHORTS", payload: cohorts });
+        if (cohorts) dispatch({ type: COHORTS_ACTIONS.SET_COHORTS, payload: cohorts });
 
         //Load session phase 1 for head center before stop loading
-        if (res.user.role !== ROLES.HEAD_CENTER) setLoading(false);
+        if (res.user?.role !== ROLES.HEAD_CENTER) setLoading(false);
       } catch (e) {
         console.log(e);
         setLoading(false);
@@ -161,17 +164,8 @@ const Home = () => {
           const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
           if (!ok) return console.log(`Error: ${code}`);
 
-          const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
-          const now = new Date();
-          now.setHours(0, 0, 0, 0);
-
-          // on regarde la session la plus proche dans le futur qui ne sait pas terminé il y a plus de 3 jours
-          // i.e. une session est considérée terminée 3 jours après la date de fin du séjour
-          const activeSession =
-            sessions.find((s) => {
-              const limit = COHESION_STAY_END[s.cohort].setDate(COHESION_STAY_END[s.cohort].getDate() + 3);
-              return limit >= now;
-            }) || sessions[sessions.length - 1];
+          const sessions = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          const activeSession = getDefaultSession(sessions, cohorts);
 
           setSessionPhase1List(sessions.reverse());
           dispatch(setSessionPhase1(activeSession));
@@ -235,7 +229,6 @@ const Home = () => {
                 <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
                 <RestrictedRoute path="/association" component={Association} />
                 <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
-                <RestrictedRoute path="/boite-de-reception" component={Inbox} />
                 <RestrictedRoute path="/equipe" component={Team} />
                 <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
                 {/* Plan de transport */}
@@ -256,7 +249,9 @@ const Home = () => {
                 <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
                 <RestrictedRoute path="/mes-contacts" component={Contact} />
                 {/* Only for developper eyes... */}
-                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} /> : null}
+                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? (
+                  <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />
+                ) : null}
                 {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
                 {/* DASHBOARD */}
                 <RestrictedRoute path="/dashboard" component={renderDashboardV2} />

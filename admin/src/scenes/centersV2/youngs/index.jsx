@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 
-import { COHORTS_BEFORE_JULY_2023, download, getDepartmentNumber } from "snu-lib";
+import { COHORTS_WITH_JDM_COUNT, download, getDepartmentNumber } from "snu-lib";
 
 import Bus from "@/assets/icons/Bus";
 import ClipboardList from "@/assets/icons/ClipboardList";
@@ -279,7 +279,7 @@ export default function CenterYoungIndex() {
       }, {}),
     });
     const result = await transformData({ data: data.data, centerId: id });
-    if (!COHORTS_BEFORE_JULY_2023.includes(result[0]?.Cohorte)) {
+    if (!COHORTS_WITH_JDM_COUNT.includes(result[0]?.Cohorte)) {
       result.forEach((item) => {
         delete item["Présence à la JDM"];
       });

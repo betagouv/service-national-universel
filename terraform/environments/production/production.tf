@@ -51,20 +51,20 @@ resource "scaleway_container" "api" {
   port            = 8080
   cpu_limit       = 1024
   memory_limit    = 2048
-  min_scale       = 4
+  min_scale       = 0
   max_scale       = 20
   timeout         = 60
-  max_concurrency = 50
+  max_concurrency = 25
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NODE_ENV"       = "production"
   }
 
   secret_environment_variables = {
-    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }
@@ -83,13 +83,14 @@ resource "scaleway_container" "admin" {
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
-  min_scale       = 1
-  max_scale       = 1
+  min_scale       = 0
+  max_scale       = 20
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NGINX_HOSTNAME" = local.admin_hostname
@@ -109,13 +110,14 @@ resource "scaleway_container" "app" {
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
-  min_scale       = 1
-  max_scale       = 1
+  min_scale       = 0
+  max_scale       = 20
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NGINX_HOSTNAME" = local.app_hostname
@@ -133,18 +135,24 @@ resource "scaleway_container" "antivirus" {
   namespace_id    = scaleway_container_namespace.production.id
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/antivirus:${var.antivirus_image_tag}"
   port            = 8089
-  cpu_limit       = 256
+  cpu_limit       = 1024
   memory_limit    = 4096
-  min_scale       = 1
+  min_scale       = 0
   max_scale       = 5
   timeout         = 60
   max_concurrency = 50
-  privacy         = "private"
+  privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "APP_NAME" = "antivirus"
+  }
+  secret_environment_variables = {
+    "SENTRY_URL"     = local.secrets.SENTRY_URL
+    "SECRET_API_KEY" = local.secrets.API_ANTIVIRUS_KEY
+    "JWT_SECRET"     = local.secrets.JWT_SECRET
   }
 }
 
@@ -153,24 +161,29 @@ resource "scaleway_container_domain" "antivirus" {
   hostname     = local.antivirus_hostname
 }
 
-resource "scaleway_container" "crons" {
-  name           = "production-crons"
+resource "scaleway_container" "tasks" {
+  name           = "production-tasks"
   namespace_id   = scaleway_container_namespace.production.id
   registry_image = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port           = 8080
   cpu_limit      = 1024
-  memory_limit   = 1024
-  min_scale      = 1
+  memory_limit   = 2048
+  min_scale      = 0
   max_scale      = 1
-  privacy        = "private"
+  privacy        = "public"
   protocol       = "http1"
   deploy         = true
+  http_option    = "redirected"
 
-  environment_variables = merge(scaleway_container.api.environment_variables, {
-    "RUN_CRONS" = "true"
-  })
+  environment_variables = {
+    "NODE_ENV"       = "production"
+    "RUN_CRONS"      = "false"
+    "RUN_TASKS"      = "true"
+  }
 
-  secret_environment_variables = scaleway_container.api.secret_environment_variables
+  secret_environment_variables = {
+    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  }
 }
 
 output "api_endpoint" {
@@ -182,8 +195,8 @@ output "api_image_tag" {
 output "api_container_status" {
   value = scaleway_container.api.status
 }
-output "crons_container_status" {
-  value = scaleway_container.crons.status
+output "tasks_container_status" {
+  value = scaleway_container.tasks.status
 }
 
 output "app_endpoint" {

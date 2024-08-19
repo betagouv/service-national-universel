@@ -13,6 +13,7 @@ import FileImport from "@/components/dsfr/forms/FileImport";
 import Verify from "./VerifyDocument";
 import plausibleEvent from "@/services/plausible";
 import { SignupButtons } from "@snu/ds/dsfr";
+import { set } from "date-fns";
 
 export default function StepUploadDesktop({
   recto,
@@ -34,13 +35,16 @@ export default function StepUploadDesktop({
 }) {
   const young = useSelector((state) => state.Auth.young);
   const [hasChanged, setHasChanged] = useState(false);
-  const isEnabled = validate();
   const [step, setStep] = useState(0);
   const history = useHistory();
   const imageFileTypes = ["image/jpeg", "image/png", "image/jpg"];
+  const isEnabled = validate();
 
   function validate() {
     if (!dayjs(date).isValid()) {
+      return false;
+    }
+    if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) {
       return false;
     }
     if (corrections?.length) {
@@ -113,7 +117,7 @@ export default function StepUploadDesktop({
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>
 
-      {young.files.cniFiles?.length > 0 && (
+      {young?.files?.cniFiles?.length > 0 && (
         <>
           <hr className="my-8" />
           <MyDocs />
@@ -162,6 +166,17 @@ export default function StepUploadDesktop({
 
 function ExpirationDate({ date, setDate, onChange, corrections, category }) {
   const young = useSelector((state) => state.Auth.young);
+  const [error, setError] = useState(false);
+
+  const handleChange = (date) => {
+    setDate(date);
+    onChange && onChange();
+
+    if (!date) return setError("Veuillez renseigner une date d'expiration.");
+    if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) return setError("Veuillez renseigner une date d'expiration valide. Elle doit être comprise entre 1990 et 2070.");
+    setError(false);
+  };
+
   return (
     <>
       <hr className="my-8" />
@@ -191,11 +206,11 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
         <label className="flex-start mt-2 flex w-full flex-col text-base">
           Date d&apos;expiration
           <DatePicker
-            displayError
+            state={error ? "error" : "default"}
+            errorText={error}
             initialValue={date}
             onChange={(date) => {
-              setDate(date);
-              onChange && onChange();
+              handleChange(date);
             }}
           />
         </label>

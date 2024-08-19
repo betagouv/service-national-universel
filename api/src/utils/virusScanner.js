@@ -1,36 +1,61 @@
 // virusScanner.js
 const config = require("config");
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const fetch = require("node-fetch");
-const FormData = require('form-data');
-const { createReadStream } = require('fs');
+const FormData = require("form-data");
+const { createReadStream } = require("fs");
 const { timeout } = require("../utils");
 const { ERRORS } = require("./index");
 
 const TIMEOUT_ANTIVIRUS_SERVICE = 20000;
 
-async function scanFile(tempFilePath, name, userId="anonymous") {
+async function getAccessToken(endpoint, apiKey) {
+  const response = await fetch(`${endpoint}/auth/token`, {
+    method: "GET",
+    redirect: "follow",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "User-Agent": "*",
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+    },
+  });
+
+  const data = await response.json();
+  if (data.ok == true && data.token) {
+    return data.token;
+  } else {
+    throw new Error("Couldn't retrieve auth token");
+  }
+}
+
+async function scanFile(tempFilePath, name, userId = "anonymous") {
+  if (!config.get("ENABLE_ANTIVIRUS")) {
+    return { infected: false };
+  }
 
   const scan = async () => {
+    const token = await getAccessToken(config.API_ANTIVIRUS_ENDPOINT, config.API_ANTIVIRUS_KEY);
+
     const stream = createReadStream(tempFilePath);
     const url = `${config.API_ANTIVIRUS_ENDPOINT}/scan`;
 
     const formData = new FormData();
-    formData.append('file', stream);
+    formData.append("file", stream);
 
-    const headers = formData.getHeaders()
-    headers["X-Auth-Token"] = config.API_ANTIVIRUS_TOKEN
+    const headers = formData.getHeaders();
+    headers["x-access-token"] = token;
 
-    const response = await fetch(url, { method: 'POST', body: formData, headers });
+    const response = await fetch(url, { method: "POST", body: formData, headers });
 
     if (response.status != 200) {
       throw new Error(ERRORS.FILE_SCAN_BAD_RESPONSE);
     }
 
-    const { infected } = await response.json()
+    const { infected } = await response.json();
 
     if (infected) {
-      capture(`File ${name} of user(${userId}) is infected`);
+      captureMessage(`File ${name} of user(${userId}) is infected`);
     }
 
     return { infected };

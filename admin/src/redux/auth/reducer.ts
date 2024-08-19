@@ -16,7 +16,7 @@ export type AuthState = {
 
 const SS_KEY_PREVIOUS_SIGNIN = "previousSigninToken";
 
-const initState = {
+const INITIAL_STATE = {
   user: null,
   structure: null,
   sessionPhase1: null,
@@ -24,7 +24,7 @@ const initState = {
   previousSigninToken: null,
 };
 
-export default function reducer(state = initState, action) {
+export default function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {
     case authActions.SETUSER:
       // eslint-disable-next-line no-case-declarations

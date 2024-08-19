@@ -5,8 +5,7 @@ import { toastr } from "react-redux-toastr";
 
 import ExternalLink from "@/assets/icons/ExternalLink";
 
-import { ROLES, getDepartmentNumber, COHORT_TYPE } from "snu-lib";
-import { CohortDto } from "snu-lib/src/dto/cohortDto";
+import { ROLES, getDepartmentNumber, COHORT_TYPE, CohortDto } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import { User } from "@/types";
@@ -63,9 +62,6 @@ export default function DetailTable({ rows, className, loading, isNational, onGo
       setExportLoading(false);
     }
   };
-
-  //console.log("const", isUserAuthorizedToExportData);
-  //console.log("condition", (!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER);
 
   return (
     <Box className={className}>

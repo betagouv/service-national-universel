@@ -10,10 +10,9 @@ import Error from "../../../components/error";
 import queryString from "query-string";
 import { useHistory } from "react-router-dom";
 import { BsShieldLock } from "react-icons/bs";
-import { isValidRedirectUrl } from "snu-lib";
+import { isValidRedirectUrl, DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
 import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
-import { DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN = DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS / 60 / 1000;
 

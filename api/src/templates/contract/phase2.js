@@ -2,6 +2,7 @@ const path = require("path");
 const PDFDocument = require("pdfkit");
 const config = require("config");
 const { formatDateFRTimezoneUTC } = require("snu-lib");
+const { withPipeStream } = require("../utils");
 
 const FONT = "Marianne";
 const FONT_BOLD = `${FONT}-Bold`;
@@ -725,9 +726,9 @@ function generateContractPhase2(outStream, contract) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument();
-  doc.pipe(outStream);
-  render(doc, contract);
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    render(doc, contract);
+  });
   console.timeEnd("RENDERING " + random);
 }
 

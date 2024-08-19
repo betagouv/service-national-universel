@@ -2,9 +2,9 @@ const XLSX = require("xlsx");
 const { getDepartmentNumber, getDepartureDate, PHONE_ZONES } = require("snu-lib");
 const dayjs = require("dayjs");
 
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const CohesionCenterModel = require("../../models/cohesionCenter");
-const YoungModel = require("../../models/young");
+const { SessionPhase1Model } = require("../../models");
+const { CohesionCenterModel } = require("../../models");
+const { YoungModel } = require("../../models");
 
 const { uploadFile } = require("../../utils");
 const { encrypt } = require("../../cryptoUtils");
@@ -61,7 +61,7 @@ const printSlackInfo = (rapport) => {
 };
 
 const generateCohesionCentersExport = async (cohort, action = "upload") => {
-  const sessions = await SessionPhase1Model.find({ cohort: cohort.name }).select({ cohesionCenterId: 1, _id: 0 });
+  const sessions = await SessionPhase1Model.find({ cohortId: cohort._id }).select({ cohesionCenterId: 1, _id: 0 });
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({
     _id: 1,
@@ -101,7 +101,7 @@ const generateCohesionCentersExport = async (cohort, action = "upload") => {
 };
 
 const generateYoungsExport = async (cohort, afterSession = false, action = "upload") => {
-  const sessions = await SessionPhase1Model.find({ cohort: cohort.name }).select({ _id: 1, cohesionCenterId: 1, dateStart: 1 });
+  const sessions = await SessionPhase1Model.find({ cohortId: cohort._id }).select({ _id: 1, cohesionCenterId: 1, dateStart: 1 });
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({ _id: 1, name: 1, code2022: 1 });
   const cohesionCenterParSessionId = {};

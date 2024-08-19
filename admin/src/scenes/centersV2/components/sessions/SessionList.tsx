@@ -1,27 +1,31 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import cx from "classnames";
+import ReactTooltip from "react-tooltip";
+import { MdOutlineDangerous } from "react-icons/md";
+import { toastr } from "react-redux-toastr";
 
-import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen, canEditSanitaryEmailContact, patternEmailAcademy, validateEmailAcademique } from "snu-lib";
-import ModalConfirmDelete from "../ModalConfirmDelete";
+import { Container, InputText, InputNumber, Label, ModalConfirmation } from "@snu/ds/admin";
+
+import { canCreateOrUpdateCohesionCenter, canPutSpecificDateOnSessionPhase1, isSessionEditionOpen } from "snu-lib";
 import { capture } from "@/sentry";
-import { canCreateOrUpdateCohesionCenter } from "@/utils";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
 import Pencil from "@/assets/icons/Pencil";
-
-import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
-import SelectCohort from "@/components/cohorts/SelectCohort";
-import { Container, InputText, InputNumber, Label } from "@snu/ds/admin";
-import { Title } from "../commons";
-import TimeSchedule from "../TimeSchedule";
-import PedagoProject from "../PedagoProject";
-import { toastr } from "react-redux-toastr";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { AuthState } from "@/redux/auth/reducer";
 import { Center, Session } from "@/types";
 import Trash from "@/assets/icons/Trash";
 import SessionHorizontalBar from "@/scenes/dashboardV2/components/graphs/SessionHorizontalBar";
+
+import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
+import { Title } from "../commons";
+import TimeSchedule from "../TimeSchedule";
+import PedagoProject from "../PedagoProject";
+import { getDefaultSession } from "@/utils/session";
 
 type Props = {
   center: Center;
@@ -29,13 +33,6 @@ type Props = {
   sessions: Session[];
   setSessions: React.Dispatch<React.SetStateAction<Session[]>>;
 };
-
-interface ModalDeleteProps {
-  isOpen: boolean;
-  title: string;
-  message: string;
-  onDelete: () => void;
-}
 
 type Errors = {
   [key: string]: string;
@@ -45,22 +42,18 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const history = useHistory();
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const user = useSelector((state: AuthState) => state.Auth.user);
-  const selectedCohort = new URLSearchParams(location.search).get("cohorte") || sessions[0]?.cohort;
-  const cohort = cohorts.find((cohort) => cohort.name === selectedCohort) || cohorts[0];
-  const session = sessions.find((session) => session.cohort === selectedCohort) || sessions[0];
-  const setSession = (newSession: Session) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
 
-  console.log(cohort);
+  const cohortParam = new URLSearchParams(location.search).get("cohorte");
+  const session = cohortParam ? sessions.find((session) => session.cohort === cohortParam) : getDefaultSession(sessions, cohorts);
+  const cohort = cohorts.find((cohort) => cohort.name === session?.cohort);
+  const setSession = (newSession: Session) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
 
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState<Session | null>(null);
   const [errors, setErrors] = useState<Errors>({});
-  const [modalDelete, setModalDelete] = useState<ModalDeleteProps | null>({
-    isOpen: false,
-    title: "",
-    message: "",
-    onDelete: () => {},
-  });
+  const [showModalDelete, setShowModalDelete] = useState(false);
+
+  if (!session || !cohort) return <div></div>;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,7 +67,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     } else if (values.placesTotal < session.placesTotal - session.placesLeft) {
       errorsObject.placesTotal = "Le nombre de places total est inférieur au nombre d'inscrits";
     }
-    if (values.dateStart && values.dateEnd && values.dateStart > values.dateEnd) {
+    if (values.dateStart && values.dateEnd && new Date(values.dateStart) > new Date(values.dateEnd)) {
       errorsObject.date = "La date de début doit être antérieure à la date de fin";
     }
     if (Object.keys(errorsObject).length > 0) {
@@ -112,7 +105,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
         return;
       }
       setLoading(false);
-      setModalDelete((current) => (current ? { ...current, isOpen: false } : null));
+      setShowModalDelete(false);
       setCenter({ ...center, cohorts: center.cohorts.filter((cohort) => cohort !== session.cohort) });
       setSessions(sessions.filter((s) => s._id !== session._id));
       history.push({ search: `?cohorte=${center.cohorts[0]}` });
@@ -120,7 +113,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     } catch (e) {
       capture(e);
       setLoading(false);
-      setModalDelete((current) => (current ? { ...current, isOpen: false } : null));
+      setShowModalDelete(false);
       toastr.error("Oups, une erreur est survenue lors de la suppression de la session", "");
     }
   };
@@ -132,8 +125,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     } else {
       setValues({
         ...values,
-        dateStart: session?.dateStart || cohort?.dateStart || new Date().toDateString(),
-        dateEnd: session?.dateEnd || cohort?.dateEnd || new Date().toDateString(),
+        dateStart: session?.dateStart || cohort?.dateStart?.toString() || new Date().toString(),
+        dateEnd: session?.dateEnd || cohort?.dateEnd?.toString() || new Date().toString(),
       });
     }
   };
@@ -147,7 +140,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
       <form onSubmit={handleSubmit} id="session-form">
         <div className="flex items-center justify-between mb-3">
           <Title>Par séjour</Title>
-          <SelectCohort cohort={selectedCohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} key="selectCohort" />
+          <SelectCohort cohort={session?.cohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} key="selectCohort" />
         </div>
         <Container
           title="Détails"
@@ -188,13 +181,6 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
               </>
             ),
           ]}>
-          <ModalConfirmDelete
-            isOpen={modalDelete?.isOpen || false}
-            title={modalDelete?.title || ""}
-            message={modalDelete?.message || ""}
-            onCancel={() => setModalDelete((current) => (current ? { ...current, isOpen: false } : null))}
-            onDelete={modalDelete?.onDelete || (() => {})}
-          />
           <div className="flex flex-row">
             <div className="w-[45%]">
               <div className="rounded-lg bg-white mb-4">
@@ -308,24 +294,41 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                   </div>
                 </div>
               </div>
-              {/* sera peut-être à remettre ne pas supprimer de suite */}
-              {/* {canCreateOrUpdateCohesionCenter(user) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    session.canBeDeleted &&
-                      setModalDelete({
-                        isOpen: true,
-                        title: "Supprimer la session",
-                        message: "Êtes-vous sûr de vouloir supprimer cette session?",
-                        onDelete: handleSessionDelete,
-                      });
-                  }}
-                  className={`mt-3 flex w-full flex-row items-center justify-end gap-2 ${session.canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>
-                  <Trash className={session.canBeDeleted ? "text-red-400" : "text-gray-400"} width={14} height={14} />
-                  <div className={`${session.canBeDeleted ? "text-gray-800" : "text-gray-500"} text-xs`}>Supprimer le séjour</div>
-                </button>
-              )} */}
+              {canCreateOrUpdateCohesionCenter(user) && (
+                <div data-tip="" data-for="tooltip-delete-session">
+                  {!session.canBeDeleted && (
+                    <ReactTooltip id="tooltip-delete-session" className="bg-white text-black shadow-xl" arrowColor="white" disable={false}>
+                      <div className="text-[black]">Des jeunes sont encore associés à ce séjour ou une ligne de bus dessert ce centre dans le PDT</div>
+                    </ReactTooltip>
+                  )}
+                  <button
+                    type="button"
+                    disabled={!session.canBeDeleted}
+                    onClick={() => {
+                      session.canBeDeleted && setShowModalDelete(true);
+                    }}
+                    className={cx("mt-3 flex w-full flex-row items-center justify-end gap-2", { "cursor-pointer": session.canBeDeleted })}>
+                    <Trash className={cx({ "text-red-400": session.canBeDeleted, "text-gray-400": !session.canBeDeleted })} width={14} height={14} />
+                    <div className={cx("text-xs", { "text-gray-800": session.canBeDeleted, "text-gray-500": !session.canBeDeleted })}>Supprimer le séjour</div>
+                  </button>
+                  <ModalConfirmation
+                    isOpen={showModalDelete}
+                    onClose={() => setShowModalDelete(false)}
+                    className="md:max-w-[700px]"
+                    title="Supprimer la session"
+                    text="Êtes-vous sûr de vouloir supprimer cette session ?"
+                    actions={[
+                      { title: "Annuler", isCancel: true },
+                      {
+                        title: "Confirmer",
+                        leftIcon: <MdOutlineDangerous size={20} />,
+                        onClick: () => handleSessionDelete(),
+                        isDestructive: true,
+                      },
+                    ]}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </Container>

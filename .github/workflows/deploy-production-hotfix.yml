@@ -37,19 +37,6 @@ jobs:
           ref: ${{ steps.target_branch.outputs.target_branch }}
           fetch-depth: 0
 
-      - name: Check differences
-        run: |
-          git fetch origin ${{ env.production_branch }}
-          diff=$(git --no-pager diff --no-patch --raw origin/${{ env.production_branch }})
-          if [[ "$diff" ]]
-          then
-            echo "https://github.com/betagouv/service-national-universel/compare/${{ env.production_branch }}...${{ steps.target_branch.outputs.target_branch }}"
-            echo "$diff"
-          else
-            echo "No difference with ${{ env.production_branch }} branch. Aborting"
-            exit 1
-          fi
-
       - name: Prepare
         id: prepare
         run: |
@@ -83,8 +70,15 @@ jobs:
       branch_name: ${{ needs.prepare.outputs.branch_name }}
     secrets: inherit
 
+  run_tests_lib:
+    needs: prepare
+    uses: ./.github/workflows/run-tests-lib.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.branch_name }}
+    secrets: inherit
+
   build:
-    needs: [prepare, run_tests_api, run_tests_front]
+    needs: [prepare, run_tests_api, run_tests_front, run_tests_lib]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -168,6 +162,9 @@ jobs:
         shell: bash
         working-directory: ${{ env.staging_directory }}
         run: |
+          # Sleep because status can still be an error if the previous deployement failed
+          sleep 10s
+
           failure=false
           while read name
           do
@@ -253,6 +250,9 @@ jobs:
         shell: bash
         working-directory: ${{ env.prod_directory }}
         run: |
+          # Sleep because status can still be an error if the previous deployement failed
+          sleep 10s
+
           failure=false
           while read name
           do
@@ -267,7 +267,7 @@ jobs:
           admin
           api
           antivirus
-          crons'
+          tasks'
 
           if $failure
           then
@@ -285,4 +285,5 @@ jobs:
       api_image_tag: ${{ needs.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ needs.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ needs.prepare.outputs.app_image_tag }}
+      antivirus_image_tag: ${{ needs.prepare.outputs.antivirus_image_tag }}
     secrets: inherit

@@ -2,4 +2,10 @@ module.exports = {
   ENVIRONMENT: "development",
   SENTRY_PROFILE_SAMPLE_RATE: 1.0,
   SENTRY_TRACING_SAMPLE_RATE: 1.0,
+  ENABLE_FLATTEN_ERROR_LOGS: false,
+  TASK_MONITOR_ENABLE_AUTH: false,
+  ENABLE_ANTIVIRUS: false,
+  ENABLE_SENTRY: false,
+  TASK_QUEUE_PREFIX: "dev",
+  RELEASE: "dev",
 };

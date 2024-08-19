@@ -1,22 +1,24 @@
-import { COHORT_TYPE } from "snu-lib";
 import { COHORTS_ACTIONS } from "./actions";
+import { CohortDto } from "snu-lib";
 
-const initialState = [];
+const INITIAL_STATE: CohortDto[] = [];
 
 export type CohortState = {
   // TODO: use API route response
-  Cohorts: {
-    name: string;
-    dateStart: string;
-    dateEnd: string;
-    type: (typeof COHORT_TYPE)[keyof typeof COHORT_TYPE];
-  }[];
+  Cohorts: CohortDto[];
 };
 
-const reducer = (oldState = initialState, action) => {
+const reducer = (oldState = INITIAL_STATE, action) => {
   switch (action.type) {
     case COHORTS_ACTIONS.SET_COHORTS:
       return action.payload.sort((a, b) => new Date(b.dateStart).getTime() - new Date(a.dateEnd).getTime());
+    case COHORTS_ACTIONS.UPDATE_COHORT:
+      return oldState.map((cohort) => {
+        if (cohort._id === action.payload._id) {
+          return action.payload;
+        }
+        return cohort;
+      });
     default:
       return oldState;
   }

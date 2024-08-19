@@ -1,0 +1,40 @@
+{
+  "aliases": {},
+  "mappings": {
+    "properties": {
+      "__v": {
+        "type": "long"
+      },
+      "capacity": {
+        "type": "long"
+      },
+      "cohort": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "idExcel": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "placesLeft": {
+        "type": "long"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  }
+}

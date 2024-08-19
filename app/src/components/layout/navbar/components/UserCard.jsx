@@ -94,11 +94,6 @@ function Menu({ open, menuRef, young, onClose, ticketsInfo }) {
       <Link to="/account" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
         Mon profil
       </Link>
-      {permissionPhase2(young) && (
-        <Link to="/preferences" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
-          Mes préférences de mission
-        </Link>
-      )}
       {ticketsInfo.hasMessage === true && (
         <Link to="/echanges" onClick={onClose} className="flex items-center justify-between gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
           <p>Mes échanges</p>

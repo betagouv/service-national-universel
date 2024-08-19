@@ -1,5 +1,7 @@
 import { Request } from "express";
+import { UserDto } from "snu-lib";
 
 export interface UserRequest extends Request {
-  user?: any;
+  user: UserDto;
+  files?: any;
 }

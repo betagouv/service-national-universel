@@ -1,4 +1,7 @@
+import { UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
+import { isNowBetweenDates } from "./utils/date";
+import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "./constants/constants";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -62,6 +65,26 @@ const ROLES_LIST = Object.values(ROLES);
 const SUB_ROLES_LIST = Object.values(SUB_ROLES);
 const SUPPORT_ROLES_LIST = Object.keys(SUPPORT_ROLES);
 const VISITOR_SUB_ROLES_LIST = Object.keys(VISITOR_SUBROLES);
+
+//TODO a supprimer
+const REFERENT_ROLES = ROLES;
+
+const REFERENT_DEPARTMENT_SUBROLE = {
+  manager_department: SUB_ROLES.manager_department,
+  assistant_manager_department: SUB_ROLES.assistant_manager_department,
+  manager_phase2: SUB_ROLES.manager_phase2,
+  secretariat: SUB_ROLES.secretariat,
+};
+const REFERENT_REGION_SUBROLE = {
+  coordinator: SUB_ROLES.coordinator,
+  assistant_coordinator: SUB_ROLES.assistant_coordinator,
+  manager_phase2: SUB_ROLES.manager_phase2,
+};
+
+const ADMINISTRATEUR_CLE_SUBROLE = {
+  referent_etablissement: SUB_ROLES.referent_etablissement,
+  coordinateur_cle: SUB_ROLES.coordinateur_cle,
+};
 
 // TODO - Geography department ref-ref array-array ref-ref/struc|young array-string
 const sameGeography = (actor, target) => {
@@ -218,7 +241,7 @@ function canViewReferent(actor, target) {
 type CanUpdateReferent = {
   actor: any;
   originalTarget: any;
-  modifiedTarget: any | null;
+  modifiedTarget?: any | null;
   structure: any;
 };
 
@@ -300,7 +323,7 @@ function canRefuseMilitaryPreparation(actor, young) {
   return canViewYoungMilitaryPreparationFile(actor, young) || [ROLES.RESPONSIBLE, ROLES.REFERENT_REGION].includes(actor.role);
 }
 
-function canViewYoungFile(actor, target, targetCenter = null) {
+function canViewYoungFile(actor, target, targetCenter?) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
   const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
@@ -412,7 +435,7 @@ function canSendTimeScheduleReminderForSessionPhase1(actor) {
 }
 
 function canSendImageRightsForSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function canCreateOrModifyMission(user, mission, structure) {
@@ -461,6 +484,22 @@ function isSupervisor(user) {
 
 function isReferentOrAdmin(user) {
   return isAdmin(user) || isReferent(user);
+}
+
+function isAdminCle(user) {
+  return user?.role === ROLES.ADMINISTRATEUR_CLE;
+}
+
+function isChefEtablissement(user) {
+  return isAdminCle(user) && user?.subRole === SUB_ROLES.referent_etablissement;
+}
+
+function isCoordinateurEtablissement(user) {
+  return isAdminCle(user) && user?.subRole === SUB_ROLES.coordinateur_cle;
+}
+
+function isReferentClasse(user) {
+  return user?.role === ROLES.REFERENT_CLASSE;
 }
 
 const isTemporaryAffected = (young) => young?.statusPhase1 === "WAITING_AFFECTATION" && ["AFFECTED", "WAITING_LIST"].includes(young?.statusPhase1Tmp);
@@ -516,7 +555,7 @@ function canViewMeetingPoints(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER].includes(actor.role);
 }
 
-function canUpdateMeetingPoint(actor, meetingPoint) {
+function canUpdateMeetingPoint(actor, meetingPoint = null) {
   if (isAdmin(actor)) return true;
   if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     if (!meetingPoint) return true;
@@ -606,7 +645,7 @@ function canViewStructureChildren(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
-function canDownloadYoungDocuments(actor, target, type = null) {
+function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: string) {
   if (type === "certificate" || type === "convocation") {
     return [
       ROLES.REFERENT_DEPARTMENT,
@@ -729,7 +768,7 @@ function canSearchInElasticSearch(actor, index) {
   } else if (index === "lignebus") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
   } else if (index === "classe") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE,ROLES.TRANSPORTER].includes(actor.role);
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "youngCle") {
     return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
   } else if (index === "etablissement") {
@@ -763,7 +802,7 @@ function canEditTableDeRepartitionDepartment(actor) {
 }
 
 function canEditTableDeRepartitionRegion(actor) {
-  return [ROLES.ADMIN].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
 }
 
 function canViewSchemaDeRepartition(actor) {
@@ -904,9 +943,6 @@ function canUpdateMyself({ actor, modifiedTarget }) {
 }
 
 //CLE
-function canInviteCoordinateur(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
-}
 
 function canCreateClasse(actor) {
   return [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
@@ -939,12 +975,45 @@ function canSearchStudent(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
-function canDeleteClasse(actor) {
+function canWithdrawClasse(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
+}
+
+function canDeleteClasse(actor) {
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canAllowSNU(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+}
+
+function canEditEstimatedSeats(actor) {
+  if (actor.role === ROLES.ADMIN) return true;
+  const now = new Date();
+  const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+  return actor.role === ROLES.ADMINISTRATEUR_CLE && now <= limitDateEstimatedSeats;
+}
+
+function canEditTotalSeats(actor) {
+  if (actor.role === ROLES.ADMIN) {
+    const now = new Date();
+    const limitDateEstimatedSeat = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+    if (now <= limitDateEstimatedSeat) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  const limitDatesEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS).toISOString();
+  const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats);
+}
+
+function canNotifyAdminCleForVerif(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
+}
+function canVerifyClasse(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
 }
 
 export {
@@ -959,6 +1028,10 @@ export {
   CENTER_ROLES,
   DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS,
   DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS,
+  REFERENT_ROLES,
+  REFERENT_DEPARTMENT_SUBROLE,
+  REFERENT_REGION_SUBROLE,
+  ADMINISTRATEUR_CLE_SUBROLE,
   canInviteUser,
   canDeleteYoung,
   canEditYoung,
@@ -1060,6 +1133,10 @@ export {
   canCreateTags,
   isSuperAdmin,
   isAdmin,
+  isAdminCle,
+  isChefEtablissement,
+  isCoordinateurEtablissement,
+  isReferentClasse,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,
@@ -1074,7 +1151,6 @@ export {
   canSeeDashboardEngagementStatus,
   canSeeDashboardSejourHeadCenter,
   canUpdateMyself,
-  canInviteCoordinateur,
   canCreateClasse,
   canUpdateClasse,
   canUpdateClasseStay,
@@ -1083,6 +1159,11 @@ export {
   canViewEtablissement,
   canSearchStudent,
   canDeleteClasse,
+  canWithdrawClasse,
   canAllowSNU,
   canEditSanitaryEmailContact,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
+  canNotifyAdminCleForVerif,
+  canVerifyClasse,
 };

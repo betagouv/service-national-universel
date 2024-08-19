@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
-import { HiOutlineOfficeBuilding, HiChevronDown } from "react-icons/hi";
+import { HiChevronDown, HiHome } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
-import { getDepartmentNumber } from "snu-lib";
+import { getDepartmentNumber, translate } from "snu-lib";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { capture } from "@/sentry";
@@ -26,6 +26,9 @@ export default function List() {
     { title: "Ville", name: "city", missingLabel: "Non renseigné" },
     { title: "Type", name: "type", missingLabel: "Non renseigné" },
     { title: "Secteur", name: "sector", missingLabel: "Non renseigné" },
+    { title: "Académie", name: "academy", missingLabel: "Non renseigné", translate },
+    { title: "Années scolaires", name: "schoolYears", missingLabel: "Non renseigné", defaultValue: ["2024-2025"] },
+    { title: "État", name: "state", missingLabel: "Non renseigné", translate },
   ];
 
   const exportData = async () => {
@@ -47,7 +50,7 @@ export default function List() {
     <Page>
       <Header
         title="Liste des établissements"
-        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Établissements" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Établissements" }]}
         actions={[<Button key="export" rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData()} />]}
       />
       <Container className="!p-0">
@@ -73,8 +76,8 @@ export default function List() {
                 { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
               ]}
               selectedFilters={selectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
+              pagination={paramData}
+              onPaginationChange={setParamData}
             />
           </div>
           <div className="mt-2 flex flex-row flex-wrap items-center px-4">

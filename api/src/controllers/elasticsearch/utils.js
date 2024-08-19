@@ -2,7 +2,7 @@ const Joi = require("joi");
 const { ROLES, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { ERRORS, isYoung, isReferent } = require("../../utils");
-const StructureObject = require("../../models/structure");
+const { StructureModel } = require("../../models");
 
 const ES_NO_LIMIT = 10000;
 
@@ -159,7 +159,7 @@ async function buildMissionContext(user) {
   // A supervisor can only see their structures' missions.
   if (user.role === ROLES.SUPERVISOR) {
     if (!user.structureId) return { missionContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    const data = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
     contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
   }
 
@@ -181,7 +181,7 @@ async function buildApplicationContext(user) {
   // A supervisor can only see their structures' applications.
   if (user.role === ROLES.SUPERVISOR) {
     if (!user.structureId) return { applicationContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    const data = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
     contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
     contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
   }

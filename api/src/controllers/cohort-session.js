@@ -5,8 +5,7 @@ const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
 const { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } = require("../utils/cohort");
 const { validateId } = require("../utils/validator");
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const { YoungModel } = require("../models");
 const passport = require("passport");
 const { ROLES, COHORT_TYPE } = require("snu-lib");
 const config = require("config");
@@ -52,7 +51,8 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
       if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const bypassFilter =
-        (user?.role === ROLES.ADMIN && req.get("origin") === config.ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
+        (user?.role === ROLES.ADMIN && req.get("origin") === config.ADMIN_URL) ||
+        ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
       const sessions = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user?.role)
         ? await getFilteredSessionsForCLE()
         : bypassFilter

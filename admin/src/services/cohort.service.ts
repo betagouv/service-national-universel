@@ -63,7 +63,10 @@ export const getCohortGroups = (parentFilterKey: string = "cohort"): IIntermedia
         missingLabel: "Non renseigné",
         sort: (data) => orderCohort(data),
         filter: (data: DataFilter) => data,
-        filterRootFilter: (dataFiltered: DataFilter[]) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
+        filterRootFilter: (dataFiltered: DataFilter[]) =>
+          dataFiltered?.filter(
+            (cohort) => (cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")) || cohort.key.toLowerCase().includes("cle 23-24"),
+          ),
       },
       {
         title: "HTS 2024",
@@ -93,7 +96,8 @@ export const getCohortGroups = (parentFilterKey: string = "cohort"): IIntermedia
         missingLabel: "Non renseigné",
         sort: (data) => orderCohort(data),
         filter: (data: DataFilter) => data,
-        filterRootFilter: (dataFiltered: DataFilter[]) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("2022") || cohort.key.toLowerCase().includes("2021")),
+        filterRootFilter: (dataFiltered: DataFilter[]) =>
+          dataFiltered?.filter((cohort) => ["2019", "2020", "2021"].includes(cohort.key.toLowerCase()) || cohort.key.toLowerCase().includes("2022")),
       },
       {
         title: "à venir",

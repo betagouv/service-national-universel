@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const { region2department, canViewTableDeRepartition, canEditTableDeRepartitionDepartment, canEditTableDeRepartitionRegion } = require("snu-lib");
 const { ERRORS } = require("../../utils");
-const tableDeRepartition = require("../../models/PlanDeTransport/tableDeRepartition");
+const { TableDeRepartitionModel } = require("../../models");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 
@@ -19,9 +19,9 @@ router.post("/region", passport.authenticate("referent", { session: false, failW
     if (!canEditTableDeRepartitionRegion(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort, fromRegion, toRegion } = value;
-    const exist = await tableDeRepartition.findOne(value);
+    const exist = await TableDeRepartitionModel.findOne(value);
     if (exist) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
-    await tableDeRepartition.create({ cohort, fromRegion, toRegion });
+    await TableDeRepartitionModel.create({ cohort, fromRegion, toRegion });
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -40,8 +40,8 @@ router.post("/delete/region", passport.authenticate("referent", { session: false
 
     if (!canEditTableDeRepartitionRegion(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const toRemove = await tableDeRepartition.find({ ...value });
-    await tableDeRepartition.deleteMany({ _id: { $in: toRemove.map((e) => e._id) } });
+    const toRemove = await TableDeRepartitionModel.find({ ...value });
+    await TableDeRepartitionModel.deleteMany({ _id: { $in: toRemove.map((e) => e._id) } });
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -65,19 +65,19 @@ router.post("/department", passport.authenticate("referent", { session: false, f
 
     const { cohort, fromRegion, toRegion, fromDepartment, toDepartment } = value;
 
-    const existing = await tableDeRepartition.find({ cohort, fromRegion, toRegion });
+    const existing = await TableDeRepartitionModel.find({ cohort, fromRegion, toRegion });
 
     //si pas de fromRegion, toRegion, operation interdite
     if (existing.length === 0) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     //si on a une seul entrée et ques les deux départements sont a null, on update
     if (existing.length === 1 && !existing[0].toDepartment && !existing[0].fromDepartment) {
-      await tableDeRepartition.updateOne({ _id: existing[0]._id }, { $set: { fromDepartment, toDepartment } });
+      await TableDeRepartitionModel.updateOne({ _id: existing[0]._id }, { $set: { fromDepartment, toDepartment } });
     } else {
       //sinon on crée une nouvelle entrée avec check des doublons
-      const doublon = await tableDeRepartition.findOne({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
+      const doublon = await TableDeRepartitionModel.findOne({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
       if (doublon) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      tableDeRepartition.create({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
+      TableDeRepartitionModel.create({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
     }
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -101,8 +101,8 @@ router.post("/delete/department", passport.authenticate("referent", { session: f
 
     const { cohort, fromRegion, toRegion, fromDepartment, toDepartment } = value;
 
-    const toDelete = await tableDeRepartition.findOne({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
-    const existing = await tableDeRepartition.find({ cohort, fromRegion, toRegion });
+    const toDelete = await TableDeRepartitionModel.findOne({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
+    const existing = await TableDeRepartitionModel.find({ cohort, fromRegion, toRegion });
 
     //si rien a supprimer, on renvoie une erreur
     if (!toDelete) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -111,7 +111,7 @@ router.post("/delete/department", passport.authenticate("referent", { session: f
     if (existing.length === 1) {
       //check si toDelete === existing[0] pour eviter de supprimer la mauvaise donnée
       if (toDelete._id.toString() === existing[0]._id.toString()) {
-        await tableDeRepartition.updateOne({ _id: existing[0]._id }, { $set: { fromDepartment: undefined, toDepartment: undefined } });
+        await TableDeRepartitionModel.updateOne({ _id: existing[0]._id }, { $set: { fromDepartment: undefined, toDepartment: undefined } });
       } else {
         return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
@@ -135,7 +135,7 @@ router.get("/national/:cohort", passport.authenticate("referent", { session: fal
     if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort } = value;
-    const data = await tableDeRepartition.find({ cohort });
+    const data = await TableDeRepartitionModel.find({ cohort });
 
     const filteredData = data.filter((e, i) => {
       return i === data.findIndex((a) => a.fromRegion === e.fromRegion && a.toRegion === e.toRegion);
@@ -170,7 +170,7 @@ router.get("/fromRegion/:cohort/:region", passport.authenticate("referent", { se
     if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort, region } = value;
-    const data = await tableDeRepartition.find({ cohort, fromRegion: region });
+    const data = await TableDeRepartitionModel.find({ cohort, fromRegion: region });
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -190,7 +190,7 @@ router.get("/toRegion/:cohort/:region", passport.authenticate("referent", { sess
     if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { cohort, region } = value;
-    const data = await tableDeRepartition.find({ cohort, toRegion: region });
+    const data = await TableDeRepartitionModel.find({ cohort, toRegion: region });
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {

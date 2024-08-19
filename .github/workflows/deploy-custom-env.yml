@@ -69,6 +69,13 @@ jobs:
       branch_name: ${{ needs.prepare.outputs.branch_name }}
     secrets: inherit
 
+  run_tests_lib:
+    needs: prepare
+    uses: ./.github/workflows/run-tests-lib.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.branch_name }}
+    secrets: inherit
+
   build:
     if: |
       github.event_name == 'workflow_dispatch' ||
@@ -189,6 +196,9 @@ jobs:
         shell: bash
         working-directory: ${{ env.custom_directory }}
         run: |
+          # Sleep because status can still be an error if the previous deployement failed
+          sleep 10s
+
           failure=false
           while read name
           do

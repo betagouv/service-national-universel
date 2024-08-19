@@ -1,5 +1,5 @@
-const InscriptionGoalModel = require("../models/inscriptionGoal");
-const YoungModel = require("../models/young");
+const { InscriptionGoalModel } = require("../models");
+const { YoungModel } = require("../models");
 
 const getFillingRate = async (department, cohort) => {
   const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments();

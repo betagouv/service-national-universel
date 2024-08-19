@@ -7,7 +7,7 @@
 
   const { generateYoungsExport, generateCohesionCentersExport } = require("./utils");
 
-  const CohortModel = require("../../models/cohort");
+  const { CohortModel } = require("../../models");
 
   const action = "view"; // "upload" or "view"
   const cohortName = "Juillet 2023";

@@ -2,7 +2,7 @@ import React from "react";
 
 import PaginationServerDriven from "../../PaginationServerDriven";
 
-export default function ResultTable({ render, currentEntryOnPage, pagination = true, paramData, setParamData, size = 10, setSize = null }) {
+export default function ResultTable({ render, currentEntryOnPage, pagination = true, paramData, setParamData, size = 10, setSize }) {
   return (
     <div>
       {pagination && (

@@ -1,10 +1,10 @@
 const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge } = require("snu-lib");
 const { deletePatches } = require("../controllers/patches");
-const ApplicationModel = require("../models/application");
-const CohortModel = require("../models/cohort");
-const YoungModel = require("../models/young");
-const ReferentModel = require("../models/referent");
-const { sendTemplate } = require("../sendinblue");
+const { ApplicationModel } = require("../models");
+const { CohortModel } = require("../models");
+const { YoungModel } = require("../models");
+const { ReferentModel } = require("../models");
+const { sendTemplate } = require("../brevo");
 const config = require("config");
 const { getCcOfYoung } = require("../utils");
 const { getTutorName } = require("./mission");
@@ -125,12 +125,11 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
 
 const getAuthorizationToApply = async (mission, young) => {
   let refusalMessages = [];
-  if (isCohortTooOld(young?.cohort)) {
+  if (isCohortTooOld(young)) {
     refusalMessages.push("Le délai pour candidater est dépassé.");
   }
 
-  const cohort = await CohortModel.findOne({ name: young.cohort });
-
+  const cohort = await CohortModel.findById(young.cohortId);
   if (!canApplyToPhase2(young, cohort)) {
     refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
   }
@@ -170,7 +169,7 @@ const getAuthorizationToApply = async (mission, young) => {
   }
 
   const isMilitaryApplicationIncomplete =
-    !young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length;
+    !young.files.militaryPreparationFilesIdentity?.length || !young.files.militaryPreparationFilesAuthorization?.length || !young.files.militaryPreparationFilesCertificate?.length;
 
   if (isMilitaryPreparation && isMilitaryApplicationIncomplete) {
     refusalMessages.push("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");

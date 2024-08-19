@@ -1,19 +1,39 @@
 import React from "react";
 import { HiBell } from "react-icons/hi";
-import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { RiInformationFill } from "react-icons/ri";
 import StepAgreement from "./step/stepAgreement";
 import StepConvocation from "./step/stepConvocation";
 import StepMedicalFile from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
 import { areAllStepsDone, countOfStepsDone } from "../utils/steps.utils";
+import useAuth from "@/services/useAuth";
+import plausibleEvent from "@/services/plausible";
 
 export default function StepsAffected({ data }) {
-  const young = useSelector((state) => state.Auth.young);
+  const { isCLE, young } = useAuth();
   if (!young) return <div />;
+
+  function handleClick() {
+    plausibleEvent("CLE affecte - desistement");
+  }
 
   return (
     <section className={`order-3 m-[1rem] flex flex-col md:mx-[4rem] ${areAllStepsDone(young) ? "order-4" : "order-3"}`}>
       <article className="mb-6">
+        {isCLE && (
+          <>
+            <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-2 mb-8 gap-2">
+              <div>
+                <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
+                <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
+              </div>
+              <Link to="account/withdrawn?desistement=1" className="text-blue-600 underline underline-offset-2" onClick={handleClick}>
+                Se désister du SNU.
+              </Link>
+            </div>
+          </>
+        )}
         <div className="flex flex-row items-center md:hidden">
           {areAllStepsDone(young) && (
             <div className="mr-3 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500">

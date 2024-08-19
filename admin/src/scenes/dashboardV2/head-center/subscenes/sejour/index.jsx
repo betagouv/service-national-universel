@@ -1,7 +1,7 @@
 import React from "react";
 import queryString from "query-string";
 import { useSelector } from "react-redux";
-import { HiOutlineChartSquareBar } from "react-icons/hi";
+import { HiHome } from "react-icons/hi";
 
 import api from "@/services/api";
 import { getNewLink } from "@/utils";
@@ -24,19 +24,16 @@ export default function Index() {
     cohort: [cohort],
   };
 
-  const data = useAsync(
-    () => async () => {
-      const { resultYoung } = await api.post("/elasticsearch/dashboard/sejour/head-center", {
-        filters: Object.fromEntries(Object.entries(selectedFilters)),
-      });
-      return resultYoung;
-    },
-    [],
-  );
+  const { value: data } = useAsync(async () => {
+    const response = await api.post("/elasticsearch/dashboard/sejour/head-center", {
+      filters: Object.fromEntries(Object.entries(selectedFilters)),
+    });
+    return response.resultYoung;
+  }, []);
 
   return (
     <Page>
-      <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} />
+      <Header title="Tableau de bord" breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]} />
       <DashboardContainer active="sejour" availableTab={["general", "sejour"]}>
         <div className="flex flex-col gap-8">
           <h1 className="text-[28px] font-bold leading-8 text-gray-900">Général</h1>

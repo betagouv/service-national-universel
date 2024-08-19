@@ -1,11 +1,11 @@
 const { capture } = require("../sentry");
 const slack = require("../slack");
-const ApplicationModel = require("../models/application");
-const StructureModel = require("../models/structure");
-const YoungModel = require("../models/young");
+const { ApplicationModel } = require("../models");
+const { StructureModel } = require("../models");
+const { YoungModel } = require("../models");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const config = require("config");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const { getCcOfYoung } = require("../utils");
 
 const clean = async () => {
