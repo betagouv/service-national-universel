@@ -54,7 +54,6 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const [showModalDelete, setShowModalDelete] = useState(false);
 
   if (!session || !cohort) return <div></div>;
-  console.log(isSessionEditionOpen(user, cohort));
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!values) return;
@@ -291,7 +290,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                     to: values?.dateEnd || session.dateEnd,
                   }}
                   onChangeRange={(range: { to: string; from: string }) => {
-                    if (values) setValues({ ...values, dateStart: range?.from.toString(), dateEnd: range?.to.toString() });
+                    if (values) setValues({ ...values, dateStart: range?.from, dateEnd: range?.to });
                   }}
                 />
                 {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
