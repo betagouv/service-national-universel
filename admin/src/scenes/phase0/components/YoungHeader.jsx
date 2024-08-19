@@ -259,7 +259,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 </>
               )}
             </Title>
-            <AttestationDownloadButton young={young} />
+            {![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && <AttestationDownloadButton young={young} />}
             {[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && young.status !== YOUNG_STATUS.WITHDRAWN && (
               <>
                 <DsfrButton title="Désister" onClick={() => onSelectStatus(YOUNG_STATUS.WITHDRAWN)} />
