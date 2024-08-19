@@ -13,7 +13,6 @@ import {
   canViewMeetingPointId,
   isPdrEditionOpen,
   ROLES,
-  START_DATE_SESSION_PHASE1,
 } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -33,10 +32,12 @@ import { Title } from "./components/common";
 import Field from "./components/Field";
 import ModalConfirmDelete from "./components/ModalConfirmDelete";
 import ModalCreation from "./components/ModalCreation";
+import { getDefaultCohort } from "@/utils/session";
 
 export default function View(props) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Auth.user?.cohorts);
 
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -171,7 +172,7 @@ export default function View(props) {
         return setIsLoading(false);
       }
       toastr.success("Le séjour a bien été supprimé");
-      setCurrentCohort(PDR?.cohorts?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])[0]);
+      setCurrentCohort(getDefaultCohort(cohorts.filter((c) => PDR.cohorts.includes(c.name))));
       setPdr(PDR);
       setIsLoading(false);
     } catch (e) {

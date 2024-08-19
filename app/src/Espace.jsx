@@ -6,7 +6,6 @@ import {
   ENABLE_PM,
   FEATURES_NAME,
   YOUNG_STATUS,
-  inscriptionModificationOpenForYoungs,
   isFeatureEnabled,
   shouldDisplayMaintenanceNotice,
   shouldForceRedirectToInscription,
@@ -81,7 +80,9 @@ const Espace = () => {
 
   if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
-  if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
+  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
+
+  if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription2023" />;
 
   return (
     <>

@@ -1,5 +1,4 @@
 import { toastr } from "react-redux-toastr";
-import { COHESION_STAY_START } from "snu-lib";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 
@@ -115,15 +114,7 @@ export function normalizeString(s) {
 }
 
 export const orderCohort = (cohorts) => {
-  for (const cohort of cohorts) {
-    if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, cohort.key)) {
-      cohort.date = COHESION_STAY_START[cohort.key];
-    } else {
-      cohort.date = new Date("01/01/2000");
-    }
-  }
-  cohorts = cohorts.sort((a, b) => new Date(b.date) - new Date(a.date));
-  return cohorts;
+  return cohorts.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
 };
 
 export const transformExistingField = (data) => {

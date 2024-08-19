@@ -8,7 +8,7 @@ import { formatDateFR } from "../../../../utils";
 import ModalChangePresenceOnArrival from "../../../../components/modals/young/ModalChangePresenceOnArrival";
 import ModalChangePresenceJDM from "../../../../components/modals/young/ModalChangePresenceJDM";
 import ModalPointageDepart from "../../../centersV2/components/modals/ModalPointageDepart";
-import { COHORTS_BEFORE_JULY_2023 } from "../../../../utils";
+import { COHORTS_WITH_JDM_COUNT } from "../../../../utils";
 
 const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, setValues, setYoung, editing = false, setLoading, isYoungCheckinOpen }) => {
   const [isPresenceOnArrivalModalOpen, setIsPresenceOnArrivalModalOpen] = useState(false);
@@ -81,7 +81,7 @@ const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, 
               ]}
             />
           </div>
-          {COHORTS_BEFORE_JULY_2023.includes(young?.cohort) ? (
+          {COHORTS_WITH_JDM_COUNT.includes(young?.cohort) ? (
             <div className="min-w-[250px] flex-1">
               <TailwindSelect
                 name="presenceJDM"

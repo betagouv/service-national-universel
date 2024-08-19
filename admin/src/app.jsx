@@ -59,7 +59,7 @@ import Footer from "./components/footer";
 import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
-import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
+import { ROLES, ROLES_LIST } from "./utils";
 
 import ModalCGU from "./components/modals/ModalCGU";
 import "./index.css";
@@ -72,6 +72,7 @@ import useRefreshToken from "./hooks/useRefreshToken";
 import SideBar from "./components/drawer/SideBar";
 import ApplicationError from "./components/layout/ApplicationError";
 import NotFound from "./components/layout/NotFound";
+import { getDefaultSession } from "./utils/session";
 import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
 
 initApi();
@@ -110,6 +111,7 @@ export default Sentry.withProfiler(App);
 const Home = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Auth.cohorts);
   const { pathname, search } = useLocation();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
@@ -167,17 +169,8 @@ const Home = () => {
           const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
           if (!ok) return console.log(`Error: ${code}`);
 
-          const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
-          const now = new Date();
-          now.setHours(0, 0, 0, 0);
-
-          // on regarde la session la plus proche dans le futur qui ne sait pas terminé il y a plus de 3 jours
-          // i.e. une session est considérée terminée 3 jours après la date de fin du séjour
-          const activeSession =
-            sessions.find((s) => {
-              const limit = COHESION_STAY_END[s.cohort].setDate(COHESION_STAY_END[s.cohort].getDate() + 3);
-              return limit >= now;
-            }) || sessions[sessions.length - 1];
+          const sessions = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          const activeSession = getDefaultSession(sessions, cohorts);
 
           setSessionPhase1List(sessions.reverse());
           dispatch(setSessionPhase1(activeSession));

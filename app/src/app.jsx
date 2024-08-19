@@ -186,7 +186,7 @@ const MandatoryLogIn = () => {
 
           const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
           const forceEmailValidation =
-            isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(cohort);
+            isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
           if (forceEmailValidation) return history.push("/preinscription");
         }
       } catch (e) {

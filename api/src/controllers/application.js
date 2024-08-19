@@ -197,7 +197,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
-      const cohort = await CohortModel.findOne({ name: young.cohort });
+      const cohort = await CohortModel.findById(young.cohortId);
       if (!canApplyToPhase2(young, cohort)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
