@@ -1,7 +1,7 @@
 const { ES_NO_LIMIT, ROLES, YOUNG_STATUS, YOUNG_PHASE, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
 const config = require("config");
-const CohortModel = require("../../models/cohort");
+const { CohortModel } = require("../../models");
 
 async function getAccessToken(endpoint, apiKey) {
   const response = await fetch(`${endpoint}/auth/token`, {
