@@ -35,10 +35,16 @@ async function validateUser(Model, jwtPayload, done, role) {
 
     if (error) return done(null, false);
     if (!checkJwtSigninVersion(value)) return done(null, false);
-    delete value.__v;
 
-    const user = await Model.findOne(value);
-    if (user && (!role || user.role === role)) return done(null, user);
+    const user = await Model.findById(value._id);
+    if (user) {
+      const passwordMatch = !value.passwordChangedAt || user.passwordChangedAt === value.passwordChangedAt;
+      const logoutMatch = !value.lastLogoutAt || user.lastLogoutAt === value.lastLogoutAt;
+
+      if (passwordMatch && logoutMatch && (!role || user.role === role)) {
+        return done(null, user);
+      }
+    }
   } catch (error) {
     capture(error);
   }
