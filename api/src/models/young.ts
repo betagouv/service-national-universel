@@ -2,7 +2,7 @@ import mongoose, { Schema, Types, InferSchemaType } from "mongoose";
 import bcrypt from "bcryptjs";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
-import { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { ROLES_LIST, PHONE_ZONES_NAMES_ARR, YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 import esClient from "../es";
 import * as brevo from "../brevo";
 import config from "config";
@@ -36,6 +36,12 @@ const CorrectionRequest = new Schema({
     required: true,
     documentation: {
       description: "Cohorte du jeune au moment de la dernière action sur cette demande de correction",
+    },
+  },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
     },
   },
   field: {
@@ -216,15 +222,26 @@ const schema = new Schema({
   },
   cohort: {
     type: String,
-    enum: getCohortNames(),
     documentation: {
       description: "Cohorte",
+    },
+  },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
     },
   },
   originalCohort: {
     type: String,
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
+    },
+  },
+  originalCohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte d'origine",
     },
   },
   cohortChangeReason: {

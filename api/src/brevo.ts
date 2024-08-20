@@ -48,7 +48,7 @@ type Email = {
 
 const api = async (path, options: any = {}, force?: boolean) => {
   try {
-    if (!config.ENABLE_SENDINBLUE && !force) return console.log("No mail sent as ENABLE_SENDINBLUE is disabled");
+    if (!config.ENABLE_SENDINBLUE && !force) return console.log("Not possible to use BREVO api as ENABLE_SENDINBLUE is disabled");
 
     if (!config.SENDINBLUEKEY) {
       console.log("NO SENDINBLUE KEY");

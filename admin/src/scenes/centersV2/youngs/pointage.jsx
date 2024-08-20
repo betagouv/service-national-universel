@@ -3,7 +3,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
 import { BiLoaderAlt } from "react-icons/bi";
-import { formatDateFR, getAge, translate, COHORTS_BEFORE_JULY_2023 } from "snu-lib";
+import { formatDateFR, getAge, translate, COHORTS_WITH_JDM_COUNT } from "snu-lib";
 import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
 import BadgeCheck from "../../../assets/icons/BadgeCheck";
 import CursorClick from "../../../assets/icons/CursorClick";
@@ -202,7 +202,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                           },
                         ],
                       },
-                      COHORTS_BEFORE_JULY_2023.includes(focusedSession.cohort)
+                      COHORTS_WITH_JDM_COUNT.includes(focusedSession.cohort)
                         ? {
                             key: "group2",
                             title: "La JDM",
@@ -333,7 +333,7 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                       </th>
                       <th className="">Volontaire</th>
                       <th className="">Présence à l&apos;arrivée</th>
-                      {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? <th className="">Présence JDM</th> : null}
+                      {COHORTS_WITH_JDM_COUNT.includes(focusedSession?.cohort) ? <th className="">Présence JDM</th> : null}
                       <th className="">Départ</th>
                     </tr>
                   </thead>
@@ -473,7 +473,7 @@ const Line = ({ hit, onClick, opened, onSelect, selected, isYoungCheckinOpen, fo
             )}
           </div>
         </td>
-        {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? (
+        {COHORTS_WITH_JDM_COUNT.includes(focusedSession?.cohort) ? (
           <td className={`${bgColor}`}>
             <div className="text-xs font-normal text-[#242526]" onClick={(e) => e.stopPropagation()}>
               {isYoungCheckinOpen ? (
