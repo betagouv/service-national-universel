@@ -14,3 +14,7 @@ requestZammad.json
 .idea
 node_modules
 out/
+coverage/
+
+*.bson.gz
+*.json.gz

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 
-import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, CleClasseModel } from "../../models";
+import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../models";
 import { ERRORS } from "../../utils";
 
 import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
@@ -78,11 +78,24 @@ export const validatePdtFile = async (
   const expectedColumns = Object.keys(errors);
   const missingColumns = expectedColumns.filter((e) => !columns.includes(e));
 
+  //check if all columns are present
   if (missingColumns.length) {
     missingColumns.forEach((e) => {
       errors[e].push({ line: 1, error: PDT_IMPORT_ERRORS.MISSING_COLUMN });
     });
     console.log("errors", errors);
+    return { ok: false, code: ERRORS.INVALID_BODY, errors };
+  }
+
+  //check if there are unexpected columns
+  columns.forEach((column) => {
+    if (!expectedColumns.includes(column)) {
+      errors[column] = errors[column] || [];
+      errors[column].push({ line: 1, error: PDT_IMPORT_ERRORS.UNEXPECTED_COLUMN });
+    }
+  });
+
+  if (Object.values(errors).some((error) => error.length > 0)) {
     return { ok: false, code: ERRORS.INVALID_BODY, errors };
   }
 
@@ -321,7 +334,7 @@ export const validatePdtFile = async (
     for (const [i, line] of lines.entries()) {
       const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
       if (line["ID CLASSE"] && mongoose.Types.ObjectId.isValid(line["ID CLASSE"])) {
-        const classe = await CleClasseModel.findById(line["ID CLASSE"]);
+        const classe = await ClasseModel.findById(line["ID CLASSE"]);
         if (!classe) {
           errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CLASSE_ID, extra: line["ID CLASSE"] });
         }

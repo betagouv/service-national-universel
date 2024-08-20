@@ -1,7 +1,7 @@
 const { capture } = require("../sentry");
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
-const { sendTemplate } = require("../sendinblue");
+const { YoungModel } = require("../models");
+const { CohortModel } = require("../models");
+const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 const config = require("config");
@@ -38,7 +38,7 @@ exports.handler = async () => {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_IMAGERIGHT_REMINDER, {
           emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
           params: {
-            cta: `${config.APP_URL}/representants-legaux/droits-image?token=${young.parent2Inscription2023Token}`,
+            cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
             youngFirstName: young.firstName,
             youngName: young.lastName,
           },

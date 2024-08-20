@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { HiOutlineChartSquareBar, HiChartSquareBar } from "react-icons/hi";
+import { HiHome } from "react-icons/hi";
 
 import api from "@/services/api";
 import plausibleEvent from "@/services/plausible";
@@ -9,7 +9,6 @@ import { getNewLink } from "@/utils";
 import { getCohortNameList } from "@/services/cohort.service";
 import { Page, Header, DropdownButton } from "@snu/ds/admin";
 import {
-  getCohortNames,
   ROLES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
@@ -104,7 +103,7 @@ export default function Index() {
         id: "cohort",
         name: "Cohorte",
         fullValue: "Toutes",
-        options: getCohortNames().map((cohort) => ({ key: cohort, label: cohort })),
+        options: getCohortNameList(cohorts).map((cohort) => ({ key: cohort, label: cohort })),
         sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
@@ -162,7 +161,7 @@ export default function Index() {
       <BandeauInfo />
       <Header
         title="Tableau de bord"
-        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]}
         actions={[<DropdownButton title={"Exporter"} optionsGroup={selectOptions} key={"export"} position="right" />]}
       />
       <DashboardContainer active="sejour" availableTab={["general", "engagement", "sejour", "inscription"]}>

@@ -1,5 +1,9 @@
 const config = require("config");
 
+// Require this first!
+const { initSentry } = require("./sentry");
+initSentry();
+
 // NODE_ENV environment variable (default "development") is used by :
 // - node-config : to determine the config file used in ./config
 // - jest : unit test (NODE_ENV == "test")
@@ -23,9 +27,9 @@ process.on("unhandledRejection", (reason, promise) => {
   throw reason;
 });
 
-const { runCrons, runAPI } = require("./main");
-if (process.env.RUN_CRONS === "true") {
-  runCrons();
+const { runTasks, runAPI } = require("./main");
+if (process.env.RUN_TASKS === "true") {
+  runTasks();
 } else {
   runAPI();
 }

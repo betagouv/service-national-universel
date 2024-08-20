@@ -11,9 +11,7 @@ const secrets = getSecrets(secretKey, CI_PROJECT_ID, secretName);
 
 module.exports = {
   ENVIRONMENT: "custom",
-  RELEASE: process.env.RELEASE,
-  API_URL: process.env.API_URL,
-  APP_URL: process.env.APP_URL,
-  ADMIN_URL: process.env.ADMIN_URL,
+  TASK_QUEUE_PREFIX: "ci",
+  MAIL_TRANSPORT: "SMTP",
   ...secrets,
 };

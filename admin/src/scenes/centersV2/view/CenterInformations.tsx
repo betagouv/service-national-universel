@@ -117,7 +117,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
       setIsLoading(false);
     }
   };
-  const onDelete = async () => {
+  const handleDelete = async () => {
     try {
       setIsLoading(true);
       const { ok, code } = await api.remove(`/cohesion-center/${data?._id}`);
@@ -173,7 +173,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                     isOpen: true,
                     title: "Supprimer le centre",
                     message: "Êtes-vous sûr de vouloir supprimer ce centre?",
-                    onDelete: onDelete,
+                    onDelete: handleDelete,
                   })
                 }
                 disabled={isLoading || sessions.length !== 0}>
@@ -257,7 +257,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                   department: data.department,
                   region: data.region,
                 }}
-                updateData={(newData) => setData({ ...data, ...newData, academy: departmentToAcademy[newData.department] })}
+                updateData={(newData) => setData({ ...data, ...newData, academy: departmentToAcademy[newData.department!] })}
                 query={query}
                 setQuery={setQuery}
                 options={results}

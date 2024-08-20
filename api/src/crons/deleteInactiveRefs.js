@@ -1,5 +1,5 @@
-const ReferentModel = require("../models/referent");
-const { sendTemplate } = require("../sendinblue");
+const { ReferentModel } = require("../models");
+const { sendTemplate } = require("../brevo");
 const { capture } = require("../sentry");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
@@ -20,7 +20,7 @@ exports.handler = async () => {
     }).cursor();
     await cursor.eachAsync(async function (ref) {
       const lastLogin = ref.lastLoginAt === null ? ref.createdAt : ref.lastLoginAt;
-      const emailTo = [{ name: `${ref.firstName} ${ref.lastName}`, email: ref.email }]
+      const emailTo = [{ name: `${ref.firstName} ${ref.lastName}`, email: ref.email }];
       if (diffDays(lastLogin, sixMonthsAgo) === 0) {
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.DELETE_ACCOUNT_NOTIFICATION_1, { emailTo });
       }

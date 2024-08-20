@@ -1,16 +1,22 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib");
+const { ROLES, FeatureFlagName, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const { populateWithReferentInfo, populateEtablissementWithNumber } = require("../populate/populateEtablissement");
+const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
 
 async function buildEtablisssementContext(user) {
   const contextFilters = [];
+  if (await isFeatureAvailable(FeatureFlagName.CLE_BEFORE_JULY_15)) {
+    if (user.role !== ROLES.ADMIN) {
+      contextFilters.push({ term: { "schoolYears.keyword": "2023-2024" } });
+    }
+  }
 
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
@@ -27,7 +33,18 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const { user, body } = req;
     // Configuration
     const searchFields = ["name.keyword", "zip.keyword", "address.keyword"];
-    const filterFields = ["uai.keyword", "name.keyword", "department.keyword", "region.keyword", "city.keyword", "type.keyword", "sector.keyword"];
+    const filterFields = [
+      "uai.keyword",
+      "name.keyword",
+      "department.keyword",
+      "region.keyword",
+      "city.keyword",
+      "type.keyword",
+      "sector.keyword",
+      "state.keyword",
+      "academy.keyword",
+      "schoolYears.keyword",
+    ];
 
     const sortFields = ["createdAt", "name.keyword"];
 

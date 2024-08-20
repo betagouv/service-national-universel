@@ -2,6 +2,7 @@ const path = require("path");
 const PDFDocument = require("pdfkit");
 const config = require("config");
 const datefns = require("date-fns");
+const { withPipeStream } = require("../utils");
 
 const FONT = "Marianne";
 const FONT_BOLD = `${FONT}-Bold`;
@@ -179,9 +180,9 @@ function generateDroitImage(outStream, young) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument();
-  doc.pipe(outStream);
-  render(doc, young);
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    render(doc, young);
+  });
   console.timeEnd("RENDERING " + random);
 }
 
@@ -189,12 +190,12 @@ function generateBatchDroitImage(outStream, youngs) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument({ autoFirstPage: false });
-  doc.pipe(outStream);
-  for (const young of youngs) {
-    doc.addPage();
-    render(doc, young);
-  }
-  doc.end();
+  withPipeStream(doc, outStream, () => {
+    for (const young of youngs) {
+      doc.addPage();
+      render(doc, young);
+    }
+  });
   console.timeEnd("RENDERING " + random);
 }
 

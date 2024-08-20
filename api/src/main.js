@@ -14,19 +14,67 @@ const { createTerminus } = require("@godaddy/terminus");
 
 const config = require("config");
 
-const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
+const { capture } = require("./sentry");
+const { setupExpressErrorHandler } = require("@sentry/node");
 const { initDB, closeDB } = require("./mongo");
+const { initRedisClient, closeRedisClient } = require("./redis");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
-const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
+const { injectRoutes } = require("./routes");
+const { runMigrations } = require("./migration");
 
-async function runCrons() {
-  initSentry();
-  await initDB();
-  scheduleCrons();
-  // Serverless containers requires running http server
+const basicAuth = require("express-basic-auth");
+const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers, scheduleRepeatableTasks } = require("./queues/redisQueue");
+
+async function runTasks() {
+  await Promise.all([initDB(), getAllPdfTemplates()]);
+
+  initQueues();
+  initWorkers();
+  await scheduleRepeatableTasks();
+
   const app = express();
-  app.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
+
+  if (config.get("TASK_MONITOR_ENABLE_AUTH")) {
+    app.use(
+      basicAuth({
+        challenge: true,
+        users: {
+          [config.get("TASK_MONITOR_USER")]: config.get("TASK_MONITOR_SECRET"),
+        },
+      }),
+    );
+  }
+  app.use("/", initMonitor());
+  setupExpressErrorHandler(app);
+
+  // * Use Terminus for graceful shutdown when using Docker
+  const server = http.createServer(app);
+
+  function onSignal() {
+    console.log("server is starting cleanup");
+    return Promise.all([closeDB(), closeQueues(), closeWorkers()]);
+  }
+
+  function onShutdown() {
+    console.log("cleanup finished, server is shutting down");
+  }
+
+  function healthCheck({ state }) {
+    return Promise.resolve();
+  }
+
+  const options = {
+    healthChecks: {
+      "/healthcheck": healthCheck,
+    },
+    onSignal,
+    onShutdown,
+  };
+
+  createTerminus(server, options);
+
+  server.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
 }
 
 async function runAPI() {
@@ -39,20 +87,21 @@ async function runAPI() {
     console.log("ANALYTICS_URL", config.API_ANALYTICS_ENDPOINT);
   }
 
-  await initDB();
+  await Promise.all([initDB(), initRedisClient()]);
+  await runMigrations();
 
   /*
-      Download all certificate templates when instance is starting,
-      making them available for PDF generation
+    Download all certificate templates when instance is starting,
+    making them available for PDF generation
 
-      These templates are sensitive data, so we can't treat them as simple statics
+    These templates are sensitive data, so we can't treat them as simple statics
 
-      TODO : A possible improvement would be to download templates at build time
-    */
+    TODO : A possible improvement would be to download templates at build time
+  */
   getAllPdfTemplates();
+  initQueues();
 
   const app = express();
-  const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
   if (["production", "staging", "ci", "custom"].includes(config.ENVIRONMENT)) {
@@ -107,48 +156,7 @@ async function runAPI() {
 
   app.use(passport.initialize());
 
-  app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
-  app.use("/application", require("./controllers/application"));
-  app.use("/bus", require("./controllers/bus"));
-  app.use("/cle", require("./controllers/cle"));
-  app.use("/cohesion-center", require("./controllers/cohesion-center"));
-  app.use("/cohort", require("./cohort/cohortController"));
-  app.use("/cohort-session", require("./controllers/cohort-session"));
-  app.use("/contract", require("./controllers/contract"));
-  app.use("/correction-request", require("./controllers/correction-request"));
-  app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
-  app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
-  app.use("/department-service", require("./controllers/department-service"));
-  app.use("/diagoriente", require("./controllers/diagoriente"));
-  app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
-  app.use("/elasticsearch", require("./controllers/elasticsearch"));
-  app.use("/email", require("./controllers/email"));
-  app.use("/event", require("./controllers/event"));
-  app.use("/filters", require("./controllers/filters"));
-  app.use("/gouv.fr", require("./controllers/gouv.fr"));
-  app.use("/inscription-goal", require("./controllers/inscription-goal"));
-  app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
-  app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
-  app.use("/mission", require("./controllers/mission"));
-  app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
-  app.use("/point-de-rassemblement", require("./controllers/planDeTransport/point-de-rassemblement"));
-  app.use("/program", require("./controllers/program"));
-  app.use("/referent", require("./controllers/referent"));
-  app.use("/representants-legaux", require("./controllers/representants-legaux"));
-  app.use("/schema-de-repartition", require("./controllers/planDeTransport/schema-de-repartition"));
-  app.use("/session-phase1", require("./controllers/session-phase1"));
-  app.use("/signin", require("./controllers/signin"));
-  app.use("/structure", require("./controllers/structure"));
-  app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de-repartition"));
-  app.use("/tags", require("./controllers/tags"));
-  app.use("/waiting-list", require("./controllers/waiting-list"));
-  app.use("/young", require("./controllers/young/index"));
-  app.use("/young-edition", require("./controllers/young-edition"));
-  app.use("/SNUpport", require("./controllers/SNUpport"));
-  app.use("/classe", require("./classe/classe.controller"));
-
-  //services
-  app.use("/jeveuxaider", require("./services/jeveuxaider"));
+  injectRoutes(app);
 
   app.get("/memory-stats", async (req, res) => {
     // ! Memory usage
@@ -194,7 +202,6 @@ async function runAPI() {
     try {
       throw new Error("Intentional error");
     } catch (error) {
-      console.log("Error ");
       capture(error);
       return res.status(500).send({ ok: false, code: "hihi" });
     }
@@ -217,7 +224,7 @@ async function runAPI() {
     });
   }
 
-  registerSentryErrorHandler();
+  setupExpressErrorHandler(app);
   app.use(handleError);
 
   initPassport();
@@ -227,7 +234,7 @@ async function runAPI() {
 
   function onSignal() {
     console.log("server is starting cleanup");
-    return Promise.all([closeDB()]);
+    return Promise.all([closeDB(), closeRedisClient(), closeQueues()]);
   }
 
   function onShutdown() {
@@ -252,6 +259,6 @@ async function runAPI() {
 }
 
 module.exports = {
-  runCrons,
   runAPI,
+  runTasks,
 };

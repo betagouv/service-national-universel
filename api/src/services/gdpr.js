@@ -1,5 +1,5 @@
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const { YoungModel } = require("../models");
+const { CohortModel } = require("../models");
 const { deleteFilesByList, listFiles } = require("../utils/index");
 
 async function deleteSensitiveData(youngId, mode = "save") {

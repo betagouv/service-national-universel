@@ -1,22 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import {
-  COHESION_STAY_START,
-  getCohortNames,
-  ES_NO_LIMIT,
-  ROLES,
-  canCreateOrUpdateCohesionCenter,
-  formatLongDateFR,
-  getDepartmentNumber,
-  translate,
-  translateDomainCenter,
-  translateTypologieCenter,
-} from "snu-lib";
+import { ROLES, canCreateOrUpdateCohesionCenter, formatLongDateFR, getDepartmentNumber, translate, translateDomainCenter, translateTypologieCenter } from "snu-lib";
 import Calendar from "../../assets/icons/Calendar";
 import Menu from "../../assets/icons/Menu";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import api from "../../services/api";
 import { Title } from "../pointDeRassemblement/components/common";
 import { Badge, TabItem } from "./components/commons";
 import { orderCohort, transformExistingField } from "../../components/filters-system-v2/components/filters/utils";
@@ -27,9 +15,11 @@ import ModalRattacherCentre from "./components/ModalRattacherCentre";
 
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { getCohortGroups } from "@/services/cohort.service";
+import { getDefaultCohort } from "@/utils/session";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
 
   const history = useHistory();
   const { currentTab } = useParams();
@@ -41,22 +31,8 @@ export default function List() {
     if (!currentTab || !listTab.includes(currentTab)) return history.replace(`/centre/liste/liste-centre`);
   }, [currentTab]);
 
-  const [firstSession, setFirstSession] = useState(null);
-  const getFirstCohortAvailable = () => {
-    let firstSession = null;
-    for (const session of getCohortNames()) {
-      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        firstSession = session;
-        break;
-      }
-    }
-    if (!firstSession) firstSession = "Juillet 2023";
-    setFirstSession(firstSession);
-  };
-
-  useEffect(() => {
-    getFirstCohortAvailable();
-  }, []);
+  const firstSession = getDefaultCohort(cohorts);
+  console.log(firstSession);
 
   return (
     <div className="mb-8">
@@ -104,7 +80,7 @@ const ListSession = ({ firstSession }) => {
   });
   const [size, setSize] = useState(10);
   const filterArray = [
-    { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession], sort: (e) => orderCohort(e) },
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
       title: "Département",
@@ -154,7 +130,7 @@ const ListSession = ({ firstSession }) => {
                   let res = a?.nameCentre?.localeCompare(b?.nameCentre);
 
                   if (res === 0) {
-                    res = COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort];
+                    res = a.startDate - b.startDate;
                   }
                   return res;
                 })
@@ -306,7 +282,10 @@ const ListCenter = ({ firstSession }) => {
                   "Code du centre": data?.code2022,
                   Nom: data?.name,
                   "Désignation du centre": data?.centerDesignation,
-                  "Cohorte(s)": data?.cohorts?.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]).join(", "),
+                  "Cohorte(s)": data?.cohorts
+                    ?.sort((a, b) => a.startDate - b.startDate)
+                    .map((e) => e.cohort)
+                    .join(", "),
                   "Accessibilité aux personnes à mobilité réduite": translate(data?.pmr),
                   "Capacité maximale d'accueil": data?.placesTotal,
                   Typologie: translateTypologieCenter(data?.typology),
@@ -363,7 +342,7 @@ const ListCenter = ({ firstSession }) => {
   );
 };
 const Hit = ({ hit, onClick, history }) => {
-  const orderedSession = hit.sessionsPhase1.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
+  const orderedSession = hit.sessionsPhase1.sort((a, b) => a.startDate - b.startDate);
   return (
     <>
       <hr />

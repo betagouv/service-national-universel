@@ -1,6 +1,6 @@
 const { capture } = require("../sentry");
 const slack = require("../slack");
-const YoungModel = require("../models/young");
+const { YoungModel } = require("../models");
 const { deleteSensitiveData, getCohortsFinishedSinceYesterday } = require("../services/gdpr");
 
 let countTotal = 0;

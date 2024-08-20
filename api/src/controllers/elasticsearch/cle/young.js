@@ -7,8 +7,7 @@ const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
-const EtablissementModel = require("../../../models/cle/etablissement");
-const ClasseModel = require("../../../models/cle/classe");
+const { EtablissementModel, ClasseModel } = require("../../../models");
 const { populateYoungExport, populateYoungWithClasse } = require("../populate/populateYoung");
 const { serializeYoungs } = require("../../../utils/es-serializer");
 
@@ -65,9 +64,10 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "youngPhase1Agreement.keyword",
       "classeId.keyword",
       "etablissementId.keyword",
+      "inscriptionStep2023.keyword",
     ];
 
-    const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
+    const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt", "classeId.keyword"];
 
     // Authorization
     if (!canSearchInElasticSearch(user, "youngCle")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

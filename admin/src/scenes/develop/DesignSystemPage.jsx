@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, Select, Navbar } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
-import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
+import { HiUsers, HiPencil, HiOutlinePencil, HiHome } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
 import { BsCheck } from "react-icons/bs";
+
 import { InputPhone } from "@snu/ds/admin";
 import { PHONE_ZONES } from "snu-lib";
+
+import api from "@/services/api";
 import ModalExamples from "./components/Modal";
 import ProfilePicExamples from "./components/ProfilePic";
 import Colors from "./components/Colors";
-import api from "@/services/api";
 
 export default function DesignSystemPage() {
   const [values, setValues] = React.useState({
@@ -81,7 +83,6 @@ export default function DesignSystemPage() {
 
   const [StatusTitle, setStatusTitle] = useState("Candidature approuvée");
   const [StatusSelect, setStatusSelect] = useState("WAITING_LIST");
-  const [SelectClassName, setSelectClassName] = useState("hover:bg-cyan-200");
 
   const selectTest = [
     {
@@ -146,7 +147,6 @@ export default function DesignSystemPage() {
           action: () => {
             setStatusTitle("Candidature approuvée");
             setStatusSelect("WAITING_LIST");
-            setSelectClassName("hover:bg-cyan-200 hover:boder-cyan-500");
           },
           render: (
             <div className="flex items-center gap-4 p-2 px-3">
@@ -161,7 +161,6 @@ export default function DesignSystemPage() {
           action: () => {
             setStatusTitle("Candidature non Retenue");
             setStatusSelect("REFUSED");
-            setSelectClassName("hover:bg-red-200 hover:boder-red-500");
           },
           render: (
             <div className="flex items-center gap-4 p-2 px-3">
@@ -190,7 +189,7 @@ export default function DesignSystemPage() {
     <Page>
       <Header
         title="Design System"
-        breadcrumb={[{ to: "/", title: <HiOutlineCommandLine size={20} /> }, { title: "Design System" }]}
+        breadcrumb={[{ to: "/", title: <HiHome size={20} className="text-gray-400" /> }, { title: "Design System" }]}
         actions={[<Button key="header-action-1" title={"Click me"} />]}
       />
       <Subheader title="Code, preview, test, build and ship." />
@@ -359,11 +358,14 @@ export default function DesignSystemPage() {
             optionsGroup={selectTest2}
           />
           <Badge title={<HiPencil size={16} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
-          <DropdownButton title={StatusTitle} status={StatusSelect} buttonClassName={SelectClassName} mode={"badge"} optionsGroup={selectTestStatus} />
+          {/* Candidature approuvée */}
+          <DropdownButton title={StatusTitle} status={StatusSelect} mode={"badge"} optionsGroup={selectTestStatus} />
+          {/* Mission effectuée */}
+          <DropdownButton title="Mission effectuée" status="VALIDATED" mode="badge" optionsGroup={[]} />
           <Badge title={"Désisté"} status={"CANCEL"} />
           <Badge title={"Refusée"} status={"REFUSED"} />
           <Badge title={"En attente de validation"} status={"WAITING_VALIDATION"} />
-          <Badge title={"En attente de correction"} status={"WAITING-CORRECTION"} />
+          <Badge title={"En attente de correction"} status={"WAITING_CORRECTION"} />
           <Badge title={"En cours"} status={"IN_PROGRESS"} />
           <Badge title={"Validée sur liste principale"} status={"VALIDATED"} />
           <Badge title={"Validée sur liste complémentaire"} status={"WAITING_LIST"} className="!w-[100px]" />

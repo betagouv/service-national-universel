@@ -66,7 +66,7 @@ export function AgreementModal({ isOpen, setIsOpen, departureDate, returnDate })
                 </>
               )}
               <p className="pb-3 text-sm text-gray-600">Je ne souhaite plus participer au SNU</p>
-              <Link to="account/general?desistement=1" className="whitespace-nowrap text-sm text-blue-600 hover:underline hover:underline-offset-2">
+              <Link to="account/withdrawn?desistement=1" className="whitespace-nowrap text-sm text-blue-600 hover:underline hover:underline-offset-2">
                 Me désister &gt;
               </Link>
             </div>

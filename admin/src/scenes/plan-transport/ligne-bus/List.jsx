@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { FiFolderPlus } from "react-icons/fi";
-import { HiOutlineChartSquareBar, HiOutlineAdjustments } from "react-icons/hi";
+import { HiHome, HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
@@ -170,7 +170,7 @@ export default function List() {
     <Page>
       <Header
         title="Plan de transport"
-        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Plan de transport" }]}
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Plan de transport" }]}
         actions={
           <SelectCohort
             cohort={cohort}
@@ -239,7 +239,7 @@ export default function List() {
               type="wired"
               onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
             />,
-            returnSelect(cohort, filterArray, selectedFilters, user),
+            returnSelect(cohort, selectedFilters, user),
           ]}
         />
       )}
@@ -267,8 +267,8 @@ export default function List() {
                   { label: "Nom (Z > A)", field: "busId.keyword", order: "desc" },
                 ]}
                 selectedFilters={selectedFilters}
-                paramData={paramData}
-                setParamData={setParamData}
+                pagination={paramData}
+                onPaginationChange={setParamData}
               />
             </div>
 
@@ -336,7 +336,7 @@ export default function List() {
   );
 }
 
-const returnSelect = (cohort, filterArray, selectedFilters, user) => {
+const returnSelect = (cohort, selectedFilters, user) => {
   const selectTest = [
     {
       key: "1",
@@ -348,7 +348,6 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
               title="Plan de transport"
               exportTitle="Plan_de_transport"
               route="/elasticsearch/plandetransport/export"
-              filters={filterArray}
               selectedFilters={selectedFilters}
               setIsOpen={() => true}
               customCss={{
@@ -410,7 +409,7 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
         [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
           ? {
               action: async () => {
-                await exportLigneBus(user, cohort);
+                await exportLigneBus(cohort);
               },
               render: (
                 <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 ">

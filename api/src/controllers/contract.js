@@ -4,13 +4,9 @@ const passport = require("passport");
 const crypto = require("crypto");
 const { SENDINBLUE_TEMPLATES, getAge, canCreateOrUpdateContract, canViewContract, ROLES } = require("snu-lib");
 const { capture } = require("../sentry");
-const ContractObject = require("../models/contract");
-const YoungObject = require("../models/young");
-const ApplicationObject = require("../models/application");
-const ReferentObject = require("../models/referent");
-const StructureObject = require("../models/structure");
+const { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } = require("../models");
 const { ERRORS, isYoung, isReferent } = require("../utils");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const config = require("config");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
@@ -21,7 +17,7 @@ const { generatePdfIntoStream } = require("../utils/pdf-renderer");
 
 async function createContract(data, fromUser) {
   const { sendMessage } = data;
-  const contract = await ContractObject.create(data);
+  const contract = await ContractModel.create(data);
   const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
 
   contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
@@ -60,8 +56,8 @@ async function createContract(data, fromUser) {
 
 async function updateContract(id, data, fromUser) {
   const { sendMessage } = data;
-  const previous = await ContractObject.findById(id);
-  const contract = await ContractObject.findById(id);
+  const previous = await ContractModel.findById(id);
+  const contract = await ContractModel.findById(id);
   contract.set(data);
   await contract.save({ fromUser });
 
@@ -100,7 +96,7 @@ async function updateContract(id, data, fromUser) {
 }
 
 async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
-  const departmentReferentPhase2 = await ReferentObject.find({
+  const departmentReferentPhase2 = await ReferentModel.find({
     department: contract.youngDepartment,
     subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
   });
@@ -215,7 +211,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     }
     let previousStructureId, currentStructureId;
     if (id) {
-      const contract = await ContractObject.findById(id);
+      const contract = await ContractModel.findById(id);
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       previousStructureId = contract.structureId;
       currentStructureId = data.structureId || contract.structureId;
@@ -231,7 +227,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     }
     if (req.user.role === ROLES.SUPERVISOR) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
       if (!structures.map((e) => e._id.toString()).includes(previousStructureId.toString()) || !structures.map((e) => e._id.toString()).includes(currentStructureId.toString())) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
@@ -240,7 +236,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     // Create or update contract.
     const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
     // Update the application.
-    const application = await ApplicationObject.findById(contract.applicationId);
+    const application = await ApplicationModel.findById(contract.applicationId);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     application.contractId = contract._id;
     // We have to update the application's mission duration.
@@ -248,7 +244,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     await application.save({ fromUser: req.user });
 
     // Update young status.
-    const young = await YoungObject.findById(contract.youngId);
+    const young = await YoungModel.findById(contract.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateYoungStatusPhase2Contract(young, req.user);
     await updateYoungPhase2Hours(young, req.user);
@@ -273,7 +269,7 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
     const { error: typeError, value: type } = Joi.string().valid("projectManager", "structureManager", "parent1", "parent2", "young").required().validate(req.params.type);
     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const contract = await ContractObject.findById(id);
+    const contract = await ContractModel.findById(id);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // - admin and referent can send contract to everybody
@@ -289,7 +285,7 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
     }
     if (req.user.role === ROLES.SUPERVISOR) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
       if (!structures.map((e) => e._id.toString()).includes(contract.structureId.toString())) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
@@ -313,7 +309,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     const { error: idError, value: id } = validateId(req.params.id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const data = await ContractObject.findById(id);
+    const data = await ContractModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && data.youngId.toString() !== req.user._id.toString()) {
@@ -331,14 +327,14 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ContractObject));
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ContractModel));
 
 // Get a contract by its token.
 router.get("/token/:token", async (req, res) => {
   try {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await ContractObject.findOne({
+    const data = await ContractModel.findOne({
       $or: [{ youngContractToken: token }, { parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
     });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -355,7 +351,7 @@ router.post("/token/:token", async (req, res) => {
   try {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await ContractObject.findOne({
+    const data = await ContractModel.findOne({
       $or: [{ youngContractToken: token }, { parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
     });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -383,13 +379,13 @@ router.post("/token/:token", async (req, res) => {
 
     await data.save({ fromUser: req.user });
 
-    const young = await YoungObject.findById(data.youngId);
+    const young = await YoungModel.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await updateYoungStatusPhase2Contract(young, req.user);
 
     const contractStatus = checkStatusContract(data);
-    const application = await ApplicationObject.findById(data.applicationId);
+    const application = await ApplicationModel.findById(data.applicationId);
     application.set({ contractStatus });
     await application.save({ fromUser: req.user });
 
@@ -425,7 +421,7 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     const { error: idError, value: id } = validateId(req.params.id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const contract = await ContractObject.findById(id);
+    const contract = await ContractModel.findById(id);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only download their own documents.
@@ -438,7 +434,6 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     }
 
     await generatePdfIntoStream(res, { type: "contract", template: "2", contract });
-
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

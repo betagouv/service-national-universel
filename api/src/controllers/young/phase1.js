@@ -22,16 +22,16 @@ const {
 
 const config = require("config");
 const { capture } = require("../../sentry");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../brevo");
 
-const YoungModel = require("../../models/young");
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const CohesionCenterModel = require("../../models/cohesionCenter");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const CohortModel = require("../../models/cohort");
-const ReferentModel = require("../../models/referent");
-const DepartmentServiceModel = require("../../models/departmentService");
+const { YoungModel } = require("../../models");
+const { SessionPhase1Model } = require("../../models");
+const { CohesionCenterModel } = require("../../models");
+const { PointDeRassemblementModel } = require("../../models");
+const { LigneBusModel } = require("../../models");
+const { CohortModel } = require("../../models");
+const { ReferentModel } = require("../../models");
+const { DepartmentServiceModel } = require("../../models");
 
 const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");

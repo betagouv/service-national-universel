@@ -5,11 +5,11 @@ const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
 const config = require("config");
 const slack = require("../slack");
-const MissionModel = require("../models/mission");
-const StructureModel = require("../models/structure");
-const ReferentModel = require("../models/referent");
+const { MissionModel } = require("../models");
+const { StructureModel } = require("../models");
+const { ReferentModel } = require("../models");
 
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 
 const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS, MISSION_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");
@@ -50,7 +50,7 @@ const fetchMission = (skip = 0) =>
     .then((response) => response.json())
     .then((result) => sync(result))
     .then((rest) => (rest ? fetchMission(skip + 50) : cleanData()))
-    .catch((error) => console.log("error fetch mission :", error));
+    .catch((error) => capture(error));
 
 const fetchStructure = async (id) => {
   return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${config.JVA_API_KEY}`, {
@@ -58,12 +58,15 @@ const fetchStructure = async (id) => {
     redirect: "follow",
   })
     .then((response) => response.json())
-    .catch((error) => console.log("error fetch struture :", error));
+    .catch((error) => capture(error));
 };
 
 const sync = async (result) => {
   //console.log("Nombre de missions traitées (current iteration)", result.data.length);
   //console.log("API page", result.current_page);
+  if (!result.ok) {
+    throw new Error("sync with JVA missions : " + result.code);
+  }
 
   for (let i = 0; i < result.data.length; i++) {
     try {

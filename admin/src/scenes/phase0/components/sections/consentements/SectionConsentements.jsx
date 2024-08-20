@@ -230,8 +230,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
             <b>
               {young.firstName} {young.lastName}
             </b>{" "}
-            soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
-            jaune.
+            , à la date du séjour de cohésion, ait satisfait aux obligations vaccinales en vigueur.
           </CheckRead>
           <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du règlement Intérieur du séjour de cohésion.</CheckRead>
           <CheckRead value={young.parent1AllowSNU === "true"}>

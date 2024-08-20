@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import { useHistory } from "react-router-dom";
 
-export default function Save({ filterArray, selectedFilters, page = 1, pageId }) {
+export default function Save({ filterArray, selectedFilters, page = 1, pageId, disabled }) {
   // handle click outside
   const ref = React.useRef();
   const [nameView, setNameView] = React.useState("");
@@ -62,6 +62,7 @@ export default function Save({ filterArray, selectedFilters, page = 1, pageId })
 
   // pas de titre === pas de fitlre selectionné
   if (!title) return null;
+  if (disabled) return null;
 
   return (
     <>

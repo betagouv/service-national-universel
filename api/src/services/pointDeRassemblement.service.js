@@ -1,4 +1,4 @@
-const CohortModel = require("../models/cohort");
+const { CohortModel } = require("../models");
 
 async function isPDRChoiceOpenForYoung(young) {
   const date = new Date();

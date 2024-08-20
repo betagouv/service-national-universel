@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiHome } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
-import { BsSend } from "react-icons/bs";
 import { useParams, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
@@ -10,14 +9,14 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Button, Badge, DropdownButton } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, IS_INSCRIPTION_OPEN_CLE, FUNCTIONAL_ERRORS } from "snu-lib";
+import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
 import plausibleEvent from "@/services/plausible";
 import { downloadCertificatesByClassId } from "@/services/convocation.service";
 import { usePendingAction } from "@/hooks/usePendingAction";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
+import { ClasseDto } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
@@ -27,20 +26,25 @@ import SejourInfos from "./components/SejourInfos";
 import StatsInfos from "./components/StatsInfos";
 import DeleteButton from "./components/DeleteButton";
 import ModaleWithdraw from "./components/modale/ModaleWithdraw";
-import ModaleInvite from "./components/modale/ModaleInvite";
-import { InfoBus, TStatus, Rights } from "./components/types";
+import ModaleCohort from "./components/modale/modaleCohort";
+import ButtonInvite from "./components/ButtonInvite";
+import { InfoBus, Rights } from "./components/types";
+import { TStatus } from "@/types";
+import ButtonRelanceVerif from "./components/ButtonRelanceVerif";
+import VerifClassButton from "./components/VerifClassButton";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
-  const [modaleInvite, setModaleInvite] = useState(false);
   const [showModaleWithdraw, setShowModaleWithdraw] = useState(false);
+  const [showModaleCohort, setShowModaleCohort] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
   const [edit, setEdit] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [oldClasseCohort, setOldClasseCohort] = useState();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
   const [isConvocationDownloading, handleConvocationDownload] = usePendingAction() as [boolean, any];
 
@@ -69,6 +73,7 @@ export default function View() {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
       setClasse(classe);
+      setOldClasseCohort(classe.cohort);
       if (classe?.ligneId) {
         //Bus
         const { ok: ok1, code: code1, data: ligne } = await api.get(`/ligne-de-bus/${classe.ligneId}`);
@@ -89,7 +94,7 @@ export default function View() {
 
       //Logical stuff
       setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
-      if (classe.status !== STATUS_CLASSE.DRAFT) {
+      if (![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe.status)) {
         getStudents(classe._id);
       }
     } catch (e) {
@@ -116,30 +121,50 @@ export default function View() {
     getClasse();
   }, [id, edit, editStay]);
 
+  const checkInfo = () => {
+    setErrors({});
+    interface Errors {
+      cohort?: string;
+      name?: string;
+      coloration?: string;
+      totalSeats?: string;
+      filiere?: string;
+      grades?: string;
+      estimatedSeats?: string;
+      type?: string;
+    }
+
+    const errors: Errors = {};
+    if (classe?.cohort !== oldClasseCohort && classe.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
+    if (!classe?.name) errors.name = "Ce champ est obligatoire";
+    if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
+    if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
+    if (!classe?.type) errors.type = "Ce champ est obligatoire";
+    if (!classe?.grades.length) errors.grades = "Ce champ est obligatoire";
+    if (classe?.grades && classe?.grades.length > 3) errors.grades = "Une classe ne peut avoir que 3 niveaux maximum";
+    if (!classe?.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
+    if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
+    const now = new Date();
+    const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+    if (classe?.totalSeats && classe.estimatedSeats && classe.totalSeats > classe.estimatedSeats && now > limitDateEstimatedSeats)
+      errors.totalSeats = "L'effectif ajusté ne peut pas être supérieur à l'effectif prévisionnel";
+
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
+      setIsLoading(false);
+      return;
+    }
+    if (classe?.cohort !== oldClasseCohort) {
+      setShowModaleCohort(true);
+    } else {
+      sendInfo();
+    }
+  };
+
   const sendInfo = async () => {
     try {
+      setShowModaleCohort(false);
       setIsLoading(true);
-      setErrors({});
-      interface Errors {
-        name?: string;
-        coloration?: string;
-        totalSeats?: string;
-        filiere?: string;
-        grade?: string;
-      }
-
-      const errors: Errors = {};
-      if (!classe?.name) errors.name = "Ce champ est obligatoire";
-      if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
-      if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
-      if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
-      if (!classe?.grade) errors.grade = "Ce champ est obligatoire";
-
-      if (Object.keys(errors).length > 0) {
-        setErrors(errors);
-        setIsLoading(false);
-        return;
-      }
 
       const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}`, classe);
 
@@ -167,7 +192,6 @@ export default function View() {
   const onWithdraw = async () => {
     try {
       setIsLoading(true);
-      //delete data
       const { ok, code } = await api.remove(`/cle/classe/${classe?._id}?type=withdraw`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
@@ -214,11 +238,16 @@ export default function View() {
 
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
-
-    if (classe?.status && ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && IS_INSCRIPTION_OPEN_CLE) {
+    if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+      actionsList.push(<ButtonRelanceVerif key="relance" classeId={id} onLoading={setIsLoading} />);
+    }
+    if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+      actionsList.push(<VerifClassButton key="verify" classe={classe} setClasse={setClasse} isLoading={isLoading} setLoading={setIsLoading} />);
+    }
+    if (classe?.status && STATUS_CLASSE.OPEN === classe.status) {
       actionsList.push(
-        <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
-        <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" className="mr-2" onClick={() => setModaleInvite(true)} />,
+        <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} type="wired" title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
+        <ButtonInvite key="invite" url={url} />,
       );
     }
     if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) {
@@ -260,7 +289,7 @@ export default function View() {
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status) as TStatus} />}
         breadcrumb={[
-          { title: <HiOutlineOfficeBuilding size={20} /> },
+          { title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" to="/" /> },
           {
             title: "Mes classes",
             to: "/classes",
@@ -279,9 +308,10 @@ export default function View() {
         cohorts={cohorts}
         user={user}
         onCancel={handleCancel}
-        onSendInfo={sendInfo}
+        onCheckInfo={checkInfo}
         setShowModaleWithdraw={setShowModaleWithdraw}
         isLoading={isLoading}
+        validatedYoung={totalSeatsTakenExcluding}
       />
 
       {classe.referents?.length > 0 && <ReferentInfos classe={classe} />}
@@ -302,10 +332,12 @@ export default function View() {
         />
       )}
 
-      {classe?.status !== STATUS_CLASSE.DRAFT && <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />}
+      {![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status as any) && (
+        <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />
+      )}
 
       <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
-      <ModaleInvite isOpen={modaleInvite} onClose={() => setModaleInvite(false)} url={url} />
+      <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />
     </Page>
   );
 }

@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
-const ApplicationModel = require("../../models/application");
+const { ApplicationModel } = require("../../models");
 const ApplicationPatchModel = require("./models/applicationPatch");
 
 const config = require("config");

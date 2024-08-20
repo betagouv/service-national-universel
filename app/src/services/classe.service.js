@@ -1,5 +1,5 @@
 import { apiURL } from "@/config";
-import { STATUS_CLASSE, translateColoration, IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
+import { translateColoration } from "snu-lib";
 
 export const fetchClass = (id) =>
   fetch(`${apiURL}/cle/classe/${id}`)
@@ -10,9 +10,8 @@ export const fetchClass = (id) =>
     });
 
 export function formatClass(data) {
-  const { name, status, coloration, grade, isFull, referents, etablissement, cohort } = data;
+  const { name, status, coloration, grade, referents, etablissement, cohort } = data;
   const [{ fullName: referent }] = referents;
-  const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
   const classe = {
     id: data._id,
     name,
@@ -20,12 +19,8 @@ export function formatClass(data) {
     cohort,
     status,
     grade,
-    isFull,
-    isInscriptionOpen,
     referent,
     etablissement,
-    // TODO: update CLE cohort dates
-    dateStart: "À venir",
   };
   return classe;
 }

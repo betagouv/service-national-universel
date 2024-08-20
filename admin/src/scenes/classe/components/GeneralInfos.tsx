@@ -3,18 +3,18 @@ import { BsTrash3 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
-import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, translateGrade, translateColoration, formatDateFRTimezoneUTC } from "snu-lib";
+import {
+  translate,
+  ROLES,
+  translateGrade,
+  formatDateFRTimezoneUTC,
+  CohortDto,
+  ClasseDto,
+} from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
-import { CohortDto } from "snu-lib/src/dto/cohortDto";
 import { User } from "@/types";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
 import { Rights } from "./types";
-
-type SelectOption = {
-  value: string;
-  label: string;
-};
-
+import { colorOptions, filiereOptions, gradeOptions, typeOptions } from "../utils";
 interface Props {
   classe: ClasseDto;
   setClasse: (classe: ClasseDto) => void;
@@ -27,29 +27,31 @@ interface Props {
   setShowModaleWithdraw: (b: boolean) => void;
   isLoading: boolean;
   onCancel: () => void;
-  onSendInfo: () => void;
+  onCheckInfo: () => void;
+  validatedYoung: number;
 }
 
-export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors, rights, cohorts, user, setShowModaleWithdraw, isLoading, onCancel, onSendInfo }: Props) {
-  const colorOptions: SelectOption[] = Object.keys(CLE_COLORATION_LIST).map((value) => ({
-    value: CLE_COLORATION_LIST[value],
-    label: translateColoration(CLE_COLORATION_LIST[value]),
-  }));
-  const filiereOptions = Object.keys(CLE_FILIERE_LIST).map((value) => ({
-    value: CLE_FILIERE_LIST[value],
-    label: CLE_FILIERE_LIST[value],
-  }));
-  const gradeOptions = Object.keys(CLE_GRADE_LIST).map((value) => ({
-    value: CLE_GRADE_LIST[value],
-    label: translateGrade(CLE_GRADE_LIST[value]),
-  }));
-
+export default function GeneralInfos({
+  classe,
+  setClasse,
+  edit,
+  setEdit,
+  errors,
+  rights,
+  cohorts,
+  user,
+  setShowModaleWithdraw,
+  isLoading,
+  onCancel,
+  onCheckInfo,
+  validatedYoung,
+}: Props) {
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
       return [
         <div key="actions" className="flex items-center justify-end ml-6">
           <Button key="cancel" type="cancel" title="Annuler" onClick={onCancel} disabled={isLoading} />
-          <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={onSendInfo} loading={isLoading} disabled={isLoading} />
+          <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={onCheckInfo} loading={isLoading} disabled={isLoading} />
         </div>,
       ];
     } else if (canEdit) {
@@ -62,6 +64,64 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
   return (
     <Container title="Informations générales" actions={containerActionList({ edit, setEdit, canEdit: rights.canEdit })}>
       <div className="flex items-stretch justify-stretch">
+        <div className="flex-1">
+          <Label title="Numéro d’identification" name="identification" />
+          <InputText name="identification" className="flex-1 mb-3" value={classe.uniqueKeyAndId} disabled />
+          <Label title="Nom de la classe engagée" name="Class-name" tooltip="Identité du groupe formé." />
+          <InputText
+            name="nameClasse"
+            className="flex-1 mb-3"
+            value={classe.name}
+            onChange={(e) => setClasse({ ...classe, name: e.target.value })}
+            error={errors.name}
+            readOnly={!edit}
+            active={edit}
+          />
+          <Label title="Effectif prévisionnel" name="estimatedSeats" tooltip="Nombre d'élèves prévisionnel de la classe" />
+          <InputText
+            name="estimatedSeats"
+            className="flex-1 mb-3"
+            value={classe.estimatedSeats.toString()}
+            disabled={!rights.canEditEstimatedSeats}
+            onChange={(e) => setClasse({ ...classe, estimatedSeats: Number(e.target.value) })}
+            readOnly={!edit}
+            active={edit}
+            error={errors.estimatedSeats}
+          />
+          <Label
+            title="Effectif ajusté"
+            name="totalSeats"
+            tooltip="Estimation de l’effectif au plus proche de la réalité. L’effectif ajusté ne peut pas dépasser l’effectif prévisionnel"
+          />
+          <InputText
+            name="totalSeats"
+            className="flex-1 mb-3"
+            value={classe.totalSeats.toString()}
+            disabled={!rights.canEditTotalSeats}
+            onChange={(e) => setClasse({ ...classe, totalSeats: Number(e.target.value) })}
+            readOnly={!edit}
+            active={edit}
+            error={errors.totalSeats}
+          />
+          <Label title="Effectif inscrit" name="validatedYoung" tooltip="Nombre d'élèves validés inscrit sur la classe" />
+          <InputText name="validatedYoung" className="flex-1 mb-3" value={validatedYoung.toString()} disabled />
+          <Label title="Coloration" name="coloration" />
+          <Select
+            className="mb-3"
+            isActive={edit && rights.canEditColoration}
+            readOnly={!edit}
+            disabled={!rights.canEditColoration}
+            placeholder={"Choisissez une coloration"}
+            options={colorOptions}
+            closeMenuOnSelect={true}
+            value={classe?.coloration ? { value: classe?.coloration, label: translate(classe?.coloration) } : null}
+            onChange={(options) => {
+              setClasse({ ...classe, coloration: options.value });
+            }}
+            error={errors.coloration}
+          />
+        </div>
+        <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
         <div className="flex-1">
           {rights.showCohort && (
             <>
@@ -93,57 +153,24 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
               </div>
             </>
           )}
-          <Label title="Numéro d’identification" name="identification" />
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <InputText name="uniqueKey" className="flex-1" value={classe.uniqueKey} disabled />
-            <InputText name="uniqueId" className="flex-1" value={classe.uniqueId} disabled />
-          </div>
-          <Label title="Nom de la classe engagée" name="Class-name" tooltip="Identité du groupe formé." />
-          <InputText
-            name="nameClasse"
-            className="mb-3"
-            value={classe.name}
-            onChange={(e) => setClasse({ ...classe, name: e.target.value })}
-            error={errors.name}
-            readOnly={!edit}
-            active={edit}
-          />
-          <Label title="Coloration souhaitée" name="coloration" tooltip="Les colorations définitives seront confirmées au moment des affectations." />
+          <Label title="Type de groupe" name="type" />
           <Select
             className="mb-3"
             isActive={edit}
             readOnly={!edit}
-            placeholder={"Choisissez une coloration"}
-            options={colorOptions}
+            placeholder={"Choisissez un type de classe"}
+            options={typeOptions}
             closeMenuOnSelect={true}
-            value={classe?.coloration ? { value: classe?.coloration, label: translate(classe?.coloration) } : null}
+            value={classe?.type ? { value: classe?.type, label: translate(classe?.type) } : null}
             onChange={(options) => {
-              setClasse({ ...classe, coloration: options.value });
+              setClasse({ ...classe, type: options.value });
             }}
-            error={errors.coloration}
-          />
-        </div>
-        <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
-        <div className="flex-1">
-          <Label
-            title="Nombre d'élèves"
-            name="totalSeats"
-            tooltip="Pour qu'une classe soit considérée comme complète et puisse être validée, 100% des élèves doivent être inscrits (ou désistés). Vous pouvez modifier le nombre d'élèves dans le cas d'un changement d'effectif en cours d'année."
-          />
-          <InputText
-            className="mb-3"
-            name="totalSeats"
-            type="number"
-            value={classe.totalSeats?.toString()}
-            error={errors.totalSeats}
-            onChange={(e) => setClasse({ ...classe, totalSeats: Number(e.target.value) })}
-            readOnly={!edit}
-            active={edit}
+            error={errors.type}
           />
           <Label
             title="Situation scolaire"
             name="class-situation"
-            tooltip="C'est la situation de la classe. Une exception au niveau d'un élève qui viendrait d'une autres filière ou d'un autre niveau peut être gérer au niveau du profil de l'élève concerné."
+            tooltip="C'est la situation de la classe. Une exception au niveau d'un élève qui viendrait d'une autre filière ou d'un autre niveau peut être gérée au niveau du profil de l'élève concerné."
           />
           <Select
             className="mb-3"
@@ -164,12 +191,14 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
             readOnly={!edit}
             placeholder={"Choisissez un niveau"}
             options={gradeOptions}
-            closeMenuOnSelect={true}
-            value={classe?.grade ? { value: classe?.grade, label: translateGrade(classe?.grade) } : null}
+            isMulti={true}
+            isClearable={true}
+            label="Niveau"
+            value={classe?.grades ? classe.grades.map((grade) => ({ value: grade, label: translateGrade(grade) })) : null}
             onChange={(options) => {
-              setClasse({ ...classe, grade: options.value });
+              setClasse({ ...classe, grades: options ? options.map((opt) => opt.value) : [] });
             }}
-            error={errors.grade}
+            error={errors.grades}
           />
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
             <>
@@ -179,6 +208,9 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
               </Link>
             </>
           )}
+          <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
+            <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
+          </Link>
 
           {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? (
             <div className="flex items-center justify-end mt-6">

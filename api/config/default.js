@@ -6,7 +6,13 @@ module.exports = {
   PORT: 8080,
   IMAGES_ROOTDIR: `${__dirname}/../public/images`,
   FONT_ROOTDIR: `${__dirname}/../src/assets/fonts`,
-  ENABLE_SENDINBLUE: true,
+  RUN_CRONS: false,
+  ENABLE_SENTRY: true,
+  ENABLE_SENDINBLUE: true, // TODO: default false
+  MAIL_TRANSPORT: null, // BREVO / SMTP / null (pas d'envoi d'email)
+  SMTP_HOST: undefined,
+  SMTP_PORT: undefined,
+  ENABLE_ANTIVIRUS: true,
   ENABLE_FLATTEN_ERROR_LOGS: true, // Print error stack without newlines on stderr
   API_URL: "http://localhost:8080",
   APP_URL: "http://localhost:8081",
@@ -21,10 +27,8 @@ module.exports = {
   API_ANALYTICS_ENDPOINT: "http://localhost:8085",
   API_ANALYTICS_API_KEY: "api-key",
   API_ANTIVIRUS_ENDPOINT: "http://localhost:8089",
-  API_ANTIVIRUS_TOKEN: undefined,
   ES_ENDPOINT: undefined,
   SENDINBLUEKEY: undefined,
-  SENTRY_URL: undefined,
   DIAGORIENTE_URL: undefined,
   DIAGORIENTE_TOKEN: undefined,
   FRANCE_CONNECT_URL: undefined,
@@ -54,4 +58,12 @@ module.exports = {
   JVA_TOKEN: undefined,
   JVA_API_KEY: undefined,
   REDIS_URL: undefined,
+  API_DEMARCHE_SIMPLIFIEE_TOKEN: undefined,
+  PM2_SLACK_URL: undefined,
+  API_ANTIVIRUS_KEY: undefined,
+  TASK_QUEUE_PREFIX: undefined,
+  TASK_MONITOR_ENABLE_AUTH: true,
+  TASK_MONITOR_USER: undefined,
+  TASK_MONITOR_SECRET: undefined,
+  ENABLE_2FA: false,
 };

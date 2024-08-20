@@ -1,6 +1,6 @@
 import Img2 from "../../assets/militaryPrepMobile.png";
 import React from "react";
-import { HiOutlineSearch } from "react-icons/hi";
+import { HiArrowLeft, HiOutlineSearch } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import CheckCircle from "../../assets/icons/CheckCircle";
@@ -19,7 +19,10 @@ export default function HomeMobile() {
       <div className="pl-4">
         <div className="flex justify-between pt-4">
           <div className="flex w-2/3 flex-col">
-            <div className="text-3xl font-bold text-gray-800">Partez en préparation militaire</div>
+            <button onClick={() => history.goBack()} className="flex items-center">
+              <HiArrowLeft className="text-2xl text-gray-500" />
+            </button>
+            <div className="mt-4 text-3xl font-bold text-gray-800">Partez en préparation militaire</div>
             {!readMore ? (
               <div className="mt-4 text-left text-sm text-gray-700">
                 Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence...

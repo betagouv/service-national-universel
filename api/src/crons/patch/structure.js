@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const StructureModel = require("../../models/structure");
+const { StructureModel } = require("../../models");
 const StructurePatchModel = require("./models/structurePatch");
 const config = require("config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");

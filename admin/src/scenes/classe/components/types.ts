@@ -6,6 +6,9 @@ export type Rights = {
   showCohort: boolean;
   showCenter: boolean;
   showPDR: boolean;
+  canEditEstimatedSeats: boolean;
+  canEditTotalSeats: boolean;
+  canEditColoration: boolean;
 };
 
 export type InfoBus = {
@@ -16,16 +19,3 @@ export type InfoBus = {
   returnDate: string;
   returnHour: string;
 };
-
-export type TStatus =
-  | "none"
-  | "DRAFT"
-  | "CANCEL"
-  | "REFUSED"
-  | "IN_PROGRESS"
-  | "WAITING_VALIDATION"
-  | "WAITING_CORRECTION"
-  | "VALIDATED"
-  | "WAITING_LIST"
-  | "secondary"
-  | "primary";

@@ -10,7 +10,7 @@ import { Button } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import { toastr } from "react-redux-toastr";
 
-export default function SchemaEditor({ className = "", onExportDetail, department, region, cohort: cohortName, groups, summary, onChange, user }) {
+export default function SchemaEditor({ className = "", onExportDetail, department, region, cohortName, groups, summary, onChange, user }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isUserAuthorizedToExportData, setIsUserAuthorizedToExportData] = useState(false);
   const [isUserAuthorizedToCreateGroup, setIsUserAuthorizedToCreateGroup] = useState(false);

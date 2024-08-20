@@ -12,8 +12,7 @@ import api from "../../services/api";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
-import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
-import { formatToActualTime, isValidRedirectUrl } from "snu-lib";
+import { FEATURES_NAME, isFeatureEnabled, formatToActualTime, isValidRedirectUrl } from "snu-lib";
 import { captureMessage } from "../../sentry";
 
 export default function Signin() {
@@ -59,10 +58,12 @@ export default function Signin() {
                 initialValues={{ email: "", password: "" }}
                 onSubmit={async ({ email, password }, actions) => {
                   try {
-                    const { user, token, code } = await api.post(`/referent/signin`, { email, password });
+                    const { user, token, code, redirect: signinRedirect } = await api.post(`/referent/signin`, { email, password });
                     if (code === "2FA_REQUIRED") {
                       plausibleEvent("2FA demandée");
                       return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
+                    } else if (code === "VERIFICATION_REQUIRED") {
+                      return history.push(signinRedirect);
                     }
                     if (token) api.setToken(token);
                     if (user) {
