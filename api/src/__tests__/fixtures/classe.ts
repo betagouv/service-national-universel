@@ -23,6 +23,7 @@ export function createFixtureClasse(fields: Partial<ClasseType> = {}): Partial<C
     type: "FULL",
     estimatedSeats: 20,
     trimester: "T1",
+    cohortId: "1",
     ...fields,
   };
   return classe;

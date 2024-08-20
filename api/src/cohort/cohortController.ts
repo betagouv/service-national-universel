@@ -150,7 +150,7 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    const cohort = await CohortModel.findOne({ name: session.cohort });
+    const cohort = await CohortModel.findById(session.cohortId);
     if (!cohort) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
@@ -272,7 +272,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     await cohort.save({ fromUser: req.user });
 
     if (cohort.type === COHORT_TYPE.CLE && (oldCohort.inscriptionStartDate !== cohort.inscriptionStartDate || oldCohort.inscriptionEndDate !== cohort.inscriptionEndDate)) {
-      const classes = await ClasseModel.find({ cohort: cohortName });
+      const classes = await ClasseModel.find({ cohortId: cohort._id });
       for (const c of classes) {
         await ClasseStateManager.compute(c._id, req.user, { YoungModel });
       }

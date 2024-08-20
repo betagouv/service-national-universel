@@ -26,6 +26,7 @@ import {
   EtablissementDocument,
   ClasseDocument,
   YoungType,
+  CohortModel,
 } from "../models";
 
 import emailsEmitter from "../emails";
@@ -97,6 +98,7 @@ import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
+import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -590,6 +592,10 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
+    if (await shouldSwitchYoungByIdToLC(id, value.status)) {
+      await switchYoungByIdToLC(id);
+    }
+
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
@@ -737,7 +743,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         cohesionStayMedicalFileReceived: undefined,
       });
     }
-
+    const cohortModel = await CohortModel.findOne({ name: cohort });
     young.set({
       status: youngStatus,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
@@ -746,6 +752,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohortChangeReason: cohortChangeReason ?? young.cohortChangeReason,
       cohesionStayPresence: undefined,
       cohesionStayMedicalFileReceived: undefined,
+      cohortId: cohortModel?._id,
     });
     if (value.source === YOUNG_SOURCE.CLE) {
       const correctionRequestsFiltered = young?.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];

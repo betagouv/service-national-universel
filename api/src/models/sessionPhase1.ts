@@ -1,9 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
-import config from "config";
-
-import { getCohortNames } from "snu-lib";
 
 import esClient from "../es";
 import anonymize from "../anonymization/sessionPhase1";
@@ -28,9 +25,14 @@ const schema = new Schema({
   },
   cohort: {
     type: String,
-    enum: getCohortNames(true, false, true),
     documentation: {
       description: "Cohorte",
+    },
+  },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
     },
   },
   department: {
@@ -199,7 +201,7 @@ schema.virtual("cohesionCenter", {
   justOne: true,
 });
 
-schema.virtual("fromUser").set<SchemaExtended>(function (fromUser) {
+schema.virtual("fromUser").set<SchemaExtended>(function (fromUser: UserSaved) {
   if (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
     this._user = { _id, role, department, region, email, firstName, lastName, model };
