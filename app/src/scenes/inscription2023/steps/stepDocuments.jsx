@@ -24,7 +24,7 @@ export default function StepDocuments() {
   const corrections = young?.correctionRequests?.filter(
     (correction) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(correction.field) && ["SENT", "REMINDED"].includes(correction.status),
   );
-  const disabledUpload = young?.files?.cniFiles?.length > 2;
+  const disabledUpload = young?.files?.cniFiles?.length >= 2;
 
   const IDs = [
     {
@@ -110,7 +110,7 @@ export default function StepDocuments() {
         <div className="mt-2 text-sm text-gray-800">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         <div className="flex flex-col my-3 gap-3">
           {IDs.map((doc) => (
-            <span
+            <button
               key={doc.category}
               onClick={() => handleClick(doc)}
               className={`cursor-pointer hover:bg-[#FAFAFA] w-full flex items-center justify-between border p-4 group ${
@@ -123,7 +123,7 @@ export default function StepDocuments() {
               <div className={`w-10 h-10 ${disabledUpload ? "bg-gray-400" : "bg-blue-france-sun-113 group-hover:bg-blue-france-sun-113-hover"}`}>
                 <RiArrowRightLine className="text-white w-6 h-6 mx-auto my-2" />
               </div>
-            </span>
+            </button>
           ))}
         </div>
         <SignupButtons onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />

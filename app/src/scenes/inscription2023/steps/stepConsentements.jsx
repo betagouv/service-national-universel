@@ -80,7 +80,7 @@ export default function StepConsentements() {
                     Me porte volontaire pour participer à la session <strong>{getCohortYear(getCohort(young.cohort))}</strong> du Service National Universel
                   </span>
                 ),
-                hintText: <span className= "text-base text-black">qui comprend la participation à un séjour de cohésion puis la réalisation d'une phase d'engagement.</span>,
+                hintText: <span className="text-base text-black">qui comprend la participation à un séjour de cohésion puis la réalisation d'une phase d'engagement.</span>,
                 nativeInputProps: {
                   checked: data.consentment1,
                   onChange: (e) => setData({ ...data, consentment1: e.target.checked }),

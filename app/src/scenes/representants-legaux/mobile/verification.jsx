@@ -131,7 +131,7 @@ const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
       <hr className="mt-4" />
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h1 className="mt-2 text-lg font-bold text-[#161616]">Ses informations Personnelles</h1>
+          <h1 className="mt-2 text-lg font-bold text-[#161616]">Ses informations personnelles</h1>
         </div>
         <Details title="Prénom" value={young.lastName} />
         <Details title="Nom" value={young.firstName} />
