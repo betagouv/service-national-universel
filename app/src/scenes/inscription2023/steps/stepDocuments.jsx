@@ -24,7 +24,7 @@ export default function StepDocuments() {
   const corrections = young?.correctionRequests?.filter(
     (correction) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(correction.field) && ["SENT", "REMINDED"].includes(correction.status),
   );
-  const disabledUpload = young?.files?.cniFiles?.length >= 2;
+  const disabledUpload = young?.files?.cniFiles?.length > 2;
 
   const IDs = [
     {
@@ -104,7 +104,7 @@ export default function StepDocuments() {
         )}
 
         {disabledUpload && (
-          <Info text="Vous ne pouvez téléverser que deux fichiers maximum." subText="Si vous devez en ajouter un, merci de supprimer d'abord un document ci-dessous." />
+          <Info text="Vous ne pouvez téléverser que trois fichiers maximum." subText="Si vous devez en ajouter un, merci de supprimer d'abord un document ci-dessous." />
         )}
 
         <div className="mt-2 text-sm text-gray-800">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
