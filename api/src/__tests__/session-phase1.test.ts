@@ -72,7 +72,10 @@ describe("Session Phase 1", () => {
       const cohort = await createCohortHelper(
         getNewCohortFixture({ name: "2020", sessionEditionOpenForReferentRegion: true, sessionEditionOpenForReferentDepartment: true, sessionEditionOpenForTransporter: true }),
       );
-      const sessionPhase1 = await createSessionWithCohesionCenter(getNewCohesionCenterFixtureV2(), getNewSessionPhase1Fixture({ headCenterId: referent.id, cohort: cohort.name }));
+      const sessionPhase1 = await createSessionWithCohesionCenter(
+        getNewCohesionCenterFixtureV2(),
+        getNewSessionPhase1Fixture({ headCenterId: referent.id, cohort: cohort.name, cohortId: cohort._id }),
+      );
       const res = await request(getAppHelper())
         .put("/session-phase1/" + sessionPhase1._id)
         .send({ cohort: "2020", cohesionCenterId: sessionPhase1.cohesionCenterId });
@@ -83,15 +86,15 @@ describe("Session Phase 1", () => {
     it("should be only allowed to admin and referent", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
-      const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
-      await createCohortHelper(
+      const cohort = await createCohortHelper(
         getNewCohortFixture({
-          name: sessionPhase1.cohort,
           sessionEditionOpenForReferentRegion: true,
           sessionEditionOpenForReferentDepartment: true,
           sessionEditionOpenForTransporter: true,
         }),
       );
+      const sessionPhase1 = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohort: cohort.name, cohortId: cohort._id });
+
       const res = await request(getAppHelper())
         .put("/session-phase1/" + sessionPhase1._id)
         .send({
@@ -141,7 +144,9 @@ describe("Session Phase 1", () => {
     });
     it("should return 403 when buses are associated with the session", async () => {
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture({ cohesionCenterId: new mongoose.Types.ObjectId().toString() }));
-      await LigneBusModel.create(getNewLigneBusFixture({ sessionId: sessionPhase1._id, centerId: sessionPhase1.cohesionCenterId, cohort: sessionPhase1.cohort }));
+      await LigneBusModel.create(
+        getNewLigneBusFixture({ sessionId: sessionPhase1._id, centerId: sessionPhase1.cohesionCenterId, cohort: sessionPhase1.cohort, cohortId: sessionPhase1.cohortId }),
+      );
 
       const res = await request(getAppHelper())
         .delete("/session-phase1/" + sessionPhase1._id)

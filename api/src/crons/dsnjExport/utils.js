@@ -61,7 +61,7 @@ const printSlackInfo = (rapport) => {
 };
 
 const generateCohesionCentersExport = async (cohort, action = "upload") => {
-  const sessions = await SessionPhase1Model.find({ cohort: cohort.name }).select({ cohesionCenterId: 1, _id: 0 });
+  const sessions = await SessionPhase1Model.find({ cohortId: cohort._id }).select({ cohesionCenterId: 1, _id: 0 });
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({
     _id: 1,
@@ -101,13 +101,16 @@ const generateCohesionCentersExport = async (cohort, action = "upload") => {
 };
 
 const generateYoungsExport = async (cohort, afterSession = false, action = "upload") => {
-  const sessions = await SessionPhase1Model.find({ cohort: cohort.name }).select({ _id: 1, cohesionCenterId: 1, dateStart: 1 });
+  const sessions = await SessionPhase1Model.find({ cohortId: cohort._id }).select({ _id: 1, cohesionCenterId: 1, dateStart: 1 });
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({ _id: 1, name: 1, code2022: 1 });
   const cohesionCenterParSessionId = {};
   const statusList = afterSession ? ["VALIDATED"] : ["WAITING_LIST", "VALIDATED"];
   const q = { cohort: cohort.name, status: { $in: statusList } };
-  if (afterSession) q.frenchNationality = "true";
+  if (afterSession) {
+    q.frenchNationality = "true";
+    q.statusPhase1 = "DONE";
+  }
   const youngs = await YoungModel.find(q).select({
     _id: 1,
     sessionPhase1Id: 1,
