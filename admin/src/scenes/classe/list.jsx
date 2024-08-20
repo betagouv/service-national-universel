@@ -54,14 +54,12 @@ export default function List() {
 
   const exportData = async ({ type }) => {
     setExportLoading(true);
-    //Ne pas utiliser ES pour l'instant, si nécessaire (pb de perf) il suffit de changer l'URL
     try {
-      const res = await api.post(
-        `/cle/classe/export?type=${type}`,
-        Object.entries(selectedFilters).reduce((e, [key, value]) => {
+      const res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
+        filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
           return { ...e, [key]: value.filter };
         }, {}),
-      );
+      });
 
       const result = await exportExcelSheet({ data: res.data, type });
       const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
@@ -112,7 +110,7 @@ export default function List() {
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes classes" }]}
         actions={[
           [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (
-            <Button title="Exporter toutes les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />
+            <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />
           ),
 
           [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
