@@ -107,7 +107,10 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
   const cohesionCenterParSessionId = {};
   const statusList = afterSession ? ["VALIDATED"] : ["WAITING_LIST", "VALIDATED"];
   const q = { cohort: cohort.name, status: { $in: statusList } };
-  if (afterSession) q.frenchNationality = "true";
+  if (afterSession) {
+    q.frenchNationality = "true";
+    q.statusPhase1 = "DONE";
+  }
   const youngs = await YoungModel.find(q).select({
     _id: 1,
     sessionPhase1Id: 1,

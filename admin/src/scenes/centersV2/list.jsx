@@ -32,7 +32,6 @@ export default function List() {
   }, [currentTab]);
 
   const firstSession = getDefaultCohort(cohorts);
-  console.log(firstSession);
 
   return (
     <div className="mb-8">
