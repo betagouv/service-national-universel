@@ -1,4 +1,4 @@
-import { capture } from "../sentry";
+const { capture } = require("../sentry");
 
 const { YoungModel } = require("../models");
 const { CohortModel } = require("../models");
