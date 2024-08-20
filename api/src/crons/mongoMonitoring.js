@@ -1,5 +1,6 @@
 const { capture } = require("../sentry");
 const { getDb } = require("../mongo");
+const esClient = require("../es");
 
 exports.handler = async () => {
   const log = {
@@ -22,6 +23,11 @@ exports.handler = async () => {
       exhaustHello: connections.exhaustHello,
       awaitingTopologyChanges: connections.awaitingTopologyChanges,
     };
+
+    await esClient.index({
+      index: "mongodb-monitoring",
+      body: log,
+    });
 
     console.log(JSON.stringify(log));
   } catch (e) {
