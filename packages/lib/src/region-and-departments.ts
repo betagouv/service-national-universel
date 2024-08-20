@@ -97,7 +97,6 @@ const departmentLookUp = {
   94: "Val-de-Marne",
   95: "Val-d'Oise",
   971: "Guadeloupe",
-  "971b": "Saint-Barthélemy",
   972: "Martinique",
   973: "Guyane",
   974: "La Réunion",

@@ -232,6 +232,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
     if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
+    const cohort = await CohortModel.findOne({ name: cohortName });
+
     const classe = await ClasseModel.create({
       ...value,
       status: STATUS_CLASSE.CREATED,
@@ -246,6 +248,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       uniqueKey: uniqueClasseKey,
       uniqueKeyAndId: `${uniqueClasseKey}-${uniqueClasseId}`,
       referentClasseIds: [referent._id],
+      cohortId: cohort?._id,
     });
 
     if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
@@ -358,6 +361,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           pointDeRassemblementId: undefined,
         });
 
+        const cohort = await CohortModel.findOne({ name: value.cohort });
+
         const youngs = await YoungModel.find({ classeId: classe._id });
         await Promise.all(
           youngs.map((y) => {
@@ -366,6 +371,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
               sessionPhase1Id: undefined,
               cohesionCenterId: undefined,
               meetingPointId: undefined,
+              cohortId: cohort?._id,
             });
             return y.save({ fromUser: req.user });
           }),
@@ -564,7 +570,7 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
       status: STATUS_CLASSE.VERIFIED,
     });
 
-    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, classe);
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, classe, req.user);
 
     classe = await classe.save({ fromUser: req.user });
 

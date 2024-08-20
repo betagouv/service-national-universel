@@ -7,7 +7,7 @@ import { Filters, ResultTable, Save, SelectedFilters } from "../../../components
 import api from "../../../services/api";
 import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "../../../utils";
 import Panel from "../../volontaires/panel";
-import { COHORTS_BEFORE_JULY_2023 } from "../../../utils";
+import { COHORTS_WITH_JDM_COUNT } from "../../../utils";
 import { captureMessage } from "../../../sentry";
 
 export default function General({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {
@@ -90,7 +90,7 @@ export default function General({ updateFilter, focusedSession, filterArray, set
                     <tr className="border-y-[1px] border-gray-100 text-xs uppercase text-gray-400">
                       <th className="py-3 pl-4">Volontaire</th>
                       <th className="">Présence à l&apos;arrivée</th>
-                      {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? <th className="">Présence JDM</th> : null}
+                      {COHORTS_WITH_JDM_COUNT.includes(focusedSession?.cohort) ? <th className="">Présence JDM</th> : null}
                       <th className="">Départ Anticipé</th>
                       <th className="">Fiche Sanitaire</th>
                       <th className="">Statut phase 1</th>
@@ -147,7 +147,7 @@ const Line = ({ hit, onClick, selected, focusedSession }) => {
           {value.cohesionStayPresence === "false" && "Absent"}
         </div>
       </td>
-      {COHORTS_BEFORE_JULY_2023.includes(focusedSession?.cohort) ? (
+      {COHORTS_WITH_JDM_COUNT.includes(focusedSession?.cohort) ? (
         <td className={`${bgColor}`}>
           <div className={`text-xs font-normal ${mainTextColor}`}>
             {!value.presenceJDM && <span className="italic text-gray-400">Non renseignée</span>}

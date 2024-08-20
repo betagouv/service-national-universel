@@ -3,7 +3,7 @@ import request from "supertest";
 
 import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
 
-import { YoungModel } from "../models";
+import { CohortModel, ReferentModel, YoungModel } from "../models";
 
 import getAppHelper from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
@@ -25,6 +25,7 @@ import { createFixtureClasse } from "./fixtures/classe";
 import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
+import { ObjectId } from "bson";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -185,9 +186,10 @@ describe("Referent", () => {
     it("should return 200 if youngs updated", async () => {
       const userId = "123";
       const etablissement = await createEtablissement(createFixtureEtablissement());
-      const classe: any = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: "Juillet 2023" }));
-      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort }));
-      await createCohortHelper(getNewCohortFixture({ name: classe.cohort }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const classe: any = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id }));
+      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
+
       const youngIds = [young._id.toString()];
       const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
@@ -481,6 +483,83 @@ describe("Referent", () => {
         .send();
       expect(res.statusCode).toEqual(200);
       expect(res.headers["set-cookie"][0]).toContain("jwt_ref=");
+    });
+  });
+  describe("PUT /referent/young/:id/change-cohort", () => {
+    const passport = require("passport");
+    passport.user.role = ROLES.ADMIN;
+    beforeEach(async () => {});
+
+    afterEach(async () => {
+      await YoungModel.deleteMany();
+      await CohortModel.deleteMany();
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should change the cohort of the young and cohortId", async () => {
+      const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
+      const cohort2 = await CohortModel.create({ ...getNewCohortFixture(), name: "à venir" });
+      const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
+
+      expect(young.cohortId).toEqual(cohort1._id.toString());
+
+      const newCohortName = "à venir";
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
+        source: "VOLONTAIRE",
+        cohort: newCohortName,
+        message: "Changing cohort for testing purposes",
+        cohortChangeReason: "Testing",
+      });
+
+      expect(res.status).toEqual(200);
+      expect(res.body.data.cohort).toEqual(newCohortName);
+      expect(res.body.data.cohortChangeReason).toEqual("Testing");
+      expect(res.body.data.originalCohort).toEqual(young.cohort);
+      expect(res.body.data.cohortId).toEqual(cohort2._id.toString());
+    });
+
+    it("should change the cohort of the young and cohortId to undefined", async () => {
+      const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
+      const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
+
+      const notPersistedCohortName = "à venir";
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
+        source: "VOLONTAIRE",
+        cohort: notPersistedCohortName,
+        message: "Changing cohort for testing",
+        cohortChangeReason: "Testing",
+      });
+
+      expect(res.status).toEqual(200);
+      expect(res.body.data.cohort).toEqual(notPersistedCohortName);
+      expect(res.body.data.cohortId).toBeUndefined();
+    });
+
+    it("should return 403 if the referent is not authorized to change the cohort", async () => {
+      const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
+      const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
+      passport.user.role = ROLES.VISITOR;
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
+        source: "VOLONTAIRE",
+        cohort: cohort1.name,
+        message: "Changing cohort for testing purposes",
+        cohortChangeReason: "Testing",
+      });
+
+      expect(res.status).toEqual(403);
+    });
+
+    it("should return 409 if the cohort is not valid", async () => {
+      const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
+      const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
+        source: "VOLONTAIRE",
+        cohort: "invalid cohort",
+        message: "Changing cohort for testing purposes",
+        cohortChangeReason: "Testing",
+      });
+
+      expect(res.status).toEqual(409);
     });
   });
 });

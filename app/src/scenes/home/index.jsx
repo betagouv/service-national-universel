@@ -1,8 +1,8 @@
 import { React, useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription } from "../../utils";
-import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../utils/cohorts";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, hasAccessToReinscription } from "../../utils";
+import { cohortAssignmentAnnouncementsIsOpenForYoung, cohortsInit, getCohort } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
@@ -49,6 +49,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchReInscriptionOpen();
+    cohortsInit();
   }, []);
 
   if (reinscriptionOpenLoading) return <Loader />;
@@ -60,11 +61,10 @@ export default function Home() {
 
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
-    
     if (reinscriptionOpen && hasAccessToReinscription(young)) {
       return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
     }
-    
+
     if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
       return <Phase1NotDone />;
     }
@@ -95,7 +95,7 @@ export default function Home() {
       return <HomePhase2 />;
     }
 
-    if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
+    if (!!getCohort(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
       const isCohortInstructionOpen = new Date() < new Date(cohort.instructionEndDate);
       if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !isCohortInstructionOpen) {
