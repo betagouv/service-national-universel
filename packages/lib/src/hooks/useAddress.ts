@@ -3,7 +3,7 @@ import { department2region, departmentLookUp } from "../region-and-departments";
 
 const baseURL = "https://api-adresse.data.gouv.fr/search/?q=";
 
-export function useAddress({ query, options = {}, enabled = true }: { query: string; options: { [key: string]: string }; enabled?: boolean }) {
+export function useAddress({ query, options = {}, enabled = true }: { query: string; options: { [key: string]: string | number }; enabled?: boolean }) {
   let url = baseURL + encodeURIComponent(query);
   for (const [key, value] of Object.entries(options)) {
     url += `&${key}=${encodeURIComponent(value)}`;

@@ -25,6 +25,8 @@ import {
   CohesionCenterModel,
   EtablissementDocument,
   ClasseDocument,
+  YoungType,
+  CohortModel,
 } from "../models";
 
 import emailsEmitter from "../emails";
@@ -90,12 +92,13 @@ import {
   APPLICATION_STATUS,
   EQUIVALENCE_STATUS,
   YOUNG_SITUATIONS,
-  CLE_FILIERE_LIST,
+  CLE_FILIERE,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
+import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -383,7 +386,7 @@ router.post("/signup_retry", async (req: UserRequest, res: Response) => {
     const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId))?.name : "";
 
     await referent.save({ fromUser: req.user });
-    await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role], {
+    await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
       params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
     });
@@ -561,11 +564,11 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     // when changing statusPhase2, we check applications and equivalence
     if (newYoung.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) {
       const applications = await ApplicationModel.find({ youngId: young._id });
-      const pendingApplication = applications.filter((a) => [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION].includes(a.status));
+      const pendingApplication = applications.filter((a) => [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION].includes(a.status as any));
 
       const equivalences = await MissionEquivalenceModel.find({ youngId: young._id });
       const pendingEquivalences = equivalences.filter((equivalence) =>
-        [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(equivalence.status),
+        [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(equivalence.status as any),
       );
 
       await cancelPendingApplications(pendingApplication, req.user);
@@ -589,6 +592,10 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
+    if (await shouldSwitchYoungByIdToLC(id, value.status)) {
+      await switchYoungByIdToLC(id);
+    }
+
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
@@ -607,7 +614,7 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
     const { error, value: payload } = Joi.object()
       .keys({
         youngIds: Joi.array().items(idSchema()).min(1).required(),
-        status: Joi.string().valid("VALIDATED").required(),
+        status: Joi.string().valid(YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED).required(),
       })
       .validate(req.body);
 
@@ -710,7 +717,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     let youngStatus = young.status;
     if (cohort === "à venir ") {
-      youngStatus = getYoungStatus(young);
+      youngStatus = getYoungStatus(young) as YoungType["status"];
     }
 
     const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
@@ -736,7 +743,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         cohesionStayMedicalFileReceived: undefined,
       });
     }
-
+    const cohortModel = await CohortModel.findOne({ name: cohort });
     young.set({
       status: youngStatus,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
@@ -745,6 +752,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohortChangeReason: cohortChangeReason ?? young.cohortChangeReason,
       cohesionStayPresence: undefined,
       cohesionStayMedicalFileReceived: undefined,
+      cohortId: cohortModel?._id,
     });
     if (value.source === YOUNG_SOURCE.CLE) {
       const correctionRequestsFiltered = young?.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];
@@ -857,7 +865,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
   }
 });
 
-const getYoungStatus = (young) => {
+const getYoungStatus = (young: YoungType) => {
   switch (young.status) {
     case YOUNG_STATUS.IN_PROGRESS:
       return YOUNG_STATUS.IN_PROGRESS;
@@ -871,19 +879,19 @@ const getYoungStatus = (young) => {
 };
 
 const getYoungSituationIfCLE = (filiere) => {
-  if (filiere === CLE_FILIERE_LIST.GENERAL_AND_TECHNOLOGIC) {
+  if (filiere === CLE_FILIERE.GENERAL_AND_TECHNOLOGIC) {
     return YOUNG_SITUATIONS.GENERAL_SCHOOL;
   }
-  if (filiere === CLE_FILIERE_LIST.PROFESSIONAL) {
+  if (filiere === CLE_FILIERE.PROFESSIONAL) {
     return YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL;
   }
-  if (filiere === CLE_FILIERE_LIST.APPRENTICESHIP) {
+  if (filiere === CLE_FILIERE.APPRENTICESHIP) {
     return YOUNG_SITUATIONS.APPRENTICESHIP;
   }
-  if (filiere === CLE_FILIERE_LIST.ADAPTED) {
+  if (filiere === CLE_FILIERE.ADAPTED) {
     return YOUNG_SITUATIONS.SPECIALIZED_SCHOOL;
   }
-  if (filiere === CLE_FILIERE_LIST.MIXED) {
+  if (filiere === CLE_FILIERE.MIXED) {
     return YOUNG_SITUATIONS.GENERAL_SCHOOL;
   }
   return null;
@@ -915,7 +923,7 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
     const tutor = await ReferentModel.findById(tutorId);
     if (!tutor) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
-    if (!canSendTutorTemplate(req.user, tutor)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
+    if (!canSendTutorTemplate(req.user)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
     if (
       [

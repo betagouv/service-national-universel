@@ -1,16 +1,15 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib");
+const { ROLES, YOUNG_STATUS, STATUS_CLASSE, FeatureFlagName, canSearchInElasticSearch } = require("snu-lib");
+
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const { EtablissementModel, CohortModel } = require("../../../models");
-const { FeatureFlagName } = require("../../../models/featureFlag");
 const { serializeReferents } = require("../../../utils/es-serializer");
-const { YOUNG_STATUS, STATUS_CLASSE } = require("snu-lib");
 const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {

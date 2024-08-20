@@ -14,27 +14,24 @@ const { createTerminus } = require("@godaddy/terminus");
 
 const config = require("config");
 
-const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
+const { capture } = require("./sentry");
+const { setupExpressErrorHandler } = require("@sentry/node");
 const { initDB, closeDB } = require("./mongo");
 const { initRedisClient, closeRedisClient } = require("./redis");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
-const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
 const basicAuth = require("express-basic-auth");
-const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers } = require("./queues/redisQueue");
+const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers, scheduleRepeatableTasks } = require("./queues/redisQueue");
 
 async function runTasks() {
-  initSentry();
   await Promise.all([initDB(), getAllPdfTemplates()]);
 
-  if (config.get("RUN_CRONS")) {
-    scheduleCrons();
-  }
   initQueues();
   initWorkers();
+  await scheduleRepeatableTasks();
 
   const app = express();
 
@@ -49,6 +46,7 @@ async function runTasks() {
     );
   }
   app.use("/", initMonitor());
+  setupExpressErrorHandler(app);
 
   // * Use Terminus for graceful shutdown when using Docker
   const server = http.createServer(app);
@@ -104,7 +102,6 @@ async function runAPI() {
   initQueues();
 
   const app = express();
-  const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
   if (["production", "staging", "ci", "custom"].includes(config.ENVIRONMENT)) {
@@ -205,7 +202,6 @@ async function runAPI() {
     try {
       throw new Error("Intentional error");
     } catch (error) {
-      console.log("Error ");
       capture(error);
       return res.status(500).send({ ok: false, code: "hihi" });
     }
@@ -228,7 +224,7 @@ async function runAPI() {
     });
   }
 
-  registerSentryErrorHandler();
+  setupExpressErrorHandler(app);
   app.use(handleError);
 
   initPassport();

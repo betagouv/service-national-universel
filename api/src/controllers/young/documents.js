@@ -216,7 +216,7 @@ router.post(
         if (key === "cniFiles") {
           young.latestCNIFileExpirationDate = body.expirationDate;
           if (young.cohort !== COHORTS.AVENIR) {
-            const cohort = await CohortModel.findOne({ name: young.cohort });
+            const cohort = await CohortModel.findById(young.cohortId);
             young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
           }
           young.latestCNIFileCategory = body.category;

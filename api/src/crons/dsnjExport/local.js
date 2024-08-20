@@ -1,16 +1,17 @@
+// !!! change the path
+// process.env["NODE_CONFIG_DIR"] = "/MY_ABSOLUTE_PATH/service-national-universel/api/config/";
+
+const config = require("config");
+const { initDB } = require("../../mongo");
+
 (async () => {
-  await require("../../env-manager")();
-  const { initDB } = require("./mongo");
   await initDB();
-
-  // ! To migrate into scripts dir to not be tagged as dead code
-
   const { generateYoungsExport, generateCohesionCentersExport } = require("./utils");
 
   const { CohortModel } = require("../../models");
 
   const action = "view"; // "upload" or "view"
-  const cohortName = "Juillet 2023";
+  const cohortName = "Juillet 2024";
 
   (async function local() {
     //@todo : update export date in case of upload

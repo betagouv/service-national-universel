@@ -4,9 +4,8 @@ import { HiOutlinePencil } from "react-icons/hi";
 
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
 import { searchSessions, searchPointDeRassemblements } from "../utils";
-import { ROLES } from "snu-lib";
+import { ROLES, ClasseDto } from "snu-lib";
 
 import { Rights, InfoBus } from "./types";
 

@@ -2,11 +2,14 @@ import request from "supertest";
 import passport from "passport";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
+import emailsEmitter from "../../emails";
+import snuLib from "snu-lib";
+import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS } from "snu-lib";
+
 import { dbConnect, dbClose } from "../helpers/db";
 import { mockEsClient } from "../helpers/es";
 import getAppHelper from "../helpers/app";
-import * as snuLib from "snu-lib";
-import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES } from "snu-lib";
+import * as featureService from "../../featureFlag/featureFlagService";
 
 // classe
 import { createClasse } from "../helpers/classe";
@@ -15,7 +18,7 @@ import { createFixtureClasse } from "../fixtures/classe";
 // etablissement
 import { createFixtureEtablissement } from "../fixtures/etablissement";
 import { createEtablissement } from "../helpers/etablissement";
-import { EtablissementModel } from "../../models";
+import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 
 // young
 import getNewYoungFixture from "../fixtures/young";
@@ -27,7 +30,7 @@ import getNewCohortFixture from "../fixtures/cohort";
 import { createCohortHelper } from "../helpers/cohort";
 
 // referent
-import { getNewReferentFixture } from "../fixtures/referent";
+import { getNewReferentFixture, getNewSignupReferentFixture } from "../fixtures/referent";
 import { createReferentHelper } from "../helpers/referent";
 
 beforeAll(dbConnect);
@@ -42,8 +45,6 @@ mockEsClient({
 jest.mock("../../emails", () => ({
   emit: jest.fn(),
 }));
-
-const emailsEmitter = require("../../emails");
 
 describe("DELETE /cle/classe/:id", () => {
   it("should return 400 when id is invalid", async () => {
@@ -597,6 +598,128 @@ describe("GET /:id/notifyRef", () => {
     const res = await request(getAppHelper()).get(`/cle/classe/${validId}/notifyRef`);
 
     expect(res.status).toBe(200);
+  });
+});
+
+describe("POST /cle/classe", () => {
+  beforeEach(async () => {
+    await ClasseModel.deleteMany({});
+    await EtablissementModel.deleteMany({});
+    await ReferentModel.deleteMany({});
+  });
+  const validBody = {
+    etablissementId: new ObjectId(),
+    coloration: CLE_COLORATION.ENVIRONMENT,
+    estimatedSeats: 10,
+    type: TYPE_CLASSE.FULL,
+    name: "Classe Test",
+    grades: ["1ereCAP"],
+    filiere: "Enseignement adapté",
+    referent: {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+    },
+  };
+  it("should return 400 if the request body is invalid", async () => {
+    const response = await request(getAppHelper()).post("/cle/classe").send({});
+    expect(response.status).toBe(400);
+  });
+
+  it("should return 403 if the user is not authorized to create a classe", async () => {
+    const response = await request(getAppHelper({ role: ROLES.VISITOR }))
+      .post("/cle/classe")
+      .send(validBody);
+    expect(response.status).toBe(403);
+  });
+
+  it("should return 409 if a classe with the same uniqueKey, uniqueId, and etablissementId already exists", async () => {
+    const etablissement = await createEtablissement(createFixtureEtablissement());
+    await createClasse(createFixtureClasse({ name: "Classe 1", uniqueKey: "C-PDLL072", uniqueId: "0EE948" }));
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/classe")
+      .send({ ...validBody, etablissementId: etablissement._id.toString() });
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe(ERRORS.ALREADY_EXISTS);
+    expect(response.body.message).toBe("Classe already exists.");
+  });
+
+  it("should return 404 if etablissement is not found", async () => {
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/classe")
+      .send(validBody);
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe("Etablissement not found.");
+  });
+
+  it("should return 409 if the referent is already registered", async () => {
+    const etablissement = await createEtablissement(createFixtureEtablissement());
+    await createReferentHelper(getNewSignupReferentFixture({ email: validBody.referent.email }));
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/classe")
+      .send({ ...validBody, etablissementId: etablissement._id.toString() });
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe(ERRORS.USER_ALREADY_REGISTERED);
+  });
+
+  it("should return 404 if the cohort is not found", async () => {
+    jest.spyOn(featureService, "isFeatureAvailable").mockResolvedValueOnce(true);
+    const etablissement = await createEtablissement(createFixtureEtablissement());
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/classe")
+      .send({ ...validBody, cohort: "invalidCohort", etablissementId: etablissement._id.toString() });
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe("Cohort not found.");
+  });
+
+  it("should return 200 if the classe is valid (with cohort but no FF)", async () => {
+    const etablissement = await createEtablissement(createFixtureEtablissement());
+    const cohort = await createCohortHelper(getNewCohortFixture());
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/classe")
+      .send({ ...validBody, cohort: cohort.name, etablissementId: etablissement._id.toString() });
+
+    expect(response.status).toBe(400);
+  });
+
+  it("should return 200 if the classe is valid (with cohort and FF)", async () => {
+    jest.spyOn(featureService, "isFeatureAvailable").mockResolvedValueOnce(true);
+    const etablissement = await createEtablissement(createFixtureEtablissement());
+    const cohort = await createCohortHelper(getNewCohortFixture());
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/classe")
+      .send({ ...validBody, cohort: cohort.name, etablissementId: etablissement._id.toString() });
+
+    expect(response.status).toBe(200);
+    const classe = await ClasseModel.findById(response.body.data._id).lean();
+    expect(classe).toBeDefined();
+    expect(classe?.name).toBe(validBody.name);
+    expect(classe?.uniqueKey).toBe("C-PDLL072");
+    expect(classe?.uniqueId).toBe("0EE948");
+    expect(classe?.etablissementId).toBe(etablissement._id.toString());
+    expect(classe?.cohort).toBe(cohort.name);
+    expect(classe?.filiere).toBe(validBody.filiere);
+    expect(classe?.grades).toStrictEqual(validBody.grades);
+  });
+
+  it("should return 200 if the classe is valid (without cohort)", async () => {
+    const etablissement = await createEtablissement(createFixtureEtablissement());
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/classe")
+      .send({ ...validBody, etablissementId: etablissement._id.toString() });
+
+    expect(response.status).toBe(200);
+    const classe = await ClasseModel.findById(response.body.data._id).lean();
+    expect(classe).toBeDefined();
+    expect(classe?.name).toBe(validBody.name);
+    expect(classe?.uniqueKey).toBe("C-PDLL072");
+    expect(classe?.uniqueId).toBe("0EE948");
+    expect(classe?.etablissementId).toBe(etablissement._id.toString());
+    expect(classe?.cohort).toBe(null);
+    expect(classe?.filiere).toBe(validBody.filiere);
+    expect(classe?.grades).toStrictEqual(validBody.grades);
   });
 });
 

@@ -2,8 +2,7 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getCohort } from "@/utils/cohorts";
 import React from "react";
-import { YOUNG_STATUS } from "snu-lib";
-import { getCohortPeriod } from "snu-lib";
+import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
 
 export default function InscriptionClosed({ young, isCLE }) {
   const statusWording = (young, isCLE) => {

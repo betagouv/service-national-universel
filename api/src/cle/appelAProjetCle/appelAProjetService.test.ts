@@ -1,3 +1,4 @@
+import { CLE_COLORATION } from "snu-lib";
 import { AppelAProjetService } from "./appelAProjetService";
 import { IAppelAProjet } from "./appelAProjetType";
 
@@ -11,24 +12,44 @@ describe("AppelAProjetService", () => {
   describe("appelAProjetsFilteredOutSameUaiButDifferentEmailChefEtablissement", () => {
     it("should filter out appelAProjets with same UAI but different email chefEtablissement", () => {
       const appelAProjets = [
-        { etablissement: { uai: "sameUaiDifferentEmail" }, referentEtablissement: { email: "test1@test.com" }, classe: { name: "a", coloration: "", estimatedSeats: 0 } },
-        { etablissement: { uai: "sameUaiDifferentEmail" }, referentEtablissement: { email: "test2@test.com" }, classe: { name: "b", coloration: "", estimatedSeats: 0 } },
-        { etablissement: { uai: "sameUaiSameEmail" }, referentEtablissement: { email: "test3@test.com" }, classe: { name: "c", coloration: "", estimatedSeats: 0 } },
-        { etablissement: { uai: "sameUaiSameEmail" }, referentEtablissement: { email: "test3@test.com" }, classe: { name: "d", coloration: "", estimatedSeats: 0 } },
-        { etablissement: { uai: "8910" }, referentEtablissement: { email: "sameUaiSameEmail@test.com" }, classe: { name: "e", coloration: "", estimatedSeats: 0 } },
-        { etablissement: { uai: "" }, referentEtablissement: { email: "pasduai@test.com" }, classe: { name: "f", coloration: "", estimatedSeats: 0 } },
-        { etablissement: { uai: "pasdemail" }, referentEtablissement: { email: "" }, classe: { name: "g", coloration: "", estimatedSeats: 0 } },
+        {
+          etablissement: { uai: "sameUaiDifferentEmail" },
+          referentEtablissement: { email: "test1@test.com" },
+          classe: { name: "a", coloration: CLE_COLORATION.SPORT, estimatedSeats: 0 },
+        },
+        {
+          etablissement: { uai: "sameUaiDifferentEmail" },
+          referentEtablissement: { email: "test2@test.com" },
+          classe: { name: "b", coloration: CLE_COLORATION.SPORT, estimatedSeats: 0 },
+        },
+        {
+          etablissement: { uai: "sameUaiSameEmail" },
+          referentEtablissement: { email: "test3@test.com" },
+          classe: { name: "c", coloration: CLE_COLORATION.SPORT, estimatedSeats: 0 },
+        },
+        {
+          etablissement: { uai: "sameUaiSameEmail" },
+          referentEtablissement: { email: "test3@test.com" },
+          classe: { name: "d", coloration: CLE_COLORATION.SPORT, estimatedSeats: 0 },
+        },
+        {
+          etablissement: { uai: "8910" },
+          referentEtablissement: { email: "sameUaiSameEmail@test.com" },
+          classe: { name: "e", coloration: CLE_COLORATION.SPORT, estimatedSeats: 0 },
+        },
+        { etablissement: { uai: "" }, referentEtablissement: { email: "pasduai@test.com" }, classe: { name: "f", coloration: CLE_COLORATION.SPORT, estimatedSeats: 0 } },
+        { etablissement: { uai: "pasdemail" }, referentEtablissement: { email: "" }, classe: { name: "g", coloration: CLE_COLORATION.SPORT, estimatedSeats: 0 } },
         {
           numberDS: 1,
           etablissement: { uai: "sameUniqueId" },
           referentEtablissement: { email: "sameUniqueId@test.com" },
-          classe: { name: "d", coloration: "a", estimatedSeats: 0 },
+          classe: { name: "d", coloration: CLE_COLORATION.ENVIRONMENT, estimatedSeats: 0 },
         },
         {
           numberDS: 2,
           etablissement: { uai: "sameUniqueId" },
           referentEtablissement: { email: "sameUniqueId@test.com" },
-          classe: { name: "d", coloration: "a", estimatedSeats: 0 },
+          classe: { name: "d", coloration: CLE_COLORATION.ENVIRONMENT, estimatedSeats: 0 },
         },
       ] as IAppelAProjet[];
 
@@ -44,7 +65,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "a",
-              coloration: "",
+              coloration: CLE_COLORATION.SPORT,
               estimatedSeats: 0,
             },
           },
@@ -57,7 +78,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "b",
-              coloration: "",
+              coloration: CLE_COLORATION.SPORT,
               estimatedSeats: 0,
             },
           },
@@ -70,7 +91,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "c",
-              coloration: "",
+              coloration: CLE_COLORATION.SPORT,
               estimatedSeats: 0,
             },
           },
@@ -83,7 +104,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "d",
-              coloration: "",
+              coloration: CLE_COLORATION.SPORT,
               estimatedSeats: 0,
             },
           },
@@ -96,7 +117,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "e",
-              coloration: "",
+              coloration: CLE_COLORATION.SPORT,
               estimatedSeats: 0,
             },
           },
@@ -110,7 +131,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "d",
-              coloration: "a",
+              coloration: CLE_COLORATION.ENVIRONMENT,
               estimatedSeats: 0,
             },
           },
@@ -124,7 +145,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "d",
-              coloration: "a",
+              coloration: CLE_COLORATION.ENVIRONMENT,
               estimatedSeats: 0,
             },
           },
@@ -139,7 +160,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "a",
-              coloration: "",
+              coloration: CLE_COLORATION.SPORT,
               estimatedSeats: 0,
             },
             removedReason: "sameUaiDifferentEmail",
@@ -153,7 +174,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "b",
-              coloration: "",
+              coloration: CLE_COLORATION.SPORT,
               estimatedSeats: 0,
             },
             removedReason: "sameUaiDifferentEmail",
@@ -168,7 +189,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "d",
-              coloration: "a",
+              coloration: CLE_COLORATION.ENVIRONMENT,
               estimatedSeats: 0,
             },
             removedReason: "sameClasseUniqueId",
@@ -183,7 +204,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "d",
-              coloration: "a",
+              coloration: CLE_COLORATION.ENVIRONMENT,
               estimatedSeats: 0,
             },
             removedReason: "sameClasseUniqueId",
@@ -199,7 +220,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "f",
-              coloration: "",
+              coloration: CLE_COLORATION.SPORT,
               estimatedSeats: 0,
             },
             removedReason: "noUaiOrEmail",
@@ -213,7 +234,7 @@ describe("AppelAProjetService", () => {
             },
             classe: {
               name: "g",
-              coloration: "",
+              coloration: CLE_COLORATION.SPORT,
               estimatedSeats: 0,
             },
             removedReason: "noUaiOrEmail",

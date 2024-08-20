@@ -11,7 +11,7 @@ const ClasseStateManager = {
     if (classe.status === STATUS_CLASSE.WITHDRAWN) return classe;
 
     // Get cohort
-    const classeCohort = await CohortModel.findOne({ name: classe.cohort });
+    const classeCohort = await CohortModel.findById(classe.cohortId);
     if (!classeCohort) throw new Error("Cohort not found");
 
     // Get students
@@ -28,7 +28,7 @@ const ClasseStateManager = {
     const isInscriptionClosed = now >= inscriptionEndDate;
 
     // Open
-    if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status) && isInscriptionOpen) {
+    if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status as any) && isInscriptionOpen) {
       classe.set({ status: STATUS_CLASSE.OPEN });
       classe = await classe.save({ fromUser });
       return classe;
