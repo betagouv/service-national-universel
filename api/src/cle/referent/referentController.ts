@@ -3,15 +3,17 @@ import passport from "passport";
 import Joi from "joi";
 import { Response } from "express";
 
-import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin } from "snu-lib";
+import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin, FeatureFlagName } from "snu-lib";
 
-import { doInviteMultipleChefsEtablissements } from "../../services/cle/referent";
+import { deleteOldReferentClasse, doInviteMultipleChefsEtablissements, doInviteMultipleReferentClasseVerifiee } from "../../services/cle/referent";
 import { uploadFile } from "../../utils";
 import { UserRequest } from "../../controllers/request";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { EtablissementModel } from "../../models";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
+import { generateCSVStream } from "../../services/fileService";
+import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 
 const router = express.Router();
 
@@ -64,7 +66,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
     await etablissement.save({ fromUser: req.user });
 
     // We send the email invitation once we are sure both the referent and the classe are created
-    await inviteReferent(referent, { role: SUB_ROLES.coordinateur_cle, user: req.user }, etablissement);
+    await inviteReferent(referent, { role: SUB_ROLES.coordinateur_cle, from: req.user }, etablissement);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -91,6 +93,62 @@ router.post("/send-invitation-chef-etablissement", passport.authenticate("refere
     uploadFile(`file/appelAProjet/${timestamp}-send-invitation-chef-etablissement.json`, file);
 
     return res.status(200).send({ ok: true, data: referentInvitationSent });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/send-invitation-referent-classe-verifiee", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    console.log("Controller - send-invitation-referent-classe-verifiee");
+
+    if (!isSuperAdmin(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (!(await isFeatureAvailable(FeatureFlagName.INVITE_REFERENT_CLASSE))) {
+      return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
+    }
+
+    const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+
+    const referentInvitationSent = await doInviteMultipleReferentClasseVerifiee(req.user);
+    uploadFile(`file/appelAProjet/${timestamp}-send-invitation-referent-classe.csv`, {
+      data: generateCSVStream(referentInvitationSent),
+      encoding: "",
+      mimetype: "text/csv",
+    });
+
+    return res.status(200).send({ ok: true, data: { referentInvitationSent } });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/delete-old-referent-classe", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    console.log("Controller - send-invitation-referent-classe");
+
+    if (!isSuperAdmin(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (!(await isFeatureAvailable(FeatureFlagName.INVITE_REFERENT_CLASSE))) {
+      return res.status(422).send({ ok: false, code: ERRORS.FEATURE_NOT_AVAILABLE });
+    }
+
+    const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+
+    const referentDeleted = await deleteOldReferentClasse(req.user);
+    uploadFile(`file/appelAProjet/${timestamp}-delete-old-referent-classe.csv`, {
+      data: generateCSVStream(referentDeleted),
+      encoding: "",
+      mimetype: "text/csv",
+    });
+
+    return res.status(200).send({ ok: true, data: { referentDeleted } });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -13,6 +13,7 @@ export default defineConfig(({ command, mode }) => {
 
   if (mode !== "development") {
     plugins.push(
+      // Put the Sentry vite plugin after all other plugins
       sentryVitePlugin({
         org: "sentry",
         project: "snu-admin",
@@ -21,11 +22,12 @@ export default defineConfig(({ command, mode }) => {
         environment: mode,
         release: {
           name: env.RELEASE,
-        },
-        deploy: {
-          env: mode,
+          deploy: {
+            env: mode,
+          },
         },
         validate: true,
+        reactComponentAnnotation: { enabled: true },
         sourcemaps: {
           // Specify the directory containing build artifacts
           assets: "./**",
@@ -40,7 +42,11 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
-    build: { sourcemap: mode === "development" ? false : true, outDir: "build", port: 8082 },
+    build: {
+      sourcemap: mode !== "development",
+      outDir: "build",
+      port: 8082,
+    },
     server: {
       port: 8082,
     },

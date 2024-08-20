@@ -7,6 +7,7 @@ export * from "./src/constants/constants";
 export * from "./src/constants/cohort";
 export * from "./src/constants/email";
 export * from "./src/constants/errors";
+export * from "./src/constants/featureFlags";
 export * from "./src/constants/functionalErrors";
 export * from "./src/constants/plan-de-transport";
 export * from "./src/constants/referentConstants";

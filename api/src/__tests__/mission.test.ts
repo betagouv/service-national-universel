@@ -12,6 +12,8 @@ import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
 import { createApplication, getApplicationByIdHelper } from "./helpers/application";
 import { getNewApplicationFixture } from "./fixtures/application";
+import { createCohortHelper } from "./helpers/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -81,7 +83,8 @@ describe("Mission", () => {
       expect(res.body.data.tutor.firstName).toEqual(tutor.firstName);
     });
     it("should return application if user is a young", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper({ ...getNewYoungFixture(), cohort: cohort.name, cohortId: cohort._id });
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;

@@ -1,9 +1,12 @@
 import config from "config";
-import { BullMonitorExpress } from "@bull-monitor/express";
-import { BullAdapter } from "@bull-monitor/root/dist/bull-adapter";
-import { initQueue, initWorker } from "./sendMailQueue";
+import { createBullBoard } from "@bull-board/api";
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+import { ExpressAdapter } from "@bull-board/express";
 import { Queue, Worker } from "bullmq";
 import Redis from "ioredis";
+
+import * as sendMailQueue from "./sendMailQueue";
+import * as cronsQueue from "./cronsQueue";
 
 const queues: Queue[] = [];
 const workers: Worker[] = [];
@@ -18,7 +21,16 @@ function initRedisConnection() {
 
 export function initQueues() {
   const connection = initRedisConnection();
-  queues.push(initQueue(connection));
+  queues.push(sendMailQueue.initQueue(connection));
+  if (config.get("RUN_CRONS")) {
+    queues.push(cronsQueue.initQueue(connection));
+  }
+}
+
+export async function scheduleRepeatableTasks() {
+  if (config.get("RUN_CRONS")) {
+    await cronsQueue.scheduleCrons();
+  }
 }
 
 export async function closeQueues() {
@@ -27,21 +39,23 @@ export async function closeQueues() {
 
 export function initWorkers() {
   const connection = initRedisConnection();
-  workers.push(initWorker(connection));
+  workers.push(sendMailQueue.initWorker(connection));
+  if (config.get("RUN_CRONS")) {
+    workers.push(cronsQueue.initWorker(connection));
+  }
 }
 
 export async function closeWorkers() {
   return Promise.all(workers.map((w) => w.close()));
 }
 
-export async function initMonitor() {
-  const monitor = new BullMonitorExpress({
-    queues: queues.map((q: any) => new BullAdapter(q)),
-    metrics: {
-      collectInterval: { hours: 1 },
-      maxMetrics: 100,
-    },
+export function initMonitor() {
+  const serverAdapter = new ExpressAdapter();
+
+  createBullBoard({
+    queues: queues.map((q) => new BullMQAdapter(q)),
+    serverAdapter: serverAdapter,
   });
-  await monitor.init();
-  return monitor;
+
+  return serverAdapter.getRouter();
 }

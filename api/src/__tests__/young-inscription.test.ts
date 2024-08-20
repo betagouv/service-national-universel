@@ -4,8 +4,10 @@ import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper, getYoungByIdHelper } from "./helpers/young";
 import { dbConnect, dbClose } from "./helpers/db";
 import { STEPS2023, YOUNG_STATUS, YOUNG_SITUATIONS } from "../utils";
-import { START_DATE_SESSION_PHASE1, COHORTS } from "snu-lib";
+import { COHORTS } from "snu-lib";
 import { fakerFR as faker } from "@faker-js/faker";
+import { createCohortHelper } from "./helpers/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -415,11 +417,20 @@ describe("Young", () => {
     });
 
     it("Should return 400 when the body sent is invalid", async () => {
-      const cohortObj = {
-        cohort: "invalid value",
-      };
+      const cohortObj = {};
       let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
       expect(res.status).toBe(400);
+    });
+
+    it("Should return 409 when the cohort is not found", async () => {
+      const passport = require("passport");
+      const user = await createYoungHelper(getNewYoungFixture());
+      passport.user = user;
+      const cohortObj = {
+        cohort: "no existing value",
+      };
+      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
+      expect(res.status).toBe(409);
     });
 
     it("Should return 404 when young is not found", async () => {
@@ -534,15 +545,18 @@ describe("Young", () => {
       };
 
       const passport = require("passport");
+      const cohort = await createCohortHelper(getNewCohortFixture());
+
       // @ts-ignore
-      const user = await createYoungHelper(getNewYoungFixture({ files: { cniFiles: [cniFile] } }));
+      const user = await createYoungHelper(getNewYoungFixture({ files: { cniFiles: [cniFile] }, cohort: cohort.name, cohortId: cohort._id }));
       passport.user = user;
+      console.log(user);
 
       const documentObj = {
         date: new Date(),
       };
 
-      const CNIFileNotValidOnStart = documentObj.date < START_DATE_SESSION_PHASE1[user.cohort];
+      const CNIFileNotValidOnStart = documentObj.date < new Date("07/17/2023");
 
       let res = await request(getAppHelper()).put("/young/inscription2023/documents/next").send(documentObj);
       const nextResponseData = res.body.data;
@@ -570,8 +584,6 @@ describe("Young", () => {
       const documentObj = {
         date: new Date(),
       };
-
-      // const CNIFileNotValidOnStart = documentObj.date < START_DATE_SESSION_PHASE1[user.cohort];
 
       let res = await request(getAppHelper()).put("/young/inscription2023/documents/next").send(documentObj);
       const nextResponseData = res.body.data;
@@ -609,7 +621,8 @@ describe("Young", () => {
 
     it("Should return 200 otherwise using 'correction' route param", async () => {
       const passport = require("passport");
-      const user = await createYoungHelper(getNewYoungFixture());
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const user = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
       passport.user = user;
 
       const fileObj = {
@@ -617,7 +630,7 @@ describe("Young", () => {
         latestCNIFileCategory: "cniNew",
       };
 
-      const CNIFileNotValidOnStart = fileObj.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[user.cohort];
+      const CNIFileNotValidOnStart = fileObj.latestCNIFileExpirationDate < new Date("07/17/2023");
 
       let res = await request(getAppHelper()).put("/young/inscription2023/documents/correction").send(fileObj);
       const correctionResponseData = res.body.data;
@@ -638,7 +651,8 @@ describe("Young", () => {
 
     it("Should return 200 otherwise", async () => {
       const passport = require("passport");
-      const user = await createYoungHelper(getNewYoungFixture());
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const user = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
       passport.user = user;
       let res = await request(getAppHelper()).put("/young/inscription2023/relance");
       expect(res.status).toBe(200);

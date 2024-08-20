@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
   const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
   if (mode !== "development") {
     plugins.push(
+      // Put the Sentry vite plugin after all other plugins
       sentryVitePlugin({
         org: "sentry",
         project: "snu-moncompte",
@@ -19,11 +20,12 @@ export default defineConfig(({ mode }) => {
         environment: mode,
         release: {
           name: env.RELEASE,
-        },
-        deploy: {
-          env: mode,
+          deploy: {
+            env: mode,
+          },
         },
         validate: true,
+        reactComponentAnnotation: { enabled: true },
         sourcemaps: {
           // Specify the directory containing build artifacts
           assets: "./**",
@@ -42,7 +44,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: plugins,
     build: {
-      sourcemap: mode === "development" ? false : true,
+      sourcemap: mode !== "development",
       outDir: "build",
       rollupOptions: {
         output: {

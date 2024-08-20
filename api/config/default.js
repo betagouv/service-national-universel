@@ -7,10 +7,11 @@ module.exports = {
   IMAGES_ROOTDIR: `${__dirname}/../public/images`,
   FONT_ROOTDIR: `${__dirname}/../src/assets/fonts`,
   RUN_CRONS: false,
+  ENABLE_SENTRY: true,
   ENABLE_SENDINBLUE: true, // TODO: default false
-  ENABLE_SENDINBLUE_SIMULATE_TEMPLATE: false,
-  MAILCATCHER_HOST: undefined,
-  MAILCATCHER_PORT: undefined,
+  MAIL_TRANSPORT: null, // BREVO / SMTP / null (pas d'envoi d'email)
+  SMTP_HOST: undefined,
+  SMTP_PORT: undefined,
   ENABLE_ANTIVIRUS: true,
   ENABLE_FLATTEN_ERROR_LOGS: true, // Print error stack without newlines on stderr
   API_URL: "http://localhost:8080",
@@ -28,7 +29,6 @@ module.exports = {
   API_ANTIVIRUS_ENDPOINT: "http://localhost:8089",
   ES_ENDPOINT: undefined,
   SENDINBLUEKEY: undefined,
-  SENTRY_URL: undefined,
   DIAGORIENTE_URL: undefined,
   DIAGORIENTE_TOKEN: undefined,
   FRANCE_CONNECT_URL: undefined,
@@ -65,4 +65,5 @@ module.exports = {
   TASK_MONITOR_ENABLE_AUTH: true,
   TASK_MONITOR_USER: undefined,
   TASK_MONITOR_SECRET: undefined,
+  ENABLE_2FA: false,
 };
