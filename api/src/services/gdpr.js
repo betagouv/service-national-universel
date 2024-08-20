@@ -13,10 +13,12 @@ async function deleteSensitiveData(youngId, mode = "save") {
     const CNIFileArray = res.map((e) => {
       return { Key: e.Key };
     });
-    if (CNIFileArray.length !== 0) console.log("Deleting files: ", CNIFileArray);
-    if (mode === "save") {
-      fileStatus = "DELETED";
-      await deleteFilesByList(CNIFileArray);
+    if (CNIFileArray.length !== 0) {
+      console.log(`Deleting files for young ${young._id}:`, CNIFileArray);
+      if (mode === "save") {
+        fileStatus = "DELETED";
+        await deleteFilesByList(CNIFileArray);
+      }
     }
   } catch (error) {
     fileStatus = "NOT_FOUND";
