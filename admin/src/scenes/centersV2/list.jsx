@@ -32,6 +32,7 @@ export default function List() {
   }, [currentTab]);
 
   const firstSession = getDefaultCohort(cohorts);
+  console.log(firstSession);
 
   return (
     <div className="mb-8">
@@ -79,7 +80,7 @@ const ListSession = ({ firstSession }) => {
   });
   const [size, setSize] = useState(10);
   const filterArray = [
-    { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession], sort: (e) => orderCohort(e) },
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
       title: "Département",
