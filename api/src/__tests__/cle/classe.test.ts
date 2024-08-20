@@ -59,7 +59,7 @@ describe("GET /cle/classe/:id", () => {
   });
 
   it("should return 404 when class is not found", async () => {
-    const nonExistingId = new ObjectId();
+    const nonExistingId = "104a49ba503555e4d8853003";
     const res = await request(getAppHelper()).get(`/cle/classe/${nonExistingId}`);
     expect(res.status).toBe(404);
   });

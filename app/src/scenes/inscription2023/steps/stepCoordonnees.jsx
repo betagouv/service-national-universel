@@ -236,10 +236,6 @@ export default function StepCoordonnees() {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
-
   const updateWasBornInFrance = (newWasBornInFrance) => {
     if (newWasBornInFrance === "true") {
       setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), birthCountry: FRANCE });

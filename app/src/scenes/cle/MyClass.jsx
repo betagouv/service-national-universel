@@ -1,10 +1,11 @@
 import { List } from "@snu/ds/dsfr";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import React from "react";
 
 export default function MyClass({ classe }) {
   const formatDate = (dateString) => {
-    return format(new Date(dateString), "dd MMMM yyyy");
+    return format(new Date(dateString), "dd MMMM yyyy", { locale: fr });
   };
 
   const fields = [

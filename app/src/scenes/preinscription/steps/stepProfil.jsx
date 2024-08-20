@@ -49,6 +49,20 @@ export default function StepProfil() {
     enabled: validateId(classeId),
   });
 
+  const optionsScolarite = [
+    { value: "4eme", label: "4ème" },
+    { value: "3eme", label: "3ème" },
+    { value: "2ndePro", label: "2de professionnelle" },
+    { value: "2ndeGT", label: "2de générale et technologique" },
+    { value: "1erePro", label: "1ère professionnelle" },
+    { value: "1ereGT", label: "1ère générale et technologique" },
+    { value: "TermPro", label: "Terminale professionnelle" },
+    { value: "TermGT", label: "Terminale générale et technologique" },
+    { value: "1ereCAP", label: "CAP 1ère année" },
+    { value: "2ndeCAP", label: "CAP 2ème année" },
+    { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
+  ];
+
   if (isLoading) {
     return <ProgressBar />;
   }
@@ -229,11 +243,10 @@ export default function StepProfil() {
           <SearchableSelect
             label="Niveau de scolarité"
             value={data.grade}
-            options={classe?.grades.map((grade) => ({ value: grade, label: translateGrade(grade) }))}
+            options={optionsScolarite}
             onChange={(value) => {
               setData({ ...data, grade: value });
             }}
-            className=""
             placeholder="Sélectionnez une option"
           />
           {error.grade ? <span className="text-sm text-red-500">{error.grade}</span> : null}
