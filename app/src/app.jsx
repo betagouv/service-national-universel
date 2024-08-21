@@ -1,3 +1,8 @@
+// Require this first!
+import { history, initSentry, SentryRoute } from "./sentry";
+import * as Sentry from "@sentry/react";
+initSentry();
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import React, { lazy, Suspense, useEffect, useState } from "react";
@@ -7,7 +12,6 @@ import queryString from "query-string";
 import { QueryClientProvider } from "@tanstack/react-query";
 
 import { setYoung } from "./redux/auth/actions";
-import * as Sentry from "@sentry/react";
 
 import useDocumentCss from "@/hooks/useDocumentCss";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
@@ -17,7 +21,6 @@ import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
 import { YOUNG_STATUS } from "./utils";
 import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
-import { history, initSentry, SentryRoute } from "./sentry";
 import { cohortsInit, getCohort } from "./utils/cohorts";
 import FallbackComponent from "./components/FallBackComponent";
 
@@ -40,53 +43,54 @@ const RepresentantsLegaux = lazy(() => import("./scenes/representants-legaux"));
 const Thanks = lazy(() => import("./scenes/contact/Thanks"));
 const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 
-initSentry();
 initApi();
 
-export default function App() {
-  return (
-    <Sentry.ErrorBoundary fallback={FallbackComponent}>
-      <QueryClientProvider client={queryClient}>
-        <Router history={history}>
-          <ScrollToTop />
-          <div className="flex min-h-screen flex-col justify-between">
-            {maintenance ? (
-              <Switch>
-                <SentryRoute path="/" component={Maintenance} />
-              </Switch>
-            ) : (
-              <Switch>
-                <SentryRoute
-                  path={[
-                    "/validate-contract/done",
-                    "/validate-contract",
-                    "/conditions-generales-utilisation",
-                    "/noneligible",
-                    "/representants-legaux",
-                    "/je-rejoins-ma-classe-engagee",
-                    "/je-suis-deja-inscrit",
-                    "/public-besoin-d-aide",
-                    "/auth",
-                    "/public-engagements",
-                    "/besoin-d-aide",
-                    "/merci",
-                    "/preinscription",
-                  ]}
-                  component={() => <OptionalLogIn />}
-                />
-                {/* Authentification nécessaire */}
-                <SentryRoute path="/" component={() => <MandatoryLogIn />} />
-              </Switch>
-            )}
-          </div>
-        </Router>
-      </QueryClientProvider>
-    </Sentry.ErrorBoundary>
-  );
+class App extends React.Component {
+  render() {
+    return (
+      <Sentry.ErrorBoundary fallback={FallbackComponent}>
+        <QueryClientProvider client={queryClient}>
+          <Router history={history}>
+            <ScrollToTop />
+            <div className="flex min-h-screen flex-col justify-between">
+              {maintenance ? (
+                <Switch>
+                  <SentryRoute path="/" component={Maintenance} />
+                </Switch>
+              ) : (
+                <Switch>
+                  <SentryRoute
+                    path={[
+                      "/validate-contract/done",
+                      "/validate-contract",
+                      "/conditions-generales-utilisation",
+                      "/noneligible",
+                      "/representants-legaux",
+                      "/je-rejoins-ma-classe-engagee",
+                      "/je-suis-deja-inscrit",
+                      "/public-besoin-d-aide",
+                      "/auth",
+                      "/public-engagements",
+                      "/besoin-d-aide",
+                      "/merci",
+                      "/preinscription",
+                    ]}
+                    component={() => <OptionalLogIn />}
+                  />
+                  <SentryRoute path="/" component={() => <MandatoryLogIn />} />
+                </Switch>
+              )}
+            </div>
+          </Router>
+        </QueryClientProvider>
+      </Sentry.ErrorBoundary>
+    );
+  }
 }
 
+export default Sentry.withProfiler(App);
+
 const OptionalLogIn = () => {
-  //DSFR CSS is only loaded on public routes.
   useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
   startReactDsfr({ defaultColorScheme: "light", Link });
   const [loading, setLoading] = useState(true);
