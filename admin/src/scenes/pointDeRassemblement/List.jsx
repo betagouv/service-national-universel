@@ -384,8 +384,6 @@ const ListSessions = ({ user, firstSession }) => {
 
 const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
   const history = useHistory();
-  console.log(hit);
-  console.log(session);
   return (
     <>
       <hr />
