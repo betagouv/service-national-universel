@@ -1,5 +1,6 @@
-const mongoose = require("mongoose");
 const config = require("config");
+const { logger } = require("./logger");
+const mongoose = require("mongoose");
 
 // Set up default mongoose connection
 async function initDB() {
@@ -10,17 +11,17 @@ async function initDB() {
 
   db.on("error", console.error.bind(console, "MONGODB: connection error:"));
 
-  db.on("connecting", () => console.log("MONGODB: connecting"));
-  db.on("open", () => console.log("MONGODB: open"));
-  db.on("connected", () => console.log("MONGODB: connected"));
-  db.on("disconnecting", () => console.log("MONGODB: disconnecting"));
-  db.on("disconnected", () => console.log("MONGODB: disconnected"));
-  db.on("reconnected", () => console.log("MONGODB: reconnected"));
-  db.on("close", () => console.log("MONGODB: close"));
+  db.on("connecting", () => logger.debug("MONGODB: connecting"));
+  db.on("open", () => logger.debug("MONGODB: open"));
+  db.on("connected", () => logger.debug("MONGODB: connected"));
+  db.on("disconnecting", () => logger.debug("MONGODB: disconnecting"));
+  db.on("disconnected", () => logger.debug("MONGODB: disconnected"));
+  db.on("reconnected", () => logger.debug("MONGODB: reconnected"));
+  db.on("close", () => logger.debug("MONGODB: close"));
 
-  db.on("fullsetup", () => console.log("MONGODB: fullsetup"));
-  db.on("all", () => console.log("MONGODB: all"));
-  db.on("reconnectFailed", () => console.log("MONGODB: reconnectFailed"));
+  db.on("fullsetup", () => logger.debug("MONGODB: fullsetup"));
+  db.on("all", () => logger.debug("MONGODB: all"));
+  db.on("reconnectFailed", () => logger.debug("MONGODB: reconnectFailed"));
 
   let options = {
     appname: "ApiSnu", // Add your application name
@@ -39,9 +40,9 @@ async function initDB() {
     await mongoose.connect(config.MONGO_URL, options);
   } catch (error) {
     if (error.reason && error.reason.servers) {
-      console.error(error.reason.servers);
+      logger.error(error.reason.servers);
     } else {
-      console.error("MONGODB: connection error:", error);
+      logger.error("MONGODB: connection error:", error);
     }
     throw error;
   }
