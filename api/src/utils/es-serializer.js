@@ -21,12 +21,7 @@ function serializeHits(body, callback) {
 }
 
 function serializeMissions(body) {
-  return serializeHits(body, (hit) => {
-    delete hit.sqlId;
-    delete hit.sqlStructureId;
-    delete hit.sqlTutorId;
-    return hit;
-  });
+  return serializeHits(body, (hit) => hit);
 }
 
 function serializeSchools(body) {
@@ -64,7 +59,6 @@ function serializeRamsesSchools(body) {
 
 function serializeYoungs(body) {
   return serializeHits(body, (hit) => {
-    delete hit.sqlId;
     // ! Not necessary. These data shouldn't be in ES
     delete hit.password;
     delete hit.nextLoginAttemptIn;
@@ -80,17 +74,11 @@ function serializeYoungs(body) {
 }
 
 function serializeStructures(body) {
-  return serializeHits(body, (hit) => {
-    delete hit.sqlId;
-    delete hit.sqlStructureId;
-    delete hit.sqlTutorId;
-    return hit;
-  });
+  return serializeHits(body, (hit) => hit);
 }
 
 function serializeReferents(body) {
   return serializeHits(body, (hit) => {
-    delete hit.sqlId;
     // ! Not necessary. These data shouldn't be in ES
     delete hit.password;
     delete hit.nextLoginAttemptIn;
@@ -106,10 +94,7 @@ function serializeReferents(body) {
 }
 
 function serializeApplications(body) {
-  return serializeHits(body, (hit) => {
-    delete hit.sqlId;
-    return hit;
-  });
+  return serializeHits(body, (hit) => hit);
 }
 
 module.exports = {
