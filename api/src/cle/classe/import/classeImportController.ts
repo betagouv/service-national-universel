@@ -2,7 +2,7 @@ import passport from "passport";
 import express from "express";
 
 import { FeatureFlagName, isSuperAdmin } from "snu-lib";
-import { ERRORS } from "../../../utils";
+import { ERRORS, uploadFile } from "../../../utils";
 import { UserRequest } from "../../../controllers/request";
 
 import { isFeatureAvailable } from "../../../featureFlag/featureFlagService";
@@ -11,6 +11,7 @@ import { importClasseCohort } from "./classeImportService";
 import Joi from "joi";
 import { capture } from "../../../sentry";
 import { ClasseCohortImportBody, ClasseCohortImportKey } from "./classeCohortImport";
+import { generateCSVStream } from "../../../services/fileService";
 
 const router = express.Router();
 
@@ -36,6 +37,13 @@ router.post("/classe-cohort", passport.authenticate("referent", { session: false
 
   try {
     const importedClasseCohort = await importClasseCohort(value.filePath, value.classeCohortImportKey);
+    const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+
+    uploadFile(`file/appelAProjet/import/${timestamp}-imported-classes-cohorts.csv`, {
+      data: generateCSVStream(importedClasseCohort),
+      encoding: "",
+      mimetype: "text/csv",
+    });
     return res.status(200).send({ ok: true, data: importedClasseCohort });
   } catch (error) {
     capture(error);
