@@ -17,6 +17,7 @@ afterAll(dbClose);
 jest.mock("../../utils", () => ({
   ...jest.requireActual("../../utils"),
   getFile: jest.fn(),
+  uploadFile: jest.fn(),
 }));
 
 jest.mock("passport");
