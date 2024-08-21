@@ -146,8 +146,8 @@ async function getYoungRegisteredWithParticularSituation(startDate, endDate, use
 
 async function getDepartmentRegistrationGoal(startDate, endDate, user) {
   // ref reg only
-  const cohorts = await CohortModel.find({}, { name: 1 }).map((c) => c.name);
-  const cohort = cohorts[cohorts.length - 2];
+  const cohorts = await CohortModel.find({}, { name: 1 });
+  const { name: cohort } = cohorts[cohorts.length - 2];
   let body = {
     query: {
       bool: {
