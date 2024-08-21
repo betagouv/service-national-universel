@@ -1,14 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    ".env"
-  ],
+  "globalDependencies": [".env"],
+  "ui": "tui",
   "tasks": {
     "build": {
-      "outputs": [
-        ".dist/**",
-        "!.dist/cache/**"
-      ]
+      "outputs": [".dist/**", "!.dist/cache/**"]
     },
     "@snu/ds#build": {
       "cache": false
@@ -16,28 +12,16 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "outputs": [
-        "dist/**",
-        "build/**"
-      ],
-      "dependsOn": [
-        "@snu/ds#build",
-        "^build"
-      ]
+      "outputs": ["dist/**", "build/**"],
+      "dependsOn": ["@snu/ds#build", "^build"]
     },
     "start": {
-      "outputs": [
-        ".launch/**",
-        "!.launch/cache/**"
-      ]
+      "outputs": [".launch/**", "!.launch/cache/**"]
     },
     "test": {
       "cache": false,
       "persistent": true,
-      "outputs": [
-        "dist/**",
-        "build/**"
-      ]
+      "outputs": ["dist/**", "build/**"]
     },
     "lint": {},
     "clean": {
