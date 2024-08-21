@@ -29,6 +29,9 @@ import SchemaEditor from "./SchemaEditor";
 import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
 
 export default function SchemaRepartition({ region, department }) {
+  const regOrDep = region || department || "";
+  useDocumentTitle(`Schéma de répartition${regOrDep ? ` - ${regOrDep}` : ""}`);
+
   const history = useHistory();
   const location = useLocation();
   const { user } = useSelector((state) => state.Auth);
@@ -52,11 +55,6 @@ export default function SchemaRepartition({ region, department }) {
   const [data, setData] = useState({ rows: getDefaultRows() });
   const [filteredCohortList, setFilteredCohortList] = useState([]);
   const [goals, setGoals] = useState(null);
-  const [exportLoading, setExportLoading] = useState(false);
-
-  if (region) useDocumentTitle(`Schéma de répartition - ${region}`);
-  if (department) useDocumentTitle(`Schéma de répartition - ${department}`);
-  if (!department && !region) useDocumentTitle("Schéma de répartition");
 
   const departementsList =
     user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1

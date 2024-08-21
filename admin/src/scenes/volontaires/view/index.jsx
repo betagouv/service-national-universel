@@ -22,7 +22,7 @@ import CustomMission from "./customMission";
 
 export default function Index({ ...props }) {
   const [young, setYoung] = useState();
-  const setDocumentTitle = useDocumentTitle("Volontaires");
+  useDocumentTitle(young ? (young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : `${young.firstName} ${young.lastName}`) : "Volontaires");
   const user = useSelector((state) => state.Auth.user);
   const cohort = useSelector((state) => state.Cohorts).find((e) => e.name === young?.cohort);
 
@@ -31,12 +31,6 @@ export default function Index({ ...props }) {
     if (!id) return <div />;
     const { data } = await api.get(`/referent/young/${id}`);
     setYoung(data);
-    setDocumentTitle(`${data?.firstName} ${data?.lastName}`);
-    if (data?.status === YOUNG_STATUS.DELETED) {
-      setDocumentTitle(`Compte supprimé`);
-    } else {
-      setDocumentTitle(`${data?.firstName} ${data?.lastName}`);
-    }
   };
 
   const getDetail = () => {
