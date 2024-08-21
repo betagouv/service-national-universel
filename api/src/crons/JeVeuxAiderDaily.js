@@ -50,7 +50,7 @@ const fetchMission = (skip = 0) =>
     .then((response) => response.json())
     .then((result) => sync(result))
     .then((rest) => (rest ? fetchMission(skip + 50) : cleanData()))
-    .catch((error) => console.log("error fetch mission :", error));
+    .catch((error) => capture(error));
 
 const fetchStructure = async (id) => {
   return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${config.JVA_API_KEY}`, {
@@ -58,12 +58,15 @@ const fetchStructure = async (id) => {
     redirect: "follow",
   })
     .then((response) => response.json())
-    .catch((error) => console.log("error fetch struture :", error));
+    .catch((error) => capture(error));
 };
 
 const sync = async (result) => {
   //console.log("Nombre de missions traitées (current iteration)", result.data.length);
   //console.log("API page", result.current_page);
+  if (!result.ok) {
+    throw new Error("sync with JVA missions : " + result.code);
+  }
 
   for (let i = 0; i < result.data.length; i++) {
     try {

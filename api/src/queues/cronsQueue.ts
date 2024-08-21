@@ -1,10 +1,11 @@
 import config from "config";
-import { Worker, Queue } from "bullmq";
-import { capture } from "../sentry";
+import { Worker, Queue, Job } from "bullmq";
+import { capture, captureMessage } from "../sentry";
 import CRONS from "../crons";
 
 import { captureCheckIn } from "@sentry/node";
 import { MonitorConfig } from "@sentry/types";
+import { logAddedTask, logStartedTask, logSucceedTask, logFailedTask } from "./taskLoggerService";
 
 const CRONS_QUEUE = `${config.get("TASK_QUEUE_PREFIX")}_crons`;
 
@@ -25,10 +26,10 @@ export function initQueue(connection) {
   return queue;
 }
 
-export function scheduleCrons() {
+export async function scheduleCrons() {
   for (const cron of CRONS) {
-    console.log(`Schedule task ${cron.name}`);
-    queue?.add(
+    // @ts-ignore
+    const job = await queue.add(
       cron.name,
       {},
       {
@@ -38,6 +39,7 @@ export function scheduleCrons() {
         jobId: cron.name,
       },
     );
+    logAddedTask(job);
   }
 }
 
@@ -49,7 +51,7 @@ export function initWorker(connection) {
       if (!cron) {
         throw new Error("CRON not found");
       }
-      console.log(`Start processing task ${job.name} (${job.id})`);
+      logStartedTask(job);
       const monitorConfig = {
         schedule: {
           type: "crontab",
@@ -74,9 +76,7 @@ export function initWorker(connection) {
           },
           monitorConfig,
         );
-        console.log(`End processing task ${job.name} (${job.id})`);
       } catch (err) {
-        capture(err);
         captureCheckIn(
           {
             checkInId,
@@ -90,6 +90,14 @@ export function initWorker(connection) {
     },
     { connection },
   );
-  worker.on("error", (err) => console.error(err));
+  worker.on("completed", (job) => {
+    logSucceedTask(job);
+  });
+
+  worker.on("failed", (job: Job, error) => {
+    const error_id = capture(error);
+    logFailedTask(job, error_id);
+  });
+  worker.on("error", (err) => captureMessage(err));
   return worker;
 }
