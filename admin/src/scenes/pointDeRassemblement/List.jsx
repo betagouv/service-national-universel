@@ -17,6 +17,7 @@ import { Loading, TabItem, Title } from "./components/common";
 import ModalCreation from "./components/ModalCreation";
 import { getCohortGroups } from "@/services/cohort.service";
 import { getDefaultCohort } from "@/utils/session";
+import { Link } from "react-router-dom";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -233,7 +234,7 @@ const ListSessions = ({ user, firstSession }) => {
   const [paramData, setParamData] = React.useState({ page: 0 });
   const [size, setSize] = useState(10);
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false, sort: (e) => orderCohort(e) },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession.name], allowEmpty: false, sort: (e) => orderCohort(e) },
     {
       title: "Région",
       name: "region",
@@ -254,7 +255,7 @@ const ListSessions = ({ user, firstSession }) => {
   const [nbLinesByPdr, setNbLinesByPdr] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
 
-  const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : firstSession;
+  const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : firstSession.name;
 
   const getYoungsByPdr = async (ids) => {
     const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
@@ -383,7 +384,6 @@ const ListSessions = ({ user, firstSession }) => {
 
 const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
   const history = useHistory();
-
   return (
     <>
       <hr />
@@ -398,11 +398,16 @@ const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
           </div>
         </div>
         <div className="flex w-[25%] flex-wrap gap-2">
-          <div
-            onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${session}`)}
-            className={`cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]`}>
-            {session}
-          </div>
+          {hit.cohorts?.map((cohortName) => {
+            return (
+              <Link
+                key={cohortName}
+                to={`/point-de-rassemblement/${hit._id}?cohort=${cohortName}`}
+                className={`cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]`}>
+                {cohortName}
+              </Link>
+            );
+          })}
         </div>
         <div className="flex w-[20%] flex-wrap gap-2">
           {loading ? (
