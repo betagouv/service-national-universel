@@ -4,6 +4,7 @@ import { ClasseCohortCSV, ClasseCohortImportKey, ClasseCohortImportResult } from
 import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
 import { ClasseDocument, ClasseModel, CohortModel } from "../../../models";
 import { ERRORS } from "snu-lib";
+import { findCohortByNameOrThrow } from "../../../cohort/cohortService";
 
 export const importClasseCohort = async (filePath: string, classeCohortImportKey: ClasseCohortImportKey) => {
   const classeCohortFile = await getFile(filePath);
@@ -18,8 +19,9 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
   for (const classeCohort of classesCohortsMapped) {
     const classeCohortImportResult: ClasseCohortImportResult = { ...classeCohort };
     try {
-      const updatedClasse: ClasseDocument = await addCohortToClasse(classeCohort.classeId, classeCohort.cohortId, classeCohortImportKey);
+      const updatedClasse: ClasseDocument = await addCohortToClasseByCohortName(classeCohort.classeId, classeCohort.cohortName, classeCohortImportKey);
       classeCohortImportResult.result = "success";
+      classeCohortImportResult.cohortId = updatedClasse.cohortId;
       classeCohortImportResult.cohortName = updatedClasse.cohort;
     } catch (error) {
       console.error(error);
@@ -32,7 +34,18 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
   return classesCohortsImportResult;
 };
 
+export const addCohortToClasseByCohortName = async (classeId: string, cohortName: string | undefined, classeCohortImportKey: ClasseCohortImportKey) => {
+  if (!cohortName) {
+    throw new Error(ERRORS.INVALID_PARAMS);
+  }
+  const cohort = await findCohortByNameOrThrow(cohortName);
+  return addCohortToClasse(classeId, cohort._id, classeCohortImportKey);
+};
+
 export const addCohortToClasse = async (classeId: string, cohortId: string, classeCohortImportKey: ClasseCohortImportKey) => {
+  if (!classeId || !cohortId) {
+    throw new Error(ERRORS.INVALID_PARAMS);
+  }
   const cohort = await CohortModel.findById(cohortId);
   if (!cohort) {
     throw new Error(ERRORS.COHORT_NOT_FOUND);

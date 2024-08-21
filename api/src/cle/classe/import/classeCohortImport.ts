@@ -8,13 +8,13 @@ export interface ClasseCohortImportBody {
 }
 
 export interface ClasseCohortCSV {
-  classe: string;
-  cohort: string;
+  "Session: Désignation de la session": string;
+  "Identifiant de la classe engagée": string;
 }
 
 export interface ClasseCohortImportResult {
   classeId: string;
-  cohortId: string;
+  cohortId?: string;
   cohortName?: string;
   result?: "success" | "error";
   error?: "success" | string;

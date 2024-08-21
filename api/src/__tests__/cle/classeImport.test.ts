@@ -21,7 +21,9 @@ jest.mock("../../utils", () => ({
 
 jest.mock("passport");
 
-beforeEach(() => {
+beforeEach(async () => {
+  await CohortModel.deleteMany();
+  await ClasseModel.deleteMany();
   passport.user.role = ROLES.ADMIN;
   passport.user.subRole = "god";
   jest.spyOn(featureServiceModule, "isFeatureAvailable").mockImplementation(() => Promise.resolve(true));
@@ -41,9 +43,9 @@ describe("POST /cle/classe-import", () => {
     const cohort = await CohortModel.create(getNewCohortFixture({ name: "à venir" }));
 
     const notExistingClasseId = new mongoose.Types.ObjectId().toString();
-    const notExistingCohortId = new mongoose.Types.ObjectId().toString();
+    const notExistingCohortName = "not-existing-cohort";
 
-    const mockFileBody = `classe,cohort\n${classe1?._id},${cohort?._id}\n${notExistingClasseId},${cohort?._id}\n${classe2?._id},${notExistingCohortId}`;
+    const mockFileBody = `Identifiant de la classe engagée,Session: Désignation de la session\n${classe1?._id},${cohort?.name}\n${notExistingClasseId},${cohort?.name}\n${classe2?._id},${notExistingCohortName}`;
     const mockFileBuffer = { Body: Buffer.from(mockFileBody) };
     (getFile as jest.Mock).mockResolvedValue(mockFileBuffer);
 
@@ -54,17 +56,17 @@ describe("POST /cle/classe-import", () => {
         classeId: classe1._id.toString(),
         cohortId: cohort._id.toString(),
         result: "success",
-        cohortName: "à venir",
+        cohortName: cohort.name,
       },
       {
         classeId: notExistingClasseId,
-        cohortId: cohort?._id.toString(),
+        cohortName: cohort.name,
         result: "error",
         error: ERRORS.CLASSE_NOT_FOUND,
       },
       {
         classeId: classe2._id.toString(),
-        cohortId: notExistingCohortId,
+        cohortName: notExistingCohortName,
         result: "error",
         error: ERRORS.COHORT_NOT_FOUND,
       },
