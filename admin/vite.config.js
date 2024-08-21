@@ -46,6 +46,30 @@ export default defineConfig(({ command, mode }) => {
       sourcemap: mode !== "development",
       outDir: "build",
       port: 8082,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const HugeLibraries = [
+              "@codegouvfr/react-dsfr",
+              "xlsx",
+              "date-fns",
+              "react-datepicker",
+              "react-select",
+              "validator",
+              "libphonenumber-js",
+              "@sentry",
+              "react-dom",
+              "core-js",
+              "@headlessui",
+              "chart.js",
+              "@codegouvfr",
+            ];
+            if (HugeLibraries.some((libName) => id.includes(`node_modules/${libName}`))) {
+              return id.toString().split("node_modules/")[1].split("/")[0].toString();
+            }
+          },
+        },
+      },
     },
     server: {
       port: 8082,
