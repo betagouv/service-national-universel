@@ -23,7 +23,7 @@ export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts);
   const [modal, setModal] = React.useState({ isOpen: false });
-  const firstSession = getDefaultCohort(cohorts);
+  const firstSession = getDefaultCohort(cohorts)?.name;
   const history = useHistory();
   const { currentTab } = useParams();
   const { search } = useLocation();
