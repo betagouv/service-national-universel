@@ -14,7 +14,7 @@ import LoadingButton from "./LoadingButton";
 //   impersonate: Impersonate,
 // };
 
-const images = import.meta.globEager("../../assets/panel-icons/*.svg");
+const images = import.meta.glob("../../assets/panel-icons/*.svg", { eager: true });
 
 export default function PanelActionButton({ icon, title, ...rest }) {
   return (

@@ -1,6 +1,7 @@
 {
   "name": "admin",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "dev:open": "vite --open",
@@ -84,7 +85,7 @@
     "prettier": "^3.1.1",
     "tailwindcss": "^3.3.4",
     "typescript": "^5.4.5",
-    "vite": "^4.5.3"
+    "vite": "^5.4.0"
   },
   "engines": {
     "node": "^18.20",

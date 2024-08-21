@@ -8,7 +8,8 @@ import Loader from "../../../components/Loader";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { Footer } from "@snu/ds/dsfr";
-const images = import.meta.globEager("../../../assets/programmes-engagement/*");
+
+const images = import.meta.glob("../../../assets/programmes-engagement/*", { eager: true });
 
 const EngagementsProgramMobile = () => {
   const [program, setProgram] = useState();

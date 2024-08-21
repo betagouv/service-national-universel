@@ -3,14 +3,13 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-
 import ProgramCard from "./components/programCard";
 import api from "../../services/api";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { translate, ROLES } from "../../utils";
 
-const images = import.meta.globEager("../../assets/programmes-engagement/*");
+const images = import.meta.glob("../../assets/programmes-engagement/*", { eager: true });
 
 export default function List() {
   const [programs, setPrograms] = useState();
