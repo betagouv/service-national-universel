@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { HiHome } from "react-icons/hi";
-import { AiOutlinePlus } from "react-icons/ai";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import { toastr } from "react-redux-toastr";
 
-import { Page, Header, Button, Badge, DropdownButton } from "@snu/ds/admin";
+import { Page, Header, Badge } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
-import plausibleEvent from "@/services/plausible";
-import { downloadCertificatesByClassId } from "@/services/convocation.service";
-import { usePendingAction } from "@/hooks/usePendingAction";
 import { ClasseDto } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
@@ -24,20 +20,15 @@ import GeneralInfos from "./components/GeneralInfos";
 import ReferentInfos from "./components/ReferentInfos";
 import SejourInfos from "./components/SejourInfos";
 import StatsInfos from "./components/StatsInfos";
-import DeleteButton from "./components/DeleteButton";
-import ModaleWithdraw from "./components/modale/ModaleWithdraw";
-import ModaleCohort from "./components/modale/modaleCohort";
-import ButtonInvite from "./components/ButtonInvite";
+import ModaleCohort from "./components/modaleCohort";
 import { InfoBus, Rights } from "./components/types";
 import { TStatus } from "@/types";
-import ButtonRelanceVerif from "./components/ButtonRelanceVerif";
-import VerifClassButton from "./components/VerifClassButton";
+import { getHeaderActionList } from "./header";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
-  const [showModaleWithdraw, setShowModaleWithdraw] = useState(false);
   const [showModaleCohort, setShowModaleCohort] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
@@ -46,7 +37,6 @@ export default function View() {
   const [isLoading, setIsLoading] = useState(false);
   const [oldClasseCohort, setOldClasseCohort] = useState();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
-  const [isConvocationDownloading, handleConvocationDownload] = usePendingAction() as [boolean, any];
 
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortState) => state.Cohorts).filter(
@@ -55,7 +45,6 @@ export default function View() {
   const cohort = cohorts.find((c) => c.name === classe?.cohort);
   const rights = getRights(user, classe, cohort) as Rights;
 
-  const history = useHistory();
   const totalSeatsTakenExcluding =
     (classe?.seatsTaken ?? 0) -
     (studentStatus[YOUNG_STATUS.WITHDRAWN] || 0) -
@@ -189,98 +178,6 @@ export default function View() {
     setErrors({});
   };
 
-  const onWithdraw = async () => {
-    try {
-      setIsLoading(true);
-      const { ok, code } = await api.remove(`/cle/classe/${classe?._id}?type=withdraw`);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
-        return setIsLoading(false);
-      }
-      history.push("/classes");
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression", e);
-    } finally {
-      setIsLoading(false);
-      setShowModaleWithdraw(false);
-    }
-  };
-
-  const onInscription = () => {
-    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
-    history.push(`/volontaire/create?classeId=${classe?._id}`);
-  };
-
-  const handleCertificateDownload = () => {
-    const getErrorMessage = (error) => {
-      let errorMessage = "Téléchargement des convocations impossible";
-      if (FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE === error.code) {
-        errorMessage = "Le nombre de convocations est trop élevé";
-      }
-      return errorMessage;
-    };
-    handleConvocationDownload(
-      downloadCertificatesByClassId(classe?._id),
-      "Téléchargement des convocations en cours",
-      "Les convocations ont bien été téléchargées",
-      getErrorMessage,
-    );
-  };
-
-  const isClasseDeletable = () => {
-    if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) return false;
-    if (classe?.cohesionCenterId) return false;
-    if (classe?.sessionId) return false;
-    if (classe?.ligneId) return false;
-    return true;
-  };
-
-  const headerActionList = () => {
-    const actionsList: React.ReactNode[] = [];
-    if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
-      actionsList.push(<ButtonRelanceVerif key="relance" classeId={id} onLoading={setIsLoading} />);
-    }
-    if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
-      actionsList.push(<VerifClassButton key="verify" classe={classe} setClasse={setClasse} isLoading={isLoading} setLoading={setIsLoading} />);
-    }
-    if (classe?.status && STATUS_CLASSE.OPEN === classe.status) {
-      actionsList.push(
-        <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} type="wired" title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
-        <ButtonInvite key="invite" url={url} />,
-      );
-    }
-    if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) {
-      actionsList.push(<Button disabled={isConvocationDownloading} key="export" title="Exporter toutes les convocations" className="mr-2" onClick={handleCertificateDownload} />);
-    }
-    if (user.role === ROLES.ADMIN) {
-      const options = [
-        {
-          key: "actions",
-          title: "Actions",
-          items: [
-            {
-              key: "edit1",
-              render: classe && <DeleteButton classe={classe} onLoading={setIsLoading} />,
-            },
-          ],
-        },
-      ];
-      actionsList.push(
-        <DropdownButton
-          key="edit"
-          type="secondary"
-          title="Actions"
-          optionsGroup={options}
-          position="right"
-          tooltip="Vous ne pouvez pas supprimer une classe si des élèves sont validés, ou si la classe est affectée à un centre."
-          disabled={!isClasseDeletable()}
-        />,
-      );
-    }
-    return actionsList;
-  };
-
   if (!classe) return <Loader />;
 
   return (
@@ -296,7 +193,7 @@ export default function View() {
           },
           { title: "Fiche de la classe" },
         ]}
-        actions={headerActionList()}
+        actions={getHeaderActionList({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus })}
       />
       <GeneralInfos
         classe={classe}
@@ -309,8 +206,8 @@ export default function View() {
         user={user}
         onCancel={handleCancel}
         onCheckInfo={checkInfo}
-        setShowModaleWithdraw={setShowModaleWithdraw}
         isLoading={isLoading}
+        setIsLoading={setIsLoading}
         validatedYoung={totalSeatsTakenExcluding}
       />
 
@@ -336,7 +233,6 @@ export default function View() {
         <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />
       )}
 
-      <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
       <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />
     </Page>
   );

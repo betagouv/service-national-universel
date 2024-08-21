@@ -39,10 +39,15 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
     const statusCount = students.reduce((acc, student) => {
       const status = student.status;
       acc[status] = (acc[status] || 0) + 1;
+
       return acc;
     }, {});
 
-    const result = { total: students.length };
+    const parentAllowSNUCount = students.filter((student) => student.parentAllowSNU === "true").length;
+    const studentImageRightCount = students.filter((student) => student.imageRight === "true" || student.imageRight === "false").length;
+
+    const result = { parentAllowSNU: parentAllowSNUCount, imageRight: studentImageRightCount, total: students.length };
+
     Object.keys(statusCount).forEach((status) => {
       result[YOUNG_STATUS[status]] = statusCount[status];
     });
