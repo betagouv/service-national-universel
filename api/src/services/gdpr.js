@@ -1,10 +1,11 @@
+const { capture } = require("../sentry");
+
 const { YoungModel } = require("../models");
 const { CohortModel } = require("../models");
 const { deleteFilesByList, listFiles } = require("../utils/index");
 
 async function deleteSensitiveData(youngId, mode = "save") {
   const young = await YoungModel.findById(youngId);
-  const copyOfYoung = JSON.parse(JSON.stringify(young));
   let fileStatus = "";
 
   try {
@@ -12,14 +13,16 @@ async function deleteSensitiveData(youngId, mode = "save") {
     const CNIFileArray = res.map((e) => {
       return { Key: e.Key };
     });
-    console.log("Deleting files: ", CNIFileArray);
-    if (mode === "save") {
-      await deleteFilesByList(CNIFileArray);
-      fileStatus = "DELETED";
+    if (CNIFileArray.length !== 0) {
+      console.log(`Deleting files for young ${young._id}:`, CNIFileArray);
+      if (mode === "save") {
+        fileStatus = "DELETED";
+        await deleteFilesByList(CNIFileArray);
+      }
     }
   } catch (error) {
     fileStatus = "NOT_FOUND";
-    console.log(error);
+    capture(error);
   }
 
   young.set({ latestCNIFileExpirationDate: null, latestCNIFileCategory: "deleted", cniFiles: [], "files.cniFiles": [] });
@@ -28,7 +31,7 @@ async function deleteSensitiveData(youngId, mode = "save") {
   if (mode === "save") {
     await young.save({ fromUser: { firstName: "Script de suppression des champs: Nature de l'aménagement spécifique, carte nationale d'identité" } });
   }
-  return { young, copyOfYoung, fileStatus };
+  return { young, fileStatus };
 }
 
 async function getCohortsFinishedSinceYesterday() {
