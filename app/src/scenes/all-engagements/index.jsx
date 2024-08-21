@@ -6,12 +6,12 @@ import { fetchPrograms } from "../phase2/engagement.repository";
 import Loader from "@/components/Loader";
 import EngagementCard from "../preinscription/components/EngagementCard";
 
-const AllEngagements = () => {
+const Index = () => {
   const { isPending, error, data: programs } = useQuery({ queryKey: ["program"], queryFn: fetchPrograms });
 
   return (
     <DSFRLayout>
-      <DSFRContainer title="Tous les programmes d'engagement">
+      <DSFRContainer title="Toutes les formes d'engagement">
         {isPending ? (
           <Loader />
         ) : error ? (
@@ -28,4 +28,4 @@ const AllEngagements = () => {
   );
 };
 
-export default AllEngagements;
+export default Index;
