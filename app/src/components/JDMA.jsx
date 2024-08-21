@@ -18,7 +18,7 @@ export default function JDMA({ id }) {
       </style>
       <a href={url} target="_blank" rel="noreferrer noopener" className="no-underline no-after">
         <div
-          className="w-36 h-16 transition-transform transform hover:scale-105"
+          className="w-36 h-16"
           onMouseEnter={() => setImgSrc("https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc.svg")}
           onMouseLeave={() => setImgSrc("https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg")}>
           <img src={imgSrc} alt="Je donne mon avis" />
