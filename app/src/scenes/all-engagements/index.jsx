@@ -1,21 +1,31 @@
 import React from "react";
-import useDevice from "../../hooks/useDevice";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPrograms } from "../phase2/engagement.repository";
+import Loader from "@/components/Loader";
+import EngagementCard from "../preinscription/components/EngagementCard";
 
-import { Footer } from "@snu/ds/dsfr";
-import Header from "@/components/dsfr/layout/Header";
-import DesktopView from "./desktop/EngagementsProgramDesktop";
-import MobileView from "./mobile/EngagementsProgramMobile";
+const AllEngagements = () => {
+  const { isPending, error, data: programs } = useQuery({ queryKey: ["program"], queryFn: fetchPrograms });
 
-const Index = () => {
-  const device = useDevice();
-  const mobile = device === "mobile";
   return (
-    <>
-      <Header />
-      <div>{mobile ? <MobileView /> : <DesktopView />} </div>
-      {!mobile ? <Footer /> : null}
-    </>
+    <DSFRLayout>
+      <DSFRContainer title="Tous les programmes d'engagement">
+        {isPending ? (
+          <Loader />
+        ) : error ? (
+          <p>{error}</p>
+        ) : (
+          <section id="engagements" className="gap-8 grid grid-cols-1 md:grid-cols-2">
+            {programs.map((program) => (
+              <EngagementCard program={program} key={program._id} />
+            ))}
+          </section>
+        )}
+      </DSFRContainer>
+    </DSFRLayout>
   );
 };
 
-export default Index;
+export default AllEngagements;
