@@ -12,6 +12,8 @@ import * as Sentry from "@sentry/react";
 
 import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
+import "./index.css";
+import Loader from "./components/Loader";
 
 const Alerte = lazy(() => import("./scenes/alerte"));
 const Association = lazy(() => import("./scenes/association"));
@@ -49,7 +51,6 @@ const DashboardV2 = lazy(() => import("./scenes/dashboardV2/moderator-ref"));
 const DashboardResponsibleV2 = lazy(() => import("./scenes/dashboardV2/responsible"));
 const DashboardVisitorV2 = lazy(() => import("./scenes/dashboardV2/visitor"));
 
-const Loader = lazy(() => import("./components/Loader"));
 const Footer = lazy(() => import("./components/footer"));
 const ModalCGU = lazy(() => import("./components/modals/ModalCGU"));
 const RestorePreviousSignin = lazy(() => import("./components/RestorePreviousSignin"));
