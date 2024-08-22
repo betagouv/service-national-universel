@@ -51,15 +51,15 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
           must: [
             { match_all: {} },
             //context filter
-            queryFilters.region?.length ? { terms: { "schoolRegion.keyword": queryFilters.region } } : null,
-            queryFilters.department?.length ? { terms: { "schoolDepartment.keyword": queryFilters.department } } : null,
+            queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+            queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
             queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
           ].filter(Boolean),
           filter: [
             //query
-            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "schoolDepartment.keyword": user.department } } : null,
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "region.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -144,26 +144,8 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
             queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
           filter: [
-            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
-              ? {
-                  bool: {
-                    should: [
-                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": [user.region] } }] } },
-                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": [user.region] } }] } },
-                    ],
-                  },
-                }
-              : null,
-            user.role === ROLES.REFERENT_DEPARTMENT
-              ? {
-                  bool: {
-                    should: [
-                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": user.department } }] } },
-                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": user.department } }] } },
-                    ],
-                  },
-                }
-              : null,
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "region.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -249,24 +231,8 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
       },
       size: 0,
     };
-    if (queryFilters?.region?.length)
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": queryFilters.region } }] } },
-            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": queryFilters.region } }] } },
-          ],
-        },
-      });
-    if (queryFilters?.department?.length)
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },
-            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": queryFilters.department } }] } },
-          ],
-        },
-      });
+    if (queryFilters?.region?.length) body.query.bool.must.push({ terms: { "region.keyword": queryFilters.region } });
+    if (queryFilters?.department?.length) body.query.bool.must.push({ terms: { "department.keyword": queryFilters.department } });
 
     const result = await esClient.search({ index: "young", body: body });
     const response = result.body;
@@ -319,26 +285,8 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
         bool: {
           must: [{ match_all: {} }],
           filter: [
-            user.role === ROLES.REFERENT_REGION
-              ? {
-                  bool: {
-                    should: [
-                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": [user.region] } }] } },
-                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": [user.region] } }] } },
-                    ],
-                  },
-                }
-              : null,
-            user.role === ROLES.REFERENT_DEPARTMENT
-              ? {
-                  bool: {
-                    should: [
-                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": user.department } }] } },
-                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": user.department } }] } },
-                    ],
-                  },
-                }
-              : null,
+            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -347,25 +295,8 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
     };
 
     if (queryFilters?.academy?.length) body.query.bool.must.push({ terms: { "academy.keyword": queryFilters.academy } });
-    if (queryFilters?.region?.length)
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": queryFilters.region } }] } },
-            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": queryFilters.region } }] } },
-          ],
-        },
-      });
-
-    if (queryFilters?.department?.length)
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },
-            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": queryFilters.department } }] } },
-          ],
-        },
-      });
+    if (queryFilters?.region?.length) body.query.bool.must.push({ terms: { "region.keyword": queryFilters.region } });
+    if (queryFilters?.department?.length) body.query.bool.must.push({ terms: { "department.keyword": queryFilters.department } });
 
     const result = await esClient.search({ index: "young", body: body });
     const response = result.body;
@@ -395,26 +326,8 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
           ].filter(Boolean),
           filter: [
-            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
-              ? {
-                  bool: {
-                    should: [
-                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": [user.region] } }] } },
-                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": [user.region] } }] } },
-                    ],
-                  },
-                }
-              : null,
-            user.role === ROLES.REFERENT_DEPARTMENT
-              ? {
-                  bool: {
-                    should: [
-                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": user.department } }] } },
-                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": user.department } }] } },
-                    ],
-                  },
-                }
-              : null,
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "region.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -449,25 +362,9 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
       size: 0,
     };
 
-    if (queryFilters?.region?.length)
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": queryFilters.region } }] } },
-            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": queryFilters.region } }] } },
-          ],
-        },
-      });
+    if (queryFilters?.region?.length) body.query.bool.must.push({ terms: { "region.keyword": queryFilters.region } });
 
-    if (queryFilters?.department?.length)
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },
-            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": queryFilters.department } }] } },
-          ],
-        },
-      });
+    if (queryFilters?.department?.length) body.query.bool.must.push({ terms: { "department.keyword": queryFilters.department } });
 
     const responseYoung = await esClient.search({ index: "young", body: body });
     if (!responseYoung?.body) {
@@ -500,26 +397,8 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
           ].filter(Boolean),
 
           filter: [
-            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
-              ? {
-                  bool: {
-                    should: [
-                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": [user.region] } }] } },
-                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": [user.region] } }] } },
-                    ],
-                  },
-                }
-              : null,
-            user.role === ROLES.REFERENT_DEPARTMENT
-              ? {
-                  bool: {
-                    should: [
-                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": user.department } }] } },
-                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": user.department } }] } },
-                    ],
-                  },
-                }
-              : null,
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "region.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -534,25 +413,8 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
       },
       size: 0,
     };
-    if (queryFilters?.region?.length)
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": queryFilters.region } }] } },
-            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": queryFilters.region } }] } },
-          ],
-        },
-      });
-
-    if (queryFilters?.department?.length)
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },
-            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": queryFilters.department } }] } },
-          ],
-        },
-      });
+    if (queryFilters?.region?.length) body.query.bool.must.push({ terms: { "region.keyword": queryFilters.region } });
+    if (queryFilters?.department?.length) body.query.bool.must.push({ terms: { "department.keyword": queryFilters.department } });
 
     const responseYoung = await esClient.search({ index: "young", body: body });
     if (!responseYoung?.body) {
