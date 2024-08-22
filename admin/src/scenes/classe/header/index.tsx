@@ -1,7 +1,7 @@
 import React from "react";
 import { HiOutlineClipboardList } from "react-icons/hi";
 
-import { ROLES, STATUS_CLASSE, YOUNG_STATUS, ClasseDto, ClasseFileKeys } from "snu-lib";
+import { ROLES, STATUS_CLASSE, YOUNG_STATUS, ClasseDto, ClasseFileKeys, ClasseCertificateKeys } from "snu-lib";
 import { User } from "@/types";
 import { DropdownButton } from "@snu/ds/admin";
 
@@ -128,27 +128,19 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
   if (studentStatus?.parentAllowSNU > 0) {
     optionsExport[0].items.push({
       key: "consent",
-      render: (
-        <button type="button" className="flex items-center justify-start w-full text-sm leading-5 font-normal">
-          Consentements à la participation (.pdf)
-        </button>
-      ),
+      render: <ButtonCertificateDownload key="consent" title={"Consentements à la participation (.pdf)"} type={ClasseCertificateKeys.CONSENT} id={id} />,
     });
   }
   if (studentStatus?.imageRight > 0) {
     optionsExport[0].items.push({
       key: "image",
-      render: (
-        <button type="button" className="flex items-center justify-start w-full text-sm leading-5 font-normal">
-          Droits à l'image (.pdf)
-        </button>
-      ),
+      render: <ButtonCertificateDownload key="image" title={"Droits à l'image (.pdf)"} type={ClasseCertificateKeys.IMAGE} id={id} />,
     });
   }
   if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) {
     optionsExport[0].items.push({
       key: "convocation",
-      render: <ButtonCertificateDownload key="convocation" id={id} />,
+      render: <ButtonCertificateDownload key="convocation" title={"Convocations au séjour (.pdf)"} type={ClasseCertificateKeys.CONVOCATION} id={id} />,
     });
   }
 

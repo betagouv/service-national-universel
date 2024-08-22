@@ -11,6 +11,21 @@ export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]):
   });
 };
 
+export const generateImageRightForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
+  return await generatePdfIntoBuffer({
+    type: YOUNG_DOCUMENT.IMAGE_RIGHT_BATCH,
+    template: YOUNG_DOCUMENT_PHASE_TEMPLATE.IMAGE_RIGHT,
+    young: youngs,
+  });
+};
+export const generateConsentementForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
+  return await generatePdfIntoBuffer({
+    type: YOUNG_DOCUMENT.CONSENT_BATCH,
+    template: YOUNG_DOCUMENT_PHASE_TEMPLATE.CONSENT,
+    young: youngs,
+  });
+};
+
 export const findYoungsByClasseId = async (classeId: string): Promise<YoungDto[]> => {
   return YoungModel.find({ classeId });
 };

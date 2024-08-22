@@ -12,9 +12,11 @@ import * as classService from "./classeService";
 
 const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
 const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
+const generateConsentementForMultipleYoungsSpy = jest.spyOn(youngService, "generateConsentementForMultipleYoungs");
+const generateImageRightForMultipleYoungsSpy = jest.spyOn(youngService, "generateImageRightForMultipleYoungs");
 
-describe("ClasseService", () => {
-  it("should return a pdf", async () => {
+describe("ClasseService generate certificate", () => {
+  it("generateConvocationsByClasseId", async () => {
     const youngBuffer = Buffer.from("pdf");
 
     findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
@@ -24,6 +26,32 @@ describe("ClasseService", () => {
 
     expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
     expect(generateConvocationsForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("generateConsentemenrByClasseId", async () => {
+    const youngBuffer = Buffer.from("pdf");
+
+    findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
+    generateConsentementForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));
+
+    const resultPdf = await classService.generateConsentementByClasseId("classeId");
+
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateConsentementForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("generateImageRightByClasseId", async () => {
+    const youngBuffer = Buffer.from("pdf");
+
+    findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
+    generateImageRightForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));
+
+    const resultPdf = await classService.generateImageRightByClasseId("classeId");
+
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateImageRightForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
     expect(resultPdf).toEqual(youngBuffer);
   });
 });

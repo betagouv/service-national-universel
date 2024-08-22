@@ -1,5 +1,5 @@
 import * as youngService from "./youngService";
-import { findYoungByIdOrThrow, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "./youngService";
+import { findYoungByIdOrThrow, shouldSwitchYoungByIdToLC, switchYoungByIdToLC, findYoungsByClasseId } from "./youngService";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 import { YoungDocument, YoungModel } from "../models";
 import { ERRORS, YOUNG_PHASE, YOUNG_STATUS } from "snu-lib";
@@ -15,8 +15,8 @@ jest.mock("../utils/pdf-renderer", () => ({
   generatePdfIntoBuffer: jest.fn().mockReturnValue(Buffer.from("pdf")),
 }));
 
-describe("YoungService", () => {
-  it("should return one PDF for 2 youngs", async () => {
+describe("YoungService.generateConvocationsForMultipleYoungs", () => {
+  it("should return one PDF convocations for 2 youngs", async () => {
     jest.restoreAllMocks();
     const young1 = buildYoung("id_1");
     const young2 = buildYoung("id_2");
@@ -25,6 +25,50 @@ describe("YoungService", () => {
 
     expect(youngsPdfCreated).toEqual(mockBuffer);
     expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
+  });
+  it("should return one PDF consentment for 2 youngs", async () => {
+    jest.restoreAllMocks();
+    const young1 = buildYoung("id_1");
+    const young2 = buildYoung("id_2");
+
+    const youngsPdfCreated = await youngService.generateConsentementForMultipleYoungs([young1, young2]);
+
+    expect(youngsPdfCreated).toEqual(mockBuffer);
+    expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
+  });
+  it("should return one PDF imageRight for 2 youngs", async () => {
+    jest.restoreAllMocks();
+    const young1 = buildYoung("id_1");
+    const young2 = buildYoung("id_2");
+
+    const youngsPdfCreated = await youngService.generateImageRightForMultipleYoungs([young1, young2]);
+
+    expect(youngsPdfCreated).toEqual(mockBuffer);
+    expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("YoungService.findYoungsByClasseId", () => {
+  it("should return an array of young objects when found", async () => {
+    const mockYoungs = [
+      { _id: "1", name: "John Doe", classeId: "classe1" },
+      { _id: "2", name: "Jane Smith", classeId: "classe1" },
+    ];
+    // Mock the YoungModel.find method
+    YoungModel.find = jest.fn().mockResolvedValue(mockYoungs);
+
+    const result = await findYoungsByClasseId("classe1");
+    expect(result).toEqual(mockYoungs);
+    expect(YoungModel.find).toHaveBeenCalledWith({ classeId: "classe1" });
+  });
+
+  it("should return an empty array when no youngs are found", async () => {
+    // Mock the YoungModel.find method to return an empty array
+    YoungModel.find = jest.fn().mockResolvedValue([]);
+
+    const result = await findYoungsByClasseId("classe2");
+    expect(result).toEqual([]);
+    expect(YoungModel.find).toHaveBeenCalledWith({ classeId: "classe2" });
   });
 });
 

@@ -9,3 +9,9 @@ export enum ClasseFileKeys {
   REGLEMENT = "reglement",
   CONSENT_DATA = "consentData",
 }
+
+export enum ClasseCertificateKeys {
+  CONVOCATION = "convocation",
+  CONSENT = "consent",
+  IMAGE = "image",
+}

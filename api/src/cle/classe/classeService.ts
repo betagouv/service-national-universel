@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { YOUNG_STATUS } from "snu-lib";
 
 import { YoungModel, ClasseModel, ClasseDocument, ClasseType, EtablissementDocument, EtablissementType } from "../../models";
-import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs, generateImageRightForMultipleYoungs, generateConsentementForMultipleYoungs } from "../../young/youngService";
 
 import { mapRegionToTrigramme } from "../../services/regionService";
 
@@ -10,6 +10,17 @@ export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
 
   return await generateConvocationsForMultipleYoungs(youngsInClasse);
+};
+
+export const generateImageRightByClasseId = async (classeId: string) => {
+  const youngsInClasse = await findYoungsByClasseId(classeId);
+
+  return await generateImageRightForMultipleYoungs(youngsInClasse);
+};
+export const generateConsentementByClasseId = async (classeId: string) => {
+  const youngsInClasse = await findYoungsByClasseId(classeId);
+
+  return await generateConsentementForMultipleYoungs(youngsInClasse);
 };
 
 export const deleteClasse = async (_id: string, fromUser: object) => {

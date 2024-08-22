@@ -12,9 +12,10 @@ const { generateCertifPhase1 } = require("../templates/certificate/phase1");
 const { generateCertifPhase2 } = require("../templates/certificate/phase2");
 const { generateCertifPhase3 } = require("../templates/certificate/phase3");
 const { generateCertifSNU } = require("../templates/certificate/snu");
-const { generateDroitImage } = require("../templates/droitImage/droitImage");
+const { generateDroitImage, generateBatchDroitImage } = require("../templates/droitImage/droitImage");
 const { generateCohesion, generateBatchCohesion } = require("../templates/convocation/cohesion");
 const { generateContractPhase2 } = require("../templates/contract/phase2");
+const { generateBatchConsentement } = require("../templates/consent/consent");
 
 class InMemoryWritable extends Writable {
   constructor(options) {
@@ -56,6 +57,12 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
   }
   if (type === "contract" && template === "2" && contract) {
     return generateContractPhase2(outStream, contract);
+  }
+  if (type === "image_right_batch" && template === "droitImage" && young) {
+    return generateBatchDroitImage(outStream, young);
+  }
+  if (type === "consent_batch" && template === "consentement" && young) {
+    return generateBatchConsentement(outStream, young);
   }
   throw new Error(ERRORS.NOT_FOUND);
 }
