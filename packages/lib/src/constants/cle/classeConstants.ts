@@ -13,3 +13,9 @@ export enum ClasseCertificateKeys {
   CONSENT = "consent",
   IMAGE = "image",
 }
+
+export enum ClasseCertificateKeys {
+  CONVOCATION = "convocation",
+  CONSENT = "consent",
+  IMAGE = "image",
+}
