@@ -13,8 +13,9 @@ import * as Sentry from "@sentry/react";
 import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
 import "./index.css";
-import Loader from "./components/Loader";
+// import Loader from "./components/Loader";
 
+const Loader = lazy(() => import("./components/Loader"));
 const Alerte = lazy(() => import("./scenes/alerte"));
 const Association = lazy(() => import("./scenes/association"));
 const Center = lazy(() => import("./scenes/centersV2"));
