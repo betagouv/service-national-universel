@@ -12,11 +12,11 @@ import * as Sentry from "@sentry/react";
 
 import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
-import "./index.css";
-import Loader from "./components/Loader";
 
+const CGU = lazy(() => import("./scenes/CGU"));
 const Alerte = lazy(() => import("./scenes/alerte"));
 const Association = lazy(() => import("./scenes/association"));
+const Auth = lazy(() => import("./scenes/auth"));
 const Center = lazy(() => import("./scenes/centersV2"));
 const Content = lazy(() => import("./scenes/content"));
 const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
@@ -31,12 +31,14 @@ const SchemaDeRepartition = lazy(() => import("./scenes/plan-transport/schema-re
 const TableDeRepartition = lazy(() => import("./scenes/plan-transport/table-repartition"));
 const PointDeRassemblement = lazy(() => import("./scenes/pointDeRassemblement"));
 const Profil = lazy(() => import("./scenes/profil"));
+const PublicSupport = lazy(() => import("./scenes/public-support-center"));
 const School = lazy(() => import("./scenes/school"));
+const SessionShareIndex = lazy(() => import("./scenes/session-phase1/index"));
 const Settings = lazy(() => import("./scenes/settings"));
 const Structure = lazy(() => import("./scenes/structure"));
 const SupportCenter = lazy(() => import("./scenes/support-center"));
-const Team = lazy(() => import("./scenes/team"));
 const Utilisateur = lazy(() => import("./scenes/utilisateur"));
+const Validate = lazy(() => import("./scenes/validate"));
 const Volontaires = lazy(() => import("./scenes/volontaires"));
 const VolontairesHeadCenter = lazy(() => import("./scenes/volontaires-head-center"));
 const VolontairesResponsible = lazy(() => import("./scenes/volontaires-responsible"));
@@ -44,6 +46,7 @@ const Etablissement = lazy(() => import("./scenes/etablissement"));
 const Classe = lazy(() => import("./scenes/classe"));
 const VolontaireCle = lazy(() => import("./scenes/volontaire-cle"));
 const Contact = lazy(() => import("./scenes/contact"));
+const Signup = lazy(() => import("./scenes/signup"));
 
 //DashboardV2
 const DashboardHeadCenterV2 = lazy(() => import("./scenes/dashboardV2/head-center"));
@@ -51,27 +54,27 @@ const DashboardV2 = lazy(() => import("./scenes/dashboardV2/moderator-ref"));
 const DashboardResponsibleV2 = lazy(() => import("./scenes/dashboardV2/responsible"));
 const DashboardVisitorV2 = lazy(() => import("./scenes/dashboardV2/visitor"));
 
+import Loader from "./components/Loader";
 const Footer = lazy(() => import("./components/footer"));
+
+import api, { initApi } from "./services/api";
+
+import { adminURL, environment } from "./config";
+import { ROLES, ROLES_LIST } from "./utils";
+
 const ModalCGU = lazy(() => import("./components/modals/ModalCGU"));
+import "./index.css";
+const Team = lazy(() => import("./scenes/team"));
+
+import { getCohorts } from "./services/cohort.service";
 const RestorePreviousSignin = lazy(() => import("./components/RestorePreviousSignin"));
+import useRefreshToken from "./hooks/useRefreshToken";
+
 const SideBar = lazy(() => import("./components/drawer/SideBar"));
 const ApplicationError = lazy(() => import("./components/layout/ApplicationError"));
 const NotFound = lazy(() => import("./components/layout/NotFound"));
-
-const Validate = lazy(() => import("./scenes/validate"));
-const CGU = lazy(() => import("./scenes/CGU"));
-const SessionShareIndex = lazy(() => import("./scenes/session-phase1/index"));
-const PublicSupport = lazy(() => import("./scenes/public-support-center"));
-const Signup = lazy(() => import("./scenes/signup"));
-const Auth = lazy(() => import("./scenes/auth"));
-
-import api, { initApi } from "./services/api";
-import { adminURL, environment } from "./config";
 import { getDefaultSession } from "./utils/session";
-import { ROLES, ROLES_LIST } from "./utils";
-import { getCohorts } from "./services/cohort.service";
 import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
-import useRefreshToken from "./hooks/useRefreshToken";
 
 initApi();
 
