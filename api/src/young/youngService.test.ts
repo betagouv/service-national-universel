@@ -16,8 +16,10 @@ jest.mock("../utils/pdf-renderer", () => ({
 }));
 
 describe("YoungService.generateConvocationsForMultipleYoungs", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("should return one PDF convocations for 2 youngs", async () => {
-    jest.restoreAllMocks();
     const young1 = buildYoung("id_1");
     const young2 = buildYoung("id_2");
 
@@ -27,9 +29,8 @@ describe("YoungService.generateConvocationsForMultipleYoungs", () => {
     expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
   });
   it("should return one PDF consentment for 2 youngs", async () => {
-    jest.restoreAllMocks();
-    const young1 = buildYoung("id_3");
-    const young2 = buildYoung("id_4");
+    const young1 = buildYoung("id_1");
+    const young2 = buildYoung("id_2");
 
     const youngsPdfCreated = await youngService.generateConsentementForMultipleYoungs([young1, young2]);
 
@@ -37,9 +38,8 @@ describe("YoungService.generateConvocationsForMultipleYoungs", () => {
     expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
   });
   it("should return one PDF imageRight for 2 youngs", async () => {
-    jest.restoreAllMocks();
-    const young1 = buildYoung("id_5");
-    const young2 = buildYoung("id_6");
+    const young1 = buildYoung("id_1");
+    const young2 = buildYoung("id_2");
 
     const youngsPdfCreated = await youngService.generateImageRightForMultipleYoungs([young1, young2]);
 
@@ -54,7 +54,6 @@ describe("YoungService.findYoungsByClasseId", () => {
       { _id: "1", name: "John Doe", classeId: "classe1" },
       { _id: "2", name: "Jane Smith", classeId: "classe1" },
     ];
-    // Mock the YoungModel.find method
     YoungModel.find = jest.fn().mockResolvedValue(mockYoungs);
 
     const result = await findYoungsByClasseId("classe1");
@@ -63,7 +62,6 @@ describe("YoungService.findYoungsByClasseId", () => {
   });
 
   it("should return an empty array when no youngs are found", async () => {
-    // Mock the YoungModel.find method to return an empty array
     YoungModel.find = jest.fn().mockResolvedValue([]);
 
     const result = await findYoungsByClasseId("classe2");
