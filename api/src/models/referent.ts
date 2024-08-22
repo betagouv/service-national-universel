@@ -241,6 +241,12 @@ const schema = new Schema({
       description: "Identifiant des cohortes du chef de centre",
     },
   },
+  cohortIds: {
+    type: [String],
+    documentation: {
+      description: "Liste des Ids des cohortes du chef de centre",
+    },
+  },
 
   // End specific fields
 
