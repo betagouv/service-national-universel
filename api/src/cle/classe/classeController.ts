@@ -32,6 +32,7 @@ import {
   TYPE_CLASSE_LIST,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
+  ClasseCertificateKeys,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";

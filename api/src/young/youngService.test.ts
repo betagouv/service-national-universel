@@ -54,6 +54,7 @@ describe("YoungService.findYoungsByClasseId", () => {
       { _id: "1", name: "John Doe", classeId: "classe1" },
       { _id: "2", name: "Jane Smith", classeId: "classe1" },
     ];
+    // Mock the YoungModel.find method
     YoungModel.find = jest.fn().mockResolvedValue(mockYoungs);
 
     const result = await findYoungsByClasseId("classe1");
@@ -62,6 +63,7 @@ describe("YoungService.findYoungsByClasseId", () => {
   });
 
   it("should return an empty array when no youngs are found", async () => {
+    // Mock the YoungModel.find method to return an empty array
     YoungModel.find = jest.fn().mockResolvedValue([]);
 
     const result = await findYoungsByClasseId("classe2");

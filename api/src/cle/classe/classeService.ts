@@ -11,6 +11,7 @@ export const generateCertificateByKey = async (key: string, id: string) => {
   if (key === ClasseCertificateKeys.IMAGE) {
     certificates = await generateImageRightByClasseId(id);
   }
+  å;
   if (key === ClasseCertificateKeys.CONSENT) {
     certificates = await generateConsentementByClasseId(id);
   }

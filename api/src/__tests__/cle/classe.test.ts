@@ -927,3 +927,103 @@ describe("PUT /cle/classe/:id/referent", () => {
     expect(res.status).toBe(422);
   });
 });
+
+describe("POST /:id/certificate/:key", () => {
+  it("should return 400 when id is invalid", async () => {
+    const invalidId = "invalidId";
+    const res = await request(getAppHelper()).post(`/cle/classe/${invalidId}/certificate/IMAGE`);
+    expect(res.status).toBe(400);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe(ERRORS.INVALID_PARAMS);
+  });
+
+  it("should return 400 when certificate key is invalid", async () => {
+    const validId = new ObjectId();
+    const invalidKey = "invalidKey";
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${invalidKey}`);
+    expect(res.status).toBe(400);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe(ERRORS.INVALID_PARAMS);
+  });
+
+  it("should return 403 when the user is not authorized to download certificates", async () => {
+    const validId = new ObjectId();
+    // @ts-ignore
+    const previousUser = passport.user;
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.DSNJ }));
+    // @ts-ignore
+    passport.user = referent;
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${ClasseCertificateKeys.CONVOCATION}`);
+    expect(res.status).toBe(403);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe(ERRORS.OPERATION_NOT_ALLOWED);
+    // @ts-ignore
+    passport.user = previousUser;
+  });
+
+  it("should return 404 when class is not found", async () => {
+    const nonExistingId = "104a49ba503555e4d8853003";
+    const res = await request(getAppHelper()).post(`/cle/classe/${nonExistingId}/certificate/${ClasseCertificateKeys.CONVOCATION}`);
+    expect(res.status).toBe(404);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe(ERRORS.NOT_FOUND);
+  });
+
+  it("should return 500 if an error occurs during certificate generation", async () => {
+    const validId = (await createClasse(createFixtureClasse()))._id;
+    const key = ClasseCertificateKeys.CONSENT;
+    const generateConsentementSpy = jest.spyOn(classeService, "generateConsentementByClasseId").mockRejectedValue(new Error("Test Error"));
+
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${key}`);
+    expect(res.status).toBe(500);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe("Test Error");
+
+    generateConsentementSpy.mockRestore();
+  });
+
+  it("should return 200 and send the convocations when request is successful", async () => {
+    const validId = (await createClasse(createFixtureClasse()))._id;
+    const key = ClasseCertificateKeys.CONVOCATION;
+
+    const mockCertificate = Buffer.from("PDF content");
+    const generateConvocationsSpy = jest.spyOn(classeService, "generateConvocationsByClasseId").mockResolvedValue(mockCertificate);
+
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${key}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(mockCertificate);
+
+    generateConvocationsSpy.mockRestore();
+  });
+
+  it("should return 200 and send the consentements when request is successful", async () => {
+    const validId = (await createClasse(createFixtureClasse()))._id;
+    const key = ClasseCertificateKeys.CONSENT;
+
+    const mockCertificate = Buffer.from("PDF content");
+    const generateConsentementsSpy = jest.spyOn(classeService, "generateConsentementByClasseId").mockResolvedValue(mockCertificate);
+
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${key}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(mockCertificate);
+
+    generateConsentementsSpy.mockRestore();
+  });
+
+  it("should return 200 and send the imageRight when request is successful", async () => {
+    const validId = (await createClasse(createFixtureClasse()))._id;
+    const key = ClasseCertificateKeys.IMAGE;
+
+    const mockCertificate = Buffer.from("PDF content");
+    const generateImageRightSpy = jest.spyOn(classeService, "generateImageRightByClasseId").mockResolvedValue(mockCertificate);
+
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${key}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(mockCertificate);
+
+    generateImageRightSpy.mockRestore();
+  });
+});
