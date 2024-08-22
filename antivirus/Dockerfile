@@ -7,9 +7,9 @@ WORKDIR /build
 COPY . .
 
 RUN --mount=type=cache,target=/build/.npm/cache \
-    npx turbo@^2.0.0 prune --scope=$APP_NAME --out-dir ./out &&
-    cd out &&
-    npm install &&
+    npx turbo@^2.0.0 prune --scope=$APP_NAME --out-dir ./out && \
+    cd out && \
+    npm install && \
     rm -rf node_modules/.cache .npm/cache
 
 FROM node:18.20-alpine as antivirus
