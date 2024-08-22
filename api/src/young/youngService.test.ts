@@ -28,8 +28,8 @@ describe("YoungService.generateConvocationsForMultipleYoungs", () => {
   });
   it("should return one PDF consentment for 2 youngs", async () => {
     jest.restoreAllMocks();
-    const young1 = buildYoung("id_1");
-    const young2 = buildYoung("id_2");
+    const young1 = buildYoung("id_3");
+    const young2 = buildYoung("id_4");
 
     const youngsPdfCreated = await youngService.generateConsentementForMultipleYoungs([young1, young2]);
 
@@ -38,8 +38,8 @@ describe("YoungService.generateConvocationsForMultipleYoungs", () => {
   });
   it("should return one PDF imageRight for 2 youngs", async () => {
     jest.restoreAllMocks();
-    const young1 = buildYoung("id_1");
-    const young2 = buildYoung("id_2");
+    const young1 = buildYoung("id_5");
+    const young2 = buildYoung("id_6");
 
     const youngsPdfCreated = await youngService.generateImageRightForMultipleYoungs([young1, young2]);
 
