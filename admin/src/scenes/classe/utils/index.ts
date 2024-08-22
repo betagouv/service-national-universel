@@ -41,7 +41,7 @@ export const statusClassForBadge = (status) => {
       statusClasse = "CANCEL";
       break;
     case STATUS_CLASSE.OPEN:
-      statusClasse = "OPEN";
+      statusClasse = "VALIDATED";
       break;
 
     default:
