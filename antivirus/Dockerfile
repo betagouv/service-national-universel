@@ -7,9 +7,9 @@ WORKDIR /build
 COPY . .
 
 RUN --mount=type=cache,target=/build/.npm/cache \
-    npx turbo@^1.1.13 prune --scope=$APP_NAME --out-dir ./out && \
-    cd out && \
-    npm install && \
+    npx turbo@^2.0.0 prune --scope=$APP_NAME --out-dir ./out &&
+    cd out &&
+    npm install &&
     rm -rf node_modules/.cache .npm/cache
 
 FROM node:18.20-alpine as antivirus
@@ -19,7 +19,7 @@ ENV ENV production
 ENV PORT 8080
 ENV HOST 0.0.0.0
 
-RUN apk update && \
+RUN apk update &&
     apk add clamav
 
 RUN mkdir /run/clamav
@@ -29,7 +29,6 @@ RUN sed -i -e 's/^#ConcurrentDatabaseReload no/ConcurrentDatabaseReload no/g' /e
 RUN freshclam
 
 WORKDIR /service-national-universel
-
 
 COPY --chown=node:node --from=build /build/out .
 
