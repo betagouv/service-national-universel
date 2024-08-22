@@ -26,12 +26,6 @@ export default defineConfig(({ mode }) => {
         },
         validate: true,
         reactComponentAnnotation: { enabled: true },
-        sourcemaps: {
-          // Specify the directory containing build artifacts
-          assets: "./**",
-          // Don't upload the source maps of dependencies
-          ignore: ["./node_modules/**"],
-        },
 
         // Helps troubleshooting - set to false to make plugin less noisy
         debug: true,
@@ -52,7 +46,6 @@ export default defineConfig(({ mode }) => {
             "react-dom": ["react-dom"],
             "react-router-dom": ["react-router-dom"],
             "react-redux": ["react-redux"],
-            "react-router": ["react-router"],
             "react-redux-toastr": ["react-redux-toastr"],
             "react-select": ["react-select"],
             reactstrap: ["reactstrap"],
@@ -64,7 +57,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     optimizeDeps: {
-      include: ["@sentry/react", "snu-lib", "@snu/ds"],
+      include: ["snu-lib", "@snu/ds"],
       force: true,
     },
     resolve: {

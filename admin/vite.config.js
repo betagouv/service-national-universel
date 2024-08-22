@@ -28,12 +28,6 @@ export default defineConfig(({ command, mode }) => {
         },
         validate: true,
         reactComponentAnnotation: { enabled: true },
-        sourcemaps: {
-          // Specify the directory containing build artifacts
-          assets: "./**",
-          // Don't upload the source maps of dependencies
-          ignore: ["./node_modules/**"],
-        },
 
         // Helps troubleshooting - set to false to make plugin less noisy
         debug: true,
@@ -50,19 +44,23 @@ export default defineConfig(({ command, mode }) => {
         output: {
           manualChunks(id) {
             const HugeLibraries = [
-              "@codegouvfr/react-dsfr",
               "xlsx",
               "date-fns",
-              "react-datepicker",
-              "react-select",
               "validator",
               "libphonenumber-js",
               "@sentry",
               "react-dom",
+              "react-router-dom",
+              "react-redux",
+              "react-datepicker",
+              "react-redux-toastr",
+              "react-select",
+              "reactstrap",
               "core-js",
               "@headlessui",
               "chart.js",
-              "@codegouvfr",
+              "@codegouvfr/react-dsfr",
+              "@tanstack/react-query",
             ];
             if (HugeLibraries.some((libName) => id.includes(`node_modules/${libName}`))) {
               return id.toString().split("node_modules/")[1].split("/")[0].toString();
@@ -76,7 +74,7 @@ export default defineConfig(({ command, mode }) => {
     },
     plugins: plugins,
     optimizeDeps: {
-      include: ["@sentry/react", "snu-lib", "@snu/ds"],
+      include: ["snu-lib", "@snu/ds"],
       force: true,
     },
     resolve: {
