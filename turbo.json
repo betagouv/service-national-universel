@@ -1,6 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  // ! Env imported from .env should not exist in your env (command env in CLI)
+  // ! You have to add them manually here if you add global envs
   "globalDependencies": [".env"],
+  "globalEnv": ["DEV", "SCW_*"],
   "tasks": {
     "build": {
       "outputs": [".dist/**", "!.dist/cache/**"]
