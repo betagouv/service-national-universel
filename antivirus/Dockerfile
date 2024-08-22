@@ -19,7 +19,7 @@ ENV ENV production
 ENV PORT 8080
 ENV HOST 0.0.0.0
 
-RUN apk update &&
+RUN apk update && \
     apk add clamav
 
 RUN mkdir /run/clamav
