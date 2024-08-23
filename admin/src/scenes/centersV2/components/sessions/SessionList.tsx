@@ -251,8 +251,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                     onChange={(e) => {
                       if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
                     }}
-                    readOnly={cohort?.isAssignmentAnnouncementsOpenForYoung}
-                    disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
+                    readOnly={!values}
+                    // disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
                   />
                 </div>
               </div>
