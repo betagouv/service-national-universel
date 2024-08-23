@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { YOUNG_STATUS } from "snu-lib";
 
-import { YoungModel, ClasseModel, ClasseDocument, ClasseType, EtablissementDocument, EtablissementType } from "../../models";
+import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, YoungModel } from "../../models";
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
 
 import { mapRegionToTrigramme } from "../../services/regionService";
