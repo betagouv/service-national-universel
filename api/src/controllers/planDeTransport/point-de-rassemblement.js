@@ -26,6 +26,7 @@ const nanoid = require("nanoid");
 const { getCohesionCenterFromSession } = require("./commons");
 const { getTransporter } = require("../../utils");
 const { sendTemplate } = require("../../brevo");
+const { getCohortIdsFromCohortName } = require("../../cohort/cohortService");
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
@@ -304,7 +305,8 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     complementAddressToUpdate = complementAddressToUpdate.filter((c) => c.cohort !== cohort);
     complementAddressToUpdate.push({ cohort, complement: complementAddress });
 
-    pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
+    const cohortIds = await getCohortIdsFromCohortName(cohortsToUpdate);
+    pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate, cohortIds: cohortIds });
     await pointDeRassemblement.save({ fromUser: req.user });
 
     const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts }, ["name", "repartitionSchemaDownloadAvailability", "dateStart"]);

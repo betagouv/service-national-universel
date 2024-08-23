@@ -40,7 +40,6 @@ interface Note {
 export interface YoungDto {
   _id?: string;
   id?: string;
-  sqlId?: string;
   firstName?: string;
   lastName?: string;
   frenchNationality?: string;

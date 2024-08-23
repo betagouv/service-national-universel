@@ -55,6 +55,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
 
   if (!session || !cohort) return <div></div>;
 
+  const isEditionAllowed = isSessionEditionOpen(user, cohort);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!values) return;
@@ -75,9 +77,25 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
       return;
     }
 
+    // Restriction d'édition en fonction du rôle de l'utilisateur et de l'état de la session
+    let dataToSend: Partial<Session> | null = values;
+
+    if (!isEditionAllowed) {
+      // Si l'édition de la session est fermée, n'envoyez que sanitaryContactEmail
+      dataToSend = {
+        sanitaryContactEmail: values?.sanitaryContactEmail || "",
+      };
+
+      // Vérification supplémentaire pour bloquer la soumission si l'assignement est ouvert pour les jeunes
+      if (cohort.isAssignmentAnnouncementsOpenForYoung) {
+        toastr.error("Vous ne pouvez pas modifier cette session pour le moment.", "OPERATION_UNAUTHORIZED");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, values);
+      const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, dataToSend);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
         setLoading(false);
@@ -145,40 +163,36 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
         <Container
           title="Détails"
           actions={[
-            isSessionEditionOpen(user, cohort) && (
-              <>
-                {values ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                      onClick={() => {
-                        setValues(null);
-                        setErrors({});
-                      }}
-                      disabled={loading}>
-                      Annuler
-                    </button>
-                    <button
-                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      type="submit"
-                      form="session-form"
-                      disabled={!values || loading}>
-                      <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-                      Enregistrer les changements
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                    onClick={() => setValues(session)}
-                    disabled={loading}>
-                    <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                    Modifier
-                  </button>
-                )}
-              </>
+            values ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={() => {
+                    setValues(null);
+                    setErrors({});
+                  }}
+                  disabled={loading}>
+                  Annuler
+                </button>
+                <button
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="submit"
+                  form="session-form"
+                  disabled={!values || loading}>
+                  <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
+                  Enregistrer les changements
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setValues(session)}
+                disabled={loading}>
+                <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
+                Modifier
+              </button>
             ),
           ]}>
           <div className="flex flex-row">
@@ -209,29 +223,44 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       const parsedValue = parseInt(inputValue, 10);
                       if (values) setValues({ ...values, placesTotal: parsedValue });
                     }}
+                    readOnly={!values}
+                    disabled={!isEditionAllowed}
+                  />
+                  {errors?.placesTotal && <div className="text-[#EF4444] mx-auto mt-1">{errors?.placesTotal}</div>}
+                </div>
+              </div>
+
+              <div className="flex flex-call justify-start items-center w-full mt-2">
+                <div className="w-full mt-3">
+                  <Label
+                    className="text-xs leading-5 font-medium"
+                    title="Réception des fiches sanitaires (facultatif)"
+                    name="sanitaryContactEmail"
+                    tooltip={
+                      <>
+                        <p>
+                          Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches
+                          sanitaires à cette adresse.
+                        </p>
+                        <ul>
+                          <li className="mt-2 list-outside">Seules les adresses emails académiques sécurisées sont autorisées.</li>
+                          <li className="mt-2 list-outside">Toute modification est impossible après l'annonce des affectations.</li>
+                        </ul>
+                      </>
+                    }
+                  />
+                  <InputText
+                    label="Adresse email académique"
+                    name="sanitaryContactEmail"
+                    value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
+                    onChange={(e) => {
+                      if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
+                    }}
+                    readOnly={!values}
+                    disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
                   />
                 </div>
               </div>
-              {center?.region === "Provence-Alpes-Côte d'Azur" && cohort?.name === "Juin 2024 - 2" && (
-                <div className="flex flex-call justify-start items-center w-full mt-2">
-                  <div className="w-full mt-3">
-                    <Label
-                      className="text-xs leading-5 font-medium"
-                      title="Réception des fiches sanitaires (facultatif)"
-                      name="sanitaryContactEmail"
-                      tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
-                    />
-                    <InputText
-                      label="Adresse email académique"
-                      name="sanitaryContactEmail"
-                      value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
-                      onChange={(e) => {
-                        if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
             <div className="flex w-[10%] items-center justify-center">
               <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
@@ -267,7 +296,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                     </p>
                   }
-                  readOnly={!values || !canPutSpecificDateOnSessionPhase1(user)}
+                  readOnly={!isEditionAllowed && !canPutSpecificDateOnSessionPhase1(user)}
                   value={values ? !!values?.dateStart : !!session.dateStart}
                   onChange={handleToggleDate}
                   range={{
@@ -275,7 +304,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                     to: values?.dateEnd || session.dateEnd,
                   }}
                   onChangeRange={(range: { to: string; from: string }) => {
-                    if (values) setValues({ ...values, dateStart: range?.from.toString(), dateEnd: range?.to.toString() });
+                    if (values) setValues({ ...values, dateStart: range?.from, dateEnd: range?.to });
                   }}
                 />
                 {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}

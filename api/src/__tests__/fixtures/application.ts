@@ -5,7 +5,6 @@ const { ObjectId } = Types;
 
 function getNewApplicationFixture(): Partial<ApplicationType> {
   return {
-    sqlId: faker.string.uuid(),
     youngId: new ObjectId().toString(),
     youngFirstName: faker.person.firstName(),
     youngLastName: faker.person.lastName(),

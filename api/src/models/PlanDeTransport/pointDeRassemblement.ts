@@ -25,6 +25,12 @@ const schema = new Schema({
       description: "Cohorte du point de rassemblement",
     },
   },
+  cohortIds: {
+    type: [String],
+    documentation: {
+      description: "Liste des Ids des cohortes du point de rassemblement",
+    },
+  },
 
   name: {
     type: String,
