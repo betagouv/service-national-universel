@@ -14,6 +14,7 @@ import LoadingButton from "./LoadingButton";
 //   impersonate: Impersonate,
 // };
 
+// todo - les virer de /assets et utiliser des url d'image normales
 const images = import.meta.glob("../../assets/panel-icons/*.svg", { eager: true });
 
 export default function PanelActionButton({ icon, title, ...rest }) {

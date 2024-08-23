@@ -7,6 +7,8 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
+
+// todo - les virer de /assets et utiliser des url d'image normales
 const images = import.meta.glob("../../../assets/programmes-engagement/*", { eager: true });
 
 const EngagementsProgramMobile = () => {

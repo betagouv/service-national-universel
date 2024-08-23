@@ -9,6 +9,7 @@ import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { Footer } from "@snu/ds/dsfr";
 
+// todo - les virer de /assets et utiliser des url d'image normales
 const images = import.meta.glob("../../../assets/programmes-engagement/*", { eager: true });
 
 const EngagementsProgramMobile = () => {

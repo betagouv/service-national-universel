@@ -9,6 +9,7 @@ import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { translate, ROLES } from "../../utils";
 
+// todo - les virer de /assets et utiliser des url d'image normales
 const images = import.meta.glob("../../assets/programmes-engagement/*", { eager: true });
 
 export default function List() {
