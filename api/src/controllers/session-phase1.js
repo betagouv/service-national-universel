@@ -163,8 +163,23 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const cohort = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isSessionEditionOpen(req.user, cohort)) {
+    if (!isSessionEditionOpen(req.user, cohort) && cohort?.isAssignmentAnnouncementsOpenForYoung) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (!isSessionEditionOpen(req.user, cohort) && !cohort?.isAssignmentAnnouncementsOpenForYoung) {
+      const { error, value } = Joi.object({
+        sanitaryContactEmail: Joi.string().email().required(),
+      }).validate(req.body);
+
+      if (error) {
+        console.error("Erreur de validation:", error.details); // Log des détails de l'erreur de validation
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      sessionPhase1.sanitaryContactEmail = value.sanitaryContactEmail;
+      await sessionPhase1.save({ fromUser: req.user });
+      return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
     }
 
     const { error, value } = validateSessionPhase1(req.body);

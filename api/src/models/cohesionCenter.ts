@@ -75,7 +75,12 @@ const schema = new Schema({
       description: "Liste des cohortes concernées par ce centre de cohésion",
     },
   },
-
+  cohortIds: {
+    type: [String],
+    documentation: {
+      description: "Liste des Ids des cohortes concernées par ce centre de cohésion",
+    },
+  },
   academy: {
     type: String,
     documentation: {

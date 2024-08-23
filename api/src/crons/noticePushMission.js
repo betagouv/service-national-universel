@@ -63,7 +63,7 @@ exports.handler = async () => {
           // stock the list in young
           const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
           // This is used in order to minimize risk of version conflict.
-          const youngForUpdate = await YoungModel.findOne({ _id: young._id });
+          const youngForUpdate = await YoungModel.findById(young._id);
           youngForUpdate.set({ missionsInMail });
           await youngForUpdate.save({ fromUser: { firstName: `Cron ${fileName}` } });
         }

@@ -99,6 +99,7 @@ import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
 import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
+import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -127,12 +128,12 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
 function cleanReferentData(referent) {
   if (!referent.role) return referent;
 
-  const fields = ["department", "region", "sessionPhase1Id", "cohorts", "cohesionCenterId", "cohesionCenterName", "structureId"];
+  const fields = ["department", "region", "sessionPhase1Id", "cohorts", "cohortIds", "cohesionCenterId", "cohesionCenterName", "structureId"];
 
   const fieldsToKeep = {
     admin: [],
     dsnj: [],
-    head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "sessionPhase1Id"],
+    head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "cohortIds", "sessionPhase1Id"],
     referent_department: ["department", "region"],
     referent_region: ["department", "region"],
     responsible: ["structureId"],
@@ -330,7 +331,10 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       referentProperties.phone = phone;
       referentProperties.mobile = phone;
     }
-    if (cohorts) referentProperties.cohorts = cohorts;
+    if (cohorts) {
+      referentProperties.cohorts = cohorts;
+      referentProperties.cohortIds = await getCohortIdsFromCohortName(cohorts);
+    }
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     referentProperties.invitationToken = invitation_token;

@@ -10,13 +10,6 @@ import anonymize from "../anonymization/structure";
 const MODELNAME = "structure";
 
 const schema = new Schema({
-  sqlId: {
-    type: String,
-    index: true,
-    documentation: {
-      description: "Identifiant dans l'ancienne base de données",
-    },
-  },
   name: {
     type: String,
     required: true,
@@ -70,13 +63,6 @@ const schema = new Schema({
       description: "Statut de la structure",
     },
   },
-
-  sqlUserId: {
-    type: String,
-    documentation: {
-      description: "Identifiant dans l'ancienne base de données de l'utilisateur lié à cette structure",
-    },
-  },
   isNetwork: {
     type: String,
     enum: ["true", "false"],
@@ -94,12 +80,6 @@ const schema = new Schema({
     type: String,
     documentation: {
       description: "Nom de la structure principale (tête de réseau).",
-    },
-  },
-  sqlNetworkId: {
-    type: String,
-    documentation: {
-      description: "Identifiant dans l'ancienne base de données de la structure principale",
     },
   },
 

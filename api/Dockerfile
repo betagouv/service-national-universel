@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat
 RUN apk update
 # Set working directory
 WORKDIR /app
-RUN npm install --global turbo@^1.13.3
+RUN npm install --global turbo@^2.0.0
 COPY . .
 ENV APP_NAME api
 RUN turbo prune $APP_NAME --docker
@@ -57,5 +57,6 @@ ENV PATH=/app/node_modules/pm2/bin/:$PATH
 EXPOSE $PORT
 
 RUN pm2 install --docker pm2-slack
+RUN pm2 install --docker pm2-logrotate
 
 CMD ["api/docker_start.sh"]
