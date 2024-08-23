@@ -63,13 +63,10 @@ import {
   buildUniqueClasseKey,
   deleteClasse,
   findClasseByUniqueKeyAndUniqueId,
-  generateCertificateByKey,
   getClasseById,
   getClasseByIdPublic,
   updateReferent,
-  generateConvocationsByClasseId,
-  generateImageRightByClasseId,
-  generateConsentementByClasseId,
+  generateCertificateByKey,
 } from "./classeService";
 
 import {
