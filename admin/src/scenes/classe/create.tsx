@@ -210,7 +210,7 @@ export default function Create() {
               <InputNumber
                 name="estimatedSeats"
                 className="flex-1"
-                min={0}
+                min={1}
                 value={classe.estimatedSeats!}
                 onChange={(e) => setClasse({ ...classe, estimatedSeats: Number(e.target.value) })}
                 error={errors.estimatedSeats}
