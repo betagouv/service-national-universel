@@ -1,5 +1,5 @@
 import { withPipeStream } from "../utils";
-
+import { logger } from "../../logger";
 import { FONT, FONT_BOLD, checkBox, initDocument, getLogo, getSignature } from "../templateService";
 import { getYoungValidationDate } from "../../young/youngService";
 
@@ -104,8 +104,7 @@ function render(doc, young) {
 }
 
 function generateBatchConsentement(outStream, youngs) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument(100, 30, 50, 50, { autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
     for (const young of youngs) {
@@ -113,7 +112,7 @@ function generateBatchConsentement(outStream, youngs) {
       render(doc, young);
     }
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 module.exports = { generateBatchConsentement };
