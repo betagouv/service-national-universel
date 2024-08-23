@@ -54,6 +54,9 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const [showModalDelete, setShowModalDelete] = useState(false);
 
   if (!session || !cohort) return <div></div>;
+
+  const isEditionAllowed = isSessionEditionOpen(user, cohort);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!values) return;
@@ -77,7 +80,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     // Restriction d'édition en fonction du rôle de l'utilisateur et de l'état de la session
     let dataToSend: Partial<Session> | null = values;
 
-    if (!isSessionEditionOpen(user, cohort)) {
+    if (!isEditionAllowed) {
       // Si l'édition de la session est fermée, n'envoyez que sanitaryContactEmail
       dataToSend = {
         sanitaryContactEmail: values?.sanitaryContactEmail || "",
@@ -220,8 +223,10 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       const parsedValue = parseInt(inputValue, 10);
                       if (values) setValues({ ...values, placesTotal: parsedValue });
                     }}
-                    readOnly={!isSessionEditionOpen(user, cohort)}
+                    readOnly={!values}
+                    disabled={!isEditionAllowed}
                   />
+                  {errors?.placesTotal && <div className="text-[#EF4444] mx-auto mt-1">{errors?.placesTotal}</div>}
                 </div>
               </div>
 
@@ -252,7 +257,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
                     }}
                     readOnly={!values}
-                    // disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
+                    disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
                   />
                 </div>
               </div>
@@ -291,7 +296,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                     </p>
                   }
-                  readOnly={!isSessionEditionOpen(user, cohort) && !canPutSpecificDateOnSessionPhase1(user)}
+                  readOnly={!isEditionAllowed && !canPutSpecificDateOnSessionPhase1(user)}
                   value={values ? !!values?.dateStart : !!session.dateStart}
                   onChange={handleToggleDate}
                   range={{
