@@ -16,7 +16,7 @@ jest.mock("../utils/pdf-renderer", () => ({
 }));
 
 describe("YoungService.generateConvocationsForMultipleYoungs", () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
   it("should return one PDF convocations for 2 youngs", async () => {
