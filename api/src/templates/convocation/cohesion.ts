@@ -67,7 +67,7 @@ async function fetchDataForYoung(young) {
 }
 
 function getTemplate(young) {
-  if (young.cohort === "Octobre 2023 - NC" && !young.source === "CLE") {
+  if (young.cohort === "Octobre 2023 - NC" && young.source !== "CLE") {
     return "convocation/convocation_template_base_NC.png";
   }
   return "convocation/convocation_template_base_2024_V2.png";
@@ -175,7 +175,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
 
   doc.moveDown(0.5);
 
-  let stuff = [];
+  let stuff: string[] = [];
   if (young.source !== "CLE") {
     stuff = ["votre convocation", "une pièce d'identité"];
   }
