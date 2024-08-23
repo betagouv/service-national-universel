@@ -20,7 +20,7 @@ export default function DocumentsPhase1({ young }) {
   const youngStatusPhase1 = getStatusPhase1(young);
 
   // TODO: find a better way to implement feature flags
-  if (young.status === YOUNG_STATUS.VALIDATED && young.cohort === "Juin 2024 - 2" && young.region === "Provence-Alpes-Côte d'Azur") {
+  if (young.status === YOUNG_STATUS.VALIDATED) {
     return (
       <section>
         <h3 className="text-base font-semibold">Document à préparer</h3>
