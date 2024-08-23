@@ -13,7 +13,6 @@ import {
   canViewMeetingPointId,
   isPdrEditionOpen,
   ROLES,
-  START_DATE_SESSION_PHASE1,
 } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -28,15 +27,16 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Loader from "@/components/Loader";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
-import VerifyAddress from "../phase0/components/VerifyAddress";
 import { Title } from "./components/common";
 import Field from "./components/Field";
 import ModalConfirmDelete from "./components/ModalConfirmDelete";
 import ModalCreation from "./components/ModalCreation";
+import { getDefaultCohort } from "@/utils/session";
 
 export default function View(props) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Auth.user?.cohorts);
 
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -125,19 +125,6 @@ export default function View(props) {
     }
   }, [editInfo, editSession]);
 
-  const handleVerifyAddress = (isConfirmed) => (suggestion) => {
-    setPdr({
-      ...pdr,
-      addressVerified: true,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      address: isConfirmed ? suggestion.address : pdr.address,
-      zip: isConfirmed ? suggestion.zip : pdr.zip,
-      city: isConfirmed ? suggestion.city : pdr.city,
-    });
-  };
-
   const handleChangeComplement = (e) => {
     let complementAddressToUpdate = pdr.complementAddress;
     complementAddressToUpdate = complementAddressToUpdate.filter((c) => c.cohort !== currentCohort);
@@ -171,7 +158,7 @@ export default function View(props) {
         return setIsLoading(false);
       }
       toastr.success("Le séjour a bien été supprimé");
-      setCurrentCohort(PDR?.cohorts?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])[0]);
+      setCurrentCohort(getDefaultCohort(cohorts.filter((c) => PDR.cohorts.includes(c.name))));
       setPdr(PDR);
       setIsLoading(false);
     } catch (e) {
@@ -196,9 +183,6 @@ export default function View(props) {
       }
       if (!pdr?.zip) {
         error.zip = "Le code postal est obligatoire";
-      }
-      if (!pdr?.addressVerified) {
-        error.addressVerified = "L'adresse n'a pas été vérifiée";
       }
       console.log(error);
       setErrors(error);
@@ -365,7 +349,7 @@ export default function View(props) {
                 <AddressForm
                   readOnly={!editInfo}
                   data={{ address: pdr.address, zip: pdr.zip, city: pdr.city }}
-                  updateData={(address) => setPdr({ ...pdr, ...address })}
+                  updateData={(address) => setPdr({ ...pdr, ...address, addressVerified: true })}
                   query={query}
                   setQuery={setQuery}
                   options={results}
@@ -374,21 +358,6 @@ export default function View(props) {
                   <Field label="Département" onChange={(e) => setPdr({ ...pdr, department: e.target.value })} value={pdr.department} readOnly={true} disabled={editInfo} />
                   <Field label="Région" onChange={(e) => setPdr({ ...pdr, region: e.target.value })} value={pdr.region} readOnly={true} disabled={editInfo} />
                 </div>
-                {editInfo ? (
-                  <div className="flex flex-col gap-2">
-                    <VerifyAddress
-                      address={pdr.address}
-                      zip={pdr.zip}
-                      city={pdr.city}
-                      onSuccess={handleVerifyAddress(true)}
-                      onFail={handleVerifyAddress()}
-                      isVerified={pdr.addressVerified === true}
-                      buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
-                      verifyText="Pour vérifier  l'adresse vous devez remplir les champs adresse, code postal et ville."
-                    />
-                    {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
-                  </div>
-                ) : null}
               </div>
             </div>
           </div>

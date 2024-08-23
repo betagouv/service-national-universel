@@ -33,7 +33,7 @@ export default function Settings() {
 
   const urlParams = new URLSearchParams(window.location.search);
 
-  const [cohort, setCohort] = useState(urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : null);
+  const cohort = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : "Février 2024 - C";
   const [isLoading, setIsLoading] = useState(true);
   const readOnly = !isSuperAdmin(user);
   const [noChange, setNoChange] = useState(true);
@@ -45,6 +45,7 @@ export default function Settings() {
     ...uselessSettings,
   });
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const getCohort = async () => {
     try {
@@ -71,12 +72,6 @@ export default function Settings() {
       toastr.error("Oups, une erreur est survenue lors de la récupération du séjour");
     }
   };
-
-  useEffect(() => {
-    if (!cohort) {
-      setCohort("Février 2024 - C");
-    }
-  }, []);
 
   useEffect(() => {
     if (!cohort) return;
@@ -149,14 +144,9 @@ export default function Settings() {
       <div className="flex w-full flex-col px-8 pb-8">
         <div className="flex items-center justify-between py-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrage dynamique</div>
-          <SelectCohort
-            cohort={cohort}
-            onChange={(cohortName) => {
-              setCohort(cohortName);
-              history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` });
-            }}
-          />
+          <SelectCohort cohort={cohort} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} />
         </div>
+        <button onClick={() => setCreateOpen(true)}>Créer une cohorte</button>
         <div className="flex w-full flex-col gap-8">
           {/* Informations générales */}
           <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
@@ -678,107 +668,132 @@ export default function Settings() {
                       }}
                     />
                   </div>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="flex flex-1 text-xs  font-medium text-gray-900">
-                        Affectation manuelle des volontaires et modification de leur affectation et de leur point de rassemblement
-                      </p>
-                      <MdInfoOutline data-tip data-for="affectation_manuelle" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="affectation_manuelle" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Ouverture ou fermeture pour les utilisateurs du droit à affecter manuellement des volontaires et/ou à modifier leur centre d’affectation ou point de
-                          rassemblement.
-                        </p>
-                      </ReactTooltip>
-                    </div>
-                    <ToggleDate
-                      label="Modérateurs"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      value={data.manualAffectionOpenForAdmin}
-                      onChange={() => setData({ ...data, manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin })}
-                      range={{
-                        from: data?.uselessInformation?.manualAffectionOpenForAdminFrom || undefined,
-                        to: data?.uselessInformation?.manualAffectionOpenForAdminTo || undefined,
-                      }}
-                      onChangeRange={(range) => {
-                        setData({
-                          ...data,
-                          uselessInformation: {
-                            ...data.uselessInformation,
-                            manualAffectionOpenForAdminFrom: range?.from,
-                            manualAffectionOpenForAdminTo: range?.to,
-                          },
-                        });
-                      }}
-                    />
-                    <ToggleDate
-                      label="Référents régionaux"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      value={data.manualAffectionOpenForReferentRegion}
-                      onChange={() => setData({ ...data, manualAffectionOpenForReferentRegion: !data.manualAffectionOpenForReferentRegion })}
-                      range={{
-                        from: data?.uselessInformation?.manualAffectionOpenForReferentRegionFrom || undefined,
-                        to: data?.uselessInformation?.manualAffectionOpenForReferentRegionTo || undefined,
-                      }}
-                      onChangeRange={(range) => {
-                        setData({
-                          ...data,
-                          uselessInformation: {
-                            ...data.uselessInformation,
-                            manualAffectionOpenForReferentRegionFrom: range?.from,
-                            manualAffectionOpenForReferentRegionTo: range?.to,
-                          },
-                        });
-                      }}
-                    />
-                    <ToggleDate
-                      label="Référents départementaux"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      value={data.manualAffectionOpenForReferentDepartment}
-                      onChange={() => setData({ ...data, manualAffectionOpenForReferentDepartment: !data.manualAffectionOpenForReferentDepartment })}
-                      range={{
-                        from: data?.uselessInformation?.manualAffectionOpenForReferentDepartmentFrom || undefined,
-                        to: data?.uselessInformation?.manualAffectionOpenForReferentDepartmentTo || undefined,
-                      }}
-                      onChangeRange={(range) => {
-                        setData({
-                          ...data,
-                          uselessInformation: {
-                            ...data.uselessInformation,
-                            manualAffectionOpenForReferentDepartmentFrom: range?.from,
-                            manualAffectionOpenForReferentDepartmentTo: range?.to,
-                          },
-                        });
-                      }}
-                    />
-                  </div>
-                  <div className="mt-4 flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Confirmation du point de rassemblement par les volontaires</p>
-                      <MdInfoOutline data-tip data-for="confirmation_PDR" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="confirmation_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          <li>Fin de la possibilité de confirmer le point de rassemblement pour le volontaire sur son compte.</li>
-                          <li>
-                            Fin de la possibilité pour un utilisateur de choisir l’option “Je laisse [Prénom du volontaire] choisir son point de rassemblement” dans la modale de
-                            choix du point de rassemblement.
-                          </li>
-                          <li>Cela prend effet à 23h59 heure de Paris.</li>
-                        </ul>
-                      </ReactTooltip>
-                    </div>
-                    <DatePickerInput
-                      mode="single"
-                      label="Fin"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      value={data.pdrChoiceLimitDate}
-                      onChange={(value) => setData({ ...data, pdrChoiceLimitDate: value })}
-                    />
-                  </div>
+                  {data.type !== COHORT_TYPE.CLE && (
+                    <>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <p className="flex flex-1 text-xs  font-medium text-gray-900">
+                            Affectation manuelle des volontaires et modification de leur affectation et de leur point de rassemblement
+                          </p>
+                          <MdInfoOutline data-tip data-for="affectation_manuelle" className="h-5 w-5 cursor-pointer text-gray-400" />
+                          <ReactTooltip
+                            id="affectation_manuelle"
+                            type="light"
+                            place="top"
+                            effect="solid"
+                            className="custom-tooltip-radius !opacity-100 !shadow-md"
+                            tooltipRadius="6">
+                            <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                              Ouverture ou fermeture pour les utilisateurs du droit à affecter manuellement des volontaires et/ou à modifier leur centre d’affectation ou point de
+                              rassemblement.
+                            </p>
+                          </ReactTooltip>
+                        </div>
+                        <ToggleDate
+                          label="Modérateurs"
+                          disabled={isLoading}
+                          readOnly={readOnly}
+                          value={data.manualAffectionOpenForAdmin}
+                          onChange={() =>
+                            setData({
+                              ...data,
+                              manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin,
+                            })
+                          }
+                          range={{
+                            from: data?.uselessInformation?.manualAffectionOpenForAdminFrom || undefined,
+                            to: data?.uselessInformation?.manualAffectionOpenForAdminTo || undefined,
+                          }}
+                          onChangeRange={(range) => {
+                            setData({
+                              ...data,
+                              uselessInformation: {
+                                ...data.uselessInformation,
+                                manualAffectionOpenForAdminFrom: range?.from,
+                                manualAffectionOpenForAdminTo: range?.to,
+                              },
+                            });
+                          }}
+                        />
+                        <ToggleDate
+                          label="Référents régionaux"
+                          disabled={isLoading}
+                          readOnly={readOnly}
+                          value={data.manualAffectionOpenForReferentRegion}
+                          onChange={() =>
+                            setData({
+                              ...data,
+                              manualAffectionOpenForReferentRegion: !data.manualAffectionOpenForReferentRegion,
+                            })
+                          }
+                          range={{
+                            from: data?.uselessInformation?.manualAffectionOpenForReferentRegionFrom || undefined,
+                            to: data?.uselessInformation?.manualAffectionOpenForReferentRegionTo || undefined,
+                          }}
+                          onChangeRange={(range) => {
+                            setData({
+                              ...data,
+                              uselessInformation: {
+                                ...data.uselessInformation,
+                                manualAffectionOpenForReferentRegionFrom: range?.from,
+                                manualAffectionOpenForReferentRegionTo: range?.to,
+                              },
+                            });
+                          }}
+                        />
+                        <ToggleDate
+                          label="Référents départementaux"
+                          disabled={isLoading}
+                          readOnly={readOnly}
+                          value={data.manualAffectionOpenForReferentDepartment}
+                          onChange={() =>
+                            setData({
+                              ...data,
+                              manualAffectionOpenForReferentDepartment: !data.manualAffectionOpenForReferentDepartment,
+                            })
+                          }
+                          range={{
+                            from: data?.uselessInformation?.manualAffectionOpenForReferentDepartmentFrom || undefined,
+                            to: data?.uselessInformation?.manualAffectionOpenForReferentDepartmentTo || undefined,
+                          }}
+                          onChangeRange={(range) => {
+                            setData({
+                              ...data,
+                              uselessInformation: {
+                                ...data.uselessInformation,
+                                manualAffectionOpenForReferentDepartmentFrom: range?.from,
+                                manualAffectionOpenForReferentDepartmentTo: range?.to,
+                              },
+                            });
+                          }}
+                        />
+                      </div>
+                      <div className="mt-4 flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs  font-medium text-gray-900">Confirmation du point de rassemblement par les volontaires</p>
+                          <MdInfoOutline data-tip data-for="confirmation_PDR" className="h-5 w-5 cursor-pointer text-gray-400" />
+                          <ReactTooltip id="confirmation_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                            <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                              <li>Fin de la possibilité de confirmer le point de rassemblement pour le volontaire sur son compte.</li>
+                              <li>
+                                Fin de la possibilité pour un utilisateur de choisir l’option “Je laisse [Prénom du volontaire] choisir son point de rassemblement” dans la modale
+                                de choix du point de rassemblement.
+                              </li>
+                              <li>Cela prend effet à 23h59 heure de Paris.</li>
+                            </ul>
+                          </ReactTooltip>
+                        </div>
+                        <DatePickerInput
+                          mode="single"
+                          label="Fin"
+                          disabled={isLoading}
+                          readOnly={readOnly}
+                          value={data.pdrChoiceLimitDate}
+                          onChange={(value) => setData({ ...data, pdrChoiceLimitDate: value })}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className="flex w-[10%] items-center justify-center">
                   <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>

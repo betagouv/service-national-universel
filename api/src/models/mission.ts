@@ -10,28 +10,6 @@ import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, Interface
 const MODELNAME = "mission";
 
 const schema = new mongoose.Schema({
-  sqlId: {
-    type: String,
-    index: true,
-    documentation: {
-      description: "(migration) Identifiant dans l'ancienne base de données",
-    },
-  }, // ID of the previous database
-  sqlStructureId: {
-    type: String,
-    index: true,
-    documentation: {
-      description: "(migration) Identifiant de la structure dans l'ancienne base de données",
-    },
-  }, // ID of the previous database
-  sqlTutorId: {
-    type: String,
-    index: true,
-    documentation: {
-      description: "(migration) Identifiant de l'utilisateur tuteur de mission dans l'ancienne base de données",
-    },
-  }, // ID of the previous database
-
   name: {
     type: String,
     required: true,

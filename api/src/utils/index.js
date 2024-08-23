@@ -36,6 +36,7 @@ const {
 const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
 const dayjs = require("dayjs");
+const { getCohortIdsFromCohortName } = require("../cohort/cohortService");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -867,7 +868,8 @@ const updateHeadCenter = async (headCenterId, user) => {
   if (!headCenter) return;
   const sessions = await SessionPhase1Model.find({ headCenterId }, { cohort: 1 });
   const cohorts = new Set(sessions.map((s) => s.cohort));
-  headCenter.set({ cohorts: [...cohorts] });
+  const cohortIds = await getCohortIdsFromCohortName([...cohorts]);
+  headCenter.set({ cohorts: [...cohorts], cohortIds: cohortIds });
   await headCenter.save({ fromUser: user });
 };
 

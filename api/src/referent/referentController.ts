@@ -26,6 +26,7 @@ import {
   EtablissementDocument,
   ClasseDocument,
   YoungType,
+  CohortModel,
 } from "../models";
 
 import emailsEmitter from "../emails";
@@ -97,6 +98,8 @@ import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
+import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
+import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -125,12 +128,12 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
 function cleanReferentData(referent) {
   if (!referent.role) return referent;
 
-  const fields = ["department", "region", "sessionPhase1Id", "cohorts", "cohesionCenterId", "cohesionCenterName", "structureId"];
+  const fields = ["department", "region", "sessionPhase1Id", "cohorts", "cohortIds", "cohesionCenterId", "cohesionCenterName", "structureId"];
 
   const fieldsToKeep = {
     admin: [],
     dsnj: [],
-    head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "sessionPhase1Id"],
+    head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "cohortIds", "sessionPhase1Id"],
     referent_department: ["department", "region"],
     referent_region: ["department", "region"],
     responsible: ["structureId"],
@@ -328,7 +331,10 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       referentProperties.phone = phone;
       referentProperties.mobile = phone;
     }
-    if (cohorts) referentProperties.cohorts = cohorts;
+    if (cohorts) {
+      referentProperties.cohorts = cohorts;
+      referentProperties.cohortIds = await getCohortIdsFromCohortName(cohorts);
+    }
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     referentProperties.invitationToken = invitation_token;
@@ -590,6 +596,10 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
+    if (await shouldSwitchYoungByIdToLC(id, value.status)) {
+      await switchYoungByIdToLC(id);
+    }
+
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
@@ -737,7 +747,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         cohesionStayMedicalFileReceived: undefined,
       });
     }
-
+    const cohortModel = await CohortModel.findOne({ name: cohort });
     young.set({
       status: youngStatus,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
@@ -746,6 +756,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohortChangeReason: cohortChangeReason ?? young.cohortChangeReason,
       cohesionStayPresence: undefined,
       cohesionStayMedicalFileReceived: undefined,
+      cohortId: cohortModel?._id,
     });
     if (value.source === YOUNG_SOURCE.CLE) {
       const correctionRequestsFiltered = young?.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];

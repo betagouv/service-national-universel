@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
   const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
   if (mode !== "development") {
     plugins.push(
+      // Put the Sentry vite plugin after all other plugins
       sentryVitePlugin({
         org: "sentry",
         project: "snu-moncompte",
@@ -19,17 +20,12 @@ export default defineConfig(({ mode }) => {
         environment: mode,
         release: {
           name: env.RELEASE,
-        },
-        deploy: {
-          env: mode,
+          deploy: {
+            env: mode,
+          },
         },
         validate: true,
-        sourcemaps: {
-          // Specify the directory containing build artifacts
-          assets: "./**",
-          // Don't upload the source maps of dependencies
-          ignore: ["./node_modules/**"],
-        },
+        reactComponentAnnotation: { enabled: true },
 
         // Helps troubleshooting - set to false to make plugin less noisy
         debug: true,
@@ -50,7 +46,6 @@ export default defineConfig(({ mode }) => {
             "react-dom": ["react-dom"],
             "react-router-dom": ["react-router-dom"],
             "react-redux": ["react-redux"],
-            "react-router": ["react-router"],
             "react-redux-toastr": ["react-redux-toastr"],
             "react-select": ["react-select"],
             reactstrap: ["reactstrap"],
@@ -62,7 +57,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     optimizeDeps: {
-      include: ["@sentry/react", "snu-lib", "@snu/ds"],
+      include: ["snu-lib", "@snu/ds"],
       force: true,
     },
     resolve: {

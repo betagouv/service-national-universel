@@ -13,6 +13,7 @@ export default defineConfig(({ command, mode }) => {
 
   if (mode !== "development") {
     plugins.push(
+      // Put the Sentry vite plugin after all other plugins
       sentryVitePlugin({
         org: "sentry",
         project: "snu-admin",
@@ -21,17 +22,12 @@ export default defineConfig(({ command, mode }) => {
         environment: mode,
         release: {
           name: env.RELEASE,
-        },
-        deploy: {
-          env: mode,
+          deploy: {
+            env: mode,
+          },
         },
         validate: true,
-        sourcemaps: {
-          // Specify the directory containing build artifacts
-          assets: "./**",
-          // Don't upload the source maps of dependencies
-          ignore: ["./node_modules/**"],
-        },
+        reactComponentAnnotation: { enabled: true },
 
         // Helps troubleshooting - set to false to make plugin less noisy
         debug: true,
@@ -44,13 +40,41 @@ export default defineConfig(({ command, mode }) => {
       sourcemap: mode !== "development",
       outDir: "build",
       port: 8082,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const HugeLibraries = [
+              "xlsx",
+              "date-fns",
+              "validator",
+              "libphonenumber-js",
+              "@sentry",
+              "react-dom",
+              "react-router-dom",
+              "react-redux",
+              "react-datepicker",
+              "react-redux-toastr",
+              "react-select",
+              "reactstrap",
+              "core-js",
+              "@headlessui",
+              "chart.js",
+              "@codegouvfr/react-dsfr",
+              "@tanstack/react-query",
+            ];
+            if (HugeLibraries.some((libName) => id.includes(`node_modules/${libName}`))) {
+              return id.toString().split("node_modules/")[1].split("/")[0].toString();
+            }
+          },
+        },
+      },
     },
     server: {
       port: 8082,
     },
     plugins: plugins,
     optimizeDeps: {
-      include: ["@sentry/react", "snu-lib", "@snu/ds"],
+      include: ["snu-lib", "@snu/ds"],
       force: true,
     },
     resolve: {

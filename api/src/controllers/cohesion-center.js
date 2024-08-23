@@ -13,6 +13,7 @@ const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = requ
 const { validateId } = require("../utils/validator");
 const { getReferentManagerPhase2 } = require("../utils");
 const { getTransporter } = require("../utils");
+const { getCohortIdsFromCohortName } = require("../cohort/cohortService");
 
 //To update for new affectation
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -48,6 +49,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const centerCode = await CohesionCenterModel.find({ code2022: value.code2022 });
     if (centerCode.length > 0) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
+    const cohort = await CohortModel.findOne({ name: value.cohort });
+
     const cohesionCenter = await CohesionCenterModel.create({
       name: value.name,
       code2022: value.code2022,
@@ -77,6 +80,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       nameCentre: value.name,
       cityCentre: value.city,
       zipCentre: value.zip,
+      cohortId: cohort?._id,
     });
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
@@ -114,6 +118,8 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     const newCohorts = center.cohorts;
     newCohorts.push(value.cohort);
 
+    const cohort = await CohortModel.findOne({ name: value.cohort });
+
     const session = await SessionPhase1Model.create({
       cohesionCenterId,
       cohort: value.cohort,
@@ -126,8 +132,10 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       cityCentre: center.city,
       zipCentre: center.zip,
       sanitaryContactEmail: value.email,
+      cohortId: cohort?._id,
     });
-    center.set({ cohorts: newCohorts });
+    const cohortIds = await getCohortIdsFromCohortName(newCohorts);
+    center.set({ cohorts: newCohorts, cohortIds: cohortIds });
     await center.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true, data: serializeSessionPhase1(session) });

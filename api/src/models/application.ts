@@ -9,12 +9,6 @@ import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, Interface
 const MODELNAME = "application";
 
 const schema = new Schema({
-  sqlId: {
-    type: String,
-    documentation: {
-      description: "(migration) Identifiant dans l'ancienne base de données",
-    },
-  },
   apiEngagementId: {
     type: String,
     documentation: {
@@ -67,6 +61,12 @@ const schema = new Schema({
     type: String,
     documentation: {
       description: "Cohorte du volontaire",
+    },
+  },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
     },
   },
 

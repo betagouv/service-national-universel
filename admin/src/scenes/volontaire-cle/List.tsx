@@ -115,7 +115,7 @@ export default function List() {
     setYoungList([]);
     if (currentTab === "general") {
       setSelectedFilters((prevFilters) => {
-        const { reinscriptionStep2023, status, imageRight, ...rest } = prevFilters;
+        const { inscriptionStep2023, status, imageRight, ...rest } = prevFilters;
         return rest;
       });
     } else if (currentTab === "consent") {
@@ -123,12 +123,12 @@ export default function List() {
         const { status, imageRight, ...rest } = prevFilters;
         return {
           ...rest,
-          reinscriptionStep2023: { filter: ["WAITING_CONSENT"] },
+          inscriptionStep2023: { filter: ["WAITING_CONSENT"] },
         };
       });
     } else if (currentTab === "validation") {
       setSelectedFilters((prevFilters) => {
-        const { reinscriptionStep2023, imageRight, ...rest } = prevFilters;
+        const { inscriptionStep2023, imageRight, ...rest } = prevFilters;
         return {
           ...rest,
           status: { filter: [YOUNG_STATUS.WAITING_VALIDATION] },
@@ -136,7 +136,7 @@ export default function List() {
       });
     } else if (currentTab === "image") {
       setSelectedFilters((prevFilters) => {
-        const { reinscriptionStep2023, status, ...rest } = prevFilters;
+        const { inscriptionStep2023, status, ...rest } = prevFilters;
         return {
           ...rest,
           imageRight: { filter: ["N/A"] },

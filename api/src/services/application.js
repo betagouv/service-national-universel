@@ -125,12 +125,11 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
 
 const getAuthorizationToApply = async (mission, young) => {
   let refusalMessages = [];
-  if (isCohortTooOld(young?.cohort)) {
+  if (isCohortTooOld(young)) {
     refusalMessages.push("Le délai pour candidater est dépassé.");
   }
 
-  const cohort = await CohortModel.findOne({ name: young.cohort });
-
+  const cohort = await CohortModel.findById(young.cohortId);
   if (!canApplyToPhase2(young, cohort)) {
     refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
   }
