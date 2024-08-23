@@ -8,7 +8,7 @@ import { toastr } from "react-redux-toastr";
 
 import { Container, InputText, InputNumber, Label, ModalConfirmation } from "@snu/ds/admin";
 
-import { canCreateOrUpdateCohesionCenter, canPutSpecificDateOnSessionPhase1, isSessionEditionOpen } from "snu-lib";
+import { canCreateOrUpdateCohesionCenter, canPutSpecificDateOnSessionPhase1, isSessionEditionOpen, validateEmailAcademique } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
@@ -71,6 +71,11 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     }
     if (values.dateStart && values.dateEnd && new Date(values.dateStart) > new Date(values.dateEnd)) {
       errorsObject.date = "La date de début doit être antérieure à la date de fin";
+    }
+    if (values.sanitaryContactEmail) {
+      if (!validateEmailAcademique(values.sanitaryContactEmail)) {
+        errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
+      }
     }
     if (Object.keys(errorsObject).length > 0) {
       setErrors(errorsObject);
@@ -257,10 +262,11 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
                     }}
                     readOnly={!values}
-                    disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
+                    // disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
                   />
                 </div>
               </div>
+              {errors?.sanitaryContactEmail && <div className="text-[#EF4444] mx-auto mt-1">{errors?.sanitaryContactEmail}</div>}
             </div>
             <div className="flex w-[10%] items-center justify-center">
               <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
