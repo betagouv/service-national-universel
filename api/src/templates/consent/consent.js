@@ -3,7 +3,6 @@ const PDFDocument = require("pdfkit");
 const config = require("config");
 const datefns = require("date-fns");
 const { withPipeStream } = require("../utils");
-const { FUNCTIONAL_ERRORS } = require("snu-lib");
 
 const FONT = "Marianne";
 const FONT_BOLD = `${FONT}-Bold`;
@@ -163,11 +162,9 @@ function initDocument(options = {}) {
 function generateBatchConsentement(outStream, youngs) {
   const random = Math.random();
   console.time("RENDERING " + random);
-  const youngsParentAllowSNU = youngs.filter((young) => young.parentAllowSNU === "true");
-  if (youngsParentAllowSNU.length > 100) throw new Error(FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE);
   const doc = initDocument({ autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
-    for (const young of youngsParentAllowSNU) {
+    for (const young of youngs) {
       doc.addPage();
       render(doc, young);
     }

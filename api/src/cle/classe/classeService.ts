@@ -1,10 +1,24 @@
 import crypto from "crypto";
-import { YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS, ClasseCertificateKeys } from "snu-lib";
 
 import { YoungModel, ClasseModel, ClasseDocument, ClasseType, EtablissementDocument, EtablissementType } from "../../models";
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs, generateImageRightForMultipleYoungs, generateConsentementForMultipleYoungs } from "../../young/youngService";
 
 import { mapRegionToTrigramme } from "../../services/regionService";
+
+export const generateCertificateByKey = async (key: string, id: string) => {
+  let certificates;
+  if (key === ClasseCertificateKeys.IMAGE) {
+    certificates = await generateImageRightByClasseId(id);
+  }
+  if (key === ClasseCertificateKeys.CONSENT) {
+    certificates = await generateConsentementByClasseId(id);
+  }
+  if (key === ClasseCertificateKeys.CONVOCATION) {
+    certificates = await generateConvocationsByClasseId(id);
+  }
+  return certificates;
+};
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);

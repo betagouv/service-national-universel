@@ -13,7 +13,7 @@ const { LigneToPointModel } = require("../../models");
 const { PointDeRassemblementModel } = require("../../models");
 const { DepartmentServiceModel } = require("../../models");
 const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
-const { formatStringDate, formatStringDateTimezoneUTC, transportDatesToString, YOUNG_STATUS, FUNCTIONAL_ERRORS } = require("snu-lib");
+const { formatStringDate, formatStringDateTimezoneUTC, transportDatesToString } = require("snu-lib");
 const { capture } = require("../../sentry");
 
 const FONT = "Marianne";
@@ -256,11 +256,10 @@ async function generateCohesion(outStream, young) {
 async function generateBatchCohesion(outStream, youngs) {
   const random = Math.random();
   console.time("RENDERING " + random);
-  const validatedYoungsWithSession = youngs.filter((young) => young.status === YOUNG_STATUS.VALIDATED && young.sessionPhase1Id);
-  let commonYoungData = await getYoungCommonData(validatedYoungsWithSession);
+  let commonYoungData = await getYoungCommonData(youngs);
   const doc = initDocument({ autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
-    for (const young of validatedYoungsWithSession) {
+    for (const young of youngs) {
       controlYoungCoherence(young);
       doc.addPage();
       render(doc, { young, ...commonYoungData });
@@ -276,13 +275,6 @@ function controlYoungCoherence(young) {
 }
 
 async function getYoungCommonData(youngs) {
-  if (!youngs || youngs.length === 0) {
-    throw new Error(FUNCTIONAL_ERRORS.NO_YOUNG_IN_EXPECTED_STATUS);
-  }
-  if (youngs.length > 100) {
-    throw new Error(FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE);
-  }
-
   return await fetchDataForYoung(youngs[0]);
 }
 

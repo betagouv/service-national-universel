@@ -1,28 +1,49 @@
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 import { YoungDocument, YoungModel, YoungType } from "../models";
-import { ERRORS, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto } from "snu-lib";
+import { ERRORS, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto, FUNCTIONAL_ERRORS } from "snu-lib";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
+  const validatedYoungsWithSession = youngs.filter((young) => young.status === YOUNG_STATUS.VALIDATED && young.sessionPhase1Id);
+  if (validatedYoungsWithSession.length === 0) {
+    throw new Error(FUNCTIONAL_ERRORS.NO_YOUNG_IN_EXPECTED_STATUS);
+  }
+  if (validatedYoungsWithSession.length > 100) {
+    throw new Error(FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE);
+  }
   return await generatePdfIntoBuffer({
     type: YOUNG_DOCUMENT.CONVOCATION_BATCH,
     template: YOUNG_DOCUMENT_PHASE_TEMPLATE.COHESION,
-    young: youngs,
+    young: validatedYoungsWithSession,
   });
 };
 
 export const generateImageRightForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
+  const youngsWithImageRights = youngs.filter((young) => young.imageRight === "true" || young.imageRight === "false");
+  if (youngsWithImageRights.length === 0) {
+    throw new Error(FUNCTIONAL_ERRORS.NO_YOUNG_IN_EXPECTED_STATUS);
+  }
+  if (youngsWithImageRights.length > 100) {
+    throw new Error(FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE);
+  }
   return await generatePdfIntoBuffer({
     type: YOUNG_DOCUMENT.IMAGE_RIGHT_BATCH,
     template: YOUNG_DOCUMENT_PHASE_TEMPLATE.IMAGE_RIGHT,
-    young: youngs,
+    young: youngsWithImageRights,
   });
 };
 export const generateConsentementForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
+  const youngsParentAllowSNU = youngs.filter((young) => young.parentAllowSNU === "true");
+  if (youngsParentAllowSNU.length === 0) {
+    throw new Error(FUNCTIONAL_ERRORS.NO_YOUNG_IN_EXPECTED_STATUS);
+  }
+  if (youngsParentAllowSNU.length > 100) {
+    throw new Error(FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE);
+  }
   return await generatePdfIntoBuffer({
     type: YOUNG_DOCUMENT.CONSENT_BATCH,
     template: YOUNG_DOCUMENT_PHASE_TEMPLATE.CONSENT,
-    young: youngs,
+    young: youngsParentAllowSNU,
   });
 };
 

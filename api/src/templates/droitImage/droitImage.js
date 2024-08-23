@@ -3,7 +3,6 @@ const PDFDocument = require("pdfkit");
 const config = require("config");
 const datefns = require("date-fns");
 const { withPipeStream } = require("../utils");
-const { FUNCTIONAL_ERRORS } = require("snu-lib");
 
 const FONT = "Marianne";
 const FONT_BOLD = `${FONT}-Bold`;
@@ -188,13 +187,11 @@ function generateDroitImage(outStream, young) {
 }
 
 function generateBatchDroitImage(outStream, youngs) {
-  const youngsWithImageRights = youngs.filter((young) => young.imageRight === "true" || young.imageRight === "false");
-  if (youngsWithImageRights.length > 100) throw new Error(FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE);
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument({ autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
-    for (const young of youngsWithImageRights) {
+    for (const young of youngs) {
       doc.addPage();
       render(doc, young);
     }

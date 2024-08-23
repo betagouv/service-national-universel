@@ -56,15 +56,7 @@ import {
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 
-import {
-  buildUniqueClasseId,
-  buildUniqueClasseKey,
-  deleteClasse,
-  findClasseByUniqueKeyAndUniqueId,
-  generateConvocationsByClasseId,
-  generateImageRightByClasseId,
-  generateConsentementByClasseId,
-} from "./classeService";
+import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, findClasseByUniqueKeyAndUniqueId, generateCertificateByKey } from "./classeService";
 import {
   findCohesionCentersForClasses,
   findPdrsForClasses,
@@ -108,17 +100,8 @@ router.post(
       const classe = await ClasseModel.findById(id);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      let certificates;
+      const certificates = await generateCertificateByKey(certificateKey, id);
 
-      if (certificateKey === ClasseCertificateKeys.IMAGE) {
-        certificates = await generateImageRightByClasseId(id);
-      }
-      if (certificateKey === ClasseCertificateKeys.CONSENT) {
-        certificates = await generateConsentementByClasseId(id);
-      }
-      if (certificateKey === ClasseCertificateKeys.CONVOCATION) {
-        certificates = await generateConvocationsByClasseId(id);
-      }
       res.set({
         "content-length": certificates.length,
         "content-disposition": `inline; filename="convocations.pdf"`,

@@ -33,6 +33,115 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
     if (classe?.ligneId) return false;
     return true;
   };
+
+  const getOptionsExport = () => {
+    const optionsExport = [
+      {
+        key: "export1",
+        title: "Exporter les attestations nominatives",
+        items: [],
+      },
+      {
+        key: "export2",
+        title: "Exporter un formulaire vierge",
+        items: [
+          {
+            key: "inscriptionVierge",
+            render: <ButtonDownloadEmptyFile key="inscriptionVierge" title="Formulaire d'inscription (.pdf)" type={ClasseFileKeys.INSCRIPTION} setIsLoading={setIsLoading} />,
+          },
+          {
+            key: "consentVierge",
+            render: <ButtonDownloadEmptyFile key="consentVierge" title="Formulaire de consentement (.pdf)" type={ClasseFileKeys.CONSENT} setIsLoading={setIsLoading} />,
+          },
+          {
+            key: "imageVierge",
+            render: <ButtonDownloadEmptyFile key="imageVierge" title="Formulaire du droit à l'image (.pdf)" type={ClasseFileKeys.IMAGE} setIsLoading={setIsLoading} />,
+          },
+          {
+            key: "reglement",
+            render: <ButtonDownloadEmptyFile key="reglement" title="Règlement intérieur (.pdf)" type={ClasseFileKeys.REGLEMENT} setIsLoading={setIsLoading} />,
+          },
+          {
+            key: "consentData",
+            render: <ButtonDownloadEmptyFile key="consentData" title="Formulaire protection des données (.pdf)" type={ClasseFileKeys.CONSENT_DATA} setIsLoading={setIsLoading} />,
+          },
+        ],
+      },
+    ];
+    if (studentStatus?.parentAllowSNU > 0) {
+      optionsExport[0].items.push({
+        key: "consent",
+        render: <ButtonCertificateDownload key="consent" title={"Consentements à la participation (.pdf)"} type={ClasseCertificateKeys.CONSENT} id={id} />,
+      });
+    }
+    if (studentStatus?.imageRight > 0) {
+      optionsExport[0].items.push({
+        key: "image",
+        render: <ButtonCertificateDownload key="image" title={"Droits à l'image (.pdf)"} type={ClasseCertificateKeys.IMAGE} id={id} />,
+      });
+    }
+    if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) {
+      optionsExport[0].items.push({
+        key: "convocation",
+        render: <ButtonCertificateDownload key="convocation" title={"Convocations au séjour (.pdf)"} type={ClasseCertificateKeys.CONVOCATION} id={id} />,
+      });
+    }
+
+    if (optionsExport[0].items.length === 0) optionsExport.shift();
+    return optionsExport;
+  };
+
+  const optionsInscription = [
+    {
+      key: "inscription",
+      title: "Inscrire les élèves",
+      items: [
+        {
+          key: "link",
+          render: <ButtonLinkInvite key="invite" url={url} />,
+        },
+        {
+          key: "manual",
+          render: <ButtonManualInvite key="manual" id={id} />,
+        },
+      ],
+    },
+  ];
+
+  const optionsInscriptionHandler = [
+    {
+      key: "inscriptionHandler",
+      title: "Gérer les inscriptions",
+      items: [
+        {
+          key: "consent",
+          render: <ButtonHandleInscription key="consent" title="Récolter les consentements" type="consent" id={id} />,
+        },
+        {
+          key: "validation",
+          render: <ButtonHandleInscription key="validation" title="Valider les inscriptions" type="validation" id={id} />,
+        },
+        {
+          key: "image",
+          render: <ButtonHandleInscription key="image" title="Récolter les droits à l'image" type="image" id={id} />,
+        },
+      ],
+    },
+  ];
+
+  const optionsAdmin = [
+    {
+      key: "actions",
+      title: "Actions",
+      items: [
+        {
+          key: "edit1",
+          render: classe && <DeleteButton classe={classe} onLoading={setIsLoading} />,
+        },
+      ],
+    },
+  ];
+
   const actionsList: React.ReactNode[] = [];
 
   if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
@@ -42,45 +151,9 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
     actionsList.push(<VerifClassButton key="verify" classe={classe} setClasse={setClasse} isLoading={isLoading} setLoading={setIsLoading} />);
   }
   if (classe?.status && STATUS_CLASSE.OPEN === classe.status) {
-    const optionsInscription = [
-      {
-        key: "inscription",
-        title: "Inscrire les élèves",
-        items: [
-          {
-            key: "link",
-            render: <ButtonLinkInvite key="invite" url={url} />,
-          },
-          {
-            key: "manual",
-            render: <ButtonManualInvite key="manual" id={id} />,
-          },
-        ],
-      },
-    ];
     actionsList.push(<DropdownButton key="inscription" title="Inscrire les élèves" type="wired" optionsGroup={optionsInscription} position="right" buttonClassName="mr-2" />);
   }
   if (classe?.status && (classe.status === STATUS_CLASSE.OPEN || classe.status === STATUS_CLASSE.CLOSED) && [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)) {
-    const optionsInscriptionHandler = [
-      {
-        key: "inscriptionHandler",
-        title: "Gérer les inscriptions",
-        items: [
-          {
-            key: "consent",
-            render: <ButtonHandleInscription key="consent" title="Récolter les consentements" type="consent" id={id} />,
-          },
-          {
-            key: "validation",
-            render: <ButtonHandleInscription key="validation" title="Valider les inscriptions" type="validation" id={id} />,
-          },
-          {
-            key: "image",
-            render: <ButtonHandleInscription key="image" title="Récolter les droits à l'image" type="image" id={id} />,
-          },
-        ],
-      },
-    ];
     actionsList.push(
       <DropdownButton
         key="inscriptionHandler"
@@ -92,75 +165,10 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
       />,
     );
   }
-  const optionsExport = [
-    {
-      key: "export1",
-      title: "Exporter les attestations nominatives",
-      items: [],
-    },
-    {
-      key: "export2",
-      title: "Exporter un formulaire vierge",
-      items: [
-        {
-          key: "inscriptionVierge",
-          render: <ButtonDownloadEmptyFile key="inscriptionVierge" title="Formulaire d'inscription (.pdf)" type={ClasseFileKeys.INSCRIPTION} setIsLoading={setIsLoading} />,
-        },
-        {
-          key: "consentVierge",
-          render: <ButtonDownloadEmptyFile key="consentVierge" title="Formulaire de consentement (.pdf)" type={ClasseFileKeys.CONSENT} setIsLoading={setIsLoading} />,
-        },
-        {
-          key: "imageVierge",
-          render: <ButtonDownloadEmptyFile key="imageVierge" title="Formulaire du droit à l'image (.pdf)" type={ClasseFileKeys.IMAGE} setIsLoading={setIsLoading} />,
-        },
-        {
-          key: "reglement",
-          render: <ButtonDownloadEmptyFile key="reglement" title="Règlement intérieur (.pdf)" type={ClasseFileKeys.REGLEMENT} setIsLoading={setIsLoading} />,
-        },
-        {
-          key: "consentData",
-          render: <ButtonDownloadEmptyFile key="consentData" title="Formulaire protection des données (.pdf)" type={ClasseFileKeys.CONSENT_DATA} setIsLoading={setIsLoading} />,
-        },
-      ],
-    },
-  ];
-  if (studentStatus?.parentAllowSNU > 0) {
-    optionsExport[0].items.push({
-      key: "consent",
-      render: <ButtonCertificateDownload key="consent" title={"Consentements à la participation (.pdf)"} type={ClasseCertificateKeys.CONSENT} id={id} />,
-    });
-  }
-  if (studentStatus?.imageRight > 0) {
-    optionsExport[0].items.push({
-      key: "image",
-      render: <ButtonCertificateDownload key="image" title={"Droits à l'image (.pdf)"} type={ClasseCertificateKeys.IMAGE} id={id} />,
-    });
-  }
-  if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) {
-    optionsExport[0].items.push({
-      key: "convocation",
-      render: <ButtonCertificateDownload key="convocation" title={"Convocations au séjour (.pdf)"} type={ClasseCertificateKeys.CONVOCATION} id={id} />,
-    });
-  }
 
-  if (optionsExport[0].items.length === 0) optionsExport.shift();
-
-  actionsList.push(<DropdownButton key="export" title="Exporter" optionsGroup={optionsExport} position="right" buttonClassName="mr-2" />);
+  actionsList.push(<DropdownButton key="export" title="Exporter" optionsGroup={getOptionsExport()} position="right" buttonClassName="mr-2" />);
 
   if (user.role === ROLES.ADMIN) {
-    const optionsAdmin = [
-      {
-        key: "actions",
-        title: "Actions",
-        items: [
-          {
-            key: "edit1",
-            render: classe && <DeleteButton classe={classe} onLoading={setIsLoading} />,
-          },
-        ],
-      },
-    ];
     actionsList.push(
       <DropdownButton
         key="edit"
