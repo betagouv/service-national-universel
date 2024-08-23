@@ -121,6 +121,7 @@ export default function Create() {
     if (!classe.name) errors.name = "Ce champ est obligatoire";
     if (!classe.coloration) errors.coloration = "Ce champ est obligatoire";
     if (!classe.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
+    if (classe.estimatedSeats && classe.estimatedSeats < 0) errors.estimatedSeats = "Le nombre d'élèves ne peut pas être négatif";
     if (!classe.type) errors.type = "Ce champ est obligatoire";
 
     if (Object.keys(errors).length > 0) {
@@ -209,6 +210,7 @@ export default function Create() {
               <InputNumber
                 name="estimatedSeats"
                 className="flex-1"
+                min={0}
                 value={classe.estimatedSeats!}
                 onChange={(e) => setClasse({ ...classe, estimatedSeats: Number(e.target.value) })}
                 error={errors.estimatedSeats}

@@ -176,7 +176,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       // Classe
       name: Joi.string().required(),
       cohort: Joi.string().allow("").allow(null).optional(),
-      estimatedSeats: Joi.number().required(),
+      estimatedSeats: Joi.number().min(1).required(),
       coloration: Joi.string()
         .valid(...CLE_COLORATION_LIST)
         .required(),
