@@ -23,7 +23,7 @@ export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts);
   const [modal, setModal] = React.useState({ isOpen: false });
-  const firstSession = getDefaultCohort(cohorts)?.name;
+  const defaultCohortName = getDefaultCohort(cohorts)?.name;
   const history = useHistory();
   const { currentTab } = useParams();
   const { search } = useLocation();
@@ -39,7 +39,7 @@ export default function List() {
     setModal({ isOpen: !!modalCreationOpen });
   }, []);
 
-  if (!firstSession || !user) return <div></div>;
+  if (!defaultCohortName || !user) return <div></div>;
   return (
     <>
       <Breadcrumbs items={[{ label: "Points de rassemblement" }]} />
@@ -76,7 +76,7 @@ export default function List() {
           <div className={`relative mb-8 items-start rounded-b-lg rounded-tr-lg bg-white`}>
             <div className="flex w-full flex-col pt-4">
               {currentTab === "liste-points" && <ListPoints user={user} />}
-              {currentTab === "session" && <ListSessions user={user} firstSession={firstSession} />}
+              {currentTab === "session" && <ListSessions user={user} defaultCohortName={defaultCohortName} />}
             </div>
           </div>
         </div>
@@ -95,7 +95,6 @@ export default function List() {
 
 const ListPoints = ({ user }) => {
   const [data, setData] = React.useState([]);
-  console.log("🚀 ~ ListPoints ~ data:", data);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrList";
   const [paramData, setParamData] = React.useState({ page: 0 });
@@ -227,14 +226,14 @@ const Hit = ({ hit }) => {
   );
 };
 
-const ListSessions = ({ user, firstSession }) => {
+const ListSessions = ({ user, defaultCohortName }) => {
   const [data, setData] = React.useState([]);
-  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [selectedFilters, setSelectedFilters] = React.useState({ cohorts: { filter: [defaultCohortName] } });
   const pageId = "pdrListSession";
   const [paramData, setParamData] = React.useState({ page: 0 });
   const [size, setSize] = useState(10);
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession.name], allowEmpty: false, sort: (e) => orderCohort(e) },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [defaultCohortName], allowEmpty: false, sort: (e) => orderCohort(e) },
     {
       title: "Région",
       name: "region",
@@ -255,7 +254,7 @@ const ListSessions = ({ user, firstSession }) => {
   const [nbLinesByPdr, setNbLinesByPdr] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
 
-  const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : firstSession.name;
+  const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : defaultCohortName;
 
   const getYoungsByPdr = async (ids) => {
     const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });

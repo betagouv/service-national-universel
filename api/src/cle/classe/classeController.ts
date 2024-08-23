@@ -3,34 +3,34 @@ import express, { Response } from "express";
 import Joi from "joi";
 
 import {
-  ROLES,
-  canDownloadYoungDocuments,
-  YOUNG_STATUS,
-  STATUS_CLASSE,
   canCreateClasse,
-  STATUS_PHASE1_CLASSE,
-  SENDINBLUE_TEMPLATES,
+  canDeleteClasse,
+  canDownloadYoungDocuments,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
+  canNotifyAdminCleForVerif,
+  canUpdateClasse,
+  canUpdateClasseStay,
+  canUpdateCohort,
+  canVerifyClasse,
+  canViewClasse,
+  canWithdrawClasse,
+  ClasseSchoolYear,
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
   CLE_GRADE_LIST,
-  canUpdateClasse,
-  YOUNG_STATUS_PHASE1,
-  TYPE_CLASSE_LIST,
-  canUpdateClasseStay,
-  canViewClasse,
-  canWithdrawClasse,
-  canDeleteClasse,
-  canUpdateCohort,
-  LIMIT_DATE_ESTIMATED_SEATS,
-  canEditEstimatedSeats,
-  canEditTotalSeats,
-  canVerifyClasse,
-  canNotifyAdminCleForVerif,
   CohortDto,
-  ClasseSchoolYear,
   FeatureFlagName,
   isAdmin,
   ClasseCertificateKeys,
+  LIMIT_DATE_ESTIMATED_SEATS,
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+  STATUS_CLASSE,
+  STATUS_PHASE1_CLASSE,
+  TYPE_CLASSE_LIST,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -39,18 +39,18 @@ import { validateId } from "../../utils/validator";
 import emailsEmitter from "../../emails";
 import { UserRequest } from "../../controllers/request";
 import {
+  ClasseDocument,
   ClasseModel,
+  CohesionCenterDocument,
   CohortModel,
-  YoungModel,
+  EtablissementDocument,
   EtablissementModel,
+  LigneBusDocument,
+  PointDeRassemblementDocument,
+  ReferentDocument,
   ReferentModel,
   ReferentType,
-  ClasseDocument,
-  EtablissementDocument,
-  ReferentDocument,
-  CohesionCenterDocument,
-  PointDeRassemblementDocument,
-  LigneBusDocument,
+  YoungModel,
 } from "../../models";
 
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
@@ -58,11 +58,11 @@ import { findOrCreateReferent, inviteReferent } from "../../services/cle/referen
 
 import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, findClasseByUniqueKeyAndUniqueId, generateCertificateByKey } from "./classeService";
 import {
+  findChefEtablissementInfoForClasses,
   findCohesionCentersForClasses,
+  findLigneInfoForClasses,
   findPdrsForClasses,
   getYoungsGroupByClasses,
-  findLigneInfoForClasses,
-  findChefEtablissementInfoForClasses,
 } from "./export/classeExportService";
 import ClasseStateManager from "./stateManager";
 
@@ -194,7 +194,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       // Classe
       name: Joi.string().required(),
       cohort: Joi.string().allow("").allow(null).optional(),
-      estimatedSeats: Joi.number().required(),
+      estimatedSeats: Joi.number().min(1).required(),
       coloration: Joi.string()
         .valid(...CLE_COLORATION_LIST)
         .required(),

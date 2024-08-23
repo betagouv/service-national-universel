@@ -57,5 +57,6 @@ ENV PATH=/app/node_modules/pm2/bin/:$PATH
 EXPOSE $PORT
 
 RUN pm2 install --docker pm2-slack
+RUN pm2 install --docker pm2-logrotate
 
 CMD ["api/docker_start.sh"]
