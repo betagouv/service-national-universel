@@ -1,4 +1,4 @@
-import { addCohortToClasse, addCohortToClasseByCohortName, importClasseCohort } from "./classeImportService";
+import { addCohortToClasse, addCohortToClasseByCohortSnuId, importClasseCohort } from "./classeImportService";
 import * as classeImportService from "./classeImportService";
 import { CohortModel, ClasseModel, ClasseDocument } from "../../../models";
 import { ERRORS } from "snu-lib";
@@ -7,10 +7,11 @@ import { ClasseCohortImportKey } from "./classeCohortImport";
 import { getFile } from "../../../utils";
 import { readCSVBuffer } from "../../../services/fileService";
 import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
+import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
 
 jest.mock("../../../models", () => ({
   CohortModel: { findById: jest.fn() },
-  ClasseModel: { findById: jest.fn() },
+  ClasseModel: { findById: jest.fn(), save: jest.fn() },
 }));
 
 jest.mock("../../../utils", () => ({
@@ -25,9 +26,13 @@ jest.mock("./classeCohortMapper", () => ({
   mapClassesCohortsForSept2024: jest.fn(),
 }));
 
+jest.mock("../../../cohort/cohortService", () => ({
+  findCohortBySnuIdOrThrow: jest.fn(),
+}));
+
 describe("importClasseCohort", () => {
   beforeAll(() => {
-    jest.spyOn(classeImportService, "addCohortToClasseByCohortName").mockImplementationOnce(() => {
+    jest.spyOn(classeImportService, "addCohortToClasseByCohortSnuId").mockImplementationOnce(() => {
       return new Promise((resolve) => {
         resolve({
           _id: "1",
@@ -36,7 +41,7 @@ describe("importClasseCohort", () => {
         } as ClasseDocument);
       });
     });
-    jest.spyOn(classeImportService, "addCohortToClasseByCohortName").mockImplementationOnce(() => {
+    jest.spyOn(classeImportService, "addCohortToClasseByCohortSnuId").mockImplementationOnce(() => {
       throw new Error(ERRORS.COHORT_NOT_FOUND);
     });
   });
@@ -46,16 +51,16 @@ describe("importClasseCohort", () => {
 
   it("should successfully import classe cohorts", async () => {
     const mockCSV = [
-      { "Identifiant de la classe engagée": "1", "Session: Désignation de la session": "Cohort 101" },
-      { "Identifiant de la classe engagée": "2", "Session: Désignation de la session": "Cohort 102" },
+      { "Identifiant de la classe engagée": "1", "Session : Code de la session": "Cohort 101" },
+      { "Identifiant de la classe engagée": "2", "Session : Code de la session": "Cohort 102" },
     ];
     const mappedClassesCohorts = [
-      { classeId: "1", cohortName: "Cohort 101" },
-      { classeId: "2", cohortName: "Cohort 102" },
+      { classeId: "1", cohortCode: "IDF_101" },
+      { classeId: "2", cohortCode: "IDF_102" },
     ];
     const mockImportResult = [
-      { result: "success", classeId: "1", cohortName: "Cohort 101", cohortId: "101" },
-      { result: "error", classeId: "2", cohortName: "Cohort 102", error: ERRORS.COHORT_NOT_FOUND },
+      { result: "success", classeId: "1", cohortCode: "IDF_101", cohortId: "101", cohortName: "Cohort 101" },
+      { result: "error", classeId: "2", cohortCode: "IDF_102", error: ERRORS.COHORT_NOT_FOUND },
     ];
 
     (getFile as jest.Mock).mockResolvedValue({ Body: Buffer.from("some mock data").toString() });
@@ -67,9 +72,9 @@ describe("importClasseCohort", () => {
     expect(getFile).toHaveBeenCalledWith(filePath);
     expect(readCSVBuffer).toHaveBeenCalledWith(Buffer.from("some mock data"), true);
     expect(mapClassesCohortsForSept2024).toHaveBeenCalledWith(mockCSV);
-    expect(addCohortToClasseByCohortName).toHaveBeenCalledTimes(2);
-    expect(addCohortToClasseByCohortName).toHaveBeenCalledWith("1", "Cohort 101", importKey);
-    expect(addCohortToClasseByCohortName).toHaveBeenCalledWith("2", "Cohort 102", importKey);
+    expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledTimes(2);
+    expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledWith("1", "IDF_101", importKey);
+    expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledWith("2", "IDF_102", importKey);
     expect(result).toEqual(mockImportResult);
   });
 });
@@ -114,5 +119,35 @@ describe("addCohortToClasse", () => {
     (ClasseModel.findById as jest.Mock)(null);
 
     await expect(addCohortToClasse(classeId, cohortId, importKey)).rejects.toThrow(ERRORS.CLASSE_NOT_FOUND);
+  });
+});
+
+describe("addCohortToClasseByCohortSnuId", () => {
+  const classeId = "1";
+  const cohortSnuId = "101";
+  const importKey = ClasseCohortImportKey.SEPT_2024;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  it("should add a cohort to a classe successfully", async () => {
+    const cohortId = "201";
+    (findCohortBySnuIdOrThrow as jest.Mock).mockResolvedValue({ _id: cohortId });
+    jest.spyOn(classeImportService, "addCohortToClasse").mockResolvedValueOnce({
+      _id: classeId,
+      cohort: "Cohort 101",
+      cohortId: cohortId,
+    } as ClasseDocument);
+
+    await addCohortToClasseByCohortSnuId(classeId, cohortSnuId, importKey);
+
+    expect(findCohortBySnuIdOrThrow).toHaveBeenCalledWith(cohortSnuId);
+    expect(classeImportService.addCohortToClasse).toHaveBeenCalledWith(classeId, cohortId, importKey);
+  });
+
+  it("should throw an error if the cohortSnuId is undefined", async () => {
+    await expect(addCohortToClasseByCohortSnuId(classeId, undefined, importKey)).rejects.toThrow(ERRORS.INVALID_PARAMS);
   });
 });

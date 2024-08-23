@@ -31,8 +31,8 @@ export const isReInscriptionOpen = async (cohortName: String | undefined): Promi
   return isReInscriptionOpenOnSomeCohorts();
 };
 
-export const findCohortByNameOrThrow = async (cohortName: string) => {
-  const cohort = await CohortModel.findOne({ name: cohortName });
+export const findCohortBySnuIdOrThrow = async (cohortName: string) => {
+  const cohort = await CohortModel.findOne({ snuId: cohortName });
   if (!cohort) {
     throw new Error(ERRORS.COHORT_NOT_FOUND);
   }

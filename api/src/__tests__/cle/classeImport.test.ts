@@ -31,43 +31,44 @@ beforeEach(async () => {
 });
 
 describe("POST /cle/classe-import", () => {
-  const mockFilePath = "/path/to/mock/file.csv";
-  const mockClasseCohortImportKey = ClasseCohortImportKey.SEPT_2024;
-  const mockBody = {
-    filePath: mockFilePath,
-    classeCohortImportKey: mockClasseCohortImportKey,
+  const filePath = "/path/to/file.csv";
+  const classeCohortImportKey = ClasseCohortImportKey.SEPT_2024;
+  const requestBody = {
+    filePath: filePath,
+    classeCohortImportKey: classeCohortImportKey,
   };
 
   it("should return 200 and the import results when the request is successful", async () => {
     const classe1 = await ClasseModel.create(createFixtureClasse());
     const classe2 = await ClasseModel.create(createFixtureClasse());
-    const cohort = await CohortModel.create(getNewCohortFixture({ name: "à venir" }));
+    const cohort = await CohortModel.create(getNewCohortFixture({ name: "à venir", snuId: "A_VENIR" }));
 
     const notExistingClasseId = new mongoose.Types.ObjectId().toString();
-    const notExistingCohortName = "not-existing-cohort";
+    const notExistingCohortCode = "not-existing-cohort";
 
-    const mockFileBody = `Identifiant de la classe engagée,Session: Désignation de la session\n${classe1?._id},${cohort?.name}\n${notExistingClasseId},${cohort?.name}\n${classe2?._id},${notExistingCohortName}`;
+    const mockFileBody = `Identifiant de la classe engagée,Session : Code de la session\n${classe1?._id},${cohort?.snuId}\n${notExistingClasseId},${cohort?.snuId}\n${classe2?._id},${notExistingCohortCode}`;
     const mockFileBuffer = { Body: Buffer.from(mockFileBody) };
     (getFile as jest.Mock).mockResolvedValue(mockFileBuffer);
 
-    const response = await request(getAppHelper()).post("/cle/classe/import/classe-cohort").send(mockBody);
+    const response = await request(getAppHelper()).post("/cle/classe/import/classe-cohort").send(requestBody);
 
     const expectedResponse = [
       {
         classeId: classe1._id.toString(),
         cohortId: cohort._id.toString(),
         result: "success",
+        cohortCode: cohort.snuId,
         cohortName: cohort.name,
       },
       {
         classeId: notExistingClasseId,
-        cohortName: cohort.name,
+        cohortCode: cohort.snuId,
         result: "error",
         error: ERRORS.CLASSE_NOT_FOUND,
       },
       {
         classeId: classe2._id.toString(),
-        cohortName: notExistingCohortName,
+        cohortCode: notExistingCohortCode,
         result: "error",
         error: ERRORS.COHORT_NOT_FOUND,
       },
@@ -80,7 +81,7 @@ describe("POST /cle/classe-import", () => {
     const mockInvalidCSVBuffer = Buffer.from("one_header\nvalue1,value2"); // Missing one column
     (getFile as jest.Mock).mockResolvedValue({ Body: mockInvalidCSVBuffer });
 
-    const response = await request(getAppHelper()).post("/cle/classe/import/classe-cohort").send(mockBody);
+    const response = await request(getAppHelper()).post("/cle/classe/import/classe-cohort").send(requestBody);
 
     expect(response.status).toEqual(422);
     expect(response.body.ok).toBe(false);
@@ -90,7 +91,7 @@ describe("POST /cle/classe-import", () => {
 
   it("should return 403 for non-superadmin role", async () => {
     passport.user.role = ROLES.VISITOR;
-    const response = await request(getAppHelper()).post("/cle/classe/import/classe-cohort").send(mockBody);
+    const response = await request(getAppHelper()).post("/cle/classe/import/classe-cohort").send(requestBody);
 
     expect(response.status).toEqual(403);
     expect(response.body).toEqual({

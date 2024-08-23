@@ -4,24 +4,25 @@ import { ClasseCohortCSV, ClasseCohortImportKey, ClasseCohortImportResult } from
 import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
 import { ClasseDocument, ClasseModel, CohortModel } from "../../../models";
 import { ERRORS } from "snu-lib";
-import { findCohortByNameOrThrow } from "../../../cohort/cohortService";
+import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
 
 export const importClasseCohort = async (filePath: string, classeCohortImportKey: ClasseCohortImportKey) => {
   const classeCohortFile = await getFile(filePath);
-  const classesCohorts: ClasseCohortCSV[] = await readCSVBuffer<ClasseCohortCSV>(Buffer.from(classeCohortFile.Body), true);
+  const classesCohortsToImport: ClasseCohortCSV[] = await readCSVBuffer<ClasseCohortCSV>(Buffer.from(classeCohortFile.Body), true);
 
-  const classesCohortsMapped = mapClassesCohortsForSept2024(classesCohorts);
+  const classesCohortsToImportMapped = mapClassesCohortsForSept2024(classesCohortsToImport);
   if (classeCohortImportKey !== ClasseCohortImportKey.SEPT_2024) {
     // use another mapper
   }
 
   const classesCohortsImportResult: ClasseCohortImportResult[] = [];
-  for (const classeCohort of classesCohortsMapped) {
-    const classeCohortImportResult: ClasseCohortImportResult = { ...classeCohort };
+  for (const classeCohortToImport of classesCohortsToImportMapped) {
+    const classeCohortImportResult: ClasseCohortImportResult = { ...classeCohortToImport };
     try {
-      const updatedClasse: ClasseDocument = await addCohortToClasseByCohortName(classeCohort.classeId, classeCohort.cohortName, classeCohortImportKey);
+      const updatedClasse: ClasseDocument = await addCohortToClasseByCohortSnuId(classeCohortToImport.classeId, classeCohortToImport.cohortCode, classeCohortImportKey);
       classeCohortImportResult.result = "success";
       classeCohortImportResult.cohortId = updatedClasse.cohortId;
+      classeCohortImportResult.cohortCode = classeCohortToImport.cohortCode;
       classeCohortImportResult.cohortName = updatedClasse.cohort;
     } catch (error) {
       console.error(error);
@@ -34,11 +35,11 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
   return classesCohortsImportResult;
 };
 
-export const addCohortToClasseByCohortName = async (classeId: string, cohortName: string | undefined, classeCohortImportKey: ClasseCohortImportKey) => {
-  if (!cohortName) {
+export const addCohortToClasseByCohortSnuId = async (classeId: string, cohortSnuId: string | undefined, classeCohortImportKey: ClasseCohortImportKey) => {
+  if (!cohortSnuId) {
     throw new Error(ERRORS.INVALID_PARAMS);
   }
-  const cohort = await findCohortByNameOrThrow(cohortName);
+  const cohort = await findCohortBySnuIdOrThrow(cohortSnuId);
   return addCohortToClasse(classeId, cohort._id, classeCohortImportKey);
 };
 
