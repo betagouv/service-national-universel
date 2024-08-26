@@ -66,5 +66,5 @@ module.exports = {
   TASK_MONITOR_USER: undefined,
   TASK_MONITOR_SECRET: undefined,
   ENABLE_2FA: false,
-  LOG_LEVEL: "info", // error, warn, info, http, verbose, debug, silly
+  LOG_LEVEL: "info", // error, warn, info, http, debug
 };
