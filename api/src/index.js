@@ -21,7 +21,7 @@ console.error = function (message) {
 };
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection");
+  logger.error("Unhandled Rejection");
   // Use the process.uncaughtException default handler
   // that prints the stack trace to stderr and exits with code 1
   // https://nodejs.org/api/process.html#event-uncaughtexception

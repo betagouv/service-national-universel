@@ -15,7 +15,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.ClassePatchScanned = result.classePatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const actualClasse = await ClasseModel.findById(patch.ref.toString());
     if (!actualClasse) return;
     if (patch.ops.length > 0) {

@@ -14,7 +14,6 @@ let result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.missionPatchScanned = result.missionPatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const mission = await MissionModel.findById(patch.ref.toString());
     if (!mission) return;
     if (patch.ops.length > 0) {

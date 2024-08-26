@@ -60,7 +60,6 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
 
     return res.status(200).send({ ok: true });
   } catch (error) {
-    console.log(error);
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }

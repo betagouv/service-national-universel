@@ -12,7 +12,6 @@ async function checkCert(domain) {
 
   exec(command, async (error, stdout, stderr) => {
     if (error) {
-      console.error(`Erreur lors de l'exécution de la commande pour ${domain}: ${error.message}`);
       await slack.error({
         title: `Erreur de vérification du certificat pour ${domain}`,
         text: `Erreur: ${error.message}`,
@@ -57,7 +56,6 @@ exports.handler = async () => {
     }
   } catch (e) {
     capture(e);
-    console.error("Erreur lors de la vérification des certificats:", e);
     await slack.error({
       title: "Erreur lors de la vérification des certificats",
       text: `Erreur: ${e.message}`,

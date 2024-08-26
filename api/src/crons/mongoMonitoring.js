@@ -21,6 +21,5 @@ exports.handler = async () => {
     console.log(JSON.stringify(metrics));
   } catch (e) {
     capture(e);
-    console.error("Erreur lors de la surveillance des connexions:", e);
   }
 };

@@ -16,7 +16,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.applicationPatchScanned = result.applicationPatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const actualApplication = await ApplicationModel.findById(patch.ref.toString());
     if (!actualApplication) return;
     if (patch.ops.length > 0) {

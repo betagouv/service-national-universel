@@ -3,6 +3,7 @@ const config = require("config");
 const { up, status, config: migrateMongoConfig } = migrateMongo;
 const { getDb } = require("./mongo");
 const { capture } = require("./sentry");
+const { logger } = require("./logger");
 
 const CHANGHELOG_LOCK_COLLECTION = "migrationchangeloglock";
 const CHANGELOG_LOCK_ID = "changeloglock_id";
@@ -12,13 +13,13 @@ const runMigrations = async () => {
   migrateMongoConfig.set(migrateMongoConfiguration);
   const isLocked = await isChangelogLocked(db);
   if (isLocked) {
-    console.error("runMigrations - Changelog is locked. Skipping migrations");
+    logger.warn("runMigrations - Changelog is locked. Skipping migrations");
     return;
   }
 
   try {
     const statusResult = await status(db);
-    console.log("runMigrations - Migration status:", JSON.stringify(statusResult));
+    logger.info("runMigrations - Migration status:", JSON.stringify(statusResult));
 
     await doMigrations(db);
   } catch (error) {
@@ -49,7 +50,7 @@ const isChangelogLocked = async (db) => {
 const doMigrations = async (db) => {
   await db.collection(CHANGHELOG_LOCK_COLLECTION).updateOne({ _id: CHANGELOG_LOCK_ID }, { $set: { locked: true, lockedBy: "runMigrations", lockedAt: new Date() } });
   const migrationResult = await up(db);
-  console.log("runMigrations - Migrations completed:", migrationResult);
+  console.info("runMigrations - Migrations completed:", migrationResult);
 };
 
 const migrateMongoConfiguration = {

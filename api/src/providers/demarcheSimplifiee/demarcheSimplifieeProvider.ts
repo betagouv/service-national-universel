@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import config from "config";
+import { logger } from "../../logger";
 
 import { CLE_COLORATION, TYPE_CLASSE } from "snu-lib";
 
@@ -89,7 +90,7 @@ export const getUaiFromString = (value: string | undefined) => {
   if (!value) return "";
   var match = value.match(/\(([^)]+)\)/);
   if (!match) {
-    console.warn("getUaiFromString() - no UAI found in string: ", value);
+    logger.warn("getUaiFromString() - no UAI found in string: ", value);
   }
   return match ? match[1] : "";
 };
@@ -105,7 +106,7 @@ const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: s
     case "Sport et Jeux Olympiques et Paralympiques":
       return CLE_COLORATION.SPORT;
     default:
-      console.warn("mapColorationFromAppelAProjetToColoration() - No matching coloration for : ", colorationFromAppelAProjet);
+      logger.warn("mapColorationFromAppelAProjetToColoration() - No matching coloration for : ", colorationFromAppelAProjet);
       return undefined;
   }
 };
@@ -117,7 +118,7 @@ const mapClasseTypeFromAppelAProjetToClasseType = (classeType: string | undefine
     case "Des élèves inscrits dans une seule classe":
       return TYPE_CLASSE.FULL;
     default:
-      console.warn("mapClasseTypeFromAppelAProjetToClasseType() - No matching classe type for : ", classeType);
+      logger.warn("mapClasseTypeFromAppelAProjetToClasseType() - No matching classe type for : ", classeType);
       return undefined;
   }
 };

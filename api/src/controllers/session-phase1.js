@@ -172,7 +172,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }).validate(req.body);
 
       if (error) {
-        console.error("Erreur de validation:", error.details); // Log des détails de l'erreur de validation
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }

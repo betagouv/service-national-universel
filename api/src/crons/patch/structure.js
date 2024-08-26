@@ -14,7 +14,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.structurePatchScanned = result.structurePatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const structure = await StructureModel.findById(patch.ref.toString());
     if (!structure) return;
     if (patch.ops.length > 0) {
@@ -46,10 +45,6 @@ async function createLog(patch, actualStructure, event, value) {
   let structure = rebuildStruct(structInfos);
 
   const anonymisedStructure = new StructureModel(structure).anonymise();
-
-  // console.log(
-  //   (Array.isArray(structure?.types) ? structure?.types[0] : structure?.types) || (Array.isArray(actualStructure?.types) ? actualStructure?.types[0] : actualStructure?.types),
-  // );
 
   const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/structure`, {
     method: "POST",

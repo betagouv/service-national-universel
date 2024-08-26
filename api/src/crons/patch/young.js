@@ -15,7 +15,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.youngPatchScanned = result.youngPatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const actualYoung = await YoungModel.findById(patch.ref.toString());
     if (!actualYoung) return;
     if (patch.ops.length > 0) {
