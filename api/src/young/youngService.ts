@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { CohesionCenterModel, SessionPhase1Model, CohortModel, LigneBusModel, LigneToPointModel, PointDeRassemblementModel, DepartmentServiceModel } from "../models";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
-  const invalidValidStatus: Record<string, boolean> = {
+  const validStatus: Record<string, boolean> = {
     [YOUNG_STATUS_PHASE1.AFFECTED]: true,
     [YOUNG_STATUS_PHASE1.DONE]: true,
     [YOUNG_STATUS_PHASE1.NOT_DONE]: true,
@@ -16,7 +16,7 @@ export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]):
       return false;
     }
 
-    if (invalidValidStatus[young.statusPhase1 as string]) {
+    if (!validStatus[young.statusPhase1 as string]) {
       return false;
     }
 
