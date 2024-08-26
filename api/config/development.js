@@ -8,4 +8,5 @@ module.exports = {
   ENABLE_SENTRY: false,
   TASK_QUEUE_PREFIX: "dev",
   RELEASE: "dev",
+  DO_MIGRATION: false,
 };
