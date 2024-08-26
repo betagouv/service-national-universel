@@ -254,8 +254,8 @@ const youngExportFields = [
   },
   {
     id: "psc1Info",
-    title: "Information sur le PSC1",
-    desc: ["PSC1"],
+    title: "PSC1",
+    desc: ["Titulaire du PSC1"],
     fields: ["psc1Info"],
   },
 ];
