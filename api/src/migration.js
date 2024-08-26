@@ -16,6 +16,10 @@ const runMigrations = async () => {
     logger.warn("runMigrations - Changelog is locked. Skipping migrations");
     return;
   }
+  if (!config.DO_MIGRATION) {
+    console.log("runMigrations - Won't run migrations as DO_MIGRATION is false");
+    return;
+  }
 
   try {
     const statusResult = await status(db);
@@ -37,6 +41,8 @@ const unlockChangelogLock = async (db) => {
         locked: false,
         lockedBy: null,
         lockedAt: null,
+        lockedByEnvironment: null,
+        apiUrlEnvironment: null,
       },
     },
   );
@@ -48,7 +54,12 @@ const isChangelogLocked = async (db) => {
 };
 
 const doMigrations = async (db) => {
-  await db.collection(CHANGHELOG_LOCK_COLLECTION).updateOne({ _id: CHANGELOG_LOCK_ID }, { $set: { locked: true, lockedBy: "runMigrations", lockedAt: new Date() } });
+  await db
+    .collection(CHANGHELOG_LOCK_COLLECTION)
+    .updateOne(
+      { _id: CHANGELOG_LOCK_ID },
+      { $set: { locked: true, lockedBy: "runMigrations", lockedAt: new Date(), lockedByEnvironment: config?.ENVIRONMENT, apiUrlEnvironment: config?.API_URL } },
+    );
   const migrationResult = await up(db);
   logger.info("runMigrations - Migrations completed:", migrationResult);
 };
