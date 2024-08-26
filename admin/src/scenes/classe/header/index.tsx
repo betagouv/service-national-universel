@@ -54,16 +54,8 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
             render: <ButtonDownloadEmptyFile key="consentVierge" title="Formulaire de consentement (.pdf)" type={ClasseFileKeys.CONSENT} setIsLoading={setIsLoading} />,
           },
           {
-            key: "imageVierge",
-            render: <ButtonDownloadEmptyFile key="imageVierge" title="Formulaire du droit à l'image (.pdf)" type={ClasseFileKeys.IMAGE} setIsLoading={setIsLoading} />,
-          },
-          {
             key: "reglement",
             render: <ButtonDownloadEmptyFile key="reglement" title="Règlement intérieur (.pdf)" type={ClasseFileKeys.REGLEMENT} setIsLoading={setIsLoading} />,
-          },
-          {
-            key: "consentData",
-            render: <ButtonDownloadEmptyFile key="consentData" title="Formulaire protection des données (.pdf)" type={ClasseFileKeys.CONSENT_DATA} setIsLoading={setIsLoading} />,
           },
         ],
       },
@@ -71,19 +63,23 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
     if (studentStatus?.parentAllowSNU > 0) {
       optionsExport[0].items.push({
         key: "consent",
-        render: <ButtonCertificateDownload key="consent" title={"Consentements à la participation (.pdf)"} type={ClasseCertificateKeys.CONSENT} id={id} />,
+        render: (
+          <ButtonCertificateDownload key="consent" title={"Consentements à la participation (.pdf)"} type={ClasseCertificateKeys.CONSENT} id={id} setIsLoading={setIsLoading} />
+        ),
       });
     }
     if (studentStatus?.imageRight > 0) {
       optionsExport[0].items.push({
         key: "image",
-        render: <ButtonCertificateDownload key="image" title={"Droits à l'image (.pdf)"} type={ClasseCertificateKeys.IMAGE} id={id} />,
+        render: <ButtonCertificateDownload key="image" title={"Droits à l'image (.pdf)"} type={ClasseCertificateKeys.IMAGE} id={id} setIsLoading={setIsLoading} />,
       });
     }
     if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) {
       optionsExport[0].items.push({
         key: "convocation",
-        render: <ButtonCertificateDownload key="convocation" title={"Convocations au séjour (.pdf)"} type={ClasseCertificateKeys.CONVOCATION} id={id} />,
+        render: (
+          <ButtonCertificateDownload key="convocation" title={"Convocations au séjour (.pdf)"} type={ClasseCertificateKeys.CONVOCATION} id={id} setIsLoading={setIsLoading} />
+        ),
       });
     }
 
@@ -166,7 +162,7 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
     );
   }
 
-  actionsList.push(<DropdownButton key="export" title="Exporter" optionsGroup={getOptionsExport()} position="right" buttonClassName="mr-2" />);
+  actionsList.push(<DropdownButton key="export" title="Exporter" optionsGroup={getOptionsExport()} position="right" buttonClassName="mr-2" disabled={isLoading} />);
 
   if (user.role === ROLES.ADMIN) {
     actionsList.push(

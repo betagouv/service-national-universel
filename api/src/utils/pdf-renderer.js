@@ -33,7 +33,7 @@ class InMemoryWritable extends Writable {
   }
 }
 
-async function generatePdfIntoStream(outStream, { type, template, young, contract }) {
+export async function generatePdfIntoStream(outStream, { type, template, young, contract }) {
   if (type === "certificate" && template === "1" && young) {
     return await generateCertifPhase1(outStream, young);
   }
@@ -67,7 +67,7 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
   throw new Error(ERRORS.NOT_FOUND);
 }
 
-async function generatePdfIntoBuffer(options) {
+export async function generatePdfIntoBuffer(options) {
   const stream = new InMemoryWritable();
   await generatePdfIntoStream(stream, options);
   await finished(stream);
@@ -92,7 +92,7 @@ async function getTemplate(template) {
   }
 }
 
-async function getAllPdfTemplates() {
+export async function getAllPdfTemplates() {
   await fs.mkdir(path.join(config.IMAGES_ROOTDIR, "certificates"), { recursive: true });
   const ministres = [...MINISTRES].reverse(); // Most recent first
   for (const m of ministres) {
@@ -105,4 +105,4 @@ async function getAllPdfTemplates() {
   }
 }
 
-module.exports = { getAllPdfTemplates, generatePdfIntoStream, generatePdfIntoBuffer };
+//module.exports = { getAllPdfTemplates, generatePdfIntoStream, generatePdfIntoBuffer };

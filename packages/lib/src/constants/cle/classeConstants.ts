@@ -5,9 +5,7 @@ export enum ClasseSchoolYear {
 export enum ClasseFileKeys {
   INSCRIPTION = "inscription",
   CONSENT = "consent",
-  IMAGE = "image",
   REGLEMENT = "reglement",
-  CONSENT_DATA = "consentData",
 }
 
 export enum ClasseCertificateKeys {

@@ -45,15 +45,7 @@ export default function View() {
   const cohort = cohorts.find((c) => c.name === classe?.cohort);
   const rights = getRights(user, classe, cohort) as Rights;
 
-  const totalSeatsTakenExcluding =
-    (classe?.seatsTaken ?? 0) -
-    (studentStatus[YOUNG_STATUS.WITHDRAWN] || 0) -
-    (studentStatus[YOUNG_STATUS.REFUSED] || 0) -
-    (studentStatus[YOUNG_STATUS.NOT_AUTORISED] || 0) -
-    (studentStatus[YOUNG_STATUS.IN_PROGRESS] || 0) -
-    (studentStatus[YOUNG_STATUS.WAITING_CORRECTION] || 0) -
-    (studentStatus[YOUNG_STATUS.WAITING_VALIDATION] || 0) -
-    (studentStatus[YOUNG_STATUS.ABANDONED] || 0);
+  const validatedYoung = studentStatus[YOUNG_STATUS.VALIDATED] || 0;
 
   const getClasse = async () => {
     try {
@@ -208,7 +200,7 @@ export default function View() {
         onCheckInfo={checkInfo}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
-        validatedYoung={totalSeatsTakenExcluding}
+        validatedYoung={validatedYoung}
       />
 
       {classe.referents?.length > 0 && <ReferentInfos classe={classe} />}
@@ -230,7 +222,7 @@ export default function View() {
       )}
 
       {![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status as any) && (
-        <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />
+        <StatsInfos classe={classe} user={user} studentStatus={studentStatus} validatedYoung={validatedYoung} />
       )}
 
       <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />

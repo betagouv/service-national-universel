@@ -17,20 +17,14 @@ export default function ButtonDownloadEmptyFile({ title, type, setIsLoading }) {
       }
 
       if (type === ClasseFileKeys.CONSENT) {
-        url = `${CDN_BASE_URL}/CLE/Formulaire_Consentement_Participation_SNU.pdf`;
-      }
-      if (type === ClasseFileKeys.IMAGE) {
-        url = `${CDN_BASE_URL}/CLE/Formulaire_Autorisation_Droits_Image.pdf`;
+        url = `${CDN_BASE_URL}/CLE/Formulaires_Consentement&Droits_image.pdf`;
       }
       if (type === ClasseFileKeys.REGLEMENT) {
         url = `${CDN_BASE_URL}/CLE/snu-reglement-interieur.pdf`;
       }
-      if (type === ClasseFileKeys.CONSENT_DATA) {
-        url = `${CDN_BASE_URL}/CLE/Formulaire_Consentement_Protection_données.pdf`;
-      }
       window.open(url, "_blank", "noreferrer");
     } catch (e) {
-      toastr.error("Oups, une erreur est survenue pendant le téléchagement", "");
+      toastr.error("Oups, une erreur est survenue pendant le téléchargement", "");
     } finally {
       setIsLoading(false);
     }
