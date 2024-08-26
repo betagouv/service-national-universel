@@ -17,7 +17,7 @@ const runMigrations = async () => {
     return;
   }
   if (!config.DO_MIGRATION) {
-    console.log("runMigrations - Won't run migrations as DO_MIGRATION is false");
+    logger.info("runMigrations - Won't run migrations as DO_MIGRATION is false");
     return;
   }
 
