@@ -15,6 +15,10 @@ const runMigrations = async () => {
     console.error("runMigrations - Changelog is locked. Skipping migrations");
     return;
   }
+  if (!config.DO_MIGRATION) {
+    console.log("runMigrations - Won't run migrations as DO_MIGRATION is false");
+    return;
+  }
 
   try {
     const statusResult = await status(db);
