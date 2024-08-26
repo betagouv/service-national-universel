@@ -23,7 +23,7 @@ const runMigrations = async () => {
 
   try {
     const statusResult = await status(db);
-    logger.info("runMigrations - Migration status:", JSON.stringify(statusResult));
+    logger.info("runMigrations - Migration status:", statusResult);
 
     await doMigrations(db);
   } catch (error) {
