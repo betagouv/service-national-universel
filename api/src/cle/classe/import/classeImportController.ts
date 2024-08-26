@@ -11,7 +11,7 @@ import { importClasseCohort } from "./classeImportService";
 import Joi from "joi";
 import { capture } from "../../../sentry";
 import { ClasseCohortImportBody, ClasseCohortImportKey } from "./classeCohortImport";
-import { generateCSVStream } from "../../../services/fileService";
+import { generateCSVStream, getHeaders } from "../../../services/fileService";
 
 const router = express.Router();
 
@@ -39,8 +39,9 @@ router.post("/classe-cohort", passport.authenticate("referent", { session: false
     const importedClasseCohort = await importClasseCohort(value.filePath, value.classeCohortImportKey);
     const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
 
+    const headers = getHeaders(importedClasseCohort);
     uploadFile(`file/appelAProjet/import/${timestamp}-imported-classes-cohorts.csv`, {
-      data: generateCSVStream(importedClasseCohort),
+      data: generateCSVStream(importedClasseCohort, headers),
       encoding: "",
       mimetype: "text/csv",
     });
