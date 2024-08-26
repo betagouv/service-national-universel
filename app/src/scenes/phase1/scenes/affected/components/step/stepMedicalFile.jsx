@@ -49,7 +49,7 @@ export default function StepMedicalField({ data }) {
               <a href={`mailto:${email}`}>
                 <span className="inline-block text-gray-500 underline underline-offset-2">{email}</span>
               </a>
-              .
+              puis remettez-les en mains propres le jour de votre arrivée au séjour.
             </p>
           </div>
           {isDone ? (
