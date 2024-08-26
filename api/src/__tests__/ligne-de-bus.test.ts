@@ -81,7 +81,9 @@ describe("Meeting point", () => {
       let res;
       try {
         res = await request(getAppHelper()).get("/ligne-de-bus/all").send();
-      } catch (error) {}
+      } catch (error) {
+        // tslint:disable-next-line:no-empty
+      }
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -616,7 +618,9 @@ describe("Meeting point", () => {
       let res;
       try {
         res = await request(getAppHelper()).get(`/ligne-de-bus/${new Types.ObjectId()}/data-for-check`).send();
-      } catch (error) {}
+      } catch (error) {
+        // tslint:disable-next-line:no-empty
+      }
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
