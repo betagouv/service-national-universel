@@ -18,7 +18,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetO
   let appelAProjetDemarcheSimplifieeDto: DemarcheSimplifieeDto = {} as DemarcheSimplifieeDto;
   let appelsAProjet: IAppelAProjet[] = [];
   while (hasNextPage && numberOfCalls < 50) {
-    console.time("Demarche_Simplifiee_call_" + numberOfCalls);
+    const timer = logger.startTimer();
     logger.debug(`getClassesAndEtablissementsFromAppelAProjets() - Current Demarche_Simplifiee_Current_Cursor: ${cursor}`);
     const body = buildDemarcheSimplifieeBody(91716, cursor, DossierState.ACCEPTE);
     const demarcheSimplifieeAppelAProjetResponse: Response = await fetch(DEMARCHE_SIMPLIFIEE_API, {
@@ -32,7 +32,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetO
     hasNextPage = appelAProjetDemarcheSimplifieeDto.data.demarche.dossiers.pageInfo.hasNextPage;
     appelsAProjet = [...appelsAProjet, ...mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDemarcheSimplifieeDto, appelAProjetOptions)];
 
-    console.timeEnd("Demarche_Simplifiee_call_" + numberOfCalls);
+    timer.done({ message: `Demarche_Simplifiee_call_${numberOfCalls}`, level: "debug" });
     numberOfCalls++;
   }
   logger.debug(`getClassesAndEtablissementsFromAppelAProjets() - appelsAProjet.length: ${appelsAProjet.length}`);
