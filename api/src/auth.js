@@ -204,7 +204,7 @@ class Auth {
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().required(),
         birthdateAt: Joi.date().required(),
-        grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+        grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "1erCAP", "2ndeCAP"),
         frenchNationality: Joi.string().trim().required(),
         source: Joi.string()
           .trim()
