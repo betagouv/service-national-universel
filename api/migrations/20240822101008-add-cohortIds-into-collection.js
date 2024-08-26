@@ -1,5 +1,6 @@
 const { CohortModel, CohesionCenterModel, PointDeRassemblementModel, ReferentModel } = require("../src/models");
 const collectionsWithCohortIdsToAdd = [CohesionCenterModel, PointDeRassemblementModel, ReferentModel];
+const { logger } = require("../src/logger");
 
 module.exports = {
   async up() {
@@ -28,14 +29,14 @@ module.exports = {
 
     for (const mongooseModel of collectionsWithCohortIdsToAdd) {
       const updatedDocumentsCount = await addCohortIdsToCollection(mongooseModel, cohortsMap);
-      console.log(`Total documents updated: ${updatedDocumentsCount} on ${mongooseModel.collection.name}`);
+      logger.info(`Total documents updated: ${updatedDocumentsCount} on ${mongooseModel.collection.name}`);
     }
   },
 
   async down() {
     for (const mongooseModel of collectionsWithCohortIdsToAdd) {
       const updatedDocuments = await mongooseModel.updateMany({ cohortIds: { $exists: true } }, { $unset: { cohortIds: 1 } });
-      console.log(`Collection ${mongooseModel.collection.name} - Matched: ${updatedDocuments.matchedCount} Removed property cohortId on : ${updatedDocuments.modifiedCount}`);
+      logger.info(`Collection ${mongooseModel.collection.name} - Matched: ${updatedDocuments.matchedCount} Removed property cohortId on : ${updatedDocuments.modifiedCount}`);
     }
   },
 };
