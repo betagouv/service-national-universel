@@ -1,6 +1,7 @@
 const config = require("config");
 const { logger } = require("./logger");
 const mongoose = require("mongoose");
+const { capture } = require("./sentry");
 
 // Set up default mongoose connection
 async function initDB() {
@@ -9,7 +10,7 @@ async function initDB() {
   }
   const db = mongoose.connection;
 
-  db.on("error", console.error.bind(console, "MONGODB: connection error:"));
+  db.on("error", (error) => capture(error));
 
   db.on("connecting", () => logger.debug("MONGODB: connecting"));
   db.on("open", () => logger.debug("MONGODB: open"));
@@ -35,17 +36,8 @@ async function initDB() {
     options.minPoolSize = 50;
   }
 
-  try {
-    mongoose.set("strictQuery", false);
-    await mongoose.connect(config.MONGO_URL, options);
-  } catch (error) {
-    if (error.reason && error.reason.servers) {
-      logger.error(error.reason.servers);
-    } else {
-      logger.error("MONGODB: connection error:", error);
-    }
-    throw error;
-  }
+  mongoose.set("strictQuery", false);
+  await mongoose.connect(config.MONGO_URL, options);
 }
 
 async function closeDB() {

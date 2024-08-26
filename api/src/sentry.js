@@ -2,6 +2,7 @@ const { captureException: sentryCaptureException, captureMessage: sentryCaptureM
 const { nodeProfilingIntegration } = require("@sentry/profiling-node");
 
 const config = require("config");
+const { logger } = require("./logger");
 
 function initSentry() {
   if (config.get("ENABLE_SENTRY")) {
@@ -50,9 +51,10 @@ function _flattenStack(stack) {
 
 function captureError(err, contexte) {
   if (err.stack && config.get("ENABLE_FLATTEN_ERROR_LOGS")) {
-    console.error("capture", _flattenStack(err.stack));
+    const flattened = _flattenStack(err.stack);
+    logger.error(`capture: ${flattened}`);
   } else {
-    console.error("capture", err);
+    logger.error(`capture: ${err}`);
   }
 
   return sentryCaptureException(err, contexte);
@@ -61,7 +63,7 @@ function captureError(err, contexte) {
 function capture(err, contexte) {
   if (!err) {
     const msg = "Error not defined";
-    console.error("capture", msg);
+    logger.error(`capture: ${msg}`);
     return sentryCaptureMessage(msg);
   }
 
@@ -70,21 +72,21 @@ function capture(err, contexte) {
   } else if (err.error instanceof Error) {
     return captureError(err.error, contexte);
   } else if (err.message) {
-    console.error("capture", err.message);
+    logger.error(`capture: ${err.message}`);
     return sentryCaptureMessage(err.message, contexte);
   } else {
     const msg = "Error not defined well : You should capture Error type";
-    console.error("capture", msg);
+    logger.error(`capture: ${msg}`);
     return sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
 }
 function captureMessage(mess, contexte) {
   if (mess) {
-    console.error("captureMessage", mess);
+    logger.error(`capture message: ${mess}`);
     return sentryCaptureMessage(mess, contexte);
   } else {
     const msg = "Empty message captured";
-    console.error("captureMessage", msg);
+    logger.error(`capture message: ${msg}`);
     return sentryCaptureMessage(msg);
   }
 }
