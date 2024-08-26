@@ -163,19 +163,19 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const cohort = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isSessionEditionOpen(req.user, cohort) && cohort?.isAssignmentAnnouncementsOpenForYoung) {
+
+    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.TRANSPORTER].includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    if (!isSessionEditionOpen(req.user, cohort) && !cohort?.isAssignmentAnnouncementsOpenForYoung) {
-      const { error, value } = Joi.object({
+
+    if (!isSessionEditionOpen(req.user, cohort)) {
+      if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const { value } = Joi.object({
         sanitaryContactEmail: Joi.string().email(),
       }).validate(req.body);
-
-      if (error) {
-        console.error("Erreur de validation:", error.details); // Log des détails de l'erreur de validation
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
 
       sessionPhase1.sanitaryContactEmail = value.sanitaryContactEmail;
       await sessionPhase1.save({ fromUser: req.user });
