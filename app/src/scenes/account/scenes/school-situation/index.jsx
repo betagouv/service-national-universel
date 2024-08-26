@@ -47,7 +47,7 @@ const AccountSchoolSituationPage = () => {
               </div>
               <div className="px-4 pt-6 pb-2 lg:col-span-2 lg:col-start-2">
                 <SectionTitle>Scolarité</SectionTitle>
-                <Input label="Niveau de scolarité" name="classeName" value={values.grade} disabled />
+                <Input label="Niveau de scolarité" name="classeName" value={translateGrade(values.grade)} disabled />
               </div>
               <hr className="col-span-full mx-4 my-2 md:my-6" />
               <div className="py-6 pl-6 lg:col-start-1 lg:block">
