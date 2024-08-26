@@ -168,7 +168,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     if (!isSessionEditionOpen(req.user, cohort) && !cohort?.isAssignmentAnnouncementsOpenForYoung) {
       const { error, value } = Joi.object({
-        sanitaryContactEmail: Joi.string().email().required(),
+        sanitaryContactEmail: Joi.string().email(),
       }).validate(req.body);
 
       if (error) {
