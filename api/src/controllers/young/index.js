@@ -13,6 +13,7 @@ const fileUpload = require("express-fileupload");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const { getRedisClient } = require("../../redis");
 const config = require("config");
+const { logger } = require("../../logger");
 const { capture, captureMessage } = require("../../sentry");
 const { ReferentModel, YoungModel, ApplicationModel, MissionModel, SessionPhase1Model, LigneBusModel, ClasseModel } = require("../../models");
 const AuthObject = require("../../auth");
@@ -796,7 +797,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
     await anonymizeApplicationsFromYoungId({ youngId: young._id, anonymizedYoung: young });
     await anonymizeContractsFromYoungId({ youngId: young._id, anonymizedYoung: young });
 
-    console.log(`Young ${id} has been soft deleted`);
+    logger.debug(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);

@@ -8,6 +8,7 @@ const { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentMod
 const { ERRORS, isYoung, isReferent } = require("../utils");
 const { sendTemplate } = require("../brevo");
 const config = require("config");
+const { logger } = require("../logger");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
@@ -167,10 +168,10 @@ async function sendContractEmail(contract, options) {
   try {
     let template, cc;
     if (options.isValidateAgainMail) {
-      console.log("send (re)validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
+      logger.debug(`send (re)validation mail to ${JSON.stringify({ to: options.email, cc: options.cc })}`);
       template = SENDINBLUE_TEMPLATES.REVALIDATE_CONTRACT;
     } else {
-      console.log("send validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
+      logger.debug(`send validation mail to ${JSON.stringify({ to: options.email, cc: options.cc })}`);
       template = SENDINBLUE_TEMPLATES.VALIDATE_CONTRACT;
     }
     const params = {

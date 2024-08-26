@@ -19,7 +19,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetO
   let appelsAProjet: IAppelAProjet[] = [];
   while (hasNextPage && numberOfCalls < 50) {
     console.time("Demarche_Simplifiee_call_" + numberOfCalls);
-    console.log("getClassesAndEtablissementsFromAppelAProjets() - Current Demarche_Simplifiee_Current_Cursor: ", cursor);
+    logger.debug(`getClassesAndEtablissementsFromAppelAProjets() - Current Demarche_Simplifiee_Current_Cursor: ${cursor}`);
     const body = buildDemarcheSimplifieeBody(91716, cursor, DossierState.ACCEPTE);
     const demarcheSimplifieeAppelAProjetResponse: Response = await fetch(DEMARCHE_SIMPLIFIEE_API, {
       method: "POST",
@@ -35,7 +35,7 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetO
     console.timeEnd("Demarche_Simplifiee_call_" + numberOfCalls);
     numberOfCalls++;
   }
-  console.log("getClassesAndEtablissementsFromAppelAProjets() - appelsAProjet.length: ", appelsAProjet.length);
+  logger.debug(`getClassesAndEtablissementsFromAppelAProjets() - appelsAProjet.length: ${appelsAProjet.length}`);
   return appelsAProjet;
 };
 
@@ -79,7 +79,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     };
     const fixe = appelAProjetOptions.fixes?.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
     if (fixe?.etablissement?.uai) {
-      console.log("mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet() - UAI  ", appelAProjet.etablissement.uai, fixe.etablissement.uai);
+      logger.debug(`mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet() - UAI ${appelAProjet.etablissement.uai} ${fixe.etablissement.uai}`);
       appelAProjet.etablissement.uai = fixe.etablissement.uai;
     }
     return appelAProjet;

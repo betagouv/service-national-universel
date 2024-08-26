@@ -232,7 +232,6 @@ const sync = async (result) => {
       }
     } catch (e) {
       capture(e);
-      console.log("ERROR 🚫", e);
     }
   }
   return result.skip < result.total ? true : false;

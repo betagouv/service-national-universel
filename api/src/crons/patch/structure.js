@@ -6,6 +6,7 @@ const slack = require("../../slack");
 const { StructureModel } = require("../../models");
 const StructurePatchModel = require("./models/structurePatch");
 const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -113,8 +114,8 @@ exports.manualHandler = async (startDate, endDate) => {
 
     await findAll(StructurePatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

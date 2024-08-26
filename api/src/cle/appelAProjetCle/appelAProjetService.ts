@@ -5,6 +5,7 @@ import { AppelAProjetEtablissementService } from "./appelAProjetEtablissementSer
 import { AppelAProjetClasseService } from "./appelAProjetClasseService";
 import { IAppelAProjet, IAppelAProjetOptions } from "./appelAProjetType";
 import { buildUniqueClasseId } from "../classe/classeService";
+import { logger } from "../../logger";
 
 type IRemovedAppelAProjet = IAppelAProjet & {
   removedReason: "sameUaiDifferentEmail" | "sameEmailDifferentUai" | "noUaiOrEmail" | "sameClasseUniqueId" | "invalidUAI" | "excluded" | "invalidReferent";
@@ -14,7 +15,7 @@ export class AppelAProjetService {
     const appelAProjets = await getClassesAndEtablissementsFromAppelAProjets(appelAProjetOptions);
 
     const uais = [...new Set(appelAProjets.map((AAP) => AAP.etablissement?.uai).filter(Boolean))];
-    console.log("AppelAProjetService.sync() - uais.length: ", uais.length);
+    logger.debug(`AppelAProjetService.sync() - uais.length: ${uais.length}`);
     const etablissements = await apiEducation({
       filters: [{ key: "uai", value: uais }],
       page: 0,
@@ -33,7 +34,7 @@ export class AppelAProjetService {
 
     let processCounter = 0;
     for (const appelAProjet of appelAProjetsRetained) {
-      console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", appelAProjetsRetained.length, `(${appelAProjet.etablissement?.uai})`);
+      logger.debug(`AppelAProjetService.sync() - processCounter: ${processCounter++} / ${appelAProjetsRetained.length} (${appelAProjet.etablissement?.uai})`);
       const option = appelAProjetOptions.fixes?.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
       if (option?.useExistingEtablissement || appelAProjetEtablissementService.getEtablissementFromAnnuaire(appelAProjet, etablissements)) {
         try {
@@ -43,11 +44,11 @@ export class AppelAProjetService {
           await appelAProjetClasseService.processClasse(appelAProjet, savedEtablissement!, referentClasseId, save);
         } catch (error) {
           appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "invalidReferent" });
-          console.log("AppelAProjetService.sync() - Referent with error - ", appelAProjet.etablissement?.uai, " - ", error);
+          logger.debug(`AppelAProjetService.sync() - Referent with error - ${appelAProjet.etablissement?.uai} - ${error}`);
         }
       } else {
         appelAProjetsRemoved.push({ ...appelAProjet, removedReason: "invalidUAI" });
-        console.log("AppelAProjetService.sync() - Etablissement not found: ", appelAProjet.etablissement?.uai);
+        logger.debug(`AppelAProjetService.sync() - Etablissement not found: ${appelAProjet.etablissement?.uai}`);
       }
     }
 

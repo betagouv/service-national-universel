@@ -8,6 +8,7 @@ const { ApplicationModel } = require("../../models");
 const ApplicationPatchModel = require("./models/applicationPatch");
 
 const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -110,8 +111,8 @@ exports.manualHandler = async (startDate, endDate) => {
 
     await findAll(ApplicationPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

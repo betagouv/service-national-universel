@@ -286,7 +286,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     const cohort = await CohortModel.findById(session.cohortId);
     generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
   } catch (error) {
-    console.log("error", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
@@ -399,7 +398,6 @@ router.post("/check-token/:token", async (req, res) => {
         },
       };
       const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
-      console.log("youngs", youngs.length);
 
       const ligneBus = await LigneBusModel.find({ cohortId: sessionPhase1.cohortId, centerId: sessionPhase1.cohesionCenterId });
 

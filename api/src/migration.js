@@ -50,7 +50,7 @@ const isChangelogLocked = async (db) => {
 const doMigrations = async (db) => {
   await db.collection(CHANGHELOG_LOCK_COLLECTION).updateOne({ _id: CHANGELOG_LOCK_ID }, { $set: { locked: true, lockedBy: "runMigrations", lockedAt: new Date() } });
   const migrationResult = await up(db);
-  console.info("runMigrations - Migrations completed:", migrationResult);
+  logger.info("runMigrations - Migrations completed:", migrationResult);
 };
 
 const migrateMongoConfiguration = {

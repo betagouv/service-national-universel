@@ -1,6 +1,7 @@
 const fetch = require("node-fetch");
 
 const config = require("config");
+const { logger } = require("./logger");
 const { capture } = require("./sentry");
 
 const STATUS_PREFIX = {
@@ -45,7 +46,7 @@ const postMessage = async ({ title, text, author_name, color }) => {
         capture(error);
       });
   } else {
-    console.log("slack", payload?.attachments);
+    logger.debug("slack", payload?.attachments);
   }
 };
 

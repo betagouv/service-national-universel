@@ -6,6 +6,7 @@ import { ClasseDocument, ClasseModel, CohortModel } from "../../../models";
 import { ERRORS } from "snu-lib";
 import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
 import { capture } from "../../../sentry";
+import { logger } from "../../../logger";
 
 export const importClasseCohort = async (filePath: string, classeCohortImportKey: ClasseCohortImportKey) => {
   const classeCohortFile = await getFile(filePath);
@@ -57,6 +58,6 @@ export const addCohortToClasse = async (classeId: string, cohortId: string, clas
     throw new Error(ERRORS.CLASSE_NOT_FOUND);
   }
   classe.set({ cohortId: cohortId, cohort: cohort.name });
-  console.log(`classeImportService - addCohortToClasse() - Classe ${classeId} updated with cohort ${cohortId} - ${cohort.name}`);
+  logger.debug(`classeImportService - addCohortToClasse() - Classe ${classeId} updated with cohort ${cohortId} - ${cohort.name}`);
   return classe.save({ fromUser: { firstName: `IMPORT_CLASSE_COHORT_${classeCohortImportKey}` } });
 };
