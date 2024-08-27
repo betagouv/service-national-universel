@@ -3,7 +3,7 @@ import passport from "passport";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 import emailsEmitter from "../../emails";
-import snuLib from "snu-lib";
+import snuLib, { FUNCTIONAL_ERRORS } from "snu-lib";
 import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS } from "snu-lib";
 
 import { dbConnect, dbClose } from "../helpers/db";
@@ -18,7 +18,7 @@ import { createFixtureClasse } from "../fixtures/classe";
 // etablissement
 import { createFixtureEtablissement } from "../fixtures/etablissement";
 import { createEtablissement } from "../helpers/etablissement";
-import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
+import { ClasseModel, EtablissementModel, ReferentDocument, ReferentModel } from "../../models";
 
 // young
 import getNewYoungFixture from "../fixtures/young";
@@ -45,6 +45,12 @@ mockEsClient({
 jest.mock("../../emails", () => ({
   emit: jest.fn(),
 }));
+
+beforeEach(async () => {
+  await ClasseModel.deleteMany({});
+  await EtablissementModel.deleteMany({});
+  await ReferentModel.deleteMany({});
+});
 
 describe("DELETE /cle/classe/:id", () => {
   it("should return 400 when id is invalid", async () => {
@@ -756,5 +762,67 @@ describe("POST /elasticsearch/cle/etablissement/export", () => {
       .send({ filters: {}, exportFields: ["name", "uai"] });
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBeGreaterThan(0);
+  });
+});
+
+describe("PUT /cle/classe/:id/referent", () => {
+  it("should create a new referent then link its id to classe", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const classe = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe._id}/referent`).send(newReferentDetails); // sending new referent data
+    const updatedReferent: ReferentDocument = (await ReferentModel.findOne({ email: newReferentDetails.email }))!;
+
+    expect(updatedReferent).toBeTruthy();
+    expect(updatedReferent.firstName).toBe(newReferentDetails.firstName);
+    expect(updatedReferent.lastName).toBe(newReferentDetails.lastName);
+    expect(updatedReferent.email).toBe(newReferentDetails.email);
+    expect(res.status).toBe(200);
+  });
+
+  it("should update the link of the new referent to classe", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const referent2 = await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.REFERENT_CLASSE }));
+    const classe1 = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "b@b.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe1._id}/referent`).send(newReferentDetails); // sending new referent data
+    const referentId = (await ClasseModel.findById(classe1._id))?.referentClasseIds[0];
+    const updatedReferent: ReferentDocument = (await ReferentModel.findById(referentId))!;
+    console.log(updatedReferent);
+
+    expect(updatedReferent).toBeTruthy();
+    expect(updatedReferent.firstName).toBe(newReferentDetails.firstName);
+    expect(updatedReferent.lastName).toBe(newReferentDetails.lastName);
+    expect(updatedReferent.email).toBe(newReferentDetails.email);
+    expect(res.status).toBe(200);
+  });
+
+  it("should throw an error if role not referent nor admin cle", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const referent2 = await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.VISITOR }));
+    const classe1 = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "b@b.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe1._id}/referent`).send(newReferentDetails); // sending new referent data
+
+    expect(res.text).toContain(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    expect(res.status).toBe(422);
   });
 });
