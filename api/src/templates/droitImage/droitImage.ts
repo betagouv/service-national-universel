@@ -1,7 +1,7 @@
 import { withPipeStream } from "../utils";
-
 import { FONT, FONT_BOLD, FONT_ITALIC, LIST_INDENT, checkBox, initDocument, getLogo } from "../templateService";
 import { format } from "date-fns";
+import { logger } from "../../logger";
 
 const FILL_COLOR = "#000000";
 const MARGIN = 75;
@@ -133,18 +133,16 @@ function render(doc, young) {
 }
 
 function generateDroitImage(outStream, young) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument(MARGIN, 30, MARGIN, MARGIN, {});
   withPipeStream(doc, outStream, () => {
     render(doc, young);
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 function generateBatchDroitImage(outStream, youngs) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument(MARGIN, 30, MARGIN, MARGIN, { autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
     for (const young of youngs) {
@@ -152,7 +150,7 @@ function generateBatchDroitImage(outStream, youngs) {
       render(doc, young);
     }
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 module.exports = { generateDroitImage, generateBatchDroitImage };

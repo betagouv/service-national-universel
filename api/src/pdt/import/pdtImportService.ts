@@ -1,5 +1,6 @@
 import XLSX from "xlsx";
 import mongoose from "mongoose";
+import { logger } from "../../logger";
 
 import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 
@@ -32,7 +33,7 @@ export const validatePdtFile = async (
   const lines = XLSX.utils.sheet_to_json<{ [key: string]: string }>(worksheet, { raw: false, defval: null });
 
   if (lines.length < 1) {
-    console.log("workbook Sheets 'ALLER-RETOUR' is missing or empty");
+    logger.debug("workbook Sheets 'ALLER-RETOUR' is missing or empty");
     return { ok: false, code: ERRORS.INVALID_BODY };
   }
 
@@ -83,7 +84,6 @@ export const validatePdtFile = async (
     missingColumns.forEach((e) => {
       errors[e].push({ line: 1, error: PDT_IMPORT_ERRORS.MISSING_COLUMN });
     });
-    console.log("errors", errors);
     return { ok: false, code: ERRORS.INVALID_BODY, errors };
   }
 

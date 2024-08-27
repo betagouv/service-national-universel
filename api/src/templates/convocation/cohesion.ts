@@ -7,6 +7,7 @@ import { getDepartureDateSession, getReturnDateSession } from "../../utils/cohor
 import { formatStringDate, formatStringDateTimezoneUTC, transportDatesToString } from "snu-lib";
 import { isLocalTransport, getMeetingAddress, fetchDataForYoungCertificate, getCertificateTemplate } from "../../young/youngService";
 import { FONT, FONT_BOLD, FONT_ITALIC, LIST_INDENT, initDocument } from "../templateService";
+import { logger } from "../../logger";
 
 const FILL_COLOR = "#444";
 const MARGIN = 50;
@@ -160,19 +161,17 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
 }
 
 async function generateCohesion(outStream, young) {
+  const timer = logger.startTimer();
   const data = await fetchDataForYoungCertificate(young);
-  const random = Math.random();
-  console.time("RENDERING " + random);
   const doc = initDocument(75, 30, MARGIN, MARGIN, {});
   withPipeStream(doc, outStream, () => {
     render(doc, { young, ...data });
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 async function generateBatchCohesion(outStream, youngs) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   let commonYoungData = await getYoungCommonData(youngs);
   const doc = initDocument(75, 30, MARGIN, MARGIN, { autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
@@ -181,7 +180,7 @@ async function generateBatchCohesion(outStream, youngs) {
       render(doc, { young, ...commonYoungData });
     }
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 async function getYoungCommonData(youngs) {

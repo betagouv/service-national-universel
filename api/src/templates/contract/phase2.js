@@ -1,6 +1,7 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
 const config = require("config");
+const { logger } = require("../../logger");
 const { formatDateFRTimezoneUTC } = require("snu-lib");
 const { withPipeStream } = require("../utils");
 
@@ -723,13 +724,12 @@ function initDocument() {
 }
 
 function generateContractPhase2(outStream, contract) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument();
   withPipeStream(doc, outStream, () => {
     render(doc, contract);
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 module.exports = { generateContractPhase2 };

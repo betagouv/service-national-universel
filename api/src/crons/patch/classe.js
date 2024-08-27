@@ -7,6 +7,7 @@ const slack = require("../../slack");
 const { ClasseModel } = require("../../models");
 const ClassePatchModel = require("./models/classePatch");
 const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -15,7 +16,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.ClassePatchScanned = result.classePatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const actualClasse = await ClasseModel.findById(patch.ref.toString());
     if (!actualClasse) return;
     if (patch.ops.length > 0) {
@@ -112,8 +112,8 @@ exports.manualHandler = async (startDate, endDate) => {
 
     await findAll(ClassePatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

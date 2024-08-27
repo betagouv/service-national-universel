@@ -1,4 +1,5 @@
 const path = require("path");
+const { logger } = require("../logger");
 const { Writable } = require("node:stream");
 const { Buffer } = require("node:buffer");
 const { finished } = require("node:stream/promises");
@@ -78,7 +79,7 @@ async function getTemplate(template) {
   const _path = path.join(config.IMAGES_ROOTDIR, template);
   try {
     const handle = await fs.open(_path, "wx");
-    console.log(`Downloading ${template}`);
+    logger.debug(`Downloading ${template}`);
     // Download locally certificate template
     // in order to make them available for pdf generation
     const downloaded = await getFile(template);

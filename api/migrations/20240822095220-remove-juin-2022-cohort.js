@@ -33,6 +33,7 @@ const collectionsWithCohortIdToCheck = [
   MeetingPointModel,
   SessionPhase1Model,
 ];
+const { logger } = require("../src/logger");
 const collectionsWithOriginalCohortIdToCheck = [YoungModel];
 module.exports = {
   async up() {
@@ -45,7 +46,7 @@ module.exports = {
       const documentsWithCohort1 = await mongooseModel.count({ cohortId: cohorts[1]._id });
       totalOfDocumentsLinkedToCohort0 += documentsWithCohort0;
       totalOfDocumentsLinkedToCohort1 += documentsWithCohort1;
-      console.log(
+      logger.info(
         `${mongooseModel.modelName} : ${documentsWithCohort0} documents with cohortId ${cohorts[0]._id} and ${documentsWithCohort1} documents with cohortId ${cohorts[1]._id}`,
       );
     }
@@ -56,15 +57,15 @@ module.exports = {
       totalOfDocumentsLinkedToCohort0 += documentsWithCohort0;
       totalOfDocumentsLinkedToCohort1 += documentsWithCohort1;
 
-      console.log(
+      logger.info(
         `${mongooseModel.modelName} : ${documentsWithCohort0} documents with originalCohortId ${cohorts[0]._id} and ${documentsWithCohort1} documents with cohortId ${cohorts[1]._id}`,
       );
     }
-    console.log(`${totalOfDocumentsLinkedToCohort0} documents for cohort._id : ${cohorts[0]._id}`);
-    console.log(`${totalOfDocumentsLinkedToCohort1} documents for cohort._id : ${cohorts[1]._id}`);
+    logger.info(`${totalOfDocumentsLinkedToCohort0} documents for cohort._id : ${cohorts[0]._id}`);
+    logger.info(`${totalOfDocumentsLinkedToCohort1} documents for cohort._id : ${cohorts[1]._id}`);
 
     if (totalOfDocumentsLinkedToCohort0 === 0) {
-      console.log(`Removing cohort with _id : ${cohorts[0]._id}`);
+      logger.info(`Removing cohort with _id : ${cohorts[0]._id}`);
       await CohortModel.deleteOne({ _id: cohorts[0]._id });
     }
   },

@@ -1,6 +1,7 @@
 import { EtablissementType } from "../../models";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 import { ClasseSchoolYear, CLE_SECTOR, CLE_TYPE } from "snu-lib";
+import { capture } from "../../sentry";
 
 export function mapEtablissementFromAnnuaireToEtablissement(
   etablissement: EtablissementProviderDto,
@@ -31,7 +32,7 @@ const mapStatutToSector = (statut: string): string => {
     case "Priv\u00e9":
       return CLE_SECTOR.PRIVATE;
     default:
-      console.error(`Unknown statut: ${statut}`);
+      capture(new Error("Unknown statut"));
       return "";
   }
 };
