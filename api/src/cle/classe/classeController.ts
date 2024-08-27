@@ -414,7 +414,7 @@ router.put("/:id/referent", passport.authenticate("referent", { session: false, 
     return res.status(200).send({ ok: true, data: classe });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(422).send({ ok: false, code: error.message });
   }
 });
 

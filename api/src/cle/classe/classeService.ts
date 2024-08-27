@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { InvitationType, ReferentCreatedBy, ROLES, SUB_ROLES, YOUNG_STATUS } from "snu-lib";
+import { FUNCTIONAL_ERRORS, InvitationType, ReferentCreatedBy, ROLES, SUB_ROLES, YOUNG_STATUS } from "snu-lib";
 
 import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, ReferentModel, ReferentType, YoungModel } from "../../models";
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
@@ -84,8 +84,15 @@ export const getEstimatedSeatsByEtablissement = async (etablissement: Etablissem
 export const updateReferent = async (classeId: string, newReferent: Pick<ReferentType, "firstName" | "lastName" | "email">, fromUser: object) => {
   const classe = await ClasseModel.findById(classeId);
   const referent = await ReferentModel.findOne({ email: newReferent.email });
+
+  if (![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(referent?.role || "")) {
+    throw new Error(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+  }
+
   if (referent) {
     classe?.set({ referentClasseIds: [referent._id] });
+    referent.set({ firstName: newReferent.firstName, lastName: newReferent.lastName });
+    await referent.save({ fromUser });
     return classe?.save({ fromUser });
   }
   const newReferentClasse = {
