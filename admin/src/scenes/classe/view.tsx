@@ -200,12 +200,12 @@ export default function View() {
       }
       setClasse(data);
       handleCancel();
+      toastr.success("Succès", "La classe a bien été modifié");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la classe", e);
     } finally {
       setIsLoading(false);
-      toastr.success("Succès", "La classe a bien été modifié");
     }
   };
 
@@ -222,17 +222,21 @@ export default function View() {
       const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}/referent`, referent);
 
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la modification du référent", translate(code));
+        if (code === FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE) {
+          toastr.error("Erreur", "Ce référent ne peut pas être ajouté comme référent de classe");
+        } else {
+          toastr.error("Oups, une erreur est survenue lors de la modification du référent", translate(code));
+        }
         return setIsLoading(false);
       }
       setClasse(data);
       handleCancel();
+      toastr.success("Succès", "Le référent a bien été modifié");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification du référent", e);
     } finally {
       setIsLoading(false);
-      toastr.success("Succès", "Le référent a bien été modifié");
     }
   };
 
