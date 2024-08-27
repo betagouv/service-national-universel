@@ -19,6 +19,7 @@ import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
 import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
+import { getCohort } from "@/utils/cohorts";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -35,6 +36,8 @@ const getInitialFormValues = (young) => ({
 
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
+  const cantUpdatePSC1 = cohort.isAssignmentAnnouncementsOpenForYoung;
   const dispatch = useDispatch();
 
   const { search } = useLocation();
@@ -202,6 +205,7 @@ const AccountGeneralPage = () => {
                       checked={formValues.psc1Info === "true"}
                       onChange={(e) => handleChangeValue("psc1Info")(e.target.value)}
                       className="form-radio text-blue-600"
+                      disabled={cantUpdatePSC1}
                     />
                     <span className="text-base font-normal">Oui</span>
                   </label>
@@ -213,6 +217,7 @@ const AccountGeneralPage = () => {
                       checked={formValues.psc1Info === "false"}
                       onChange={(e) => handleChangeValue("psc1Info")(e.target.value)}
                       className="form-radio text-blue-600"
+                      disabled={cantUpdatePSC1}
                     />
                     <span className="text-base font-normal">Non</span>
                   </label>
