@@ -1,7 +1,7 @@
 // To test run:
-// node ./src/crons/__tester__.js patch/young
+// ts-node ./src/crons/__tester__.js patch/young
 
-const config = require("config");
+require("config");
 const { initDB } = require("../mongo");
 
 // You need to run in local apps and target the right database (Prod usually)
@@ -30,6 +30,9 @@ const { initDB } = require("../mongo");
       break;
     case "dsnj":
       await require("./dsnjExport/index").handler();
+      break;
+    case "monitorCertificats":
+      await require("./monitorCertificats").handler();
       break;
   }
   process.exit(0);
