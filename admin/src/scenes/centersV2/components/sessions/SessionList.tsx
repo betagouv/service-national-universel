@@ -262,7 +262,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
                     }}
                     readOnly={!values}
-                    // disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
+                    disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
                   />
                 </div>
               </div>
@@ -295,14 +295,14 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
               <div className="flex flex-col w-full">
                 <ToggleDate
                   label="Dates spécifiques"
-                  className="bg-white border"
+                  className={`border ${!isEditionAllowed || !canPutSpecificDateOnSessionPhase1(user) ? "bg-gray-50" : "bg-white"}`}
                   tooltipText={
                     <p>
                       Les dates de cette session diffèrent des dates officielles :{" "}
                       <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                     </p>
                   }
-                  readOnly={!isEditionAllowed && !canPutSpecificDateOnSessionPhase1(user)}
+                  disabled={!isEditionAllowed || !canPutSpecificDateOnSessionPhase1(user)}
                   value={values ? !!values?.dateStart : !!session.dateStart}
                   onChange={handleToggleDate}
                   range={{
