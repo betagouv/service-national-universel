@@ -1,6 +1,6 @@
 const { exec } = require("child_process");
 const slack = require("../slack");
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const { logger } = require("../logger");
 
 const origin = "domain.par.clever-cloud.com";
@@ -41,7 +41,7 @@ async function checkCert(domain) {
         });
       }
     } else {
-      logger.error(`Impossible de récupérer le certificat pour ${domain}`);
+      captureMessage(`Impossible de récupérer le certificat pour ${domain}`);
       await slack.error({
         title: `Erreur de récupération du certificat pour ${domain}`,
         text: `Impossible de récupérer le certificat pour ${domain}`,

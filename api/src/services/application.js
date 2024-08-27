@@ -8,7 +8,7 @@ const { sendTemplate } = require("../brevo");
 const config = require("config");
 const { getCcOfYoung } = require("../utils");
 const { getTutorName } = require("./mission");
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const { logger } = require("../logger");
 
 const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung = {} }) => {
@@ -34,7 +34,7 @@ const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung 
       await application.save();
       const deletePatchesResult = await deletePatches({ id: application._id.toString(), model: ApplicationModel });
       if (!deletePatchesResult.ok) {
-        logger.error(`ERROR deleting patches of application with id ${application._id} >>>`, deletePatchesResult.code);
+        captureMessage(`ERROR deleting patches of application with id ${application._id} >>>`, deletePatchesResult.code);
       }
     }
 
