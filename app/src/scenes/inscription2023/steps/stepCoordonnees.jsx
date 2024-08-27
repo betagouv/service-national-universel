@@ -12,7 +12,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { supportURL } from "../../../config";
-import { useAddress, YOUNG_STATUS } from "snu-lib";
+import { getRegionForEligibility, useAddress, YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -341,7 +341,10 @@ export default function StepCoordonnees() {
 
     setErrors(errors);
 
-    if (data.region === "Occitanie") {
+    // On prend la région de l'école si le volontaire est scolarisé, celle du domicile sinon.
+    const regionForEligibility = getRegionForEligibility({ ...young, ...data });
+
+    if (regionForEligibility === "Occitanie") {
       setModalMessage(
         "Le séjour d'octobre 2024 est déjà complet pour votre région, nous ne pouvons donc pas prendre en compte votre inscription. Nous avons vos coordonnées, vous serez donc averti en priorité dès l'ouverture des inscriptions pour les séjours 2025",
       );
