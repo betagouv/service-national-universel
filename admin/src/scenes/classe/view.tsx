@@ -42,6 +42,7 @@ export default function View() {
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
   const [edit, setEdit] = useState(false);
+  const [editRef, setEditRef] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [oldClasseCohort, setOldClasseCohort] = useState();
@@ -119,7 +120,26 @@ export default function View() {
 
   useEffect(() => {
     getClasse();
-  }, [id, edit, editStay]);
+  }, [id, edit, editStay, editRef]);
+
+  const checkRefInfo = () => {
+    setErrors({});
+    interface Errors {
+      refFirstName?: string;
+      refLastName?: string;
+      refEmail?: string;
+    }
+    const errors: Errors = {};
+    if (!classe?.referents[0].firstName) errors.refFirstName = "Ce champ est obligatoire";
+    if (!classe?.referents[0].lastName) errors.refLastName = "Ce champ est obligatoire";
+    if (!classe?.referents[0].email) errors.refEmail = "Ce champ est obligatoire";
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
+      setIsLoading(false);
+      return;
+    }
+    sendInfoRef();
+  };
 
   const checkInfo = () => {
     setErrors({});
@@ -132,6 +152,9 @@ export default function View() {
       grades?: string;
       estimatedSeats?: string;
       type?: string;
+      refFirstName?: string;
+      refLastName?: string;
+      refEmail?: string;
     }
 
     const errors: Errors = {};
@@ -148,6 +171,9 @@ export default function View() {
     const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
     if (classe?.totalSeats && classe.estimatedSeats && classe.totalSeats > classe.estimatedSeats && now > limitDateEstimatedSeats)
       errors.totalSeats = "L'effectif ajusté ne peut pas être supérieur à l'effectif prévisionnel";
+    if (!classe?.referents[0].firstName) errors.refFirstName = "Ce champ est obligatoire";
+    if (!classe?.referents[0].lastName) errors.refLastName = "Ce champ est obligatoire";
+    if (!classe?.referents[0].email) errors.refEmail = "Ce champ est obligatoire";
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -179,11 +205,40 @@ export default function View() {
       toastr.error("Oups, une erreur est survenue lors de la modification de la classe", e);
     } finally {
       setIsLoading(false);
+      toastr.success("Succès", "La classe a bien été modifié");
+    }
+  };
+
+  const sendInfoRef = async () => {
+    try {
+      setShowModaleCohort(false);
+      setIsLoading(true);
+      const referent = {
+        firstName: classe?.referents[0].firstName,
+        lastName: classe?.referents[0].lastName,
+        email: classe?.referents[0].email,
+      };
+
+      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}/referent`, referent);
+
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la modification du référent", translate(code));
+        return setIsLoading(false);
+      }
+      setClasse(data);
+      handleCancel();
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la modification du référent", e);
+    } finally {
+      setIsLoading(false);
+      toastr.success("Succès", "Le référent a bien été modifié");
     }
   };
 
   const handleCancel = () => {
     setEdit(false);
+    setEditRef(false);
     setEditStay(false);
     setIsLoading(false);
     setErrors({});
@@ -314,7 +369,20 @@ export default function View() {
         validatedYoung={totalSeatsTakenExcluding}
       />
 
-      {classe.referents?.length > 0 && <ReferentInfos classe={classe} />}
+      {classe.referents?.length > 0 && (
+        <ReferentInfos
+          classe={classe}
+          setClasse={setClasse}
+          editRef={editRef}
+          setEditRef={setEditRef}
+          errors={errors}
+          rights={rights}
+          user={user}
+          isLoading={isLoading}
+          onCancel={handleCancel}
+          onCheckInfo={checkRefInfo}
+        />
+      )}
 
       {(rights.showCenter || rights.showPDR) && (
         <SejourInfos
