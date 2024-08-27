@@ -66,4 +66,5 @@ module.exports = {
   TASK_MONITOR_USER: undefined,
   TASK_MONITOR_SECRET: undefined,
   ENABLE_2FA: false,
+  DO_MIGRATION: true,
 };
