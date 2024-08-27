@@ -85,11 +85,10 @@ export const updateReferent = async (classeId: string, newReferent: Pick<Referen
   const classe = await ClasseModel.findById(classeId);
   const referent = await ReferentModel.findOne({ email: newReferent.email });
 
-  if (![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(referent?.role || "")) {
-    throw new Error(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
-  }
-
   if (referent) {
+    if (![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(referent?.role || "")) {
+      throw new Error(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    }
     classe?.set({ referentClasseIds: [referent._id] });
     referent.set({ firstName: newReferent.firstName, lastName: newReferent.lastName });
     await referent.save({ fromUser });
