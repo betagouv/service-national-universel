@@ -6,7 +6,7 @@ import { ClasseModel, CohortModel } from "../../models";
 import { createFixtureClasse } from "../fixtures/classe";
 import getNewCohortFixture from "../fixtures/cohort";
 import passport from "passport";
-import { ERRORS, FUNCTIONAL_ERRORS, ROLES } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, ROLES, STATUS_CLASSE } from "snu-lib";
 import { dbClose, dbConnect } from "../helpers/db";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
 import mongoose from "mongoose";
@@ -62,6 +62,7 @@ ${classe3?._id},""
     const expectedResponse = [
       {
         classeId: classe1._id.toString(),
+        classeStatus: STATUS_CLASSE.ASSIGNED,
         cohortId: cohort._id.toString(),
         result: "success",
         cohortCode: cohort.snuId,
