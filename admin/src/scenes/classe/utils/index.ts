@@ -60,6 +60,7 @@ export function getRights(user: User, classe, cohort: CohortDto | undefined) {
     canEditEstimatedSeats: canEditEstimatedSeats(user),
     canEditTotalSeats: canEditTotalSeats(user),
     canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
+    canEditRef: classe.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN,ROLES.ADMINISTRATEUR_CLE].includes(user.role),
 
     canEditCohort: cohort ? canUpdateCohort(cohort, user) : false,
     canEditCenter: cohort ? canUpdateCenter(cohort, user) : false,
