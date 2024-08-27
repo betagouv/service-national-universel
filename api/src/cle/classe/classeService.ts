@@ -1,7 +1,7 @@
 import crypto from "crypto";
-import { YOUNG_STATUS } from "snu-lib";
+import { InvitationType, ReferentCreatedBy, ROLES, SUB_ROLES, YOUNG_STATUS } from "snu-lib";
 
-import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, ReferentType, YoungModel } from "../../models";
+import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, ReferentModel, ReferentType, YoungModel } from "../../models";
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
 
 import { mapRegionToTrigramme } from "../../services/regionService";
@@ -81,7 +81,22 @@ export const getEstimatedSeatsByEtablissement = async (etablissement: Etablissem
   return classes.reduce((classeNumberAcc: number, classe: ClasseDocument) => classeNumberAcc + classe.estimatedSeats, 0);
 };
 
-export const updateReferent = async (classeId: string, referent: Pick<ReferentType, "firstName" | "lastName" | "email">, fromUser: object) => {
+export const updateReferent = async (classeId: string, newReferent: Pick<ReferentType, "firstName" | "lastName" | "email">, fromUser: object) => {
   const classe = await ClasseModel.findById(classeId);
-  const referentClasseIds = classe?.referentClasseIds || [];
+  const referent = await ReferentModel.findOne({ email: newReferent.email });
+  if (referent) {
+    classe?.set({ referentClasseIds: [referent._id] });
+    return classe?.save({ fromUser });
+  }
+  const newReferentClasse = {
+    role: ROLES.REFERENT_CLASSE,
+    metadata: { invitationType: InvitationType.INSCRIPTION, createdBy: ReferentCreatedBy.UPDATE_REFERENT_2024_2025 },
+    firstName: newReferent.firstName,
+    lastName: newReferent.lastName,
+    email: newReferent.email,
+  };
+
+  const newReferentClasseCreated = await ReferentModel.create(newReferentClasse);
+  classe?.set({ referentClasseIds: [newReferentClasseCreated._id] });
+  return classe?.save({ fromUser });
 };
