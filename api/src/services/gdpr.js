@@ -1,4 +1,5 @@
 const { capture } = require("../sentry");
+const { logger } = require("../logger");
 
 const { YoungModel } = require("../models");
 const { CohortModel } = require("../models");
@@ -14,7 +15,7 @@ async function deleteSensitiveData(youngId, mode = "save") {
       return { Key: e.Key };
     });
     if (CNIFileArray.length !== 0) {
-      console.log(`Deleting files for young ${young._id}:`, CNIFileArray);
+      logger.debug(`Deleting files for young ${young._id}:`, CNIFileArray);
       if (mode === "save") {
         fileStatus = "DELETED";
         await deleteFilesByList(CNIFileArray);

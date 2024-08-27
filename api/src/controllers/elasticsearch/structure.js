@@ -79,7 +79,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       size,
       customQueries: {
         networkExist: (query, value) => {
-          console.log("networkExist", value);
           const conditions = [];
           if (value.includes("true"))
             conditions.push({ bool: { must_not: [{ term: { "networkId.keyword": "" } }, { bool: { must_not: { exists: { field: "networkId.keyword" } } } }] } });
@@ -149,7 +148,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       return res.status(200).send(response);
     }
   } catch (error) {
-    console.log("ERROR: ", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }

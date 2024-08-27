@@ -2,6 +2,7 @@ import { format } from "@fast-csv/format";
 import { parse } from "@fast-csv/parse";
 import { capture } from "../sentry";
 import { ERRORS } from "snu-lib";
+const { logger } = require("../logger");
 
 export function generateCSVStream(data: any[]) {
   const csvStream = format({ headers: true });
@@ -23,7 +24,7 @@ export function readCSVBuffer<T>(buffer: Buffer, hasHeaders: boolean): Promise<T
         content.push(row);
       })
       .on("end", (rowCount: number) => {
-        console.log(`readCSVFile() - Parsed ${rowCount} rows`);
+        logger.debug(`readCSVFile() - Parsed ${rowCount} rows`);
         resolve(content);
       });
     stream.write(buffer);

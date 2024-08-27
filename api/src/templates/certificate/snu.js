@@ -1,6 +1,7 @@
 const path = require("path");
 const { initDocument, getMinistres, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
 const config = require("config");
+const { logger } = require("../../logger");
 const { withPipeStream } = require("../utils");
 
 function render(doc, young) {
@@ -39,13 +40,12 @@ function render(doc, young) {
 }
 
 function generateCertifSNU(outStream, young) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument();
   withPipeStream(doc, outStream, () => {
     render(doc, young);
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 module.exports = { generateCertifSNU };

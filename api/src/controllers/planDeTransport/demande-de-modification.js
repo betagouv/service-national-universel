@@ -66,7 +66,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     const cohort = await CohortModel.findOne({ name: line.cohort });
     if (!cohort) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
-    console.log(cohort);
     if (!isLigneBusDemandeDeModificationOpen(req.user, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const modificationBus = await ModificationBusModel.create({
@@ -199,7 +198,6 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
       message: Joi.string().required(),
       id: Joi.string().required(),
     }).validate({ ...req.body, ...req.params });
-    console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!ligneBusCanSendMessageDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -261,7 +259,6 @@ router.put("/:id/tag/:tagId/delete", passport.authenticate("referent", { session
       tagId: Joi.string().required(),
       id: Joi.string().required(),
     }).validate({ ...req.body, ...req.params });
-    console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

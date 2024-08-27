@@ -1,4 +1,5 @@
 import express, { Response } from "express";
+const { logger } = require("../logger");
 import passport from "passport";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
@@ -952,7 +953,6 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
 
     return res.status(200).send({ ok: true });
   } catch (error) {
-    console.log(error);
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
@@ -999,7 +999,6 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
         // ? Use better check link between structure and young ! + Check for tutorId as well ?
         // const test = await new Promise().any(
         //   structures.eachAsync(async (structure) => {
-        //     // console.log("🚀 ~ file: referent.js ~ line 570 ~ test ~ structure", structure);
         //     const applications = await ApplicationModel.find({ structureId: structure._id.toString(), youngId: youngId });
         //     return applications.length > 0 ? true : false;
         //   }),
@@ -1449,7 +1448,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     }
 
     await referent.remove();
-    console.log(`Referent ${req.params.id} has been deleted`);
+    logger.debug(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

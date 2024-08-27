@@ -1,6 +1,7 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
 const config = require("config");
+const { logger } = require("../../logger");
 const datefns = require("date-fns");
 const { withPipeStream } = require("../utils");
 
@@ -177,18 +178,16 @@ function initDocument(options = {}) {
 }
 
 function generateDroitImage(outStream, young) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument();
   withPipeStream(doc, outStream, () => {
     render(doc, young);
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 function generateBatchDroitImage(outStream, youngs) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument({ autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
     for (const young of youngs) {
@@ -196,7 +195,7 @@ function generateBatchDroitImage(outStream, youngs) {
       render(doc, young);
     }
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 module.exports = { generateDroitImage, generateBatchDroitImage };
