@@ -341,7 +341,6 @@ const updatePlacesBus = async (bus) => {
       bus.set({ placesLeft });
       await bus.save();
       await bus.index();
-    } else {
     }
   } catch (e) {
     capture(e);
