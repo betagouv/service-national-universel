@@ -45,7 +45,6 @@ export default function Settings() {
     ...uselessSettings,
   });
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
 
   const getCohort = async () => {
     try {
@@ -146,7 +145,6 @@ export default function Settings() {
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrage dynamique</div>
           <SelectCohort cohort={cohort} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} />
         </div>
-        <button onClick={() => setCreateOpen(true)}>Créer une cohorte</button>
         <div className="flex w-full flex-col gap-8">
           {/* Informations générales */}
           <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
