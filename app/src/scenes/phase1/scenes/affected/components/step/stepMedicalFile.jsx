@@ -47,7 +47,7 @@ export default function StepMedicalField({ data }) {
             <p className="mt-2 text-gray-500">
               Envoyez votre fiche sanitaire et les documents annexes par e-mail à{" "}
               <a href={`mailto:${email}`}>
-                <span className="inline-block text-gray-500 underline underline-offset-2">{email}</span>
+                <span className="inline-block text-gray-500 underline underline-offset-2">{email}</span>{" "}
               </a>
               puis remettez-les en mains propres le jour de votre arrivée au séjour.
             </p>

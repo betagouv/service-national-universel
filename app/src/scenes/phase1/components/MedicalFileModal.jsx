@@ -96,7 +96,7 @@ const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Téléchargez vot
                 <span className="flex h-8 w-8 bg-white shrink-0 items-center justify-center rounded-full border border-gray-300 text-sm text-gray-700">3</span>
               </div>
               <div>
-                <p className="bg-[#DBEAFE] w-fit rounded-sm px-1.5 text-xs text-[#1E40AF]">Avant le départ</p>
+                <p className="bg-[#DBEAFE] w-fit rounded-sm px-1.5 text-xs text-[#1E40AF] font-medium">Avant le départ</p>
                 <p className="text-sm text-gray-800 font-bold">Envoyer l'ensemble des documents par e-mail</p>
                 <p className="text-xs text-gray-700 leading-relaxed">
                   à{" "}
