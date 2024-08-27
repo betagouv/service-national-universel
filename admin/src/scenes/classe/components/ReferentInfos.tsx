@@ -1,6 +1,6 @@
 import React from "react";
 import { HiOutlinePencil } from "react-icons/hi";
-import { Container, InputText, Button } from "@snu/ds/admin";
+import { Container, InputText, Button, Label } from "@snu/ds/admin";
 import { ClasseDto } from "snu-lib";
 import { User } from "@/types";
 import { Rights } from "./types";
@@ -37,6 +37,13 @@ export default function ReferentInfos({ classe, setClasse, editRef, setEditRef, 
     <Container title="Référent de classe" actions={containerActionList({ edit: editRef, setEdit: setEditRef, canEdit: rights.canEditRef })}>
       <div className="flex items-stretch justify-stretch">
         <div className="flex-1">
+          {editRef && (
+            <Label
+              title="Nom et Prénom"
+              name="estimatedSeats"
+              tooltip="Le nom et prénom ne sera pas pris en compte si le compte existe déjà sur la plateforme. Le référent de classe pourra le modifier lors de son inscription."
+            />
+          )}
           <InputText
             name="refName"
             className="mb-3"

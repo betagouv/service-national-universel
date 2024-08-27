@@ -205,11 +205,35 @@ export default function View() {
       toastr.error("Oups, une erreur est survenue lors de la modification de la classe", e);
     } finally {
       setIsLoading(false);
+      toastr.success("Succès", "La classe a bien été modifié");
     }
   };
 
   const sendInfoRef = async () => {
-    console.log(classe);
+    try {
+      setShowModaleCohort(false);
+      setIsLoading(true);
+      const referent = {
+        firstName: classe?.referents[0].firstName,
+        lastName: classe?.referents[0].lastName,
+        email: classe?.referents[0].email,
+      };
+
+      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}/referent`, referent);
+
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la modification du référent", translate(code));
+        return setIsLoading(false);
+      }
+      setClasse(data);
+      handleCancel();
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la modification du référent", e);
+    } finally {
+      setIsLoading(false);
+      toastr.success("Succès", "Le référent a bien été modifié");
+    }
   };
 
   const handleCancel = () => {
