@@ -181,28 +181,28 @@ const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
           <Details title="Situation particulière" value="Non" />
         )}
         <hr className="mt-4" />
-        <p className="text-[14px] leading-[20px] text-[#666666] text-center">
+        <p className="text-[16px] leading-[20px] text-[#666666] text-left">
           {young.firstName} {young.lastName} a déclaré le(s) détenteur(s) de l'autorité parentale suivant(s) :{" "}
         </p>
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h1 className="mt-2 text-lg font-bold text-[#161616]">Représentant(es) légal(e) 1 </h1>
+            <h1 className="mt-2 text-lg font-bold text-[#161616]">Représentant(e) légal(e) 1 </h1>
           </div>
-          <Details title="Votre lien" value={translate(young.parent1Status)} />
-          <Details title="Votre prénom" value={young.parent1FirstName} />
-          <Details title="Votre nom" value={young.parent1LastName} />
-          <Details title="Votre e-mail" value={young.parent1Email} />
-          <Details title="Votre téléphone" value={concatPhoneNumberWithZone(young.parent1Phone, young.parent1PhoneZone)} />
+          <Details title="lien" value={translate(young.parent1Status)} />
+          <Details title="prénom" value={young.parent1FirstName} />
+          <Details title="nom" value={young.parent1LastName} />
+          <Details title="e-mail" value={young.parent1Email} />
+          <Details title="téléphone" value={concatPhoneNumberWithZone(young.parent1Phone, young.parent1PhoneZone)} />
           {young.parent2Status ? (
             <>
               <div className="mt-4 flex items-center justify-between">
-                <h1 className="text-lg font-bold text-[#161616]">Représentant(es) légal(e) 2 </h1>
+                <h1 className="text-lg font-bold text-[#161616]">Représentant(e) légal(e) 2 </h1>
               </div>
-              <Details title="Votre lien" value={translate(young.parent2Status)} />
-              <Details title="Votre prénom" value={young.parent2FirstName} />
-              <Details title="Votre nom" value={young.parent2LastName} />
-              <Details title="Votre e-mail" value={young.parent2Email} />
-              <Details title="Votre téléphone" value={concatPhoneNumberWithZone(young.parent2Phone, young.parent2PhoneZone)} />
+              <Details title="lien" value={translate(young.parent2Status)} />
+              <Details title="prénom" value={young.parent2FirstName} />
+              <Details title="nom" value={young.parent2LastName} />
+              <Details title="e-mail" value={young.parent2Email} />
+              <Details title="téléphone" value={concatPhoneNumberWithZone(young.parent2Phone, young.parent2PhoneZone)} />
             </>
           ) : null}
         </div>
