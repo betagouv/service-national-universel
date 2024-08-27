@@ -11,6 +11,7 @@ const alertDays = 31;
 async function checkCert(domain) {
   const command = `echo | openssl s_client -connect ${origin}:443 -servername ${domain} 2>/dev/null | openssl x509 -noout -dates`;
 
+  console.log("🚀 ~ file: monitorCertificats.js:14 ~ checkCert ~ command:", command);
   exec(command, async (error, stdout, stderr) => {
     if (error) throw new SentryError("Impossible de récupérer le certificat", { domain, error });
 
