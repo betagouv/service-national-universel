@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { YOUNG_STATUS } from "snu-lib";
 
-import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, YoungModel } from "../../models";
+import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, ReferentType, YoungModel } from "../../models";
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
 
 import { mapRegionToTrigramme } from "../../services/regionService";
@@ -79,4 +79,9 @@ export const getNumberOfClassesByEtablissement = async (etablissement: Etablisse
 export const getEstimatedSeatsByEtablissement = async (etablissement: EtablissementDocument): Promise<number> => {
   const classes = await ClasseModel.find({ etablissementId: etablissement._id });
   return classes.reduce((classeNumberAcc: number, classe: ClasseDocument) => classeNumberAcc + classe.estimatedSeats, 0);
+};
+
+export const updateReferent = async (classeId: string, referent: Pick<ReferentType, "firstName" | "lastName" | "email">, fromUser: object) => {
+  const classe = await ClasseModel.findById(classeId);
+  const referentClasseIds = classe?.referentClasseIds || [];
 };

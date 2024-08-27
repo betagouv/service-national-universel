@@ -395,6 +395,17 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+router.put("/:id/referent", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  if (!canUpdateClasse(req.user)) {
+    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  }
+  const { error, value } = Joi.object({
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    email: Joi.string().email().required(),
+  }).validate(req.body);
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const { error, value } = validateId(req.params.id);
