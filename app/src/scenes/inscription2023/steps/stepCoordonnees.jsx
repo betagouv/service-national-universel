@@ -14,6 +14,8 @@ import { capture } from "../../../sentry";
 import { supportURL } from "../../../config";
 import { useAddress, YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
+import ReactTooltip from "react-tooltip";
+import { RiInformationFill } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
@@ -36,6 +38,8 @@ const errorMessages = {
   zip: "Le code postal n'est pas valide",
   hasSpecialSituation: "Merci de choisir au moins une option.",
 };
+
+const cohortExcluded = ["Octobre 2024 - Nouvelle-Calédonie", "Toussaint 2024", "Toussaint 2024 - La Réunion"];
 
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
 const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified", "coordinatesAccuracyLevel"];
@@ -97,7 +101,7 @@ const defaultState = {
   specificAmenagmentType: "",
   reducedMobilityAccess: "",
   handicapInSameDepartment: "",
-  psc1Info: "",
+  psc1Info: null,
 };
 
 export default function StepCoordonnees() {
@@ -317,6 +321,12 @@ export default function StepCoordonnees() {
     if (!isCLE) {
       fieldToUpdate.push("situation");
       requiredFields.push("situation");
+    }
+
+    if (!cohortExcluded.includes(young.cohort)) {
+      if (!psc1Info || psc1Info === "") {
+        errors.psc1Info = "Ce champ est obligatoire";
+      }
     }
 
     if (hasSpecialSituation === null) {
@@ -757,18 +767,20 @@ export default function StepCoordonnees() {
             )}
           </>
         )}
-        {young.cohort !== "Toussaint 2024" && (
+        {!cohortExcluded.includes(young.cohort) && (
           <>
             <hr className="my-2" />
             <div className="flex mt-4 items-center gap-3 mb-4">
-              <h2 className="m-0 text-lg font-semibold leading-6 align-left">Avez-vous validé le PSC1 ?</h2>
-              <Button
-                className="cursor-pointer"
-                iconId={fr.cx("fr-icon-information-fill")}
-                onClick={() => window.open(`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`, "_blank")?.focus()}
-                priority="tertiary no outline"
-                title="Information"
-              />
+              <h2 className="m-0 text-lg font-semibold leading-6 align-left">Information PSC1</h2>
+              <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                <ul className="text-gray-800">
+                  <li> La formation PSC1 permet d'acquérir les gestes de premiers secours pour être capable d'intervenir en cas d'urgence.</li>
+                  <li> Avoir validé le PSC1 n'est pas obligatoire pour participer au séjour de cohésion.</li>
+                </ul>
+              </ReactTooltip>
+              <div data-tip data-for="tooltip-nationalite">
+                <RiInformationFill className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover text-[24px] ml-2" />
+              </div>
             </div>
             <BooleanRadioButtons
               legend="Avez-vous validé le PSC1 (Prévention et Secours Civiques de niveau 1) ?"
