@@ -1,5 +1,6 @@
 export enum ReferentCreatedBy {
   SYNC_APPEL_A_PROJET_2024_2025 = "SYNC_APPEL_A_PROJET_2024_2025",
+  UPDATE_REFERENT_2024_2025 = "UPDATE_REFERENT_2024_2025",
 }
 
 export enum InvitationType {

@@ -12,6 +12,7 @@ import {
   canUpdateClasse,
   canUpdateClasseStay,
   canUpdateCohort,
+  canUpdateReferentClasse,
   canVerifyClasse,
   canViewClasse,
   canWithdrawClasse,
@@ -55,7 +56,7 @@ import {
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 
-import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, findClasseByUniqueKeyAndUniqueId, generateConvocationsByClasseId } from "./classeService";
+import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, findClasseByUniqueKeyAndUniqueId, generateConvocationsByClasseId, updateReferent } from "./classeService";
 import {
   findChefEtablissementInfoForClasses,
   findCohesionCentersForClasses,
@@ -392,6 +393,28 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/referent", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    if (!canUpdateReferentClasse(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    const { error, value } = Joi.object({
+      firstName: Joi.string().required(),
+      lastName: Joi.string().required(),
+      email: Joi.string().email().required(),
+    }).validate(req.body);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const classe = await updateReferent(req.params.id, value, req.user);
+    return res.status(200).send({ ok: true, data: classe });
+  } catch (error) {
+    capture(error);
+    res.status(422).send({ ok: false, code: error.message });
   }
 });
 
