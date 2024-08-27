@@ -1,8 +1,9 @@
 import crypto from "crypto";
 
-import { YoungModel, ClasseModel, ClasseDocument, ClasseType, EtablissementDocument, EtablissementType, ReferentModel, ReferentType } from "../../models";
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs, generateImageRightForMultipleYoungs, generateConsentementForMultipleYoungs } from "../../young/youngService";
 import { FUNCTIONAL_ERRORS, InvitationType, ReferentCreatedBy, ROLES, SUB_ROLES, YOUNG_STATUS, ClasseCertificateKeys } from "snu-lib";
+
+import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, ReferentModel, ReferentType, YoungModel } from "../../models";
 
 import { mapRegionToTrigramme } from "../../services/regionService";
 
