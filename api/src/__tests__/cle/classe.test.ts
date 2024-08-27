@@ -4,7 +4,7 @@ import { Types } from "mongoose";
 const { ObjectId } = Types;
 import emailsEmitter from "../../emails";
 import snuLib, { FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
-import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS, ClasseCertificateKeys } from "snu-lib";
+import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS, ClasseCertificateKeys, FUNCTIONAL_ERRORS } from "snu-lib";
 import * as classeService from "../../cle/classe/classeService";
 
 import { dbConnect, dbClose } from "../helpers/db";
@@ -1129,5 +1129,67 @@ describe("POST /:id/certificate/:key", () => {
     expect(res.body).toEqual(mockCertificate);
 
     generateImageRightSpy.mockRestore();
+  });
+});
+
+describe("PUT /cle/classe/:id/referent", () => {
+  it("should create a new referent then link its id to classe", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const classe = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe._id}/referent`).send(newReferentDetails); // sending new referent data
+    const updatedReferent: ReferentDocument = (await ReferentModel.findOne({ email: newReferentDetails.email }))!;
+
+    expect(updatedReferent).toBeTruthy();
+    expect(updatedReferent.firstName).toBe(newReferentDetails.firstName);
+    expect(updatedReferent.lastName).toBe(newReferentDetails.lastName);
+    expect(updatedReferent.email).toBe(newReferentDetails.email);
+    expect(res.status).toBe(200);
+  });
+
+  it("should update the link of the new referent to classe", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const referent2 = await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.REFERENT_CLASSE }));
+    const classe1 = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "b@b.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe1._id}/referent`).send(newReferentDetails); // sending new referent data
+    const referentId = (await ClasseModel.findById(classe1._id))?.referentClasseIds[0];
+    const updatedReferent: ReferentDocument = (await ReferentModel.findById(referentId))!;
+    console.log(updatedReferent);
+
+    expect(updatedReferent).toBeTruthy();
+    expect(updatedReferent.firstName).toBe(newReferentDetails.firstName);
+    expect(updatedReferent.lastName).toBe(newReferentDetails.lastName);
+    expect(updatedReferent.email).toBe(newReferentDetails.email);
+    expect(res.status).toBe(200);
+  });
+
+  it("should throw an error if role not referent nor admin cle", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const referent2 = await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.VISITOR }));
+    const classe1 = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "b@b.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe1._id}/referent`).send(newReferentDetails); // sending new referent data
+
+    expect(res.text).toContain(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    expect(res.status).toBe(422);
   });
 });
