@@ -1,4 +1,4 @@
-const config = require("config");
+import config from "config";
 import { createLogger, transports, format } from "winston";
 
 const LEVELS = {
