@@ -5,8 +5,6 @@ const { logger } = require("../logger");
 
 const origin = "domain.par.clever-cloud.com";
 const domains = ["admin.snu.gouv.fr", "api.snu.gouv.fr", "moncompte.snu.gouv.fr"];
-console.log("🚀 ~ file: monitorCertificats.js:8 ~ domains:", domains);
-logger.debug("🚀 ~ file: monitorCertificats.js:8 ~ domains:", domains);
 
 const alertDays = 31;
 
@@ -42,8 +40,6 @@ async function checkCert(domain) {
 exports.handler = async () => {
   try {
     for (const domain of domains) {
-      logger.debug("🚀 ~ file: monitorCertificats.js:44 ~ exports.handler= ~ domains:", domains);
-      logger.debug("🚀 ~ file: monitorCertificats.js:43 ~ exports.handler= ~ domain:", domain);
       await checkCert(domain);
     }
   } catch (e) {

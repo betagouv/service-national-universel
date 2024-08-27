@@ -12,10 +12,9 @@ const LEVELS = {
 export const logger = createLogger({
   levels: LEVELS,
   level: config.get("LOG_LEVEL"),
-  format: format.simple(),
+  format: format.cli(),
   transports: [
-    new transports.Console({
-      format: format.combine(format.splat(), format.cli()),
+    new transports.Console({}),
     }),
   ],
 });

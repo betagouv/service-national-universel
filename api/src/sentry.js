@@ -4,6 +4,13 @@ const { nodeProfilingIntegration } = require("@sentry/profiling-node");
 const config = require("config");
 const { logger } = require("./logger");
 
+class SentryError extends Error {
+  constructor(message, tags = {}) {
+    super(message);
+    this.tags = tags;
+  }
+}
+
 function initSentry() {
   if (config.get("ENABLE_SENTRY")) {
     init({
@@ -92,6 +99,7 @@ function captureMessage(mess, contexte) {
 }
 
 module.exports = {
+  SentryError,
   initSentry,
   capture,
   captureMessage,
