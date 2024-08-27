@@ -1,5 +1,6 @@
 import { getUaiFromString, mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet } from "./demarcheSimplifieeProvider";
 import { DemarcheSimplifieeDto } from "./demarcheSimplifieeDto";
+import { logger } from "../../logger";
 
 describe("demarcheSimplifieeProvider", () => {
   it("should split the input string correctly", () => {
@@ -15,12 +16,12 @@ describe("demarcheSimplifieeProvider", () => {
     const input = "Lycée, Ville ()";
     const expectedOutput = "";
 
-    console.warn = jest.fn();
+    logger.warn = jest.fn();
 
     const result = getUaiFromString(input);
 
     expect(result).toEqual(expectedOutput);
-    expect(console.warn).toHaveBeenCalledWith("getUaiFromString() - no UAI found in string: ", "Lycée, Ville ()");
+    expect(logger.warn).toHaveBeenCalledWith("getUaiFromString() - no UAI found in string: ", "Lycée, Ville ()");
   });
 
   it("should return the right data", () => {

@@ -1,3 +1,4 @@
+const { logger } = require("../logger");
 import { Job } from "bullmq";
 
 function _log(job: Job, opts: any) {
@@ -12,7 +13,7 @@ function _log(job: Job, opts: any) {
     attempts: job.attemptsStarted,
     ...opts,
   };
-  console.log(JSON.stringify(log));
+  logger.info("tasks", log);
 }
 
 export const logAddedTask = (job: Job) => _log(job, { type: "added" });

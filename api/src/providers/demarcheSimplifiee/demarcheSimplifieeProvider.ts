@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import config from "config";
+import { logger } from "../../logger";
 
 import { CLE_COLORATION, TYPE_CLASSE } from "snu-lib";
 
@@ -17,8 +18,8 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetO
   let appelAProjetDemarcheSimplifieeDto: DemarcheSimplifieeDto = {} as DemarcheSimplifieeDto;
   let appelsAProjet: IAppelAProjet[] = [];
   while (hasNextPage && numberOfCalls < 50) {
-    console.time("Demarche_Simplifiee_call_" + numberOfCalls);
-    console.log("getClassesAndEtablissementsFromAppelAProjets() - Current Demarche_Simplifiee_Current_Cursor: ", cursor);
+    const timer = logger.startTimer();
+    logger.debug(`getClassesAndEtablissementsFromAppelAProjets() - Current Demarche_Simplifiee_Current_Cursor: ${cursor}`);
     const body = buildDemarcheSimplifieeBody(91716, cursor, DossierState.ACCEPTE);
     const demarcheSimplifieeAppelAProjetResponse: Response = await fetch(DEMARCHE_SIMPLIFIEE_API, {
       method: "POST",
@@ -31,10 +32,10 @@ export const getClassesAndEtablissementsFromAppelAProjets = async (appelAProjetO
     hasNextPage = appelAProjetDemarcheSimplifieeDto.data.demarche.dossiers.pageInfo.hasNextPage;
     appelsAProjet = [...appelsAProjet, ...mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet(appelAProjetDemarcheSimplifieeDto, appelAProjetOptions)];
 
-    console.timeEnd("Demarche_Simplifiee_call_" + numberOfCalls);
+    timer.done({ message: `Demarche_Simplifiee_call_${numberOfCalls}`, level: "debug" });
     numberOfCalls++;
   }
-  console.log("getClassesAndEtablissementsFromAppelAProjets() - appelsAProjet.length: ", appelsAProjet.length);
+  logger.debug(`getClassesAndEtablissementsFromAppelAProjets() - appelsAProjet.length: ${appelsAProjet.length}`);
   return appelsAProjet;
 };
 
@@ -78,7 +79,7 @@ export const mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet = (appelAProjetD
     };
     const fixe = appelAProjetOptions.fixes?.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
     if (fixe?.etablissement?.uai) {
-      console.log("mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet() - UAI  ", appelAProjet.etablissement.uai, fixe.etablissement.uai);
+      logger.debug(`mapAppelAProjetDemarcheSimplifieeDtoToAppelAProjet() - UAI ${appelAProjet.etablissement.uai} ${fixe.etablissement.uai}`);
       appelAProjet.etablissement.uai = fixe.etablissement.uai;
     }
     return appelAProjet;
@@ -89,7 +90,7 @@ export const getUaiFromString = (value: string | undefined) => {
   if (!value) return "";
   var match = value.match(/\(([^)]+)\)/);
   if (!match) {
-    console.warn("getUaiFromString() - no UAI found in string: ", value);
+    logger.warn("getUaiFromString() - no UAI found in string: ", value);
   }
   return match ? match[1] : "";
 };
@@ -105,7 +106,7 @@ const mapColorationFromAppelAProjetToColoration = (colorationFromAppelAProjet: s
     case "Sport et Jeux Olympiques et Paralympiques":
       return CLE_COLORATION.SPORT;
     default:
-      console.warn("mapColorationFromAppelAProjetToColoration() - No matching coloration for : ", colorationFromAppelAProjet);
+      logger.warn("mapColorationFromAppelAProjetToColoration() - No matching coloration for : ", colorationFromAppelAProjet);
       return undefined;
   }
 };
@@ -117,7 +118,7 @@ const mapClasseTypeFromAppelAProjetToClasseType = (classeType: string | undefine
     case "Des élèves inscrits dans une seule classe":
       return TYPE_CLASSE.FULL;
     default:
-      console.warn("mapClasseTypeFromAppelAProjetToClasseType() - No matching classe type for : ", classeType);
+      logger.warn("mapClasseTypeFromAppelAProjetToClasseType() - No matching classe type for : ", classeType);
       return undefined;
   }
 };

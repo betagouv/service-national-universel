@@ -1,5 +1,6 @@
 const { capture } = require("../sentry");
 const { getDb } = require("../mongo");
+const { logger } = require("../logger");
 
 exports.handler = async () => {
   try {
@@ -18,9 +19,8 @@ exports.handler = async () => {
       awaitingTopologyChanges: connections.awaitingTopologyChanges,
     };
 
-    console.log(JSON.stringify(metrics));
+    logger.info("mongo-metrics", metrics);
   } catch (e) {
     capture(e);
-    console.error("Erreur lors de la surveillance des connexions:", e);
   }
 };

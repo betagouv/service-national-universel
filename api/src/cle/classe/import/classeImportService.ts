@@ -5,6 +5,8 @@ import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
 import { ClasseDocument, ClasseModel, CohortModel } from "../../../models";
 import { ERRORS } from "snu-lib";
 import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
+import { capture } from "../../../sentry";
+import { logger } from "../../../logger";
 
 export const importClasseCohort = async (filePath: string, classeCohortImportKey: ClasseCohortImportKey) => {
   const classeCohortFile = await getFile(filePath);
@@ -25,7 +27,7 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
       classeCohortImportResult.cohortCode = classeCohortToImport.cohortCode;
       classeCohortImportResult.cohortName = updatedClasse.cohort;
     } catch (error) {
-      console.error(error);
+      capture(error);
       classeCohortImportResult.result = "error";
       classeCohortImportResult.error = error.message;
     } finally {
@@ -56,6 +58,6 @@ export const addCohortToClasse = async (classeId: string, cohortId: string, clas
     throw new Error(ERRORS.CLASSE_NOT_FOUND);
   }
   classe.set({ cohortId: cohortId, cohort: cohort.name });
-  console.log(`classeImportService - addCohortToClasse() - Classe ${classeId} updated with cohort ${cohortId} - ${cohort.name}`);
+  logger.debug(`classeImportService - addCohortToClasse() - Classe ${classeId} updated with cohort ${cohortId} - ${cohort.name}`);
   return classe.save({ fromUser: { firstName: `IMPORT_CLASSE_COHORT_${classeCohortImportKey}` } });
 };

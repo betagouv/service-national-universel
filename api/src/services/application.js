@@ -9,12 +9,13 @@ const config = require("config");
 const { getCcOfYoung } = require("../utils");
 const { getTutorName } = require("./mission");
 const { capture } = require("../sentry");
+const { logger } = require("../logger");
 
 const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung = {} }) => {
   try {
     const applications = await ApplicationModel.find({ youngId });
 
-    console.log("ANONYMIZE YOUNGS APPLICATIONS >>>", `${applications.length} applications found for young with id ${youngId}.`);
+    logger.debug(`ANONYMIZE YOUNGS APPLICATIONS >>> ${applications.length} applications found for young with id ${youngId}.`);
 
     if (!applications.length) {
       return;
@@ -33,13 +34,12 @@ const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung 
       await application.save();
       const deletePatchesResult = await deletePatches({ id: application._id.toString(), model: ApplicationModel });
       if (!deletePatchesResult.ok) {
-        console.error(`ERROR deleting patches of application with id ${application._id} >>>`, deletePatchesResult.code);
+        logger.error(`ERROR deleting patches of application with id ${application._id} >>>`, deletePatchesResult.code);
       }
     }
 
-    console.log("ANONYMIZE YOUNGS APPLICATIONS >>>", `${applications.length} applications anonymized for young with id ${youngId}.`);
+    logger.debug(`ANONYMIZE YOUNGS APPLICATIONS >>> ${applications.length} applications anonymized for young with id ${youngId}.`);
   } catch (e) {
-    console.log("Error while anonymizing youngs applications", e);
     capture(e);
   }
 };
@@ -58,15 +58,15 @@ const updateApplicationTutor = async (mission, fromUser = null) => {
       }
     }
   } catch (e) {
-    console.log("Error while updating application tutor", e);
     capture(e);
   }
 };
 
 const updateApplicationStatus = async (mission, fromUser = null) => {
   try {
-    if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
-      return console.log(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
+    if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status)) {
+      return logger.debug(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
+    }
     const applications = await ApplicationModel.find({
       missionId: mission._id,
       status: {
@@ -118,7 +118,6 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
       }
     }
   } catch (e) {
-    console.log("Error while updating application status", e);
     capture(e);
   }
 };

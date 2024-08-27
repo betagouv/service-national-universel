@@ -155,37 +155,34 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.TRANSPORTER].includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const cohort = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isSessionEditionOpen(req.user, cohort) && cohort?.isAssignmentAnnouncementsOpenForYoung) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-    if (!isSessionEditionOpen(req.user, cohort) && !cohort?.isAssignmentAnnouncementsOpenForYoung) {
-      const { error, value } = Joi.object({
-        sanitaryContactEmail: Joi.string().email().required(),
-      }).validate(req.body);
 
-      if (error) {
-        console.error("Erreur de validation:", error.details); // Log des détails de l'erreur de validation
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { error, value } = validateSessionPhase1(req.body);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    // If session is edition is closed, the contact email can still be updated as long as affectations are not public.
+    if (!isSessionEditionOpen(req.user, cohort)) {
+      if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       sessionPhase1.sanitaryContactEmail = value.sanitaryContactEmail;
       await sessionPhase1.save({ fromUser: req.user });
       return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
-    }
-
-    const { error, value } = validateSessionPhase1(req.body);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
@@ -287,7 +284,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     const cohort = await CohortModel.findById(session.cohortId);
     generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
   } catch (error) {
-    console.log("error", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
@@ -400,7 +396,6 @@ router.post("/check-token/:token", async (req, res) => {
         },
       };
       const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
-      console.log("youngs", youngs.length);
 
       const ligneBus = await LigneBusModel.find({ cohortId: sessionPhase1.cohortId, centerId: sessionPhase1.cohesionCenterId });
 
