@@ -13,8 +13,5 @@ export const logger = createLogger({
   levels: LEVELS,
   level: config.get("LOG_LEVEL"),
   format: format.cli(),
-  transports: [
-    new transports.Console({}),
-    }),
-  ],
+  transports: [new transports.Console()],
 });

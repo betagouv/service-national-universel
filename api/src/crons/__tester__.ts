@@ -31,9 +31,6 @@ const { initDB } = require("../mongo");
     case "dsnj":
       await require("./dsnjExport/index").handler();
       break;
-    case "monitorCertificats":
-      await require("./monitorCertificats").handler();
-      break;
   }
   process.exit(0);
 })();
