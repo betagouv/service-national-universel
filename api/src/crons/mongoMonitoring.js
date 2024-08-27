@@ -19,7 +19,7 @@ exports.handler = async () => {
       awaitingTopologyChanges: connections.awaitingTopologyChanges,
     };
 
-    logger.info(JSON.stringify(metrics));
+    logger.info("mongo-metrics", metrics);
   } catch (e) {
     capture(e);
   }

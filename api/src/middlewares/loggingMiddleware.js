@@ -32,7 +32,7 @@ const loggingMiddleware = async (req, res, next) => {
           log.userRole = req.user?.role;
         }
       }
-      logger.info(JSON.stringify(log));
+      logger.info("api", log);
     } catch (error) {
       capture(error);
     }

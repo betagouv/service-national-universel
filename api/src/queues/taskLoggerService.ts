@@ -13,7 +13,7 @@ function _log(job: Job, opts: any) {
     attempts: job.attemptsStarted,
     ...opts,
   };
-  logger.info(JSON.stringify(log));
+  logger.info("tasks", log);
 }
 
 export const logAddedTask = (job: Job) => _log(job, { type: "added" });
