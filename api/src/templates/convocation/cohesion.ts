@@ -7,6 +7,7 @@ import { getDepartureDateSession, getReturnDateSession } from "../../utils/cohor
 import { formatStringDate, formatStringDateTimezoneUTC, transportDatesToString } from "snu-lib";
 import { isLocalTransport, getMeetingAddress, fetchDataForYoungCertificate, getCertificateTemplate } from "../../young/youngService";
 import { FONT, FONT_BOLD, FONT_ITALIC, LIST_INDENT, initDocument } from "../templateService";
+import { logger } from "../../logger";
 
 const FILL_COLOR = "#444";
 const MARGIN = 50;
