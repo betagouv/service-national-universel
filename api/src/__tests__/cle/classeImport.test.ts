@@ -6,7 +6,7 @@ import { ClasseModel, CohortModel } from "../../models";
 import { createFixtureClasse } from "../fixtures/classe";
 import getNewCohortFixture from "../fixtures/cohort";
 import passport from "passport";
-import { ERRORS, ROLES } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, ROLES, STATUS_CLASSE } from "snu-lib";
 import { dbClose, dbConnect } from "../helpers/db";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
 import mongoose from "mongoose";
@@ -41,12 +41,19 @@ describe("POST /cle/classe-import", () => {
   it("should return 200 and the import results when the request is successful", async () => {
     const classe1 = await ClasseModel.create(createFixtureClasse());
     const classe2 = await ClasseModel.create(createFixtureClasse());
+    const classe3 = await ClasseModel.create(createFixtureClasse());
     const cohort = await CohortModel.create(getNewCohortFixture({ name: "à venir", snuId: "A_VENIR" }));
 
     const notExistingClasseId = new mongoose.Types.ObjectId().toString();
     const notExistingCohortCode = "not-existing-cohort";
 
-    const mockFileBody = `Identifiant de la classe engagée,Session : Code de la session\n${classe1?._id},${cohort?.snuId}\n${notExistingClasseId},${cohort?.snuId}\n${classe2?._id},${notExistingCohortCode}`;
+    const mockFileBody = `Identifiant de la classe engagée,Session : Code de la session
+${classe1?._id},${cohort?.snuId}
+${notExistingClasseId},${cohort?.snuId}
+${classe2?._id},${notExistingCohortCode}
+${classe3?._id},""
+"",${cohort?.snuId}`;
+
     const mockFileBuffer = { Body: Buffer.from(mockFileBody) };
     (getFile as jest.Mock).mockResolvedValue(mockFileBuffer);
 
@@ -55,6 +62,7 @@ describe("POST /cle/classe-import", () => {
     const expectedResponse = [
       {
         classeId: classe1._id.toString(),
+        classeStatus: STATUS_CLASSE.ASSIGNED,
         cohortId: cohort._id.toString(),
         result: "success",
         cohortCode: cohort.snuId,
@@ -71,6 +79,18 @@ describe("POST /cle/classe-import", () => {
         cohortCode: notExistingCohortCode,
         result: "error",
         error: ERRORS.COHORT_NOT_FOUND,
+      },
+      {
+        classeId: classe3._id.toString(),
+        cohortCode: "",
+        result: "error",
+        error: FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED,
+      },
+      {
+        classeId: "",
+        cohortCode: cohort.snuId,
+        result: "error",
+        error: FUNCTIONAL_ERRORS.NO_CLASSE_ID_PROVIDED,
       },
     ];
     expect(response.body.ok).toBe(true);

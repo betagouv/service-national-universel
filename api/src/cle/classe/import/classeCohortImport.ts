@@ -1,3 +1,5 @@
+import { STATUS_CLASSE } from "snu-lib";
+
 export enum ClasseCohortImportKey {
   SEPT_2024 = "SEPT_2024",
 }
@@ -14,6 +16,7 @@ export interface ClasseCohortCSV {
 
 export interface ClasseCohortImportResult {
   classeId: string;
+  classeStatus?: keyof typeof STATUS_CLASSE;
   cohortId?: string;
   cohortCode?: string;
   cohortName?: string;
