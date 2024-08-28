@@ -3,7 +3,7 @@ import passport from "passport";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 import emailsEmitter from "../../emails";
-import snuLib, { FUNCTIONAL_ERRORS } from "snu-lib";
+import snuLib, { FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
 import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS } from "snu-lib";
 
 import { dbConnect, dbClose } from "../helpers/db";
@@ -45,6 +45,12 @@ mockEsClient({
 jest.mock("../../emails", () => ({
   emit: jest.fn(),
 }));
+
+class MockDate extends Date {
+  constructor() {
+    super(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000);
+  }
+}
 
 beforeEach(async () => {
   await ClasseModel.deleteMany({});
@@ -278,6 +284,8 @@ describe("PUT /cle/classe/:id", () => {
   it("should send mail if value.estimatedSeats > classe.estimatedSeats", async () => {
     const classeFixture = createFixtureClasse({ estimatedSeats: 5, totalSeats: 5 });
     const classe = await createClasse(classeFixture);
+    // @ts-ignore
+    global.Date = MockDate;
     const res = await request(getAppHelper())
       .put(`/cle/classe/${classe._id}`)
       .send({
@@ -293,6 +301,7 @@ describe("PUT /cle/classe/:id", () => {
         _id: classe._id,
       }),
     );
+    global.Date = Date;
   });
 
   it("should updte totalSeats when estimatedSeats change and date < LIMIT_DATE_ESTIMATED_SEATS", async () => {
