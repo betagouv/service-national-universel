@@ -34,7 +34,8 @@ export class AppelAProjetService {
 
     let processCounter = 0;
     for (const appelAProjet of appelAProjetsRetained) {
-      logger.debug(`AppelAProjetService.sync() - processCounter: ${processCounter++} / ${appelAProjetsRetained.length} (${appelAProjet.etablissement?.uai})`);
+      logger.debug(`AppelAProjetService.sync() - processCounter: ${processCounter} / ${appelAProjetsRetained.length} (${appelAProjet.etablissement?.uai})`);
+      processCounter++;
       const option = appelAProjetOptions.fixes?.find(({ numberDS }) => numberDS === appelAProjet.numberDS);
       if (option?.useExistingEtablissement || appelAProjetEtablissementService.getEtablissementFromAnnuaire(appelAProjet, etablissements)) {
         try {
