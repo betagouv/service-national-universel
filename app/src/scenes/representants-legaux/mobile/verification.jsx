@@ -188,21 +188,21 @@ const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Représentant(e) légal(e) 1 </h1>
           </div>
-          <Details title="lien" value={translate(young.parent1Status)} />
-          <Details title="prénom" value={young.parent1FirstName} />
-          <Details title="nom" value={young.parent1LastName} />
-          <Details title="e-mail" value={young.parent1Email} />
-          <Details title="téléphone" value={concatPhoneNumberWithZone(young.parent1Phone, young.parent1PhoneZone)} />
+          <Details title="Lien" value={translate(young.parent1Status)} />
+          <Details title="Prénom" value={young.parent1FirstName} />
+          <Details title="Nom" value={young.parent1LastName} />
+          <Details title="E-mail" value={young.parent1Email} />
+          <Details title="Téléphone" value={concatPhoneNumberWithZone(young.parent1Phone, young.parent1PhoneZone)} />
           {young.parent2Status ? (
             <>
               <div className="mt-4 flex items-center justify-between">
                 <h1 className="text-lg font-bold text-[#161616]">Représentant(e) légal(e) 2 </h1>
               </div>
-              <Details title="lien" value={translate(young.parent2Status)} />
-              <Details title="prénom" value={young.parent2FirstName} />
-              <Details title="nom" value={young.parent2LastName} />
-              <Details title="e-mail" value={young.parent2Email} />
-              <Details title="téléphone" value={concatPhoneNumberWithZone(young.parent2Phone, young.parent2PhoneZone)} />
+              <Details title="Lien" value={translate(young.parent2Status)} />
+              <Details title="Prénom" value={young.parent2FirstName} />
+              <Details title="Nom" value={young.parent2LastName} />
+              <Details title="E-mail" value={young.parent2Email} />
+              <Details title="Téléphone" value={concatPhoneNumberWithZone(young.parent2Phone, young.parent2PhoneZone)} />
             </>
           ) : null}
         </div>
