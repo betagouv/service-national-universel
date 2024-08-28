@@ -9,7 +9,7 @@ export const apiEducation = async ({ filters, page, size }, options = { headers:
   try {
     const params = formatParams(filters, page, size);
     const url = new URL(baseUrl + "?" + params);
-    logger.debug("apiEducation - url: ", url.toString());
+    logger.debug(`apiEducation - url: ${url.toString()}`);
 
     const res = await fetch(url, {
       ...options,
@@ -23,7 +23,7 @@ export const apiEducation = async ({ filters, page, size }, options = { headers:
 
     const data: EtablissementProviderDto[] = await res.json();
 
-    logger.debug("apiEducation - response.length: ", data.length);
+    logger.debug(`apiEducation - response.length: ${data.length}`);
     return data;
   } catch (e) {
     capture(e);

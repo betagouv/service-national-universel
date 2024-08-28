@@ -1,7 +1,7 @@
 import { addCohortToClasse, addCohortToClasseByCohortSnuId, importClasseCohort } from "./classeImportService";
 import * as classeImportService from "./classeImportService";
 import { CohortModel, ClasseModel, ClasseDocument } from "../../../models";
-import { ERRORS } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE } from "snu-lib";
 import mongoose from "mongoose";
 import { ClasseCohortImportKey } from "./classeCohortImport";
 import { getFile } from "../../../utils";
@@ -104,7 +104,7 @@ describe("addCohortToClasse", () => {
 
     expect(CohortModel.findById).toHaveBeenCalledWith(cohortId);
     expect(ClasseModel.findById).toHaveBeenCalledWith(classeId);
-    expect(setMock).toHaveBeenCalledWith({ cohortId: cohortId, cohort: cohortName });
+    expect(setMock).toHaveBeenCalledWith({ cohortId: cohortId, cohort: cohortName, status: STATUS_CLASSE.ASSIGNED });
     expect(saveMock).toHaveBeenCalledWith({ fromUser: { firstName: `IMPORT_CLASSE_COHORT_${importKey}` } });
   });
 
@@ -148,6 +148,6 @@ describe("addCohortToClasseByCohortSnuId", () => {
   });
 
   it("should throw an error if the cohortSnuId is undefined", async () => {
-    await expect(addCohortToClasseByCohortSnuId(classeId, undefined, importKey)).rejects.toThrow(ERRORS.INVALID_PARAMS);
+    await expect(addCohortToClasseByCohortSnuId(classeId, undefined, importKey)).rejects.toThrow(FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED);
   });
 });
