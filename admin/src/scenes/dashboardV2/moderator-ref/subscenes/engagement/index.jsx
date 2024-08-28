@@ -2,20 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { HiHome } from "react-icons/hi";
 
-import {
-  getCohortNames,
-  departmentList,
-  regionList,
-  ROLES,
-  translateInscriptionStatus,
-  getDepartmentNumber,
-  YOUNG_STATUS,
-  academyList,
-  academyToDepartments,
-  departmentToAcademy,
-  department2region,
-  region2department,
-} from "snu-lib";
+import { departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
+import { YOUNG_STATUS } from "snu-lib";
+import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib";
+import { department2region, region2department } from "snu-lib";
 import { getCohortNameList } from "@/services/cohort.service";
 import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
@@ -85,7 +75,7 @@ export default function Index() {
         id: "cohorts",
         name: "Cohorte",
         fullValue: "Toutes",
-        options: getCohortNames().map((cohort) => ({ key: cohort, label: cohort })),
+        options: getCohortNameList(cohorts).map((cohort) => ({ key: cohort, label: cohort })),
         sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);

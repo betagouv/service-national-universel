@@ -16,7 +16,6 @@ const {
   isInRuralArea,
   PHONE_ZONES_NAMES_ARR,
   formatPhoneNumberFromPhoneZone,
-  getCohortNames,
   isYoungInReinscription,
   isCle,
   REGLEMENT_INTERIEUR_VERSION,
@@ -381,7 +380,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     }
 
     if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && !young?.inscriptionDoneDate) {
-      const cohort = await CohortModel.findOne({ name: young.cohort });
+      const cohort = await CohortModel.findById(young.cohortId);
       // If latest ID proof has an invalid date, notify parent 1.
       if (young.latestCNIFileExpirationDate < new Date(cohort.dateStart)) {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
@@ -426,10 +425,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
 router.put("/changeCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      cohort: Joi.string()
-        .trim()
-        .valid(...getCohortNames(true, false, false))
-        .required(),
+      cohort: Joi.string().trim().required(),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {
@@ -490,7 +486,7 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       }
       let CNIFileNotValidOnStart = undefined;
       if (young.cohort !== COHORTS.AVENIR) {
-        const cohort = await CohortModel.findOne({ name: young.cohort });
+        const cohort = await CohortModel.findById(young.cohortId);
         CNIFileNotValidOnStart = value.date < new Date(cohort.dateStart);
       }
       young.set({ latestCNIFileExpirationDate: value.date, latestCNIFileCategory: value.latestCNIFileCategory, CNIFileNotValidOnStart });
@@ -513,7 +509,7 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       }
       let data = { ...value, ...validateCorrectionRequest(young, ["latestCNIFileExpirationDate", "cniFile", "latestCNIFileCategory"]) };
       if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      const cohort = await CohortModel.findOne({ name: young.cohort });
+      const cohort = await CohortModel.findById(young.cohortId);
       const CNIFileNotValidOnStart = data.latestCNIFileExpirationDate < new Date(cohort.dateStart);
       young.set({ ...data, CNIFileNotValidOnStart });
     }
@@ -531,7 +527,7 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // If latest ID proof has an invalid date, notify parent 1.
-    const cohort = await CohortModel.findOne({ name: young.cohort });
+    const cohort = await CohortModel.findById(young.cohortId);
     const notifyExpirationDate = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
     const needCniRelance = young?.parentStatementOfHonorInvalidId !== "true";
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);

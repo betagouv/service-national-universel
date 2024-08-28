@@ -1,4 +1,5 @@
 import { capture } from "../../sentry";
+const { logger } = require("../../logger");
 import { EtablissementProviderDto } from "./etablissementType";
 import fetch from "node-fetch";
 
@@ -8,7 +9,7 @@ export const apiEducation = async ({ filters, page, size }, options = { headers:
   try {
     const params = formatParams(filters, page, size);
     const url = new URL(baseUrl + "?" + params);
-    console.log("apiEducation - url: ", url.toString());
+    logger.debug(`apiEducation - url: ${url.toString()}`);
 
     const res = await fetch(url, {
       ...options,
@@ -22,7 +23,7 @@ export const apiEducation = async ({ filters, page, size }, options = { headers:
 
     const data: EtablissementProviderDto[] = await res.json();
 
-    console.log("apiEducation - response.length: ", data.length);
+    logger.debug(`apiEducation - response.length: ${data.length}`);
     return data;
   } catch (e) {
     capture(e);

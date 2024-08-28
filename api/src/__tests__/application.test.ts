@@ -25,7 +25,7 @@ afterAll(dbClose);
 
 describe("Application", () => {
   describe("POST /application", () => {
-    it.skip("should return 404 when young is not found", async () => {
+    it("should return 404 when young is not found", async () => {
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
         .post("/application")
@@ -40,11 +40,11 @@ describe("Application", () => {
         .send({ ...application, youngId: young._id, missionId: notExisitingMissionId });
       expect(res.status).toBe(404);
     });
-    it.skip("should only allow young to apply for themselves", async () => {
+    it("should only allow young to apply for themselves", async () => {
       const lastYear = new Date().getFullYear() - 1;
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
-      const secondYoung = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const secondYoung = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
@@ -66,7 +66,7 @@ describe("Application", () => {
 
       passport.user = previous;
     });
-    it.skip("should create an application when priority is given", async () => {
+    it("should create an application when priority is given", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
@@ -89,7 +89,7 @@ describe("Application", () => {
       expect(res.body.data.priority).toBe("2");
       expect(res.body.data.youngId).toBe(young._id.toString());
     });
-    it.skip("should update young status", async () => {
+    it("should update young status", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
@@ -102,7 +102,7 @@ describe("Application", () => {
       expect(updatedYoung?.statusPhase2).toBe("IN_PROGRESS");
       expect([...updatedYoung!.phase2ApplicationStatus]).toStrictEqual(["WAITING_VALIDATION"]);
     });
-    it.skip("should update mission places left status", async () => {
+    it("should update mission places left status", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 100, placesTotal: 100 });
       const application = getNewApplicationFixture();
@@ -117,7 +117,7 @@ describe("Application", () => {
     it("should return 403 when young is under 15 years old", async () => {
       const year = new Date().getFullYear();
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, birthdateAt: new Date(`${year - 12}-01-01T00:00:00.000Z`) }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, birthdateAt: new Date(`${year - 12}-01-01T00:00:00.000Z`) }));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
@@ -131,7 +131,7 @@ describe("Application", () => {
     });
     it("should return 403 when cohort is too old", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "2019" }));
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
@@ -146,7 +146,7 @@ describe("Application", () => {
     it("should return 403 when young has not finished phase1", async () => {
       const year = new Date().getFullYear();
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION }));
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;

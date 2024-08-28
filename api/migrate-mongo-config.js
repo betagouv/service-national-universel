@@ -6,7 +6,6 @@ const config = require("config");
 // This IIFE is needed to allow using mongoose into down script as it will be called from CLI
 if (config.ENVIRONMENT === "development") {
   (async () => {
-    console.log("MIGRATE-MONGO-CONFIG - Initializing database and Mongoose Connection...");
     await initDB();
   })();
 }

@@ -1,6 +1,7 @@
-const { ES_NO_LIMIT, ROLES, getCohortNames, YOUNG_STATUS, YOUNG_PHASE, formatDateForPostGre } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, YOUNG_STATUS, YOUNG_PHASE, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
 const config = require("config");
+const { CohortModel } = require("../../models");
 
 async function getAccessToken(endpoint, apiKey) {
   const response = await fetch(`${endpoint}/auth/token`, {
@@ -145,8 +146,8 @@ async function getYoungRegisteredWithParticularSituation(startDate, endDate, use
 
 async function getDepartmentRegistrationGoal(startDate, endDate, user) {
   // ref reg only
-  const cohorts = getCohortNames();
-  const cohort = cohorts[cohorts.length - 2];
+  const cohorts = await CohortModel.find({}, { name: 1 });
+  const { name: cohort } = cohorts[cohorts.length - 2];
   let body = {
     query: {
       bool: {

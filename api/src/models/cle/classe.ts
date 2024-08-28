@@ -55,6 +55,12 @@ const schema = new Schema({
       description: "Cohorte de la classe",
     },
   },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
+    },
+  },
 
   uniqueKey: {
     type: String,

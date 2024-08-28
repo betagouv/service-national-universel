@@ -2,10 +2,11 @@ const esClient = require("../es");
 const path = require("path");
 
 const { capture } = require("../sentry");
-const { YoungModel } = require("../models");
+const { YoungModel, CohortModel } = require("../models");
+
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, translate, formatStringDate, END_DATE_PHASE1 } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, translate, formatStringDate } = require("snu-lib");
 const config = require("config");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
@@ -17,13 +18,14 @@ exports.handler = async () => {
     let countMissionSent = {};
     let countMissionSentCohort = {};
 
-    const cohort = Object.keys(END_DATE_PHASE1).filter((key) => {
-      const diff = diffYear(END_DATE_PHASE1[key], new Date());
-      return diff < 1;
-    });
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    const cohorts = await CohortModel.find({ dateEnd: { $gte: oneYearAgo } });
+    const cohortsName = cohorts.map((s) => s.name);
 
     const cursor = YoungModel.find({
-      cohort: { $in: cohort },
+      cohort: { $in: cohortsName },
       status: "VALIDATED",
       statusPhase1: "DONE",
       statusPhase2: { $nin: ["VALIDATED", "WITHDRAWN"] },
@@ -61,7 +63,7 @@ exports.handler = async () => {
           // stock the list in young
           const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
           // This is used in order to minimize risk of version conflict.
-          const youngForUpdate = await YoungModel.findOne({ _id: young._id });
+          const youngForUpdate = await YoungModel.findById(young._id);
           youngForUpdate.set({ missionsInMail });
           await youngForUpdate.save({ fromUser: { firstName: `Cron ${fileName}` } });
         }
@@ -164,10 +166,4 @@ const getMissions = async ({ young }) => {
     capture(e);
     slack.error({ title: "noticePushMission", text: JSON.stringify(e) });
   }
-};
-
-const diffYear = (date1, date2) => {
-  const d1 = new Date(date1);
-  const d2 = new Date(date2);
-  return d2.getFullYear() - d1.getFullYear();
 };

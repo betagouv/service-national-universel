@@ -1,5 +1,5 @@
 // ! Copy to local-development.js & Edit local configuration
-const { getSecrets, CI_PROJECT_ID, PROD_PROJECT_ID } = require("../src/secrets-manager");
+const { getSecrets, CI_PROJECT_ID } = require("../src/secrets-manager");
 
 const secretKey = process.env.SCW_SECRET_KEY;
 
@@ -13,7 +13,10 @@ const secrets = getSecrets(secretKey, CI_PROJECT_ID, "snu-ci");
 module.exports = {
   ENABLE_SENDINBLUE: false,
   ...secrets,
+  // MAIL_TRANSPORT: "STMP", // BREVO / SMTP
+  // SMTP_HOST: "localhost",
+  // SMTP_PORT: 1025,
   // REDIS_URL: "redis://127.0.0.1:6379",
-  // MAILCATCHER_HOST: "localhost",
-  // MAILCATCHER_PORT: 1025,
+  // MONGO_URL: "mongodb://localhost:27017/local_app",
+  // ES_ENDPOINT: "http://localhost:9200",
 };

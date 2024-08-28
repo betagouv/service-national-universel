@@ -6,7 +6,7 @@ if (!secretKey) {
   throw new Error("SCW_SECRET_KEY is required to get configuration secrets");
 }
 
-const REVISION = 23;
+const REVISION = 24;
 const secrets = getSecrets(secretKey, PROD_PROJECT_ID, "snu-production", REVISION);
 
 module.exports = {
@@ -18,5 +18,7 @@ module.exports = {
   SENTRY_PROFILE_SAMPLE_RATE: 0.2,
   SENTRY_TRACING_SAMPLE_RATE: 0.01,
   TASK_QUEUE_PREFIX: "production",
+  MAIL_TRANSPORT: "BREVO",
+  ENABLE_2FA: true,
   ...secrets,
 };

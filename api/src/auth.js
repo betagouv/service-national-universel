@@ -4,7 +4,8 @@ const Joi = require("joi");
 
 const { capture, captureMessage } = require("./sentry");
 const config = require("config");
-const { sendTemplate, regexp_exception_staging } = require("./brevo");
+const { logger } = require("./logger");
+const { sendTemplate } = require("./brevo");
 const {
   JWT_SIGNIN_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC,
@@ -31,7 +32,7 @@ const {
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
-const { ClasseModel, EtablissementModel } = require("./models");
+const { ClasseModel, EtablissementModel, CohortModel } = require("./models");
 const { getFeatureFlagsAvailable } = require("./featureFlag/featureFlagService");
 
 class Auth {
@@ -125,6 +126,8 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
+      const cohortModel = await CohortModel.findOne({ name: cohort });
+
       const user = await this.model.create({
         email,
         phone,
@@ -146,6 +149,7 @@ class Auth {
         schoolId,
         zip,
         cohort,
+        cohortId: cohortModel?._id,
         grade,
         inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
         emailVerified: "false",
@@ -184,7 +188,6 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
-      console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -251,6 +254,8 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
+      const cohort = await CohortModel.findById(classe.cohortId);
+
       const userData = {
         email,
         phone,
@@ -286,6 +291,7 @@ class Auth {
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
+        cohortId: cohort?._id,
       };
 
       const user = await this.model.create(userData);
@@ -322,7 +328,6 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
-      console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -367,8 +372,7 @@ class Auth {
 
       const shouldUse2FA = async () => {
         try {
-          if (config.ENVIRONMENT === "development") return false;
-          if (["staging", "ci", "custom"].includes(config.ENVIRONMENT) && !user.email.match(regexp_exception_staging)) return false;
+          if (!config.ENABLE_2FA) return false;
 
           const trustToken = req.cookies[`trust_token-${user._id}`];
           if (!trustToken) return true;
@@ -389,7 +393,9 @@ class Auth {
 
       if (await shouldUse2FA()) {
         const token2FA = await crypto.randomInt(1000000);
-        if (config.ENVIRONMENT === "development") console.log(`2FA code : ${token2FA}`);
+        if (config.ENVIRONMENT === "development") {
+          logger.debug(`2FA code : ${token2FA}`);
+        }
 
         if (isYoung(user)) user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS });
         else if (isReferent(user)) user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS });

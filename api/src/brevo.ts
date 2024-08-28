@@ -2,6 +2,7 @@ import fs from "fs";
 import fetch from "node-fetch";
 import queryString from "querystring";
 import config from "config";
+import { logger } from "./logger";
 
 import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
 
@@ -14,8 +15,6 @@ const SENDER_NAME_SMS = "SNU";
 const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 //https://my.sendinblue.com/lists/add-attributes
-
-const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports|snu)\.gouv\.fr|lexfo\.fr/;
 
 type ContactAttribute = {
   FIRSTNAME: string;
@@ -50,12 +49,16 @@ type Email = {
 
 const api = async (path, options: any = {}, force?: boolean) => {
   try {
-    if (!config.ENABLE_SENDINBLUE && !force) return console.log("No mail sent as ENABLE_SENDINBLUE is disabled");
+    if (!config.ENABLE_SENDINBLUE && !force) {
+      logger.warn("Not possible to use BREVO api as ENABLE_SENDINBLUE is disabled");
+      return;
+    }
 
     if (!config.SENDINBLUEKEY) {
-      console.log("NO SENDINBLUE KEY");
-      console.log(options);
-      return console.log("Mail was not sent.");
+      logger.error("NO SENDINBLUE KEY");
+      logger.debug(options);
+      logger.debug("Mail was not sent.");
+      return;
     }
 
     const res = await fetch(`https://api.sendinblue.com/v3${path}`, {
@@ -70,7 +73,6 @@ const api = async (path, options: any = {}, force?: boolean) => {
     // Sometimes, sendinblue returns a 204 with an empty body
     return true;
   } catch (e) {
-    console.log("Erreur in sendinblue api", e);
     capture(e, { extra: { path, options } });
   }
 };
@@ -96,10 +98,9 @@ export async function sendSMS(phoneNumber, content, tag) {
       captureMessage("Error sending an SMS", { extra: { sms, body } });
     }
     if (config.ENVIRONMENT !== "production") {
-      console.log(body, sms);
+      logger.debug("", { body, sms });
     }
   } catch (e) {
-    console.log("Erreur in sendSMS", e);
     capture(e);
   }
 }
@@ -107,17 +108,16 @@ export async function sendSMS(phoneNumber, content, tag) {
 // https://developers.sendinblue.com/reference#sendtransacemail
 export async function sendEmail(to: Email[], subject: string, htmlContent, { params, attachment, cc, bcc }: Omit<SendMailParameters, "emailTo"> = {}) {
   try {
-    const body: any = {};
-    if (config.ENVIRONMENT !== "production") {
-      if (config.MAILCATCHER_PORT && config.MAILCATCHER_HOST) {
-        // TODO: faire un return après le simulate
-        await sendMailCatcher(subject, htmlContent, { emailTo: to, cc, bcc, attachment });
-      }
-      console.log("to before filter:", to);
-      to = to.filter((e) => e.email.match(regexp_exception_staging));
-      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
-      if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp_exception_staging));
+    if (config.get("MAIL_TRANSPORT") === "SMTP") {
+      await sendMailCatcher(subject, htmlContent, { emailTo: to, cc, bcc, attachment });
+      return;
     }
+
+    if (config.get("MAIL_TRANSPORT") !== "BREVO") {
+      return;
+    }
+
+    const body: any = {};
     body.to = [to];
     if (cc?.length) body.cc = cc;
     if (bcc?.length) body.bcc = bcc;
@@ -132,10 +132,9 @@ export async function sendEmail(to: Email[], subject: string, htmlContent, { par
       captureMessage("Error sending an email", { extra: { mail, body } });
     }
     if (config.ENVIRONMENT !== "production") {
-      console.log(body, mail);
+      logger.debug("", { body, mail });
     }
   } catch (e) {
-    console.log("Erreur in sendEmail", e);
     capture(e);
   }
 }
@@ -160,7 +159,6 @@ export async function getEmailsList({ email, templateId, messageId, startDate, e
       }, {});
     return await api(`/smtp/emails?${queryString.stringify(filteredBody)}`, { method: "GET" });
   } catch (e) {
-    console.log("Erreur in getEmail", e);
     capture(e);
   }
 }
@@ -169,7 +167,6 @@ export async function getEmailContent(uuid) {
   try {
     return await api(`/smtp/emails/${uuid}`, { method: "GET" });
   } catch (e) {
-    console.log("Erreur in getEmail", e);
     capture(e);
   }
 }
@@ -193,11 +190,11 @@ function replaceTemplateParams(content: string, params: SendMailParameters["para
 }
 
 async function simulateTemplate(id: string, { params, emailTo, cc, bcc, attachment }: SendMailParameters) {
-  if ((!config.ENABLE_SENDINBLUE_SIMULATE_TEMPLATE && (!config.MAILCATCHER_PORT || !config.MAILCATCHER_HOST)) || !config.SENDINBLUEKEY) return null;
+  if (!config.SENDINBLUEKEY) return null;
   const template: BrevoEmailTemplate = await api(`/smtp/templates/${id}`, undefined, true);
   const subject = replaceTemplateParams(template.subject, params);
   const html = replaceTemplateParams(template.htmlContent, params);
-  if (config.MAILCATCHER_PORT && config.MAILCATCHER_HOST) {
+  if (config.SMTP_PORT && config.SMTP_HOST) {
     await sendMailCatcher(subject, html, {
       emailTo,
       cc,
@@ -228,15 +225,14 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
   try {
     if (!id) throw new Error("No template id provided");
 
-    const body: any = { templateId: parseInt(id) };
-    if (!options.force && config.ENVIRONMENT !== "production") {
-      // TODO: faire un return après le simulate
+    if (!options.force && config.get("MAIL_TRANSPORT") === "SMTP") {
       await simulateTemplate(id, { params, emailTo, cc, bcc, attachment });
-      console.log("emailTo before filter:", emailTo);
-      emailTo = emailTo?.filter((e) => e.email.match(regexp_exception_staging));
-      if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
-      if (bcc?.length) bcc = bcc.filter((e) => e.email.match(regexp_exception_staging));
+      return;
     }
+    if (!options.force && config.get("MAIL_TRANSPORT") !== "BREVO") {
+      return;
+    }
+    const body: any = { templateId: parseInt(id) };
     if (emailTo) body.to = emailTo;
     if (cc?.length) body.cc = cc;
     if (bcc?.length) body.bcc = bcc;
@@ -256,11 +252,10 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
       return;
     }
     if (config.ENVIRONMENT !== "production" || options.force) {
-      console.log(body, mail);
+      logger.debug("", { body, mail });
     }
     return mail;
   } catch (e) {
-    console.log("Erreur in sendTemplate", e);
     capture(e);
   }
 }
@@ -336,10 +331,16 @@ export async function updateContact(id, { attributes, emailBlacklisted, smsBlack
 }
 
 export async function sync(obj, type, { force } = { force: false }) {
-  if (config.ENVIRONMENT !== "production" && !force) return console.log("no sync brevo");
+  if (config.ENVIRONMENT !== "production" && !force) {
+    logger.debug("no sync brevo");
+    return;
+  }
   try {
     const user = JSON.parse(JSON.stringify(obj));
-    if (!user) return console.log("ERROR WITH ", obj);
+    if (!user) {
+      logger.error(`ERROR WITH ${obj}`);
+      return;
+    }
 
     const email = user.email;
     let parents: Contact[] = [];
@@ -386,7 +387,6 @@ export async function sync(obj, type, { force } = { force: false }) {
       syncContact(parent.email, parent.attributes, parent.listIds!);
     }
   } catch (e) {
-    console.log("error", e);
     capture(e);
   }
 }
@@ -403,7 +403,7 @@ export async function syncContact(email: string, attributes, listIds: number[]) 
 
 export async function unsync(obj, options = { force: false }) {
   if (config.ENVIRONMENT !== "production" && !options.force) {
-    console.log("no unsync brevo");
+    logger.debug("no unsync brevo");
     return;
   }
 
@@ -412,7 +412,7 @@ export async function unsync(obj, options = { force: false }) {
   try {
     await Promise.all(emails.map(deleteContact));
   } catch (error) {
-    console.log("Can't delete in brevo", emails);
+    logger.error(`Can't delete in brevo ${emails}`);
     capture(error);
   }
 }

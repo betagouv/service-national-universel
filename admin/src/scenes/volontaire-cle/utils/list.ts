@@ -60,7 +60,7 @@ export const getFilterArray = (bus, session, classes) => {
     },
     {
       title: "Étape de l'inscription",
-      name: "reinscriptionStep2023",
+      name: "inscriptionStep2023",
       parentGroup: "Dossier",
       missingLabel: "Non renseigné",
       translate: translate,
