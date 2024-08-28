@@ -901,7 +901,6 @@ describe("PUT /cle/classe/:id/referent", () => {
     const res = await request(getAppHelper()).put(`/cle/classe/${classe1._id}/referent`).send(newReferentDetails); // sending new referent data
     const referentId = (await ClasseModel.findById(classe1._id))?.referentClasseIds[0];
     const updatedReferent: ReferentDocument = (await ReferentModel.findById(referentId))!;
-    console.log(updatedReferent);
 
     expect(updatedReferent).toBeTruthy();
     expect(updatedReferent.firstName).toBe(newReferentDetails.firstName);
