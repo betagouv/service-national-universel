@@ -88,9 +88,9 @@ export default function StepWaitingConsent() {
         </DSFRContainer>
       ) : (
         <>
-          <DSFRContainer title={`${young?.parent1FirstName} ${young?.parent1LastName} a reçu un mail pour approuver votre demande d'inscription.`}>
+          <DSFRContainer title={`${young?.parent1FirstName} ${young?.parent1LastName} a reçu un email pour approuver votre demande d'inscription.`}>
             {error?.text && <Error {...error} onClose={() => setError({})} />}
-            <p className="mt-2 text-sm text-[#666666]">
+            <p className="mt-2 text-[16px] text-[#666666]">
               {isCLE
                 ? "Lorsque votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à votre établissement scolaire pour le valider."
                 : "Lorsque votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider."}
@@ -102,7 +102,7 @@ export default function StepWaitingConsent() {
                 <FaClock className="mr-2 inline-block" />
                 Consentement en attente
               </p>
-              <p className="mt-1 mb-0 text-sm text-[#666666]">
+              <p className="mt-1 mb-0 text-[16px] text-[#666666]">
                 Un email à été envoyé à <strong className="text-black">{young?.parent1Email}</strong>
               </p>
               <div className="mt-3 flex justify-between">
@@ -119,7 +119,7 @@ export default function StepWaitingConsent() {
             </span>
 
             {!isCLE && (
-              <div className="flex flex-col md:flex-row gap-6 justify-between items-center mt-8 md:mb-4 p-4 bg-[#F5F5FD]">
+              <div className="flex flex-col md:flex-row gap-6 justify-between items-left md:items-center mt-8 md:mb-4 p-4 bg-[#F5F5FD]">
                 <div className="flex flex-col justify-start items-start max-w-md">
                   <p className="m-0 mt-1 text-lg font-semibold">Comment s'est passée votre inscription&nbsp;?</p>
                   <p className="m-0 mt-1 text-sm">Partagez votre expérience et contribuez à l'amélioration de nos services</p>
