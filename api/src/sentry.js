@@ -44,9 +44,6 @@ function initSentry() {
   }
 }
 
-// * Adopt the same error capture strategy as Sentry
-// * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples
-
 function _flattenStack(stack) {
   // Remove new lines and merge spaces to get 1 line log output
   return stack.replace(/\n/g, " | ").replace(/\s+/g, " ");
@@ -63,9 +60,11 @@ function captureError(err, contexte) {
   return sentryCaptureException(err, contexte);
 }
 
+// * 09/24 -> Adopting progressively this capture strategy
+// * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples
 function capture(err, contexte) {
   if (!err) {
-    const msg = "Error not defined";
+    const msg = "Error not defined (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)";
     logger.error(`capture: ${msg}`);
     sentryCaptureMessage(msg);
     return;
@@ -77,16 +76,21 @@ function capture(err, contexte) {
 
     let currentError = err.cause;
     while (currentError instanceof Error) {
-      captureError(currentError, contexte);
+      const warningMessage =
+        "You should capture error earlier and adding dedicated context to it. This is a fallback, capturing same error a second time is ignored even with different context";
+      captureError(currentError, { ...contexte, contexts: { ...contexte.contexts, warning: { msg: warningMessage } } });
       currentError = currentError.cause;
     }
   } else if (err.error instanceof Error) {
-    capture(err.error, contexte); // Recursively handle the nested error
+    capture(err.error, {
+      ...contexte,
+      contexts: { ...contexte.contexts, warning: { msg: "Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples" } },
+    }); // Recursively handle the nested error
   } else if (err.message) {
-    logger.error(`capture: ${err.message}`);
+    logger.error(`capture: ${err.message} (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)`);
     sentryCaptureMessage(err.message, contexte);
   } else {
-    const msg = "Error not defined well: You should capture Error type";
+    const msg = "Error not defined well (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)";
     logger.error(`capture: ${msg}`);
     sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
@@ -97,7 +101,7 @@ function captureMessage(mess, contexte) {
     logger.error(`capture message: ${mess}`);
     return sentryCaptureMessage(mess, contexte);
   } else {
-    const msg = "Empty message captured";
+    const msg = "Empty message captured (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)";
     logger.error(`capture message: ${msg}`);
     return sentryCaptureMessage(msg);
   }
