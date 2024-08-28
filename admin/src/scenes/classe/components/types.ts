@@ -9,6 +9,7 @@ export type Rights = {
   canEditEstimatedSeats: boolean;
   canEditTotalSeats: boolean;
   canEditColoration: boolean;
+  canEditRef: boolean;
 };
 
 export type InfoBus = {

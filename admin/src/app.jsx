@@ -3,7 +3,7 @@ initSentry();
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import queryString from "query-string";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -12,66 +12,67 @@ import * as Sentry from "@sentry/react";
 
 import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
-import CGU from "./scenes/CGU";
-import Alerte from "./scenes/alerte";
-import Association from "./scenes/association";
-import Auth from "./scenes/auth";
-import Center from "./scenes/centersV2";
-import Content from "./scenes/content";
-import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
-import DesignSystemPage from "./scenes/develop/DesignSystemPage";
-import DSNJExport from "./scenes/dsnj-export";
-import EditTransport from "./scenes/edit-transport";
-import Goal from "./scenes/goal";
-import Inscription from "./scenes/inscription";
-import Missions from "./scenes/missions";
-import LigneBus from "./scenes/plan-transport/ligne-bus";
-import SchemaDeRepartition from "./scenes/plan-transport/schema-repartition";
-import TableDeRepartition from "./scenes/plan-transport/table-repartition";
-import PointDeRassemblement from "./scenes/pointDeRassemblement";
-import Profil from "./scenes/profil";
-import PublicSupport from "./scenes/public-support-center";
-import School from "./scenes/school";
-import SessionShareIndex from "./scenes/session-phase1/index";
-import Settings from "./scenes/settings";
-import Structure from "./scenes/structure";
-import SupportCenter from "./scenes/support-center";
-import Utilisateur from "./scenes/utilisateur";
-import Validate from "./scenes/validate";
-import Volontaires from "./scenes/volontaires";
-import VolontairesHeadCenter from "./scenes/volontaires-head-center";
-import VolontairesResponsible from "./scenes/volontaires-responsible";
-import Etablissement from "./scenes/etablissement";
-import Classe from "./scenes/classe";
-import VolontaireCle from "./scenes/volontaire-cle";
-import Contact from "./scenes/contact";
-import Signup from "./scenes/signup";
+
+const CGU = lazy(() => import("./scenes/CGU"));
+const Alerte = lazy(() => import("./scenes/alerte"));
+const Association = lazy(() => import("./scenes/association"));
+const Auth = lazy(() => import("./scenes/auth"));
+const Center = lazy(() => import("./scenes/centersV2"));
+const Content = lazy(() => import("./scenes/content"));
+const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
+const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
+const DSNJExport = lazy(() => import("./scenes/dsnj-export"));
+const EditTransport = lazy(() => import("./scenes/edit-transport"));
+const Goal = lazy(() => import("./scenes/goal"));
+const Inscription = lazy(() => import("./scenes/inscription"));
+const Missions = lazy(() => import("./scenes/missions"));
+const LigneBus = lazy(() => import("./scenes/plan-transport/ligne-bus"));
+const SchemaDeRepartition = lazy(() => import("./scenes/plan-transport/schema-repartition"));
+const TableDeRepartition = lazy(() => import("./scenes/plan-transport/table-repartition"));
+const PointDeRassemblement = lazy(() => import("./scenes/pointDeRassemblement"));
+const Profil = lazy(() => import("./scenes/profil"));
+const PublicSupport = lazy(() => import("./scenes/public-support-center"));
+const School = lazy(() => import("./scenes/school"));
+const SessionShareIndex = lazy(() => import("./scenes/session-phase1/index"));
+const Settings = lazy(() => import("./scenes/settings"));
+const Structure = lazy(() => import("./scenes/structure"));
+const SupportCenter = lazy(() => import("./scenes/support-center"));
+const Utilisateur = lazy(() => import("./scenes/utilisateur"));
+const Validate = lazy(() => import("./scenes/validate"));
+const Volontaires = lazy(() => import("./scenes/volontaires"));
+const VolontairesHeadCenter = lazy(() => import("./scenes/volontaires-head-center"));
+const VolontairesResponsible = lazy(() => import("./scenes/volontaires-responsible"));
+const Etablissement = lazy(() => import("./scenes/etablissement"));
+const Classe = lazy(() => import("./scenes/classe"));
+const VolontaireCle = lazy(() => import("./scenes/volontaire-cle"));
+const Contact = lazy(() => import("./scenes/contact"));
+const Signup = lazy(() => import("./scenes/signup"));
 
 //DashboardV2
-import DashboardHeadCenterV2 from "./scenes/dashboardV2/head-center";
-import DashboardV2 from "./scenes/dashboardV2/moderator-ref";
-import DashboardResponsibleV2 from "./scenes/dashboardV2/responsible";
-import DashboardVisitorV2 from "./scenes/dashboardV2/visitor";
+const DashboardHeadCenterV2 = lazy(() => import("./scenes/dashboardV2/head-center"));
+const DashboardV2 = lazy(() => import("./scenes/dashboardV2/moderator-ref"));
+const DashboardResponsibleV2 = lazy(() => import("./scenes/dashboardV2/responsible"));
+const DashboardVisitorV2 = lazy(() => import("./scenes/dashboardV2/visitor"));
 
 import Loader from "./components/Loader";
-import Footer from "./components/footer";
+const Footer = lazy(() => import("./components/footer"));
 
 import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST } from "./utils";
 
-import ModalCGU from "./components/modals/ModalCGU";
+const ModalCGU = lazy(() => import("./components/modals/ModalCGU"));
 import "./index.css";
-import Team from "./scenes/team";
+const Team = lazy(() => import("./scenes/team"));
 
 import { getCohorts } from "./services/cohort.service";
-import RestorePreviousSignin from "./components/RestorePreviousSignin";
+const RestorePreviousSignin = lazy(() => import("./components/RestorePreviousSignin"));
 import useRefreshToken from "./hooks/useRefreshToken";
 
-import SideBar from "./components/drawer/SideBar";
-import ApplicationError from "./components/layout/ApplicationError";
-import NotFound from "./components/layout/NotFound";
+const SideBar = lazy(() => import("./components/drawer/SideBar"));
+const ApplicationError = lazy(() => import("./components/layout/ApplicationError"));
+const NotFound = lazy(() => import("./components/layout/NotFound"));
 import { getDefaultSession } from "./utils/session";
 import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
 
@@ -85,19 +86,21 @@ class App extends React.Component {
           <Router history={history}>
             <ScrollToTop />
             <div className="main">
-              <Switch>
-                {/* Aucune authentification nécessaire */}
-                <SentryRoute path="/validate" component={Validate} />
-                <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-                <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
-                <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-                <SentryRoute path="/creer-mon-compte" component={Signup} />
-                <SentryRoute path="/verifier-mon-compte" component={Signup} />
-                {/* Authentification accessoire */}
-                <SentryRoute path="/auth" component={Auth} />
-                {/* Page par default (404 et Home) */}
-                <SentryRoute path="/" component={Home} />
-              </Switch>
+              <Suspense fallback={<Loader />}>
+                <Switch>
+                  {/* Aucune authentification nécessaire */}
+                  <SentryRoute path="/validate" component={Validate} />
+                  <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+                  <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
+                  <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+                  <SentryRoute path="/creer-mon-compte" component={Signup} />
+                  <SentryRoute path="/verifier-mon-compte" component={Signup} />
+                  {/* Authentification accessoire */}
+                  <SentryRoute path="/auth" component={Auth} />
+                  {/* Page par default (404 et Home) */}
+                  <SentryRoute path="/" component={Home} />
+                </Switch>
+              </Suspense>
             </div>
           </Router>
         </QueryClientProvider>
@@ -111,7 +114,7 @@ export default Sentry.withProfiler(App);
 const Home = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Auth.cohorts);
+  const cohorts = useSelector((state) => state.Cohorts);
   const { pathname, search } = useLocation();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
@@ -218,51 +221,53 @@ const Home = () => {
         <div className="flex flex-col w-full">
           <div className={`flex-1  min-h-screen`}>
             <Sentry.ErrorBoundary fallback={ApplicationError}>
-              <Switch>
-                <RestrictedRoute path="/structure" component={Structure} />
-                <RestrictedRoute path="/settings" component={Settings} />
-                <RestrictedRoute path="/alerte" component={Alerte} />
-                <RestrictedRoute path="/profil" component={Profil} />
-                <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-                <RestrictedRoute path="/school" component={School} />
-                <RestrictedRoute path="/mission" component={Missions} />
-                <RestrictedRoute path="/inscription" component={Inscription} />
-                <RestrictedRoute path="/user" component={Utilisateur} />
-                <RestrictedRoute path="/contenu" component={Content} />
-                <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-                <RestrictedRoute path="/centre" component={Center} />
-                <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
-                <RestrictedRoute path="/association" component={Association} />
-                <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
-                <RestrictedRoute path="/equipe" component={Team} />
-                <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
-                {/* Plan de transport */}
-                {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
-                {/* Table de répartition */}
-                <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
-                {/* Ligne de bus */}
-                <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
-                {/* Schéma de répartition */}
-                <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
-                <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
-                <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
-                {/* Institution */}
-                <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
-                <RestrictedRoute path="/etablissement" component={Etablissement} />
+              <Suspense fallback={<Loader />}>
+                <Switch>
+                  <RestrictedRoute path="/structure" component={Structure} />
+                  <RestrictedRoute path="/settings" component={Settings} />
+                  <RestrictedRoute path="/alerte" component={Alerte} />
+                  <RestrictedRoute path="/profil" component={Profil} />
+                  <RestrictedRoute path="/volontaire" component={renderVolontaire} />
+                  <RestrictedRoute path="/school" component={School} />
+                  <RestrictedRoute path="/mission" component={Missions} />
+                  <RestrictedRoute path="/inscription" component={Inscription} />
+                  <RestrictedRoute path="/user" component={Utilisateur} />
+                  <RestrictedRoute path="/contenu" component={Content} />
+                  <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
+                  <RestrictedRoute path="/centre" component={Center} />
+                  <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
+                  <RestrictedRoute path="/association" component={Association} />
+                  <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+                  <RestrictedRoute path="/equipe" component={Team} />
+                  <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
+                  {/* Plan de transport */}
+                  {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
+                  {/* Table de répartition */}
+                  <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
+                  {/* Ligne de bus */}
+                  <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
+                  {/* Schéma de répartition */}
+                  <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
+                  <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
+                  <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
+                  {/* Institution */}
+                  <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
+                  <RestrictedRoute path="/etablissement" component={Etablissement} />
 
-                <RestrictedRoute path="/classes" component={Classe} />
-                <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
-                <RestrictedRoute path="/mes-contacts" component={Contact} />
-                {/* Only for developper eyes... */}
-                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? (
-                  <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />
-                ) : null}
-                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
-                {/* DASHBOARD */}
-                <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
-                {/* Default route (redirection de la home et 404) */}
-                <RestrictedRoute path="/" component={(props) => <NotFound {...props} homePath="/dashboard" />} />
-              </Switch>
+                  <RestrictedRoute path="/classes" component={Classe} />
+                  <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
+                  <RestrictedRoute path="/mes-contacts" component={Contact} />
+                  {/* Only for developper eyes... */}
+                  {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? (
+                    <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />
+                  ) : null}
+                  {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
+                  {/* DASHBOARD */}
+                  <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
+                  {/* Default route (redirection de la home et 404) */}
+                  <RestrictedRoute path="/" component={(props) => <NotFound {...props} homePath="/dashboard" />} />
+                </Switch>
+              </Suspense>
             </Sentry.ErrorBoundary>
           </div>
           <Footer />

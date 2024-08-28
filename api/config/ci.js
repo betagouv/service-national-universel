@@ -16,5 +16,6 @@ module.exports = {
   ADMIN_URL: "https://admin.ci.beta-snu.dev",
   TASK_QUEUE_PREFIX: "ci",
   MAIL_TRANSPORT: "SMTP",
+  LOG_LEVEL: "debug",
   ...secrets,
 };

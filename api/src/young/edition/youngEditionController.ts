@@ -39,6 +39,7 @@ import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
 import { format } from "date-fns";
 import config from "config";
+const { logger } = require("../../logger");
 import { validateId, idSchema } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
 import { canEditYoungConsent, updateYoungConsent } from "./youngEditionService";
@@ -239,7 +240,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     });
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
-    console.log("🚀 ~ file: young-edition.js:191 ~ router.put ~ value:", value);
+    logger.debug("🚀 ~ file: young-edition.js:191 ~ router.put ~ value:", value);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -287,7 +288,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("joi error: ", error);
+      logger.debug("joi error: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -383,7 +384,7 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("joi error: ", error);
+      logger.debug("joi error: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -492,7 +493,7 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("joi error: ", error);
+      logger.debug("joi error: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 

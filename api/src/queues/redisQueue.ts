@@ -11,16 +11,11 @@ import * as cronsQueue from "./cronsQueue";
 const queues: Queue[] = [];
 const workers: Worker[] = [];
 
-function initRedisConnection() {
+export function initQueues() {
   const opts = {
     enableOfflineQueue: false,
-    maxRetriesPerRequest: null,
   };
-  return new Redis(config.get("REDIS_URL"), opts);
-}
-
-export function initQueues() {
-  const connection = initRedisConnection();
+  const connection = new Redis(config.get("REDIS_URL"), opts);
   queues.push(sendMailQueue.initQueue(connection));
   if (config.get("RUN_CRONS")) {
     queues.push(cronsQueue.initQueue(connection));
@@ -38,7 +33,10 @@ export async function closeQueues() {
 }
 
 export function initWorkers() {
-  const connection = initRedisConnection();
+  const opts = {
+    maxRetriesPerRequest: null,
+  };
+  const connection = new Redis(config.get("REDIS_URL"), opts);
   workers.push(sendMailQueue.initWorker(connection));
   if (config.get("RUN_CRONS")) {
     workers.push(cronsQueue.initWorker(connection));

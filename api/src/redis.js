@@ -1,6 +1,7 @@
 const redis = require("redis");
 const config = require("config");
 const { capture } = require("./sentry");
+const { logger } = require("./logger");
 
 let client = null;
 
@@ -18,13 +19,13 @@ async function initRedisClient() {
   });
 
   client.on("error", (error) => {
-    capture(new Error(`Redis client error: ${error.message}`));
+    capture(error);
   });
 
-  client.on("connect", () => console.log("REDIS: connect"));
-  client.on("ready", () => console.log("REDIS: ready"));
-  client.on("end", () => console.log("REDIS: end"));
-  client.on("reconnecting", () => console.log("REDIS: reconnecting"));
+  client.on("connect", () => logger.debug("REDIS: connect"));
+  client.on("ready", () => logger.debug("REDIS: ready"));
+  client.on("end", () => logger.debug("REDIS: end"));
+  client.on("reconnecting", () => logger.debug("REDIS: reconnecting"));
 
   await client.connect();
 }

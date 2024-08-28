@@ -77,7 +77,6 @@ const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Téléchargez vot
             </div>
           </div>
         </li>
-
         <li className="mt-1 flex px-3 py-2 gap-3">
           <div>
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200 text-sm text-gray-700">2</span>
@@ -90,39 +89,50 @@ const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Téléchargez vot
           </div>
         </li>
 
-        <li className="flex bg-blue-50 rounded-xl px-3 py-4 mt-3 gap-3">
-          <div>
-            <span className="flex h-8 w-8 bg-white shrink-0 items-center justify-center rounded-full border border-gray-300 text-sm text-gray-700">3</span>
-          </div>
-          {email ? (
-            <div>
-              <p className="text-sm text-gray-800 font-bold">Envoyer l'ensemble des documents par e-mail</p>
-              <p className="text-xs text-gray-700 leading-relaxed">
-                à{" "}
-                <a href={`mailto:${email}`} className="text-blue-600 underline underline-offset-2 break-normal">
-                  <span className="inline-block text-gray-500 underline underline-offset-2">{email}</span>
-                </a>{" "}
-                avant votre arrivé au séjour
-              </p>
-              <div className="mt-3 border rounded-xl">
-                <ul className="p-3 list-disc list-outside ms-4 text-xs text-gray-600 leading-relaxed">
-                  <li>Les pièces jointes doivent peser moins de 10 Mo.</li>
-                  <li>
-                    Si vous n’arrivez pas à envoyer la fiche sanitaire et les documents annexes, vous pourrez les remettre au référent sanitaire en mains propres le jour de votre
-                    arrivée au centre du séjour.
-                  </li>
-                </ul>
+        {email ? (
+          <>
+            <li className="flex bg-blue-50 rounded-xl px-3 py-4 mt-3 gap-3">
+              <div>
+                <span className="flex h-8 w-8 bg-white shrink-0 items-center justify-center rounded-full border border-gray-300 text-sm text-gray-700">3</span>
               </div>
-            </div>
-          ) : (
+              <div>
+                <p className="bg-[#DBEAFE] w-fit rounded-sm px-1.5 text-xs text-[#1E40AF] font-medium">Avant le départ</p>
+                <p className="text-sm text-gray-800 font-bold">Envoyer l'ensemble des documents par e-mail</p>
+                <p className="text-xs text-gray-700 leading-relaxed">
+                  à{" "}
+                  <a href={`mailto:${email}`} className="text-blue-600 underline underline-offset-2 break-normal">
+                    <span className="inline-block underline-none text-sm">{email}</span>
+                  </a>{" "}
+                </p>
+              </div>
+            </li>
+            <li className="flex bg-blue-50 rounded-xl px-3 py-4 mt-3 gap-3">
+              <div>
+                <span className="flex h-8 w-8 bg-white shrink-0 items-center justify-center rounded-full border border-gray-300 text-sm text-gray-700">4</span>
+              </div>
+              <div>
+                <p className="bg-[#DBEAFE] w-fit rounded-sm px-1.5 text-xs text-[#1E40AF] font-medium">Le jour du départ</p>
+                <p className="text-sm text-gray-800 font-bold">Remettre l’ensemble des documents en mains propres</p>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  à l’équipe d’encadrement, dans une enveloppe portant la mention <i>“À l’attention du référent sanitaire, Pli Confidentiel”</i>.
+                </p>
+              </div>
+            </li>
+          </>
+        ) : (
+          <li className="flex bg-blue-50 rounded-xl px-3 py-4 mt-3 gap-3">
             <div>
+              <span className="flex h-8 w-8 bg-white shrink-0 items-center justify-center rounded-full border border-gray-300 text-sm text-gray-700">3</span>
+            </div>
+            <div>
+              <p className="bg-[#DBEAFE] w-fit rounded-sm px-1.5 text-xs text-[#1E40AF] font-medium">Le jour du départ</p>
               <p className="text-sm text-gray-800 font-bold">Remettre l’ensemble des documents en mains propres</p>
               <p className="text-xs text-gray-600 leading-relaxed">
                 à l’équipe d’encadrement à l’arrivée au séjour, dans une enveloppe portant la mention <i>“À l’attention du référent sanitaire, Pli Confidentiel”</i>.
               </p>
             </div>
-          )}
-        </li>
+          </li>
+        )}
       </ul>
 
       <ButtonPrimary onClick={handleClick} disabled={loading} className="mt-6 w-full">

@@ -1,4 +1,5 @@
 import express, { Response } from "express";
+const { logger } = require("../logger");
 import passport from "passport";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
@@ -99,6 +100,7 @@ import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
 import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
+import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -127,12 +129,12 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
 function cleanReferentData(referent) {
   if (!referent.role) return referent;
 
-  const fields = ["department", "region", "sessionPhase1Id", "cohorts", "cohesionCenterId", "cohesionCenterName", "structureId"];
+  const fields = ["department", "region", "sessionPhase1Id", "cohorts", "cohortIds", "cohesionCenterId", "cohesionCenterName", "structureId"];
 
   const fieldsToKeep = {
     admin: [],
     dsnj: [],
-    head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "sessionPhase1Id"],
+    head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "cohortIds", "sessionPhase1Id"],
     referent_department: ["department", "region"],
     referent_region: ["department", "region"],
     responsible: ["structureId"],
@@ -330,7 +332,10 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       referentProperties.phone = phone;
       referentProperties.mobile = phone;
     }
-    if (cohorts) referentProperties.cohorts = cohorts;
+    if (cohorts) {
+      referentProperties.cohorts = cohorts;
+      referentProperties.cohortIds = await getCohortIdsFromCohortName(cohorts);
+    }
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     referentProperties.invitationToken = invitation_token;
@@ -948,7 +953,6 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
 
     return res.status(200).send({ ok: true });
   } catch (error) {
-    console.log(error);
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
@@ -995,7 +999,6 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
         // ? Use better check link between structure and young ! + Check for tutorId as well ?
         // const test = await new Promise().any(
         //   structures.eachAsync(async (structure) => {
-        //     // console.log("🚀 ~ file: referent.js ~ line 570 ~ test ~ structure", structure);
         //     const applications = await ApplicationModel.find({ structureId: structure._id.toString(), youngId: youngId });
         //     return applications.length > 0 ? true : false;
         //   }),
@@ -1445,7 +1448,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     }
 
     await referent.remove();
-    console.log(`Referent ${req.params.id} has been deleted`);
+    logger.debug(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

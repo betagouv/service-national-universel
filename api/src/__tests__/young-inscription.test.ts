@@ -550,7 +550,6 @@ describe("Young", () => {
       // @ts-ignore
       const user = await createYoungHelper(getNewYoungFixture({ files: { cniFiles: [cniFile] }, cohort: cohort.name, cohortId: cohort._id }));
       passport.user = user;
-      console.log(user);
 
       const documentObj = {
         date: new Date(),

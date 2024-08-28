@@ -4,6 +4,7 @@ const Joi = require("joi");
 
 const { capture, captureMessage } = require("./sentry");
 const config = require("config");
+const { logger } = require("./logger");
 const { sendTemplate } = require("./brevo");
 const {
   JWT_SIGNIN_MAX_AGE_SEC,
@@ -187,7 +188,6 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
-      console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -326,7 +326,6 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
-      console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -392,7 +391,9 @@ class Auth {
 
       if (await shouldUse2FA()) {
         const token2FA = await crypto.randomInt(1000000);
-        if (config.ENVIRONMENT === "development") console.log(`2FA code : ${token2FA}`);
+        if (config.ENVIRONMENT === "development") {
+          logger.debug(`2FA code : ${token2FA}`);
+        }
 
         if (isYoung(user)) user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS });
         else if (isReferent(user)) user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS });

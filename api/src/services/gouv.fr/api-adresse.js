@@ -51,7 +51,6 @@ const putLocation = async (city, zip) => {
       lat: 48.856613,
     };
   } catch (e) {
-    console.log("Erreur in putLocation", e);
     capture(e);
   }
 };

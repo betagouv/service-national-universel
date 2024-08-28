@@ -9,6 +9,8 @@ const { YoungModel } = require("../../models");
 const { uploadFile } = require("../../utils");
 const { encrypt } = require("../../cryptoUtils");
 
+const { logger } = require("../../logger");
+
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
 const EXPORT_YOUNGS_AFTER_SESSION = "youngsAfterSession";
@@ -96,7 +98,7 @@ const generateCohesionCentersExport = async (cohort, action = "upload") => {
     await uploadFile(`dsnj/${cohort.snuId}/${fileName}`, file);
   } else {
     XLSX.writeFile(workbook, fileName);
-    console.log(`File ${fileName} generated`);
+    logger.debug(`File ${fileName} generated`);
   }
 };
 
@@ -215,7 +217,7 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
     await uploadFile(`dsnj/${cohort.snuId}/${fileName}`, file);
   } else {
     XLSX.writeFile(workbook, fileName);
-    console.log(`File ${fileName} generated`);
+    logger.debug(`File ${fileName} generated`);
   }
 };
 

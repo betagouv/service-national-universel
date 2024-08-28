@@ -513,7 +513,6 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
-    console.log(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });

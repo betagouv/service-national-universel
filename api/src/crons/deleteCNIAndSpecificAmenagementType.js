@@ -2,6 +2,7 @@ const { capture } = require("../sentry");
 const slack = require("../slack");
 const { YoungModel } = require("../models");
 const { deleteSensitiveData, getCohortsFinishedSinceYesterday } = require("../services/gdpr");
+const { logger } = require("../logger");
 
 let countTotal = 0;
 let countModified = 0;
@@ -16,13 +17,12 @@ exports.handler = async () => {
     latestCNIFileCategory: { $ne: "deleted" },
   };
   const total = await YoungModel.countDocuments(where);
-  console.log("🚀 ~ file: deleteCNiAndSpecificAmenagementType.js:21 ~ total:", total);
+  logger.info(`🚀 ~ file: deleteCNiAndSpecificAmenagementType.js:21 ~ total: ${total}`);
 
   const youngIds = await YoungModel.find(where, "_id");
   try {
     for (let i = 0; i < youngIds.length; i = i + 100) {
       const subArray = youngIds.slice(i, i + 100);
-      console.log(i);
       await Promise.all(
         subArray.map(async ({ _id }) => {
           await deleteSensitiveData(_id);
