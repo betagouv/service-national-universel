@@ -15,7 +15,9 @@ export const logger = createLogger({
   format: format.simple(),
   transports: [
     new transports.Console({
-      stderrLevels: ["error", "warn"],
+      forceConsole: true,
+      stderrLevels: ["error"],
+      consoleWarnLevels: ["warn"],
     }),
   ],
 });
