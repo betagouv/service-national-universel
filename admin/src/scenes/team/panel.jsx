@@ -27,12 +27,16 @@ export default function UserPanel({ onChange, value }) {
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
+  const [handleImpersonateLoading, setHandleImpersonateLoading] = useState(false);
 
   const handleImpersonate = async () => {
     try {
+      if (handleImpersonateLoading) return;
+      setHandleImpersonateLoading(true);
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", value._id);
       dispatch(setUser(data));
+      setHandleImpersonateLoading(false);
       history.push("/dashboard");
     } catch (e) {
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
