@@ -8,9 +8,7 @@ import "./index.css";
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Link, Router, Switch, useLocation, useHistory } from "react-router-dom";
-import queryString from "query-string";
 import { QueryClientProvider } from "@tanstack/react-query";
-
 import { setYoung } from "./redux/auth/actions";
 
 import useDocumentCss from "@/hooks/useDocumentCss";
@@ -22,6 +20,8 @@ import { queryClient } from "./services/react-query";
 import { YOUNG_STATUS } from "./utils";
 import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 import { cohortsInit, getCohort } from "./utils/cohorts";
+
+import Loader from "./components/Loader";
 import FallbackComponent from "./components/FallBackComponent";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
@@ -33,7 +33,6 @@ const Contract = lazy(() => import("./scenes/contract"));
 const ContractDone = lazy(() => import("./scenes/contract/done"));
 const Espace = lazy(() => import("./Espace"));
 const Inscription2023 = lazy(() => import("./scenes/inscription2023"));
-const Loader = lazy(() => import("./components/Loader"));
 const Maintenance = lazy(() => import("./scenes/maintenance"));
 const NonEligible = lazy(() => import("./scenes/noneligible"));
 const OnBoarding = lazy(() => import("./scenes/cle/OnBoarding"));
@@ -45,47 +44,46 @@ const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 
 initApi();
 
-class App extends React.Component {
-  render() {
-    return (
-      <Sentry.ErrorBoundary fallback={FallbackComponent}>
-        <QueryClientProvider client={queryClient}>
-          <Router history={history}>
-            <ScrollToTop />
-            <div className="flex min-h-screen flex-col justify-between">
-              {maintenance ? (
-                <Switch>
-                  <SentryRoute path="/" component={Maintenance} />
-                </Switch>
-              ) : (
-                <Switch>
-                  <SentryRoute
-                    path={[
-                      "/validate-contract/done",
-                      "/validate-contract",
-                      "/conditions-generales-utilisation",
-                      "/noneligible",
-                      "/representants-legaux",
-                      "/je-rejoins-ma-classe-engagee",
-                      "/je-suis-deja-inscrit",
-                      "/public-besoin-d-aide",
-                      "/auth",
-                      "/public-engagements",
-                      "/besoin-d-aide",
-                      "/merci",
-                      "/preinscription",
-                    ]}
-                    component={() => <OptionalLogIn />}
-                  />
-                  <SentryRoute path="/" component={() => <MandatoryLogIn />} />
-                </Switch>
-              )}
-            </div>
-          </Router>
-        </QueryClientProvider>
-      </Sentry.ErrorBoundary>
-    );
-  }
+function App() {
+  return (
+    <Sentry.ErrorBoundary fallback={FallbackComponent}>
+      <QueryClientProvider client={queryClient}>
+        <Router history={history}>
+          <ScrollToTop />
+          <ScrollToHash />
+          <div className="flex min-h-screen flex-col justify-between">
+            {maintenance ? (
+              <Switch>
+                <SentryRoute path="/" component={Maintenance} />
+              </Switch>
+            ) : (
+              <Switch>
+                <SentryRoute
+                  path={[
+                    "/validate-contract/done",
+                    "/validate-contract",
+                    "/conditions-generales-utilisation",
+                    "/noneligible",
+                    "/representants-legaux",
+                    "/je-rejoins-ma-classe-engagee",
+                    "/je-suis-deja-inscrit",
+                    "/public-besoin-d-aide",
+                    "/auth",
+                    "/public-engagements",
+                    "/besoin-d-aide",
+                    "/merci",
+                    "/preinscription",
+                  ]}
+                  component={OptionalLogIn}
+                />
+                <SentryRoute path="/" component={MandatoryLogIn} />
+              </Switch>
+            )}
+          </div>
+        </Router>
+      </QueryClientProvider>
+    </Sentry.ErrorBoundary>
+  );
 }
 
 export default Sentry.withProfiler(App);
@@ -120,7 +118,7 @@ const OptionalLogIn = () => {
       }
     }
     fetchData();
-  }, []); //eslint-disable-line
+  }, []);
 
   if (loading) return <Loader />;
   if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
@@ -164,7 +162,10 @@ const Inscription = () => {
 };
 
 const MandatoryLogIn = () => {
+  console.log("🚀 ~ MandatoryLogIn ~ MandatoryLogIn");
   const { pathname, search } = useLocation();
+  console.log("🚀 ~ MandatoryLogIn ~ search:", search);
+  console.log("🚀 ~ MandatoryLogIn ~ pathname:", pathname);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
@@ -182,7 +183,7 @@ const MandatoryLogIn = () => {
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
-          const cohort = await getCohort(user.cohort);
+          // const cohort = await getCohort(user.cohort);
 
           const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
           const forceEmailValidation =
@@ -199,12 +200,8 @@ const MandatoryLogIn = () => {
   }, []);
 
   if (loading) return <Loader />;
-  if (!user) {
-    const queryObject = { disconnected: 1 };
-    if (pathname) queryObject.redirect = `${pathname}${search}`;
 
-    return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
-  }
+  if (!user) return <Redirect to={`/auth?disconnected=1&redirect=${pathname}${search}`} />;
 
   return (
     <Suspense fallback={<Loader />}>
@@ -225,6 +222,21 @@ function ScrollToTop() {
     }
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  return null;
+}
+
+function ScrollToHash() {
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const element = document.getElementById(hash.replace("#", ""));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [hash]);
 
   return null;
 }

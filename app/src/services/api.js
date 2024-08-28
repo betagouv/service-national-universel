@@ -100,7 +100,7 @@ class api {
         });
         if (response.status === 401) {
           if (window?.location?.pathname !== "/auth") {
-            window.location.href = "/auth?disconnected=1";
+            window.location.href = "/auth?disconnected=1&redirect=" + window.location.pathname;
             return;
           }
         }
