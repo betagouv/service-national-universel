@@ -114,7 +114,7 @@ export default Sentry.withProfiler(App);
 const Home = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Auth.cohorts);
+  const cohorts = useSelector((state) => state.Cohorts);
   const { pathname, search } = useLocation();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
