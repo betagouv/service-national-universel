@@ -23,7 +23,7 @@ const runMigrations = async () => {
 
   try {
     const statusResult = await status(db);
-    logger.info("runMigrations - Migration status:", { statusResult });
+    logger.info("runMigrations - Migration status:", statusResult);
 
     await doMigrations(db);
   } catch (error) {
@@ -61,7 +61,7 @@ const doMigrations = async (db) => {
       { $set: { locked: true, lockedBy: "runMigrations", lockedAt: new Date(), lockedByEnvironment: config?.ENVIRONMENT, apiUrlEnvironment: config?.API_URL } },
     );
   const migrationResult = await up(db);
-  logger.info("runMigrations - Migrations completed:", { migrationResult });
+  logger.info("runMigrations - Migrations completed:", migrationResult);
 };
 
 const migrateMongoConfiguration = {

@@ -66,13 +66,12 @@ function capture(err, contexte) {
   if (!err) {
     const msg = "Error not defined (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)";
     logger.error(`capture: ${msg}`);
-    sentryCaptureMessage(msg);
-    return;
+    return sentryCaptureMessage(msg);
   }
 
   if (err instanceof Error) {
     // Capture the current error and recursively capture any nested causes
-    captureError(err, contexte);
+    const eventId = captureError(err, contexte);
 
     let currentError = err.cause;
     while (currentError instanceof Error) {
@@ -81,18 +80,20 @@ function capture(err, contexte) {
       captureError(currentError, { ...contexte, contexts: { ...contexte.contexts, warning: { msg: warningMessage } } });
       currentError = currentError.cause;
     }
+
+    return eventId;
   } else if (err.error instanceof Error) {
-    capture(err.error, {
+    return capture(err.error, {
       ...contexte,
       contexts: { ...contexte.contexts, warning: { msg: "Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples" } },
     }); // Recursively handle the nested error
   } else if (err.message) {
     logger.error(`capture: ${err.message} (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)`);
-    sentryCaptureMessage(err.message, contexte);
+    return sentryCaptureMessage(err.message, contexte);
   } else {
     const msg = "Error not defined well (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)";
     logger.error(`capture: ${msg}`);
-    sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
+    return sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
 }
 
