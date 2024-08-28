@@ -80,7 +80,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
         <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-gray-500">
           <p className="">{mission.structureName}</p>
           {/* Choix*/}
-          <p className="">{hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}</p>
+          <p className="">{hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION && "Mission proposée au volontaire"}</p>
         </div>
 
         <div className="row-span-2 flex items-center justify-between">
