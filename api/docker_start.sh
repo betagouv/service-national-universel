@@ -3,6 +3,7 @@
 set -e
 
 pm2 --no-daemon set pm2-logrotate:max_size 1K
+pm2 --no-daemon set pm2-logrotate:retain 2
 
 config=$(node -e 'console.log(JSON.stringify(require("config")))')
 
