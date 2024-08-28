@@ -1,3 +1,5 @@
+const { logger } = require("../logger");
+
 export const mapRegionToTrigramme = (region: string | undefined): string | undefined => {
   switch (region) {
     case "Auvergne-Rhône-Alpes":
@@ -38,7 +40,7 @@ export const mapRegionToTrigramme = (region: string | undefined): string | undef
     case "Provence-Alpes-Côte d'Azur":
       return "PAC";
     default:
-      console.log("mapRegionToTrigramme() - No matching region for : ", region);
+      logger.warn(`mapRegionToTrigramme() - No matching region for : ${region}`);
       return undefined;
   }
 };

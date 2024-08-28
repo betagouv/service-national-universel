@@ -44,13 +44,6 @@ const referentMetadataSchema = {
 };
 
 const schema = new Schema({
-  sqlId: {
-    type: String,
-    index: true,
-    documentation: {
-      description: "Identifiant dans l'ancienne base de données",
-    },
-  },
   firstName: {
     type: String,
     documentation: {
@@ -246,6 +239,12 @@ const schema = new Schema({
     type: [String],
     documentation: {
       description: "Identifiant des cohortes du chef de centre",
+    },
+  },
+  cohortIds: {
+    type: [String],
+    documentation: {
+      description: "Liste des Ids des cohortes du chef de centre",
     },
   },
 

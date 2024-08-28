@@ -4,6 +4,7 @@ const passport = require("passport");
 const Joi = require("joi");
 
 const { capture } = require("../sentry");
+const { logger } = require("../logger");
 const { MissionModel, ApplicationModel, StructureModel, ReferentModel } = require("../models");
 // eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung } = require("../utils/index");
@@ -382,7 +383,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (applications && applications.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
     await mission.remove();
 
-    console.log(`Mission ${req.params.id} has been deleted`);
+    logger.debug(`Mission ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

@@ -8,25 +8,37 @@ const Joi = require("joi");
 const optionalAuth = async (req, _, next) => {
   try {
     const token = getToken(req);
-    let user;
     if (token) {
       const jwtPayload = await jwt.verify(token, config.JWT_SECRET);
-      const { error, value } = Joi.object({ __v: Joi.string().required(), _id: Joi.string().required(), passwordChangedAt: Joi.string(), lastLogoutAt: Joi.date() }).validate({
-        ...jwtPayload,
-      });
-      if (error || !checkJwtSigninVersion(value)) return;
-      delete value.__v;
 
-      user = await ReferentModel.findOne(value);
+      // Validate the JWT payload
+      const { error, value } = Joi.object({
+        __v: Joi.string().required(),
+        _id: Joi.string().required(),
+        passwordChangedAt: Joi.date().allow(null),
+        lastLogoutAt: Joi.date().allow(null),
+      }).validate(jwtPayload, { stripUnknown: true });
+
+      if (error || !checkJwtSigninVersion(value)) return;
+
+      const { _id, passwordChangedAt, lastLogoutAt } = value;
+      let user = await ReferentModel.findById(_id);
+
       if (!user) {
-        user = await YoungModel.findOne(value);
+        user = await YoungModel.findById(_id);
       }
+
       if (user) {
-        req.user = user;
+        const passwordMatch = passwordChangedAt?.getTime() === user.passwordChangedAt?.getTime();
+        const logoutMatch = lastLogoutAt?.getTime() === user.lastLogoutAt?.getTime();
+
+        if (passwordMatch && logoutMatch) {
+          req.user = user;
+        }
       }
     }
   } catch (e) {
-    /* empty */
+    // Silently handle errors (no action needed)
   }
   next();
 };

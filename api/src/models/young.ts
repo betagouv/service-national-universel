@@ -127,14 +127,6 @@ const Note = new mongoose.Schema({
 });
 
 const schema = new Schema({
-  sqlId: {
-    type: String,
-    index: true,
-    documentation: {
-      description: "Identifiant dans l'ancienne base de données",
-    },
-  },
-
   firstName: {
     type: String,
     documentation: {

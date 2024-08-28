@@ -17,6 +17,7 @@ const collectionsWithCohortIdToAdd = [
   "meetingpoints",
   "sessionphase1",
 ];
+const { logger } = require("../src/logger");
 
 module.exports = {
   async up(db) {
@@ -32,7 +33,7 @@ module.exports = {
       let updatedDocuments = await db.collection(collectionName).updateMany({ cohort: cohort[0] }, { $set: { cohortId: cohort[1] } });
 
       updatedDocumentsCount += updatedDocuments.modifiedCount;
-      console.log(
+      logger.info(
         `Collection ${collectionName} - Added cohortId: ${cohort[1]} for cohort: ${cohort[0]} - Matched: ${updatedDocuments.matchedCount}, Added property cohortId : ${updatedDocuments.modifiedCount}`,
       );
     };
@@ -41,7 +42,7 @@ module.exports = {
       let updatedDocuments = await db.collection(collectionName).updateMany({ originalCohort: cohort[0] }, { $set: { originalCohortId: cohort[1] } });
 
       updatedDocumentsForOriginalCohortCount += updatedDocuments.modifiedCount;
-      console.log(
+      logger.info(
         `Collection ${collectionName} - Added originalCohortId: ${cohort[1]} for originalCohort: ${cohort[0]} - Matched: ${updatedDocuments.matchedCount}, Added property originalCohortId : ${updatedDocuments.modifiedCount}`,
       );
     };
@@ -52,23 +53,23 @@ module.exports = {
       for (const cohort of cohortsMap) {
         await addCohortIdToCollection(collectionName, cohort);
       }
-      console.log(`Total documents updated: ${updatedDocumentsCount} on ${collectionName}`);
+      logger.info(`Total documents updated: ${updatedDocumentsCount} on ${collectionName}`);
     }
 
     // Collections with originalCohort field : youngs
     for (const cohort of cohortsMap) {
       await addOriginalCohortIdToCollection("youngs", cohort);
     }
-    console.log(`Total documents updated for originalCohortId: ${updatedDocumentsForOriginalCohortCount}`);
+    logger.info(`Total documents updated for originalCohortId: ${updatedDocumentsForOriginalCohortCount}`);
   },
 
   async down(db) {
     for (const collectionName of collectionsWithCohortIdToAdd) {
       const updatedDocuments = await db.collection(collectionName).updateMany({ cohortId: { $exists: true } }, { $unset: { cohortId: 1 } });
-      console.log(`Collection ${collectionName} - Matched: ${updatedDocuments.matchedCount} Removed property cohortId on : ${updatedDocuments.modifiedCount}`);
+      logger.info(`Collection ${collectionName} - Matched: ${updatedDocuments.matchedCount} Removed property cohortId on : ${updatedDocuments.modifiedCount}`);
     }
     const updatedDocumentsForOriginalCohort = await db.collection("youngs").updateMany({ originalCohortId: { $exists: true } }, { $unset: { originalCohortId: 1 } });
-    console.log(
+    logger.info(
       `Collection youngs - Matched: ${updatedDocumentsForOriginalCohort.matchedCount} Removed property originalCohortId on : ${updatedDocumentsForOriginalCohort.modifiedCount}`,
     );
   },

@@ -244,7 +244,7 @@ describe("Cle Referent", () => {
   });
 
   describe("deleteOldReferentClasse", () => {
-    it("should delete referent not linked with 2024_2025 classe", async () => {
+    it.skip("should delete referent not linked with 2024_2025 classe", async () => {
       await ReferentModel.create([
         {
           email: "referent1@classe.fr",

@@ -34,15 +34,16 @@ export default function MissionList({ publisherName }) {
     },
     distance: distance || 50,
     domain: domain || "",
-    page: page || 0,
-    size: size || 20,
-    sort: sort || "geo",
     publisherName,
   };
 
+  const currentPage = page ?? 0;
+  const currentSize = size ?? 20;
+  const currentSort = sort ?? "geo";
+
   const { data, isError, isPending } = useQuery({
-    queryKey: ["missions", filters],
-    queryFn: () => fetchMissionsFromApiEngagement(filters, page, size, sort),
+    queryKey: ["missions", { filters, currentPage, currentSize, currentSort }],
+    queryFn: () => fetchMissionsFromApiEngagement(filters, currentPage, currentSize, currentSort),
     enabled: !!young.location?.lat,
   });
 
@@ -117,7 +118,7 @@ export default function MissionList({ publisherName }) {
           </div>
           <Pagination
             currentPageNumber={page || 0}
-            setCurrentPageNumber={() => setParams("page", page)}
+            setCurrentPageNumber={(p) => setParams("page", p)}
             itemsCountTotal={data.total.value}
             itemsCountOnCurrentPage={data.hits.length}
             size={size || 20}

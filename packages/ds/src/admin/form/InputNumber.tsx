@@ -12,6 +12,8 @@ type OwnProps = {
   disabled?: boolean;
   active?: boolean;
   readOnly?: boolean;
+  min?: number;
+  max?: number;
   error?: string;
 };
 
@@ -25,6 +27,8 @@ export default function InputNumber({
   disabled,
   active,
   readOnly,
+  min,
+  max,
   error,
 }: OwnProps) {
   const {
@@ -48,7 +52,7 @@ export default function InputNumber({
           focusActive,
           bgColorClass,
           borderColorClass,
-          "px-[13px] py-[9px] h-[54px]"
+          "px-[13px] py-[9px] h-[54px]",
         )}
       >
         <div className="flex flex-1 flex-col justify-center">
@@ -57,7 +61,7 @@ export default function InputNumber({
               htmlFor={name}
               className={classNames(
                 error ? "text-red-500" : "text-gray-500",
-                "m-0  text-xs font-normal leading-4"
+                "m-0  text-xs font-normal leading-4",
               )}
             >
               {label}
@@ -72,6 +76,8 @@ export default function InputNumber({
             disabled={disabled}
             value={value}
             readOnly={readOnly}
+            min={min}
+            max={max}
             onChange={(e) => onChange(e)}
           />
         </div>

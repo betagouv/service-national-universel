@@ -952,6 +952,10 @@ function canUpdateClasse(actor) {
   return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
+function canUpdateReferentClasse(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
+}
+
 function canUpdateClasseStay(actor) {
   return [ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
@@ -1166,4 +1170,5 @@ export {
   canEditTotalSeats,
   canNotifyAdminCleForVerif,
   canVerifyClasse,
+  canUpdateReferentClasse,
 };
