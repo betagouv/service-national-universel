@@ -351,6 +351,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       "departInform.keyword",
       "departSejourMotif.keyword",
       "youngPhase1Agreement.keyword",
+      "psc1Info.keyword",
     ];
     const sortFields = [];
 
