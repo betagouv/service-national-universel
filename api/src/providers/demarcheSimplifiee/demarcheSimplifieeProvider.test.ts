@@ -21,7 +21,7 @@ describe("demarcheSimplifieeProvider", () => {
     const result = getUaiFromString(input);
 
     expect(result).toEqual(expectedOutput);
-    expect(logger.warn).toHaveBeenCalledWith("getUaiFromString() - no UAI found in string: ", "Lycée, Ville ()");
+    expect(logger.warn).toHaveBeenCalledWith("getUaiFromString() - no UAI found in string: Lycée, Ville ()");
   });
 
   it("should return the right data", () => {
