@@ -8,6 +8,6 @@ export type UserDto = {
   lastName: string;
   structureId: string;
   region: string;
-  departement: string;
+  department: string[];
   subRole?: keyof typeof SUB_ROLES | keyof typeof SUPPORT_ROLES_LIST | keyof typeof VISITOR_SUB_ROLES_LIST;
 };
