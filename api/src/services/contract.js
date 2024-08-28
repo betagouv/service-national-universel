@@ -2,8 +2,6 @@ const { deletePatches } = require("../controllers/patches");
 const { ContractModel } = require("../models");
 const { logger } = require("../logger");
 
-const { captureMessage } = require("../sentry");
-
 const anonymizeContractsFromYoungId = async ({ youngId = "", anonymizedYoung = {} }) => {
   const contracts = await ContractModel.find({ youngId });
 
@@ -41,7 +39,7 @@ const anonymizeContractsFromYoungId = async ({ youngId = "", anonymizedYoung = {
     await contract.save();
     const deletePatchesResult = await deletePatches({ id: contract._id.toString(), model: ContractModel });
     if (!deletePatchesResult.ok) {
-      captureMessage(`ERROR deleting patches of contract with id ${contract._id} >>>`, deletePatchesResult.code);
+      throw new Error("ERROR deleting patches of application", { cause: { contract_id: contract._id, code: deletePatchesResult.code } });
     }
   }
 

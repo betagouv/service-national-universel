@@ -4,8 +4,6 @@ import queryString from "querystring";
 import config from "config";
 import { logger } from "./logger";
 
-import { capture, captureMessage } from "./sentry";
-
 import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
 
 import { capture, captureMessage } from "./sentry";
@@ -339,10 +337,7 @@ export async function sync(obj, type, { force } = { force: false }) {
   }
   try {
     const user = JSON.parse(JSON.stringify(obj));
-    if (!user) {
-      captureMessage("NO USER TO SYNC", { extra: { obj } });
-      return;
-    }
+    if (!user) throw new Error("NO USER TO SYNC", { cause: { obj } });
 
     const email = user.email;
     let parents: Contact[] = [];
@@ -414,6 +409,6 @@ export async function unsync(obj, options = { force: false }) {
   try {
     await Promise.all(emails.map(deleteContact));
   } catch (error) {
-    capture(error, { extra: { emails } });
+    capture(error, { contexts: { emails } });
   }
 }

@@ -4,13 +4,6 @@ const { nodeProfilingIntegration } = require("@sentry/profiling-node");
 const config = require("config");
 const { logger } = require("./logger");
 
-class SentryError extends Error {
-  constructor(message, tags = {}) {
-    super(message);
-    this.tags = tags;
-  }
-}
-
 function initSentry() {
   if (config.get("ENABLE_SENTRY")) {
     init({
@@ -51,6 +44,9 @@ function initSentry() {
   }
 }
 
+// * Adopt the same error capture strategy as Sentry
+// * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples
+
 function _flattenStack(stack) {
   // Remove new lines and merge spaces to get 1 line log output
   return stack.replace(/\n/g, " | ").replace(/\s+/g, " ");
@@ -71,22 +67,31 @@ function capture(err, contexte) {
   if (!err) {
     const msg = "Error not defined";
     logger.error(`capture: ${msg}`);
-    return sentryCaptureMessage(msg);
+    sentryCaptureMessage(msg);
+    return;
   }
 
   if (err instanceof Error) {
-    return captureError(err, contexte);
+    // Capture the current error and recursively capture any nested causes
+    captureError(err, contexte);
+
+    let currentError = err.cause;
+    while (currentError instanceof Error) {
+      captureError(currentError, contexte);
+      currentError = currentError.cause;
+    }
   } else if (err.error instanceof Error) {
-    return captureError(err.error, contexte);
+    capture(err.error, contexte); // Recursively handle the nested error
   } else if (err.message) {
     logger.error(`capture: ${err.message}`);
-    return sentryCaptureMessage(err.message, contexte);
+    sentryCaptureMessage(err.message, contexte);
   } else {
-    const msg = "Error not defined well : You should capture Error type";
+    const msg = "Error not defined well: You should capture Error type";
     logger.error(`capture: ${msg}`);
-    return sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
+    sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
 }
+
 function captureMessage(mess, contexte) {
   if (mess) {
     logger.error(`capture message: ${mess}`);
@@ -99,7 +104,6 @@ function captureMessage(mess, contexte) {
 }
 
 module.exports = {
-  SentryError,
   initSentry,
   capture,
   captureMessage,
