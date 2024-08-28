@@ -18,7 +18,7 @@ async function processPatch(patch, count, total) {
   try {
     result.missionEquivalencePatchScanned = result.missionEquivalencePatchScanned + 1 || 1;
     if (count % 100 === 0) {
-      logger.debug(count, "/", total);
+      logger.debug(`${count} / ${total}`);
     }
     const actualMissionEquivalence = await MissionEquivalenceModel.findById(patch.ref.toString());
     if (!actualMissionEquivalence) return;

@@ -34,7 +34,7 @@ const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung 
       await application.save();
       const deletePatchesResult = await deletePatches({ id: application._id.toString(), model: ApplicationModel });
       if (!deletePatchesResult.ok) {
-        logger.error(`ERROR deleting patches of application with id ${application._id} >>>`, deletePatchesResult.code);
+        logger.error(`ERROR deleting patches of application with id ${application._id} >>> ${deletePatchesResult.code}`);
       }
     }
 
