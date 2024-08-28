@@ -236,8 +236,9 @@ export default function SectionConsentements({ young, onChange, readonly = false
           <CheckRead value={young.parent1AllowSNU === "true"}>
             Accepte la collecte et le traitement des données personnelles de{" "}
             <b>
-              {young.firstName} {young.lastName}
+              {young.firstName} {young.lastName}{" "}
             </b>
+            dans le cadre d’une mission d’intérêt public.
           </CheckRead>
         </div>
         <div className="mb-[16px] mt-4 flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">

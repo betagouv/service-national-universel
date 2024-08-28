@@ -1213,9 +1213,9 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow2")} errors={errors} value={parent1Consentement.allow2}>
             Accepte la collecte et le traitement des données personnelles de{" "}
             <b>
-              {young.firstName} {young.lastName}
+              {young.firstName} {young.lastName}{" "}
             </b>
-            .
+            dans le cadre d’une mission d’intérêt public.
           </CheckRead>
         </div>
         <div className="itemx-center mt-[16px] flex justify-between">
