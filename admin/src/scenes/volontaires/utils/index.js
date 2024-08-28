@@ -627,6 +627,7 @@ export async function transformInscription(data) {
       "Autotest PCR": translate(data.autoTestPCR),
       "Règlement intérieur": translate(data.rulesYoung),
       "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
+      PSC1: translate(data.psc1Info) || "Non Renseigné",
       "Statut représentant légal 1": translate(data.parent1Status),
       "Prénom représentant légal 1": data.parent1FirstName,
       "Nom représentant légal 1": data.parent1LastName,
