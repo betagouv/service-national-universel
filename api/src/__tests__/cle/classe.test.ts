@@ -792,6 +792,7 @@ describe("PUT /cle/classe/:id/referent", () => {
     expect(updatedReferent.firstName).toBe(newReferentDetails.firstName);
     expect(updatedReferent.lastName).toBe(newReferentDetails.lastName);
     expect(updatedReferent.email).toBe(newReferentDetails.email);
+    expect(updatedReferent.metadata.isFirstInvitationPending).toBe(true);
     expect(res.status).toBe(200);
   });
 
