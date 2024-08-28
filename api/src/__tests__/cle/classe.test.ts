@@ -503,9 +503,9 @@ describe("PUT /cle/classe/:id/verify", () => {
     // @ts-ignore
     passport.user.role = ROLES.REFERENT_DEPARTMENT;
     // @ts-ignore
-    const previous = passport.user.departement;
+    const previous = passport.user.department;
     // @ts-ignore
-    passport.user.departement = "Loire";
+    passport.user.department = ["Loire"];
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}/verify`)
       .send({
@@ -515,7 +515,7 @@ describe("PUT /cle/classe/:id/verify", () => {
     // @ts-ignore
     passport.user.role = ROLES.ADMIN;
     // @ts-ignore
-    passport.user.departement = previous;
+    passport.user.department = previous;
   });
 
   it("should return 403 when REFERENT_REGION tries to verify a class they don't manage", async () => {
@@ -599,7 +599,7 @@ describe("GET /:id/notifyRef", () => {
     // @ts-ignore
     passport.user.role = ROLES.REFERENT_DEPARTMENT;
     // @ts-ignore
-    passport.user.departement = "Loire";
+    passport.user.department = ["Loire"];
     const res = await request(getAppHelper()).get(`/cle/classe/${validId}/notifyRef`);
     expect(res.status).toBe(403);
     // @ts-ignore
