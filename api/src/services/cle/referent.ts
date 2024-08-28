@@ -82,8 +82,9 @@ export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
   let processCounter = 1;
   for (const chefEtablissement of chefsEtablissementsToSendInvitation) {
     try {
-      logger.debug(`AppelAProjetService.sync() - processCounter: ${processCounter++} / ${chefsEtablissementsToSendInvitation.length}`);
+      logger.debug(`AppelAProjetService.sync() - processCounter: ${processCounter} / ${chefsEtablissementsToSendInvitation.length}`);
       logger.debug(`doInviteMultipleChefsEtablissements() - creating invitation for : ${chefEtablissement.email}`);
+      processCounter++;
       const mailResponse = await doInviteChefEtablissement(chefEtablissement, user);
       chefEtablissement.set({ metadata: { ...chefEtablissement.metadata, isFirstInvitationPending: false } });
       await chefEtablissement.save({ fromUser: user });
@@ -143,8 +144,9 @@ export const doInviteMultipleReferentClasseVerifiee = async (user: UserDto) => {
   let processCounter = 1;
   for (const referentClasse of referentsClasseToSendInvitation) {
     try {
-      logger.debug(`doInviteMultipleReferentClasse - processCounter: ${processCounter++} / ${referentsClasseToSendInvitation.length}`);
+      logger.debug(`doInviteMultipleReferentClasse - processCounter: ${processCounter} / ${referentsClasseToSendInvitation.length}`);
       logger.debug(`doInviteMultipleReferentClasse() - creating invitation for : ${referentClasse.email}`);
+      processCounter++;
       const mailResponse = await doInviteReferentClasse(referentClasse, user);
       referentClasse.set({ "metadata.isFirstInvitationPending": false });
       await referentClasse.save({ fromUser: user });

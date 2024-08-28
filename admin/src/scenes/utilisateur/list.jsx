@@ -277,13 +277,17 @@ const Action = ({ hit, structure }) => {
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
+  const [handleImpersonateLoading, setHandleImpersonateLoading] = useState(false);
 
   const handleImpersonate = async () => {
     try {
+      if (handleImpersonateLoading) return;
+      setHandleImpersonateLoading(true);
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", hit._id);
       dispatch(setUser(data));
       history.push("/dashboard");
+      setHandleImpersonateLoading(false);
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
