@@ -239,7 +239,6 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     });
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
-    logger.debug("🚀 ~ file: young-edition.js:191 ~ router.put ~ value:", value);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
