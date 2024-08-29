@@ -59,12 +59,14 @@ import { findOrCreateReferent, inviteReferent } from "../../services/cle/referen
 import {
   buildUniqueClasseId,
   buildUniqueClasseKey,
+  canUpdateReferentClasseBasedOnStatus,
   deleteClasse,
   findClasseByUniqueKeyAndUniqueId,
   generateConvocationsByClasseId,
   getClasseById,
   getClasseByIdPublic,
-  updateReferent,
+  updateReferentByClasseId,
+  UpdateReferentClasse,
 } from "./classeService";
 
 import {
@@ -416,16 +418,22 @@ router.put("/:id/referent", passport.authenticate("referent", { session: false, 
     if (!canUpdateReferentClasse(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const { error, value } = Joi.object({
+    const { error, value } = Joi.object<UpdateReferentClasse & { id: string }>({
+      id: Joi.string().required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
       email: Joi.string().email().required(),
-    }).validate(req.body);
+    }).validate({ id: req.params.id, ...req.body });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const classe = await updateReferent(req.params.id, value, req.user);
+
+    const { id, ...referent } = value;
+
+    await canUpdateReferentClasseBasedOnStatus(req.user, id);
+
+    const classe = await updateReferentByClasseId(id, referent, req.user);
     return res.status(200).send({ ok: true, data: classe });
   } catch (error) {
     capture(error);
