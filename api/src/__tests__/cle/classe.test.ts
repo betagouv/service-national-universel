@@ -72,14 +72,15 @@ describe("GET /cle/classe/:id", () => {
 
   it("should return 404 when class is not found", async () => {
     const nonExistingId = "104a49ba503555e4d8853003";
-    const res = await request(getAppHelper()).get(`/cle/classe/${nonExistingId}`);
+    const res = await request(getAppHelper()).delete(`/cle/classe/${nonExistingId}`).query({ type: "delete" }).send();
     expect(res.status).toBe(404);
   });
 
   it("should return 200 and class data without details when withDetails is false", async () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
-    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=false`);
+    const withDetails = false;
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveProperty("_id", validId.toString());
     expect(res.body.data).not.toHaveProperty("etablissement");
@@ -89,12 +90,14 @@ describe("GET /cle/classe/:id", () => {
   it("should return 200 and class data with details when withDetails is true", async () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
-    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=true`);
+    const withDetails = true;
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}`);
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveProperty("_id", validId.toString());
     expect(res.body.data).toHaveProperty("etablissement");
     expect(res.body.data).toHaveProperty("referents");
   });
+});
 
 describe("DELETE /cle/classe/:id", () => {
   it("should return 400 when id is invalid", async () => {

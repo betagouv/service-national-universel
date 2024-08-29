@@ -56,8 +56,15 @@ import {
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 
-
-import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, findClasseByUniqueKeyAndUniqueId, generateConvocationsByClasseId, getClasseById, updateReferent } from "./classeService";
+import {
+  buildUniqueClasseId,
+  buildUniqueClasseKey,
+  deleteClasse,
+  findClasseByUniqueKeyAndUniqueId,
+  generateConvocationsByClasseId,
+  getClasseById,
+  updateReferent,
+} from "./classeService";
 
 import {
   findChefEtablissementInfoForClasses,
@@ -69,7 +76,7 @@ import {
 import ClasseStateManager from "./stateManager";
 
 const querySchema = Joi.object({
-  withDetail: Joi.boolean().default(true),
+  withDetails: Joi.boolean().default(true),
   // Ajoutez d'autres paramètres si nécessaire
 });
 
