@@ -27,7 +27,6 @@ export default function ApplicationList({ young, onChangeApplication }) {
       capture(new Error(code));
       return toastr.error("Oups, une erreur est survenue", code);
     }
-    data.sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0));
     return setApplications(data);
   };
 
