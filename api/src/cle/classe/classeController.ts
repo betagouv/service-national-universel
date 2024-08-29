@@ -548,7 +548,7 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
     if (!classe?.etablissement?.referentEtablissementIds) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    console.log(classe.etablissement.department);
+
     if (req.user.role === ROLES.REFERENT_REGION && classe.etablissement.region !== req.user.region) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
