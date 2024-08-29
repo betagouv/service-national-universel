@@ -1,4 +1,5 @@
 const { CohortModel } = require("../src/models");
+const { logger } = require("../src/logger");
 const cohortsNames = ["2019", "2020", "2021", "2022", "Juin 2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"];
 module.exports = {
   async up() {
@@ -26,6 +27,6 @@ module.exports = {
 
   async down() {
     const deletedCohorts = await CohortModel.deleteMany({ name: { $in: cohortsNames } });
-    console.log("Deleted Cohort:", deletedCohorts.deletedCount);
+    logger.info(`Deleted Cohort: ${deletedCohorts.deletedCount}`);
   },
 };

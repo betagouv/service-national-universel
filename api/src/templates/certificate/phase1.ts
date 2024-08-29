@@ -3,6 +3,7 @@ import { getDepartureDateSession, getReturnDateSession } from "../../utils/cohor
 import { getCohortEndDate, transportDatesToString } from "snu-lib";
 import { SessionPhase1Model, CohesionCenterModel, MeetingPointModel, CohortModel } from "../../models";
 import config from "config";
+import { logger } from "../../logger";
 import { ERRORS } from "../../utils/errors";
 import { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } from "./utils";
 import { withPipeStream } from "../utils";
@@ -96,18 +97,16 @@ function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter)
 
 async function generateCertifPhase1(outStream, young) {
   const { session, cohort, cohesionCenter } = await fetchDataForYoung(young);
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument();
   withPipeStream(doc, outStream, () => {
     render(doc, young, session, cohort, cohesionCenter);
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 function generateBatchCertifPhase1(outStream, youngs, session, cohort, cohesionCenter) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument({ autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
     for (const young of youngs) {
@@ -115,7 +114,7 @@ function generateBatchCertifPhase1(outStream, youngs, session, cohort, cohesionC
       render(doc, young, session, cohort, cohesionCenter);
     }
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 module.exports = { generateCertifPhase1, generateBatchCertifPhase1 };

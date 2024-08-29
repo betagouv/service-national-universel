@@ -121,7 +121,6 @@ describe("Young", () => {
 
       //Check that the saved fields are equals to the old one
       for (const key in updatedYoung) {
-        console.log("key -> ", key);
         if (fieldToKeep.find((val) => val === key)) {
           if (key === "status") {
             expect(updatedYoung[key]).toEqual("DELETED");

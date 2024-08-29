@@ -30,7 +30,7 @@ const deletePatches = async ({ id, model }) => {
   try {
     const { error, value: validatedId } = validateId(id);
     if (error) {
-      console.error(error);
+      capture(error);
     }
     if (error) return { ok: false, code: ERRORS.INVALID_PARAMS, codeError: 400 };
 

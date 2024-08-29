@@ -187,7 +187,6 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     const result = consentBodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("error: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -311,7 +310,6 @@ router.post("/consent-image-rights", tokenParentValidMiddleware, async (req, res
     const result = consentBodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("error: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 

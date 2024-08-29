@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../sentry");
+const { logger } = require("../logger");
 
 const { StructureModel, MissionModel, ReferentModel, ApplicationModel } = require("../models");
 const { ERRORS } = require("../utils");
@@ -72,7 +73,10 @@ async function updateNetworkName(structure, fromUser) {
 async function updateMissionStructureName(structure) {
   try {
     const missions = await MissionModel.find({ structureId: structure._id });
-    if (!missions?.length) return console.log(`no missions edited for structure ${structure._id}`);
+    if (!missions?.length) {
+      logger.debug(`no missions edited for structure ${structure._id}`);
+      return;
+    }
     for (const mission of missions) await setAndSave(mission, { structureName: structure.name });
   } catch (error) {
     capture(error);
@@ -82,7 +86,10 @@ async function updateMissionStructureName(structure) {
 async function updateResponsibleAndSupervisorRole(structure) {
   try {
     const referents = await ReferentModel.find({ structureId: structure._id, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
-    if (!referents?.length) return console.log(`no referents edited for structure ${structure._id}`);
+    if (!referents?.length) {
+      logger.debug(`no referents edited for structure ${structure._id}`);
+      return;
+    }
     for (const referent of referents) await setAndSave(referent, { role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE });
   } catch (error) {
     capture(error);
@@ -274,7 +281,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     }
 
     await structure.remove();
-    console.log(`Structure ${req.params.id} has been deleted by ${req.user._id}`);
+    logger.debug(`Structure ${req.params.id} has been deleted by ${req.user._id}`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

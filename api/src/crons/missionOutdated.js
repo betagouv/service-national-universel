@@ -5,6 +5,7 @@ const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const config = require("config");
+const { logger } = require("../logger");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
 
@@ -15,7 +16,7 @@ const clean = async () => {
     .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
     countAutoArchived++;
-    console.log(`${mission._id} ${mission.name} archived.`);
+    logger.info(`${mission._id} ${mission.name} archived.`);
     mission.set({ status: "ARCHIVED" });
     await mission.save({ fromUser: { firstName: `Cron ${fileName}` } });
     await cancelApplications(mission);
@@ -44,8 +45,8 @@ const notify1Week = async () => {
     .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
     countNotice++;
-    console.log(`${mission._id} ${mission.name} : 1 week notice.`);
-    console.log(`${mission._id} ${mission.name} : endAt ${mission.endAt}`);
+    logger.info(`${mission._id} ${mission.name} : 1 week notice.`);
+    logger.info(`${mission._id} ${mission.name} : endAt ${mission.endAt}`);
 
     // notify structure
     if (mission.tutorId) {

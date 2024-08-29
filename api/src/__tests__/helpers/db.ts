@@ -17,8 +17,6 @@ const dbConnect = async () => {
 
   mongoose.Promise = global.Promise;
   db = mongoose.connection;
-  db.on("error", console.error.bind(console, "MongoDB connection error:"));
-  db.once("open", () => console.log("CONNECTED OK"));
 };
 
 const dbClose = async () => {

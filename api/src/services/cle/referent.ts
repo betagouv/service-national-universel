@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { addDays } from "date-fns";
 import crypto from "crypto";
 import config from "config";
+const { logger } = require("../../logger");
 
 import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ClasseSchoolYear, STATUS_CLASSE } from "snu-lib";
 
@@ -81,8 +82,9 @@ export const doInviteMultipleChefsEtablissements = async (user: UserDto) => {
   let processCounter = 1;
   for (const chefEtablissement of chefsEtablissementsToSendInvitation) {
     try {
-      console.log("AppelAProjetService.sync() - processCounter: ", processCounter++, "/", chefsEtablissementsToSendInvitation.length);
-      console.log("doInviteMultipleChefsEtablissements() - creating invitation for :", chefEtablissement.email);
+      logger.debug(`AppelAProjetService.sync() - processCounter: ${processCounter} / ${chefsEtablissementsToSendInvitation.length}`);
+      logger.debug(`doInviteMultipleChefsEtablissements() - creating invitation for : ${chefEtablissement.email}`);
+      processCounter++;
       const mailResponse = await doInviteChefEtablissement(chefEtablissement, user);
       chefEtablissement.set({ metadata: { ...chefEtablissement.metadata, isFirstInvitationPending: false } });
       await chefEtablissement.save({ fromUser: user });
@@ -142,8 +144,9 @@ export const doInviteMultipleReferentClasseVerifiee = async (user: UserDto) => {
   let processCounter = 1;
   for (const referentClasse of referentsClasseToSendInvitation) {
     try {
-      console.log("doInviteMultipleReferentClasse - processCounter: ", processCounter++, "/", referentsClasseToSendInvitation.length);
-      console.log("doInviteMultipleReferentClasse() - creating invitation for :", referentClasse.email);
+      logger.debug(`doInviteMultipleReferentClasse - processCounter: ${processCounter} / ${referentsClasseToSendInvitation.length}`);
+      logger.debug(`doInviteMultipleReferentClasse() - creating invitation for : ${referentClasse.email}`);
+      processCounter++;
       const mailResponse = await doInviteReferentClasse(referentClasse, user);
       referentClasse.set({ "metadata.isFirstInvitationPending": false });
       await referentClasse.save({ fromUser: user });
@@ -209,7 +212,7 @@ export async function deleteOldReferentClasse(user: UserDto) {
     if (!referentClasse) {
       continue;
     }
-    console.log(`Referent - deleteOldReferentClasse(): deleting ${referentClasse?._id} - ${referentClasse?.email}`);
+    logger.debug(`Referent - deleteOldReferentClasse(): deleting ${referentClasse?._id} - ${referentClasse?.email}`);
     referentClasse.set({ deletedAt: new Date() });
     referentClasse.save({ fromUser: user });
     const mailResponse = await sendTemplate(SENDINBLUE_TEMPLATES.CLE.SUPPRESSION_ANCIEN_REFERENT_CLASSE_TEMPLATE, {
