@@ -63,6 +63,7 @@ function getYoungsFilters(user) {
     "source.keyword",
     "classeId.keyword",
     "etablissementId.keyword",
+    "psc1Info.keyword",
   ].filter(Boolean);
 }
 
@@ -350,6 +351,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       "departInform.keyword",
       "departSejourMotif.keyword",
       "youngPhase1Agreement.keyword",
+      "psc1Info.keyword",
     ];
     const sortFields = [];
 

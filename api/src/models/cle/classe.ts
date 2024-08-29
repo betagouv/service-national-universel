@@ -12,6 +12,7 @@ import { CohesionCenterDocument } from "../cohesionCenter";
 import { SessionPhase1Document } from "../sessionPhase1";
 import { PointDeRassemblementDocument } from "../PlanDeTransport/pointDeRassemblement";
 import { LigneBusDocument } from "../PlanDeTransport/ligneBus";
+import { CohortDocument } from "../cohort";
 
 const MODELNAME = "classe";
 
@@ -304,6 +305,13 @@ schema.virtual("ligne", {
   justOne: true,
 });
 
+schema.virtual("cohortDetails", {
+  ref: "cohort",
+  localField: "cohort",
+  foreignField: "name",
+  justOne: true,
+});
+
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;
@@ -343,6 +351,7 @@ export type ClasseDocument<T = {}> = DocumentExtended<
     session?: SessionPhase1Document;
     pointDeRassemblement?: PointDeRassemblementDocument;
     ligne?: LigneBusDocument;
+    cohortDetails?: CohortDocument;
   } & T
 >;
 type SchemaExtended = ClasseDocument & UserExtension;
