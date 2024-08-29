@@ -27,13 +27,15 @@ import SelectCohort from "@/components/cohorts/SelectCohort";
 import { settings, uselessSettings } from "./utils";
 import { InformationsConvoyage } from "@/scenes/settings/InformationsConvoyage";
 import { CleSettings } from "@/scenes/settings/CleSettings";
+import { getDefaultCohort } from "@/utils/session";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
+  const cohorts = useSelector((state) => state.Cohorts);
 
   const urlParams = new URLSearchParams(window.location.search);
 
-  const cohort = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : "Février 2024 - C";
+  const cohort = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : getDefaultCohort(cohorts);
   const [isLoading, setIsLoading] = useState(true);
   const readOnly = !isSuperAdmin(user);
   const [noChange, setNoChange] = useState(true);

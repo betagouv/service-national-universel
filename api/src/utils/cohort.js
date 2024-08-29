@@ -2,12 +2,12 @@ const { getRegionForEligibility, regionsListDROMS, COHORT_TYPE, COHORT_STATUS } 
 const { YoungModel, CohortModel, InscriptionGoalModel } = require("../models");
 
 async function getFilteredSessions(young, timeZoneOffset = null) {
-  const cohorts = await getCohorts(young, timeZoneOffset);
+  const cohorts = await getCohorts(young, timeZoneOffset, [COHORT_TYPE.VOLONTAIRE]);
   return cohorts.filter((cohort) => cohort.isEligible);
 }
 
 async function getAllSessions(young) {
-  const cohorts = await getCohorts(young, null);
+  const cohorts = await getCohorts(young, null, [COHORT_TYPE.CLE, COHORT_TYPE.VOLONTAIRE]);
   return cohorts;
 }
 
@@ -125,21 +125,21 @@ function getReturnDateSession(session, young, cohort) {
   return new Date(cohortDateEnd);
 }
 
-async function getCohorts(young, timeZoneOffset = null) {
+async function getCohorts(young, timeZoneOffset = null, types = [COHORT_TYPE.VOLONTAIRE, COHORT_TYPE.CLE]) {
   const cohorts = await CohortModel.find({
-    type: COHORT_TYPE.VOLONTAIRE,
+    type: { $in: types },
     status: COHORT_STATUS.ACTIVE,
   });
 
   const formattedCohorts = cohorts.map((cohort) => ({
     ...cohort.toObject(),
-    isOpen: cohort.isOpen(young, timeZoneOffset),
-    isEligible: cohort.isEligible(young),
+    isOpen: cohort.getIsOpen(young, timeZoneOffset),
+    isEligible: cohort.getIsEligible(young),
   }));
 
   const region = getRegionForEligibility(young);
-  const formattedCohortsWithPlaces = await getPlaces(formattedCohorts, region);
-  return formattedCohortsWithPlaces;
+  const cohortsWithPlaces = await getPlaces(formattedCohorts, region);
+  return cohortsWithPlaces;
 }
 
 module.exports = {

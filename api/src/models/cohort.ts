@@ -1,6 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import { isAfter, isWithinInterval } from "date-fns";
-import { COHORT_TYPE, COHORT_STATUS, COHORT_TYPE_LIST, getDateTimeByTimeZoneOffset, YoungDto, getRegionForEligibility, region2zone, YOUNG_STATUS } from "snu-lib";
+import { COHORT_TYPE, COHORT_TYPE_LIST, COHORT_STATUS, getDateTimeByTimeZoneOffset, getRegionForEligibility, region2zone, YOUNG_STATUS } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "./types";
@@ -389,7 +389,7 @@ schema.virtual("isReInscriptionOpen").get<SchemaExtended>(function () {
   return this.getIsReInscriptionOpen();
 });
 
-schema.methods.isOpen = function (young: YoungDocument, timeZoneOffset) {
+schema.methods.getIsOpen = function (young: YoungDocument, timeZoneOffset) {
   if (!young) return false;
 
   if (young.status === YOUNG_STATUS.REINSCRIPTION) {
@@ -401,7 +401,7 @@ schema.methods.isOpen = function (young: YoungDocument, timeZoneOffset) {
   return this.getIsInscriptionOpen(timeZoneOffset);
 };
 
-schema.methods.isEligible = function (young: YoungDto) {
+schema.methods.getIsEligible = function (young: YoungDocument) {
   if (!young || !young.birthdateAt || !young.grade) {
     throw new Error("Young is missing required fields");
   }
