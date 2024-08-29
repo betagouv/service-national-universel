@@ -1675,6 +1675,13 @@ const schema = new Schema({
       description: "Status du fichier consentement de droit à l'image ",
     },
   },
+  psc1Info: {
+    type: String,
+    enum: ["true", "false", null],
+    documentation: {
+      description: "Le volontaire mention si il a obtenu son diplome PSC1 ou non",
+    },
+  },
 
   psc1Info: {
     type: String,
@@ -1690,7 +1697,7 @@ const schema = new Schema({
       description: "Commentaire du status WAITING_CORRECTION consentement de droit à l'image ",
     },
   },
-
+  // Legacy to remove ------------------------
   autoTestPCR: {
     type: String,
     enum: ["true", "false"],
@@ -1720,6 +1727,7 @@ const schema = new Schema({
       description: "Commentaire du status WAITING_CORRECTION consentement d'autotest PCR",
     },
   },
+  // ----------------------------------------------------------
 
   rulesYoung: {
     type: String,
