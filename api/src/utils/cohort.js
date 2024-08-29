@@ -2,38 +2,13 @@ const { getRegionForEligibility, regionsListDROMS, COHORT_TYPE, COHORT_STATUS } 
 const { YoungModel, CohortModel, InscriptionGoalModel } = require("../models");
 
 async function getFilteredSessions(young, timeZoneOffset = null) {
-  const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE, status: COHORT_STATUS.ACTIVE });
-
-  const region = getRegionForEligibility(young);
-
-  const formattedCohorts = cohorts.map((cohort) => {
-    return {
-      ...cohort.toObject(),
-      isOpen: cohort.isOpen(young, timeZoneOffset),
-      isEligible: cohort.isEligible(young),
-    };
-  });
-
-  const formattedCohortsWithPlaces = await getPlaces(formattedCohorts, region);
-  return formattedCohortsWithPlaces.filter((cohort) => cohort.isEligible);
+  const cohorts = await getCohorts(young, timeZoneOffset);
+  return cohorts.filter((cohort) => cohort.isEligible);
 }
 
 async function getAllSessions(young) {
-  const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE, status: COHORT_STATUS.ACTIVE });
-
-  const region = getRegionForEligibility(young);
-
-  const formattedCohorts = cohorts.map((cohort) => {
-    return {
-      ...cohort.toObject(),
-      isOpen: cohort.isOpen(young, null),
-      isEligible: cohort.isEligible(young),
-    };
-  });
-
-  const formattedCohortsWithPlaces = await getPlaces(formattedCohorts, region);
-
-  return formattedCohortsWithPlaces;
+  const cohorts = await getCohorts(young, null);
+  return cohorts;
 }
 
 async function getFilteredSessionsForCLE() {
@@ -148,6 +123,23 @@ function getReturnDateSession(session, young, cohort) {
   const cohortDateEnd = new Date(cohort?.dateEnd);
   cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
   return new Date(cohortDateEnd);
+}
+
+async function getCohorts(young, timeZoneOffset = null) {
+  const cohorts = await CohortModel.find({
+    type: COHORT_TYPE.VOLONTAIRE,
+    status: COHORT_STATUS.ACTIVE,
+  });
+
+  const formattedCohorts = cohorts.map((cohort) => ({
+    ...cohort.toObject(),
+    isOpen: cohort.isOpen(young, timeZoneOffset),
+    isEligible: cohort.isEligible(young),
+  }));
+
+  const region = getRegionForEligibility(young);
+  const formattedCohortsWithPlaces = await getPlaces(formattedCohorts, region);
+  return formattedCohortsWithPlaces;
 }
 
 module.exports = {

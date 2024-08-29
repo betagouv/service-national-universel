@@ -69,7 +69,6 @@ export default function List() {
 
 const ListSession = ({ firstSession }) => {
   const user = useSelector((state) => state.Auth.user);
-  const { cohorts } = useSelector((state) => state.Cohorts);
   const history = useHistory();
 
   const [data, setData] = React.useState([]);
@@ -118,7 +117,7 @@ const ListSession = ({ firstSession }) => {
             paramData={paramData}
             setParamData={setParamData}
             size={size}
-            intermediateFilters={[getCohortGroups("cohort", cohorts)]}
+            intermediateFilters={[getCohortGroups()]}
           />
           <ExportComponent
             title="Exporter"
