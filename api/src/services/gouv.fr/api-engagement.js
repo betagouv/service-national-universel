@@ -73,7 +73,7 @@ const apiEngagement = {
 
       return data;
     } catch (e) {
-      console.error("Error while sending tracking data to API Engagement:", e);
+      capture(e);
     }
   },
 };

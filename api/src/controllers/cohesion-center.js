@@ -13,6 +13,7 @@ const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = requ
 const { validateId } = require("../utils/validator");
 const { getReferentManagerPhase2 } = require("../utils");
 const { getTransporter } = require("../utils");
+const { getCohortIdsFromCohortName } = require("../cohort/cohortService");
 
 //To update for new affectation
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -133,7 +134,8 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       sanitaryContactEmail: value.email,
       cohortId: cohort?._id,
     });
-    center.set({ cohorts: newCohorts });
+    const cohortIds = await getCohortIdsFromCohortName(newCohorts);
+    center.set({ cohorts: newCohorts, cohortIds: cohortIds });
     await center.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true, data: serializeSessionPhase1(session) });
@@ -202,7 +204,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
       const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
-      console.log(firstSession);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 

@@ -14,8 +14,8 @@ import History from "./history";
 import Loader from "../../../components/Loader";
 
 export default function Index({ ...props }) {
-  const setDocumentTitle = useDocumentTitle("Utilisateurs");
   const [user, setUser] = useState();
+  useDocumentTitle(user ? `${user.firstName} ${user.lastName}` : "Volontaires");
   const currentUser = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -30,7 +30,6 @@ export default function Index({ ...props }) {
           return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur. Celui-ci est peut-être introuvable.");
         }
         setUser(userResponse.data);
-        setDocumentTitle(`${userResponse.data.firstName} ${userResponse.data.lastName}`);
       } catch (e) {
         console.log(e);
         return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur");

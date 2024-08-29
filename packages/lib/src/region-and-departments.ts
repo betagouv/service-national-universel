@@ -341,7 +341,7 @@ const region2zone = {
 };
 
 const getRegionForEligibility = (young) => {
-  let region = young.schooled ? young.schoolRegion : young.region;
+  let region = young.schooled === "true" ? young.schoolRegion : young.region;
   if (!region) {
     let dep = young?.schoolDepartment || young?.department || getDepartmentByZip(young?.zip);
     if (dep && (!isNaN(dep) || ["2A", "2B", "02A", "02B"].includes(dep))) {

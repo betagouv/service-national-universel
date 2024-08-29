@@ -70,7 +70,6 @@ router.post(
       archive.finalize();
     } catch (e) {
       capture(e);
-      console.error(e);
       res.status(500).json({ error: e.message });
     }
   },

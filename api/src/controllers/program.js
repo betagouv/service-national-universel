@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../sentry");
+const { logger } = require("../logger");
 
 const { ProgramModel } = require("../models");
 const { ERRORS, isYoung } = require("../utils");
@@ -129,7 +130,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const program = await ProgramModel.findById(checkedId);
     if (!canCreateOrUpdateProgram(req.user, program)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await program.remove();
-    console.log(`Program ${req.params.id} has been deleted`);
+    logger.debug(`Program ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

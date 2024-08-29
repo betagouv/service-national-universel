@@ -13,8 +13,8 @@ import ProposeMission from "./propose-mission";
 import Youngs from "./youngs";
 
 export default function Index({ ...props }) {
-  const setDocumentTitle = useDocumentTitle("Missions");
   const [mission, setMission] = useState(null);
+  useDocumentTitle(mission ? `${mission.name}` : "Missions");
   const [tutor, setTutor] = useState(null);
   const [structure, setStructure] = useState(null);
   const [applications, setApplications] = useState(null);
@@ -32,7 +32,6 @@ export default function Index({ ...props }) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(missionResponse.code));
         return history.push("/mission");
       }
-      setDocumentTitle(`${missionResponse.data?.name}`);
       setMission(missionResponse.data);
 
       const structureResponse = await api.get(`/structure/${missionResponse.data.structureId}`);
@@ -62,7 +61,6 @@ export default function Index({ ...props }) {
       toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(missionResponse.code));
       return history.push("/mission");
     }
-    // setDocumentTitle(`${missionResponse.data?.name}`);
     setMission(missionResponse.data);
   }
 

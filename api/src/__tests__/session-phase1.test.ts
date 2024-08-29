@@ -139,7 +139,6 @@ describe("Session Phase 1", () => {
       const res = await request(getAppHelper())
         .delete("/session-phase1/" + sessionPhase1._id)
         .send();
-      console.log(res.body);
       expect(res.status).toBe(403);
     });
     it("should return 403 when buses are associated with the session", async () => {

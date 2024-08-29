@@ -3,7 +3,6 @@ export const mockEsClient = (results: { [key: string]: any[] } = {}) => {
 
   const mock = jest.mock("../../es", () => ({
     search: async (params: { index: string; scroll: "1m"; size: 1000; body: { query: any; _source: "*" } }) => {
-      console.log("mockEsClient - search()", params, results[params.index]?.length || 0);
       return {
         body: {
           hits: {

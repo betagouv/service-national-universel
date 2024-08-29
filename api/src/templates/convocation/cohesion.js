@@ -1,6 +1,7 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
 const config = require("config");
+const { logger } = require("../../logger");
 const dayjs = require("dayjs");
 require("dayjs/locale/fr");
 const { withPipeStream } = require("../utils");
@@ -244,19 +245,17 @@ function initDocument(options = {}) {
 async function generateCohesion(outStream, young) {
   controlYoungCoherence(young);
   const data = await fetchDataForYoung(young);
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument();
   withPipeStream(doc, outStream, () => {
     render(doc, { young, ...data });
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 async function generateBatchCohesion(outStream, youngs) {
   let commonYoungData = await getYoungCommonData(validatedYoungsWithSession);
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const validatedYoungsWithSession = youngs.filter((young) => young.status === YOUNG_STATUS.VALIDATED && young.sessionPhase1Id);
   const doc = initDocument({ autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
@@ -266,7 +265,7 @@ async function generateBatchCohesion(outStream, youngs) {
       render(doc, { young, ...commonYoungData });
     }
   });
-  console.timeEnd("RENDERING " + random);
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 function controlYoungCoherence(young) {

@@ -1,3 +1,6 @@
+const { capture } = require("../sentry");
+const { logger } = require("../logger");
+
 const loggingMiddleware = async (req, res, next) => {
   const startTime = new Date();
   res.on("finish", async () => {
@@ -29,9 +32,9 @@ const loggingMiddleware = async (req, res, next) => {
           log.userRole = req.user?.role;
         }
       }
-      console.log(JSON.stringify(log));
+      logger.info("api", log);
     } catch (error) {
-      console.error("Error in logging middleware:", error);
+      capture(error);
     }
   });
   next();

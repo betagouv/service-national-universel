@@ -1,6 +1,6 @@
-const slack = require("../slack");
 const { capture } = require("../sentry");
 const { getDb } = require("../mongo");
+const { logger } = require("../logger");
 
 exports.handler = async () => {
   try {
@@ -8,27 +8,19 @@ exports.handler = async () => {
     const serverStatus = await db.command({ serverStatus: 1 });
     const connections = serverStatus.connections;
 
-    console.log("MongoMonitoring - Connexions actives:", connections.active);
-    console.log("MongoMonitoring - Connexions actuelles:", connections.current);
-    console.log("MongoMonitoring - Connexions disponibles:", connections.available);
-    console.log("MongoMonitoring - Total des connexions créées:", connections.totalCreated);
-    // console.log("MongoMonitoring - Threaded:", connections.threaded);
-    // console.log("MongoMonitoring - Exhaust Is Master:", connections.exhaustIsMaster);
-    // console.log("MongoMonitoring - Exhaust Hello:", connections.exhaustHello);
-    // console.log("MongoMonitoring - Awaiting Topology Changes:", connections.awaitingTopologyChanges);
+    const metrics = {
+      activeConnections: connections.active,
+      currentConnections: connections.current,
+      availableConnections: connections.available,
+      totalCreatedConnections: connections.totalCreated,
+      threadedConnections: connections.threaded,
+      exhaustIsMaster: connections.exhaustIsMaster,
+      exhaustHello: connections.exhaustHello,
+      awaitingTopologyChanges: connections.awaitingTopologyChanges,
+    };
 
-    if (connections.active > 50) {
-      await slack.info({
-        title: "Mongo DB connection monitor",
-        text: `High number of active connections: ${connections.active}`,
-      });
-    }
+    logger.info("mongo-metrics", metrics);
   } catch (e) {
     capture(e);
-    console.error("Erreur lors de la surveillance des connexions:", e);
-    await slack.error({
-      title: "Mongo DB connection monitor - Error",
-      text: `Erreur lors de la surveillance des connexions: ${e.message}`,
-    });
   }
 };

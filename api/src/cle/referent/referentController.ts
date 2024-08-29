@@ -2,6 +2,7 @@ import express from "express";
 import passport from "passport";
 import Joi from "joi";
 import { Response } from "express";
+import { logger } from "../../logger";
 
 import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin, FeatureFlagName } from "snu-lib";
 
@@ -77,7 +78,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
 
 router.post("/send-invitation-chef-etablissement", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    console.log("Controller - send-invitation-chef-etablissement");
+    logger.debug("Controller - send-invitation-chef-etablissement");
 
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -101,7 +102,7 @@ router.post("/send-invitation-chef-etablissement", passport.authenticate("refere
 
 router.post("/send-invitation-referent-classe-verifiee", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    console.log("Controller - send-invitation-referent-classe-verifiee");
+    logger.debug("Controller - send-invitation-referent-classe-verifiee");
 
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -129,7 +130,7 @@ router.post("/send-invitation-referent-classe-verifiee", passport.authenticate("
 
 router.post("/delete-old-referent-classe", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    console.log("Controller - send-invitation-referent-classe");
+    logger.debug("Controller - send-invitation-referent-classe");
 
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

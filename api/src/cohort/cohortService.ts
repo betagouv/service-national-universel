@@ -1,4 +1,5 @@
-import { COHORT_TYPE } from "snu-lib";
+import { COHORT_TYPE, ERRORS } from "snu-lib";
+import { CohortDocument } from "../models";
 
 const { CohortModel } = require("../models");
 
@@ -28,4 +29,17 @@ export const isReInscriptionOpen = async (cohortName: String | undefined): Promi
     return cohort.isReInscriptionOpen;
   }
   return isReInscriptionOpenOnSomeCohorts();
+};
+
+export const findCohortBySnuIdOrThrow = async (cohortName: string) => {
+  const cohort = await CohortModel.findOne({ snuId: cohortName });
+  if (!cohort) {
+    throw new Error(ERRORS.COHORT_NOT_FOUND);
+  }
+  return cohort;
+};
+
+export const getCohortIdsFromCohortName = async (cohortNames: string[]): Promise<string[]> => {
+  const cohorts: Pick<CohortDocument, "_id" | "name">[] = await CohortModel.find({ name: { $in: cohortNames } }, { _id: 1, name: 1 }).lean();
+  return cohorts.map((cohort) => cohort._id);
 };

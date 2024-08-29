@@ -2,6 +2,7 @@ import { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, isChefEtablissement, UserDto, F
 import { ClasseType, EtablissementModel, ReferentDocument, ReferentModel } from "../../models";
 import { capture } from "../../sentry";
 import config from "config";
+import { logger } from "../../logger";
 import { sendTemplate } from "../../brevo";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { doInviteReferentClasse } from "../../services/cle/referent";
@@ -89,7 +90,7 @@ export default function (emailsEmitter) {
       if (await isFeatureAvailable(FeatureFlagName.INVITE_REFERENT_CLASSE_EACH_CLASSE_VERIFIED)) {
         const referentsClasse = await ReferentModel.find({ _id: { $in: classe.referentClasseIds } });
         for (const referent of referentsClasse) {
-          console.log(`emails/cle/classe - emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED) - invite referent classe : ${referent.email}`);
+          logger.debug(`emails/cle/classe - emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED) - invite referent classe : ${referent.email}`);
           await doInviteReferentClasse(referent, { ...user, departement: user.department[0] } as UserDto);
         }
       }

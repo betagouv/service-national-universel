@@ -6,7 +6,6 @@ const checkFeatureAvailable = (feature?: FeatureFlagDocument | null) => {
     return false;
   }
   const isBetween = feature.date && feature.date.from <= new Date() && feature.date.to >= new Date();
-  console.log("isFeatureAvailable - featureName:", feature.name, "- feature.enabled:", feature.enabled, "- isNowBetweenDates:", isBetween);
   return !!(feature.enabled || isBetween);
 };
 

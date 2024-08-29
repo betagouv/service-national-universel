@@ -1,6 +1,7 @@
 import { ReferentCreatedBy, ROLES, SUB_ROLES, InvitationType } from "snu-lib";
 import { ReferentModel, ReferentType, EtablissementType } from "../../models";
 import { IAppelAProjet } from "./appelAProjetType";
+import { logger } from "../../logger";
 
 export class AppelAProjetReferentService {
   referents: Partial<ReferentType & { operation: "create" | "none"; uai?: string }>[] = [];
@@ -13,11 +14,10 @@ export class AppelAProjetReferentService {
     const referentMetadata: ReferentType["metadata"] = { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, isFirstInvitationPending: true };
 
     if (alreadyProcessedEtablissement) {
-      console.log(
-        "AppelAProjetReferentService - processReferentEtablissement() - alreadyProcessedEtablissement: ",
-        appelAProjet.referentEtablissement.email,
-        alreadyProcessedEtablissement.referentEtablissementIds![0],
-        alreadyProcessedEtablissement.uai,
+      logger.debug(
+        `AppelAProjetReferentService - processReferentEtablissement() - alreadyProcessedEtablissement: ${appelAProjet.referentEtablissement.email} ${
+          alreadyProcessedEtablissement.referentEtablissementIds![0]
+        } ${alreadyProcessedEtablissement.uai}`,
       );
       return alreadyProcessedEtablissement.referentEtablissementIds![0];
     }
@@ -54,7 +54,7 @@ export class AppelAProjetReferentService {
 
     if (save) {
       createdReferent = await ReferentModel.create(newReferent);
-      console.log("AppelAProjetReferentService - processReferentEtablissement() - created referentEtablissement : ", createdReferent?._id);
+      logger.debug(`AppelAProjetReferentService - processReferentEtablissement() - created referentEtablissement : ${createdReferent?._id}`);
     }
 
     if (!hasAlreadyBeenProcessed) {
@@ -98,7 +98,7 @@ export class AppelAProjetReferentService {
     let createdReferent;
     if (save) {
       createdReferent = await ReferentModel.create(newClasseReferent);
-      console.log("AppelAProjetReferentService - processReferentClasse() - created referentClasse : ", createdReferent?._id);
+      logger.debug(`AppelAProjetReferentService - processReferentClasse() - created referentClasse : ${createdReferent?._id}`);
     }
     if (!hasAlreadyBeenProcessed) {
       this.referents.push({ ...newClasseReferent, _id: createdReferent?._id, operation: "create", uai: appelAProjet.etablissement?.uai });

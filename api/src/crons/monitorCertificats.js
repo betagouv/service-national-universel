@@ -1,6 +1,7 @@
 const { exec } = require("child_process");
 const slack = require("../slack");
 const { capture } = require("../sentry");
+const { logger } = require("../logger");
 
 const origin = "domain.par.clever-cloud.com";
 const domains = ["admin.snu.gouv.fr", "api.snu.gouv.fr", "moncompte.snu.gouv.fr"];
@@ -12,7 +13,6 @@ async function checkCert(domain) {
 
   exec(command, async (error, stdout, stderr) => {
     if (error) {
-      console.error(`Erreur lors de l'exécution de la commande pour ${domain}: ${error.message}`);
       await slack.error({
         title: `Erreur de vérification du certificat pour ${domain}`,
         text: `Erreur: ${error.message}`,
@@ -34,14 +34,14 @@ async function checkCert(domain) {
       });
 
       if (diffDays <= alertDays) {
-        console.log(`Alerte : le certificat pour ${domain} (CleverCloud) expire dans ${diffDays} jours!`);
+        logger.warn(`Alerte : le certificat pour ${domain} (CleverCloud) expire dans ${diffDays} jours!`);
         await slack.alert({
           title: `Alerte Certificat SSL pour ${domain}`,
           text: `Le certificat pour ${domain} expire dans ${diffDays} jours (${expiryDate.toUTCString()}).`,
         });
       }
     } else {
-      console.log(`Impossible de récupérer le certificat pour ${domain}`);
+      logger.error(`Impossible de récupérer le certificat pour ${domain}`);
       await slack.error({
         title: `Erreur de récupération du certificat pour ${domain}`,
         text: `Impossible de récupérer le certificat pour ${domain}`,
@@ -57,7 +57,6 @@ exports.handler = async () => {
     }
   } catch (e) {
     capture(e);
-    console.error("Erreur lors de la vérification des certificats:", e);
     await slack.error({
       title: "Erreur lors de la vérification des certificats",
       text: `Erreur: ${e.message}`,
