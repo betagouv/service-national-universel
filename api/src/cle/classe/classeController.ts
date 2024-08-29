@@ -551,7 +551,7 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
 
     const classe: ClasseDocument<{ etablissement: EtablissementDocument }> | null = await ClasseModel.findById(value).populate({
       path: "etablissement",
-      options: { select: { referentEtablissementIds: 1, coordinateurIds: 1 } },
+      options: { select: { referentEtablissementIds: 1, coordinateurIds: 1, department: 1, region: 1 } },
     });
 
     if (!classe?.etablissement?.referentEtablissementIds) {
