@@ -19,6 +19,7 @@ import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
 import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
+import { getCohort } from "@/utils/cohorts";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -30,10 +31,13 @@ const getInitialFormValues = (young) => ({
     phoneNumber: young.phone || "",
     phoneZone: young.phoneZone || "",
   },
+  psc1Info: young.psc1Info || "",
 });
 
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
+  const cantUpdatePSC1 = cohort.isAssignmentAnnouncementsOpenForYoung;
   const dispatch = useDispatch();
 
   const { search } = useLocation();
@@ -81,6 +85,7 @@ const AccountGeneralPage = () => {
         gender: formValues.gender,
         phone: formValues.phone.phoneNumber.trim(),
         phoneZone: formValues.phone.phoneZone,
+        psc1Info: formValues.psc1Info,
       };
       const { title, message, data: updatedYoung } = await updateYoung("profile", youngDataToUpdate);
       toastr.success(title, message);
@@ -127,7 +132,7 @@ const AccountGeneralPage = () => {
                   <Input label="Nom" name="lastName" placeholder="Dupond" className="basis-1/2" value={formValues.lastName} disabled />
                   <Input label="Prénom" name="firstName" placeholder="Gaspard" className="basis-1/2" value={formValues.firstName} disabled />
                 </FormRow>
-                <Select label="Sexe" name="gender" value={formValues.gender} onChange={handleChangeValue("gender")}>
+                <Select label="Sexe" name="gender" value={formValues.gender} onChange={(e) => handleChangeValue("gender")(e.target.value)}>
                   <option value="male">Homme</option>
                   <option value="female">Femme</option>
                 </Select>
@@ -145,7 +150,7 @@ const AccountGeneralPage = () => {
                   error={errors?.email}
                   placeholder="example@example.com"
                   value={formValues.email}
-                  onChange={handleChangeValue("email")}
+                  onChange={(e) => handleChangeValue("email")(e.target.value)}
                   disabled
                 />
                 <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-4">
@@ -181,7 +186,45 @@ const AccountGeneralPage = () => {
               )}
             </div>
           </div>
-
+          <hr className="ml-4"></hr>
+          <div className="grid grid-cols-1 lg:grid-cols-3">
+            <div className="py-6 pl-6 lg:col-start-1">
+              <h2 className="m-0 text-lg font-medium leading-6 text-gray-900">Formation PSC1</h2>
+            </div>
+            <div className="px-4 py-6 lg:col-span-2 lg:col-start-2">
+              <section className="mb-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="m-0 text-base font-normal leading-6 align-left">Avez-vous validé le PSC1 (Prévention et Secours Civiques de niveau 1) ?</h2>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="psc1Info"
+                      value="true"
+                      checked={formValues.psc1Info === "true"}
+                      onChange={(e) => handleChangeValue("psc1Info")(e.target.value)}
+                      className="form-radio text-blue-600"
+                      disabled={cantUpdatePSC1}
+                    />
+                    <span className="text-base font-normal">Oui</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="psc1Info"
+                      value="false"
+                      checked={formValues.psc1Info === "false"}
+                      onChange={(e) => handleChangeValue("psc1Info")(e.target.value)}
+                      className="form-radio text-blue-600"
+                      disabled={cantUpdatePSC1}
+                    />
+                    <span className="text-base font-normal">Non</span>
+                  </label>
+                </div>
+              </section>
+            </div>
+          </div>
           <div className="flex flex-col gap-3 bg-gray-50 py-3 px-4 lg:flex-row lg:justify-end">
             <ButtonLight className="w-full bg-white lg:w-fit" onClick={handleResetForm}>
               Annuler
