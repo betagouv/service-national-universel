@@ -2,7 +2,7 @@ import { apiURL } from "@/config";
 import { translateColoration } from "snu-lib";
 
 export const fetchClass = (id, params = {}) =>
-  fetch(`${apiURL}/cle/classe/${id}?${new URLSearchParams(params).toString()}`)
+  fetch(`${apiURL}/cle/classe/public/${id}?${new URLSearchParams(params).toString()}`)
     .then((res) => res.json())
     .then((res) => {
       if (!res.ok) throw new Error(res.code);
