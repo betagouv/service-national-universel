@@ -155,6 +155,13 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       translate: translateCniExpired,
     },
     {
+      title: "PSC1",
+      name: "psc1Info",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
       title: "Statut phase 1",
       name: "statusPhase1",
       parentGroup: "Phase 1",
@@ -343,6 +350,9 @@ export async function transformVolontaires(data, values) {
     if (!data.domains) data.domains = [];
     if (!data.periodRanking) data.periodRanking = [];
     const allFields = {
+      psc1Info: {
+        PSC1: translate(data?.psc1Info) || "Non renseigné",
+      },
       identity: {
         Prénom: data.firstName,
         Nom: data.lastName,
@@ -617,6 +627,7 @@ export async function transformInscription(data) {
       "Autotest PCR": translate(data.autoTestPCR),
       "Règlement intérieur": translate(data.rulesYoung),
       "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
+      PSC1: translate(data.psc1Info) || "Non Renseigné",
       "Statut représentant légal 1": translate(data.parent1Status),
       "Prénom représentant légal 1": data.parent1FirstName,
       "Nom représentant légal 1": data.parent1LastName,
