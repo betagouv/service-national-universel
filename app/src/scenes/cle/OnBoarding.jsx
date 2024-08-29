@@ -80,8 +80,8 @@ const OnBoarding = () => {
     queryFn: () => fetchClass(id),
     enabled: validateId(id),
   });
-
   if (isPending) return <Loader />;
+  console.log(classe);
   if (isError)
     return <OnboardingError message="Impossible de joindre le service. Essayez de vérifier le lien d'inscription qui vous a été transmis. Sinon, veuillez réessayer plus tard." />;
 
