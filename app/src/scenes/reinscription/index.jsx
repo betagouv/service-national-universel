@@ -16,6 +16,7 @@ import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { hasAccessToReinscription } from "snu-lib";
 import FutureCohort from "../inscription2023/FutureCohort";
+import useDocumentCss from "@/hooks/useDocumentCss";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -42,6 +43,8 @@ const Step = () => {
 };
 
 export default function ReInscription() {
+  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+
   const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
   const young = useSelector((state) => state.Auth.young);

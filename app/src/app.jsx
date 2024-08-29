@@ -11,7 +11,6 @@ import { Redirect, Link, Router, Switch, useLocation, useHistory } from "react-r
 import { QueryClientProvider } from "@tanstack/react-query";
 import { setYoung } from "./redux/auth/actions";
 
-import useDocumentCss from "@/hooks/useDocumentCss";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 
 import { environment, maintenance } from "./config";
@@ -43,43 +42,41 @@ const Thanks = lazy(() => import("./scenes/contact/Thanks"));
 const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 
 initApi();
+startReactDsfr({ defaultColorScheme: "light", Link });
 
 function App() {
   return (
     <Sentry.ErrorBoundary fallback={FallbackComponent}>
       <QueryClientProvider client={queryClient}>
         <Router history={history}>
-          <ScrollToTop />
-          <ScrollToHash />
-          <div className="flex min-h-screen flex-col justify-between">
-            {maintenance ? (
+          <AutoScroll />
+          {maintenance ? (
+            <Switch>
+              <SentryRoute path="/" component={Maintenance} />
+            </Switch>
+          ) : (
+            <Suspense fallback={<Loader />}>
               <Switch>
-                <SentryRoute path="/" component={Maintenance} />
+                <RouteWithOptionalLogin path="/validate-contract/done" component={ContractDone} />
+                <RouteWithOptionalLogin path="/validate-contract" component={Contract} />
+                <RouteWithOptionalLogin path="/conditions-generales-utilisation" component={CGU} />
+                <RouteWithOptionalLogin path="/noneligible" component={NonEligible} />
+                <RouteWithOptionalLogin path="/representants-legaux" component={RepresentantsLegaux} />
+                <RouteWithOptionalLogin path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+                <RouteWithOptionalLogin path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
+                <RouteWithOptionalLogin path="/public-besoin-d-aide" component={Contact} />
+                <RouteWithOptionalLogin path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
+                <RouteWithOptionalLogin path="/besoin-d-aide" component={Contact} />
+                <RouteWithOptionalLogin path="/auth" component={Auth} />
+                <RouteWithOptionalLogin path="/public-engagements" component={AllEngagements} />
+                <RouteWithOptionalLogin path="/merci" component={Thanks} />
+                <RouteWithOptionalLogin path="/preinscription" component={PreInscription} />
+                <RouteWithMandatoryLogin path="/inscription2023" component={Inscription2023} />
+                <RouteWithMandatoryLogin path="/reinscription" component={ReInscription} />
+                <RouteWithMandatoryLogin path="/" component={Espace} />
               </Switch>
-            ) : (
-              <Switch>
-                <SentryRoute
-                  path={[
-                    "/validate-contract/done",
-                    "/validate-contract",
-                    "/conditions-generales-utilisation",
-                    "/noneligible",
-                    "/representants-legaux",
-                    "/je-rejoins-ma-classe-engagee",
-                    "/je-suis-deja-inscrit",
-                    "/public-besoin-d-aide",
-                    "/auth",
-                    "/public-engagements",
-                    "/besoin-d-aide",
-                    "/merci",
-                    "/preinscription",
-                  ]}
-                  component={OptionalLogIn}
-                />
-                <SentryRoute path="/" component={MandatoryLogIn} />
-              </Switch>
-            )}
-          </div>
+            </Suspense>
+          )}
         </Router>
       </QueryClientProvider>
     </Sentry.ErrorBoundary>
@@ -88,9 +85,7 @@ function App() {
 
 export default Sentry.withProfiler(App);
 
-const OptionalLogIn = () => {
-  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
-  startReactDsfr({ defaultColorScheme: "light", Link });
+function RouteWithOptionalLogin({ path, component }) {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
@@ -121,51 +116,14 @@ const OptionalLogIn = () => {
   }, []);
 
   if (loading) return <Loader />;
+
   if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
 
-  return (
-    <Suspense fallback={<Loader />}>
-      <Switch>
-        <SentryRoute path="/validate-contract/done" component={ContractDone} />
-        <SentryRoute path="/validate-contract" component={Contract} />
-        <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-        <SentryRoute path="/noneligible" component={NonEligible} />
-        <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-        <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
-        <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
-        <SentryRoute path="/public-besoin-d-aide" component={Contact} />
-        <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
-        <SentryRoute path="/besoin-d-aide" component={Contact} />
-        <SentryRoute path="/auth" component={Auth} />
-        <SentryRoute path="/public-engagements" component={AllEngagements} />
-        <SentryRoute path="/merci" component={Thanks} />
-        <SentryRoute path="/preinscription" component={PreInscription} />
-        <Redirect to="/" />
-      </Switch>
-    </Suspense>
-  );
-};
+  return <SentryRoute path={path} component={component} />;
+}
 
-const Inscription = () => {
-  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
-  startReactDsfr({ defaultColorScheme: "light", Link });
-
-  return (
-    <Suspense fallback={<Loader />}>
-      <Switch>
-        <SentryRoute path="/inscription2023" component={Inscription2023} />
-        <SentryRoute path="/reinscription" component={ReInscription} />
-        <Redirect to="/" />
-      </Switch>
-    </Suspense>
-  );
-};
-
-const MandatoryLogIn = () => {
-  console.log("🚀 ~ MandatoryLogIn ~ MandatoryLogIn");
+function RouteWithMandatoryLogin({ path, component }) {
   const { pathname, search } = useLocation();
-  console.log("🚀 ~ MandatoryLogIn ~ search:", search);
-  console.log("🚀 ~ MandatoryLogIn ~ pathname:", pathname);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
@@ -183,7 +141,7 @@ const MandatoryLogIn = () => {
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
-          // const cohort = await getCohort(user.cohort);
+          const cohort = await getCohort(user.cohort);
 
           const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
           const forceEmailValidation =
@@ -203,40 +161,22 @@ const MandatoryLogIn = () => {
 
   if (!user) return <Redirect to={`/auth?disconnected=1&redirect=${pathname}${search}`} />;
 
-  return (
-    <Suspense fallback={<Loader />}>
-      <Switch>
-        <SentryRoute path={["/inscription2023", "/reinscription"]} component={Inscription} />
-        <SentryRoute path="/" component={Espace} />
-      </Switch>
-    </Suspense>
-  );
-};
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    if (document.getElementsByTagName) {
-      const inputElements = document.getElementsByTagName("input");
-      for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
-    }
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
+  return <SentryRoute path={path} component={component} />;
 }
 
-function ScrollToHash() {
-  const { hash } = useLocation();
+function AutoScroll() {
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
     if (hash) {
       const element = document.getElementById(hash.replace("#", ""));
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
+        return;
       }
     }
-  }, [hash]);
+    window.scrollTo(0, 0);
+  }, [pathname, hash]);
 
   return null;
 }

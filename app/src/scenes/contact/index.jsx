@@ -17,9 +17,12 @@ import Select from "@/components/dsfr/forms/Select";
 import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
+import useDocumentCss from "@/hooks/useDocumentCss";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
+  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+
   const { isLoggedIn, young } = useAuth();
 
   const params = new URLSearchParams(window.location.search);

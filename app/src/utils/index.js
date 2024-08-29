@@ -181,5 +181,3 @@ export const validateId = (id) => {
 };
 
 export const desktopBreakpoint = 768;
-
-export const shouldDisplayMaintenanceNotice = new Date() < new Date("2024-04-18T23:59:59");

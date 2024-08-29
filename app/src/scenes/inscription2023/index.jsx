@@ -24,6 +24,7 @@ import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
 import Stepper from "@/components/dsfr/ui/Stepper";
+import useDocumentCss from "@/hooks/useDocumentCss";
 
 function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
@@ -103,6 +104,8 @@ const StepCorrection = () => {
 };
 
 export default function Index() {
+  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+
   const young = useSelector((state) => state.Auth.young);
   const { isCLE } = useAuth();
   const cohort = getCohort(young.cohort);

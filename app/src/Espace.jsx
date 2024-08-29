@@ -7,7 +7,6 @@ import {
   FEATURES_NAME,
   YOUNG_STATUS,
   isFeatureEnabled,
-  shouldDisplayMaintenanceNotice,
   shouldForceRedirectToInscription,
   shouldForceRedirectToReinscription,
   shouldReAcceptRI,
@@ -90,9 +89,6 @@ const Espace = () => {
         <Navbar />
       </div>
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
-        {shouldDisplayMaintenanceNotice && (
-          <Notice>Maintenance planifiée jeudi 18 avril de 20h à minuit&nbsp;: vous ne serez pas en mesure d'accéder aux plateformes pendant cette période.</Notice>
-        )}
         <Suspense fallback={<Loader />}>
           <Switch>
             <SentryRoute exact path="/" component={Home} />
@@ -116,8 +112,8 @@ const Espace = () => {
       </main>
       <Footer />
 
-      <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
-      <ModalRI isOpen={isModalRIOpen} onAccept={handleModalRIConfirm} />
+      {isModalCGUOpen ? <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} /> : null}
+      {isModalRIOpen ? <ModalRI isOpen={isModalRIOpen} onAccept={handleModalRIConfirm} /> : null}
     </>
   );
 };
