@@ -2,8 +2,6 @@
 
 set -e
 
-pm2 --no-daemon set pm2-logrotate:retain 2
-
 config=$(node -e 'console.log(JSON.stringify(require("config")))')
 
 PM2_SLACK_URL=$(echo $config | jq -r '.PM2_SLACK_URL')
