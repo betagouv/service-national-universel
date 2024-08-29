@@ -24,9 +24,6 @@ import { RiInformationLine } from "react-icons/ri";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
 import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
-import { fetchClass } from "@/services/classe.service";
-import { useQuery } from "@tanstack/react-query";
-import { validateId } from "@/utils";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -38,16 +35,6 @@ export default function StepProfil() {
   const parcours = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase();
   const isCLE = parcours === YOUNG_SOURCE.CLE;
   const classeId = new URLSearchParams(window.location.search).get("classeId");
-
-  const {
-    data: classe,
-    isError,
-    isLoading,
-  } = useQuery({
-    queryKey: ["class", classeId],
-    queryFn: () => fetchClass(classeId),
-    enabled: validateId(classeId),
-  });
 
   const optionsScolarite = [
     { value: "4eme", label: "4ème" },
@@ -62,14 +49,6 @@ export default function StepProfil() {
     { value: "2ndeCAP", label: "CAP 2ème année" },
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
-
-  if (isLoading) {
-    return <ProgressBar />;
-  }
-
-  if (isError) {
-    return <div>Une erreur s'est produite lors du chargement des données de la classe.</div>;
-  }
 
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
   const trimmedEmail = data?.email?.trim();
