@@ -103,6 +103,25 @@ export const getClasseById = async (classeId, withPopulate = true) => {
   return classe;
 };
 
+export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
+  let query = ClasseModel.findById(classeId);
+
+  if (withPopulate) {
+    query = query
+      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1 } } })
+      .populate({ path: "cohortDetails", options: { select: { dateStart: 1 } } })
+      .populate({ path: "etablissement", options: { select: { name: 1 } } });
+  }
+
+  const classe = await query.exec();
+
+  if (!classe) {
+    return null;
+  }
+
+  return classe;
+};
+
 export const updateReferent = async (classeId: string, newReferent: Pick<ReferentType, "firstName" | "lastName" | "email">, fromUser: object) => {
   const classe = await ClasseModel.findById(classeId);
   const referent = await ReferentModel.findOne({ email: newReferent.email });
@@ -127,5 +146,4 @@ export const updateReferent = async (classeId: string, newReferent: Pick<Referen
   const newReferentClasseCreated = await ReferentModel.create(newReferentClasse);
   classe?.set({ referentClasseIds: [newReferentClasseCreated._id] });
   return classe?.save({ fromUser });
-
 };
