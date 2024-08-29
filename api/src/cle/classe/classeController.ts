@@ -122,7 +122,7 @@ router.post("/export", passport.authenticate("referent", { session: false, failW
 
     const queryParams = req.query.type === "schema-de-repartition" ? { cohort: req.body.cohort, status: { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] } } : {};
     if (req.user.role === ROLES.REFERENT_REGION) queryParams["region"] = req.user.region;
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.departement;
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.department;
 
     const classes: ClasseDocument<{
       cohesionCenter?: CohesionCenterDocument;
@@ -545,7 +545,7 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
     if (req.user.role === ROLES.REFERENT_REGION && classe.etablissement.region !== req.user.region) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT && classe.etablissement.department !== req.user.departement) {
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT && !req.user.department?.includes(classe.etablissement.department)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -585,7 +585,7 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
       }
     }
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
-      if (classe.department !== req.user.departement) {
+      if (!req.user.department?.includes(classe.department)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }

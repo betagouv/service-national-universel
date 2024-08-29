@@ -118,7 +118,7 @@ export const updateReferent = async (classeId: string, newReferent: Pick<Referen
   }
   const newReferentClasse = {
     role: ROLES.REFERENT_CLASSE,
-    metadata: { invitationType: InvitationType.INSCRIPTION, createdBy: ReferentCreatedBy.UPDATE_REFERENT_2024_2025 },
+    metadata: { invitationType: InvitationType.INSCRIPTION, createdBy: ReferentCreatedBy.UPDATE_REFERENT_2024_2025, isFirstInvitationPending: true },
     firstName: newReferent.firstName,
     lastName: newReferent.lastName,
     email: newReferent.email,
