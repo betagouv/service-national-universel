@@ -797,9 +797,9 @@ const translateGrade = (grade) => {
     case "1ere":
       return "1ère";
     case "1ereCAP":
-      return "1ère année de CAP";
+      return "CAP 1ère année";
     case "2ndeCAP":
-      return "2ème année de CAP";
+      return "CAP 2ème année";
     case "Terminale":
       return "Terminale";
     case "TERM_CAP":

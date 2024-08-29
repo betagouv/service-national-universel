@@ -3,33 +3,34 @@ import express, { Response } from "express";
 import Joi from "joi";
 
 import {
-  ROLES,
-  canDownloadYoungDocuments,
-  YOUNG_STATUS,
-  STATUS_CLASSE,
   canCreateClasse,
-  STATUS_PHASE1_CLASSE,
-  SENDINBLUE_TEMPLATES,
+  canDeleteClasse,
+  canDownloadYoungDocuments,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
+  canNotifyAdminCleForVerif,
+  canUpdateClasse,
+  canUpdateClasseStay,
+  canUpdateCohort,
+  canUpdateReferentClasse,
+  canVerifyClasse,
+  canViewClasse,
+  canWithdrawClasse,
+  ClasseSchoolYear,
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
   CLE_GRADE_LIST,
-  canUpdateClasse,
-  YOUNG_STATUS_PHASE1,
-  TYPE_CLASSE_LIST,
-  canUpdateClasseStay,
-  canViewClasse,
-  canWithdrawClasse,
-  canDeleteClasse,
-  canUpdateCohort,
-  LIMIT_DATE_ESTIMATED_SEATS,
-  canEditEstimatedSeats,
-  canEditTotalSeats,
-  canVerifyClasse,
-  canNotifyAdminCleForVerif,
   CohortDto,
-  ClasseSchoolYear,
   FeatureFlagName,
   isAdmin,
+  LIMIT_DATE_ESTIMATED_SEATS,
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+  STATUS_CLASSE,
+  STATUS_PHASE1_CLASSE,
+  TYPE_CLASSE_LIST,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -38,32 +39,46 @@ import { validateId } from "../../utils/validator";
 import emailsEmitter from "../../emails";
 import { UserRequest } from "../../controllers/request";
 import {
+  ClasseDocument,
   ClasseModel,
+  CohesionCenterDocument,
   CohortModel,
-  YoungModel,
+  EtablissementDocument,
   EtablissementModel,
+  LigneBusDocument,
+  PointDeRassemblementDocument,
+  ReferentDocument,
   ReferentModel,
   ReferentType,
-  ClasseDocument,
-  EtablissementDocument,
-  ReferentDocument,
-  CohesionCenterDocument,
-  PointDeRassemblementDocument,
-  LigneBusDocument,
+  YoungModel,
 } from "../../models";
 
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 
-import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, findClasseByUniqueKeyAndUniqueId, generateConvocationsByClasseId } from "./classeService";
 import {
+  buildUniqueClasseId,
+  buildUniqueClasseKey,
+  deleteClasse,
+  findClasseByUniqueKeyAndUniqueId,
+  generateConvocationsByClasseId,
+  getClasseById,
+  updateReferent,
+} from "./classeService";
+
+import {
+  findChefEtablissementInfoForClasses,
   findCohesionCentersForClasses,
+  findLigneInfoForClasses,
   findPdrsForClasses,
   getYoungsGroupByClasses,
-  findLigneInfoForClasses,
-  findChefEtablissementInfoForClasses,
 } from "./export/classeExportService";
 import ClasseStateManager from "./stateManager";
+
+const querySchema = Joi.object({
+  withDetails: Joi.boolean().default(true),
+  // Ajoutez d'autres paramètres si nécessaire
+});
 
 const router = express.Router();
 router.post(
@@ -114,7 +129,7 @@ router.post("/export", passport.authenticate("referent", { session: false, failW
 
     const queryParams = req.query.type === "schema-de-repartition" ? { cohort: req.body.cohort, status: { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] } } : {};
     if (req.user.role === ROLES.REFERENT_REGION) queryParams["region"] = req.user.region;
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.departement;
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.department;
 
     const classes: ClasseDocument<{
       cohesionCenter?: CohesionCenterDocument;
@@ -176,7 +191,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       // Classe
       name: Joi.string().required(),
       cohort: Joi.string().allow("").allow(null).optional(),
-      estimatedSeats: Joi.number().required(),
+      estimatedSeats: Joi.number().min(1).required(),
       coloration: Joi.string()
         .valid(...CLE_COLORATION_LIST)
         .required(),
@@ -232,6 +247,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
     if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
+    const cohort = await CohortModel.findOne({ name: cohortName });
+
     const classe = await ClasseModel.create({
       ...value,
       status: STATUS_CLASSE.CREATED,
@@ -246,6 +263,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       uniqueKey: uniqueClasseKey,
       uniqueKeyAndId: `${uniqueClasseKey}-${uniqueClasseId}`,
       referentClasseIds: [referent._id],
+      cohortId: cohort?._id,
     });
 
     if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
@@ -358,6 +376,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           pointDeRassemblementId: undefined,
         });
 
+        const cohort = await CohortModel.findOne({ name: value.cohort });
+
         const youngs = await YoungModel.find({ classeId: classe._id });
         await Promise.all(
           youngs.map((y) => {
@@ -366,6 +386,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
               sessionPhase1Id: undefined,
               cohesionCenterId: undefined,
               meetingPointId: undefined,
+              cohortId: cohort?._id,
             });
             return y.save({ fromUser: req.user });
           }),
@@ -389,6 +410,28 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+router.put("/:id/referent", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    if (!canUpdateReferentClasse(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    const { error, value } = Joi.object({
+      firstName: Joi.string().required(),
+      lastName: Joi.string().required(),
+      email: Joi.string().email().required(),
+    }).validate(req.body);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const classe = await updateReferent(req.params.id, value, req.user);
+    return res.status(200).send({ ok: true, data: classe });
+  } catch (error) {
+    capture(error);
+    res.status(422).send({ ok: false, code: error.message });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const { error, value } = validateId(req.params.id);
@@ -397,21 +440,20 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    // We need to populate the model with the 2 virtuals etablissement and referents
-    const data = await ClasseModel.findById(value)
-      .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
-      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })
-      .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
-      .populate({ path: "session", options: { select: { _id: 1 } } })
-      .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } });
-    if (!data) {
-      captureMessage("Error finding classe with id : " + JSON.stringify(value));
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // Validate and transform query parameters
+    const { error: queryError, value: queryParams } = querySchema.validate(req.query);
+    if (queryError) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
     }
+
+    const data = await getClasseById(value, queryParams?.withDetails);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
+    if (error.message === "Classe not found") {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
@@ -510,7 +552,7 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
     if (req.user.role === ROLES.REFERENT_REGION && classe.etablissement.region !== req.user.region) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT && classe.etablissement.department !== req.user.departement) {
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT && !req.user.department?.includes(classe.etablissement.department)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -550,7 +592,7 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
       }
     }
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
-      if (classe.department !== req.user.departement) {
+      if (!req.user.department?.includes(classe.department)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
@@ -564,7 +606,7 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
       status: STATUS_CLASSE.VERIFIED,
     });
 
-    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, classe);
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VERIFIED, classe, req.user);
 
     classe = await classe.save({ fromUser: req.user });
 

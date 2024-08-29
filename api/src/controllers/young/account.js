@@ -78,7 +78,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const currentCohort = await CohortModel.findOne({ name: young.cohort });
+    const currentCohort = await CohortModel.findById(young.cohortId);
 
     // If the young is affected and the cohort is not ended address can't be updated.
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && new Date(currentCohort.dateEnd).valueOf() > Date.now()) {

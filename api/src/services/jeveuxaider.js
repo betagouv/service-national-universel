@@ -147,7 +147,7 @@ router.get("/actions", async (req, res) => {
 
         const applications = await ApplicationModel.find({ missionId: mission._id });
         for (const application of applications) {
-          const young = await YoungModel.findOne({ _id: application.youngId });
+          const young = await YoungModel.findById(application.youngId);
           //If young exist and not deleted
           if (young && young.status !== YOUNG_STATUS.DELETED) {
             if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) data.actions.applicationWaitingValidation += 1;

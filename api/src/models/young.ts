@@ -2,7 +2,7 @@ import mongoose, { Schema, Types, InferSchemaType } from "mongoose";
 import bcrypt from "bcryptjs";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
-import { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { ROLES_LIST, PHONE_ZONES_NAMES_ARR, YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 import esClient from "../es";
 import * as brevo from "../brevo";
 import config from "config";
@@ -127,14 +127,6 @@ const Note = new mongoose.Schema({
 });
 
 const schema = new Schema({
-  sqlId: {
-    type: String,
-    index: true,
-    documentation: {
-      description: "Identifiant dans l'ancienne base de données",
-    },
-  },
-
   firstName: {
     type: String,
     documentation: {
@@ -222,7 +214,6 @@ const schema = new Schema({
   },
   cohort: {
     type: String,
-    enum: getCohortNames(),
     documentation: {
       description: "Cohorte",
     },
@@ -1684,6 +1675,13 @@ const schema = new Schema({
       description: "Status du fichier consentement de droit à l'image ",
     },
   },
+  psc1Info: {
+    type: String,
+    enum: ["true", "false", null],
+    documentation: {
+      description: "Le volontaire mention si il a obtenu son diplome PSC1 ou non",
+    },
+  },
 
   psc1Info: {
     type: String,
@@ -1699,7 +1697,7 @@ const schema = new Schema({
       description: "Commentaire du status WAITING_CORRECTION consentement de droit à l'image ",
     },
   },
-
+  // Legacy to remove ------------------------
   autoTestPCR: {
     type: String,
     enum: ["true", "false"],
@@ -1729,6 +1727,7 @@ const schema = new Schema({
       description: "Commentaire du status WAITING_CORRECTION consentement d'autotest PCR",
     },
   },
+  // ----------------------------------------------------------
 
   rulesYoung: {
     type: String,

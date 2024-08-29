@@ -24,8 +24,8 @@
     "doc": "node ./src/utils/generate-models-documentation.js",
     "clean": "rm -fr node_modules .turbo",
     "build": "tsc -b ./build.tsconfig.json",
-    "migrate-status": "migrate-mongo status",
-    "migrate-create": "migrate-mongo create",
+    "migrate-status": "tsx node_modules/.bin/migrate-mongo status",
+    "migrate-create": "tsx node_modules/.bin/migrate-mongo create",
     "migrate-down": "tsx --max-old-space-size=4096 node_modules/.bin/migrate-mongo down",
     "migrate-up": "tsx --max-old-space-size=4096 node_modules/.bin/migrate-mongo up"
   },
@@ -35,11 +35,11 @@
     "@bull-board/express": "^5.21.1",
     "@elastic/elasticsearch": "^7.14.0",
     "@fast-csv/format": "^5.0.0",
+    "@fast-csv/parse": "^5.0.0",
     "@godaddy/terminus": "^4.12.1",
     "@selego/mongoose-elastic": "1.7.1",
-    "@sentry/integrations": "^7.58.1",
-    "@sentry/node": "^7.92.0",
-    "@sentry/profiling-node": "^1.2.1",
+    "@sentry/node": "^8.25.0",
+    "@sentry/profiling-node": "^8.25.0",
     "archiver": "^7.0.1",
     "aws-sdk": "^2.1248.0",
     "bcryptjs": "^2.4.3",
@@ -81,7 +81,8 @@
     "snu-lib": "*",
     "sync-request-curl": "^3.0.0",
     "uuid": "^9.0.0",
-    "validator": "^13.7.0"
+    "validator": "^13.7.0",
+    "winston": "^3.14.2"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",

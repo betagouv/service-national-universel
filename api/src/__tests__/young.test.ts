@@ -121,7 +121,6 @@ describe("Young", () => {
 
       //Check that the saved fields are equals to the old one
       for (const key in updatedYoung) {
-        console.log("key -> ", key);
         if (fieldToKeep.find((val) => val === key)) {
           if (key === "status") {
             expect(updatedYoung[key]).toEqual("DELETED");
@@ -545,12 +544,13 @@ describe("Young", () => {
 
   describe("POST /young/:youngId/documents/:key", () => {
     it("should send file for the young", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      await createCohortHelper(
+      const cohort = await createCohortHelper(
         getNewCohortFixture({
-          name: young.cohort,
+          name: "Juillet 2023",
         }),
       );
+      const young = await createYoungHelper({ ...getNewYoungFixture(), cohort: cohort.name, cohortId: cohort._id });
+
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
@@ -772,7 +772,7 @@ describe("Young", () => {
     it("should call StateManager.Classe.compute if source is CLE", async () => {
       const cohortFixture = getNewCohortFixture({ type: "CLE" });
       const cohort = await createCohortHelper(cohortFixture);
-      const classe = createFixtureClasse({ seatsTaken: 0, status: "OPEN", cohort: cohort.name });
+      const classe = createFixtureClasse({ seatsTaken: 0, status: "OPEN", cohort: cohort.name, cohortId: cohort._id });
       const classeId = (await createClasse(classe))._id;
       const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId });
       const young = await createYoungHelper(youngFixture);

@@ -1,16 +1,18 @@
-import { ExtraErrorData, ReportingObserver } from "@sentry/integrations";
 import {
+  extraErrorDataIntegration,
+  reportingObserverIntegration,
   init,
-  reactRouterV5Instrumentation,
+  reactRouterV5BrowserTracingIntegration,
   withSentryRouting,
+  moduleMetadataIntegration,
+  httpClientIntegration,
   captureException as sentryCaptureException,
   captureMessage as sentryCaptureMessage,
-  BrowserTracing,
   makeBrowserOfflineTransport,
   makeFetchTransport,
-  Replay,
+  replayIntegration,
 } from "@sentry/react";
-import { RELEASE, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, environment } from "./config";
+import { RELEASE, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, environment } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -23,8 +25,7 @@ function initSentry() {
   if (environment !== "development") {
     // Evite le spam sentry en local
     init({
-      enabled: Boolean(SENTRY_URL),
-      dsn: SENTRY_URL,
+      dsn: "https://70778e8aa9a6f1b9f483a8b6c9046a12@sentry.selego.co/140",
       environment,
       release: RELEASE,
       normalizeDepth: 16,
@@ -32,17 +33,17 @@ function initSentry() {
       transportOptions: {
         maxQueueSize: 50,
       },
+      sendDefaultPii: true,
+      tracePropagationTargets: ["localhost", apiURL],
       integrations: [
-        new ExtraErrorData({ depth: 16 }),
-        new BrowserTracing({
-          routingInstrumentation: reactRouterV5Instrumentation(history),
-          // Pass the tracing info to this domain
-          tracingOrigins: [apiURL].map((url) => new URL(url).host),
-        }),
-        new ReportingObserver({
+        extraErrorDataIntegration({ depth: 16 }),
+        reactRouterV5BrowserTracingIntegration({ history }),
+        httpClientIntegration(),
+        moduleMetadataIntegration(),
+        reportingObserverIntegration({
           types: ["crash", "deprecation", "intervention"],
         }),
-        new Replay(),
+        replayIntegration(),
       ],
       replaysSessionSampleRate: SENTRY_SESSION_SAMPLE_RATE,
       replaysOnErrorSampleRate: SENTRY_ON_ERROR_SAMPLE_RATE,
@@ -91,7 +92,7 @@ function capture(err, contexte) {
   } else if (err.message) {
     sentryCaptureMessage(err.message, contexte);
   } else {
-    sentryCaptureMessage("Error not defined well", { extra: { error: err, contexte: contexte } });
+    sentryCaptureMessage("Error not defined well : You should capture Error type", { extra: { error: err, contexte: contexte } });
   }
 }
 function captureMessage(mess, contexte) {

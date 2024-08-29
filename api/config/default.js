@@ -29,7 +29,6 @@ module.exports = {
   API_ANTIVIRUS_ENDPOINT: "http://localhost:8089",
   ES_ENDPOINT: undefined,
   SENDINBLUEKEY: undefined,
-  SENTRY_URL: undefined,
   DIAGORIENTE_URL: undefined,
   DIAGORIENTE_TOKEN: undefined,
   FRANCE_CONNECT_URL: undefined,
@@ -67,4 +66,6 @@ module.exports = {
   TASK_MONITOR_USER: undefined,
   TASK_MONITOR_SECRET: undefined,
   ENABLE_2FA: false,
+  LOG_LEVEL: "info", // error, warn, info, http, debug
+  DO_MIGRATION: true,
 };

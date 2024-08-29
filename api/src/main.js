@@ -13,8 +13,10 @@ const express = require("express");
 const { createTerminus } = require("@godaddy/terminus");
 
 const config = require("config");
+const { logger } = require("./logger");
 
-const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
+const { capture } = require("./sentry");
+const { setupExpressErrorHandler } = require("@sentry/node");
 const { initDB, closeDB } = require("./mongo");
 const { initRedisClient, closeRedisClient } = require("./redis");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
@@ -26,7 +28,6 @@ const basicAuth = require("express-basic-auth");
 const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers, scheduleRepeatableTasks } = require("./queues/redisQueue");
 
 async function runTasks() {
-  initSentry();
   await Promise.all([initDB(), getAllPdfTemplates()]);
 
   initQueues();
@@ -46,17 +47,18 @@ async function runTasks() {
     );
   }
   app.use("/", initMonitor());
+  setupExpressErrorHandler(app);
 
   // * Use Terminus for graceful shutdown when using Docker
   const server = http.createServer(app);
 
   function onSignal() {
-    console.log("server is starting cleanup");
+    logger.debug("server is starting cleanup");
     return Promise.all([closeDB(), closeQueues(), closeWorkers()]);
   }
 
   function onShutdown() {
-    console.log("cleanup finished, server is shutting down");
+    logger.debug("cleanup finished, server is shutting down");
   }
 
   function healthCheck({ state }) {
@@ -73,17 +75,17 @@ async function runTasks() {
 
   createTerminus(server, options);
 
-  server.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
+  server.listen(config.PORT, () => logger.debug(`Listening on port ${config.PORT}`));
 }
 
 async function runAPI() {
   if (config.ENVIRONMENT !== "test") {
-    console.log("API_URL", config.API_URL);
-    console.log("APP_URL", config.APP_URL);
-    console.log("ADMIN_URL", config.ADMIN_URL);
-    console.log("SUPPORT_URL", config.SUPPORT_URL);
-    console.log("KNOWLEDGEBASE_URL", config.KNOWLEDGEBASE_URL);
-    console.log("ANALYTICS_URL", config.API_ANALYTICS_ENDPOINT);
+    logger.info(`API_URL ${config.API_URL}`);
+    logger.info(`APP_URL ${config.APP_URL}`);
+    logger.info(`ADMIN_URL ${config.ADMIN_URL}`);
+    logger.info(`SUPPORT_URL ${config.SUPPORT_URL}`);
+    logger.info(`KNOWLEDGEBASE_URL ${config.KNOWLEDGEBASE_URL}`);
+    logger.info(`ANALYTICS_URL ${config.API_ANALYTICS_ENDPOINT}`);
   }
 
   await Promise.all([initDB(), initRedisClient()]);
@@ -101,7 +103,6 @@ async function runAPI() {
   initQueues();
 
   const app = express();
-  const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
   if (["production", "staging", "ci", "custom"].includes(config.ENVIRONMENT)) {
@@ -219,12 +220,12 @@ async function runAPI() {
           throw new Error("PM2 TEST ERROR CRASH APP");
         }, 10);
       } catch (e) {
-        console.log("error", e);
+        logger.error(`error ${e}`);
       }
     });
   }
 
-  registerSentryErrorHandler();
+  setupExpressErrorHandler(app);
   app.use(handleError);
 
   initPassport();
@@ -233,12 +234,12 @@ async function runAPI() {
   const server = http.createServer(app);
 
   function onSignal() {
-    console.log("server is starting cleanup");
+    logger.debug("server is starting cleanup");
     return Promise.all([closeDB(), closeRedisClient(), closeQueues()]);
   }
 
   function onShutdown() {
-    console.log("cleanup finished, server is shutting down");
+    logger.debug("cleanup finished, server is shutting down");
   }
 
   function healthCheck({ state }) {
@@ -255,7 +256,7 @@ async function runAPI() {
 
   createTerminus(server, options);
 
-  server.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
+  server.listen(config.PORT, () => logger.debug(`Listening on port ${config.PORT}`));
 }
 
 module.exports = {

@@ -1,5 +1,5 @@
 import dayjs from "@/utils/dayjs.utils";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -23,13 +23,17 @@ const getSubtitle = (user) => {
 export default function UserHeader({ user, tab, currentUser }) {
   const history = useHistory();
   const dispatch = useDispatch();
+  const [handleImpersonateLoading, setHandleImpersonateLoading] = useState(false);
 
   const handleImpersonate = async () => {
     try {
+      if (handleImpersonateLoading) return;
+      setHandleImpersonateLoading(true);
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", user._id);
       dispatch(setUserInRedux(data));
       history.push("/dashboard");
+      setHandleImpersonateLoading(false);
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));

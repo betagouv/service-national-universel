@@ -729,7 +729,6 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       cohort: Joi.string().required(),
     }).validate(req.params);
     if (error) {
-      console.log("🚀 ~ file: ligne-de-bus.js:551 ~ router.get ~ error", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 

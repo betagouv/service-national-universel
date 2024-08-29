@@ -121,7 +121,7 @@ class api {
     }
   }
 
-  get(path) {
+  get(path, params = {}) {
     return new Promise(async (resolve, reject) => {
       try {
         const controller = new AbortController();
@@ -129,7 +129,11 @@ class api {
 
         window.addEventListener("beforeunload", () => controller.abort());
 
-        const response = await fetch(`${apiURL}${path}`, {
+        // Convert params object to query string
+        const queryString = new URLSearchParams(params).toString();
+        const url = `${apiURL}${path}${queryString ? `?${queryString}` : ""}`;
+
+        const response = await fetch(url, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],

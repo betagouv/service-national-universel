@@ -4,6 +4,7 @@ const Joi = require("joi");
 
 const { capture, captureMessage } = require("./sentry");
 const config = require("config");
+const { logger } = require("./logger");
 const { sendTemplate } = require("./brevo");
 const {
   JWT_SIGNIN_MAX_AGE_SEC,
@@ -31,7 +32,7 @@ const {
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
-const { ClasseModel, EtablissementModel } = require("./models");
+const { ClasseModel, EtablissementModel, CohortModel } = require("./models");
 const { getFeatureFlagsAvailable } = require("./featureFlag/featureFlagService");
 
 class Auth {
@@ -64,7 +65,7 @@ class Auth {
         birthdateAt: Joi.date().required(),
         frenchNationality: Joi.string().trim().required(),
         schooled: Joi.string().trim().required(),
-        grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+        grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "1ereCAP", "2ndeCAP", "Autre"),
         schoolName: Joi.string().trim(),
         schoolType: Joi.string().trim(),
         schoolAddress: Joi.string().trim(),
@@ -125,6 +126,8 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
+      const cohortModel = await CohortModel.findOne({ name: cohort });
+
       const user = await this.model.create({
         email,
         phone,
@@ -146,6 +149,7 @@ class Auth {
         schoolId,
         zip,
         cohort,
+        cohortId: cohortModel?._id,
         grade,
         inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
         emailVerified: "false",
@@ -184,7 +188,6 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
-      console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -204,6 +207,7 @@ class Auth {
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().required(),
         birthdateAt: Joi.date().required(),
+        grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "1ereCAP", "2ndeCAP"),
         frenchNationality: Joi.string().trim().required(),
         source: Joi.string()
           .trim()
@@ -220,7 +224,7 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality, classeId } = value;
+      const { email, phone, phoneZone, firstName, lastName, password, grade, birthdateAt, frenchNationality, classeId } = value;
 
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
@@ -250,6 +254,8 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
+      const cohort = await CohortModel.findById(classe.cohortId);
+
       const userData = {
         email,
         phone,
@@ -257,6 +263,7 @@ class Auth {
         firstName,
         lastName,
         password,
+        grade,
         birthdateAt: formatedDate,
         frenchNationality,
         inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
@@ -284,6 +291,7 @@ class Auth {
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
+        cohortId: cohort?._id,
       };
 
       const user = await this.model.create(userData);
@@ -320,7 +328,6 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
-      console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -386,7 +393,9 @@ class Auth {
 
       if (await shouldUse2FA()) {
         const token2FA = await crypto.randomInt(1000000);
-        if (config.ENVIRONMENT === "development") console.log(`2FA code : ${token2FA}`);
+        if (config.ENVIRONMENT === "development") {
+          logger.debug(`2FA code : ${token2FA}`);
+        }
 
         if (isYoung(user)) user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS });
         else if (isReferent(user)) user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS });

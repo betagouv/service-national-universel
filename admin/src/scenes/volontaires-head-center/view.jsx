@@ -11,14 +11,13 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function VolontaireHeadCenter({ ...props }) {
   const [young, setYoung] = useState();
-  const setDocumentTitle = useDocumentTitle("Volontaires");
+  useDocumentTitle(young ? `${young.firstName} ${young.lastName}` : "Volontaires");
 
   const getYoung = async () => {
     const id = props.match && props.match.params && props.match.params.id;
     if (!id) return <div />;
     const { data } = await api.get(`/referent/young/${id}`);
     setYoung(data);
-    setDocumentTitle(`${data?.firstName} ${data?.lastName}`);
   };
 
   useEffect(() => {

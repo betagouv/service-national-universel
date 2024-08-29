@@ -58,6 +58,8 @@ export function initWorker(connection) {
           value: cron.crontab,
         },
         timezone: "Etc/UTC",
+        checkinMargin: 10,
+        maxRuntime: 15,
       } as MonitorConfig;
       const checkInId = captureCheckIn(
         {
