@@ -1,6 +1,6 @@
-import { CohortDto, getCohortPeriod, translate } from "snu-lib";
+import { getCohortPeriod, translate } from "snu-lib";
 import API from "./api";
-import { IIntermediateFilter, DataFilter, RowFilter } from "@/components/filters-system-v2/components/Filter";
+import { IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 
 export const getCohortByName = async (cohortName) => {
@@ -51,32 +51,72 @@ export const getCohortSelectOptions = (cohorts, short = false) => {
   return cohorts.map((cohort) => ({ value: cohort.name, label: `${cohort.name} (${getCohortPeriod(cohort, true)})` }));
 };
 
-function getGroupTitle(cohort: CohortDto) {
-  if (cohort.status === "future") return "À venir";
-  return `${cohort.type === "CLE" ? "CLE" : "HTS"} ${cohort.groupLabel}`;
-}
-
-export const getCohortGroups = (parentFilterKey: string = "cohort", cohorts: CohortDto[]): IIntermediateFilter => {
+export const getCohortGroups = (parentFilterKey: string = "cohort"): IIntermediateFilter => {
   return {
     key: parentFilterKey,
-    filters: cohorts.reduce<RowFilter[]>((acc, cohort) => {
-      const groupId = cohort.groupId;
-      if (!acc.find((a) => a.name === groupId))
-        acc.push({
-          title: getGroupTitle(cohort),
-          name: groupId,
-          parentGroup: "Cohorte",
-          parentFilter: parentFilterKey,
-          missingLabel: "Non renseigné",
-          sort: (data) => orderCohort(data),
-          filter: (data: DataFilter) => data,
-          filterRootFilter: (dataFiltered: DataFilter[]) =>
-            dataFiltered?.filter((cohortFilter) => {
-              const cohort = cohorts.find((cohort) => cohort.name === cohortFilter.key);
-              return cohort?.groupId === groupId;
-            }),
-        });
-      return acc;
-    }, []),
+    filters: [
+      {
+        title: "CLE 2024",
+        name: CohortGroup.CLE_2024,
+        parentGroup: "Cohorte",
+        parentFilter: parentFilterKey,
+        missingLabel: "Non renseigné",
+        sort: (data) => orderCohort(data),
+        filter: (data: DataFilter) => data,
+        filterRootFilter: (dataFiltered: DataFilter[]) =>
+          dataFiltered?.filter(
+            (cohort) => (cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")) || cohort.key.toLowerCase().includes("cle 23-24"),
+          ),
+      },
+      {
+        title: "HTS 2024",
+        name: CohortGroup.HTS_2024,
+        parentGroup: "Cohorte",
+        parentFilter: parentFilterKey,
+        missingLabel: "Non renseigné",
+        sort: (data) => orderCohort(data),
+        filter: (data: DataFilter) => data,
+        filterRootFilter: (dataFiltered: DataFilter[]) => dataFiltered?.filter((cohort) => !cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
+      },
+      {
+        title: "2023",
+        name: CohortGroup._2023,
+        parentGroup: "Cohorte",
+        parentFilter: parentFilterKey,
+        missingLabel: "Non renseigné",
+        sort: (data) => orderCohort(data),
+        filter: (data: DataFilter) => data,
+        filterRootFilter: (dataFiltered: DataFilter[]) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("2023")),
+      },
+      {
+        title: "2022 et -",
+        name: CohortGroup.LOWER_THAN_2022,
+        parentGroup: "Cohorte",
+        parentFilter: parentFilterKey,
+        missingLabel: "Non renseigné",
+        sort: (data) => orderCohort(data),
+        filter: (data: DataFilter) => data,
+        filterRootFilter: (dataFiltered: DataFilter[]) =>
+          dataFiltered?.filter((cohort) => ["2019", "2020", "2021"].includes(cohort.key.toLowerCase()) || cohort.key.toLowerCase().includes("2022")),
+      },
+      {
+        title: "à venir",
+        name: CohortGroup.COMING_SOON,
+        parentGroup: "Cohorte",
+        parentFilter: parentFilterKey,
+        missingLabel: "Non renseigné",
+        sort: (data) => orderCohort(data),
+        filter: (data: DataFilter) => data,
+        filterRootFilter: (dataFiltered: DataFilter[]) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("à venir")),
+      },
+    ],
   };
 };
+
+export enum CohortGroup {
+  CLE_2024 = "CLE_2024",
+  HTS_2024 = "HTS_2024",
+  _2023 = "2023",
+  LOWER_THAN_2022 = "LOWER_THAN_2022",
+  COMING_SOON = "COMING_SOON",
+}
