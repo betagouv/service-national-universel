@@ -2,6 +2,12 @@ import { ROLES } from "../roles";
 import { CohortDto, ReferentDto, UserDto } from "../dto";
 import { isNowBetweenDates } from "../utils/date";
 
+export const COHORT_STATUS = {
+  FUTURE: "FUTURE",
+  ACTIVE: "ACTIVE",
+  ARCHIVED: "ARCHIVED",
+};
+
 export const canUpdateCohort = (cohort?: CohortDto, user?: UserDto | ReferentDto): boolean => {
   if (!user) return false;
   if (!cohort) return true;

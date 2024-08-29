@@ -1,9 +1,10 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import { isAfter, isWithinInterval } from "date-fns";
-import { COHORT_TYPE, COHORT_TYPE_LIST, getDateTimeByTimeZoneOffset } from "snu-lib";
+import { COHORT_TYPE, COHORT_STATUS, COHORT_TYPE_LIST, getDateTimeByTimeZoneOffset, YoungDto, getRegionForEligibility, region2zone, YOUNG_STATUS } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "./types";
+import { YoungDocument } from "./young";
 
 const MODELNAME = "cohort";
 
@@ -44,6 +45,16 @@ const schema = new mongoose.Schema({
       description: "Cohorte name (defined in snu lib)",
     },
   },
+
+  status: {
+    type: String,
+    enum: Object.values(COHORT_STATUS),
+    default: COHORT_STATUS.ACTIVE,
+    documentation: {
+      description: "Les cohortes 'ACTIVE' sont les seules proposées à l'éligibilité. Seuls les volontaires positionnés sur ces cohortes ont accès au Changement de séjour.",
+    },
+  },
+
   dsnjExportDates: {
     type: DSNJExportDates,
     documentation: {
@@ -89,6 +100,7 @@ const schema = new mongoose.Schema({
   reInscriptionStartDate: { type: Date || null },
   reInscriptionEndDate: { type: Date || null },
 
+  // Deprecated (always set to 9999%)
   buffer: {
     type: Number,
     required: true,
@@ -376,6 +388,34 @@ schema.methods.getIsReInscriptionOpen = function (timeZoneOffset) {
 schema.virtual("isReInscriptionOpen").get<SchemaExtended>(function () {
   return this.getIsReInscriptionOpen();
 });
+
+schema.methods.isOpen = function (young: YoungDocument, timeZoneOffset) {
+  if (!young) return false;
+
+  if (young.status === YOUNG_STATUS.REINSCRIPTION) {
+    return this.getIsReInscriptionOpen(timeZoneOffset);
+  }
+  if (young.status === YOUNG_STATUS.WAITING_VALIDATION || young.status === YOUNG_STATUS.WAITING_CORRECTION) {
+    return this.getIsInstructionOpen(timeZoneOffset);
+  }
+  return this.getIsInscriptionOpen(timeZoneOffset);
+};
+
+schema.methods.isEligible = function (young: YoungDto) {
+  if (!young || !young.birthdateAt || !young.grade) {
+    throw new Error("Young is missing required fields");
+  }
+
+  const { birthdateAt, grade } = young;
+  const region = getRegionForEligibility(young);
+  const { bornAfter, bornBefore, schoolLevels, zones } = this.eligibility;
+
+  if (!isWithinInterval(new Date(birthdateAt), { start: new Date(bornAfter), end: new Date(bornBefore) })) return false;
+  if (!schoolLevels.includes(grade)) return false;
+  if (!zones.includes(region) && !zones.includes(region2zone[region])) return false;
+
+  return true;
+};
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   this.fromUser = params?.fromUser;

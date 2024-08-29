@@ -3,6 +3,7 @@ export type CohortDto = {
   snuId: string;
   name: string;
   type: string;
+  status: string;
   dateStart: Date;
   dateEnd: Date;
   inscriptionStartDate: Date;

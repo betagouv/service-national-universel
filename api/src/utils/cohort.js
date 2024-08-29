@@ -1,39 +1,39 @@
-const { YOUNG_STATUS, region2zone, getRegionForEligibility, regionsListDROMS, COHORT_TYPE } = require("snu-lib");
+const { getRegionForEligibility, regionsListDROMS, COHORT_TYPE, COHORT_STATUS } = require("snu-lib");
 const { YoungModel, CohortModel, InscriptionGoalModel } = require("../models");
 
 async function getFilteredSessions(young, timeZoneOffset = null) {
-  const cohorts = await CohortModel.find({});
+  const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE, status: COHORT_STATUS.ACTIVE });
+
   const region = getRegionForEligibility(young);
 
-  const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart)?.getFullYear() : undefined;
+  const formattedCohorts = cohorts.map((cohort) => {
+    return {
+      ...cohort.toObject(),
+      isOpen: cohort.isOpen(young, timeZoneOffset),
+      isEligible: cohort.isEligible(young),
+    };
+  });
 
-  const sessions = cohorts.filter(
-    (session) =>
-      // if the young has already a cohort, he can only apply for the cohorts of the same year
-      (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
-      session.eligibility?.zones.includes(region2zone[region]) &&
-      session.eligibility?.schoolLevels.includes(young.grade) &&
-      session.eligibility?.bornAfter <= young.birthdateAt &&
-      session.eligibility?.bornBefore.setTime(session.eligibility?.bornBefore.getTime() + 11 * 60 * 60 * 1000) >= young.birthdateAt &&
-      (session.getIsInscriptionOpen(timeZoneOffset) ||
-        (session.getIsReInscriptionOpen(timeZoneOffset) && young.isReInscription) ||
-        (session.getIsInstructionOpen(timeZoneOffset) && [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status))),
-  );
-  for (let session of sessions) {
-    session.isEligible = true;
-  }
-  return getPlaces(sessions, region);
+  const formattedCohortsWithPlaces = await getPlaces(formattedCohorts, region);
+  return formattedCohortsWithPlaces.filter((cohort) => cohort.isEligible);
 }
 
 async function getAllSessions(young) {
-  const cohorts = await CohortModel.find({});
+  const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE, status: COHORT_STATUS.ACTIVE });
+
   const region = getRegionForEligibility(young);
-  const sessionsWithPlaces = await getPlaces(cohorts, region);
-  const availableSessions = await getFilteredSessions(young);
-  for (let session of sessionsWithPlaces) {
-    session.isEligible = availableSessions.some((e) => e.name === session.name);
-  }
-  return sessionsWithPlaces;
+
+  const formattedCohorts = cohorts.map((cohort) => {
+    return {
+      ...cohort.toObject(),
+      isOpen: cohort.isOpen(young, null),
+      isEligible: cohort.isEligible(young),
+    };
+  });
+
+  const formattedCohortsWithPlaces = await getPlaces(formattedCohorts, region);
+
+  return formattedCohortsWithPlaces;
 }
 
 async function getFilteredSessionsForCLE() {
