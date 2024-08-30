@@ -21,7 +21,6 @@ import { toastr } from "react-redux-toastr";
 import { YOUNG_SOURCE, FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { environment } from "@/config";
 import useAuth from "@/services/useAuth";
-import useDocumentCss from "@/hooks/useDocumentCss";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -101,7 +100,6 @@ const PreInscriptionPrivate = () => {
 };
 
 export default function PreInscription() {
-  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
   const { isCLE } = useAuth();
   const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
 

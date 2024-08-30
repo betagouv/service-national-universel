@@ -17,7 +17,6 @@ import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import useDocumentCss from "@/hooks/useDocumentCss";
 
 const Render = ({ screen }) => {
   const device = useDevice();
@@ -34,8 +33,6 @@ const Render = ({ screen }) => {
 };
 
 export default function Index() {
-  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
-
   let location = useLocation();
   let parentPath = location.pathname.substring(0, location.pathname.lastIndexOf("/"));
 
