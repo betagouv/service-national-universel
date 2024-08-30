@@ -75,9 +75,10 @@ describe("ClasseService generateCertificateByKey", () => {
 describe("ClasseService generate certificate", () => {
   const youngBuffer = Buffer.from("pdf");
 
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
+
   it("generateConvocationsByClasseId", async () => {
     findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
     generateConvocationsForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));

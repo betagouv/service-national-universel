@@ -28,8 +28,15 @@ describe("YoungService.generateConvocationsForMultipleYoungs", () => {
     jest.clearAllMocks();
   });
   it("should return one PDF convocations for 2 youngs", async () => {
-    const young1 = buildYoung("id_1");
-    const young2 = buildYoung("id_2");
+    const young1 = {
+      _id: "1",
+      status: YOUNG_STATUS.VALIDATED,
+      sessionPhase1Id: "session1",
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      transportInfoGivenByLocal: "true",
+      source: "OTHER",
+    };
+    const young2 = { _id: "2", status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: "session2", statusPhase1: YOUNG_STATUS_PHASE1.NOT_DONE, meetingPointId: "mp2", source: "CLE" };
 
     const youngsPdfCreated = await youngService.generateConvocationsForMultipleYoungs([young1, young2]);
 
@@ -37,8 +44,8 @@ describe("YoungService.generateConvocationsForMultipleYoungs", () => {
     expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
   });
   it("should return one PDF consentment for 2 youngs", async () => {
-    const young1 = buildYoung("id_1");
-    const young2 = buildYoung("id_2");
+    const young1 = { _id: "1", name: "John Doe", status: YOUNG_STATUS.VALIDATED, parentAllowSNU: "true" };
+    const young2 = { _id: "3", name: "Alice Brown", status: YOUNG_STATUS.VALIDATED, parentAllowSNU: "true" };
 
     const youngsPdfCreated = await youngService.generateConsentementForMultipleYoungs([young1, young2]);
 
@@ -46,8 +53,8 @@ describe("YoungService.generateConvocationsForMultipleYoungs", () => {
     expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
   });
   it("should return one PDF imageRight for 2 youngs", async () => {
-    const young1 = buildYoung("id_1");
-    const young2 = buildYoung("id_2");
+    const young1 = { _id: "1", name: "John Doe", status: YOUNG_STATUS.VALIDATED, imageRight: "true" };
+    const young2 = { _id: "2", name: "Jane Smith", status: YOUNG_STATUS.IN_PROGRESS, imageRight: "false" };
 
     const youngsPdfCreated = await youngService.generateImageRightForMultipleYoungs([young1, young2]);
 
