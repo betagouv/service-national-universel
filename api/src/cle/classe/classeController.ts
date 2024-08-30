@@ -31,6 +31,7 @@ import {
   TYPE_CLASSE_LIST,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
+  ClasseCertificateKeys,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -61,7 +62,7 @@ import {
   buildUniqueClasseKey,
   deleteClasse,
   findClasseByUniqueKeyAndUniqueId,
-  generateConvocationsByClasseId,
+  generateCertificateByKey,
   getClasseById,
   getClasseByIdPublic,
   updateReferent,
@@ -83,30 +84,46 @@ const querySchema = Joi.object({
 
 const router = express.Router();
 router.post(
-  "/:id/convocations",
+  "/:id/certificate/:key",
   passport.authenticate("referent", {
     session: false,
     failWithError: true,
   }),
   async (req: UserRequest, res: Response) => {
     try {
-      const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
-      if (error) {
-        capture(error);
+      const certificateValues = Object.values(ClasseCertificateKeys);
+      const { error: exportDateKeyError, value: certificateKey } = Joi.string()
+        .valid(...certificateValues)
+        .required()
+        .validate(req.params.key, { stripUnknown: true });
+
+      const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+
+      if (exportDateKeyError) {
+        capture(exportDateKeyError);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, undefined, "convocation")) {
+
+      if (idError) {
+        capture(idError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, undefined, "certificate")) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
-      const { id } = value;
-      const convocations = await generateConvocationsByClasseId(id);
+
+      const classe = await ClasseModel.findById(id);
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const certificates = await generateCertificateByKey(certificateKey, id);
+
       res.set({
-        "content-length": convocations.length,
+        "content-length": certificates.length,
         "content-disposition": `inline; filename="convocations.pdf"`,
         "content-type": "application/pdf",
         "cache-control": "public, max-age=1",
       });
-      res.send(convocations);
+      res.send(certificates);
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: error.message });

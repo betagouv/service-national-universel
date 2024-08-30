@@ -1,8 +1,16 @@
 import * as youngService from "./youngService";
-import { findYoungByIdOrThrow, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "./youngService";
+import {
+  findYoungByIdOrThrow,
+  shouldSwitchYoungByIdToLC,
+  switchYoungByIdToLC,
+  findYoungsByClasseId,
+  getValidatedYoungsWithSession,
+  getYoungsImageRight,
+  getYoungsParentAllowSNU,
+} from "./youngService";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 import { YoungDocument, YoungModel } from "../models";
-import { ERRORS, YOUNG_PHASE, YOUNG_STATUS } from "snu-lib";
+import { ERRORS, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 const mockBuffer = Buffer.from("pdf");
 
@@ -15,9 +23,11 @@ jest.mock("../utils/pdf-renderer", () => ({
   generatePdfIntoBuffer: jest.fn().mockReturnValue(Buffer.from("pdf")),
 }));
 
-describe("YoungService", () => {
-  it("should return one PDF for 2 youngs", async () => {
-    jest.restoreAllMocks();
+describe("YoungService.generateConvocationsForMultipleYoungs", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  it("should return one PDF convocations for 2 youngs", async () => {
     const young1 = buildYoung("id_1");
     const young2 = buildYoung("id_2");
 
@@ -25,6 +35,141 @@ describe("YoungService", () => {
 
     expect(youngsPdfCreated).toEqual(mockBuffer);
     expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
+  });
+  it("should return one PDF consentment for 2 youngs", async () => {
+    const young1 = buildYoung("id_1");
+    const young2 = buildYoung("id_2");
+
+    const youngsPdfCreated = await youngService.generateConsentementForMultipleYoungs([young1, young2]);
+
+    expect(youngsPdfCreated).toEqual(mockBuffer);
+    expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
+  });
+  it("should return one PDF imageRight for 2 youngs", async () => {
+    const young1 = buildYoung("id_1");
+    const young2 = buildYoung("id_2");
+
+    const youngsPdfCreated = await youngService.generateImageRightForMultipleYoungs([young1, young2]);
+
+    expect(youngsPdfCreated).toEqual(mockBuffer);
+    expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("YoungService.findYoungsByClasseId", () => {
+  it("should return an array of young objects when found", async () => {
+    const mockYoungs = [
+      { _id: "1", name: "John Doe", classeId: "classe1" },
+      { _id: "2", name: "Jane Smith", classeId: "classe1" },
+    ];
+    // Mock the YoungModel.find method
+    YoungModel.find = jest.fn().mockResolvedValue(mockYoungs);
+
+    const result = await findYoungsByClasseId("classe1");
+    expect(result).toEqual(mockYoungs);
+    expect(YoungModel.find).toHaveBeenCalledWith({ classeId: "classe1" });
+  });
+
+  it("should return an empty array when no youngs are found", async () => {
+    // Mock the YoungModel.find method to return an empty array
+    YoungModel.find = jest.fn().mockResolvedValue([]);
+
+    const result = await findYoungsByClasseId("classe2");
+    expect(result).toEqual([]);
+    expect(YoungModel.find).toHaveBeenCalledWith({ classeId: "classe2" });
+  });
+});
+
+describe("YoungService.getYoungsParentAllowSNU", () => {
+  it("should return an array of young objects with valid status and parentAllowSNU true", () => {
+    const youngs = [
+      { _id: "1", name: "John Doe", status: YOUNG_STATUS.VALIDATED, parentAllowSNU: "true" },
+      { _id: "2", name: "Jane Smith", status: YOUNG_STATUS.IN_PROGRESS, parentAllowSNU: "false" },
+      { _id: "3", name: "Alice Brown", status: YOUNG_STATUS.WAITING_CORRECTION, parentAllowSNU: "true" },
+      { _id: "4", name: "Bob Green", status: YOUNG_STATUS.WITHDRAWN, parentAllowSNU: "true" },
+    ];
+
+    const expected = [
+      { _id: "1", name: "John Doe", status: YOUNG_STATUS.VALIDATED, parentAllowSNU: "true" },
+      { _id: "3", name: "Alice Brown", status: YOUNG_STATUS.WAITING_CORRECTION, parentAllowSNU: "true" },
+    ];
+
+    const result = getYoungsParentAllowSNU(youngs);
+    expect(result).toEqual(expected);
+  });
+
+  it("should return an empty array when no youngs have valid status or parentAllowSNU true", () => {
+    const youngs = [
+      { _id: "1", name: "John Doe", status: YOUNG_STATUS.WITHDRAWN, parentAllowSNU: "true" },
+      { _id: "2", name: "Jane Smith", status: YOUNG_STATUS.IN_PROGRESS, parentAllowSNU: "false" },
+    ];
+
+    const result = getYoungsParentAllowSNU(youngs);
+    expect(result).toEqual([]);
+  });
+});
+
+describe("YoungService.getYoungsImageRight", () => {
+  it("should return an array of young objects with valid status and imageRight set to true or false", () => {
+    const youngs = [
+      { _id: "1", name: "John Doe", status: YOUNG_STATUS.VALIDATED, imageRight: "true" },
+      { _id: "2", name: "Jane Smith", status: YOUNG_STATUS.IN_PROGRESS, imageRight: "false" },
+      { _id: "3", name: "Alice Brown", status: YOUNG_STATUS.WAITING_CORRECTION, imageRight: "true" },
+      { _id: "4", name: "Bob Green", status: YOUNG_STATUS.WITHDRAWN, imageRight: "true" },
+      { _id: "5", name: "Eve Black", status: YOUNG_STATUS.VALIDATED, imageRight: "undefined" },
+    ];
+
+    const expected = [
+      { _id: "1", name: "John Doe", status: YOUNG_STATUS.VALIDATED, imageRight: "true" },
+      { _id: "2", name: "Jane Smith", status: YOUNG_STATUS.IN_PROGRESS, imageRight: "false" },
+      { _id: "3", name: "Alice Brown", status: YOUNG_STATUS.WAITING_CORRECTION, imageRight: "true" },
+    ];
+
+    const result = getYoungsImageRight(youngs);
+    expect(result).toEqual(expected);
+  });
+
+  it("should return an empty array when no youngs have valid status or imageRight set to true or false", () => {
+    const youngs = [
+      { _id: "1", name: "John Doe", status: YOUNG_STATUS.WITHDRAWN, imageRight: "true" },
+      { _id: "2", name: "Jane Smith", status: YOUNG_STATUS.WITHDRAWN, imageRight: "false" },
+      { _id: "3", name: "Alice Brown", status: YOUNG_STATUS.VALIDATED, imageRight: "undefined" },
+    ];
+
+    const result = getYoungsImageRight(youngs);
+    expect(result).toEqual([]);
+  });
+});
+
+describe("YoungService.getValidatedYoungsWithSession", () => {
+  it("should return an array of young objects that are validated, have a session, and meet the criteria", () => {
+    const youngs = [
+      {
+        _id: "1",
+        status: YOUNG_STATUS.VALIDATED,
+        sessionPhase1Id: "session1",
+        statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+        meetingPointId: "mp1",
+        deplacementPhase1Autonomous: "true",
+        source: "OTHER",
+      },
+      { _id: "2", status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: "session2", statusPhase1: YOUNG_STATUS_PHASE1.DONE, transportInfoGivenByLocal: "true", source: "OTHER" },
+      { _id: "3", status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: "session3", statusPhase1: YOUNG_STATUS_PHASE1.NOT_DONE, meetingPointId: "mp2", source: "CLE" },
+    ];
+
+    const result = getValidatedYoungsWithSession(youngs);
+    expect(result).toEqual(youngs);
+  });
+
+  it("should return an empty array when youngs do not have a valid session or do not meet the criteria", () => {
+    const youngs = [
+      { _id: "1", status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: "session1", statusPhase1: YOUNG_STATUS_PHASE1.WITHDRAWN, meetingPointId: "mp1" },
+      { _id: "2", status: YOUNG_STATUS.WITHDRAWN, sessionPhase1Id: "session2", statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED, transportInfoGivenByLocal: "true" },
+      { _id: "3", status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: null, statusPhase1: YOUNG_STATUS_PHASE1.DONE, deplacementPhase1Autonomous: "false" },
+    ];
+
+    const result = getValidatedYoungsWithSession(youngs);
+    expect(result).toEqual([]);
   });
 });
 

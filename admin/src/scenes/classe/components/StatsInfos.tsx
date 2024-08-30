@@ -8,10 +8,10 @@ interface Props {
   classe: ClasseDto;
   user: User;
   studentStatus: { [key: string]: number };
-  totalSeatsTakenExcluding: number;
+  validatedYoung: number;
 }
 
-export default function StatsInfos({ classe, user, studentStatus, totalSeatsTakenExcluding }: Props) {
+export default function StatsInfos({ classe, user, studentStatus, validatedYoung }: Props) {
   return (
     <Container
       title="Suivi de la classe"
@@ -30,13 +30,13 @@ export default function StatsInfos({ classe, user, studentStatus, totalSeatsTake
             </tr>
             <tr className="border-b border-gray-200">
               <td className="font-bold pr-4 py-2">Effectif inscrit :</td>
-              <td className="px-4 font-bold text-lg text-center py-2">{totalSeatsTakenExcluding}</td>
-              <td className="text-gray-500 text-center py-2">({Math.round((totalSeatsTakenExcluding * 100) / classe.totalSeats || 0)}%)</td>
+              <td className="px-4 font-bold text-lg text-center py-2">{validatedYoung}</td>
+              <td className="text-gray-500 text-center py-2">({Math.round((validatedYoung * 100) / classe.totalSeats || 0)}%)</td>
             </tr>
             <tr>
               <td className="font-bold pr-4 py-2">Places libres :</td>
-              <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - totalSeatsTakenExcluding < 0 ? 0 : classe.totalSeats - totalSeatsTakenExcluding}</td>
-              <td className="text-gray-500 text-center py-2"> ({Math.round(100 - (totalSeatsTakenExcluding * 100) / classe.totalSeats)}%)</td>
+              <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - validatedYoung < 0 ? 0 : classe.totalSeats - validatedYoung}</td>
+              <td className="text-gray-500 text-center py-2"> ({Math.round(100 - (validatedYoung * 100) / classe.totalSeats)}%)</td>
             </tr>
           </tbody>
         </table>

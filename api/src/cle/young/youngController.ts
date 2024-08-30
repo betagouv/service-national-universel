@@ -8,6 +8,7 @@ import { ERRORS } from "../../utils";
 import { capture } from "../../sentry";
 import { ClasseModel, YoungModel, EtablissementModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
+import { getValidatedYoungsWithSession, getYoungsImageRight, getYoungsParentAllowSNU } from "../../young/youngService";
 
 const router = express.Router();
 
@@ -42,7 +43,11 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
       return acc;
     }, {});
 
-    const result = { total: students.length };
+    const parentAllowSNUCount = getYoungsParentAllowSNU(students).length;
+    const studentImageRightCount = getYoungsImageRight(students).length;
+    const validatedYoungsWithSession = getValidatedYoungsWithSession(students).length;
+
+    const result = { parentAllowSNU: parentAllowSNUCount, imageRight: studentImageRightCount, youngWithSession: validatedYoungsWithSession, total: students.length };
     Object.keys(statusCount).forEach((status) => {
       result[YOUNG_STATUS[status]] = statusCount[status];
     });

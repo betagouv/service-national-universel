@@ -1,22 +1,84 @@
 import { Types } from "mongoose";
 const ObjectId = Types.ObjectId;
 
-import { ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE, isNowBetweenDates, canEditEstimatedSeats, canEditTotalSeats, CLE_COLORATION } from "snu-lib";
+import {
+  ROLES,
+  LIMIT_DATE_ESTIMATED_SEATS,
+  LIMIT_DATE_TOTAL_SEATS,
+  STATUS_CLASSE,
+  isNowBetweenDates,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
+  CLE_COLORATION,
+  ClasseCertificateKeys,
+} from "snu-lib";
 
 import { ClasseModel, CohortModel, YoungModel, EtablissementDocument, EtablissementType } from "../../models";
 
-import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
+import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement, generateCertificateByKey } from "./classeService";
 import * as youngService from "../../young/youngService";
 import ClasseStateManager from "./stateManager";
 import * as classService from "./classeService";
 
 const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
 const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
+const generateConsentementForMultipleYoungsSpy = jest.spyOn(youngService, "generateConsentementForMultipleYoungs");
+const generateImageRightForMultipleYoungsSpy = jest.spyOn(youngService, "generateImageRightForMultipleYoungs");
+const generateConvocationsByClasseIdSpy = jest.spyOn(classService, "generateConvocationsByClasseId");
+const generateConsentementByClasseIdSpy = jest.spyOn(classService, "generateConsentementByClasseId");
+const generateImageRightByClasseIdSpy = jest.spyOn(classService, "generateImageRightByClasseId");
 
-describe("ClasseService", () => {
-  it("should return a pdf", async () => {
-    const youngBuffer = Buffer.from("pdf");
+describe("ClasseService generateCertificateByKey", () => {
+  const youngBuffer = Buffer.from("pdf");
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should call generateImageRightByClasseId when key is IMAGE", async () => {
+    jest.spyOn(classService, "generateImageRightByClasseId").mockResolvedValue(youngBuffer);
+
+    const resultPdf = await generateCertificateByKey(ClasseCertificateKeys.IMAGE, "classeId");
+
+    expect(generateImageRightByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateImageRightByClasseIdSpy).toHaveBeenCalledWith("classeId");
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("should call generateConsentementByClasseId when key is CONSENT", async () => {
+    jest.spyOn(classService, "generateConsentementByClasseId").mockResolvedValue(youngBuffer);
+
+    const resultPdf = await generateCertificateByKey(ClasseCertificateKeys.CONSENT, "classeId");
+
+    expect(generateConsentementByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateConsentementByClasseIdSpy).toHaveBeenCalledWith("classeId");
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("should call generateConvocationsByClasseId when key is CONVOCATION", async () => {
+    jest.spyOn(classService, "generateConvocationsByClasseId").mockResolvedValue(youngBuffer);
+
+    const resultPdf = await generateCertificateByKey(ClasseCertificateKeys.CONVOCATION, "classeId");
+
+    expect(generateConvocationsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateConvocationsByClasseIdSpy).toHaveBeenCalledWith("classeId");
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("should return undefined when key is invalid", async () => {
+    const resultPdf = await generateCertificateByKey("INVALID_KEY", "classeId");
+
+    expect(resultPdf).toBeUndefined();
+  });
+});
+
+describe("ClasseService generate certificate", () => {
+  const youngBuffer = Buffer.from("pdf");
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  it("generateConvocationsByClasseId", async () => {
     findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
     generateConvocationsForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));
 
@@ -24,6 +86,28 @@ describe("ClasseService", () => {
 
     expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
     expect(generateConvocationsForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("generateConsentemenrByClasseId", async () => {
+    findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
+    generateConsentementForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));
+
+    const resultPdf = await classService.generateConsentementByClasseId("classeId");
+
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateConsentementForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("generateImageRightByClasseId", async () => {
+    findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
+    generateImageRightForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));
+
+    const resultPdf = await classService.generateImageRightByClasseId("classeId");
+
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateImageRightForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
     expect(resultPdf).toEqual(youngBuffer);
   });
 });
