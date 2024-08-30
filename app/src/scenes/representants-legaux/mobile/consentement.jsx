@@ -8,7 +8,7 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/dsfr/forms/toggle";
-import { translate, getCohortYear, PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
+import { translate, getCohortYear, PHONE_ZONES, isPhoneNumberWellFormated, YOUNG_SOURCE } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -21,6 +21,9 @@ import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress, getDataForConsentStep } from "../utils";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import { SignupButtons } from "@snu/ds/dsfr";
+import { useQuery } from "@tanstack/react-query";
+import { fetchClass } from "@/services/classe.service";
+import { validateId } from "@/utils";
 
 export default function Consentement({ step, parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -39,9 +42,15 @@ function ConsentementForm({ young, token, step, parentId }) {
   const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
   const [data, setData] = useState(getDataForConsentStep(young, parentId));
 
+  const { data: classe } = useQuery({
+    queryKey: ["class", young?.classeId],
+    queryFn: () => fetchClass(young?.classeId),
+    enabled: young?.source === YOUNG_SOURCE.CLE && validateId(young?.classeId),
+  });
+
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
-  const cohortYear = getCohortYear(young.cohort);
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? classe?.etablissement?.schoolYears[0] : getCohortYear(young.cohort);
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";

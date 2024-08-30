@@ -8,7 +8,7 @@ import { capture } from "@/sentry";
 import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib";
+import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES, YOUNG_SOURCE } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -1105,6 +1105,8 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
     }
   }, [parent1Consentement]);
 
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? young?.etablissement?.schoolYears[0] : getCohortYear(young.cohort);
+
   const authorizationOptions = [
     { value: "true", label: "Autorise" },
     { value: "false", label: "N'autorise pas" },
@@ -1147,8 +1149,8 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
         </div>
         <div>
           <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment1")} errors={errors} value={volontaireConsentement.consentment1}>
-            Se porte volontaire pour participer à la session <b>{getCohortYear(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis
-            la réalisation d&apos;une mission d&apos;intérêt général.
+            Se porte volontaire pour participer à la session <b>{cohortYear}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis la
+            réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
           <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU1")} errors={errors} value={volontaireConsentement.acceptCGU1}>
             S&apos;inscrit pour le séjour de cohésion <strong>{getCohortPeriod(cohort)}</strong> sous réserve de places disponibles et s&apos;engage à en respecter le règlement
@@ -1183,7 +1185,7 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohort)}</b> du SNU.
+          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{cohortYear}</b> du SNU.
         </div>
         <div>
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow1")} errors={errors} value={parent1Consentement.allow1}>
