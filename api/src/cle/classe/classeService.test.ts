@@ -75,7 +75,7 @@ describe("ClasseService generateCertificateByKey", () => {
 describe("ClasseService generate certificate", () => {
   const youngBuffer = Buffer.from("pdf");
 
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
