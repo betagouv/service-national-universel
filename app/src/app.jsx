@@ -1,5 +1,5 @@
 // Require this first!
-import { history, initSentry, SentryRoute } from "./sentry";
+import { history as sentryHistory, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 initSentry();
 
@@ -45,38 +45,73 @@ initApi();
 startReactDsfr({ defaultColorScheme: "light", Link });
 
 function App() {
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  async function fetchData() {
+    try {
+      const { ok, user, token } = await api.checkToken();
+      if (!ok) {
+        api.setToken(null);
+        dispatch(setYoung(null));
+      }
+      await cohortsInit();
+      if (token) api.setToken(token);
+      if (ok && user) {
+        dispatch(setYoung(user));
+        const cohort = await getCohort(user.cohort);
+
+        const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
+        const forceEmailValidation =
+          isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
+        if (forceEmailValidation) return history.push("/preinscription");
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (loading) return <Loader />;
+
   return (
     <Sentry.ErrorBoundary fallback={FallbackComponent}>
       <QueryClientProvider client={queryClient}>
-        <Router history={history}>
+        <Router history={sentryHistory}>
           <AutoScroll />
-          {maintenance ? (
-            <Switch>
-              <SentryRoute path="/" component={Maintenance} />
-            </Switch>
-          ) : (
-            <Suspense fallback={<Loader />}>
+          <Suspense fallback={<Loader />}>
+            {maintenance ? (
               <Switch>
-                <RouteWithOptionalLogin path="/validate-contract/done" component={ContractDone} />
-                <RouteWithOptionalLogin path="/validate-contract" component={Contract} />
-                <RouteWithOptionalLogin path="/conditions-generales-utilisation" component={CGU} />
-                <RouteWithOptionalLogin path="/noneligible" component={NonEligible} />
-                <RouteWithOptionalLogin path="/representants-legaux" component={RepresentantsLegaux} />
-                <RouteWithOptionalLogin path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
-                <RouteWithOptionalLogin path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
-                <RouteWithOptionalLogin path="/public-besoin-d-aide" component={Contact} />
-                <RouteWithOptionalLogin path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
-                <RouteWithOptionalLogin path="/besoin-d-aide" component={Contact} />
-                <RouteWithOptionalLogin path="/auth" component={Auth} />
-                <RouteWithOptionalLogin path="/public-engagements" component={AllEngagements} />
-                <RouteWithOptionalLogin path="/merci" component={Thanks} />
-                <RouteWithOptionalLogin path="/preinscription" component={PreInscription} />
-                <RouteWithMandatoryLogin path="/inscription2023" component={Inscription2023} />
-                <RouteWithMandatoryLogin path="/reinscription" component={ReInscription} />
-                <RouteWithMandatoryLogin path="/" component={Espace} />
+                <SentryRoute path="/" component={Maintenance} />
               </Switch>
-            </Suspense>
-          )}
+            ) : (
+              <Switch>
+                <PublicRoute path="/validate-contract/done" component={ContractDone} />
+                <PublicRoute path="/validate-contract" component={Contract} />
+                <PublicRoute path="/conditions-generales-utilisation" component={CGU} />
+                <PublicRoute path="/noneligible" component={NonEligible} />
+                <PublicRoute path="/representants-legaux" component={RepresentantsLegaux} />
+                <PublicRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+                <PublicRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
+                <PublicRoute path="/public-besoin-d-aide" component={Contact} />
+                <PublicRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
+                <PublicRoute path="/besoin-d-aide" component={Contact} />
+                <PublicRoute path="/auth" component={Auth} />
+                <PublicRoute path="/public-engagements" component={AllEngagements} />
+                <PublicRoute path="/merci" component={Thanks} />
+                <PublicRoute path="/preinscription" component={PreInscription} />
+                <SecureRoute path="/inscription2023" component={Inscription2023} />
+                <SecureRoute path="/reinscription" component={ReInscription} />
+                <SecureRoute path="/" component={Espace} />
+              </Switch>
+            )}
+          </Suspense>
         </Router>
       </QueryClientProvider>
     </Sentry.ErrorBoundary>
@@ -85,82 +120,19 @@ function App() {
 
 export default Sentry.withProfiler(App);
 
-function RouteWithOptionalLogin({ path, component }) {
-  const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
+function PublicRoute({ path, component }) {
   const user = useSelector((state) => state.Auth.young);
-
   const location = useLocation();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { ok, user, token } = await api.checkToken();
-        if (!ok) {
-          api.setToken(null);
-          dispatch(setYoung(null));
-          return setLoading(false);
-        }
-        if (token) api.setToken(token);
-        if (ok && user) {
-          dispatch(setYoung(user));
-          await cohortsInit();
-        }
-      } catch (e) {
-        console.log(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
-
-  if (loading) return <Loader />;
-
   if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
-
   return <SentryRoute path={path} component={component} />;
 }
 
-function RouteWithMandatoryLogin({ path, component }) {
+function SecureRoute({ path, component }) {
   const { pathname, search } = useLocation();
-  const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
-  const history = useHistory();
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { ok, user, token } = await api.checkToken();
-        if (!ok) {
-          api.setToken(null);
-          dispatch(setYoung(null));
-        }
-        await cohortsInit();
-        if (token) api.setToken(token);
-        if (ok && user) {
-          dispatch(setYoung(user));
-          const cohort = await getCohort(user.cohort);
-
-          const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
-          const forceEmailValidation =
-            isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
-          if (forceEmailValidation) return history.push("/preinscription");
-        }
-      } catch (e) {
-        console.log(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
-
-  if (loading) return <Loader />;
 
   if (!user) return <Redirect to={`/auth?disconnected=1&redirect=${pathname}${search}`} />;
-
   return <SentryRoute path={path} component={component} />;
 }
 
