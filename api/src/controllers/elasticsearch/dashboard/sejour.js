@@ -6,7 +6,7 @@ const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
 const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1, YOUNG_STATUS, canSeeDashboardSejourInfo, canSeeDashboardSejourHeadCenter } = require("snu-lib");
-const SessionPhase1Model = require("../../../models/sessionPhase1");
+const { SessionPhase1Model } = require("../../../models");
 
 router.post("/moderator", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   // creation de la Query avec filtres pour récupèrer les infos des jeunes

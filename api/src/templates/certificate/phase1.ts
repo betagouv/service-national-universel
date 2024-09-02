@@ -1,13 +1,12 @@
 import path from "path";
 import { getDepartureDateSession, getReturnDateSession } from "../../utils/cohort";
 import { getCohortEndDate, transportDatesToString } from "snu-lib";
-import SessionPhase1Model from "../../models/sessionPhase1";
-import CohesionCenterModel from "../../models/cohesionCenter";
-import MeetingPointModel from "../../models/meetingPoint";
-import CohortModel from "../../models/cohort";
+import { SessionPhase1Model, CohesionCenterModel, MeetingPointModel, CohortModel } from "../../models";
 import config from "config";
+import { logger } from "../../logger";
 import { ERRORS } from "../../utils/errors";
 import { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } from "./utils";
+import { withPipeStream } from "../utils";
 
 import type PDFDocument from "pdfkit";
 
@@ -51,18 +50,18 @@ async function fetchDataForYoung(young) {
 
 function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter) {
   if (!cohesionCenter) {
-    throw { error: ERRORS.NO_COHESION_CENTER_FOUND };
+    throw new Error(ERRORS.NO_COHESION_CENTER_FOUND);
   }
-  const cohortEndDate = getCohortEndDate(young, cohort);
+  const cohortEndDate = getCohortEndDate(cohort);
 
   const ministresData = getMinistres(cohortEndDate);
-  if (!ministresData) throw { error: "NO_MINISTRES_FOUND" };
+  if (!ministresData) throw new Error("NO_MINISTRES_FOUND");
   const template = ministresData.template;
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   const departureDate = getDepartureDateSession(session, young, cohort);
   const returnDate = getReturnDateSession(session, young, cohort);
 
-  const COHORT = cohortEndDate.getYear() + 1900;
+  const COHORT = cohortEndDate.getFullYear();
   const COHESION_DATE = transportDatesToString(departureDate, returnDate);
   const COHESION_CENTER_NAME = cohesionCenter.name || "";
   const COHESION_CENTER_LOCATION = cohesionCenterLocation;
@@ -98,26 +97,24 @@ function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter)
 
 async function generateCertifPhase1(outStream, young) {
   const { session, cohort, cohesionCenter } = await fetchDataForYoung(young);
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument();
-  doc.pipe(outStream);
-  render(doc, young, session, cohort, cohesionCenter);
-  doc.end();
-  console.timeEnd("RENDERING " + random);
+  withPipeStream(doc, outStream, () => {
+    render(doc, young, session, cohort, cohesionCenter);
+  });
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 function generateBatchCertifPhase1(outStream, youngs, session, cohort, cohesionCenter) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+  const timer = logger.startTimer();
   const doc = initDocument({ autoFirstPage: false });
-  doc.pipe(outStream);
-  for (const young of youngs) {
-    doc.addPage();
-    render(doc, young, session, cohort, cohesionCenter);
-  }
-  doc.end();
-  console.timeEnd("RENDERING " + random);
+  withPipeStream(doc, outStream, () => {
+    for (const young of youngs) {
+      doc.addPage();
+      render(doc, young, session, cohort, cohesionCenter);
+    }
+  });
+  timer.done({ message: "RENDERING", level: "debug" });
 }
 
 module.exports = { generateCertifPhase1, generateBatchCertifPhase1 };

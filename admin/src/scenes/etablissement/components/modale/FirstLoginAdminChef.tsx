@@ -3,50 +3,47 @@ import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
 
 import { ProfilePic } from "@snu/ds";
-import { ModalConfirmation, Button } from "@snu/ds/admin";
+import { ModalConfirmation } from "@snu/ds/admin";
 import { User } from "@/types";
-import { ROLES, SUB_ROLES } from "snu-lib";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+import { isChefEtablissement, EtablissementDto } from "snu-lib";
 
-import ButtonAddCoordinator from "../ButtonAddCoordinator";
+import { REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY } from "@/services/cle";
 
 interface Props {
   user: User;
   etablissement: EtablissementDto;
 }
 
-export default function FirstLoginAdminChef({ user, etablissement }: Props) {
-  const [modalChef, setModalChef] = useState(false);
+/* First login ADMINISTRATEUR_CLE referent_etablissement */
+export default function FirstLoginAdminChef({ user }: Props) {
   const history = useHistory();
-  const firstLogin = localStorage.getItem("cle_referent_signup_first_time");
+
+  const [showModal, setShowModal] = useState(false);
+
+  const firstLogin = localStorage.getItem(REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY);
 
   useEffect(() => {
-    if (firstLogin && user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement) {
-      setModalChef(true);
+    if (firstLogin && isChefEtablissement(user)) {
+      setShowModal(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstLogin]);
-
-  {
-    /* First login ADMINISTRATEUR_CLE referent_etablissement */
-  }
 
   return (
     <ModalConfirmation
-      isOpen={modalChef}
+      isOpen={showModal}
       onClose={() => {
-        setModalChef(false);
-        localStorage.removeItem("cle_referent_signup_first_time");
+        setShowModal(false);
+        localStorage.removeItem(REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY);
       }}
       className="md:max-w-[700px]"
-      icon={<ProfilePic initials={`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`} />}
+      icon={<ProfilePic initials={`${user.firstName?.charAt(0)}${user.lastName?.charAt(0)}`} />}
       title={`Bonjour ${user.firstName} ${user.lastName} !`}
-      text="Bienvenue sur votre compte Administrateur CLE en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un coordinateur d'établissement."
-      actions={
-        <div className="flex items-center justify-between gap-3">
-          <Button title="Créer une classe engagée" leftIcon={<HiOutlineOfficeBuilding size={20} />} onClick={() => history.push("/classes/create")} />
-          <ButtonAddCoordinator etablissement={etablissement} />
-        </div>
-      }
+      text="Bienvenue sur votre compte Administrateur en tant que Chef d’établissement. Vous devez mettre à jour l’effectif prévisionnel du nombre d’élèves. Vous pouvez modifier les informations de vos classes, et ajouter un ou deux coordinateurs d’établissement."
+      actions={[
+        { title: "Fermer", isCancel: true },
+        { title: "Voir la liste de mes classes", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push("/classes") },
+      ]}
     />
   );
 }

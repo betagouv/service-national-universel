@@ -8,8 +8,7 @@ const config = require("config");
 const { serializeYoung, serializeReferent } = require("../utils/serializer");
 const { ERRORS } = require("../utils");
 
-const Young = require("../models/young");
-const Referent = require("../models/referent");
+const { YoungModel, ReferentModel } = require("../models");
 const { capture } = require("../sentry");
 const { checkJwtSigninVersion } = require("../jwt-options");
 
@@ -49,25 +48,36 @@ router.get("/token", async (req, res) => {
     const { error, value } = Joi.object({
       __v: Joi.string().required(),
       _id: Joi.string().required(),
-      passwordChangedAt: Joi.string(),
-      lastLogoutAt: Joi.date(),
+      passwordChangedAt: Joi.date().allow(null),
+      lastLogoutAt: Joi.date().allow(null),
     }).validate(jwtPayload, { stripUnknown: true });
 
-    if (error || !checkJwtSigninVersion(value)) return res.status(401).json({ ok: false, user: { restriction: "public" } });
-    delete value.__v;
+    if (error || !checkJwtSigninVersion(value)) {
+      return res.status(401).json({ ok: false, user: { restriction: "public" } });
+    }
 
-    const young = await Young.findOne(value);
-    if (young) {
-      young.set({ lastActivityAt: Date.now() });
-      await young.save();
-      return res.status(200).send({ ok: true, user: { ...serializeYoung(young, young), allowedRole: "young" } });
+    const { _id, passwordChangedAt, lastLogoutAt } = value;
+
+    // First, check in the YoungModel
+    let user = await YoungModel.findById(_id);
+    if (user) {
+      if (passwordChangedAt?.getTime() === user.passwordChangedAt?.getTime() && lastLogoutAt?.getTime() === user.lastLogoutAt?.getTime()) {
+        user.set({ lastActivityAt: Date.now() });
+        await user.save();
+        return res.status(200).send({ ok: true, user: { ...serializeYoung(user, user), allowedRole: "young" } });
+      }
     }
-    const referent = await Referent.findOne(value);
-    if (referent) {
-      referent.set({ lastActivityAt: Date.now() });
-      await referent.save();
-      return res.status(200).send({ ok: true, user: { ...serializeReferent(referent, referent), allowedRole: allowedRole(referent) } });
+
+    // If not found in YoungModel, check in ReferentModel
+    user = await ReferentModel.findById(_id);
+    if (user) {
+      if (passwordChangedAt?.getTime() === user.passwordChangedAt?.getTime() && lastLogoutAt?.getTime() === user.lastLogoutAt?.getTime()) {
+        user.set({ lastActivityAt: Date.now() });
+        await user.save();
+        return res.status(200).send({ ok: true, user: { ...serializeReferent(user, user), allowedRole: allowedRole(user) } });
+      }
     }
+
     return res.status(401).send({ ok: false, user: { restriction: "public" } });
   } catch (error) {
     capture(error);

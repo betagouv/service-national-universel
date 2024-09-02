@@ -8,16 +8,10 @@ const fileUpload = require("express-fileupload");
 const mime = require("mime-types");
 
 const { capture, captureMessage } = require("../sentry");
-const ApplicationObject = require("../models/application");
-const ContractObject = require("../models/contract");
-const MissionObject = require("../models/mission");
-const StructureObject = require("../models/structure");
-const YoungObject = require("../models/young");
-const CohortObject = require("../models/cohort");
-const ReferentObject = require("../models/referent");
+const { YoungModel, CohortModel, ReferentModel, ApplicationModel, ContractModel, MissionModel, StructureModel } = require("../models");
 const { decrypt, encrypt } = require("../cryptoUtils");
 
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
 const config = require("config");
 const {
@@ -70,10 +64,10 @@ const canUpdateApplication = async (user, application, young, structures) => {
 
 async function updateMission(app, fromUser) {
   try {
-    const mission = await MissionObject.findById(app.missionId);
+    const mission = await MissionModel.findById(app.missionId);
 
     // Get all applications for the mission
-    const placesTaken = await ApplicationObject.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
+    const placesTaken = await ApplicationModel.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
     const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
     if (mission.placesLeft !== placesLeft) {
       mission.set({ placesLeft });
@@ -88,7 +82,7 @@ async function updateMission(app, fromUser) {
     }
 
     // On met à jour le nb de candidatures en attente.
-    const pendingApplications = await ApplicationObject.countDocuments({
+    const pendingApplications = await ApplicationModel.countDocuments({
       missionId: mission._id,
       status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION"] },
     });
@@ -97,7 +91,7 @@ async function updateMission(app, fromUser) {
       mission.set({ pendingApplications });
     }
 
-    const allApplications = await ApplicationObject.find({ missionId: mission._id });
+    const allApplications = await ApplicationModel.find({ missionId: mission._id });
     mission.set({ applicationStatus: allApplications.map((e) => e.status) });
 
     await mission.save({ fromUser });
@@ -113,10 +107,10 @@ router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { s
     const JoiRank = Joi.string().required().validate(req.params.rank);
     if (JoiRank.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const application = await ApplicationObject.findById(JoiId.value);
+    const application = await ApplicationModel.findById(JoiId.value);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const young = await YoungObject.findById(application.youngId);
+    const young = await YoungModel.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only update his own application.
@@ -124,7 +118,7 @@ router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { s
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const allApplications = await ApplicationObject.find({ youngId: young._id.toString() });
+    const allApplications = await ApplicationModel.find({ youngId: young._id.toString() });
     const allApplicationsSorted = allApplications.sort((a, b) => Number(a.priority) - Number(b.priority));
     const currentIndex = allApplicationsSorted.findIndex((app) => app._id.toString() === application._id.toString());
 
@@ -156,10 +150,10 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const { clickId } = Joi.object({ clickId: Joi.string().optional() }).validate(req.query, { stripUnknown: true }).value;
 
     if (!("priority" in value)) {
-      const applications = await ApplicationObject.find({ youngId: value.youngId });
+      const applications = await ApplicationModel.find({ youngId: value.youngId });
       value.priority = applications.length + 1;
     }
-    const mission = await MissionObject.findById(value.missionId);
+    const mission = await MissionModel.findById(value.missionId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // On vérifie si les candidatures sont ouvertes.
@@ -169,7 +163,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     value.isJvaMission = mission.isJvaMission;
 
-    const young = await YoungObject.findById(value.youngId);
+    const young = await YoungModel.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user)) {
@@ -198,19 +192,19 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       }
       if (req.user.role === ROLES.SUPERVISOR) {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
         if (!structures.map((e) => e._id.toString()).includes(value.structureId.toString())) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
-      const cohort = await CohortObject.findOne({ name: young.cohort });
+      const cohort = await CohortModel.findById(young.cohortId);
       if (!canApplyToPhase2(young, cohort)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
     // On vérifie que la candidature n'existe pas déjà en base de donnée.
-    const doublon = await ApplicationObject.findOne({ youngId: value.youngId, missionId: value.missionId });
+    const doublon = await ApplicationModel.findOne({ youngId: value.youngId, missionId: value.missionId });
     if (doublon) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
@@ -222,7 +216,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     }
 
     value.contractStatus = "DRAFT";
-    const data = await ApplicationObject.create(value);
+    const data = await ApplicationModel.create(value);
     await updateYoungPhase2Hours(young, req.user);
     await updateStatusPhase2(young, req.user);
     await updateMission(data, req.user);
@@ -283,7 +277,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       { $unwind: "$young" },
     ];
 
-    const applications = await ApplicationObject.aggregate(pipeline).exec();
+    const applications = await ApplicationModel.aggregate(pipeline).exec();
     if (!applications || applications?.length !== value.ids?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     //check toutes les perms pour chaque application
 
@@ -291,7 +285,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
     let structures = null;
     if (req.user.role === ROLES.SUPERVISOR) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+      structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
     }
 
     for (const application of applications) {
@@ -305,8 +299,8 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
     }
 
     value.ids.map(async (id) => {
-      const application = await ApplicationObject.findById(id);
-      const young = await YoungObject.findById(application.youngId);
+      const application = await ApplicationModel.findById(id);
+      const young = await YoungModel.findById(application.youngId);
 
       application.set({ status: valueKey.key });
       await application.save({ fromUser: req.user });
@@ -334,10 +328,10 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const application = await ApplicationObject.findById(value._id);
+    const application = await ApplicationModel.findById(value._id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const young = await YoungObject.findById(application.youngId);
+    const young = await YoungModel.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only update his own application.
@@ -360,7 +354,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
       }
       if (req.user.role === ROLES.SUPERVISOR) {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
         if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
@@ -374,7 +368,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     if (application.isJvaMission === "true") {
       // When a young accepts a mission proposed by a ref, it counts as an application creation in API Engagement
       if (originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION && application.status === APPLICATION_STATUS.WAITING_VALIDATION) {
-        const mission = await MissionObject.findById(application.missionId);
+        const mission = await MissionModel.findById(application.missionId);
         const data = await apiEngagement.create(application, mission.apiEngagementId, null);
         application.set({ apiEngagementId: data._id });
       } else {
@@ -407,10 +401,10 @@ router.put("/:id/visibilite", passport.authenticate(["young"], { session: false,
       .validate(req.body, { stripUnknown: true });
     if (joiBody.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const application = await ApplicationObject.findById(joiId.value);
+    const application = await ApplicationModel.findById(joiId.value);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const young = await YoungObject.findById(application.youngId);
+    const young = await YoungModel.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only update his own application.
@@ -433,13 +427,13 @@ router.get("/:id/contract", passport.authenticate("referent", { session: false, 
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const application = await ApplicationObject.findById(id);
+    const application = await ApplicationModel.findById(id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const contract = await ContractObject.findById(application.contractId);
+    const contract = await ContractModel.findById(application.contractId);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const young = await YoungObject.findById(application.youngId);
+    const young = await YoungModel.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
@@ -465,10 +459,10 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const data = await ApplicationObject.findById(id);
+    const data = await ApplicationModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const young = await YoungObject.findById(data.youngId);
+    const young = await YoungModel.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canViewYoungApplications(req.user, young)) {
@@ -529,13 +523,13 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
 
     const { id, template: defaultTemplate, message, type, multipleDocument } = value;
 
-    const application = await ApplicationObject.findById(id);
+    const application = await ApplicationModel.findById(id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const mission = await MissionObject.findById(application.missionId);
+    const mission = await MissionModel.findById(application.missionId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const referent = await ReferentObject.findById(mission.tutorId);
+    const referent = await ReferentModel.findById(mission.tutorId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const young = await YoungObject.findById(application.youngId);
+    const young = await YoungModel.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && req.user._id.toString() !== application.youngId) {
@@ -557,7 +551,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       }
       if (req.user.role === ROLES.SUPERVISOR) {
         if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
         if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
@@ -715,7 +709,7 @@ router.post(
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req, res) => {
     try {
-      const application = await ApplicationObject.findById(req.params.id);
+      const application = await ApplicationModel.findById(req.params.id);
       const rootKeys = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
       const { error: keyError, value: key } = Joi.string()
         .required()
@@ -731,7 +725,7 @@ router.post(
         value: { names },
       } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
       if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      const user = await YoungObject.findById(application.youngId);
+      const user = await YoungModel.findById(application.youngId);
       if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
 
       // Validate files with Joi
@@ -757,7 +751,7 @@ router.post(
           { stripUnknown: true },
         );
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      //const application = await ApplicationObject.find({ youngId: req.user._id });
+      //const application = await ApplicationModel.find({ youngId: req.user._id });
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
 
       for (let i = 0; i < files.length; i++) {
@@ -817,9 +811,9 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
 
     const { id, key, name } = value;
 
-    const application = await ApplicationObject.findById(id);
+    const application = await ApplicationModel.findById(id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const young = await YoungObject.findById(application.youngId);
+    const young = await YoungModel.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -846,6 +840,6 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ApplicationObject));
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ApplicationModel));
 
 module.exports = router;

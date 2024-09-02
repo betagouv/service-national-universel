@@ -13,49 +13,96 @@ const express = require("express");
 const { createTerminus } = require("@godaddy/terminus");
 
 const config = require("config");
+const { logger } = require("./logger");
 
-const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
+const { capture } = require("./sentry");
+const { setupExpressErrorHandler } = require("@sentry/node");
 const { initDB, closeDB } = require("./mongo");
+const { initRedisClient, closeRedisClient } = require("./redis");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
-const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
-async function runCrons() {
-  initSentry();
-  await initDB();
-  scheduleCrons();
-  // Serverless containers requires running http server
+const basicAuth = require("express-basic-auth");
+const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers, scheduleRepeatableTasks } = require("./queues/redisQueue");
+
+async function runTasks() {
+  await Promise.all([initDB(), getAllPdfTemplates()]);
+
+  initQueues();
+  initWorkers();
+  await scheduleRepeatableTasks();
+
   const app = express();
-  app.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
+
+  if (config.get("TASK_MONITOR_ENABLE_AUTH")) {
+    app.use(
+      basicAuth({
+        challenge: true,
+        users: {
+          [config.get("TASK_MONITOR_USER")]: config.get("TASK_MONITOR_SECRET"),
+        },
+      }),
+    );
+  }
+  app.use("/", initMonitor());
+  setupExpressErrorHandler(app);
+
+  // * Use Terminus for graceful shutdown when using Docker
+  const server = http.createServer(app);
+
+  function onSignal() {
+    logger.debug("server is starting cleanup");
+    return Promise.all([closeDB(), closeQueues(), closeWorkers()]);
+  }
+
+  function onShutdown() {
+    logger.debug("cleanup finished, server is shutting down");
+  }
+
+  function healthCheck({ state }) {
+    return Promise.resolve();
+  }
+
+  const options = {
+    healthChecks: {
+      "/healthcheck": healthCheck,
+    },
+    onSignal,
+    onShutdown,
+  };
+
+  createTerminus(server, options);
+
+  server.listen(config.PORT, () => logger.debug(`Listening on port ${config.PORT}`));
 }
 
 async function runAPI() {
   if (config.ENVIRONMENT !== "test") {
-    console.log("API_URL", config.API_URL);
-    console.log("APP_URL", config.APP_URL);
-    console.log("ADMIN_URL", config.ADMIN_URL);
-    console.log("SUPPORT_URL", config.SUPPORT_URL);
-    console.log("KNOWLEDGEBASE_URL", config.KNOWLEDGEBASE_URL);
-    console.log("ANALYTICS_URL", config.API_ANALYTICS_ENDPOINT);
+    logger.info(`API_URL ${config.API_URL}`);
+    logger.info(`APP_URL ${config.APP_URL}`);
+    logger.info(`ADMIN_URL ${config.ADMIN_URL}`);
+    logger.info(`SUPPORT_URL ${config.SUPPORT_URL}`);
+    logger.info(`KNOWLEDGEBASE_URL ${config.KNOWLEDGEBASE_URL}`);
+    logger.info(`ANALYTICS_URL ${config.API_ANALYTICS_ENDPOINT}`);
   }
 
-  await initDB();
+  await Promise.all([initDB(), initRedisClient()]);
   await runMigrations();
 
   /*
-      Download all certificate templates when instance is starting,
-      making them available for PDF generation
+    Download all certificate templates when instance is starting,
+    making them available for PDF generation
 
-      These templates are sensitive data, so we can't treat them as simple statics
+    These templates are sensitive data, so we can't treat them as simple statics
 
-      TODO : A possible improvement would be to download templates at build time
-    */
+    TODO : A possible improvement would be to download templates at build time
+  */
   getAllPdfTemplates();
+  initQueues();
 
   const app = express();
-  const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
   if (["production", "staging", "ci", "custom"].includes(config.ENVIRONMENT)) {
@@ -156,7 +203,6 @@ async function runAPI() {
     try {
       throw new Error("Intentional error");
     } catch (error) {
-      console.log("Error ");
       capture(error);
       return res.status(500).send({ ok: false, code: "hihi" });
     }
@@ -174,12 +220,12 @@ async function runAPI() {
           throw new Error("PM2 TEST ERROR CRASH APP");
         }, 10);
       } catch (e) {
-        console.log("error", e);
+        logger.error(`error ${e}`);
       }
     });
   }
 
-  registerSentryErrorHandler();
+  setupExpressErrorHandler(app);
   app.use(handleError);
 
   initPassport();
@@ -188,12 +234,12 @@ async function runAPI() {
   const server = http.createServer(app);
 
   function onSignal() {
-    console.log("server is starting cleanup");
-    return Promise.all([closeDB()]);
+    logger.debug("server is starting cleanup");
+    return Promise.all([closeDB(), closeRedisClient(), closeQueues()]);
   }
 
   function onShutdown() {
-    console.log("cleanup finished, server is shutting down");
+    logger.debug("cleanup finished, server is shutting down");
   }
 
   function healthCheck({ state }) {
@@ -210,10 +256,10 @@ async function runAPI() {
 
   createTerminus(server, options);
 
-  server.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
+  server.listen(config.PORT, () => logger.debug(`Listening on port ${config.PORT}`));
 }
 
 module.exports = {
-  runCrons,
   runAPI,
+  runTasks,
 };

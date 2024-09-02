@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
-import { translate, getCohortPeriod } from "snu-lib";
+import { translate, getCohortPeriod, concatPhoneNumberWithZone } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import EditPen from "../../../assets/icons/EditPen";
 import ModalSejour from "../components/ModalSejour";
@@ -10,7 +10,6 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
-import { concatPhoneNumberWithZone } from "snu-lib";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { SignupButtons } from "@snu/ds/dsfr";
 
@@ -132,6 +131,7 @@ export default function StepConfirm() {
           ) : (
             <Details title="Situation particulière" value="Non" />
           )}
+          <Details title="PSC1" value={translate(young.psc1Info)} />
         </div>
         <hr className="mt-4" />
         <div className="flex flex-col gap-3">

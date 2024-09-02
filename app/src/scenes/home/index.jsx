@@ -1,8 +1,8 @@
 import { React, useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { getCohortNames, hasAccessToReinscription } from "../../utils";
-import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../utils/cohorts";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, hasAccessToReinscription } from "../../utils";
+import { cohortAssignmentAnnouncementsIsOpenForYoung, cohortsInit, getCohort } from "../../utils/cohorts";
 import Affected from "./Affected";
 // import FutureCohort from "./FutureCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
@@ -20,7 +20,7 @@ import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
 import AvenirCohort from "./AvenirCohort";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, isCohortTooOld } from "snu-lib";
+import { isCohortTooOld } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasAccessToPhase2, hasCompletedPhase2 } from "../../utils";
 import { fetchReInscriptionOpen } from "../../services/reinscription.service";
@@ -35,6 +35,11 @@ export default function Home() {
     queryKey: ["isReInscriptionOpen"],
     queryFn: fetchReInscriptionOpen,
   });
+
+  useEffect(() => {
+    fetchReInscriptionOpen();
+    cohortsInit();
+  }, []);
 
   if (isReinscriptionOpenLoading) return <Loader />;
 
@@ -84,7 +89,7 @@ export default function Home() {
 
     // Ma phase 1 est en cours, soit en cours d'inscription, soit en plein parcours
     // à voir comment on gère les cohort présente et passé.
-    if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+    if (!!getCohort(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
       const isCohortInstructionOpen = new Date() < new Date(cohort.instructionEndDate);
       if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !isCohortInstructionOpen) {

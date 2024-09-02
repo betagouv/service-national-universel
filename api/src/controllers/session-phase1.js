@@ -12,16 +12,15 @@ const mongoose = require("mongoose");
 const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
 const { generateBatchDroitImage } = require("../templates/droitImage/droitImage");
 const { capture } = require("../sentry");
-const SessionPhase1Model = require("../models/sessionPhase1");
-const CohesionCenterModel = require("../models/cohesionCenter");
-const CohortModel = require("../models/cohort");
-const YoungModel = require("../models/young");
-const ReferentModel = require("../models/referent");
-const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
-const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
-const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const SessionPhase1 = require("../models/sessionPhase1");
+const { SessionPhase1Model } = require("../models");
+const { CohesionCenterModel } = require("../models");
+const { CohortModel } = require("../models");
+const { YoungModel } = require("../models");
+const { ReferentModel } = require("../models");
+const { PointDeRassemblementModel } = require("../models");
+const { LigneBusModel } = require("../models");
+const { SessionPhase1TokenModel } = require("../models");
+const { SchemaDeRepartitionModel } = require("../models");
 
 const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
 const {
@@ -40,10 +39,11 @@ const {
   isSessionEditionOpen,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendImageRightsForSessionPhase1,
+  formatDateTimeZone,
 } = require("snu-lib");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const config = require("config");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const scanFile = require("../utils/virusScanner");
@@ -83,7 +83,7 @@ router.get("/:id/schema-repartition", passport.authenticate("referent", { sessio
     const session = await SessionPhase1Model.findById(id);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const schema = await schemaRepartitionModel.find({ sessionId: id });
+    const schema = await SchemaDeRepartitionModel.find({ sessionId: id });
     return res.status(200).send({ ok: true, schema: schema });
   } catch (error) {
     capture(error);
@@ -155,22 +155,34 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.TRANSPORTER].includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    const cohort = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isSessionEditionOpen(req.user, cohort)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
 
     const { error, value } = validateSessionPhase1(req.body);
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    // If session is edition is closed, the contact email can still be updated as long as affectations are not public.
+    if (!isSessionEditionOpen(req.user, cohort)) {
+      if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      sessionPhase1.sanitaryContactEmail = value.sanitaryContactEmail;
+      await sessionPhase1.save({ fromUser: req.user });
+      return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
     }
 
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
@@ -269,10 +281,9 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const cohort = await CohortModel.findOne({ name: session.cohort });
+    const cohort = await CohortModel.findById(session.cohortId);
     generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
   } catch (error) {
-    console.log("error", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
@@ -295,7 +306,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (sessionPhase1.placesTotal !== sessionPhase1.placesLeft || youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // Check for existing Plan de Transport
-    const lignesDeBus = await LigneBusModel.find({ cohort: sessionPhase1.cohort, centerId: sessionPhase1.cohesionCenterId }).select({ _id: 1 });
+    const lignesDeBus = await LigneBusModel.find({ cohortId: sessionPhase1.cohortId, centerId: sessionPhase1.cohesionCenterId }).select({ _id: 1 });
     if (lignesDeBus.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // delete cohort in cohesion center
@@ -330,10 +341,10 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
     if (!canShareSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     //Create token
-    const cohort = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    const cohort = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const sessionToken = await sessionPhase1TokenModel.create({
+    const sessionToken = await SessionPhase1TokenModel.create({
       token: crypto.randomBytes(50).toString("hex"),
       sessionId: sessionPhase1._id,
     });
@@ -364,13 +375,13 @@ router.post("/check-token/:token", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const sessionPhase1Token = await sessionPhase1TokenModel.findOne({ token: value.token });
+    const sessionPhase1Token = await SessionPhase1TokenModel.findOne({ token: value.token });
     if (!sessionPhase1Token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Token.sessionId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const cohortParam = await CohortModel.findOne({ name: sessionPhase1.cohort });
+    const cohortParam = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohortParam) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (cohortParam?.busListAvailability) {
@@ -385,9 +396,8 @@ router.post("/check-token/:token", async (req, res) => {
         },
       };
       const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
-      console.log("youngs", youngs.length);
 
-      const ligneBus = await LigneBusModel.find({ cohort: sessionPhase1.cohort, centerId: sessionPhase1.cohesionCenterId });
+      const ligneBus = await LigneBusModel.find({ cohortId: sessionPhase1.cohortId, centerId: sessionPhase1.cohesionCenterId });
 
       let arrayMeetingPoints = [];
       ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
@@ -472,7 +482,7 @@ router.put("/:id/headCenter", passport.authenticate("referent", { session: false
     if (referent.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Cannot be head of center in more than one centers for the same cohort
-    const overlappingSessionPhase1 = await SessionPhase1Model.find({ cohort: sessionPhase1.cohort, headCenterId: checkedIdHeadCenter });
+    const overlappingSessionPhase1 = await SessionPhase1Model.find({ cohortId: sessionPhase1.cohortId, headCenterId: checkedIdHeadCenter });
     if (overlappingSessionPhase1.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     sessionPhase1.set({ headCenterId: checkedIdHeadCenter });
@@ -531,7 +541,7 @@ router.post(
       const { id: sessionId, key } = value;
 
       // --- rights
-      const session = await SessionPhase1.findById(sessionId);
+      const session = await SessionPhase1Model.findById(sessionId);
       if (!session) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
@@ -613,7 +623,7 @@ router.delete("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { 
     const { sessionId, key, fileId } = value;
 
     // --- rights
-    const session = await SessionPhase1.findById(sessionId);
+    const session = await SessionPhase1Model.findById(sessionId);
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
@@ -676,7 +686,7 @@ router.get("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { ses
     const { sessionId, key, fileId } = value;
 
     // --- rights
-    const session = await SessionPhase1.findById(sessionId);
+    const session = await SessionPhase1Model.findById(sessionId);
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
@@ -725,7 +735,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
     const { sessionId, key } = value;
 
     // --- rights
-    const session = await SessionPhase1.findById(sessionId);
+    const session = await SessionPhase1Model.findById(sessionId);
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
@@ -743,8 +753,8 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
     }
 
     // --- send template
-    const cohort = await CohortModel.findOne({ name: session.cohort });
-    let date = getCohortStartDate(session, cohort);
+    const cohort = await CohortModel.findById(session.cohortId);
+    let date = getCohortStartDate(cohort);
 
     await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.FILE_SESSION_REMINDER, {
       emailTo: [{ email: headCenter.email }],
@@ -775,7 +785,7 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
     }
     const { sessionId } = value;
     // --- rights
-    const session = await SessionPhase1.findById(sessionId);
+    const session = await SessionPhase1Model.findById(sessionId);
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
@@ -791,12 +801,5 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-const formatDateTimeZone = (date) => {
-  //set timezone to UTC
-  let d = new Date(date);
-  d.toISOString();
-  return d;
-};
 
 module.exports = router;

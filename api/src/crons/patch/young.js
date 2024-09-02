@@ -4,9 +4,10 @@ const { isInRuralArea, getAge } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const YoungModel = require("../../models/young");
+const { YoungModel } = require("../../models");
 const YoungPatchModel = require("./models/youngPatch");
 const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -15,7 +16,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.youngPatchScanned = result.youngPatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const actualYoung = await YoungModel.findById(patch.ref.toString());
     if (!actualYoung) return;
     if (patch.ops.length > 0) {
@@ -161,8 +161,8 @@ exports.manualHandler = async (startDate, endDate) => {
 
     await findAll(YoungPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

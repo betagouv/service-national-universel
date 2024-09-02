@@ -9,14 +9,14 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Button, Badge, DropdownButton } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, IS_INSCRIPTION_OPEN_CLE, FUNCTIONAL_ERRORS } from "snu-lib";
+import { translate, ROLES, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
 import plausibleEvent from "@/services/plausible";
 import { downloadCertificatesByClassId } from "@/services/convocation.service";
 import { usePendingAction } from "@/hooks/usePendingAction";
-import { ClasseDto } from "snu-lib/src/dto/classeDto";
+import { ClasseDto } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
@@ -28,7 +28,10 @@ import DeleteButton from "./components/DeleteButton";
 import ModaleWithdraw from "./components/modale/ModaleWithdraw";
 import ModaleCohort from "./components/modale/modaleCohort";
 import ButtonInvite from "./components/ButtonInvite";
-import { InfoBus, TStatus, Rights } from "./components/types";
+import { InfoBus, Rights } from "./components/types";
+import { TStatus } from "@/types";
+import ButtonRelanceVerif from "./components/ButtonRelanceVerif";
+import VerifClassButton from "./components/VerifClassButton";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | null>(null);
@@ -39,6 +42,7 @@ export default function View() {
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
   const [edit, setEdit] = useState(false);
+  const [editRef, setEditRef] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [oldClasseCohort, setOldClasseCohort] = useState();
@@ -91,7 +95,7 @@ export default function View() {
 
       //Logical stuff
       setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
-      if (classe.status !== STATUS_CLASSE.DRAFT) {
+      if (![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe.status)) {
         getStudents(classe._id);
       }
     } catch (e) {
@@ -116,7 +120,26 @@ export default function View() {
 
   useEffect(() => {
     getClasse();
-  }, [id, edit, editStay]);
+  }, [id, edit, editStay, editRef]);
+
+  const checkRefInfo = () => {
+    setErrors({});
+    interface Errors {
+      refFirstName?: string;
+      refLastName?: string;
+      refEmail?: string;
+    }
+    const errors: Errors = {};
+    if (!classe?.referents[0].firstName) errors.refFirstName = "Ce champ est obligatoire";
+    if (!classe?.referents[0].lastName) errors.refLastName = "Ce champ est obligatoire";
+    if (!classe?.referents[0].email) errors.refEmail = "Ce champ est obligatoire";
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
+      setIsLoading(false);
+      return;
+    }
+    sendInfoRef();
+  };
 
   const checkInfo = () => {
     setErrors({});
@@ -128,21 +151,29 @@ export default function View() {
       filiere?: string;
       grades?: string;
       estimatedSeats?: string;
-      trimester?: string;
       type?: string;
+      refFirstName?: string;
+      refLastName?: string;
+      refEmail?: string;
     }
 
     const errors: Errors = {};
     if (classe?.cohort !== oldClasseCohort && classe.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
     if (!classe?.name) errors.name = "Ce champ est obligatoire";
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
-    if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
-    if (!classe?.trimester) errors.trimester = "Ce champ est obligatoire";
-    if (!classe?.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
     if (!classe?.type) errors.type = "Ce champ est obligatoire";
     if (!classe?.grades.length) errors.grades = "Ce champ est obligatoire";
     if (classe?.grades && classe?.grades.length > 3) errors.grades = "Une classe ne peut avoir que 3 niveaux maximum";
+    if (!classe?.estimatedSeats) errors.estimatedSeats = "Ce champ est obligatoire";
+    if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
+    const now = new Date();
+    const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+    if (classe?.totalSeats && classe.estimatedSeats && classe.totalSeats > classe.estimatedSeats && now > limitDateEstimatedSeats)
+      errors.totalSeats = "L'effectif ajusté ne peut pas être supérieur à l'effectif prévisionnel";
+    if (!classe?.referents[0].firstName) errors.refFirstName = "Ce champ est obligatoire";
+    if (!classe?.referents[0].lastName) errors.refLastName = "Ce champ est obligatoire";
+    if (!classe?.referents[0].email) errors.refEmail = "Ce champ est obligatoire";
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -169,6 +200,7 @@ export default function View() {
       }
       setClasse(data);
       handleCancel();
+      toastr.success("Succès", "La classe a bien été modifié");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la classe", e);
@@ -177,8 +209,40 @@ export default function View() {
     }
   };
 
+  const sendInfoRef = async () => {
+    try {
+      setShowModaleCohort(false);
+      setIsLoading(true);
+      const referent = {
+        firstName: classe?.referents[0].firstName,
+        lastName: classe?.referents[0].lastName,
+        email: classe?.referents[0].email,
+      };
+
+      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}/referent`, referent);
+
+      if (!ok) {
+        if (code === FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE) {
+          toastr.error("Erreur", "Ce référent ne peut pas être ajouté comme référent de classe");
+        } else {
+          toastr.error("Oups, une erreur est survenue lors de la modification du référent", translate(code));
+        }
+        return setIsLoading(false);
+      }
+      setClasse(data);
+      handleCancel();
+      toastr.success("Succès", "Le référent a bien été modifié");
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la modification du référent", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleCancel = () => {
     setEdit(false);
+    setEditRef(false);
     setEditStay(false);
     setIsLoading(false);
     setErrors({});
@@ -233,10 +297,15 @@ export default function View() {
 
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
-
-    if (classe?.status && ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && IS_INSCRIPTION_OPEN_CLE) {
+    if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
+      actionsList.push(<ButtonRelanceVerif key="relance" classeId={id} onLoading={setIsLoading} />);
+    }
+    if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+      actionsList.push(<VerifClassButton key="verify" classe={classe} setClasse={setClasse} isLoading={isLoading} setLoading={setIsLoading} />);
+    }
+    if (classe?.status && STATUS_CLASSE.OPEN === classe.status) {
       actionsList.push(
-        <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
+        <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} type="wired" title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
         <ButtonInvite key="invite" url={url} />,
       );
     }
@@ -304,7 +373,20 @@ export default function View() {
         validatedYoung={totalSeatsTakenExcluding}
       />
 
-      {classe.referents?.length > 0 && <ReferentInfos classe={classe} />}
+      {classe.referents?.length > 0 && (
+        <ReferentInfos
+          classe={classe}
+          setClasse={setClasse}
+          editRef={editRef}
+          setEditRef={setEditRef}
+          errors={errors}
+          rights={rights}
+          user={user}
+          isLoading={isLoading}
+          onCancel={handleCancel}
+          onCheckInfo={checkRefInfo}
+        />
+      )}
 
       {(rights.showCenter || rights.showPDR) && (
         <SejourInfos
@@ -322,7 +404,9 @@ export default function View() {
         />
       )}
 
-      {classe?.status !== STATUS_CLASSE.DRAFT && <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />}
+      {![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status as any) && (
+        <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />
+      )}
 
       <ModaleWithdraw isOpen={showModaleWithdraw} onClose={() => setShowModaleWithdraw(false)} onWithdraw={onWithdraw} />
       <ModaleCohort isOpen={showModaleCohort} onClose={() => setShowModaleCohort(false)} onSendInfo={sendInfo} />

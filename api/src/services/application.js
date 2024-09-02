@@ -1,20 +1,21 @@
 const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge } = require("snu-lib");
 const { deletePatches } = require("../controllers/patches");
-const ApplicationModel = require("../models/application");
-const CohortModel = require("../models/cohort");
-const YoungModel = require("../models/young");
-const ReferentModel = require("../models/referent");
-const { sendTemplate } = require("../sendinblue");
+const { ApplicationModel } = require("../models");
+const { CohortModel } = require("../models");
+const { YoungModel } = require("../models");
+const { ReferentModel } = require("../models");
+const { sendTemplate } = require("../brevo");
 const config = require("config");
 const { getCcOfYoung } = require("../utils");
 const { getTutorName } = require("./mission");
 const { capture } = require("../sentry");
+const { logger } = require("../logger");
 
 const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung = {} }) => {
   try {
     const applications = await ApplicationModel.find({ youngId });
 
-    console.log("ANONYMIZE YOUNGS APPLICATIONS >>>", `${applications.length} applications found for young with id ${youngId}.`);
+    logger.debug(`ANONYMIZE YOUNGS APPLICATIONS >>> ${applications.length} applications found for young with id ${youngId}.`);
 
     if (!applications.length) {
       return;
@@ -33,13 +34,12 @@ const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung 
       await application.save();
       const deletePatchesResult = await deletePatches({ id: application._id.toString(), model: ApplicationModel });
       if (!deletePatchesResult.ok) {
-        console.error(`ERROR deleting patches of application with id ${application._id} >>>`, deletePatchesResult.code);
+        throw new Error("ERROR deleting patches of application", { cause: { application_id: application._id, code: deletePatchesResult.code } });
       }
     }
 
-    console.log("ANONYMIZE YOUNGS APPLICATIONS >>>", `${applications.length} applications anonymized for young with id ${youngId}.`);
+    logger.debug(`ANONYMIZE YOUNGS APPLICATIONS >>> ${applications.length} applications anonymized for young with id ${youngId}.`);
   } catch (e) {
-    console.log("Error while anonymizing youngs applications", e);
     capture(e);
   }
 };
@@ -58,15 +58,15 @@ const updateApplicationTutor = async (mission, fromUser = null) => {
       }
     }
   } catch (e) {
-    console.log("Error while updating application tutor", e);
     capture(e);
   }
 };
 
 const updateApplicationStatus = async (mission, fromUser = null) => {
   try {
-    if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
-      return console.log(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
+    if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status)) {
+      return logger.debug(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
+    }
     const applications = await ApplicationModel.find({
       missionId: mission._id,
       status: {
@@ -118,19 +118,17 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
       }
     }
   } catch (e) {
-    console.log("Error while updating application status", e);
     capture(e);
   }
 };
 
 const getAuthorizationToApply = async (mission, young) => {
   let refusalMessages = [];
-  if (isCohortTooOld(young?.cohort)) {
+  if (isCohortTooOld(young)) {
     refusalMessages.push("Le délai pour candidater est dépassé.");
   }
 
-  const cohort = await CohortModel.findOne({ name: young.cohort });
-
+  const cohort = await CohortModel.findById(young.cohortId);
   if (!canApplyToPhase2(young, cohort)) {
     refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
   }
@@ -170,7 +168,7 @@ const getAuthorizationToApply = async (mission, young) => {
   }
 
   const isMilitaryApplicationIncomplete =
-    !young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length;
+    !young.files.militaryPreparationFilesIdentity?.length || !young.files.militaryPreparationFilesAuthorization?.length || !young.files.militaryPreparationFilesCertificate?.length;
 
   if (isMilitaryPreparation && isMilitaryApplicationIncomplete) {
     refusalMessages.push("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");

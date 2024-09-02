@@ -12,8 +12,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const { YoungModel, CohortModel } = require("../models");
 const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, REGLEMENT_INTERIEUR_VERSION } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
@@ -21,7 +20,7 @@ const { serializeYoung } = require("../utils/serializer");
 const { ERRORS } = require("../utils");
 
 const { validateFirstName, validateString } = require("../utils/validator");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 const config = require("config");
 
 function tokenParentValidMiddleware(req, res, next) {
@@ -116,7 +115,7 @@ router.post("/accept-ri", tokenParentValidMiddleware, async (req, res) => {
     const young = await YoungModel.findById(req.body._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ parent1ValidationDate: new Date() });
+    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
     await young.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
@@ -188,7 +187,6 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     const result = consentBodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("error: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -312,7 +310,6 @@ router.post("/consent-image-rights", tokenParentValidMiddleware, async (req, res
     const result = consentBodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      console.log("error: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 

@@ -7,11 +7,11 @@ import { ProfilePic } from "@snu/ds";
 import validator from "validator";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { ERRORS, translate } from "snu-lib";
-import { EtablissementDto } from "snu-lib/src/dto/etablissementDto";
+import { ERRORS, translate, EtablissementDto } from "snu-lib";
 
 interface Props {
   etablissement: EtablissementDto;
+  onChange: () => void;
 }
 interface Errors {
   firstName?: string;
@@ -25,7 +25,7 @@ interface NewCoordinator {
   email: string;
 }
 
-export default function ButtonAddCoordinator({ etablissement }: Props) {
+export default function ButtonAddCoordinator({ etablissement, onChange }: Props) {
   const [modalAddCoordinator, setModalAddCoordinator] = useState(false);
   const [newCoordinator, setNewCoordinator] = useState<NewCoordinator>({ firstName: "", lastName: "", email: "" });
   const [errors, setErrors] = useState<Errors>({});
@@ -45,7 +45,7 @@ export default function ButtonAddCoordinator({ etablissement }: Props) {
         return;
       }
 
-      const { ok, code } = await api.post(`/cle/referent/invite-coordonnateur`, newCoordinator);
+      const { ok, code } = await api.post(`/cle/referent/invite-coordonnateur`, { ...newCoordinator, etablissementId: etablissement._id });
 
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
@@ -56,6 +56,7 @@ export default function ButtonAddCoordinator({ etablissement }: Props) {
       setErrors({});
       setNewCoordinator({ firstName: "", lastName: "", email: "" });
       setModalAddCoordinator(false);
+      onChange();
       return toastr.success("Succès", "Invitation envoyée");
     } catch (e) {
       capture(e);

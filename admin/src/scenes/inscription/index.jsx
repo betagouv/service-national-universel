@@ -221,6 +221,13 @@ export default function Inscription() {
       missingLabel: "Non renseigné",
       translate: translateCniExpired,
     },
+    {
+      title: "PSC1",
+      name: "psc1Info",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
   ].filter(Boolean);
 
   return (

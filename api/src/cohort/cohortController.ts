@@ -2,10 +2,10 @@ import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
 
-import { ROLES, isSuperAdmin } from "snu-lib";
+import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone } from "snu-lib";
 
-import CohortModel from "../models/cohort";
-import SessionPhase1Model from "../models/sessionPhase1";
+import { CohortModel, ClasseModel, YoungModel, SessionPhase1Model } from "../models";
+import ClasseStateManager from "../cle/classe/stateManager";
 import { capture } from "../sentry";
 import { ERRORS, getFile, deleteFile } from "../utils";
 import { decrypt } from "../cryptoUtils";
@@ -150,7 +150,7 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    const cohort = await CohortModel.findOne({ name: session.cohort });
+    const cohort = await CohortModel.findById(session.cohortId);
     if (!cohort) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
@@ -186,8 +186,8 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey].setHours(0, 0, 0, 0));
-    const exportAvailableUntil = new Date(cohort.dsnjExportDates[exportKey]);
+    const exportAvailableFrom = new Date(cohort.dsnjExportDates![exportKey].setHours(0, 0, 0, 0));
+    const exportAvailableUntil = new Date(cohort.dsnjExportDates![exportKey]);
     exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
     const now = new Date();
 
@@ -254,6 +254,10 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
         body[key] = date;
       }
     });
+    const oldCohort = {
+      inscriptionStartDate: cohort.inscriptionStartDate,
+      inscriptionEndDate: cohort.inscriptionEndDate,
+    };
 
     cohort.set({
       ...body,
@@ -266,18 +270,18 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     if (body.validationDateForTerminaleGrade) cohort.validationDateForTerminaleGrade = formatDateTimeZone(body.validationDateForTerminaleGrade);
 
     await cohort.save({ fromUser: req.user });
+
+    if (cohort.type === COHORT_TYPE.CLE && (oldCohort.inscriptionStartDate !== cohort.inscriptionStartDate || oldCohort.inscriptionEndDate !== cohort.inscriptionEndDate)) {
+      const classes = await ClasseModel.find({ cohortId: cohort._id });
+      for (const c of classes) {
+        await ClasseStateManager.compute(c._id, req.user, { YoungModel });
+      }
+    }
     return res.status(200).send({ ok: true, data: cohort });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-const formatDateTimeZone = (date) => {
-  //set timezone to UTC
-  let d = new Date(date);
-  d.toISOString();
-  return d;
-};
 
 module.exports = router;

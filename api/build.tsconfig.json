@@ -9,10 +9,11 @@
     "preserveWatchOutput": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "target": "ES2021",
+    "target": "ES2022",
     "outDir": "./src",
     "rootDir": "./src"
   },
+  "references": [{ "path": "../packages/lib" }],
   "include": ["src/**/*.ts"],
   "exclude": ["**/node_modules/*", "src/__tests__/*"]
 }

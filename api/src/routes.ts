@@ -2,9 +2,6 @@ export function injectRoutes(app) {
   app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
   app.use("/application", require("./controllers/application"));
   app.use("/bus", require("./controllers/bus"));
-  app.use("/cle/referent", require("./controllers/cle/referent"));
-  app.use("/cle/referent-signup", require("./controllers/cle/referent-signup"));
-  app.use("/cle/young", require("./controllers/cle/young"));
   app.use("/cohesion-center", require("./controllers/cohesion-center"));
   app.use("/cohort", require("./cohort/cohortController"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
@@ -27,7 +24,7 @@ export function injectRoutes(app) {
   app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
   app.use("/point-de-rassemblement", require("./controllers/planDeTransport/point-de-rassemblement"));
   app.use("/program", require("./controllers/program"));
-  app.use("/referent", require("./controllers/referent"));
+  app.use("/referent", require("./referent/referentController").default);
   app.use("/representants-legaux", require("./controllers/representants-legaux"));
   app.use("/schema-de-repartition", require("./controllers/planDeTransport/schema-de-repartition"));
   app.use("/session-phase1", require("./controllers/session-phase1"));
@@ -37,9 +34,10 @@ export function injectRoutes(app) {
   app.use("/tags", require("./controllers/tags"));
   app.use("/waiting-list", require("./controllers/waiting-list"));
   app.use("/young", require("./controllers/young/index"));
-  app.use("/young-edition", require("./controllers/young-edition"));
+  app.use("/young", require("./young/youngController").default);
+  app.use("/young-edition", require("./young/edition/youngEditionController").default);
   app.use("/SNUpport", require("./controllers/SNUpport"));
-  app.use("/cle", require("./cle"));
+  app.use("/cle", require("./cle").default);
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));

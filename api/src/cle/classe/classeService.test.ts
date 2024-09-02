@@ -1,19 +1,17 @@
-import { buildUniqueClasseId, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
-const youngService = require("../../young/young.service");
-const classService = require("./classeService");
+import { Types } from "mongoose";
+const ObjectId = Types.ObjectId;
+
+import { ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE, isNowBetweenDates, canEditEstimatedSeats, canEditTotalSeats, CLE_COLORATION } from "snu-lib";
+
+import { ClasseModel, CohortModel, YoungModel, EtablissementDocument, EtablissementType } from "../../models";
+
+import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
+import * as youngService from "../../young/youngService";
+import ClasseStateManager from "./stateManager";
+import * as classService from "./classeService";
 
 const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
 const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
-
-const ClasseStateManager = require("../../states/models/classe");
-const ClasseModel = require("../../models/cle/classe");
-import YoungModel from "../../models/young";
-const { ObjectId } = require("mongoose").Types;
-
-import { canEditEstimatedSeats, canEditTotalSeats } from "./classeService";
-import { ROLES, SUB_ROLES, LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib";
-import { EtablissementDocument, IEtablissement } from "../../models/cle/etablissementType";
-import { CleClasseModel } from "../../models";
 
 describe("ClasseService", () => {
   it("should return a pdf", async () => {
@@ -31,7 +29,7 @@ describe("ClasseService", () => {
 });
 
 describe("ClasseStateManager.withdraw function", () => {
-  const classId = new ObjectId();
+  const classId = new ObjectId().toString();
   const fromUser = { userId: "user123" };
   const options = { YoungModel: YoungModel }; // Mocked YoungModel
 
@@ -117,7 +115,7 @@ describe("ClasseStateManager.withdraw function", () => {
 });
 
 describe("deleteClasse function", () => {
-  const classId = new ObjectId();
+  const classId = new ObjectId().toString();
   const mockedFromUser = { userId: "user123" };
 
   const saveMock = jest.fn().mockImplementation(() => {
@@ -152,7 +150,7 @@ describe("deleteClasse function", () => {
     const mockedClasse = {
       _id: classId,
       deletedAt: null,
-      cohesionCenterId: new ObjectId(), // Assuming cohesionCenterId is set
+      cohesionCenterId: new ObjectId().toString(), // Assuming cohesionCenterId new is set
       sessionId: null,
       ligneId: null,
     };
@@ -167,7 +165,7 @@ describe("deleteClasse function", () => {
       _id: classId,
       deletedAt: null,
       cohesionCenterId: null,
-      sessionId: new ObjectId(), // Assuming sessionId is set
+      sessionId: new ObjectId().toString(), // Assuming sessionId new is set
       ligneId: null,
     };
 
@@ -182,7 +180,7 @@ describe("deleteClasse function", () => {
       deletedAt: null,
       cohesionCenterId: null,
       sessionId: null,
-      ligneId: new ObjectId(), // Assuming ligneId is set
+      ligneId: new ObjectId(), // Assuming ligneId new is set
     };
 
     jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
@@ -270,7 +268,7 @@ describe("deleteClasse function", () => {
         withdrawnReason: "other",
       });
     });
-    expect(deletedClasse.deletedAt).toBeDefined();
+    expect(deletedClasse!.deletedAt).toBeDefined();
   });
 });
 
@@ -287,20 +285,19 @@ describe("canEditEstimatedSeats", () => {
     expect(canEditEstimatedSeats(user)).toBe(true);
   });
 
-  it("should return true if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is before LIMIT_DATE_ADMIN_CLE", () => {
-    const user = { role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement };
-    jest.setSystemTime(new Date(LIMIT_DATE_ADMIN_CLE.getTime() - 24 * 60 * 60 * 1000));
+  it("should return true if user is ADMINISTRATEUR_CLE, and date is before LIMIT_DATE_ESTIMATED_SEATS", () => {
+    const user = { role: ROLES.ADMINISTRATEUR_CLE };
+    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditEstimatedSeats(user)).toBe(true);
   });
 
-  it("should return false if user is ADMINISTRATEUR_CLE, subRole is referent_etablissement and date is after LIMIT_DATE_ADMIN_CLE", () => {
-    const user = { role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement };
-    jest.setSystemTime(new Date(LIMIT_DATE_ADMIN_CLE.getTime() + 24 * 60 * 60 * 1000));
+  it("should return false if user is ADMINISTRATEUR_CLE and date is after LIMIT_DATE_ESTIMATED_SEATS", () => {
+    const user = { role: ROLES.ADMINISTRATEUR_CLE };
+    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() + 24 * 60 * 60 * 1000));
     expect(canEditEstimatedSeats(user)).toBe(false);
   });
-
-  it("should return false if user is not ADMIN and not ADMINISTRATEUR_CLE with referent_etablissement subRole", () => {
-    const user = { role: ROLES.REFERENT_CLASSE, subRole: SUB_ROLES.referent_etablissement };
+  it("should return false if user is not ADMIN or ADMINISTRATEUR_CLE", () => {
+    const user = { role: ROLES.RESPONSIBLE };
     expect(canEditEstimatedSeats(user)).toBe(false);
   });
 });
@@ -313,57 +310,220 @@ describe("canEditTotalSeats", () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-  it("should return true if user is ADMIN", () => {
+
+  it("should return false if user is ADMIN and date is before LIMIT_DATES_ESTIMATED_SEATS", () => {
     const user = { role: ROLES.ADMIN };
+    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000));
+    expect(canEditTotalSeats(user)).toBe(false);
+  });
+
+  it("should return true if user is ADMIN and date is after LIMIT_DATES_ESTIMATED_SEATS", () => {
+    const user = { role: ROLES.ADMIN };
+    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() + 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user)).toBe(true);
   });
 
-  it("should return true if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is before LIMIT_DATE_REF_CLASSE", () => {
+  it("should return true if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is between LIMIT_DATE_ESTIMATED_SEATS and LIMIT_DATE_TOTAL_SEATS", () => {
     const user1 = { role: ROLES.ADMINISTRATEUR_CLE };
     const user2 = { role: ROLES.REFERENT_CLASSE };
-    jest.setSystemTime(new Date(LIMIT_DATE_REF_CLASSE.getTime() - 24 * 60 * 60 * 1000));
+    const middleDate = new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() + (LIMIT_DATE_TOTAL_SEATS.getTime() - LIMIT_DATE_ESTIMATED_SEATS.getTime()) / 2);
+    jest.setSystemTime(middleDate);
+
+    const limitDatesEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS).toISOString();
+    const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();
+
+    expect(isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats)).toBe(true);
     expect(canEditTotalSeats(user1)).toBe(true);
     expect(canEditTotalSeats(user2)).toBe(true);
   });
 
-  it("should return false if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is after LIMIT_DATE_REF_CLASSE", () => {
+  it("should return false if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is after LIMIT_DATE_TOTAL_SEATS", () => {
     const user1 = { role: ROLES.ADMINISTRATEUR_CLE };
     const user2 = { role: ROLES.REFERENT_CLASSE };
-    jest.setSystemTime(new Date(LIMIT_DATE_REF_CLASSE.getTime() + 24 * 60 * 60 * 1000));
+    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() + 24 * 60 * 60 * 1000));
+    expect(canEditTotalSeats(user1)).toBe(false);
+    expect(canEditTotalSeats(user2)).toBe(false);
+  });
+
+  it("should return false if user is ADMINISTRATEUR_CLE or REFERENT_CLASSE and date is before LIMIT_DATE_ESTIMATED_SEATS", () => {
+    const user1 = { role: ROLES.ADMINISTRATEUR_CLE };
+    const user2 = { role: ROLES.REFERENT_CLASSE };
+    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user1)).toBe(false);
     expect(canEditTotalSeats(user2)).toBe(false);
   });
 
   it("should return false if user is not ADMIN, ADMINISTRATEUR_CLE, or REFERENT_CLASSE", () => {
-    const user = { role: ROLES.SOME_OTHER_ROLE };
+    const user = { role: ROLES.RESPONSIBLE };
     expect(canEditTotalSeats(user)).toBe(false);
   });
 });
 
-describe("buildUniqueClasseId", () => {
+describe("ClasseStateManager.compute function", () => {
+  const _id = new ObjectId().toString();
+  const fromUser = { userId: "user123" };
+  const options = { YoungModel: YoungModel };
+  const saveStudentMock = jest.fn();
+  const mockedClasse = {
+    _id,
+    status: STATUS_CLASSE.CREATED,
+    save: jest.fn(),
+    set: jest.fn(),
+    cohort: "CLE Juin 2024",
+    seatsTaken: 0,
+    totalSeats: 20,
+  };
+  const mockedYoungs = [
+    {
+      _id: "student1",
+      status: "IN_PROGRESS",
+      save: saveStudentMock,
+      set: jest.fn(function (data) {
+        Object.assign(this, data);
+      }),
+    },
+  ];
+
+  jest.mock("../../emails", () => ({
+    emit: jest.fn(),
+  }));
+
+  it("should throw an error if YoungModel is not provided", async () => {
+    await expect(ClasseStateManager.compute(_id, fromUser, {})).rejects.toThrow("YoungModel is required");
+  });
+
+  it("should throw an error if class is not found", async () => {
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(null);
+
+    await expect(ClasseStateManager.compute(_id, fromUser, options)).rejects.toThrow("Classe not found");
+  });
+  it("should throw an error if cohort is not found", async () => {
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
+    jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(null);
+
+    await expect(ClasseStateManager.compute(_id, fromUser, options)).rejects.toThrow("Cohort not found");
+  });
+
+  it("should set classe.seatsTaken if a young is VALIDATED", async () => {
+    const mockedCohort = {
+      name: "Example Cohort",
+      inscriptionStartDate: new Date(),
+      inscriptionEndDate: new Date(),
+    };
+
+    const patchedYoungs = [
+      {
+        _id: "student1",
+        status: "VALIDATED",
+        save: saveStudentMock,
+        set: jest.fn(function (data) {
+          Object.assign(this, data);
+        }),
+      },
+    ];
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(mockedClasse);
+    jest.spyOn(YoungModel, "find").mockReturnValueOnce({
+      lean: jest.fn().mockResolvedValue(patchedYoungs),
+    } as any);
+    jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
+
+    const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
+
+    expect(mockedClasse.set).toHaveBeenCalledWith({ seatsTaken: 1 });
+    expect(mockedClasse.save).toHaveBeenCalledWith({ fromUser });
+  });
+
+  it("should transition class to STATUS_CLASSE.OPEN when inscription open", async () => {
+    const patchedClasse = {
+      ...mockedClasse,
+      status: STATUS_CLASSE.ASSIGNED,
+    };
+
+    const now = new Date();
+    const oneDayBefore = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const oneDayAfter = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    const mockedCohort = {
+      name: "Example Cohort",
+      inscriptionStartDate: oneDayBefore,
+      inscriptionEndDate: oneDayAfter,
+    };
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(patchedClasse);
+    jest.spyOn(YoungModel, "find").mockReturnValueOnce({
+      lean: jest.fn().mockResolvedValue(mockedYoungs),
+    } as any);
+    jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
+
+    const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
+
+    expect(patchedClasse.set).toHaveBeenCalledWith({ seatsTaken: 0 });
+    expect(patchedClasse.set).toHaveBeenCalledWith({ status: STATUS_CLASSE.OPEN });
+    expect(patchedClasse.save).toHaveBeenCalledWith({ fromUser });
+  });
+
+  it("should transition class to STATUS_CLASSE.CLOSED when inscription close", async () => {
+    const patchedClasse = {
+      ...mockedClasse,
+      status: STATUS_CLASSE.OPEN,
+    };
+
+    const now = new Date();
+    const oneDayBefore = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const twoDaysBefore = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2);
+
+    const mockedCohort = {
+      name: "Example Cohort",
+      inscriptionStartDate: twoDaysBefore,
+      inscriptionEndDate: oneDayBefore,
+    };
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(patchedClasse);
+    jest.spyOn(YoungModel, "find").mockReturnValueOnce({
+      lean: jest.fn().mockResolvedValue(mockedYoungs),
+    } as any);
+    jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
+
+    const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
+
+    expect(patchedClasse.set).toHaveBeenCalledWith({ seatsTaken: 0 });
+    expect(patchedClasse.set).toHaveBeenCalledWith({ status: STATUS_CLASSE.CLOSED });
+    expect(patchedClasse.save).toHaveBeenCalledWith({ fromUser });
+  });
+});
+describe("buildUniqueClasseId and key", () => {
   it("should return the correct unique classe ID", () => {
+    const classe = {
+      name: "une classe",
+      coloration: CLE_COLORATION.SPORT,
+      estimatedSeats: 22,
+    };
+    const etablissement: EtablissementType = {
+      uai: "UN_UAI",
+    } as EtablissementType;
+    const expectedId = "52FD6A";
+
+    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+    expect(buildUniqueClasseId(etablissement, classe, String(12345))).toEqual("7DE84F");
+  });
+
+  it("should return the correct unique classe Key", () => {
     const etablissement = {
       region: "Île-de-France",
       zip: "75001",
       academy: "Paris",
-    } as IEtablissement;
-    const classe = {
-      name: "une classe",
-      coloration: "SPORT",
-    };
-    const expectedId = "IDFP075-E73E72";
-    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+    } as EtablissementType;
+    const expectedKey = "C-IDFP075";
+
+    expect(buildUniqueClasseKey(etablissement)).toEqual(expectedKey);
   });
 
   it("should handle missing inputs gracefully and return NO_UID", () => {
-    const etablissement = {
-      region: "Île-de-France",
-      zip: "75001",
-      academy: "Paris",
-    } as IEtablissement;
-    const classe = { name: "", coloration: undefined };
-    const expectedId = "IDFP075-NO_UID";
-    expect(buildUniqueClasseId(etablissement, classe)).toEqual(expectedId);
+    const classe = { name: "", coloration: undefined, department: "Maine et Loire", estimatedSeats: 22 };
+    const expectedId = "NO_UID";
+
+    expect(buildUniqueClasseId({} as EtablissementType, classe)).toEqual(expectedId);
   });
 });
 
@@ -373,11 +533,11 @@ describe("getEffectifPrevisionnelByEtablissement", () => {
     const mockClasses = [{ estimatedSeats: 10 }, { estimatedSeats: 20 }, { estimatedSeats: 30 }];
     const expectedResult = 60;
 
-    CleClasseModel.find = jest.fn().mockResolvedValue(mockClasses);
+    ClasseModel.find = jest.fn().mockResolvedValue(mockClasses);
 
     const result = await getEstimatedSeatsByEtablissement(mockEtablissement);
 
     expect(result).toEqual(expectedResult);
-    expect(CleClasseModel.find).toHaveBeenCalledWith({ etablissementId: mockEtablissement._id });
+    expect(ClasseModel.find).toHaveBeenCalledWith({ etablissementId: mockEtablissement._id });
   });
 });

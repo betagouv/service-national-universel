@@ -36,7 +36,7 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
 
   const fetchCenters = async (q: string) => {
     const { responses } = await api.post("/elasticsearch/cohesioncenter/not-in-cohort/" + selectedCohort, { filters: { searchbar: [q] } });
-    const options = responses[0].hits.hits.map((hit) => ({ label: hit._source.name, value: hit._id, center: hit._source }));
+    const options = responses[0].hits.hits.map((hit) => ({ label: hit._source.name, value: hit._id, center: { ...hit._source, _id: hit._id } }));
     options.push({
       label: (
         <div className="p-1 border-t-2 text-center">
@@ -134,17 +134,15 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
             <InputText name="placesTotal" label="Nombre de places ouvertes" onChange={(e) => setPlacesTotal(e.target.value)} value={placesTotal} className="mt-3" />
           </>
         )}
-        {selectedCentre?.region === "Provence-Alpes-Côte d'Azur" && selectedCohort === "Juin 2024 - 2" && (
-          <>
-            <Label
-              title="Réception des fiches sanitaires (facultatif)"
-              tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
-              name="email"
-              className="my-3"
-            />
-            <InputText name="email" label="Adresse email académique" onChange={(e) => setEmail(e.target.value)} value={email} error={errors.email} />
-          </>
-        )}
+        <>
+          <Label
+            title="Réception des fiches sanitaires (facultatif)"
+            tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
+            name="email"
+            className="my-3"
+          />
+          <InputText name="email" label="Adresse email académique" onChange={(e) => setEmail(e.target.value)} value={email} error={errors.email} />
+        </>
         <div className="mt-10 flex items-center gap-4">
           <button type="button" onClick={onCancel} className="w-1/2 rounded-lg border-[1px] border-gray-300 py-2">
             Annuler

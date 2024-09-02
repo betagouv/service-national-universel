@@ -1,9 +1,9 @@
-const YoungObject = require("../models/young");
-const ReferentObject = require("../models/referent");
+const { YoungModel, ReferentModel } = require("../models");
 const SNUpport = require("../SNUpport");
 const { capture } = require("../sentry");
 const slack = require("../slack");
 const { getUserAttributes } = require("../services/support");
+const { logger } = require("../logger");
 
 exports.handler = async () => {
   try {
@@ -16,7 +16,7 @@ exports.handler = async () => {
         if (!response.ok) {
           slack.error({ title: `Fail sync ${type} contacts to SNUpport`, text: JSON.stringify(response.code) });
         }
-        console.log(`Processed batch ${contactsWithAttributes.length} (${type} contacts)`);
+        logger.info(`Processed batch ${contactsWithAttributes.length} (${type} contacts)`);
       }
 
       for await (const contact of cursor) {
@@ -37,8 +37,8 @@ exports.handler = async () => {
       slack.success({ title: `Successfully synced ${type} contacts to SNUpport` });
     };
 
-    await processContacts(YoungObject, "young");
-    await processContacts(ReferentObject, "referent");
+    await processContacts(YoungModel, "young");
+    await processContacts(ReferentModel, "referent");
   } catch (e) {
     capture(e);
     throw e;

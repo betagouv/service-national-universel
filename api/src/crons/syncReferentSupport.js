@@ -1,4 +1,4 @@
-const ReferentObject = require("../models/referent");
+const { ReferentModel } = require("../models");
 const SNUpport = require("../SNUpport");
 const { capture, captureMessage } = require("../sentry");
 const slack = require("../slack");
@@ -6,7 +6,7 @@ const { ROLES } = require("snu-lib");
 
 exports.handler = async () => {
   try {
-    const referents = await ReferentObject.find({
+    const referents = await ReferentModel.find({
       updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) },
       role: { $in: [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION] },
     });

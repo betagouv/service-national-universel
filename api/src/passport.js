@@ -5,8 +5,7 @@ const config = require("config");
 const { capture } = require("./sentry");
 const Joi = require("joi");
 
-const Young = require("./models/young");
-const Referent = require("./models/referent");
+const { YoungModel, ReferentModel } = require("./models");
 const { ROLES } = require("snu-lib");
 const { checkJwtSigninVersion } = require("./jwt-options");
 
@@ -36,10 +35,16 @@ async function validateUser(Model, jwtPayload, done, role) {
 
     if (error) return done(null, false);
     if (!checkJwtSigninVersion(value)) return done(null, false);
-    delete value.__v;
 
-    const user = await Model.findOne(value);
-    if (user && (!role || user.role === role)) return done(null, user);
+    const user = await Model.findById(value._id);
+    if (user) {
+      const passwordMatch = user.passwordChangedAt?.getTime() === value.passwordChangedAt?.getTime();
+      const logoutMatch = user.lastLogoutAt?.getTime() === value.lastLogoutAt?.getTime();
+
+      if (passwordMatch && logoutMatch && (!role || user.role === role)) {
+        return done(null, user);
+      }
+    }
   } catch (error) {
     capture(error);
   }
@@ -51,11 +56,11 @@ function initPassport() {
   opts.jwtFromRequest = getToken;
   opts.secretOrKey = config.JWT_SECRET;
 
-  passport.use("young", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Young, jwtPayload, done)));
-  passport.use("referent", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done)));
-  passport.use("admin", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done, ROLES.ADMIN)));
-  passport.use("dsnj", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done, ROLES.DSNJ)));
-};
+  passport.use("young", new JwtStrategy(opts, (jwtPayload, done) => validateUser(YoungModel, jwtPayload, done)));
+  passport.use("referent", new JwtStrategy(opts, (jwtPayload, done) => validateUser(ReferentModel, jwtPayload, done)));
+  passport.use("admin", new JwtStrategy(opts, (jwtPayload, done) => validateUser(ReferentModel, jwtPayload, done, ROLES.ADMIN)));
+  passport.use("dsnj", new JwtStrategy(opts, (jwtPayload, done) => validateUser(ReferentModel, jwtPayload, done, ROLES.DSNJ)));
+}
 
 module.exports = {
   initPassport,

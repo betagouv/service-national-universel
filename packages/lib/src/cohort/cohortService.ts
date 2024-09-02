@@ -1,13 +1,13 @@
 import { ROLES } from "../roles";
-import { CohortDto, ReferentRoleDto } from "../dto";
+import { CohortDto, ReferentDto, UserDto } from "../dto";
 import { isNowBetweenDates } from "../utils/date";
 
-export const canUpdateCohort = (cohort: CohortDto | undefined, user: ReferentRoleDto | undefined): boolean => {
+export const canUpdateCohort = (cohort?: CohortDto, user?: UserDto | ReferentDto): boolean => {
   if (!user) return false;
   if (!cohort) return true;
 
   return (
-    [ROLES.ADMIN].includes(user?.role) ||
+    [ROLES.ADMIN].includes(user.role) ||
     (user?.role === ROLES.REFERENT_REGION &&
       !!cohort.cleUpdateCohortForReferentRegion &&
       isNowBetweenDates(cohort.cleUpdateCohortForReferentRegionDate?.from, cohort.cleUpdateCohortForReferentRegionDate?.to)) ||
@@ -17,7 +17,7 @@ export const canUpdateCohort = (cohort: CohortDto | undefined, user: ReferentRol
   );
 };
 
-export const canUpdateCenter = (cohort: CohortDto | undefined, user: ReferentRoleDto | undefined): boolean => {
+export const canUpdateCenter = (cohort: CohortDto | undefined, user: ReferentDto | undefined): boolean => {
   if (!user) return false;
   if (!cohort) return true;
 

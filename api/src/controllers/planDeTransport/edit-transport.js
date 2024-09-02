@@ -4,12 +4,12 @@ const passport = require("passport");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
 const { canViewLigneBus } = require("snu-lib");
-//const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const CohesionCenterModel = require("../../models/cohesionCenter");
+//const { PlanTransportModel } = require("../../models");
+const { PointDeRassemblementModel } = require("../../models");
+const { LigneBusModel } = require("../../models");
+const { CohesionCenterModel } = require("../../models");
 
-const YoungModel = require("../../models/young");
+const { YoungModel } = require("../../models");
 
 const { ERRORS, updateSeatsTakenInBusLine } = require("../../utils");
 

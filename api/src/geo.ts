@@ -1,8 +1,9 @@
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
 import querystring from "querystring";
-import { capture } from "./sentry";
+import { capture, captureMessage } from "./sentry";
 import config from "config";
-import AreaModel from "./models/areas";
+import { logger } from "./logger";
+import { AreasModel } from "./models";
 
 type GeoReferenceurResponse = {
   code_reponse?: string;
@@ -14,9 +15,12 @@ const url = "https://wsa.sig.ville.gouv.fr/service/georeferenceur.json";
 // HZUS : ???
 // QP : QUartier Prioritaire
 
-async function getQPV(postcode: string, commune: string, adresse: string): Promise<unknown> {
+export async function getQPV(postcode: string, commune: string, adresse: string): Promise<unknown> {
   try {
-    if (!config.QPV_USERNAME || !config.QPV_PASSWORD) return console.log("QPV ENV VARIABLES ARE NOT SET (QPV_USERNAME and QPV_PASSWORD) ");
+    if (!config.QPV_USERNAME || !config.QPV_PASSWORD) {
+      captureMessage("QPV ENV VARIABLES ARE NOT SET (QPV_USERNAME and QPV_PASSWORD) ");
+      return;
+    }
 
     // I need to remove postcode and city from the adresse
     let addresseFormated = adresse.replace(postcode, "").replace(commune, "");
@@ -66,15 +70,15 @@ async function getQPV(postcode: string, commune: string, adresse: string): Promi
   }
 }
 
-async function getDensity(cityCode: string): Promise<string | undefined> {
+export async function getDensity(cityCode: string): Promise<string | undefined> {
   try {
     if (!cityCode) {
-      console.log("City Code is not set");
+      logger.warn("City Code is not set");
       return "";
     }
-    const area = await AreaModel.findOne({ cityCode });
+    const area = await AreasModel.findOne({ cityCode });
     if (!area) {
-      console.log(`cityCode not found ${cityCode}`);
+      logger.warn(`cityCode not found ${cityCode}`);
       return "";
     }
     return area.density;
@@ -82,5 +86,3 @@ async function getDensity(cityCode: string): Promise<string | undefined> {
     capture(e);
   }
 }
-
-module.exports = { getQPV, getDensity };

@@ -4,10 +4,11 @@ const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
-const ApplicationModel = require("../../models/application");
+const { ApplicationModel } = require("../../models");
 const ApplicationPatchModel = require("./models/applicationPatch");
 
 const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -16,7 +17,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.applicationPatchScanned = result.applicationPatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const actualApplication = await ApplicationModel.findById(patch.ref.toString());
     if (!actualApplication) return;
     if (patch.ops.length > 0) {
@@ -111,8 +111,8 @@ exports.manualHandler = async (startDate, endDate) => {
 
     await findAll(ApplicationPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

@@ -293,7 +293,7 @@ jobs:
           admin
           api
           antivirus
-          crons'
+          tasks'
 
           if $failure
           then

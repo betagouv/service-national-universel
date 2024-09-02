@@ -1,35 +1,47 @@
-import { canUpdateCenter, canUpdateCohort, isNowBetweenDates, ROLES, STATUS_CLASSE, SUB_ROLES } from "snu-lib";
-import { LIMIT_DATE_ADMIN_CLE, LIMIT_DATE_REF_CLASSE } from "snu-lib/src/constants/constants";
-import { ReferentRoleDto, CohortDto } from "snu-lib/src/dto";
+import {
+  canUpdateCenter,
+  canUpdateCohort,
+  isNowBetweenDates,
+  ROLES,
+  STATUS_CLASSE,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
+  TYPE_CLASSE_LIST,
+  CLE_GRADE_LIST,
+  CLE_FILIERE_LIST,
+  translateColoration,
+  translateGrade,
+  CLE_COLORATION_LIST,
+  translate,
+} from "snu-lib";
+import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { User } from "@/types";
-import { ca } from "date-fns/locale";
 
 export const statusClassForBadge = (status) => {
   let statusClasse;
 
   switch (status) {
-    case STATUS_CLASSE.INSCRIPTION_IN_PROGRESS:
-      statusClasse = "IN_PROGRESS";
-      break;
-
-    case STATUS_CLASSE.INSCRIPTION_TO_CHECK:
-      statusClasse = "WAITING_VALIDATION";
-      break;
-
     case STATUS_CLASSE.CREATED:
       statusClasse = "WAITING_LIST";
       break;
 
-    case STATUS_CLASSE.VALIDATED:
-      statusClasse = "VALIDATED";
+    case STATUS_CLASSE.VERIFIED:
+      statusClasse = "WAITING_VALIDATION";
+      break;
+
+    case STATUS_CLASSE.ASSIGNED:
+      statusClasse = "WAITING_VALIDATION";
       break;
 
     case STATUS_CLASSE.WITHDRAWN:
+      statusClasse = "REFUSED";
+      break;
+    case STATUS_CLASSE.CLOSED:
       statusClasse = "CANCEL";
       break;
-    case STATUS_CLASSE.DRAFT:
-      statusClasse = "DRAFT";
+    case STATUS_CLASSE.OPEN:
+      statusClasse = "OPEN";
       break;
 
     default:
@@ -40,33 +52,23 @@ export const statusClassForBadge = (status) => {
 };
 
 export function getRights(user: User, classe, cohort: CohortDto | undefined) {
-  if (!user || !classe || !cohort) return {};
+  if (!user || !classe) return {};
   return {
     canEdit:
-      // [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-      // classe?.status !== STATUS_CLASSE.WITHDRAWN, //à garder car ça va changer
-      [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN,
-    canEditCohort: canUpdateCohort(cohort, user),
-    canEditCenter: canUpdateCenter(cohort, user),
-    canEditPDR: user?.role === ROLES.ADMIN,
-    showCohort: showCohort(cohort, user),
-    showCenter: showCenter(cohort, user),
-    showPDR: showPdr(cohort, user),
+      ([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN) ||
+      ([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status) && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)),
     canEditEstimatedSeats: canEditEstimatedSeats(user),
     canEditTotalSeats: canEditTotalSeats(user),
+    canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
+    canEditRef: classe.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN,ROLES.ADMINISTRATEUR_CLE].includes(user.role),
+
+    canEditCohort: cohort ? canUpdateCohort(cohort, user) : false,
+    canEditCenter: cohort ? canUpdateCenter(cohort, user) : false,
+    canEditPDR: cohort ? user?.role === ROLES.ADMIN : false,
+    showCohort: cohort ? showCohort(cohort, user) : false,
+    showCenter: cohort ? showCenter(cohort, user) : false,
+    showPDR: cohort ? showPdr(cohort, user) : false,
   };
-}
-
-function canEditEstimatedSeats(user: User) {
-  if (user.role === ROLES.ADMIN) return true;
-  const now = new Date();
-  return user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement && now < LIMIT_DATE_ADMIN_CLE;
-}
-
-function canEditTotalSeats(user: User) {
-  if (user.role === ROLES.ADMIN) return true;
-  const now = new Date();
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && now < LIMIT_DATE_REF_CLASSE;
 }
 
 const showCohort = (cohort: CohortDto | undefined, user: User | undefined): boolean => {
@@ -154,3 +156,23 @@ export const searchPointDeRassemblements = async ({ q, cohort }) => {
     };
   });
 };
+
+export const colorOptions: {
+  value: string;
+  label: string;
+}[] = Object.keys(CLE_COLORATION_LIST).map((value) => ({
+  value: CLE_COLORATION_LIST[value],
+  label: translateColoration(CLE_COLORATION_LIST[value]),
+}));
+export const filiereOptions = Object.keys(CLE_FILIERE_LIST).map((value) => ({
+  value: CLE_FILIERE_LIST[value],
+  label: CLE_FILIERE_LIST[value],
+}));
+export const gradeOptions = CLE_GRADE_LIST.filter((value) => value !== "CAP").map((value) => ({
+  value: value,
+  label: translateGrade(value),
+}));
+export const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
+  value: TYPE_CLASSE_LIST[value],
+  label: translate(TYPE_CLASSE_LIST[value]),
+}));

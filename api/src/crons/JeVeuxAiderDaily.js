@@ -5,11 +5,11 @@ const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
 const config = require("config");
 const slack = require("../slack");
-const MissionModel = require("../models/mission");
-const StructureModel = require("../models/structure");
-const ReferentModel = require("../models/referent");
+const { MissionModel } = require("../models");
+const { StructureModel } = require("../models");
+const { ReferentModel } = require("../models");
 
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../brevo");
 
 const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS, MISSION_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");
@@ -50,7 +50,7 @@ const fetchMission = (skip = 0) =>
     .then((response) => response.json())
     .then((result) => sync(result))
     .then((rest) => (rest ? fetchMission(skip + 50) : cleanData()))
-    .catch((error) => console.log("error fetch mission :", error));
+    .catch((error) => capture(error));
 
 const fetchStructure = async (id) => {
   return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${config.JVA_API_KEY}`, {
@@ -58,12 +58,13 @@ const fetchStructure = async (id) => {
     redirect: "follow",
   })
     .then((response) => response.json())
-    .catch((error) => console.log("error fetch struture :", error));
+    .catch((error) => capture(error));
 };
 
 const sync = async (result) => {
-  //console.log("Nombre de missions traitées (current iteration)", result.data.length);
-  //console.log("API page", result.current_page);
+  if (!result.ok) {
+    throw new Error("sync with JVA missions : " + result.code);
+  }
 
   for (let i = 0; i < result.data.length; i++) {
     try {
@@ -78,13 +79,11 @@ const sync = async (result) => {
       if (SnuStructureException.includes(structure?._id.toString())) continue;
 
       if (!structure) {
-        // console.log("Create new struct");
         //get JVA struture
         let jvaStructure = await fetchStructure(mission.organizationId);
 
         //Struct without resp skip
         if (!jvaStructure?.responsables.length) {
-          // console.log("Skip structure : no resp");
           continue;
         }
 
@@ -94,7 +93,6 @@ const sync = async (result) => {
           //Check unique email
           const exist = await ReferentModel.findOne({ email: resp.email });
           if (exist) {
-            // console.log("Skip referent : email already registered");
             continue;
           }
 
@@ -112,7 +110,6 @@ const sync = async (result) => {
 
         //Error on referent creation
         if (!newResps.length) {
-          // console.log("Skip structure : error creation referent");
           continue;
         }
 
@@ -142,9 +139,6 @@ const sync = async (result) => {
         };
 
         const newStructure = await StructureModel.create(infoStructure);
-        if (!newStructure) {
-          // console.log("Skip structure : error creation structure");
-        }
 
         //Set structureId to referent
         for (const resp of newResps) {
@@ -196,7 +190,6 @@ const sync = async (result) => {
       //Check if mission exist
       const missionExist = await MissionModel.findOne({ jvaMissionId: mission.clientId });
       if (!missionExist) {
-        // console.log("Create new mission");
         const data = await MissionModel.create({ ...infoMission, placesLeft: mission.snuPlaces });
 
         //Send mail to responsable department
@@ -225,7 +218,6 @@ const sync = async (result) => {
         }
       } else {
         const oldMissionTutorId = missionExist.tutorId;
-        // console.log("Update mission");
         delete infoMission.status;
         delete infoMission.name;
         delete infoMission.description;
@@ -240,7 +232,6 @@ const sync = async (result) => {
       }
     } catch (e) {
       capture(e);
-      console.log("ERROR 🚫", e);
     }
   }
   return result.skip < result.total ? true : false;

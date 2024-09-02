@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 
-import { COHORTS_BEFORE_JULY_2023, download, getDepartmentNumber } from "snu-lib";
+import { COHORTS_WITH_JDM_COUNT, download, getDepartmentNumber } from "snu-lib";
 
 import Bus from "@/assets/icons/Bus";
 import ClipboardList from "@/assets/icons/ClipboardList";
@@ -167,6 +167,13 @@ export default function CenterYoungIndex() {
       translate: translate,
     },
     {
+      title: "PSC1",
+      name: "psc1Info",
+      parentGroup: "Dossier",
+      translate: translate,
+      missingLabel: "Non renseigné",
+    },
+    {
       title: "Présence à l'arrivée",
       name: "cohesionStayPresence",
       parentGroup: "Pointage",
@@ -279,7 +286,7 @@ export default function CenterYoungIndex() {
       }, {}),
     });
     const result = await transformData({ data: data.data, centerId: id });
-    if (!COHORTS_BEFORE_JULY_2023.includes(result[0]?.Cohorte)) {
+    if (!COHORTS_WITH_JDM_COUNT.includes(result[0]?.Cohorte)) {
       result.forEach((item) => {
         delete item["Présence à la JDM"];
       });
@@ -374,13 +381,11 @@ export default function CenterYoungIndex() {
         if (key === "noMeetingPoint") name = "Autonome";
         else if (key === "transportInfoGivenByLocal") name = "Services locaux";
         else name = key;
-        console.log(name, result[key]);
         return {
           name: name,
           data: result[key].youngs.map((young) => {
             const meetingPoint = young.meetingPointId && result[key].meetingPoint.find((mp) => mp._id === young.meetingPointId);
             const ligneBus = young.ligneId && result[key].ligneBus.find((lb) => lb._id === young.ligneId);
-            console.log(young.ligneId);
             return {
               _id: young._id,
               Cohorte: young.cohort,
@@ -612,7 +617,6 @@ const transformData = async ({ data: all, centerId }) => {
   let response = all.length > 0 ? await api.get(`/point-de-rassemblement/center/${centerId}/cohort/${all[0].cohort}`) : null;
   const meetingPoints = response ? response.data.meetingPoints : [];
   const ligneBus = response ? response.data.ligneBus : [];
-
   return all.map((data) => {
     let meetingPoint = {};
     let bus = {};
@@ -680,6 +684,7 @@ const transformData = async ({ data: all, centerId }) => {
       "Autotest PCR - Statut": translateFileStatusPhase1(data.autoTestPCRFilesStatus) || "Non Renseigné",
       "Règlement intérieur": translate(data.rulesYoung),
       "Fiche Sanitaire": !data.cohesionStayMedicalFileReceived ? "Non renseignée" : data.cohesionStayMedicalFileReceived === "true" ? "Réceptionnée" : "Non réceptionnée",
+      PSC1: translate(data.psc1Info) || "Non Renseigné",
       "Présence à l'arrivée": !data.cohesionStayPresence ? "Non renseignée" : data.cohesionStayPresence === "true" ? "Présent" : "Absent",
       "Présence à la JDM": !data.presenceJDM ? "Non renseignée" : data.presenceJDM === "true" ? "Présent" : "Absent",
       "Date de départ": !data.departSejourAt ? "Non renseignée" : formatDateFRTimezoneUTC(data.departSejourAt),

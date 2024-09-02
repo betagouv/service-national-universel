@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { COHESION_STAY_START, getCohortNames, ROLES, START_DATE_SESSION_PHASE1, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
+import { ROLES, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
 import Calendar from "../../assets/icons/Calendar";
 import ExternalLink from "../../assets/icons/ExternalLink";
@@ -16,27 +16,18 @@ import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoublePro
 import { Loading, TabItem, Title } from "./components/common";
 import ModalCreation from "./components/ModalCreation";
 import { getCohortGroups } from "@/services/cohort.service";
+import { getDefaultCohort } from "@/utils/session";
+import { Link } from "react-router-dom";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const [modal, setModal] = React.useState({ isOpen: false });
-  const [firstSession, setFirstSession] = React.useState(null);
+  const defaultCohortName = getDefaultCohort(cohorts)?.name;
   const history = useHistory();
   const { currentTab } = useParams();
   const { search } = useLocation();
   const query = new URLSearchParams(search);
-
-  const getFirstCohortAvailable = () => {
-    let firstSession = null;
-    for (const session of getCohortNames()) {
-      if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        firstSession = session;
-        break;
-      }
-    }
-    if (!firstSession) firstSession = "Juillet 2023";
-    setFirstSession(firstSession);
-  };
 
   React.useEffect(() => {
     const listTab = ["liste-points", "session"];
@@ -44,15 +35,11 @@ export default function List() {
   }, [currentTab]);
 
   React.useEffect(() => {
-    getFirstCohortAvailable();
-  }, []);
-
-  React.useEffect(() => {
     const modalCreationOpen = query.get("modal_creation_open");
     setModal({ isOpen: !!modalCreationOpen });
   }, []);
 
-  if (!firstSession || !user) return <div></div>;
+  if (!defaultCohortName || !user) return <div></div>;
   return (
     <>
       <Breadcrumbs items={[{ label: "Points de rassemblement" }]} />
@@ -89,7 +76,7 @@ export default function List() {
           <div className={`relative mb-8 items-start rounded-b-lg rounded-tr-lg bg-white`}>
             <div className="flex w-full flex-col pt-4">
               {currentTab === "liste-points" && <ListPoints user={user} />}
-              {currentTab === "session" && <ListSessions user={user} firstSession={firstSession} />}
+              {currentTab === "session" && <ListSessions user={user} defaultCohortName={defaultCohortName} />}
             </div>
           </div>
         </div>
@@ -152,10 +139,7 @@ const ListPoints = ({ user }) => {
                 res.push({
                   Identifiant: item._id.toString(),
                   Code: item.code,
-                  Cohortes: item?.cohorts
-                    .sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
-                    ?.map((e) => e)
-                    .join(", "),
+                  Cohortes: item?.cohorts.map((e) => e).join(", "),
                   Nom: item.name,
                   Adresse: item.address,
                   Ville: item.city,
@@ -207,6 +191,7 @@ const ListPoints = ({ user }) => {
 
 const Hit = ({ hit }) => {
   const history = useHistory();
+  const cohorts = useSelector((state) => state.Cohorts);
   return (
     <>
       <hr />
@@ -221,35 +206,34 @@ const Hit = ({ hit }) => {
           </div>
         </div>
         <div className="flex w-[60%] flex-wrap items-center gap-2">
-          {hit.cohorts
-            ?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
-            ?.map((cohort, index) => {
-              const disabled = START_DATE_SESSION_PHASE1[cohort] < new Date();
-              return (
-                <div
-                  key={cohort + hit.name + index}
-                  onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${cohort}`)}
-                  className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
-                    disabled ? "border-gray-100 bg-gray-100 text-gray-500" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF]"
-                  }`}>
-                  {cohort}
-                </div>
-              );
-            })}
+          {hit.cohorts?.map((cohortName) => {
+            const cohort = cohorts.find((e) => e.name === cohortName);
+            const disabled = new Date(cohort.startDate) < new Date();
+            return (
+              <div
+                key={cohortName}
+                onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${cohortName}`)}
+                className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
+                  disabled ? "border-gray-100 bg-gray-100 text-gray-500" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF]"
+                }`}>
+                {cohortName}
+              </div>
+            );
+          })}
         </div>
       </div>
     </>
   );
 };
 
-const ListSessions = ({ user, firstSession }) => {
+const ListSessions = ({ user, defaultCohortName }) => {
   const [data, setData] = React.useState([]);
-  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [selectedFilters, setSelectedFilters] = React.useState({ cohorts: { filter: [defaultCohortName] } });
   const pageId = "pdrListSession";
   const [paramData, setParamData] = React.useState({ page: 0 });
   const [size, setSize] = useState(10);
   const filterArray = [
-    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false, sort: (e) => orderCohort(e) },
+    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [defaultCohortName], allowEmpty: false, sort: (e) => orderCohort(e) },
     {
       title: "Région",
       name: "region",
@@ -270,7 +254,7 @@ const ListSessions = ({ user, firstSession }) => {
   const [nbLinesByPdr, setNbLinesByPdr] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
 
-  const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : firstSession;
+  const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : defaultCohortName;
 
   const getYoungsByPdr = async (ids) => {
     const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: ids, cohort: [selectedCohort] } });
@@ -399,7 +383,6 @@ const ListSessions = ({ user, firstSession }) => {
 
 const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
   const history = useHistory();
-
   return (
     <>
       <hr />
@@ -414,11 +397,16 @@ const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
           </div>
         </div>
         <div className="flex w-[25%] flex-wrap gap-2">
-          <div
-            onClick={() => history.push(`/point-de-rassemblement/${hit._id}?cohort=${session}`)}
-            className={`cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]`}>
-            {session}
-          </div>
+          {hit.cohorts?.map((cohortName) => {
+            return (
+              <Link
+                key={cohortName}
+                to={`/point-de-rassemblement/${hit._id}?cohort=${cohortName}`}
+                className={`cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]`}>
+                {cohortName}
+              </Link>
+            );
+          })}
         </div>
         <div className="flex w-[20%] flex-wrap gap-2">
           {loading ? (

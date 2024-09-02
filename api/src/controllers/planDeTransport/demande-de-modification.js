@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
-const ReferentModel = require("../../models/referent");
-const CohortModel = require("../../models/cohort");
+const { LigneBusModel } = require("../../models");
+const { PlanTransportModel } = require("../../models");
+const { ModificationBusModel } = require("../../models");
+const { ReferentModel } = require("../../models");
+const { CohortModel } = require("../../models");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
@@ -21,7 +21,7 @@ const {
   isLigneBusDemandeDeModificationOpen,
 } = require("snu-lib");
 const { ObjectId } = require("mongoose").Types;
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../brevo");
 const config = require("config");
 
 const updateModificationDependencies = async (modif, fromUser) => {
@@ -66,7 +66,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     const cohort = await CohortModel.findOne({ name: line.cohort });
     if (!cohort) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
-    console.log(cohort);
     if (!isLigneBusDemandeDeModificationOpen(req.user, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const modificationBus = await ModificationBusModel.create({
@@ -199,7 +198,6 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
       message: Joi.string().required(),
       id: Joi.string().required(),
     }).validate({ ...req.body, ...req.params });
-    console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!ligneBusCanSendMessageDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -261,7 +259,6 @@ router.put("/:id/tag/:tagId/delete", passport.authenticate("referent", { session
       tagId: Joi.string().required(),
       id: Joi.string().required(),
     }).validate({ ...req.body, ...req.params });
-    console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

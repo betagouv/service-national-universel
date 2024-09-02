@@ -4,11 +4,11 @@ const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
-const StructureModel = require("../../models/structure");
-const MissionEquivalenceModel = require("../../models/missionEquivalence");
+const { StructureModel, MissionEquivalenceModel } = require("../../models");
 const MissionEquivalencePatchModel = require("./models/missionEquivalencePatch");
 
 const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -17,7 +17,9 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.missionEquivalencePatchScanned = result.missionEquivalencePatchScanned + 1 || 1;
-    if (count % 100 === 0) console.log(count, "/", total);
+    if (count % 100 === 0) {
+      logger.debug(`${count} / ${total}`);
+    }
     const actualMissionEquivalence = await MissionEquivalenceModel.findById(patch.ref.toString());
     if (!actualMissionEquivalence) return;
     if (patch.ops.length > 0) {
@@ -111,8 +113,8 @@ exports.manualHandler = async (startDate, endDate) => {
 
     await findAll(MissionEquivalencePatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

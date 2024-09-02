@@ -5,8 +5,7 @@ const crypto = require("crypto");
 const { ERRORS, notifDepartmentChange, YOUNG_STATUS_PHASE1, YOUNG_STATUS } = require("../../utils");
 const { getQPV, getDensity } = require("../../geo");
 const router = express.Router({ mergeParams: true });
-const YoungObject = require("../../models/young");
-const CohortObject = require("../../models/cohort");
+const { YoungModel, CohortModel } = require("../../models");
 const { serializeYoung } = require("../../utils/serializer");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { capture } = require("../../sentry");
@@ -21,11 +20,12 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
       gender: Joi.string().valid("male", "female").required(),
       phone: Joi.string().required(),
       phoneZone: Joi.string().required(),
+      psc1Info: Joi.string().valid("true", "false"),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!isPhoneNumberWellFormated(value.phone, value.phoneZone)) {
@@ -76,9 +76,9 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const currentCohort = await CohortObject.findOne({ name: young.cohort });
+    const currentCohort = await CohortModel.findById(young.cohortId);
 
     // If the young is affected and the cohort is not ended address can't be updated.
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && new Date(currentCohort.dateEnd).valueOf() > Date.now()) {
@@ -159,7 +159,7 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!isPhoneNumberWellFormated(value.parent1Phone, value.parent1PhoneZone)) {
@@ -225,7 +225,7 @@ router.put("/mission-preferences", passport.authenticate("young", { session: fal
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.set(value);

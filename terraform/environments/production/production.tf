@@ -58,6 +58,7 @@ resource "scaleway_container" "api" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NODE_ENV"       = "production"
@@ -89,6 +90,7 @@ resource "scaleway_container" "admin" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NGINX_HOSTNAME" = local.admin_hostname
@@ -115,6 +117,7 @@ resource "scaleway_container" "app" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "NGINX_HOSTNAME" = local.app_hostname
@@ -141,6 +144,7 @@ resource "scaleway_container" "antivirus" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+  http_option     = "redirected"
 
   environment_variables = {
     "APP_NAME" = "antivirus"
@@ -157,22 +161,24 @@ resource "scaleway_container_domain" "antivirus" {
   hostname     = local.antivirus_hostname
 }
 
-resource "scaleway_container" "crons" {
-  name           = "production-crons"
+resource "scaleway_container" "tasks" {
+  name           = "production-tasks"
   namespace_id   = scaleway_container_namespace.production.id
   registry_image = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port           = 8080
   cpu_limit      = 1024
-  memory_limit   = 1024
+  memory_limit   = 2048
   min_scale      = 0
   max_scale      = 1
-  privacy        = "private"
+  privacy        = "public"
   protocol       = "http1"
   deploy         = true
+  http_option    = "redirected"
 
   environment_variables = {
     "NODE_ENV"       = "production"
     "RUN_CRONS"      = "false"
+    "RUN_TASKS"      = "true"
   }
 
   secret_environment_variables = {
@@ -189,8 +195,8 @@ output "api_image_tag" {
 output "api_container_status" {
   value = scaleway_container.api.status
 }
-output "crons_container_status" {
-  value = scaleway_container.crons.status
+output "tasks_container_status" {
+  value = scaleway_container.tasks.status
 }
 
 output "app_endpoint" {

@@ -4,33 +4,39 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 import { Button, Container } from "@snu/ds/admin";
-import { translate, ROLES } from "snu-lib";
+import { translate, isAdminCle, isReferentClasse, isChefEtablissement, isReferentOrAdmin, isCoordinateurEtablissement, ReferentDto } from "snu-lib";
 import { copyToClipboard } from "@/utils";
 import { User } from "@/types";
 
-import ButtonModalContact from "./ButtonModalContact";
-import { ContactType } from "./types";
+import ButtonDeleteCoordinator from "./ButtonDeleteCoordinator";
 
 interface Props {
-  contacts: ContactType[];
+  contacts: ReferentDto[];
   user: User;
   etablissementId: string;
-  getEtablissement: () => void;
+  onChange: () => void;
 }
 
-export default function Contact({ contacts, user, etablissementId, getEtablissement }: Props) {
+export default function Contact({ contacts, user, etablissementId, onChange }: Props) {
   const [copied, setCopied] = useState<boolean[]>([]);
+
   return (
     <Container
       title="Contacts"
-      actions={[
-        [ROLES.ADMIN].includes(user.role) && <ButtonModalContact contacts={contacts} etablissementId={etablissementId} getEtablissement={getEtablissement} />,
-        [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
-          <Link key="list-users" to="/user">
-            <Button type="tertiary" title="Voir mes contacts" />
-          </Link>
-        ),
-      ]}>
+      titleComponent={
+        <span>
+          {(isAdminCle(user) || isReferentClasse(user)) && (
+            <Link key="list-users" to="/user">
+              <Button type="tertiary" title="Voir tous mes contacts" />
+            </Link>
+          )}
+        </span>
+      }
+      actions={
+        (isChefEtablissement(user) || isReferentOrAdmin(user)) && contacts.filter(isCoordinateurEtablissement).length
+          ? [<ButtonDeleteCoordinator key="delete-coordinator" etablissementId={etablissementId} contacts={contacts} onChange={onChange} className="ml-auto" />]
+          : []
+      }>
       <div className="flex items-stretch justify-between overflow-y-auto">
         {contacts.map((contact, index) => (
           <div key={contact.email} className="flex-1 shrink-0 flex items-stretch justify-between">

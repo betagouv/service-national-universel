@@ -1,31 +1,29 @@
 const path = require("path");
 const { capture } = require("../sentry");
-const Mission = require("../models/mission");
-const Referent = require("../models/referent");
-const ApplicationObject = require("../models/application");
-const YoungObject = require("../models/young");
-const { sendTemplate } = require("../sendinblue");
+const { MissionModel, ReferentModel, ApplicationModel, YoungModel } = require("../models");
+const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const config = require("config");
+const { logger } = require("../logger");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
 
 const clean = async () => {
   let countAutoArchived = 0;
-  const cursor = await Mission.find({ endAt: { $lt: Date.now() }, status: "VALIDATED" })
+  const cursor = await MissionModel.find({ endAt: { $lt: Date.now() }, status: "VALIDATED" })
     .cursor()
     .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
     countAutoArchived++;
-    console.log(`${mission._id} ${mission.name} archived.`);
+    logger.info(`${mission._id} ${mission.name} archived.`);
     mission.set({ status: "ARCHIVED" });
     await mission.save({ fromUser: { firstName: `Cron ${fileName}` } });
     await cancelApplications(mission);
 
     // notify structure
     if (mission.tutorId) {
-      const responsible = await Referent.findById(mission.tutorId);
+      const responsible = await ReferentModel.findById(mission.tutorId);
       if (responsible)
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED, {
           emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
@@ -42,17 +40,17 @@ const clean = async () => {
 const notify1Week = async () => {
   let countNotice = 0;
   const now = Date.now();
-  const cursor = await Mission.find({ endAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" })
+  const cursor = await MissionModel.find({ endAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" })
     .cursor()
     .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
     countNotice++;
-    console.log(`${mission._id} ${mission.name} : 1 week notice.`);
-    console.log(`${mission._id} ${mission.name} : endAt ${mission.endAt}`);
+    logger.info(`${mission._id} ${mission.name} : 1 week notice.`);
+    logger.info(`${mission._id} ${mission.name} : endAt ${mission.endAt}`);
 
     // notify structure
     if (mission.tutorId) {
-      const responsible = await Referent.findById(mission.tutorId);
+      const responsible = await ReferentModel.findById(mission.tutorId);
       if (responsible)
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED_1_WEEK_NOTICE, {
           emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
@@ -68,7 +66,7 @@ const notify1Week = async () => {
 };
 
 const cancelApplications = async (mission) => {
-  const applications = await ApplicationObject.find({
+  const applications = await ApplicationModel.find({
     missionId: mission._id,
     status: {
       $in: [
@@ -86,15 +84,15 @@ const cancelApplications = async (mission) => {
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
     await application.save({ fromUser: { firstName: `Cron ${fileName}` } });
 
-    const young = await YoungObject.findById(application.youngId);
+    const young = await YoungModel.findById(application.youngId);
     if (young) {
-      const applications = await ApplicationObject.find({ youngId: young._id.toString() });
+      const applications = await ApplicationModel.find({ youngId: young._id.toString() });
       young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
       await young.save({ fromUser: { firstName: `Cron ${fileName}` } });
     }
 
     if (sendinblueTemplate) {
-      const young = await YoungObject.findById(application.youngId);
+      const young = await YoungModel.findById(application.youngId);
       let cc = getCcOfYoung({ template: sendinblueTemplate, young });
 
       await sendTemplate(sendinblueTemplate, {

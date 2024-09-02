@@ -180,6 +180,7 @@ export default function CardEquivalence({ young, equivalence }) {
                   <span>Adresse :</span>
                   <span>Code postal :</span>
                   <span>Ville :</span>
+                  {equivalence.missionDuration ? <span>durée :</span> : null}
                 </div>
                 <div className="flex flex-col gap-y-4 text-sm font-medium leading-none">
                   <span>{equivalence.type}</span>
@@ -197,6 +198,7 @@ export default function CardEquivalence({ young, equivalence }) {
                   <span>{equivalence.address}</span>
                   <span>{equivalence.zip}</span>
                   <span>{equivalence.city}</span>
+                  {equivalence.missionDuration ? <span>{`${equivalence.missionDuration} heures`}</span> : null}
                 </div>
               </div>
               <div className="flex flex-col justify-center gap-4 rounded-lg bg-gray-50">

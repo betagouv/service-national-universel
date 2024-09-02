@@ -1,10 +1,14 @@
-import { IReferent } from "../../models/referentType";
-import { IClasse } from "../../models/cle/classeType";
-import { IEtablissement } from "../../models/cle/etablissementType";
+import { EtablissementType, ClasseType, ReferentType } from "../../models";
 
 export type IAppelAProjet = {
-  etablissement: Pick<IEtablissement, "uai"> & { nameAndCommune?: string };
-  referentEtablissement: Pick<IReferent, "email">;
-  classe: Pick<IClasse, "name" | "coloration" | "trimester" | "estimatedSeats" | "type">;
-  referentClasse: Pick<IReferent, "firstName" | "lastName" | "email">;
+  numberDS: number;
+  etablissement: Pick<EtablissementType, "uai"> & { nameAndCommune?: string };
+  referentEtablissement: Pick<ReferentType, "email" | "firstName" | "lastName">;
+  classe: Pick<ClasseType, "name" | "coloration" | "trimester" | "estimatedSeats" | "type">;
+  referentClasse?: Pick<ReferentType, "firstName" | "lastName" | "email">;
+};
+
+export type IAppelAProjetOptions = {
+  fixes?: Array<Partial<IAppelAProjet> & { useExistingEtablissement?: boolean }>;
+  filters?: number[];
 };

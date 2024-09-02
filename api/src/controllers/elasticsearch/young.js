@@ -11,11 +11,7 @@ const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 
 const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
-const StructureObject = require("../../models/structure");
-const ApplicationObject = require("../../models/application");
-const SessionPhase1Object = require("../../models/sessionPhase1");
-const CohesionCenterObject = require("../../models/cohesionCenter");
-const MissionObject = require("../../models/mission");
+const { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel, MissionModel } = require("../../models");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
 const { populateYoungExport } = require("./populate/populateYoung");
 
@@ -67,6 +63,7 @@ function getYoungsFilters(user) {
     "source.keyword",
     "classeId.keyword",
     "etablissementId.keyword",
+    "psc1Info.keyword",
   ].filter(Boolean);
 }
 
@@ -83,7 +80,7 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
 
   // A head center can only see youngs of their session.
   if (user.role === ROLES.HEAD_CENTER) {
-    const sessionPhase1 = await SessionPhase1Object.find({ headCenterId: user._id });
+    const sessionPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
     if (!sessionPhase1.length) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     contextFilters.push(
       { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } },
@@ -100,15 +97,15 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
   // A responsible can only see youngs in application of their structure.
   if (user.role === ROLES.RESPONSIBLE) {
     if (!user.structureId) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const applications = await ApplicationObject.find({ structureId: user.structureId });
+    const applications = await ApplicationModel.find({ structureId: user.structureId });
     contextFilters.push({ terms: { _id: applications.map((e) => e.youngId) } });
   }
 
   // A supervisor can only see youngs in application of their structures.
   if (user.role === ROLES.SUPERVISOR) {
     if (!user.structureId) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const structures = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
-    const applications = await ApplicationObject.find({ structureId: { $in: structures.map((e) => e._id.toString()) } });
+    const structures = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    const applications = await ApplicationModel.find({ structureId: { $in: structures.map((e) => e._id.toString()) } });
     contextFilters.push({ terms: { _id: applications.map((e) => e.youngId) } });
   }
 
@@ -117,7 +114,7 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
   }
 
   if (user.role === ROLES.REFERENT_REGION && showAffectedToRegionOrDep) {
-    const sessionPhase1 = await SessionPhase1Object.find({ region: user.region });
+    const sessionPhase1 = await SessionPhase1Model.find({ region: user.region });
     if (sessionPhase1.length === 0) {
       contextFilters.push({ term: { "region.keyword": user.region } });
     } else {
@@ -133,7 +130,7 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
-    const sessionPhase1 = await SessionPhase1Object.find({ department: { $in: user.department } });
+    const sessionPhase1 = await SessionPhase1Model.find({ department: { $in: user.department } });
     if (sessionPhase1.length === 0) {
       contextFilters.push({ terms: { "department.keyword": user.department } });
     } else {
@@ -354,6 +351,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       "departInform.keyword",
       "departSejourMotif.keyword",
       "youngPhase1Agreement.keyword",
+      "psc1Info.keyword",
     ];
     const sortFields = [];
 
@@ -367,7 +365,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     ].filter(Boolean);
 
     if (user.role === ROLES.HEAD_CENTER) {
-      const sessionsPhase1 = await SessionPhase1Object.find({ headCenterId: user._id });
+      const sessionsPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
       if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
       const visibleCohorts = await getCohortNamesEndAfter(datesub(new Date(), { months: 3 }));
       if (visibleCohorts.length > 0) {
@@ -381,16 +379,16 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       }
     }
     if (user.role === ROLES.REFERENT_REGION) {
-      const centers = await CohesionCenterObject.find({ region: user.region });
-      const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
+      const centers = await CohesionCenterModel.find({ region: user.region });
+      const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      const centers = await CohesionCenterObject.find({ department: user.department });
-      const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
+      const centers = await CohesionCenterModel.find({ department: user.department });
+      const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
@@ -567,7 +565,7 @@ router.post("/propose-mission/:id/:action(search|export)", passport.authenticate
       return res.status(youngContextError.status).send(youngContextError.body);
     }
 
-    const mission = await MissionObject.findById(req.params.id);
+    const mission = await MissionModel.findById(req.params.id);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // Context filters
@@ -643,7 +641,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
     const contextFilters = [];
 
     if (user.role === ROLES.HEAD_CENTER) {
-      const sessionsPhase1 = await SessionPhase1Object.find({ headCenterId: user._id });
+      const sessionsPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
       if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
       const visibleCohorts = await getCohortNamesEndAfter(datesub(new Date(), { months: 3 }));
       if (visibleCohorts.length > 0) {

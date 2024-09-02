@@ -4,7 +4,9 @@ import { HiSortAscending } from "react-icons/hi";
 
 interface Option {
   label: string;
-  value: string;
+  value?: string;
+  field?: string;
+  order?: "asc" | "desc";
 }
 
 interface Pagnination {
@@ -53,7 +55,7 @@ const SortOption = ({ sortOptions, pagination, onPaginationChange, selectedFilte
   };
 
   return (
-    <div className="flex justify-center items-center text-gray-600 text-sm bg-gray-100 rounded-md px-1 cursor-pointer">
+    <div className="flex justify-center items-center text-gray-600 text-sm bg-gray-100 rounded-md px-1 cursor-pointer ml-auto">
       <HiSortAscending size={16} style={{ color: "#6B7280" }} className="ml-2" />
 
       <Select
@@ -66,6 +68,7 @@ const SortOption = ({ sortOptions, pagination, onPaginationChange, selectedFilte
         onChange={(option) => {
           handleClick(option.value);
         }}
+        closeMenuOnSelect={true}
         size="sm"
         controlCustomStyle={{
           background: "rgb(243 244 246)",

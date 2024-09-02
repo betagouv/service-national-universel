@@ -18,15 +18,7 @@ import Loader from "../../components/Loader";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import { capture } from "../../sentry";
 import api from "../../services/api";
-import {
-  APPLICATION_STATUS,
-  copyToClipboard,
-  formatStringDateTimezoneUTC,
-  SENDINBLUE_TEMPLATES,
-  translate,
-  translateAddFilePhase2WithoutPreposition,
-  translateApplication,
-} from "../../utils";
+import { APPLICATION_STATUS, copyToClipboard, formatStringDateTimezoneUTC, SENDINBLUE_TEMPLATES, translate, translateAddFilePhase2WithoutPreposition } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
 import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
 import FileCard from "../militaryPreparation/components/FileCard";
@@ -39,6 +31,7 @@ import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
 import { apiEngagement } from "./utils";
+import ApplicationStatusBadge from "../phase2/components/ApplicationStatusBadge";
 
 export default function ViewMobile() {
   const [mission, setMission] = useState();
@@ -522,37 +515,11 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, co
     }
   };
 
-  const theme = {
-    background: {
-      WAITING_VALIDATION: "bg-sky-100",
-      WAITING_VERIFICATION: "bg-sky-100",
-      WAITING_ACCEPTATION: "bg-orange-500",
-      VALIDATED: "bg-[#71C784]",
-      DONE: "bg-[#2094FF]",
-      REFUSED: "bg-red-500",
-      CANCEL: "bg-[#F4F4F4]",
-      IN_PROGRESS: "bg-indigo-600",
-      ABANDON: "bg-gray-50",
-    },
-    text: {
-      WAITING_VALIDATION: "text-sky-600",
-      WAITING_VERIFICATION: "text-sky-600",
-      WAITING_ACCEPTATION: "text-white",
-      VALIDATED: "text-white",
-      DONE: "text-white",
-      REFUSED: "text-white",
-      CANCEL: "text-[#6B6B6B]",
-      IN_PROGRESS: "text-white",
-      ABANDON: "text-gray-400",
-    },
-  };
   if (["WAITING_VALIDATION", "WAITING_VERIFICATION", "REFUSED", "CANCEL"].includes(application.status)) {
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="flex items-center gap-6">
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
-            {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? "Candidature en attente" : translateApplication(application.status)}
-          </div>
+          <ApplicationStatusBadge status={application.status} />
         </div>
         <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} hebergement={mission.hebergement} hebergementPayant={mission.hebergementPayant} />
       </div>
@@ -562,9 +529,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, co
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="align-items flex justify-between gap-6">
-          <div className={`text-xs font-normal ${theme.background[application.status]} ${theme.text[application.status]} rounded-sm px-2 py-[2px]`}>
-            {translateApplication(application.status)}
-          </div>
+          <ApplicationStatusBadge status={application.status} />
           {contract && contractHasAllValidation(contract, young) && (
             <div className="relative" ref={refContractButton}>
               <button

@@ -11,7 +11,7 @@ type Ttype =
   | "cancel";
 
 type OwnProps = {
-  title: string;
+  title: React.ReactNode;
   type?: Ttype;
   className?: string;
   leftIcon?: React.ReactNode;

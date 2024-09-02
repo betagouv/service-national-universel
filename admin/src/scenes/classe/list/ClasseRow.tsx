@@ -2,8 +2,7 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import { HiUsers } from "react-icons/hi";
 
-import { ClasseDto } from "snu-lib/src/dto";
-import { translateStatusClasse } from "snu-lib";
+import { ClasseDto, translateStatusClasse } from "snu-lib";
 import { Badge } from "@snu/ds/admin";
 
 import { statusClassForBadge } from "../utils";
@@ -38,7 +37,7 @@ export default function ClasseRow({ classe }: Props) {
         </div>
       </td>
       <td className="flex w-[20%] flex-col gap-2">
-        <Badge title={classe?.cohort} leftIcon={<HiUsers color="#EC4899" size={20} />} />
+        <Badge title={classe?.cohort || "Non renseigné"} className={`${!classe?.cohort && "!text-gray-400 italic"}`} leftIcon={<HiUsers color="#EC4899" size={20} />} />
       </td>
       <td className="flex w-[20%] flex-col gap-2">
         {classe?.totalSeats ? (

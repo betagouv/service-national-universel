@@ -2,12 +2,13 @@ import React from "react";
 
 type OwnProps = {
   tab: Array<{
-    title: string;
+    title: React.ReactNode;
+    label?: string;
     isActive?: boolean;
     leftIcon?: React.ReactNode;
     onClick?: () => void;
   }>;
-  button: Array<React.ReactNode>;
+  button?: Array<React.ReactNode> | null;
 };
 
 export default function Navbar({ tab, button }: OwnProps) {
@@ -22,17 +23,29 @@ export default function Navbar({ tab, button }: OwnProps) {
             `}
             onClick={tabItem.onClick}
           >
-            {tabItem.leftIcon}
-            <span className="truncate mr-3">{tabItem.title}</span>
+            <div>
+              <span
+                className={`text-[10px] leading-4 ml-8 ${
+                  !tabItem.isActive && "text-gray-400"
+                }`}
+              >
+                {tabItem.label}
+              </span>
+              <div className="flex gap-2">
+                {tabItem.leftIcon}
+                <span className="truncate mr-3">{tabItem.title}</span>
+              </div>
+            </div>
           </div>
         ))}
       </div>
-
-      <div className="flex gap-4 pb-3">
-        {button.map((buttonItem, index) => (
-          <div key={`button-${index}`}>{buttonItem}</div>
-        ))}
-      </div>
+      {button && (
+        <div className="flex gap-4 pb-3">
+          {button?.map((buttonItem, index) => (
+            <div key={`button-${index}`}>{buttonItem}</div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

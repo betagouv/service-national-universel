@@ -4,7 +4,7 @@ import React from "react";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
 import { useHistory } from "react-router-dom";
 
-import { translateField, translateCorrectionReason, translate, YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
+import { translateField, translateCorrectionReason, translate, YOUNG_STATUS } from "snu-lib";
 import plausibleEvent from "../../services/plausible";
 import { redirectToCorrection } from "../../utils/navigation";
 import { getCohort } from "@/utils/cohorts";
@@ -14,6 +14,7 @@ export default function WaitingCorrection() {
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
   const history = useHistory();
+  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
 
   return (
     <>
@@ -45,11 +46,11 @@ export default function WaitingCorrection() {
                         <button
                           className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:!disabled:bg-blue-600 hover:!disabled:text-white disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50"
                           onClick={() => history.push(redirectToCorrection(young, correction.field))}
-                          disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(cohort)}>
+                          disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !isInscriptionModificationOpenForYoungs}>
                           Corriger
                         </button>
                       </div>
-                      {!inscriptionModificationOpenForYoungs(cohort) && (
+                      {!isInscriptionModificationOpenForYoungs && (
                         <span className="text-sm leading-5 text-[#6B7280]">La date limite pour modifier votre dossier d'inscription a été dépassée.</span>
                       )}
                       <hr className="border-gray-200" />
@@ -97,13 +98,13 @@ export default function WaitingCorrection() {
                         {correction?.message ? <div className="text-sm font-normal text-gray-600">{correction.message}</div> : null}
                       </div>
                       <button
-                        disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(cohort)}
+                        disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !isInscriptionModificationOpenForYoungs}
                         className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:!disabled:bg-blue-600 hover:!disabled:text-white disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50"
                         onClick={() => history.push(redirectToCorrection(young, correction.field))}>
                         Corriger
                       </button>
                     </div>
-                    {!inscriptionModificationOpenForYoungs(cohort) && (
+                    {!isInscriptionModificationOpenForYoungs && (
                       <span className="text-sm leading-5 text-[#6B7280]">La date limite pour modifier votre dossier d'inscription a été dépassée.</span>
                     )}
                     <hr className="border-gray-200" />

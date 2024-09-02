@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import * as FileSaver from "file-saver";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { HiHome, HiOutlineCalendar } from "react-icons/hi";
 import plausibleEvent from "@/services/plausible";
 
 import { translate } from "snu-lib";
 import dayjs from "dayjs";
 import api from "@/services/api";
+import { COHORTS_ACTIONS } from "@/redux/cohorts/actions";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import { Page, Header, ModalConfirmation } from "@snu/ds/admin";
 import SelectCohort from "@/components/cohorts/SelectCohort";
@@ -18,6 +19,7 @@ import DatePicker from "./components/DatePicker";
 const exportDateKeys = ["cohesionCenters", "youngsBeforeSession", "youngsAfterSession"];
 
 const DSNJExport = () => {
+  const dispatch = useDispatch();
   const cohortList = useSelector((state) => state.Cohorts);
 
   const [currentCohort, setCurrentCohort] = useState(cohortList[0]);
@@ -76,6 +78,7 @@ const DSNJExport = () => {
     setIsModalConfirmOpenByKey({ ...isModalConfirmOpenByKey, [key]: false });
     const { ok, code, data: updatedCohort } = await api.put(`/cohort/${currentCohort._id}/export/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
     if (!ok) return toastr.error("Une erreur est survenue lors de l'enregistrement de la date d'export", translate(code));
+    dispatch({ type: COHORTS_ACTIONS.UPDATE_COHORT, payload: updatedCohort });
     setCurrentCohort(updatedCohort);
   };
 
