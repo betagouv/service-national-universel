@@ -14,6 +14,8 @@ import { capture } from "../../../sentry";
 import { supportURL } from "../../../config";
 import { getRegionForEligibility, useAddress, YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
+import ReactTooltip from "react-tooltip";
+import { RiInformationFill } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
@@ -37,12 +39,15 @@ const errorMessages = {
   hasSpecialSituation: "Merci de choisir au moins une option.",
 };
 
+// TODO: remove this
+const cohortExcluded = ["Octobre 2024 - Nouvelle-Calédonie", "Toussaint 2024", "Toussaint 2024 - La Réunion"];
+
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
 const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified", "coordinatesAccuracyLevel"];
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [...birthPlaceFields, ...addressFields, "gender", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
+const commonFields = [...birthPlaceFields, ...addressFields, "gender", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary", "psc1Info"];
 
 const commonRequiredFields = [
   ...birthPlaceFields,
@@ -59,6 +64,7 @@ const commonRequiredFields = [
   "allergies",
   "ppsBeneficiary",
   "paiBeneficiary",
+  "psc1Info",
 ];
 
 const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
@@ -96,6 +102,7 @@ const defaultState = {
   specificAmenagmentType: "",
   reducedMobilityAccess: "",
   handicapInSameDepartment: "",
+  psc1Info: null,
 };
 
 export default function StepCoordonnees() {
@@ -144,6 +151,7 @@ export default function StepCoordonnees() {
     specificAmenagmentType,
     reducedMobilityAccess,
     handicapInSameDepartment,
+    psc1Info,
   } = data;
 
   const debouncedBirthCity = useDebounce(birthCity, 200);
@@ -197,6 +205,7 @@ export default function StepCoordonnees() {
         specificAmenagmentType: young.specificAmenagmentType || data.specificAmenagmentType,
         reducedMobilityAccess: young.reducedMobilityAccess || data.reducedMobilityAccess,
         handicapInSameDepartment: young.handicapInSameDepartment || data.handicapInSameDepartment,
+        psc1Info: young.psc1Info || data.psc1Info,
       });
     }
     if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
@@ -315,6 +324,11 @@ export default function StepCoordonnees() {
       requiredFields.push("situation");
     }
 
+    // TODO: remove this
+    if (!cohortExcluded.includes(young.cohort)) {
+      (!psc1Info || psc1Info === "") && (errors.psc1Info = "Ce champ est obligatoire");
+    }
+
     if (hasSpecialSituation === null) {
       errors.hasSelectedSpecialSituation = "Ce champ est obligatoire";
     }
@@ -344,7 +358,7 @@ export default function StepCoordonnees() {
     // On prend la région de l'école si le volontaire est scolarisé, celle du domicile sinon.
     const regionForEligibility = getRegionForEligibility({ ...young, ...data });
 
-    if (regionForEligibility === "Occitanie") {
+    if (regionForEligibility === "Occitanie" && young.cohort === "Toussaint 2024") {
       setModalMessage(
         "Le séjour d'octobre 2024 est déjà complet pour votre région, nous ne pouvons donc pas prendre en compte votre inscription. Nous avons vos coordonnées, vous serez donc averti en priorité dès l'ouverture des inscriptions pour les séjours 2025",
       );
@@ -455,13 +469,15 @@ export default function StepCoordonnees() {
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
         supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
         supportEvent="Phase0/aide inscription - coordonnees">
-        <div className="flex flex-col text-base w-fit rounded-md px-2 py-1 font-bold bg-[#E8EDFF] text-[#0063CB] px-4 py-2 mb-4">
-          <p className="mb-2 mt-2 font-bold">Attention !</p>
-          <p className="mb-2 text-sm md:text-base">
-            Dans la région Occitanie, compte tenu du nombre très élevé d'inscriptions, nous ne pouvons pas garantir votre participation au séjour d'octobre 2024. Vous serez informé
-            en priorité lors de l'ouverture des inscriptions pour les séjours 2025.
-          </p>
-        </div>
+        {young.cohort === "Toussaint 2024" && (
+          <div className="flex flex-col text-base w-fit rounded-md px-2 py-1 font-bold bg-[#E8EDFF] text-[#0063CB] px-4 py-2 mb-4">
+            <p className="mb-2 mt-2 font-bold">Attention !</p>
+            <p className="mb-2 text-sm md:text-base">
+              Dans la région Occitanie, compte tenu du nombre très élevé d'inscriptions, nous ne pouvons pas garantir votre participation au séjour d'octobre 2024. Vous serez
+              informé en priorité lors de l'ouverture des inscriptions pour les séjours 2025.
+            </p>
+          </div>
+        )}
         <BooleanRadioButtons
           options={inFranceOrAbroadOptions}
           legend="Je suis né(e)..."
@@ -754,6 +770,33 @@ export default function StepCoordonnees() {
                 />
               </>
             )}
+          </>
+        )}
+        {!cohortExcluded.includes(young.cohort) && (
+          <>
+            <hr className="my-2" />
+            <div className="flex mt-4 items-center gap-3 mb-4">
+              <h2 className="m-0 text-lg font-semibold leading-6 align-left">Formation PSC1</h2>
+              <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                <ul className="text-gray-800">
+                  <li> La formation PSC1 permet d'acquérir les gestes de premiers secours pour être capable d'intervenir en cas d'urgence.</li>
+                  <li> Avoir validé le PSC1 n'est pas obligatoire pour participer au séjour de cohésion.</li>
+                </ul>
+              </ReactTooltip>
+              <div data-tip data-for="tooltip-nationalite">
+                <RiInformationFill className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover text-[24px] ml-2" />
+              </div>
+            </div>
+            <BooleanRadioButtons
+              legend="Avez-vous validé le PSC1 (Prévention et Secours Civiques de niveau 1) ?"
+              hintText=""
+              value={psc1Info}
+              options={[{ value: "true" }, { value: "false" }]}
+              onChange={(e) => updateData("psc1Info")(e.target.value)}
+              orientation="horizontal"
+              state={(corrections?.psc1Info || errors.psc1Info) && "error"}
+              stateRelatedMessage={errors.psc1Info}
+            />
           </>
         )}
         <SignupButtons onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />

@@ -56,7 +56,17 @@ import {
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 
-import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, findClasseByUniqueKeyAndUniqueId, generateConvocationsByClasseId, updateReferent } from "./classeService";
+import {
+  buildUniqueClasseId,
+  buildUniqueClasseKey,
+  deleteClasse,
+  findClasseByUniqueKeyAndUniqueId,
+  generateConvocationsByClasseId,
+  getClasseById,
+  getClasseByIdPublic,
+  updateReferent,
+} from "./classeService";
+
 import {
   findChefEtablissementInfoForClasses,
   findCohesionCentersForClasses,
@@ -65,6 +75,11 @@ import {
   getYoungsGroupByClasses,
 } from "./export/classeExportService";
 import ClasseStateManager from "./stateManager";
+
+const querySchema = Joi.object({
+  withDetails: Joi.boolean().default(true),
+  // Ajoutez d'autres paramètres si nécessaire
+});
 
 const router = express.Router();
 router.post(
@@ -115,7 +130,7 @@ router.post("/export", passport.authenticate("referent", { session: false, failW
 
     const queryParams = req.query.type === "schema-de-repartition" ? { cohort: req.body.cohort, status: { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] } } : {};
     if (req.user.role === ROLES.REFERENT_REGION) queryParams["region"] = req.user.region;
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.departement;
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.department;
 
     const classes: ClasseDocument<{
       cohesionCenter?: CohesionCenterDocument;
@@ -418,7 +433,7 @@ router.put("/:id/referent", passport.authenticate("referent", { session: false, 
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
@@ -426,21 +441,48 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    // We need to populate the model with the 2 virtuals etablissement and referents
-    const data = await ClasseModel.findById(value)
-      .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
-      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })
-      .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
-      .populate({ path: "session", options: { select: { _id: 1 } } })
-      .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } });
-    if (!data) {
-      captureMessage("Error finding classe with id : " + JSON.stringify(value));
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Validate and transform query parameters
+    const { error: queryError, value: queryParams } = querySchema.validate(req.query);
+    if (queryError) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
     }
+
+    const data = await getClasseById(value, queryParams?.withDetails);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
+    if (error.message === "Classe not found") {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/public/:id", async (req, res) => {
+  try {
+    const { error, value } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    // Validate and transform query parameters
+    const { error: queryError, value: queryParams } = querySchema.validate(req.query);
+    if (queryError) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
+    }
+
+    const data = await getClasseByIdPublic(value, queryParams?.withDetails);
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    if (error.message === "Classe not found") {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
@@ -529,7 +571,7 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
 
     const classe: ClasseDocument<{ etablissement: EtablissementDocument }> | null = await ClasseModel.findById(value).populate({
       path: "etablissement",
-      options: { select: { referentEtablissementIds: 1, coordinateurIds: 1 } },
+      options: { select: { referentEtablissementIds: 1, coordinateurIds: 1, department: 1, region: 1 } },
     });
 
     if (!classe?.etablissement?.referentEtablissementIds) {
@@ -539,7 +581,7 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
     if (req.user.role === ROLES.REFERENT_REGION && classe.etablissement.region !== req.user.region) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT && classe.etablissement.department !== req.user.departement) {
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT && !req.user.department?.includes(classe.etablissement.department)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -579,7 +621,7 @@ router.put("/:id/verify", passport.authenticate("referent", { session: false, fa
       }
     }
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
-      if (classe.department !== req.user.departement) {
+      if (!req.user.department?.includes(classe.department)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }

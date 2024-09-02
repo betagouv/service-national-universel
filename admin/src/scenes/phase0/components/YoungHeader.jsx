@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import {
+  canManageMig,
   canViewEmailHistory,
   canViewNotes,
   isCle,
@@ -304,11 +305,13 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                   </Tab>
                   {user.role !== ROLES.HEAD_CENTER && (
                     <>
-                      <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
-                        <div className="flex items-center">
-                          Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_2)} />}
-                        </div>
-                      </Tab>
+                      {canManageMig(user) && (
+                        <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+                          <div className="flex items-center">
+                            Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_2)} />}
+                          </div>
+                        </Tab>
+                      )}
                       {[YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED].includes(young.statusPhase3) && (
                         <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
                           <div className="flex items-center">
