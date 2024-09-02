@@ -106,7 +106,7 @@ export default function StepEligibilite() {
       return;
     }
 
-      onSubmit();
+    onSubmit();
   };
 
   const onSubmit = async () => {

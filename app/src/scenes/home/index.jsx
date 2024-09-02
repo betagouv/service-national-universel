@@ -19,8 +19,7 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-// import AvenirCohort from "./AvenirCohort";
-import AvenirCohortv2 from "./AvenirCohortV2";
+import AvenirCohort from "./AvenirCohort";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, isCohortTooOld } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasAccessToPhase2, hasCompletedPhase2 } from "../../utils";
@@ -42,6 +41,7 @@ export default function Home() {
   if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
+    const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
     // Je ne peux plus participer au SNU (exclu, refusé) :
     if (wasYoungExcluded(young)) return <Excluded />;
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
@@ -50,11 +50,14 @@ export default function Home() {
     // placer le default ici qui est en fait la phase 3 (hasAccessToPhase2 ?)
     // -------------------
 
-    // Je peux accéder à la Homepage de la Phase 2 si lj'ai validé ma phase 1 et que ma cohorte me permet encore de faire la phase 2 :
+    // Je peux accéder à la Homepage de la Phase 2 si j'ai validé ma phase 1 et que ma cohorte me permet encore de faire la phase 2 :
     const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
     if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
+      // les volontaires des première cohortes n'ont plus le droit de faire la phase 2 SAUF si ils l'ont commencé
       if (isCohortTooOld(young) && !hasCompletedPhase2(young) && !hasMission) {
         return <DelaiDepasse />;
+      } else if (hasWithdrawn) {
+        return <Withdrawn />;
       }
       return <HomePhase2 />;
     }
@@ -64,17 +67,17 @@ export default function Home() {
       return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
     }
     // Je n'ai pas validé ma phase 1 et la réinscription n'est pas ouverte (je peux changer de séjour):
+    // Cet écran permet de changer de séjour ou se désister
     if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
       return <Phase1NotDone />;
     }
 
     // je suis sur une cohorte à venir et la réinscription n'est pas ouverte
     if (young.cohort === "à venir") {
-      return <AvenirCohortv2 />; //moyen de faire encore mieux niveau merge
+      return <AvenirCohort />; //moyen de faire encore mieux niveau merge
     }
 
     // Je me suis désisté et la reinscription est fermée
-    const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
     if (hasWithdrawn) {
       return <Withdrawn />;
     }

@@ -13,19 +13,14 @@ export default function WaitingReinscription({ reinscriptionOpen }) {
   let textPrecision;
   let textSecond;
 
-  if (reinscriptionOpen) {
-    textPrecision = "Vérifiez dès maintenant votre éligibilité !";
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
-      textPrecision = "Votre Phase 1 n'a pas été validée.";
-      textSecond = "Pour la valider, inscrivez-vous pour participer à un prochain séjour !";
-    }
-  } else {
-    if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
-    else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
-      textPrecision = "Vous n’avez pas réalisé votre séjour de cohésion";
-      textSecond = "Votre phase 1 n’est donc pas validée";
-    } else return;
+  textPrecision = "Vérifiez dès maintenant votre éligibilité !";
+  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
+    textPrecision = "Votre Phase 1 n'a pas été validée.";
+    textSecond = "Pour la valider, inscrivez-vous pour participer à un prochain séjour !";
   }
+
+  if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
+
   const onClickEligibilte = async () => {
     plausibleEvent("Phase0/CTA reinscription - home page");
     return history.push("/reinscription");
