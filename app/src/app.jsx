@@ -86,6 +86,9 @@ function App() {
           <AutoScroll />
           <Suspense fallback={<PageLoader />}>
             <Switch>
+              <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
+              <Redirect from={"/inscription2023"} to={"/inscription"} />
+
               <PublicRoute path="/validate-contract/done" component={ContractDone} />
               <PublicRoute path="/validate-contract" component={Contract} />
               <PublicRoute path="/conditions-generales-utilisation" component={CGU} />
@@ -99,11 +102,10 @@ function App() {
               <PublicRoute path="/public-engagements" component={AllEngagements} />
               <PublicRoute path="/merci" component={Thanks} />
               <PublicRoute path="/preinscription" component={PreInscription} />
+
               <SecureRoute path="/inscription" component={Inscription2023} />
               <SecureRoute path="/reinscription" component={ReInscription} />
               <SecureRoute path="/" component={Espace} />
-              <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
-              <Redirect from={"/inscription2023"} to={"/inscription"} />
             </Switch>
           </Suspense>
         </Router>
