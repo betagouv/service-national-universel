@@ -93,16 +93,17 @@ function App() {
               <PublicRoute path="/representants-legaux" component={RepresentantsLegaux} />
               <PublicRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
               <PublicRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
-              <PublicRoute path="/public-besoin-d-aide" component={Contact} />
               <PublicRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
               <PublicRoute path="/besoin-d-aide" component={Contact} />
               <PublicRoute path="/auth" component={Auth} />
               <PublicRoute path="/public-engagements" component={AllEngagements} />
               <PublicRoute path="/merci" component={Thanks} />
               <PublicRoute path="/preinscription" component={PreInscription} />
-              <SecureRoute path="/inscription2023" component={Inscription2023} />
+              <SecureRoute path="/inscription" component={Inscription2023} />
               <SecureRoute path="/reinscription" component={ReInscription} />
               <SecureRoute path="/" component={Espace} />
+              <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
+              <Redirect from={"/inscription2023"} to={"/inscription"} />
             </Switch>
           </Suspense>
         </Router>
