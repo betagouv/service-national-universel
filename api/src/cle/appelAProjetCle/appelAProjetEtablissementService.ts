@@ -5,6 +5,8 @@ import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementTy
 import { mapEtablissementFromAnnuaireToEtablissement } from "../etablissement/etablissementMapper";
 import { EtablissementModel, EtablissementType } from "../../models";
 
+import { logger } from "../../logger";
+
 export class AppelAProjetEtablissementService {
   etablissements: (EtablissementType & { operation: "create" | "update" })[] = [];
 
@@ -25,14 +27,14 @@ export class AppelAProjetEtablissementService {
 
     const etablissementFromAnnuaire = this.getEtablissementFromAnnuaire(appelAProjet, etablissements);
     if (!useExistingEtablissement && !etablissementFromAnnuaire) {
-      console.log(`Etablissement not found for UAI ${uai}`);
+      logger.debug(`Etablissement not found for UAI ${uai}`);
       return;
     }
 
     const existingEtablissement = await EtablissementModel.findOne({ uai });
     const hasAlreadyBeenProcessed = this.etablissements.some((etablissement) => etablissement.uai === appelAProjet.etablissement.uai);
     if (useExistingEtablissement && !existingEtablissement) {
-      console.log(`Cannot use existing etablissement ${uai}: Not Found !`);
+      logger.debug(`Cannot use existing etablissement ${uai}: Not Found !`);
       return;
     }
 
@@ -54,7 +56,7 @@ export class AppelAProjetEtablissementService {
         });
 
         await existingEtablissement.save({ fromUser: { firstName: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025 } });
-        console.log("AppelAProjetEtablissementService - processEtablissement() - updated etablissement : ", existingEtablissement?._id);
+        logger.debug(`AppelAProjetEtablissementService - processEtablissement() - updated etablissement : ${existingEtablissement?._id}`);
         this.etablissements.push({ ...existingEtablissement.toObject(), schoolYears: schoolYears, operation: "update" });
         return existingEtablissement;
       }
@@ -70,7 +72,7 @@ export class AppelAProjetEtablissementService {
     let createdEtablissement;
     if (save) {
       createdEtablissement = await EtablissementModel.create(formattedEtablissement);
-      console.log("AppelAProjetEtablissementService - processEtablissement() - created etablissement : ", createdEtablissement?._id);
+      logger.debug(`AppelAProjetEtablissementService - processEtablissement() - created etablissement : ${createdEtablissement?._id}`);
     }
     if (!hasAlreadyBeenProcessed) {
       // @ts-expect-error on ne crée pas d'établissemnt si il esxite déjà donc formattedEtablissement est complet ici

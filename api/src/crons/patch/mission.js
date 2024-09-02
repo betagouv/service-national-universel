@@ -6,6 +6,7 @@ const slack = require("../../slack");
 const { MissionModel } = require("../../models");
 const MissionPatchModel = require("./models/missionPatch");
 const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -14,7 +15,6 @@ let result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.missionPatchScanned = result.missionPatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const mission = await MissionModel.findById(patch.ref.toString());
     if (!mission) return;
     if (patch.ops.length > 0) {
@@ -124,8 +124,8 @@ exports.manualHandler = async (startDate, endDate) => {
 
     await findAll(MissionPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

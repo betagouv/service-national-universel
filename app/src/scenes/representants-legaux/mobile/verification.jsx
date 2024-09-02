@@ -3,12 +3,12 @@ import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
 import { getDepartmentByZip, translate, translateGrade, getCohortPeriod, YOUNG_SOURCE } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
-
+import { concatPhoneNumberWithZone } from "snu-lib";
 import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
-import dayjs from "dayjs";
 import Check from "../components/Check";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { supportURL } from "../../../config";
@@ -22,14 +22,24 @@ export default function Verification({ step, parentId }) {
   const [error, setError] = React.useState(null);
   const [saving, setSaving] = React.useState(false);
 
+  const isCLE = YOUNG_SOURCE.CLE === young?.source;
+  const hasHandicap =
+    young?.handicap === "true" ||
+    young?.allergies === "true" ||
+    young?.ppsBeneficiary === "true" ||
+    young?.paiBeneficiary === "true" ||
+    young?.specificAmenagment === "true" ||
+    young?.reducedMobilityAccess === "true" ||
+    young?.handicapInSameDepartment === "true" ||
+    young?.highSkilledActivity === "true" ||
+    young?.highSkilledActivityInSameDepartment === "true";
+
   if (!young) return <Loader />;
 
   if (isReturningParent(young, parentId)) {
     const route = parentId === 2 ? "done-parent2" : "done";
     history.push(`/representants-legaux/${route}?token=${token}`);
   }
-
-  const sections = sectionsData(young).map(Section);
 
   async function onNext() {
     if (parentId === 1) {
@@ -92,11 +102,11 @@ export default function Verification({ step, parentId }) {
           )}
         </div>
 
-        {sections}
+        <ProfileDetails young={young} isCLE={isCLE} hasHandicap={hasHandicap} />
 
         {parentId === 1 && (
           <>
-            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-8">
+            <div className="flex items-center pt-[32px] mb-8">
               <Check checked={certified} onChange={(e) => setCertified(e)}>
                 <span>
                   Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez&nbsp;
@@ -116,208 +126,102 @@ export default function Verification({ step, parentId }) {
   );
 }
 
-function Section(section, idx) {
-  if (section.subtitle) {
-    return SectionSubtitle(section, idx);
-  }
-
-  const fields = section.fields?.map(SectionField);
-
+const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
   return (
     <>
-      <hr className="mt-8" />
-      <div className="pt-[32px]" key={idx.toString()}>
-        <h2 className="mt-0 mb-[19px] text-[18px] font-semibold leading-[32px]">{section.title}</h2>
-        {fields}
+      <hr className="mt-4" />
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h1 className="mt-2 text-lg font-bold text-[#161616]">Ses informations personnelles</h1>
+        </div>
+        <Details title="Prénom" value={young.lastName} />
+        <Details title="Nom" value={young.firstName} />
+        <Details title="Email" value={young.email} />
+        <Details title="Son niveau scolaire" value={young.grade} />
+        <Details title="Téléphone" value={concatPhoneNumberWithZone(young.phone, young.phoneZone)} />
+        <hr className="mt-4" />
+        <div className="flex flex-col gap-1">
+          <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
+          <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div>
+        </div>
+        <hr className="mt-4" />
+        <div className="flex items-center justify-between">
+          <h1 className="mt-2 text-lg font-bold text-[#161616]">Son Profil</h1>
+        </div>
+        <Details title="Pays de naissance" value={young.birthCountry} />
+        <Details title="Ville de naissance" value={young.birthCity} />
+        <Details title="Code postal de naissance" value={young.birthCityZip} />
+        <Details title="Sexe" value={translate(young.gender)} />
+        <Details title="Adresse de résidence" value={young.address} />
+        <Details title="Ville de résidence" value={young.city} />
+        <Details title="Code postal de résidence" value={young.zip} />
+        {young.foreignAddress && (
+          <>
+            <div className="text-center text-base text-[#666666]">L&apos;adresse affichée ci-dessus est celle de votre hébergeur. Votre adresse à l&apos;étranger :</div>
+            <Details title="Adresse à l'étranger" value={young.foreignAddress} />
+            <Details title="Code postal à l'étranger" value={young.foreignZip} />
+            <Details title="Ville à l'étranger" value={young.foreignCity} />
+            <Details title="Pays à l'étranger" value={young.foreignCountry} />
+          </>
+        )}
+        {!isCLE && <Details title={young.schooled === "true" ? "Sa situation scolaire" : "Sa situation"} value={translate(young.situation)} />}
+        {hasHandicap ? (
+          <>
+            <Details title="Handicap" value={translate(young.handicap)} />
+            <Details title="PPS" value={translate(young.ppsBeneficiary)} />
+            <Details title="PAI" value={translate(young.paiBeneficiary)} />
+            <Details title="Allergies" value={translate(young.allergies)} />
+            <Details title="Aménagement spécifique" value={translate(young.specificAmenagment)} />
+            <Details title="A besoin d'un aménagement pour mobilité réduite" value={translate(young.reducedMobilityAccess)} />
+            <Details title="Doit être affecté dans son département de résidence" value={translate(young.handicapInSameDepartment)} />
+            <Details title="Activités de haut niveau" value={translate(young.highSkilledActivity)} />
+            <Details title="Doit être affecté dans son département de résidence (activité de haut niveau)" value={translate(young.highSkilledActivityInSameDepartment)} />
+          </>
+        ) : (
+          <Details title="Situation particulière" value="Non" />
+        )}
+        <hr className="mt-4" />
+        <p className="text-[16px] leading-[20px] text-[#666666] text-left">
+          {young.firstName} {young.lastName} a déclaré le(s) détenteur(s) de l'autorité parentale suivant(s) :{" "}
+        </p>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h1 className="mt-2 text-lg font-bold text-[#161616]">Représentant(e) légal(e) 1 </h1>
+          </div>
+          <Details title="Lien" value={translate(young.parent1Status)} />
+          <Details title="Prénom" value={young.parent1FirstName} />
+          <Details title="Nom" value={young.parent1LastName} />
+          <Details title="E-mail" value={young.parent1Email} />
+          <Details title="Téléphone" value={concatPhoneNumberWithZone(young.parent1Phone, young.parent1PhoneZone)} />
+          {young.parent2Status ? (
+            <>
+              <div className="mt-4 flex items-center justify-between">
+                <h1 className="text-lg font-bold text-[#161616]">Représentant(e) légal(e) 2 </h1>
+              </div>
+              <Details title="Lien" value={translate(young.parent2Status)} />
+              <Details title="Prénom" value={young.parent2FirstName} />
+              <Details title="Nom" value={young.parent2LastName} />
+              <Details title="E-mail" value={young.parent2Email} />
+              <Details title="Téléphone" value={concatPhoneNumberWithZone(young.parent2Phone, young.parent2PhoneZone)} />
+            </>
+          ) : null}
+        </div>
+        <hr className="mt-4" />
       </div>
     </>
   );
-}
+};
 
-function SectionSubtitle(section, idx) {
+const Details = ({ title, value }) => {
+  if (!value) return null;
   return (
-    <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px]" key={idx.toString()}>
-      <h2 className="font-400 mt-0 mb-[19px] text-[18px] leading-[32px]">
-        <b>{section.title} : </b> {section.subtitle}
-      </h2>
+    <div className="flex items-center justify-between">
+      <div className="mr-4 min-w-[90px] text-[#666666]">{`${title} :`}</div>
+      <div className="text-right text-[#161616]">{value}</div>
     </div>
   );
-}
+};
 
-function SectionField(field, idx) {
-  let content;
-  if (field.subtitle) {
-    content = <div className="font-400 text-[16px] text-[#666666]">{field.subtitle}&nbsp;:</div>;
-  } else {
-    content = (
-      <div className="flex flex-col md:flex-row w-full md:justify-between">
-        <p className="font-400 text-[16px] text-[#666666]">{field.label}&nbsp;:</p>
-        <p className="font-400 md:text-right text-[16px] text-[#161616] break-all">{field.value ? field.value : "-"}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className={"justify-content-between mb-[15px] flex items-center" + (field.separator ? " border-t-solid m-t-2 border-t-[1px] border-t-[#E5E5E5] pt-2" : "")} key={idx}>
-      {content}
-    </div>
-  );
-}
-
-function specialSituations(young) {
-  let specials = [];
-
-  if (young.handicap === "true") {
-    specials.push({ label: "En situation de handicap", value: "Oui" });
-  }
-
-  if (young.allergies === "true") {
-    specials.push({ label: "A des allergies", value: "Oui" });
-  }
-  if (young.reducedMobilityAccess === "true") {
-    specials.push({ label: "A besoin d’un aménagement pour mobilité réduite", value: "Oui" });
-  }
-  if (young.ppsBeneficiary === "true") {
-    specials.push({ label: "Bénéficie d'un PPS (projet personnalisé de scolarisation", value: "Oui" });
-  }
-  if (young.paiBeneficiary === "true") {
-    specials.push({ label: "Bénéficie d'un PAI (projet d'accueil individualisé", value: "Oui" });
-  }
-  if (young.specificAmenagment === "true") {
-    specials.push({ label: "A besoin d'aménagements spécifiques", value: young.specificAmenagmentType ? ": " + young.specificAmenagmentType : "Oui" });
-  }
-  if (young.handicapInSameDepartment === "true") {
-    specials.push({ label: "Doit être affecté dans son département de résidence", value: "Oui" });
-  }
-  if (young.highSkilledActivity === "true") {
-    specials.push({ label: "A une activité de haut niveau", value: "Oui" });
-  }
-  if (young.highSkilledActivityInSameDepartment === "true") {
-    specials.push({ label: "Doit être affecté dans son département de résidence (activité de haut niveau)", value: "Oui" });
-  }
-
-  return specials;
-}
-
-function sectionsData(young) {
-  const isCLE = YOUNG_SOURCE.CLE === young?.source;
-  // --- foreign address
-  let foreignAddress = [];
-  let titleAddress = [];
-  if (young.foreignAddress) {
-    titleAddress.push({ separator: true, subtitle: "Adresse de l'hébergeur" });
-
-    foreignAddress.push(
-      { separator: true, subtitle: "Adresse à l'étranger" },
-      { label: "Adresse", value: young.foreignAddress },
-      { label: "Code postal", value: young.foreignZip },
-      { label: "Ville", value: young.foreignCity },
-      { label: "Pays", value: young.foreignCountry },
-    );
-  }
-
-  // --- situation
-  let situation = [];
-  if (young.status === "REINSCRIPTION") {
-    // situation.push({ separator: false });
-    if (young.schooled === "true") {
-      situation.push(
-        { label: "Pays de l'établissement", value: young.schoolCountry },
-        { label: "Ville de l'établissement", value: young.schoolCity },
-        { label: "Nom de l'établissement", value: young.schoolName },
-      );
-    } else {
-      situation.push({ label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
-    }
-  } else {
-    if (!isCLE) {
-      situation.push({ separator: true, subtitle: "Situation" });
-    }
-    if (young.schooled === "true") {
-      situation.push(
-        { label: "Pays de l'établissement", value: young.schoolCountry },
-        { label: "Ville de l'établissement", value: young.schoolCity },
-        { label: "Nom de l'établissement", value: young.schoolName },
-      );
-      if (!isCLE) {
-        situation.push({ label: "Situation scolaire", value: translate(young.situation) });
-      }
-    } else {
-      situation.push({ label: "Situation", value: translate(young.situation) }, { label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
-    }
-    // --- situations particulières
-    const specials = specialSituations(young);
-    if (specials.length > 0) {
-      situation = [...situation, { separator: true, subtitle: "Situation particulière" }, ...specials];
-    } else {
-      situation.push({ label: "Situation particulière", value: "Non" });
-    }
-  }
-
-  // --- parent 2
-  let secondParent = [];
-
-  if (young.parent2Status !== null && young.parent2Status !== undefined && young.parent2Status.trim().length > 0) {
-    secondParent.push(
-      { separator: true, subtitle: "2ème parent" },
-      { label: "Son lien", value: translate(young.parent2Status) },
-      { label: "Son prénom", value: young.parent2FirstName },
-      { label: "Son nom", value: young.parent2LastName },
-      // { label: "Moyen de contact favori", value: "?" },
-      { label: "Son email", value: young.parent2Email },
-      { label: "Son téléphone", value: young.parent2Phone },
-    );
-  }
-
-  let personalInfoFields = [
-    { label: "Prénom", value: young.firstName },
-    { label: "Nom", value: young.lastName },
-    { label: "Email", value: young.email },
-    { label: "Date de naissance", value: dayjs(young.birthdateAt).locale("fr").format("DD/MM/YYYY") },
-  ];
-  if (!isCLE) {
-    personalInfoFields.push({ label: "Niveau de scolarité", value: translateGrade(young.grade) });
-  }
-
-  return [
-    {
-      title: "Ses informations personnelles",
-      fields: personalInfoFields,
-    },
-    {
-      title: "Séjour de cohésion",
-      subtitle: young.cohort.name === "CLE 23-24" ? "À venir" : getCohortPeriod(young.cohort),
-    },
-    {
-      title: "Son profil",
-      fields:
-        young.status === "REINSCRIPTION"
-          ? situation
-          : [
-              { label: "Pays de naissance", value: young.birthCountry },
-              { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
-              { label: "Ville de naissance", value: young.birthCity },
-              { label: "Sexe", value: translate(young.gender) },
-              { label: "Téléphone", value: young.phone },
-              ...titleAddress,
-              { label: "Adresse de résidence", value: young.address ? young.address + (young.complementAddress ? "<br/>" + young.complementAddress : "") : undefined },
-              { label: "Code postal", value: young.zip },
-              { label: "Ville", value: young.city },
-              ...foreignAddress,
-              ...situation,
-            ],
-    },
-    {
-      title: young.firstName + " " + young.lastName + " a déclaré les représentants légaux suivants détenteurs de l'autorité parentale\u00A0:",
-      fields: [
-        { label: "Votre lien", value: translate(young.parent1Status) },
-        { label: "Votre prénom", value: young.parent1FirstName },
-        { label: "Votre nom", value: young.parent1LastName },
-        // { label: "Moyen de contact favori", value: "?" },
-        { label: "Votre email", value: young.parent1Email },
-        { label: "Votre téléphone", value: young.parent1Phone },
-        ...secondParent,
-      ],
-    },
-  ];
+function capitalizeFirstLetter(string) {
+  if (string) return string.charAt(0).toUpperCase() + string.slice(1);
 }

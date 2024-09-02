@@ -3,8 +3,10 @@ import { readCSVBuffer } from "../../../services/fileService";
 import { ClasseCohortCSV, ClasseCohortImportKey, ClasseCohortImportResult } from "./classeCohortImport";
 import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
 import { ClasseDocument, ClasseModel, CohortModel } from "../../../models";
-import { ERRORS } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE } from "snu-lib";
 import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
+import { capture } from "../../../sentry";
+import { logger } from "../../../logger";
 
 export const importClasseCohort = async (filePath: string, classeCohortImportKey: ClasseCohortImportKey) => {
   const classeCohortFile = await getFile(filePath);
@@ -20,15 +22,16 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
     const classeCohortImportResult: ClasseCohortImportResult = { ...classeCohortToImport };
     try {
       const updatedClasse: ClasseDocument = await addCohortToClasseByCohortSnuId(classeCohortToImport.classeId, classeCohortToImport.cohortCode, classeCohortImportKey);
-      classeCohortImportResult.result = "success";
       classeCohortImportResult.cohortId = updatedClasse.cohortId;
-      classeCohortImportResult.cohortCode = classeCohortToImport.cohortCode;
       classeCohortImportResult.cohortName = updatedClasse.cohort;
+      classeCohortImportResult.classeStatus = updatedClasse.status;
+      classeCohortImportResult.result = "success";
     } catch (error) {
-      console.error(error);
+      logger.error(error.stack);
       classeCohortImportResult.result = "error";
       classeCohortImportResult.error = error.message;
     } finally {
+      classeCohortImportResult.cohortCode = classeCohortToImport.cohortCode;
       classesCohortsImportResult.push(classeCohortImportResult);
     }
   }
@@ -37,15 +40,18 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
 
 export const addCohortToClasseByCohortSnuId = async (classeId: string, cohortSnuId: string | undefined, classeCohortImportKey: ClasseCohortImportKey) => {
   if (!cohortSnuId) {
-    throw new Error(ERRORS.INVALID_PARAMS);
+    throw new Error(FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED);
   }
   const cohort = await findCohortBySnuIdOrThrow(cohortSnuId);
   return addCohortToClasse(classeId, cohort._id, classeCohortImportKey);
 };
 
 export const addCohortToClasse = async (classeId: string, cohortId: string, classeCohortImportKey: ClasseCohortImportKey) => {
-  if (!classeId || !cohortId) {
-    throw new Error(ERRORS.INVALID_PARAMS);
+  if (!classeId) {
+    throw new Error(FUNCTIONAL_ERRORS.NO_CLASSE_ID_PROVIDED);
+  }
+  if (!cohortId) {
+    throw new Error(FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED);
   }
   const cohort = await CohortModel.findById(cohortId);
   if (!cohort) {
@@ -55,7 +61,7 @@ export const addCohortToClasse = async (classeId: string, cohortId: string, clas
   if (!classe) {
     throw new Error(ERRORS.CLASSE_NOT_FOUND);
   }
-  classe.set({ cohortId: cohortId, cohort: cohort.name });
-  console.log(`classeImportService - addCohortToClasse() - Classe ${classeId} updated with cohort ${cohortId} - ${cohort.name}`);
+  classe.set({ cohortId: cohortId, cohort: cohort.name, status: STATUS_CLASSE.ASSIGNED });
+  logger.info(`classeImportService - addCohortToClasse() - Classe ${classeId} updated with cohort ${cohortId} - ${cohort.name}`);
   return classe.save({ fromUser: { firstName: `IMPORT_CLASSE_COHORT_${classeCohortImportKey}` } });
 };

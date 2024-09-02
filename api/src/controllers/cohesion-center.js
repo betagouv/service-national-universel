@@ -204,7 +204,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
       const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
-      console.log(firstSession);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 

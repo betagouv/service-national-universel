@@ -1,4 +1,4 @@
-import { UserDto } from "./dto";
+import { ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "./constants/constants";
@@ -952,6 +952,10 @@ function canUpdateClasse(actor) {
   return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
+function canUpdateReferentClasse(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
+}
+
 function canUpdateClasseStay(actor) {
   return [ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
@@ -1014,6 +1018,10 @@ function canNotifyAdminCleForVerif(actor) {
 }
 function canVerifyClasse(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
+}
+
+function canManageMig(user: ReferentDto) {
+  return ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role);
 }
 
 export {
@@ -1166,4 +1174,6 @@ export {
   canEditTotalSeats,
   canNotifyAdminCleForVerif,
   canVerifyClasse,
+  canManageMig,
+  canUpdateReferentClasse,
 };

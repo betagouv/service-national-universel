@@ -2,6 +2,7 @@ import fs from "fs";
 import fetch from "node-fetch";
 import queryString from "querystring";
 import config from "config";
+import { logger } from "./logger";
 
 import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
 
@@ -48,12 +49,16 @@ type Email = {
 
 const api = async (path, options: any = {}, force?: boolean) => {
   try {
-    if (!config.ENABLE_SENDINBLUE && !force) return console.log("Not possible to use BREVO api as ENABLE_SENDINBLUE is disabled");
+    if (!config.ENABLE_SENDINBLUE && !force) {
+      logger.warn("Not possible to use BREVO api as ENABLE_SENDINBLUE is disabled");
+      return;
+    }
 
     if (!config.SENDINBLUEKEY) {
-      console.log("NO SENDINBLUE KEY");
-      console.log(options);
-      return console.log("Mail was not sent.");
+      captureMessage("NO SENDINBLUE KEY");
+      logger.debug(options);
+      logger.debug("Mail was not sent.");
+      return;
     }
 
     const res = await fetch(`https://api.sendinblue.com/v3${path}`, {
@@ -68,7 +73,6 @@ const api = async (path, options: any = {}, force?: boolean) => {
     // Sometimes, sendinblue returns a 204 with an empty body
     return true;
   } catch (e) {
-    console.log("Erreur in sendinblue api", e);
     capture(e, { extra: { path, options } });
   }
 };
@@ -94,10 +98,9 @@ export async function sendSMS(phoneNumber, content, tag) {
       captureMessage("Error sending an SMS", { extra: { sms, body } });
     }
     if (config.ENVIRONMENT !== "production") {
-      console.log(body, sms);
+      logger.debug("", { body, sms });
     }
   } catch (e) {
-    console.log("Erreur in sendSMS", e);
     capture(e);
   }
 }
@@ -129,10 +132,9 @@ export async function sendEmail(to: Email[], subject: string, htmlContent, { par
       captureMessage("Error sending an email", { extra: { mail, body } });
     }
     if (config.ENVIRONMENT !== "production") {
-      console.log(body, mail);
+      logger.debug("", { body, mail });
     }
   } catch (e) {
-    console.log("Erreur in sendEmail", e);
     capture(e);
   }
 }
@@ -157,7 +159,6 @@ export async function getEmailsList({ email, templateId, messageId, startDate, e
       }, {});
     return await api(`/smtp/emails?${queryString.stringify(filteredBody)}`, { method: "GET" });
   } catch (e) {
-    console.log("Erreur in getEmail", e);
     capture(e);
   }
 }
@@ -166,7 +167,6 @@ export async function getEmailContent(uuid) {
   try {
     return await api(`/smtp/emails/${uuid}`, { method: "GET" });
   } catch (e) {
-    console.log("Erreur in getEmail", e);
     capture(e);
   }
 }
@@ -252,11 +252,10 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
       return;
     }
     if (config.ENVIRONMENT !== "production" || options.force) {
-      console.log(body, mail);
+      logger.debug("", { body, mail });
     }
     return mail;
   } catch (e) {
-    console.log("Erreur in sendTemplate", e);
     capture(e);
   }
 }
@@ -332,10 +331,13 @@ export async function updateContact(id, { attributes, emailBlacklisted, smsBlack
 }
 
 export async function sync(obj, type, { force } = { force: false }) {
-  if (config.ENVIRONMENT !== "production" && !force) return console.log("no sync brevo");
+  if (config.ENVIRONMENT !== "production" && !force) {
+    logger.debug("no sync brevo");
+    return;
+  }
   try {
     const user = JSON.parse(JSON.stringify(obj));
-    if (!user) return console.log("ERROR WITH ", obj);
+    if (!user) throw new Error("NO USER TO SYNC", { cause: { obj } });
 
     const email = user.email;
     let parents: Contact[] = [];
@@ -382,7 +384,6 @@ export async function sync(obj, type, { force } = { force: false }) {
       syncContact(parent.email, parent.attributes, parent.listIds!);
     }
   } catch (e) {
-    console.log("error", e);
     capture(e);
   }
 }
@@ -399,7 +400,7 @@ export async function syncContact(email: string, attributes, listIds: number[]) 
 
 export async function unsync(obj, options = { force: false }) {
   if (config.ENVIRONMENT !== "production" && !options.force) {
-    console.log("no unsync brevo");
+    logger.debug("no unsync brevo");
     return;
   }
 
@@ -408,7 +409,6 @@ export async function unsync(obj, options = { force: false }) {
   try {
     await Promise.all(emails.map(deleteContact));
   } catch (error) {
-    console.log("Can't delete in brevo", emails);
-    capture(error);
+    capture(error, { contexts: { emails } });
   }
 }

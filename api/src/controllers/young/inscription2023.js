@@ -59,7 +59,10 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
     const eligibilityScheme = {
       birthdateAt: Joi.string().trim().required(),
       schooled: Joi.string().trim().required(),
-      grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE").required(),
+      grade: Joi.string()
+        .trim()
+        .valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "1ereCAP", "2ndeCAP", "Autre", "NOT_SCOLARISE")
+        .required(),
       schoolName: Joi.string().trim(),
       schoolType: Joi.string().trim().allow(null, ""),
       schoolAddress: Joi.string().trim().allow(null, ""),
@@ -89,6 +92,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       schoolRegion: "",
       schoolCountry: "",
       schoolId: "",
+      grade: "",
       zip: "",
       ...value,
       ...(value.livesInFrance === "true"
@@ -201,6 +205,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
+      psc1Info: Joi.string().trim().valid("true", "false").allow(null),
     };
 
     if (!isCle(young)) {
@@ -513,7 +518,6 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
-    console.log(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@snu/ds/admin";
 import { toastr } from "react-redux-toastr";
+import ReactTooltip from "react-tooltip";
 import validator from "validator";
+import { HiInformationCircle } from "react-icons/hi";
 
 import { FieldsGroup } from "../FieldsGroup";
 import Field from "../Field";
@@ -45,6 +47,12 @@ const BOOLEAN_OPTIONS = [
   { value: "false", label: translate("false") },
 ];
 
+const psc1Options = [
+  { value: "true", label: "Oui" },
+  { value: "false", label: "Non" },
+  { value: null, label: "Non renseigné" },
+];
+
 export default function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, oldCohort, readonly }) {
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
@@ -65,7 +73,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
       }
     }
     if (young) {
-      setData({ ...young });
+      setData({ ...young, psc1Info: young.psc1Info });
       setHasSpecificSituation(SPECIFIC_SITUATIONS_KEY.findIndex((key) => young[key] === "true") >= 0);
       setYoungAge(getAge(young.birthdateAt));
     } else {
@@ -347,7 +355,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                     transformer={translateEtbalissementSector}
                   />
                   <Field name="etablissementCity" label="Ville de l'établissement" value={data?.etablissement?.city} mode="readonly" className="mb-[16px]" young={young} />
-                  <Field name="classeGrade" label="Classe" value={data?.classe?.grade} mode="readonly" className="mb-[16px]" young={young} transformer={translateGrade} />
+                  <Field name="classeGrade" label="Classe" value={young?.grade} mode="readonly" className="mb-[16px]" young={young} transformer={translateGrade} />
                   <div className="flex items-center">
                     <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} className="mr-2" />
                     <p className="text-xs font-base text-gray-900 mr-1">Situation de l’élève différente de celle de la Classe engagée</p>
@@ -384,6 +392,30 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 )}
               </div>
             )}
+            <div className="mt-[16px]">
+              <div className="flex flex">
+                <MiniTitle>Titulaire du PSC1</MiniTitle>
+                <HiInformationCircle data-tip data-for="psc1Info" className="mt-0.5 ml-1 text-gray-400" />
+              </div>
+              <ReactTooltip id="psc1Info" className="bg-white shadow-xl" arrowColor="white" place="right">
+                <div className="text-xs text-[#414458]">Information déclarée par le volontaire lors de son inscription </div>
+              </ReactTooltip>
+              <Field
+                name="psc1Info"
+                value={data?.psc1Info || "Non renseigné"}
+                transformer={translate}
+                mode={sectionMode}
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "psc1Info")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                type="select"
+                options={psc1Options}
+                onChange={(value) => onLocalChange("psc1Info", value)}
+                young={young}
+                className="flex-[1_1_50%]"
+              />
+            </div>
           </div>
           <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-[56px]">

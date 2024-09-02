@@ -6,6 +6,8 @@ import { buildUniqueClasseId, buildUniqueClasseKey, findClasseByUniqueKeyAndUniq
 
 import { IAppelAProjet } from "./appelAProjetType";
 
+import { logger } from "../../logger";
+
 export class AppelAProjetClasseService {
   classes: Partial<ClasseType & { numberDS: number; uai: string; operation: "create" | "none" }>[] = [];
 
@@ -23,7 +25,7 @@ export class AppelAProjetClasseService {
     let formattedClasse: Partial<ClasseType>;
     const classeFound = await findClasseByUniqueKeyAndUniqueId(uniqueClasseKey, uniqueClasseId);
     if (classeFound) {
-      console.log("AppelAProjetClasseService - processClasse() - classe found : ", classeFound?._id);
+      logger.debug(`AppelAProjetClasseService - processClasse() - classe found : ${classeFound?._id}`);
 
       this.classes.push({ ...classeFound.toObject({ virtuals: false }), uai: appelAProjet.etablissement?.uai, numberDS: appelAProjet.numberDS, operation: "none" });
     } else {
@@ -34,7 +36,7 @@ export class AppelAProjetClasseService {
           ...formattedClasse,
           metadata: { createdBy: ReferentCreatedBy.SYNC_APPEL_A_PROJET_2024_2025, numeroDossierDS: appelAProjet.numberDS },
         });
-        console.log("AppelAProjetClasseService - processClasse() - created classe : ", createdClasse?._id);
+        logger.debug(`AppelAProjetClasseService - processClasse() - created classe : ${createdClasse?._id}`);
       }
       this.classes.push({ ...formattedClasse, _id: createdClasse?._id, uai: appelAProjet.etablissement?.uai, numberDS: appelAProjet.numberDS, operation: "create" });
     }

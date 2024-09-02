@@ -3,7 +3,7 @@ import passport from "passport";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 import emailsEmitter from "../../emails";
-import snuLib from "snu-lib";
+import snuLib, { FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
 import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS } from "snu-lib";
 
 import { dbConnect, dbClose } from "../helpers/db";
@@ -18,7 +18,7 @@ import { createFixtureClasse } from "../fixtures/classe";
 // etablissement
 import { createFixtureEtablissement } from "../fixtures/etablissement";
 import { createEtablissement } from "../helpers/etablissement";
-import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
+import { ClasseModel, EtablissementModel, ReferentDocument, ReferentModel } from "../../models";
 
 // young
 import getNewYoungFixture from "../fixtures/young";
@@ -45,6 +45,114 @@ mockEsClient({
 jest.mock("../../emails", () => ({
   emit: jest.fn(),
 }));
+
+class MockDate extends Date {
+  constructor() {
+    super(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000);
+  }
+}
+
+beforeEach(async () => {
+  await ClasseModel.deleteMany({});
+  await EtablissementModel.deleteMany({});
+  await ReferentModel.deleteMany({});
+});
+
+describe("GET /cle/classe/:id", () => {
+  it("should return 400 when id is invalid", async () => {
+    const res = await request(getAppHelper()).get("/cle/classe/invalidId");
+    expect(res.status).toBe(400);
+  });
+
+  it("should return 403 when user cannot update classes", async () => {
+    const classe = createFixtureClasse();
+    const validId = (await createClasse(classe))._id;
+    // @ts-ignore
+    passport.user.role = ROLES.RESPONSIBLE;
+    const withDetails = true;
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
+    expect(res.status).toBe(403);
+    // @ts-ignore
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 400 when query params are invalid", async () => {
+    const classeId = new ObjectId();
+    const res = await request(getAppHelper()).get(`/cle/classe/${classeId}?withDetails=invalid`);
+    expect(res.status).toBe(400);
+  });
+
+  it("should return 404 when class is not found", async () => {
+    const nonExistingId = "104a49ba503555e4d8853003";
+    const res = await request(getAppHelper()).delete(`/cle/classe/${nonExistingId}`).query({ type: "delete" }).send();
+    expect(res.status).toBe(404);
+  });
+
+  it("should return 200 and class data without details when withDetails is false", async () => {
+    const classe = createFixtureClasse();
+    const validId = (await createClasse(classe))._id;
+    const withDetails = false;
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveProperty("_id", validId.toString());
+    expect(res.body.data).not.toHaveProperty("etablissement");
+    expect(res.body.data).not.toHaveProperty("cohortDetails");
+  });
+
+  it("should return 200 and class data with details when withDetails is true", async () => {
+    const classe = createFixtureClasse();
+    const validId = (await createClasse(classe))._id;
+    const withDetails = true;
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveProperty("_id", validId.toString());
+    expect(res.body.data).toHaveProperty("etablissement");
+    expect(res.body.data).toHaveProperty("referents");
+    expect(res.body.data).toHaveProperty("cohortDetails");
+  });
+});
+
+describe("GET /cle/classe/public/:id", () => {
+  it("should return 400 when id is invalid", async () => {
+    const res = await request(getAppHelper()).get("/cle/classe/invalidId");
+    expect(res.status).toBe(400);
+  });
+
+  it("should return 400 when query params are invalid", async () => {
+    const classeId = new ObjectId();
+    const res = await request(getAppHelper()).get(`/cle/classe/${classeId}?withDetails=invalid`);
+    expect(res.status).toBe(400);
+  });
+
+  it("should return 404 when class is not found", async () => {
+    const nonExistingId = "104a49ba503555e4d8853003";
+    const res = await request(getAppHelper()).delete(`/cle/classe/${nonExistingId}`).query({ type: "delete" }).send();
+    expect(res.status).toBe(404);
+  });
+
+  it("should return 200 and class data without details when withDetails is false", async () => {
+    const classe = createFixtureClasse();
+    const validId = (await createClasse(classe))._id;
+    const withDetails = false;
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveProperty("_id", validId.toString());
+    expect(res.body.data).not.toHaveProperty("etablissement");
+    expect(res.body.data).not.toHaveProperty("cohortDetails");
+  });
+
+  it("should return 200 and class data with details when withDetails is true", async () => {
+    const classe = createFixtureClasse();
+    const validId = (await createClasse(classe))._id;
+    const withDetails = true;
+    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveProperty("_id", validId.toString());
+    expect(res.body.data).toHaveProperty("etablissement");
+    expect(res.body.data).toHaveProperty("referents");
+    expect(res.body.data).toHaveProperty("cohortDetails");
+  });
+});
 
 describe("DELETE /cle/classe/:id", () => {
   it("should return 400 when id is invalid", async () => {
@@ -272,6 +380,8 @@ describe("PUT /cle/classe/:id", () => {
   it("should send mail if value.estimatedSeats > classe.estimatedSeats", async () => {
     const classeFixture = createFixtureClasse({ estimatedSeats: 5, totalSeats: 5 });
     const classe = await createClasse(classeFixture);
+    // @ts-ignore
+    global.Date = MockDate;
     const res = await request(getAppHelper())
       .put(`/cle/classe/${classe._id}`)
       .send({
@@ -287,6 +397,7 @@ describe("PUT /cle/classe/:id", () => {
         _id: classe._id,
       }),
     );
+    global.Date = Date;
   });
 
   it("should updte totalSeats when estimatedSeats change and date < LIMIT_DATE_ESTIMATED_SEATS", async () => {
@@ -487,9 +598,9 @@ describe("PUT /cle/classe/:id/verify", () => {
     // @ts-ignore
     passport.user.role = ROLES.REFERENT_DEPARTMENT;
     // @ts-ignore
-    const previous = passport.user.departement;
+    const previous = passport.user.department;
     // @ts-ignore
-    passport.user.departement = "Loire";
+    passport.user.department = ["Loire"];
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}/verify`)
       .send({
@@ -499,7 +610,7 @@ describe("PUT /cle/classe/:id/verify", () => {
     // @ts-ignore
     passport.user.role = ROLES.ADMIN;
     // @ts-ignore
-    passport.user.departement = previous;
+    passport.user.department = previous;
   });
 
   it("should return 403 when REFERENT_REGION tries to verify a class they don't manage", async () => {
@@ -583,7 +694,7 @@ describe("GET /:id/notifyRef", () => {
     // @ts-ignore
     passport.user.role = ROLES.REFERENT_DEPARTMENT;
     // @ts-ignore
-    passport.user.departement = "Loire";
+    passport.user.department = ["Loire"];
     const res = await request(getAppHelper()).get(`/cle/classe/${validId}/notifyRef`);
     expect(res.status).toBe(403);
     // @ts-ignore
@@ -756,5 +867,67 @@ describe("POST /elasticsearch/cle/etablissement/export", () => {
       .send({ filters: {}, exportFields: ["name", "uai"] });
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBeGreaterThan(0);
+  });
+});
+
+describe("PUT /cle/classe/:id/referent", () => {
+  it("should create a new referent then link its id to classe", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const classe = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe._id}/referent`).send(newReferentDetails); // sending new referent data
+    const updatedReferent: ReferentDocument = (await ReferentModel.findOne({ email: newReferentDetails.email }))!;
+
+    expect(updatedReferent).toBeTruthy();
+    expect(updatedReferent.firstName).toBe(newReferentDetails.firstName);
+    expect(updatedReferent.lastName).toBe(newReferentDetails.lastName);
+    expect(updatedReferent.email).toBe(newReferentDetails.email);
+    expect(updatedReferent.metadata.isFirstInvitationPending).toBe(true);
+    expect(res.status).toBe(200);
+  });
+
+  it("should update the link of the new referent to classe", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const referent2 = await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.REFERENT_CLASSE }));
+    const classe1 = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "b@b.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe1._id}/referent`).send(newReferentDetails); // sending new referent data
+    const referentId = (await ClasseModel.findById(classe1._id))?.referentClasseIds[0];
+    const updatedReferent: ReferentDocument = (await ReferentModel.findById(referentId))!;
+
+    expect(updatedReferent).toBeTruthy();
+    expect(updatedReferent.firstName).toBe(newReferentDetails.firstName);
+    expect(updatedReferent.lastName).toBe(newReferentDetails.lastName);
+    expect(updatedReferent.email).toBe(newReferentDetails.email);
+    expect(res.status).toBe(200);
+  });
+
+  it("should throw an error if role not referent nor admin cle", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const referent2 = await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.VISITOR }));
+    const classe1 = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "b@b.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe1._id}/referent`).send(newReferentDetails); // sending new referent data
+
+    expect(res.text).toContain(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    expect(res.status).toBe(422);
   });
 });
