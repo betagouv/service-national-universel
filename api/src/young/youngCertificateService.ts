@@ -7,11 +7,11 @@ import {
   PointDeRassemblementModel,
   DepartmentServiceModel,
   CohesionCenterType,
-  MeetingPointType,
+  PointDeRassemblementType,
 } from "../models";
 import { YoungDto } from "snu-lib";
 
-export const getMeetingAddress = (young: YoungDto, meetingPoint: MeetingPointType, center: CohesionCenterType) => {
+export const getMeetingAddress = (young: YoungDto, meetingPoint: PointDeRassemblementType, center: CohesionCenterType) => {
   if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
   const complement = meetingPoint?.complementAddress.find((c) => c.cohort === young.cohort);
   const complementText = complement?.complement ? ", " + complement.complement : "";
