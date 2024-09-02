@@ -39,7 +39,7 @@ const anonymizeContractsFromYoungId = async ({ youngId = "", anonymizedYoung = {
     await contract.save();
     const deletePatchesResult = await deletePatches({ id: contract._id.toString(), model: ContractModel });
     if (!deletePatchesResult.ok) {
-      logger.error(`ERROR deleting patches of contract with id ${contract._id} >>> ${deletePatchesResult.code}`);
+      throw new Error("ERROR deleting patches of application", { cause: { contract_id: contract._id, code: deletePatchesResult.code } });
     }
   }
 
