@@ -9,7 +9,7 @@
     "preserveWatchOutput": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "target": "ES2021",
+    "target": "ES2022",
     "outDir": "./src",
     "rootDir": "./src"
   },

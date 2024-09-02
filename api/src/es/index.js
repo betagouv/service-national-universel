@@ -8,7 +8,7 @@ let esClient;
 if (config.ES_ENDPOINT) {
   esClient = new Client({ node: config.ES_ENDPOINT });
 } else {
-  logger.error("Can't initialize ES. Missing envs");
+  logger.info("Can't initialize ES. Missing envs");
 }
 
 module.exports = esClient;
