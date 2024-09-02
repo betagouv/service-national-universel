@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import passport from "passport";
 
-import { canSearchStudent, ROLES, YOUNG_STATUS } from "snu-lib";
+import { canSearchStudent, ROLES, YOUNG_STATUS, YoungDto } from "snu-lib";
 
 import { validateId } from "../../utils/validator";
 import { ERRORS } from "../../utils";
@@ -35,10 +35,10 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
       }
     }
 
-    const students = await YoungModel.find({ classeId: value })?.lean();
+    const students: YoungDto[] = await YoungModel.find({ classeId: value });
 
     const statusCount = students.reduce((acc, student) => {
-      const status = student.status;
+      const status = student.status || "";
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     }, {});

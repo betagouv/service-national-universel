@@ -5,7 +5,7 @@ import "dayjs/locale/fr";
 import { withPipeStream } from "../utils";
 import { getDepartureDateSession, getReturnDateSession } from "../../utils/cohort";
 import { formatStringDate, formatStringDateTimezoneUTC, transportDatesToString } from "snu-lib";
-import { isLocalTransport, getMeetingAddress, fetchDataForYoungCertificate, getCertificateTemplate } from "../../young/youngService";
+import { getMeetingAddress, getCertificateTemplate, isLocalTransport, fetchDataForYoungCertificate } from "../../young/youngCertificateService";
 import { FONT, FONT_BOLD, FONT_ITALIC, LIST_INDENT, initDocument } from "../templateService";
 import { logger } from "../../logger";
 

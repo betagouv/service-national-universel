@@ -172,7 +172,7 @@ describe("YoungService.getValidatedYoungsWithSession", () => {
     const youngs = [
       { _id: "1", status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: "session1", statusPhase1: YOUNG_STATUS_PHASE1.WITHDRAWN, meetingPointId: "mp1" },
       { _id: "2", status: YOUNG_STATUS.WITHDRAWN, sessionPhase1Id: "session2", statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED, transportInfoGivenByLocal: "true" },
-      { _id: "3", status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: null, statusPhase1: YOUNG_STATUS_PHASE1.DONE, deplacementPhase1Autonomous: "false" },
+      { _id: "3", status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: undefined, statusPhase1: YOUNG_STATUS_PHASE1.DONE, deplacementPhase1Autonomous: "false" },
     ];
 
     const result = getValidatedYoungsWithSession(youngs);
