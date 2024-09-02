@@ -4,7 +4,6 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, hasAccessToReinscription } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung, cohortsInit, getCohort } from "../../utils/cohorts";
 import Affected from "./Affected";
-// import FutureCohort from "./FutureCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
