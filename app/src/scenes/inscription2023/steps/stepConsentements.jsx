@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
-import { getCohortPeriod, getCohortYear } from "snu-lib";
+import { getCohortPeriod, getCohortYear, getSchoolYear } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import Error from "../../../components/error";
 import { supportURL } from "../../../config";
@@ -34,7 +34,7 @@ export default function StepConsentements() {
     enabled: isCLE && validateId(young?.classeId),
   });
 
-  const year = isCLE ? classe?.etablissement?.schoolYears[0] : getCohortYear(getCohort(young.cohort));
+  const cohortYear = isCLE ? getSchoolYear(classe?.etablissement) : getCohortYear(getCohort(young.cohort));
 
   const onSubmit = async () => {
     setLoading(true);
@@ -87,7 +87,7 @@ export default function StepConsentements() {
               {
                 label: (
                   <span>
-                    Me porte volontaire pour participer à la session <strong>{year}</strong> du Service National Universel.
+                    Me porte volontaire pour participer à la session <strong>{cohortYear}</strong> du Service National Universel.
                   </span>
                 ),
                 hintText: <span className="text-base text-black">qui comprend la participation à un séjour de cohésion puis la réalisation d'une phase d'engagement.</span>,

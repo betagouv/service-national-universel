@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, YOUNG_STATUS, ROLES, getCohortPeriod, getCohortYear, YOUNG_SOURCE } from "snu-lib";
+import { translate, YOUNG_STATUS, ROLES, getCohortPeriod, getCohortYear, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
 
 import dayjs from "@/utils/dayjs.utils";
 
@@ -36,7 +36,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
 
   const user = useSelector((state) => state.Auth.user);
   const consent = young.parentAllowSNU === "true" ? "Autorise " : "N'autorise pas ";
-  const cohortYear = young.source === YOUNG_SOURCE.CLE ? young?.etablissement?.schoolYears[0] : getCohortYear(young.cohort);
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? getSchoolYear(young.etablissement) : getCohortYear(young.cohort);
 
   async function handleConfirmConsent(participationConsent, imageRights) {
     try {

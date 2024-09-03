@@ -8,7 +8,7 @@ import { capture } from "@/sentry";
 import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES, YOUNG_SOURCE } from "snu-lib";
+import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -1105,7 +1105,7 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
     }
   }, [parent1Consentement]);
 
-  const cohortYear = young.source === YOUNG_SOURCE.CLE ? young?.etablissement?.schoolYears[0] : getCohortYear(young.cohort);
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? getSchoolYear(young.etablissement) : getCohortYear(young.cohort);
 
   const authorizationOptions = [
     { value: "true", label: "Autorise" },
