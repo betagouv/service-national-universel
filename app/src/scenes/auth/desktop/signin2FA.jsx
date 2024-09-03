@@ -2,7 +2,6 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "@/services/plausible";
-import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/dsfr/forms/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
@@ -13,6 +12,7 @@ import { BsShieldLock } from "react-icons/bs";
 import { isValidRedirectUrl, DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
 import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
+import { cohortsInit } from "@/utils/cohorts";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN = DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS / 60 / 1000;
 
@@ -46,6 +46,7 @@ export default function Signin() {
       if (response.user) {
         plausibleEvent("2FA/ Connexion réussie");
         dispatch(setYoung(response.user));
+        await cohortsInit();
         const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
         if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
