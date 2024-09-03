@@ -1,6 +1,6 @@
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
-import api from "../services/api";
+import { apiURL } from "@/config";
 import { capture } from "../sentry";
 import dayjs from "dayjs";
 let cohorts = null;
@@ -9,7 +9,7 @@ let cohortsCachedAt = null;
 export async function cohortsInit() {
   if (isCohortsInitialized()) return;
   try {
-    const result = await api.get("/cohort");
+    const result = await fetch(`${apiURL}/cohort`);
     if (result?.status === 401) {
       return;
     }
