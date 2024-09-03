@@ -15,7 +15,6 @@ import { getCohortGroups } from "@/services/cohort.service";
 import ClasseRow from "./list/ClasseRow";
 
 export default function List() {
-  const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
 
   const [classes, setClasses] = useState(null);
@@ -227,6 +226,8 @@ function exportExcelSheet({ data: classes, type }) {
     academy: c.academy,
     region: c.region,
     department: c.department,
+    createdAt: dayjs(c.createdAt).format("DD/MM/YYYY HH:mm"),
+    updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
     classeRefLastName: c.referents ? c.referents[0]?.lastName : "",
     classeRefFirstName: c.referents ? c.referents[0]?.firstName : "",
     classeRefEmail: c.referents ? c.referents[0]?.email : "",
@@ -249,6 +250,8 @@ function exportExcelSheet({ data: classes, type }) {
     "Académie",
     "Région",
     "Département",
+    "Date de création",
+    "Dernière modification",
     "Nom du référent de classe",
     "Prénom du référent de classe",
     "Email du référent de classe",
