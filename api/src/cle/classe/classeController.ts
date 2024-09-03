@@ -34,7 +34,7 @@ import {
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
-import { ERRORS, isReferent } from "../../utils";
+import { ERRORS, isReferent, validateBirthDate } from "../../utils";
 import { validateId } from "../../utils/validator";
 import emailsEmitter from "../../emails";
 import { UserRequest } from "../../controllers/request";
@@ -90,6 +90,7 @@ router.post(
   }),
   async (req: UserRequest, res: Response) => {
     try {
+      validateBirthDate(req.params.id);
       const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
       if (error) {
         capture(error);
@@ -116,19 +117,28 @@ router.post(
 
 router.post("/export", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
+    const allowedRoles = req.query.type === "schema-de-repartition" ? [ROLES.ADMIN, ROLES.REFERENT_REGION] : [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const queryParams = {};
+
     if (req.query.type === "schema-de-repartition") {
+      // Validate the request body
       const validation = Joi.object({ cohort: Joi.array().min(1).items(Joi.string()).required() })
         .unknown()
         .validate(req.body, { stripUnknown: true });
+
       if (validation.error) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else {
-      if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      queryParams["cohort"] = req.body.cohort;
+      queryParams["status"] = { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] };
     }
 
-    const queryParams = req.query.type === "schema-de-repartition" ? { cohort: req.body.cohort, status: { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] } } : {};
     if (req.user.role === ROLES.REFERENT_REGION) queryParams["region"] = req.user.region;
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.department;
 

@@ -143,8 +143,6 @@ const ChangeYoung = ({ cohort }) => {
           data,
           busFrom: selectedLigneFrom._id,
           busTo: selectedLigneTo._id,
-          pdrFromId: selectedPDRFrom._id,
-          pdrToId: selectedPDRTo._id,
         });
         if (res.ok) {
           toastr.success("Les jeunes ont bien été déplacé.");
