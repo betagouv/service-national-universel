@@ -20,19 +20,21 @@ import * as youngService from "../../young/youngService";
 import ClasseStateManager from "./stateManager";
 import * as classService from "./classeService";
 
-const generateConvocationsByClasseIdSpy = jest.spyOn(classService, "generateConvocationsByClasseId");
-const generateConsentementByClasseIdSpy = jest.spyOn(classService, "generateConsentementByClasseId");
-const generateImageRightByClasseIdSpy = jest.spyOn(classService, "generateImageRightByClasseId");
-
 describe("ClasseService generateCertificateByKey", () => {
   const youngBuffer = Buffer.from("pdf");
+  let generateConvocationsByClasseIdSpy;
+  let generateConsentementByClasseIdSpy;
+  let generateImageRightByClasseIdSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    generateConvocationsByClasseIdSpy = jest.spyOn(classService, "generateConvocationsByClasseId");
+    generateConsentementByClasseIdSpy = jest.spyOn(classService, "generateConsentementByClasseId");
+    generateImageRightByClasseIdSpy = jest.spyOn(classService, "generateImageRightByClasseId");
   });
 
   it("should call generateImageRightByClasseId when key is IMAGE", async () => {
-    jest.spyOn(classService, "generateImageRightByClasseId").mockResolvedValue(youngBuffer);
+    generateImageRightByClasseIdSpy.mockResolvedValue(youngBuffer);
 
     const resultPdf = await generateCertificateByKey(ClasseCertificateKeys.IMAGE, "classeId");
 
@@ -42,7 +44,7 @@ describe("ClasseService generateCertificateByKey", () => {
   });
 
   it("should call generateConsentementByClasseId when key is CONSENT", async () => {
-    jest.spyOn(classService, "generateConsentementByClasseId").mockResolvedValue(youngBuffer);
+    generateConsentementByClasseIdSpy.mockResolvedValue(youngBuffer);
 
     const resultPdf = await generateCertificateByKey(ClasseCertificateKeys.CONSENT, "classeId");
 
@@ -52,7 +54,7 @@ describe("ClasseService generateCertificateByKey", () => {
   });
 
   it("should call generateConvocationsByClasseId when key is CONVOCATION", async () => {
-    jest.spyOn(classService, "generateConvocationsByClasseId").mockResolvedValue(youngBuffer);
+    generateConvocationsByClasseIdSpy.mockResolvedValue(youngBuffer);
 
     const resultPdf = await generateCertificateByKey(ClasseCertificateKeys.CONVOCATION, "classeId");
 
@@ -70,47 +72,51 @@ describe("ClasseService generateCertificateByKey", () => {
 
 describe("ClasseService generate certificate", () => {
   const youngBuffer = Buffer.from("pdf");
-  const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
-  const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
-  const generateConsentementForMultipleYoungsSpy = jest.spyOn(youngService, "generateConsentementForMultipleYoungs");
-  const generateImageRightForMultipleYoungsSpy = jest.spyOn(youngService, "generateImageRightForMultipleYoungs");
+  let findYoungsByClasseIdSpy;
+  let generateConvocationsForMultipleYoungsSpy;
+  let generateConsentementForMultipleYoungsSpy;
+  let generateImageRightForMultipleYoungsSpy;
 
   beforeEach(() => {
-    findYoungsByClasseIdSpy.mockClear();
-    generateConvocationsForMultipleYoungsSpy.mockClear();
-    generateConsentementForMultipleYoungsSpy.mockClear();
-    generateImageRightForMultipleYoungsSpy.mockClear();
+    jest.resetAllMocks();
+    findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
+    generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
+    generateConsentementForMultipleYoungsSpy = jest.spyOn(youngService, "generateConsentementForMultipleYoungs");
+    generateImageRightForMultipleYoungsSpy = jest.spyOn(youngService, "generateImageRightForMultipleYoungs");
   });
 
   it("generateConvocationsByClasseId", async () => {
-    findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
-    generateConvocationsForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));
+    findYoungsByClasseIdSpy.mockResolvedValue(new Array(50).fill({}));
+    generateConvocationsForMultipleYoungsSpy.mockResolvedValue(youngBuffer);
 
     const resultPdf = await classService.generateConvocationsByClasseId("classeId");
 
     expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledWith("classeId");
     expect(generateConvocationsForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
     expect(resultPdf).toEqual(youngBuffer);
   });
 
   it("generateConsentemenrByClasseId", async () => {
-    findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
-    generateConsentementForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));
+    findYoungsByClasseIdSpy.mockResolvedValue(new Array(50).fill({}));
+    generateConsentementForMultipleYoungsSpy.mockResolvedValue(youngBuffer);
 
     const resultPdf = await classService.generateConsentementByClasseId("classeId");
 
     expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledWith("classeId");
     expect(generateConsentementForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
     expect(resultPdf).toEqual(youngBuffer);
   });
 
   it("generateImageRightByClasseId", async () => {
-    findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
-    generateImageRightForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));
+    findYoungsByClasseIdSpy.mockResolvedValue(new Array(50).fill({}));
+    generateImageRightForMultipleYoungsSpy.mockResolvedValue(youngBuffer);
 
     const resultPdf = await classService.generateImageRightByClasseId("classeId");
 
     expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledWith("classeId");
     expect(generateImageRightForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
     expect(resultPdf).toEqual(youngBuffer);
   });
