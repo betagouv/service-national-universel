@@ -10,15 +10,20 @@ export interface ClasseCohortImportBody {
 }
 
 export interface ClasseCohortCSV {
-  "Session : Code de la session": string;
+  "Session formule": string;
   "Identifiant de la classe engagée": string;
+  "Effectif de jeunes concernés": number;
 }
 
-export interface ClasseCohortImportResult {
+export interface ClasseCohortMapped {
+  cohortCode?: string;
   classeId: string;
+  classeEstimatedSeats?: number;
+}
+
+export interface ClasseCohortImportResult extends ClasseCohortMapped {
   classeStatus?: keyof typeof STATUS_CLASSE;
   cohortId?: string;
-  cohortCode?: string;
   cohortName?: string;
   result?: "success" | "error";
   error?: "success" | string;
