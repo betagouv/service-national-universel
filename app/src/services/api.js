@@ -99,7 +99,7 @@ class api {
           signal,
         });
         if (response.status === 401) {
-          if (window?.location?.pathname !== "/auth") {
+          if (window?.location?.pathname !== "/auth" && path !== "/cohort") {
             window.location.href = "/auth?disconnected=1";
             return;
           }
