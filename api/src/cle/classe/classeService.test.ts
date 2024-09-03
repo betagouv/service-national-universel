@@ -23,10 +23,6 @@ import * as classService from "./classeService";
 const generateConvocationsByClasseIdSpy = jest.spyOn(classService, "generateConvocationsByClasseId");
 const generateConsentementByClasseIdSpy = jest.spyOn(classService, "generateConsentementByClasseId");
 const generateImageRightByClasseIdSpy = jest.spyOn(classService, "generateImageRightByClasseId");
-const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
-const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
-const generateConsentementForMultipleYoungsSpy = jest.spyOn(youngService, "generateConsentementForMultipleYoungs");
-const generateImageRightForMultipleYoungsSpy = jest.spyOn(youngService, "generateImageRightForMultipleYoungs");
 
 describe("ClasseService generateCertificateByKey", () => {
   const youngBuffer = Buffer.from("pdf");
@@ -74,9 +70,17 @@ describe("ClasseService generateCertificateByKey", () => {
 
 describe("ClasseService generate certificate", () => {
   const youngBuffer = Buffer.from("pdf");
+  let findYoungsByClasseIdSpy;
+  let generateConvocationsForMultipleYoungsSpy;
+  let generateConsentementForMultipleYoungsSpy;
+  let generateImageRightForMultipleYoungsSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
+    generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
+    generateConsentementForMultipleYoungsSpy = jest.spyOn(youngService, "generateConsentementForMultipleYoungs");
+    generateImageRightForMultipleYoungsSpy = jest.spyOn(youngService, "generateImageRightForMultipleYoungs");
   });
 
   it("generateConvocationsByClasseId", async () => {
@@ -86,7 +90,7 @@ describe("ClasseService generate certificate", () => {
     const resultPdf = await classService.generateConvocationsByClasseId("classeId");
 
     expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
-    //expect(findYoungsByClasseIdSpy).toHaveBeenCalledWith("classeId");
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledWith("classeId");
     expect(generateConvocationsForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
     expect(resultPdf).toEqual(youngBuffer);
   });
