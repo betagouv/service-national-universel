@@ -17,6 +17,7 @@ import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
 import { SignupButtons } from "@snu/ds/dsfr";
+import { cohortsInit } from "@/utils/cohorts";
 
 export default function StepConfirm() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -114,6 +115,7 @@ export default function StepConfirm() {
         if (user) {
           plausibleEvent("Phase0/CTA preinscription - inscription");
           if (token) api.setToken(token);
+          await cohortsInit();
           dispatch(setYoung(user));
           removePersistedData();
           history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");

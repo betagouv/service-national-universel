@@ -13,6 +13,7 @@ import { isValidRedirectUrl } from "snu-lib";
 import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
 import { DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
+import { cohortsInit } from "@/utils/cohorts";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN = DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS / 60 / 1000;
 
@@ -43,6 +44,7 @@ export default function Signin() {
       const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
       setLoading(false);
       if (response.token) api.setToken(response.token);
+      await cohortsInit();
       if (response.user) {
         plausibleEvent("2FA/ Connexion réussie");
         dispatch(setYoung(response.user));
