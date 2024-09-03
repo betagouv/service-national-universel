@@ -955,6 +955,14 @@ const validateBirthDate = (date) => {
   return true;
 };
 
+const normalizeString = (str) => {
+  return str
+    .normalize("NFD") // Normalise la chaîne de caractères
+    .replace(/[\u0300-\u036f]/g, "") // Supprime les diacritiques (accents)
+    .replace(/[-\s]/g, "") // Remplace les tirets et les espaces par rien
+    .toLowerCase(); // Convertit tout en minuscules pour une comparaison insensible à la casse
+};
+
 module.exports = {
   timeout,
   uploadFile,
@@ -1002,4 +1010,5 @@ module.exports = {
   getMetaDataFile,
   deleteFilesByList,
   validateBirthDate,
+  normalizeString,
 };

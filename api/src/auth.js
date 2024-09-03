@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Joi = require("joi");
+const { getDb } = require("./mongo");
 
 const { capture, captureMessage } = require("./sentry");
 const config = require("config");
@@ -15,7 +16,7 @@ const {
   checkJwtTrustTokenVersion,
 } = require("./jwt-options");
 const { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString } = require("./utils");
 const {
   SENDINBLUE_TEMPLATES,
   PHONE_ZONES_NAMES_ARR,
@@ -48,6 +49,27 @@ class Auth {
     } else {
       await this.signupVolontaire(req, res);
     }
+  }
+
+  async countDocumentsInView(normalizedFirstName, normalizedLastName, birthdateAt) {
+    console.log(birthdateAt);
+    const countResult = await getDb()
+      .collection("normalizeName")
+      .aggregate([
+        {
+          $match: {
+            normalizedFirstName: normalizedFirstName,
+            normalizedLastName: normalizedLastName,
+            birthdateAt: birthdateAt,
+          },
+        },
+        {
+          $count: "count",
+        },
+      ])
+      .toArray();
+    console.log(countResult.length);
+    return countResult.length > 0 ? countResult[0].count : 0;
   }
 
   async signupVolontaire(req, res) {
@@ -111,11 +133,15 @@ class Auth {
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
       const formatedDate = birthdateAt;
-      formatedDate.setUTCHours(11, 0, 0);
+      formatedDate.setUTCHours(0, 0, 0);
       if (!validateBirthDate(formatedDate)) return res.status(400).send({ ok: false, user: null, code: ERRORS.INVALID_PARAMS });
-
-      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
-      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      const normalizedFirstName = normalizeString(firstName);
+      const normalizedLastName = normalizeString(lastName);
+      console.log(normalizedFirstName, normalizedLastName);
+      const count = await this.countDocumentsInView(normalizedFirstName, normalizedLastName, formatedDate);
+      console.log(count);
+      // let countDocuments = await this.model.countDocuments({ normalizedLastName, normalizedFirstName, birthdateAt: formatedDate });
+      if (count > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
       let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
       if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
