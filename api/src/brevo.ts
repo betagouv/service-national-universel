@@ -55,7 +55,7 @@ const api = async (path, options: any = {}, force?: boolean) => {
     }
 
     if (!config.SENDINBLUEKEY) {
-      logger.error("NO SENDINBLUE KEY");
+      captureMessage("NO SENDINBLUE KEY");
       logger.debug(options);
       logger.debug("Mail was not sent.");
       return;
@@ -337,10 +337,7 @@ export async function sync(obj, type, { force } = { force: false }) {
   }
   try {
     const user = JSON.parse(JSON.stringify(obj));
-    if (!user) {
-      logger.error(`ERROR WITH ${obj}`);
-      return;
-    }
+    if (!user) throw new Error("NO USER TO SYNC", { cause: { obj } });
 
     const email = user.email;
     let parents: Contact[] = [];
@@ -412,7 +409,6 @@ export async function unsync(obj, options = { force: false }) {
   try {
     await Promise.all(emails.map(deleteContact));
   } catch (error) {
-    logger.error(`Can't delete in brevo ${emails}`);
-    capture(error);
+    capture(error, { contexts: { emails } });
   }
 }
