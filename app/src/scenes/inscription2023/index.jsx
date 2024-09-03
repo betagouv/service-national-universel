@@ -47,7 +47,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
   const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
 
   if (!requestedStep && eligibleStep) {
-    return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
+    return <Redirect to={`/inscription/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
   }
 
   const currentStep = requestedStep || STEP_LIST[0].name;
@@ -69,7 +69,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
   }
 
   if (currentStepIndex > updatedEligibleStepIndex) {
-    return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
+    return <Redirect to={`/inscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
   return (
@@ -108,7 +108,6 @@ export default function Index() {
   const cohort = getCohort(young.cohort);
 
   if (!young) return <Redirect to="/preinscription" />;
-
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir") {
     return <FutureCohort />;
   }
@@ -142,8 +141,8 @@ export default function Index() {
   }
 
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION) {
-    return <SentryRoute path="/inscription2023/correction/:step?/:category?" component={() => <StepCorrection young={young} />} />;
+    return <SentryRoute path="/inscription/correction/:step?/:category?" component={() => <StepCorrection young={young} />} />;
   }
 
-  return <SentryRoute path="/inscription2023/:step?/:category?" component={() => <Step young={young} />} />;
+  return <SentryRoute path="/inscription/:step?/:category?" component={() => <Step young={young} />} />;
 }

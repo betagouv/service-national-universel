@@ -7,7 +7,6 @@ import {
   FEATURES_NAME,
   YOUNG_STATUS,
   isFeatureEnabled,
-  shouldDisplayMaintenanceNotice,
   shouldForceRedirectToInscription,
   shouldForceRedirectToReinscription,
   shouldReAcceptRI,
@@ -18,11 +17,9 @@ import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
 
-import Navbar from "./components/layout/navbar";
-import Notice from "./components/ui/alerts/Notice";
-import Loader from "./components/Loader";
+import ClassicLayout from "./components/layout";
+import PageLoader from "./components/PageLoader";
 import Diagoriente from "./components/layout/navbar/components/Diagoriente";
-import Footer from "./components/footer";
 import ModalCGU from "./components/modals/ModalCGU";
 import ModalRI from "./components/modals/ModalRI";
 
@@ -85,40 +82,30 @@ const Espace = () => {
   if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription2023" />;
 
   return (
-    <>
-      <div className="fixed top-0 left-0 right-0 z-10 w-screen  md:right-auto md:w-64">
-        <Navbar />
-      </div>
-      <main className="mt-16 md:mt-0 md:ml-[16rem]">
-        {shouldDisplayMaintenanceNotice && (
-          <Notice>Maintenance planifiée jeudi 18 avril de 20h à minuit&nbsp;: vous ne serez pas en mesure d'accéder aux plateformes pendant cette période.</Notice>
-        )}
-        <Suspense fallback={<Loader />}>
-          <Switch>
-            <SentryRoute exact path="/" component={Home} />
-            <SentryRoute path="/account" component={Account} />
-            <SentryRoute path="/echanges" component={Echanges} />
-            <SentryRoute path="/phase1" component={Phase1} />
-            <SentryRoute path="/phase2" component={Phase2} />
-            <SentryRoute path="/phase3" component={Phase3} />
-            <SentryRoute path="/autres-engagements" component={AutresEngagements} />
-            <SentryRoute path="/les-programmes" component={Engagement} />
-            <SentryRoute path="/mission" component={Missions} />
-            <SentryRoute path="/candidature" component={Candidature} />
-            {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
-            {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
-            <SentryRoute path="/diagoriente" component={Diagoriente} />
-            {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={ChangeSejour} /> : null}
-            {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
-            <Redirect to="/" />
-          </Switch>
-        </Suspense>
-      </main>
-      <Footer />
-
-      <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
-      <ModalRI isOpen={isModalRIOpen} onAccept={handleModalRIConfirm} />
-    </>
+    <ClassicLayout>
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <SentryRoute exact path="/" component={Home} />
+          <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/echanges" component={Echanges} />
+          <SentryRoute path="/phase1" component={Phase1} />
+          <SentryRoute path="/phase2" component={Phase2} />
+          <SentryRoute path="/phase3" component={Phase3} />
+          <SentryRoute path="/autres-engagements" component={AutresEngagements} />
+          <SentryRoute path="/les-programmes" component={Engagement} />
+          <SentryRoute path="/mission" component={Missions} />
+          <SentryRoute path="/candidature" component={Candidature} />
+          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
+          <SentryRoute path="/diagoriente" component={Diagoriente} />
+          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={ChangeSejour} /> : null}
+          {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+          <Redirect to="/" />
+        </Switch>
+      </Suspense>
+      {isModalCGUOpen ? <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} /> : null}
+      {isModalRIOpen ? <ModalRI isOpen={isModalRIOpen} onAccept={handleModalRIConfirm} /> : null}
+    </ClassicLayout>
   );
 };
 

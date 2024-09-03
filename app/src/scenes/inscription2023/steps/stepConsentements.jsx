@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
-import { getCohortPeriod, getCohortYear } from "snu-lib";
+import { getCohortPeriod, getCohortYear, getSchoolYear } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import Error from "../../../components/error";
 import { supportURL } from "../../../config";
@@ -10,9 +10,11 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { translate } from "../../../utils";
+import { translate, validateId } from "../../../utils";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
+import { useQuery } from "@tanstack/react-query";
+import { fetchClass } from "@/services/classe.service";
 
 export default function StepConsentements() {
   const { young, isCLE } = useAuth();
@@ -25,6 +27,14 @@ export default function StepConsentements() {
     consentment1: young?.consentment === "true",
     consentment2: young?.acceptCGU === "true",
   });
+
+  const { data: classe } = useQuery({
+    queryKey: ["class", young?.classeId],
+    queryFn: () => fetchClass(young?.classeId),
+    enabled: isCLE && validateId(young?.classeId),
+  });
+
+  const cohortYear = isCLE ? getSchoolYear(classe?.etablissement) : getCohortYear(getCohort(young.cohort));
 
   const onSubmit = async () => {
     setLoading(true);
@@ -77,7 +87,7 @@ export default function StepConsentements() {
               {
                 label: (
                   <span>
-                    Me porte volontaire pour participer à la session <strong>{getCohortYear(getCohort(young.cohort))}</strong> du Service National Universel
+                    Me porte volontaire pour participer à la session <strong>{cohortYear}</strong> du Service National Universel.
                   </span>
                 ),
                 hintText: <span className="text-base text-black">qui comprend la participation à un séjour de cohésion puis la réalisation d'une phase d'engagement.</span>,
