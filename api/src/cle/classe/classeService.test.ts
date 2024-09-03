@@ -78,12 +78,10 @@ describe("ClasseService generate certificate", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
-    generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
-    generateConsentementForMultipleYoungsSpy = jest.spyOn(youngService, "generateConsentementForMultipleYoungs");
-    generateImageRightForMultipleYoungsSpy = jest.spyOn(youngService, "generateImageRightForMultipleYoungs");
   });
 
   it("generateConvocationsByClasseId", async () => {
+    generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
     findYoungsByClasseIdSpy.mockResolvedValue(new Array(50).fill({}));
     generateConvocationsForMultipleYoungsSpy.mockResolvedValue(youngBuffer);
 
@@ -96,6 +94,7 @@ describe("ClasseService generate certificate", () => {
   });
 
   it("generateConsentemenrByClasseId", async () => {
+    generateConsentementForMultipleYoungsSpy = jest.spyOn(youngService, "generateConsentementForMultipleYoungs");
     findYoungsByClasseIdSpy.mockResolvedValue(new Array(50).fill({}));
     generateConsentementForMultipleYoungsSpy.mockResolvedValue(youngBuffer);
 
@@ -108,6 +107,7 @@ describe("ClasseService generate certificate", () => {
   });
 
   it("generateImageRightByClasseId", async () => {
+    generateImageRightForMultipleYoungsSpy = jest.spyOn(youngService, "generateImageRightForMultipleYoungs");
     findYoungsByClasseIdSpy.mockResolvedValue(new Array(50).fill({}));
     generateImageRightForMultipleYoungsSpy.mockResolvedValue(youngBuffer);
 
