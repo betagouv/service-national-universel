@@ -13,20 +13,9 @@ import DownloadMenu from "./components/DownloadMenu";
 import { Popover, PopoverButton } from "@headlessui/react";
 import { supportURL } from "@/config";
 import Voiture from "@/assets/Voiture";
-import { useLocation } from "react-router-dom";
 
 export default function HomePhase2() {
   const { young } = useSelector((state) => state.Auth);
-  const { hash } = useLocation();
-
-  useEffect(() => {
-    if (hash) {
-      const element = document.getElementById(hash.replace("#", ""));
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  }, [hash]);
 
   return (
     <div className="bg-white pt-8 pb-16">

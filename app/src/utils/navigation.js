@@ -85,7 +85,7 @@ export const getStepUrl = (name, STEP_LIST) => {
 const WAITING_CORRECTION_LINK = [
   {
     field: ["firstName", "lastName", "phone", "email"],
-    redirect: "/inscription2023/correction/profil",
+    redirect: "/inscription/correction/profil",
     step: "profil",
   },
   {
@@ -104,7 +104,7 @@ const WAITING_CORRECTION_LINK = [
       "schoolId",
       "zip",
     ],
-    redirect: "/inscription2023/correction/eligibilite",
+    redirect: "/inscription/correction/eligibilite",
     step: "eligibilite",
   },
   {
@@ -121,7 +121,7 @@ const WAITING_CORRECTION_LINK = [
       "parent2Email",
       "parent2Phone",
     ],
-    redirect: "/inscription2023/correction/representants",
+    redirect: "/inscription/correction/representants",
     step: "representants",
   },
   {
@@ -159,12 +159,12 @@ const WAITING_CORRECTION_LINK = [
       "reducedMobilityAccess",
       "handicapInSameDepartment",
     ],
-    redirect: "/inscription2023/correction/coordonnee",
+    redirect: "/inscription/correction/coordonnee",
     step: "coordonnee",
   },
   {
     field: ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"],
-    redirect: "/inscription2023/correction/documents",
+    redirect: "/inscription/correction/documents",
     step: "documents",
   },
 ];
@@ -172,7 +172,7 @@ const WAITING_CORRECTION_LINK = [
 const WAITING_CORRECTION_LINK_CLE = [
   {
     field: ["firstName", "lastName", "frenchNationality", "phone", "email", "birthdateAt", "grade"],
-    redirect: "/inscription2023/correction/profil",
+    redirect: "/inscription/correction/profil",
     step: "profil",
   },
   {
@@ -189,7 +189,7 @@ const WAITING_CORRECTION_LINK_CLE = [
       "parent2Email",
       "parent2Phone",
     ],
-    redirect: "/inscription2023/correction/representants",
+    redirect: "/inscription/correction/representants",
     step: "representants",
   },
   {
@@ -226,7 +226,7 @@ const WAITING_CORRECTION_LINK_CLE = [
       "reducedMobilityAccess",
       "handicapInSameDepartment",
     ],
-    redirect: "/inscription2023/correction/coordonnee",
+    redirect: "/inscription/correction/coordonnee",
     step: "coordonnee",
   },
 ];

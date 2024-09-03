@@ -1,5 +1,5 @@
 // Require this first!
-import { history, initSentry, SentryRoute } from "./sentry";
+import { history as sentryHistory, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 initSentry();
 
@@ -8,20 +8,17 @@ import "./index.css";
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Link, Router, Switch, useLocation, useHistory } from "react-router-dom";
-import queryString from "query-string";
 import { QueryClientProvider } from "@tanstack/react-query";
-
 import { setYoung } from "./redux/auth/actions";
-
-import useDocumentCss from "@/hooks/useDocumentCss";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
-
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
 import { YOUNG_STATUS } from "./utils";
 import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 import { cohortsInit, getCohort } from "./utils/cohorts";
+
+import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
@@ -33,7 +30,6 @@ const Contract = lazy(() => import("./scenes/contract"));
 const ContractDone = lazy(() => import("./scenes/contract/done"));
 const Espace = lazy(() => import("./Espace"));
 const Inscription2023 = lazy(() => import("./scenes/inscription2023"));
-const Loader = lazy(() => import("./components/Loader"));
 const Maintenance = lazy(() => import("./scenes/maintenance"));
 const NonEligible = lazy(() => import("./scenes/noneligible"));
 const OnBoarding = lazy(() => import("./scenes/cle/OnBoarding"));
@@ -44,130 +40,11 @@ const Thanks = lazy(() => import("./scenes/contact/Thanks"));
 const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 
 initApi();
+startReactDsfr({ defaultColorScheme: "light", Link });
 
-class App extends React.Component {
-  render() {
-    return (
-      <Sentry.ErrorBoundary fallback={FallbackComponent}>
-        <QueryClientProvider client={queryClient}>
-          <Router history={history}>
-            <ScrollToTop />
-            <div className="flex min-h-screen flex-col justify-between">
-              {maintenance ? (
-                <Switch>
-                  <SentryRoute path="/" component={Maintenance} />
-                </Switch>
-              ) : (
-                <Switch>
-                  <SentryRoute
-                    path={[
-                      "/validate-contract/done",
-                      "/validate-contract",
-                      "/conditions-generales-utilisation",
-                      "/noneligible",
-                      "/representants-legaux",
-                      "/je-rejoins-ma-classe-engagee",
-                      "/je-suis-deja-inscrit",
-                      "/public-besoin-d-aide",
-                      "/auth",
-                      "/public-engagements",
-                      "/besoin-d-aide",
-                      "/merci",
-                      "/preinscription",
-                    ]}
-                    component={() => <OptionalLogIn />}
-                  />
-                  <SentryRoute path="/" component={() => <MandatoryLogIn />} />
-                </Switch>
-              )}
-            </div>
-          </Router>
-        </QueryClientProvider>
-      </Sentry.ErrorBoundary>
-    );
-  }
-}
-
-export default Sentry.withProfiler(App);
-
-const OptionalLogIn = () => {
-  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
-  startReactDsfr({ defaultColorScheme: "light", Link });
+function App() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.Auth.young);
-
-  const location = useLocation();
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { ok, user, token } = await api.checkToken();
-        if (!ok) {
-          api.setToken(null);
-          dispatch(setYoung(null));
-          return setLoading(false);
-        }
-        if (token) api.setToken(token);
-        if (ok && user) {
-          dispatch(setYoung(user));
-          await cohortsInit();
-        }
-      } catch (e) {
-        console.log(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []); //eslint-disable-line
-
-  if (loading) return <Loader />;
-  if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
-
-  return (
-    <Suspense fallback={<Loader />}>
-      <Switch>
-        <SentryRoute path="/validate-contract/done" component={ContractDone} />
-        <SentryRoute path="/validate-contract" component={Contract} />
-        <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-        <SentryRoute path="/noneligible" component={NonEligible} />
-        <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-        <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
-        <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
-        <SentryRoute path="/public-besoin-d-aide" component={Contact} />
-        <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
-        <SentryRoute path="/besoin-d-aide" component={Contact} />
-        <SentryRoute path="/auth" component={Auth} />
-        <SentryRoute path="/public-engagements" component={AllEngagements} />
-        <SentryRoute path="/merci" component={Thanks} />
-        <SentryRoute path="/preinscription" component={PreInscription} />
-        <Redirect to="/" />
-      </Switch>
-    </Suspense>
-  );
-};
-
-const Inscription = () => {
-  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
-  startReactDsfr({ defaultColorScheme: "light", Link });
-
-  return (
-    <Suspense fallback={<Loader />}>
-      <Switch>
-        <SentryRoute path="/inscription2023" component={Inscription2023} />
-        <SentryRoute path="/reinscription" component={ReInscription} />
-        <Redirect to="/" />
-      </Switch>
-    </Suspense>
-  );
-};
-
-const MandatoryLogIn = () => {
-  const { pathname, search } = useLocation();
-  const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
   useEffect(() => {
@@ -198,33 +75,76 @@ const MandatoryLogIn = () => {
     fetchData();
   }, []);
 
-  if (loading) return <Loader />;
-  if (!user) {
-    const queryObject = { disconnected: 1 };
-    if (pathname) queryObject.redirect = `${pathname}${search}`;
+  if (loading) return <PageLoader />;
 
-    return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
-  }
+  if (maintenance) return <Maintenance />;
 
   return (
-    <Suspense fallback={<Loader />}>
-      <Switch>
-        <SentryRoute path={["/inscription2023", "/reinscription"]} component={Inscription} />
-        <SentryRoute path="/" component={Espace} />
-      </Switch>
-    </Suspense>
-  );
-};
+    <Sentry.ErrorBoundary fallback={FallbackComponent}>
+      <QueryClientProvider client={queryClient}>
+        <Router history={sentryHistory}>
+          <AutoScroll />
+          <Suspense fallback={<PageLoader />}>
+            <Switch>
+              <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
+              <Redirect from={"/inscription2023"} to={"/inscription"} />
 
-function ScrollToTop() {
-  const { pathname } = useLocation();
+              <PublicRoute path="/validate-contract/done" component={ContractDone} />
+              <PublicRoute path="/validate-contract" component={Contract} />
+              <PublicRoute path="/conditions-generales-utilisation" component={CGU} />
+              <PublicRoute path="/noneligible" component={NonEligible} />
+              <PublicRoute path="/representants-legaux" component={RepresentantsLegaux} />
+              <PublicRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+              <PublicRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
+              <PublicRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
+              <PublicRoute path="/besoin-d-aide" component={Contact} />
+              <PublicRoute path="/auth" component={Auth} />
+              <PublicRoute path="/public-engagements" component={AllEngagements} />
+              <PublicRoute path="/merci" component={Thanks} />
+              <PublicRoute path="/preinscription" component={PreInscription} />
+
+              <SecureRoute path="/inscription" component={Inscription2023} />
+              <SecureRoute path="/reinscription" component={ReInscription} />
+              <SecureRoute path="/" component={Espace} />
+            </Switch>
+          </Suspense>
+        </Router>
+      </QueryClientProvider>
+    </Sentry.ErrorBoundary>
+  );
+}
+
+export default Sentry.withProfiler(App);
+
+function PublicRoute({ path, component }) {
+  const user = useSelector((state) => state.Auth.young);
+  const location = useLocation();
+
+  if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
+  return <SentryRoute path={path} component={component} />;
+}
+
+function SecureRoute({ path, component }) {
+  const { pathname, search } = useLocation();
+  const user = useSelector((state) => state.Auth.young);
+
+  if (!user) return <Redirect to={`/auth?disconnected=1&redirect=${pathname}${search}`} />;
+  return <SentryRoute path={path} component={component} />;
+}
+
+function AutoScroll() {
+  const { pathname, hash } = useLocation();
+
   useEffect(() => {
-    if (document.getElementsByTagName) {
-      const inputElements = document.getElementsByTagName("input");
-      for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
+    if (hash) {
+      const element = document.getElementById(hash.replace("#", ""));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
     }
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [pathname, hash]);
 
   return null;
 }
