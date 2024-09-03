@@ -1,17 +1,22 @@
 import React, { useState } from "react";
-import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
-import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
-import { HiChevronDown, HiHome } from "react-icons/hi";
+import { useSelector } from "react-redux";
+import { HiHome } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
-import { getDepartmentNumber, translate } from "snu-lib";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
+
+import { AuthState } from "@/redux/auth/reducer";
+import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
+import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
+import { getDepartmentNumber, translate, ROLES, YoungDto } from "snu-lib";
 import { capture } from "@/sentry";
 import dayjs from "@/utils/dayjs.utils";
 import api from "@/services/api";
 
 export default function List() {
   const [data, setData] = useState([]);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const history = useHistory();
   const pageId = "etablissement-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({
@@ -35,7 +40,7 @@ export default function List() {
     try {
       const res = await api.post(`/elasticsearch/cle/etablissement/export?needReferentInfo=true`, {
         filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
-          return { ...e, [key]: value.filter };
+          return { ...e, [key]: (value as any).filter };
         }, {}),
       });
       const result = await exportExcelSheet({ data: res.data });
@@ -46,12 +51,20 @@ export default function List() {
     }
   };
 
+  const getActionsList = () => {
+    const actionsList = [<Button key="export" title="Exporter" onClick={() => exportData()} />];
+    if (user.role === ROLES.ADMIN) {
+      actionsList.push(<Button key="create" title="Créer un établissement" onClick={() => history.push("/etablissement/create")} />);
+    }
+    return actionsList;
+  };
+
   return (
     <Page>
       <Header
         title="Liste des établissements"
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Établissements" }]}
-        actions={[<Button key="export" rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData()} />]}
+        actions={getActionsList()}
       />
       <Container className="!p-0">
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
@@ -108,7 +121,7 @@ export default function List() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {data.map((hit) => (
+                  {data.map((hit: YoungDto) => (
                     <Hit key={hit._id} hit={hit} />
                   ))}
                 </tbody>
@@ -161,7 +174,7 @@ const Hit = ({ hit }) => {
 };
 
 function exportExcelSheet({ data: etablissements }) {
-  let sheetData = etablissements.map((e) => ({
+  const sheetData = etablissements.map((e) => ({
     id: e._id.toString(),
     name: e.name,
     uai: e.uai,
@@ -175,13 +188,13 @@ function exportExcelSheet({ data: etablissements }) {
     updatedAt: dayjs(e.updatedAt).format("DD/MM/YYYY HH:mm"),
     createdAt: dayjs(e.createdAt).format("DD/MM/YYYY HH:mm"),
   }));
-  let headers = ["ID", "Nom", "UAI", "Adresse", "Type", "Chef d'établissement", "Tél", "Email", "Nb de classes", "Nb d'élèves", "Dernière modification", "Date de création"];
+  const headers = ["ID", "Nom", "UAI", "Adresse", "Type", "Chef d'établissement", "Tél", "Email", "Nb de classes", "Nb d'élèves", "Dernière modification", "Date de création"];
 
-  let sheet = XLSX.utils.json_to_sheet(sheetData);
+  const sheet = XLSX.utils.json_to_sheet(sheetData);
   XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
 
   // --- create workbook
-  let workbook = XLSX.utils.book_new();
+  const workbook = XLSX.utils.book_new();
   // ⚠️ Becareful, sheet name length is limited to 31 characters
   XLSX.utils.book_append_sheet(workbook, sheet, "Liste des établissements");
   const fileName = "etablissements.xlsx";
