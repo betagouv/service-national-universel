@@ -238,6 +238,8 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     onStartRequest("");
   }
 
+  const cohortExcluded = ["Octobre 2024 - Nouvelle-Calédonie", "Toussaint 2024", "Toussaint 2024 - La Réunion"];
+
   return (
     <SectionContext.Provider value={{ errors }}>
       <Section
@@ -392,30 +394,33 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 )}
               </div>
             )}
-            <div className="mt-[16px]">
-              <div className="flex flex">
-                <MiniTitle>Titulaire du PSC1</MiniTitle>
-                <HiInformationCircle data-tip data-for="psc1Info" className="mt-0.5 ml-1 text-gray-400" />
+
+            {!cohortExcluded.includes(young.cohort) && (
+              <div className="mt-[16px]">
+                <div className="flex flex">
+                  <MiniTitle>Titulaire du PSC1</MiniTitle>
+                  <HiInformationCircle data-tip data-for="psc1Info" className="mt-0.5 ml-1 text-gray-400" />
+                </div>
+                <ReactTooltip id="psc1Info" className="bg-white shadow-xl" arrowColor="white" place="right">
+                  <div className="text-xs text-[#414458]">Information déclarée par le volontaire lors de son inscription </div>
+                </ReactTooltip>
+                <Field
+                  name="psc1Info"
+                  value={data?.psc1Info || "Non renseigné"}
+                  transformer={translate}
+                  mode={sectionMode}
+                  onStartRequest={onStartRequest}
+                  currentRequest={currentRequest}
+                  correctionRequest={getCorrectionRequest(requests, "psc1Info")}
+                  onCorrectionRequestChange={onCorrectionRequestChange}
+                  type="select"
+                  options={psc1Options}
+                  onChange={(value) => onLocalChange("psc1Info", value)}
+                  young={young}
+                  className="flex-[1_1_50%]"
+                />
               </div>
-              <ReactTooltip id="psc1Info" className="bg-white shadow-xl" arrowColor="white" place="right">
-                <div className="text-xs text-[#414458]">Information déclarée par le volontaire lors de son inscription </div>
-              </ReactTooltip>
-              <Field
-                name="psc1Info"
-                value={data?.psc1Info || "Non renseigné"}
-                transformer={translate}
-                mode={sectionMode}
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "psc1Info")}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                type="select"
-                options={psc1Options}
-                onChange={(value) => onLocalChange("psc1Info", value)}
-                young={young}
-                className="flex-[1_1_50%]"
-              />
-            </div>
+            )}
           </div>
           <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-[56px]">
