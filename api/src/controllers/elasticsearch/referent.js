@@ -202,6 +202,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     // Context filters
     const contextFilters = [
       ...referentContextFilters,
+      { bool: { must_not: { exists: { field: "deletedAt" } } } },
       query.cohort
         ? {
             bool: {
