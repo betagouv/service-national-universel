@@ -169,7 +169,6 @@ function canApplyToPhase2(young, cohort) {
 }
 
 export {
-  getSchoolYear,
   getCohortYear,
   getCohortPeriod,
   formatCohortPeriod,
