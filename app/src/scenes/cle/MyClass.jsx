@@ -4,6 +4,7 @@ import { fr } from "date-fns/locale";
 import React from "react";
 
 export default function MyClass({ classe }) {
+  console.log("🚀 ~ MyClass ~ classe:", classe);
   const formatDate = (dateString) => {
     return format(new Date(dateString), "dd MMMM yyyy", { locale: fr });
   };
@@ -23,10 +24,10 @@ export default function MyClass({ classe }) {
     },
   ];
 
-  if (classe?.cohortDetails?.dateStart) {
+  if (classe?.cohortDetails?.dateStart && classe?.cohortDetails?.dateEnd) {
     fields.push({
       label: "Date de séjour",
-      value: `du ${formatDate(classe?.cohortDetails?.dateStart)} au ${formatDate(classe?.cohortDetails?.dateEnd)}`,
+      value: `Du ${formatDate(classe?.cohortDetails?.dateStart)} au ${formatDate(classe?.cohortDetails?.dateEnd)}`,
     });
   }
 
