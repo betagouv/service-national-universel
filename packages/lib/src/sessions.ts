@@ -96,7 +96,6 @@ const getCohortPeriodTemp = (young) => {
 };
 
 function inscriptionCreationOpenForYoungs(cohort) {
-  console.log(cohort)
   if (!cohort?.inscriptionEndDate) return false;
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
