@@ -6,11 +6,14 @@ export const authActions = {
 
 export function setYoung(young) {
   return (dispatch, getState) => {
-    const currentYoung = getState().auth.young;
-    const updatedYoung = {
-      ...young,
-      cohortData: young?.cohortData || currentYoung.cohortData,
-    };
+    const currentYoung = getState().Auth?.young;
+    const updatedYoung = young
+      ? {
+          ...young,
+          // Keep old cohort data if new young is not populated
+          cohortData: young?.cohortData || currentYoung?.cohortData,
+        }
+      : null;
 
     if (updatedYoung) {
       Sentry.setUser({
