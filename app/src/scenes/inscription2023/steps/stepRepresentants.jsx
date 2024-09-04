@@ -140,10 +140,10 @@ export default function StepRepresentants() {
         dispatch(setYoung(responseData));
         if (isCLE) {
           plausibleEvent("CLE/CTA inscription - representants legaux");
-          history.push("/inscription2023/confirm");
+          history.push("/inscription/confirm");
         } else {
           plausibleEvent("Phase0/CTA inscription - representants legaux");
-          history.push("/inscription2023/documents");
+          history.push("/inscription/documents");
         }
       } catch (e) {
         capture(e);
@@ -260,7 +260,7 @@ export default function StepRepresentants() {
         {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
           <SignupButtons onClickNext={onCorrection} onClickPrevious={() => history.push("/")} disabled={loading} />
         ) : (
-          <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
+          <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription/consentement")} disabled={loading} />
         )}
       </DSFRContainer>
     </>

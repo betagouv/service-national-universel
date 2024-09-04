@@ -8,7 +8,7 @@ import { toastr } from "react-redux-toastr";
 
 import { Container, InputText, InputNumber, Label, ModalConfirmation } from "@snu/ds/admin";
 
-import { canCreateOrUpdateCohesionCenter, canPutSpecificDateOnSessionPhase1, isSessionEditionOpen, validateEmailAcademique } from "snu-lib";
+import { canCreateOrUpdateCohesionCenter, canPutSpecificDateOnSessionPhase1, COHORT_TYPE, isSessionEditionOpen, validateEmailAcademique } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
@@ -235,38 +235,42 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                 </div>
               </div>
 
-              <div className="flex flex-call justify-start items-center w-full mt-2">
-                <div className="w-full mt-3">
-                  <Label
-                    className="text-xs leading-5 font-medium"
-                    title="Réception des fiches sanitaires (facultatif)"
-                    name="sanitaryContactEmail"
-                    tooltip={
-                      <>
-                        <p>
-                          Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches
-                          sanitaires à cette adresse.
-                        </p>
-                        <ul>
-                          <li className="mt-2 list-outside">Seules les adresses emails académiques sécurisées sont autorisées.</li>
-                          <li className="mt-2 list-outside">Toute modification est impossible après l'annonce des affectations.</li>
-                        </ul>
-                      </>
-                    }
-                  />
-                  <InputText
-                    label="Adresse email académique"
-                    name="sanitaryContactEmail"
-                    value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
-                    onChange={(e) => {
-                      if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
-                    }}
-                    readOnly={!values}
-                    disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
-                  />
-                </div>
-              </div>
-              {errors?.sanitaryContactEmail && <div className="text-[#EF4444] mx-auto mt-1">{errors?.sanitaryContactEmail}</div>}
+              {cohort.type === COHORT_TYPE.VOLONTAIRE && (
+                <>
+                  <div className="flex flex-call justify-start items-center w-full mt-2">
+                    <div className="w-full mt-3">
+                      <Label
+                        className="text-xs leading-5 font-medium"
+                        title="Réception des fiches sanitaires (facultatif)"
+                        name="sanitaryContactEmail"
+                        tooltip={
+                          <>
+                            <p>
+                              Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches
+                              sanitaires à cette adresse.
+                            </p>
+                            <ul>
+                              <li className="mt-2 list-outside">Seules les adresses emails académiques sécurisées sont autorisées.</li>
+                              <li className="mt-2 list-outside">Toute modification est impossible après l'annonce des affectations.</li>
+                            </ul>
+                          </>
+                        }
+                      />
+                      <InputText
+                        label="Adresse email académique"
+                        name="sanitaryContactEmail"
+                        value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
+                        onChange={(e) => {
+                          if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
+                        }}
+                        readOnly={!values}
+                        disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
+                      />
+                    </div>
+                  </div>
+                  {errors?.sanitaryContactEmail && <div className="text-[#EF4444] mx-auto mt-1">{errors?.sanitaryContactEmail}</div>}
+                </>
+              )}
             </div>
             <div className="flex w-[10%] items-center justify-center">
               <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>

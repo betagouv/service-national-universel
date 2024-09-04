@@ -10,7 +10,7 @@ export const fetchClass = (id, params = {}) =>
     });
 
 export function formatClass(data) {
-  const { name, status, coloration, grades, referents, etablissement, cohort, cohortDetails } = data;
+  const { name, status, coloration, grades, referents, etablissement, cohort, cohortDetails, schoolYear } = data;
   const [{ fullName: referent }] = referents;
   const classe = {
     id: data._id,
@@ -22,6 +22,7 @@ export function formatClass(data) {
     referent,
     etablissement,
     cohortDetails,
+    schoolYear,
   };
   return classe;
 }

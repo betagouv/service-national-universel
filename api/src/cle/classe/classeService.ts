@@ -91,7 +91,7 @@ export const getClasseById = async (classeId, withPopulate = true) => {
       .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
       .populate({ path: "session", options: { select: { _id: 1 } } })
       .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
-      .populate({ path: "cohortDetails", options: { select: { dateStart: 1 } } });
+      .populate({ path: "cohortDetails", options: { select: { dateStart: 1, dateEnd: 1 } } });
   }
 
   const classe = await query.exec();
@@ -109,8 +109,8 @@ export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
   if (withPopulate) {
     query = query
       .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1 } } })
-      .populate({ path: "cohortDetails", options: { select: { dateStart: 1 } } })
-      .populate({ path: "etablissement", options: { select: { name: 1 } } });
+      .populate({ path: "cohortDetails", options: { select: { dateStart: 1, dateEnd: 1 } } })
+      .populate({ path: "etablissement", options: { select: { name: 1, schoolYear: 1 } } });
   }
 
   const classe = await query.exec();
