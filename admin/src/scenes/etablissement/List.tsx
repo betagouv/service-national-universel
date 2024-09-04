@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { HiHome } from "react-icons/hi";
-import { useHistory } from "react-router-dom";
+import { HiHome, HiPlus } from "react-icons/hi";
+import { Link, useHistory } from "react-router-dom";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 
@@ -16,7 +16,6 @@ import api from "@/services/api";
 export default function List() {
   const [data, setData] = useState([]);
   const user = useSelector((state: AuthState) => state.Auth.user);
-  const history = useHistory();
   const pageId = "etablissement-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({
@@ -54,7 +53,11 @@ export default function List() {
   const getActionsList = () => {
     const actionsList = [<Button key="export" title="Exporter" onClick={() => exportData()} />];
     if (user.role === ROLES.ADMIN) {
-      actionsList.push(<Button key="create" title="Créer un établissement" onClick={() => history.push("/etablissement/create")} />);
+      actionsList.push(
+        <Link to="/etablissement/create">
+          <Button type="wired" leftIcon={<HiPlus size={20} className="mt-1" />} title="Créer un établissement" className="ml-2" />
+        </Link>,
+      );
     }
     return actionsList;
   };
