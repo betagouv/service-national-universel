@@ -2,6 +2,7 @@ import { regionsListDROMS } from "./region-and-departments";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { isCle } from "./young";
 import { getZonedDate } from "./utils/date";
+import { EtablissementDto } from "./dto";
 
 const COHORTS_WITH_JDM_COUNT = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
 
@@ -13,6 +14,10 @@ const getCohortEndDate = (cohort) => {
   return new Date(cohort.dateEnd);
 };
 
+const getSchoolYear = (etablissement: EtablissementDto) => {
+  const schoolYears = etablissement?.schoolYears || [];
+  return schoolYears[schoolYears.length - 1];
+};
 
 const getCohortYear = (cohort) => cohort?.dateStart?.slice(0, 4);
 
@@ -169,6 +174,7 @@ function canApplyToPhase2(young, cohort) {
 }
 
 export {
+  getSchoolYear,
   getCohortYear,
   getCohortPeriod,
   formatCohortPeriod,
