@@ -8,6 +8,7 @@ import {
   ROLES,
   canUpdateEtablissement,
   canViewEtablissement,
+  canCreateEtablissement,
   isAdmin,
   departmentToAcademy,
   isChefEtablissement,
@@ -23,6 +24,8 @@ import { UserRequest } from "../../controllers/request";
 import { idSchema } from "../../utils/validator";
 import { sendTemplate } from "../../brevo";
 import { buildUniqueClasseKey } from "../classe/classeService";
+import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
+import { apiEducation } from "../../services/gouv.fr/api-education";
 
 const router = express.Router();
 
@@ -219,6 +222,54 @@ router.delete("/:id/referents", passport.authenticate("referent", { session: fal
   }
 });
 
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value } = Joi.object({
+      uai: Joi.string().required(),
+      email: Joi.string().email().required(),
+      refLastName: Joi.string().required(),
+      refFirstName: Joi.string().required(),
+    }).validate(req.body, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canCreateEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    //if (!(await isUAIValid(value.uai))) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
+    const etablissementFromAnnuaire = await apiEducation({
+      filters: [{ key: "uai", value: value.uai }],
+      page: 0,
+      size: -1,
+    });
+
+    console.log("etablissementFromAnnuaire", etablissementFromAnnuaire);
+
+    const etablissement = await EtablissementModel.create({
+      uai: value.uai,
+    });
+
+    if (!etablissement) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Etablissement not created." });
+
+    const referent = await findOrCreateReferent(value.referent, { etablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not created." });
+    if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+    await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, from: isAdmin(req.user) ? null : req.user }, etablissement);
+
+    etablissement.set({ referentEtablissementIds: [referent._id] });
+    await etablissement.save();
+
+    return res.status(200).send({ ok: true, data: etablissement });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 function toReferentDto(referent: any): ReferentDto {
   return {
     _id: referent._id,
@@ -253,6 +304,11 @@ async function populateEtablissementWithClasse(etablissement, user) {
   }
   etablissement.classes = classes;
   return etablissement;
+}
+
+async function isUAIValid(uai: string): Promise<boolean> {
+  const etablissement = await EtablissementModel.findOne({ uai });
+  return !etablissement;
 }
 
 export default router;
