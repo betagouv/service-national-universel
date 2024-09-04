@@ -6,7 +6,7 @@ import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts
 import { CDN_BASE_URL } from "../representants-legaux/commons";
 import FileIcon from "@/assets/FileIcon";
 import ButtonExternalLinkPrimary from "@/components/ui/buttons/ButtonExternalLinkPrimary";
-import { YOUNG_STATUS } from "snu-lib";
+import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 
 function getStatusPhase1(young) {
   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
@@ -29,7 +29,11 @@ export default function DocumentsPhase1({ young }) {
           <FileIcon filled={true} icon="sanitaire" />
           <p className="text-lg font-bold">Fiche sanitaire</p>
           <p className="text-xs bg-blue-100 text-blue-800 rounded w-fit px-1">Obligatoire</p>
-          <p className="text-xs text-center">La consigne pour transmettre la fiche sanitaire sera précisée lors de l'affectation.</p>
+          {young.source === YOUNG_SOURCE.VOLONTAIRE ? (
+            <p className="text-xs text-center">La consigne pour transmettre la fiche sanitaire sera précisée lors de l'affectation.</p>
+          ) : (
+            <p className="text-xs text-center">Remettre l’ensemble des documents en mains propres le jour du départ.</p>
+          )}
           <ButtonExternalLinkPrimary href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} className="w-full">
             Télécharger
           </ButtonExternalLinkPrimary>
