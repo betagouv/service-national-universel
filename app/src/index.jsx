@@ -10,7 +10,6 @@ import store from "./redux/store";
 import App from "./app";
 
 window.addEventListener("vite:preloadError", (event) => {
-  event.preventDefault();
   console.log("An error occured while preloading a page, reloading the page to prevent future errors.");
   window.location.reload();
 });
