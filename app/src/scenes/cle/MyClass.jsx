@@ -26,7 +26,7 @@ export default function MyClass({ classe }) {
   if (classe?.cohortDetails?.dateStart) {
     fields.push({
       label: "Date de séjour",
-      value: formatDate(classe?.cohortDetails?.dateStart),
+      value: `du ${formatDate(classe?.cohortDetails?.dateStart)} au ${formatDate(classe?.cohortDetails?.dateEnd)}`,
     });
   }
 
