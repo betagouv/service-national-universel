@@ -167,9 +167,9 @@ const populateWithReferentInfo = async (classes, action) => {
 
   return classes.map((item) => {
     if (action === "search") {
-      item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+      item._source.referents = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
     } else {
-      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
+      item.referents = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
     }
     return item;
   });
