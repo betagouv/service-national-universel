@@ -24,6 +24,7 @@ import { RiInformationLine } from "react-icons/ri";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
 import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
+import { cohortsInit } from "@/utils/cohorts";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -145,6 +146,7 @@ export default function StepProfil() {
       if (user) {
         plausibleEvent("CLE/CTA preinscription - infos persos");
         if (token) API.setToken(token);
+        await cohortsInit();
         dispatch(setYoung(user));
         history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
       }
