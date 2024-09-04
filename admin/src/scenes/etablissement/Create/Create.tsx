@@ -4,7 +4,7 @@ import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
 
-import { translate } from "snu-lib";
+import { translate, ERRORS } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { Page, Header, Container, Label, InputText, Button } from "@snu/ds/admin";
@@ -12,6 +12,7 @@ import { Page, Header, Container, Label, InputText, Button } from "@snu/ds/admin
 import { Etablissement } from "./type";
 import ModaleWarning from "./ModalWarning";
 import ModaleConfirmation from "./ModalConfirmation";
+import ModaleError from "./ModalError";
 
 interface FormError {
   lastName?: string;
@@ -25,6 +26,9 @@ export default function Create() {
   const [errors, setErrors] = useState<FormError>({});
   const [modalWarning, setModalWarning] = useState(true);
   const [modalConfirmation, setModalConfirmation] = useState(false);
+  const [modalError, setModalError] = useState(false);
+  const [titleError, setTitleError] = useState("");
+  const [textError, setTextError] = useState("");
   const history = useHistory();
 
   const handleSubmit = () => {
@@ -44,8 +48,7 @@ export default function Create() {
 
   const confirmSubmit = async () => {
     setModalConfirmation(false);
-    console.log("etablissement", etablissement);
-    /*     try {
+    try {
       const { ok, code, data } = await api.post("/cle/etablissement", etablissement);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la création de l'établissement", translate(code));
@@ -54,16 +57,22 @@ export default function Create() {
       history.push("/etablissement/" + data._id);
     } catch (e) {
       capture(e);
-            if (e.code === ERRORS.USER_ALREADY_REGISTERED)
-        return toastr.error("Cette adresse email est déjà utilisée. Si vous souhaitez désigner un referent de classe existant pour cette classe, utilisez le menu Select", "", {
-          timeOut: 10000,
-        });
-      if (e.code === ERRORS.ALREADY_EXISTS)
-        return toastr.error("Une classe avec les même caractéristiques existe déjá. Utilisez le nom pour les différencier", "", {
-          timeOut: 10000,
-        });
+      if (e.code === ERRORS.USER_ALREADY_REGISTERED) {
+        setTitleError("Erreur : adresse email déjà utilisée !");
+        setTextError(
+          "Cette adresse email est déjà utilisée sur la plateforme : un compte a déjà été créé avec cette adresse email et il n’est pas possible d’en créer un deuxième. Veuillez vérifier et recommencer svp.",
+        );
+        return setModalError(true);
+      }
+
+      if (e.code === ERRORS.ALREADY_EXISTS) {
+        setTitleError("Erreur : code UAI déjà utilisé !");
+        setTextError("Cet UAI est déjà utilisé sur la plateforme : la fiche de cet établissement a déjà été créée. Veuillez vérifier et recommencer svp.");
+        return setModalError(true);
+      }
+
       toastr.error("Oups, une erreur est survenue lors de la création de la classe", "");
-    } */
+    }
   };
 
   return (
@@ -147,6 +156,7 @@ export default function Create() {
       </Container>
       <ModaleWarning isOpen={modalWarning} onClose={() => setModalWarning(false)} />
       <ModaleConfirmation isOpen={modalConfirmation} onClose={() => setModalConfirmation(false)} etablissement={etablissement} onConfirmSubmit={confirmSubmit} />
+      <ModaleError isOpen={modalError} onClose={() => setModalError(false)} title={titleError} text={textError} />
     </Page>
   );
 }

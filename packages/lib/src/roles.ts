@@ -1024,6 +1024,10 @@ function canManageMig(user: ReferentDto) {
   return ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role);
 }
 
+function canCreateEtablissement(user: UserDto) {
+  return [ROLES.ADMIN].includes(user.role);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -1176,4 +1180,5 @@ export {
   canVerifyClasse,
   canManageMig,
   canUpdateReferentClasse,
+  canCreateEtablissement,
 };
