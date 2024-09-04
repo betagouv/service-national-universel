@@ -4,7 +4,6 @@ import { fr } from "date-fns/locale";
 import React from "react";
 
 export default function MyClass({ classe }) {
-  console.log("🚀 ~ MyClass ~ classe:", classe);
   const formatDate = (dateString) => {
     return format(new Date(dateString), "dd MMMM yyyy", { locale: fr });
   };
