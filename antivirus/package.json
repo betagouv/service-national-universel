@@ -20,11 +20,11 @@
     "express": "^4.19.2",
     "express-fileupload": "^1.4.3",
     "joi": "^17.12.1",
-    "jsonwebtoken": "^9.0.0" 
+    "jsonwebtoken": "^9.0.0"
   },
   "engines": {
-    "node": "^18.20",
-    "npm": "^10.5",
+    "node": "^20.17",
+    "npm": "^10.8",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "devDependencies": {
