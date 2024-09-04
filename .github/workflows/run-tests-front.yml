@@ -23,10 +23,10 @@ jobs:
         with:
           ref: ${{ inputs.branch_name }}
 
-      - name: Node 18.x
+      - name: Node 20.x
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 20.x
 
       - uses: actions/cache@v4
         id: cache-npm
