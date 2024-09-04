@@ -134,8 +134,8 @@ const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
         <div className="flex items-center justify-between">
           <h1 className="mt-2 text-lg font-bold text-[#161616]">Ses informations personnelles</h1>
         </div>
-        <Details title="Prénom" value={young.lastName} />
-        <Details title="Nom" value={young.firstName} />
+        <Details title="Prénom" value={young.firstName} />
+        <Details title="Nom" value={young.lastName} />
         <Details title="Email" value={young.email} />
         <Details title="Son niveau scolaire" value={young.grade} />
         <Details title="Téléphone" value={concatPhoneNumberWithZone(young.phone, young.phoneZone)} />
