@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
-import { getCohortPeriod, getCohortYear, getSchoolYear } from "snu-lib";
+import { getCohortPeriod, getCohortYear } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import Error from "../../../components/error";
 import { supportURL } from "../../../config";
@@ -34,7 +34,7 @@ export default function StepConsentements() {
     enabled: isCLE && validateId(young?.classeId),
   });
 
-  const cohortYear = isCLE ? getSchoolYear(classe?.etablissement) : getCohortYear(getCohort(young.cohort));
+  const cohortYear = isCLE ? classe.schoolYear : getCohortYear(getCohort(young.cohort));
 
   const onSubmit = async () => {
     setLoading(true);
@@ -48,7 +48,7 @@ export default function StepConsentements() {
       dispatch(setYoung(responseData));
       const eventName = isCLE ? "CLE/CTA inscription - consentement" : "Phase0/CTA inscription - consentement";
       plausibleEvent(eventName);
-      history.push("/inscription2023/representants");
+      history.push("/inscription/representants");
     } catch (e) {
       capture(e);
       setError({
@@ -121,7 +121,7 @@ export default function StepConsentements() {
             ]}
           />
         </div>
-        <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/coordonnee")} disabled={disabled || loading} />
+        <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription/coordonnee")} disabled={disabled || loading} />
       </DSFRContainer>
     </>
   );

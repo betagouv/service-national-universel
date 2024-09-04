@@ -110,7 +110,7 @@ export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
     query = query
       .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1 } } })
       .populate({ path: "cohortDetails", options: { select: { dateStart: 1, dateEnd: 1 } } })
-      .populate({ path: "etablissement", options: { select: { name: 1 } } });
+      .populate({ path: "etablissement", options: { select: { name: 1, schoolYear: 1 } } });
   }
 
   const classe = await query.exec();
