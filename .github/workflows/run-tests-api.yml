@@ -44,7 +44,7 @@ jobs:
             admin/node_modules
             packages/ds/node_modules
             packages/lib/node_modules
-          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json', '.nvmrc') }}
           restore-keys: |
             ${{ runner.os }}-nodemodules-
 
