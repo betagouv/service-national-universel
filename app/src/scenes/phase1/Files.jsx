@@ -32,7 +32,7 @@ export default function DocumentsPhase1({ young }) {
           {young.source === YOUNG_SOURCE.VOLONTAIRE ? (
             <p className="text-xs text-center">La consigne pour transmettre la fiche sanitaire sera précisée lors de l'affectation.</p>
           ) : (
-            <p className="text-xs text-center">Remettre l’ensemble des documents en mains propres le jour du départ.</p>
+            <p className="text-xs text-center">Remettez l’ensemble des documents en mains propres le jour du départ.</p>
           )}
           <ButtonExternalLinkPrimary href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} className="w-full">
             Télécharger

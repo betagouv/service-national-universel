@@ -342,7 +342,7 @@ const ACADEMIQUE_DOMAINS = [
   "ac-nice.fr",
   "ac-spm.fr",
   "ac-lyon.fr",
-  "beta.gouv.fr",
+  "gouv.fr",
 ];
 
 const MINISTRES = [
