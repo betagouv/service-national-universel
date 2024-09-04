@@ -50,7 +50,6 @@ function ConsentementForm({ young, token, step, parentId }) {
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
-  const cohortYear = young.source === YOUNG_SOURCE.CLE ? classe?.schoolYear : getCohortYear(young.cohort);
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
@@ -246,6 +245,8 @@ function ConsentementForm({ young, token, step, parentId }) {
   }
 
   if (isPending) return <Loader />;
+
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? classe?.schoolYear : getCohortYear(young.cohort);
 
   return (
     <>

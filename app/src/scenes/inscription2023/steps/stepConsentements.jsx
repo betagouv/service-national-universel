@@ -15,6 +15,7 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 import { useQuery } from "@tanstack/react-query";
 import { fetchClass } from "@/services/classe.service";
+import Loader from "@/components/Loader";
 
 export default function StepConsentements() {
   const { young, isCLE } = useAuth();
@@ -28,13 +29,11 @@ export default function StepConsentements() {
     consentment2: young?.acceptCGU === "true",
   });
 
-  const { data: classe } = useQuery({
+  const { data: classe, isPending } = useQuery({
     queryKey: ["class", young?.classeId],
     queryFn: () => fetchClass(young?.classeId),
     enabled: isCLE && validateId(young?.classeId),
   });
-
-  const cohortYear = isCLE ? classe.schoolYear : getCohortYear(getCohort(young.cohort));
 
   const onSubmit = async () => {
     setLoading(true);
@@ -64,6 +63,10 @@ export default function StepConsentements() {
     if (data.consentment1 && data.consentment2) setDisabled(false);
     else setDisabled(true);
   }, [data]);
+
+  if (isPending) return <Loader />;
+
+  const cohortYear = isCLE ? classe?.schoolYear : getCohortYear(getCohort(young.cohort));
 
   return (
     <>
