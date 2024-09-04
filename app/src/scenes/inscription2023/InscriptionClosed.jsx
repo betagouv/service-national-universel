@@ -1,6 +1,5 @@
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import { getCohort } from "@/utils/cohorts";
 import React from "react";
 import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
 
@@ -27,7 +26,7 @@ export default function InscriptionClosed({ young, isCLE }) {
     <DSFRLayout title={statusTitle(isCLE)}>
       <DSFRContainer title={statusWording(young, isCLE)}>
         {!isCLE ? (
-          <p className="mb-16">Les inscriptions pour le séjour {getCohortPeriod(getCohort(young?.cohort))} sont clôturées. Vous ne pourrez donc pas participer au séjour.</p>
+          <p className="mb-16">Les inscriptions pour le séjour {getCohortPeriod(young.cohortData)} sont clôturées. Vous ne pourrez donc pas participer au séjour.</p>
         ) : (
           <p>Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023-2024.</p>
         )}

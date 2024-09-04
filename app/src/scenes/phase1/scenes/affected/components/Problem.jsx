@@ -1,9 +1,11 @@
 import React from "react";
 import { getCohortPeriod } from "snu-lib";
 import { RiErrorWarningLine } from "react-icons/ri";
-import { getCohort } from "@/utils/cohorts";
+import useAuth from "@/services/useAuth";
 
-export default function Problem({ cohort }) {
+export default function Problem() {
+  const { young } = useAuth();
+
   return (
     <div className="my-12 mx-10 w-full">
       <div className="relative my-0 mb-4 max-w-[80rem] justify-between overflow-hidden rounded-xl bg-gray-50 px-4 py-8 shadow md:mx-auto md:bg-white md:!px-8 lg:!px-16">
@@ -14,12 +16,12 @@ export default function Problem({ cohort }) {
                 <h1 className="text-5xl">Mon séjour de cohésion</h1>
                 <div className="flex flex-row items-center">
                   <h1 className="text-5xl">
-                    <strong>{getCohortPeriod(getCohort(cohort))}</strong>
+                    <strong>{getCohortPeriod(young.cohortData)}</strong>
                   </h1>
                 </div>
               </div>
               <div className="mb-4 flex flex-col md:hidden">
-                <h1 className="text-sm text-gray-600 ">Séjour {getCohortPeriod(getCohort(cohort))}</h1>
+                <h1 className="text-sm text-gray-600 ">Séjour {getCohortPeriod(young.cohortData)}</h1>
               </div>
             </article>
           </section>

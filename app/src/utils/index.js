@@ -15,9 +15,9 @@ function addOneDay(date) {
   apres la date de mise en place du dernier reglement (et s'il ne l'a pas déja 
   accepté).
 */
-export function shouldReAcceptRI(young, cohort) {
+export function shouldReAcceptRI(young) {
   const newRiDate = new Date(REGLEMENT_INTERIEUR_VERSION);
-  const cohortStartDate = new Date(cohort?.dateStart);
+  const cohortStartDate = new Date(young.cohortData?.dateStart);
   if (permissionPhase1(young) && cohortStartDate >= newRiDate && young?.acceptRI != REGLEMENT_INTERIEUR_VERSION) {
     return true;
   }
@@ -109,7 +109,7 @@ export function permissionPhase3(y) {
 export function isYoungCanApplyToPhase2Missions(young) {
   if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
-  return isCohortDone(young.cohort, 1) && hasYoungPhase1DoneOrExempted;
+  return isCohortDone(young.cohortData, 1) && hasYoungPhase1DoneOrExempted;
 }
 
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];

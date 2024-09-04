@@ -12,7 +12,6 @@ import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import { getPasswordErrorMessage } from "../../../utils";
-import { cohortsInit } from "../../../utils/cohorts";
 import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
 import { toastr } from "react-redux-toastr";
@@ -50,7 +49,6 @@ export default function Signin() {
         plausibleEvent("INVITATION/ Connexion réussie");
         api.setToken(token);
         dispatch(setYoung(young));
-        await cohortsInit();
         const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
         if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });

@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 import { getCohortPeriod, getCohortYear, getSchoolYear } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
 import Error from "../../../components/error";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
@@ -34,7 +33,7 @@ export default function StepConsentements() {
     enabled: isCLE && validateId(young?.classeId),
   });
 
-  const cohortYear = isCLE ? getSchoolYear(classe?.etablissement) : getCohortYear(getCohort(young.cohort));
+  const cohortYear = isCLE ? getSchoolYear(classe?.etablissement) : getCohortYear(young.cohortData);
 
   const onSubmit = async () => {
     setLoading(true);
@@ -103,7 +102,7 @@ export default function StepConsentements() {
                       <>M&apos;inscris au séjour de cohésion </>
                     ) : (
                       <>
-                        M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles{" "}
+                        M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(young.cohortData)}</strong> sous réserve de places disponibles{" "}
                       </>
                     )}
                     et m&apos;engage à en respecter le{" "}

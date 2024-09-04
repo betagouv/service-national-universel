@@ -2,7 +2,7 @@ import { React, useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, hasAccessToReinscription } from "../../utils";
-import { cohortAssignmentAnnouncementsIsOpenForYoung, cohortsInit, getCohort } from "../../utils/cohorts";
+import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
@@ -28,7 +28,6 @@ import Loader from "@/components/Loader";
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
-  const cohort = getCohort(young.cohort);
 
   const [reinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [reinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
@@ -49,7 +48,6 @@ export default function Home() {
 
   useEffect(() => {
     fetchReInscriptionOpen();
-    cohortsInit();
   }, []);
 
   if (reinscriptionOpenLoading) return <Loader />;
@@ -95,16 +93,16 @@ export default function Home() {
       return <HomePhase2 />;
     }
 
-    if (!!getCohort(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
+    if (![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
-      const isCohortInstructionOpen = new Date() < new Date(cohort.instructionEndDate);
+      const isCohortInstructionOpen = new Date() < new Date(young.cohortData.instructionEndDate);
       if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !isCohortInstructionOpen) {
         return <InscriptionClosedCLE />;
       }
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
       if (young.status === YOUNG_STATUS.VALIDATED) {
-        if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+        if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohortData)) {
           return <Affected />;
         } else {
           return <ValidatedV2 />;

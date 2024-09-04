@@ -8,6 +8,7 @@ import * as brevo from "../brevo";
 import config from "config";
 import anonymize from "../anonymization/young";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "./types";
+import { CohortDocument } from "./cohort";
 
 const MODELNAME = "young";
 
@@ -2044,6 +2045,13 @@ const schema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+schema.virtual("cohortData", {
+  ref: "cohort",
+  localField: "cohortId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 schema.virtual("fromUser").set<SchemaExtended>(function (fromUser: UserSaved) {
   if (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
@@ -2087,6 +2095,9 @@ schema.post("findOneAndUpdate", function (doc) {
 schema.post("remove", function (doc) {
   brevo.unsync(doc);
 });
+
+schema.set("toObject", { virtuals: true });
+schema.set("toJSON", { virtuals: true });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   this.fromUser = params?.fromUser;
@@ -2160,7 +2171,11 @@ schema.index({ sessionPhase1Id: 1, status: 1 });
 schema.index({ classeId: -1 });
 
 export type YoungType = InterfaceExtended<InferSchemaType<typeof schema>>;
-export type YoungDocument<T = {}> = DocumentExtended<YoungType & T>;
+export type YoungDocument<T = {}> = DocumentExtended<
+  YoungType & {
+    cohortData?: CohortDocument;
+  } & T
+>;
 type SchemaExtended = YoungDocument & UserExtension & { previousStatus?: YoungType["status"] };
 
 export const YoungModel = mongoose.model<YoungDocument>(MODELNAME, schema);

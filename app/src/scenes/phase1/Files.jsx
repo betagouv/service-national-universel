@@ -9,7 +9,7 @@ import ButtonExternalLinkPrimary from "@/components/ui/buttons/ButtonExternalLin
 import { YOUNG_STATUS } from "snu-lib";
 
 function getStatusPhase1(young) {
-  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !cohortAssignmentAnnouncementsIsOpenForYoung(young.cohortData)) {
     return YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
   }
   return young.statusPhase1;

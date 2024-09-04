@@ -3,7 +3,6 @@ import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { getCohort } from "../../utils/cohorts";
 import Clock from "../../assets/icons/Clock";
 import { translate, getCohortPeriod } from "snu-lib";
 import JDMA from "../../components/JDMA";
@@ -11,7 +10,6 @@ import plausibleEvent from "../../services/plausible";
 
 export default function WaitingList() {
   const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
 
   function handleClick() {
     plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) });
@@ -28,7 +26,7 @@ export default function WaitingList() {
           </h1>
 
           <div className="text-xl font-bold text-gray-800 mt-8">
-            Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {getCohortPeriod(cohort || young.cohort)}.
+            Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {getCohortPeriod(young.cohortData)}.
           </div>
 
           <hr className="text-gray-200 my-4" />

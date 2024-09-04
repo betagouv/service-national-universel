@@ -1,6 +1,5 @@
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { getCohort } from "./utils/cohorts";
 import API from "./services/api";
 import {
   ENABLE_PM,
@@ -43,7 +42,6 @@ const Espace = () => {
   const [isModalRIOpen, setIsModalRIOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
@@ -68,16 +66,16 @@ const Espace = () => {
   useEffect(() => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
-    } else if (shouldReAcceptRI(young, cohort)) {
+    } else if (shouldReAcceptRI(young)) {
       setIsModalRIOpen(true);
     }
-  }, [young, cohort]);
+  }, [young]);
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
   if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
-  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
+  const isInscriptionModificationOpenForYoungs = new Date() < new Date(young?.cohortData?.inscriptionModificationEndDate);
 
   if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription2023" />;
 

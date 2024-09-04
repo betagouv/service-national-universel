@@ -19,7 +19,6 @@ import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
 import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
-import { getCohort } from "@/utils/cohorts";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -36,8 +35,7 @@ const getInitialFormValues = (young) => ({
 
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
-  const cantUpdatePSC1 = cohort.isAssignmentAnnouncementsOpenForYoung;
+  const cantUpdatePSC1 = young.cohortData.isAssignmentAnnouncementsOpenForYoung;
   const dispatch = useDispatch();
 
   const { search } = useLocation();

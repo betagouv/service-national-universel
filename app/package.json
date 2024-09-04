@@ -71,6 +71,8 @@
     "react-tooltip": "^4.4.3",
     "reactstrap": "8.10.1",
     "redux": "4.2.1",
+    "redux-devtools-extension": "^2.13.9",
+    "redux-thunk": "^2.4.1",
     "regenerator-runtime": "0.13.9",
     "remark-gfm": "^4.0.0",
     "slugify": "^1.6.5",

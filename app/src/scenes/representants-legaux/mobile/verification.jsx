@@ -2,8 +2,7 @@ import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
-import { getDepartmentByZip, translate, translateGrade, getCohortPeriod, YOUNG_SOURCE } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
+import { translate, getCohortPeriod, YOUNG_SOURCE } from "snu-lib";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 import { concatPhoneNumberWithZone } from "snu-lib";
@@ -142,7 +141,7 @@ const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
         <hr className="mt-4" />
         <div className="flex flex-col gap-1">
           <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
-          <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div>
+          <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(young.cohortData))}</div>
         </div>
         <hr className="mt-4" />
         <div className="flex items-center justify-between">

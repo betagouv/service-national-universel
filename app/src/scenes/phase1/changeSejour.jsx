@@ -16,7 +16,6 @@ import { setYoung } from "../../redux/auth/actions";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { capture } from "../../sentry";
 import { YOUNG_STATUS, getCohortPeriod, getCohortPeriodTemp } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
 import { supportURL } from "@/config";
 
 export default function ChangeSejour() {
@@ -31,6 +30,8 @@ export default function ChangeSejour() {
   const [loading, setLoading] = useState(true);
   const history = useHistory();
   const dispatch = useDispatch();
+
+  const selectedSejourObject = sejours?.find((c) => c.name === newSejour);
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -145,7 +146,7 @@ export default function ChangeSejour() {
                   <p>
                     <b>Une contrainte personnelle, familiale, scolaire ou professionnelle ?</b>
                     <br />
-                    Vous pouvez modifier les dates de votre séjour initialement prévu {getCohortPeriodTemp({ ...young, cohort: getCohort(young.cohort) })}.
+                    Vous pouvez modifier les dates de votre séjour initialement prévu {getCohortPeriodTemp({ ...young, cohort: young.cohortData })}.
                   </p>
                   <p style={{ marginTop: 10, marginBottom: 9, fontSize: 14, fontWeight: 500 }}>Dates de séjour</p>
                   <ActionBox color="#ffffff" width="375px">
@@ -158,8 +159,8 @@ export default function ChangeSejour() {
                         <DropdownMenu>
                           {sejours.map((cohort) => {
                             return (
-                              <DropdownItem key={cohort} className="dropdown-item" onClick={() => setNewSejour(cohort)}>
-                                {`Séjour ${getCohortPeriod(getCohort(cohort))}`}
+                              <DropdownItem key={cohort} className="dropdown-item" onClick={() => setNewSejour(cohort.name)}>
+                                {`Séjour ${getCohortPeriod(cohort)}`}
                               </DropdownItem>
                             );
                           })}
@@ -222,11 +223,10 @@ export default function ChangeSejour() {
                         message={
                           <>
                             Êtes-vous sûr ? <br /> <br />
-                            Ancien séjour :{" "}
-                            <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={`Séjour ${getCohortPeriod(getCohort(young.cohort))}`} style={{ cursor: "default" }} />
+                            Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={`Séjour ${getCohortPeriod(young.cohortData)}`} style={{ cursor: "default" }} />
                             <br />
                             Nouveau séjour :{" "}
-                            <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={`Séjour ${getCohortPeriod(getCohort(newSejour))}`} style={{ cursor: "default" }} />
+                            <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={`Séjour ${getCohortPeriod(selectedSejourObject)}`} style={{ cursor: "default" }} />
                             <div className="mt-2 text-xs">Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>
                           </>
                         }

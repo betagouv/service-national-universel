@@ -24,7 +24,7 @@ export default () => {
   const renderStep = () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) return <Done />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) {
-      if (cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+      if (cohortAssignmentAnnouncementsIsOpenForYoung(young.cohortData)) {
         return <Affected />;
       } else {
         return <WaitingAffectation young={young} />;
@@ -34,7 +34,7 @@ export default () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <NotDone />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return <WaitingAffectation young={young} />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) {
-      if (cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+      if (cohortAssignmentAnnouncementsIsOpenForYoung(young.cohortData)) {
         return <WaitingList young={young} />;
       } else {
         return <WaitingAffectation young={young} />;

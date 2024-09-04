@@ -15,15 +15,13 @@ import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import useAuth from "@/services/useAuth";
 import { RiInformationFill } from "react-icons/ri";
-import { getCohort } from "@/utils/cohorts";
 import plausibleEvent from "@/services/plausible";
 
 export default function WaitingAffectation() {
   const { young, isCLE } = useAuth();
   const shouldShowChangeStayLink = !isCLE && youngCanChangeSession(young);
 
-  const cohort = getCohort(young.cohort);
-  const cohortDate = getCohortPeriod(cohort);
+  const cohortDate = getCohortPeriod(young.cohortData);
 
   function handleClick() {
     plausibleEvent("CLE attente affectation - desistement");

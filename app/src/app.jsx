@@ -16,7 +16,6 @@ import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
 import { YOUNG_STATUS } from "./utils";
 import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
-import { cohortsInit, getCohort } from "./utils/cohorts";
 
 import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
@@ -55,15 +54,15 @@ function App() {
           api.setToken(null);
           dispatch(setYoung(null));
         }
-        await cohortsInit();
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
-          const cohort = await getCohort(user.cohort);
-
           const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
           const forceEmailValidation =
-            isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
+            isEmailValidationEnabled &&
+            user.status === YOUNG_STATUS.IN_PROGRESS &&
+            user.emailVerified === "false" &&
+            new Date() < new Date(user.cohortData.inscriptionModificationEndDate);
           if (forceEmailValidation) return history.push("/preinscription");
         }
       } catch (e) {

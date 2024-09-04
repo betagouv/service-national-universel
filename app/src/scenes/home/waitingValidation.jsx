@@ -10,15 +10,13 @@ import { capture } from "../../sentry";
 import API from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { translate, YOUNG_STATUS } from "../../utils";
-import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 
 export default function WaitingValidation() {
   const { young, isCLE } = useAuth();
-  const cohort = getCohort(young.cohort);
   const history = useHistory();
   const dispatch = useDispatch();
-  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
+  const isInscriptionModificationOpenForYoungs = new Date() < new Date(young.cohortData.inscriptionModificationEndDate);
 
   const goToInscription = async () => {
     try {

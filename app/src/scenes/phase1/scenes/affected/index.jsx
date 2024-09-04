@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import { isCle, transportDatesToString, youngCanChangeSession, getDepartureDate, getReturnDate } from "snu-lib";
-import { getCohort } from "../../../../utils/cohorts";
 import api from "../../../../services/api";
 import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink";
@@ -25,9 +24,8 @@ export default function Affected() {
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const cohort = getCohort(young.cohort);
-  const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
-  const returnDate = getReturnDate(young, session, cohort, meetingPoint);
+  const departureDate = getDepartureDate(young, session, young.cohortData, meetingPoint);
+  const returnDate = getReturnDate(young, session, young.cohortData, meetingPoint);
   const data = { center, meetingPoint, session, departureDate, returnDate };
 
   useEffect(() => {
@@ -62,7 +60,7 @@ export default function Affected() {
   }
 
   if (!center && !meetingPoint) {
-    return <Problem cohort={young.cohort} />;
+    return <Problem />;
   }
 
   return (

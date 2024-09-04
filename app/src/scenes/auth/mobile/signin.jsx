@@ -14,7 +14,6 @@ import { environment } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture, captureMessage } from "../../../sentry";
 import api from "../../../services/api";
-import { cohortsInit } from "../../../utils/cohorts";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -49,7 +48,6 @@ export default function Signin() {
         plausibleEvent("Connexion réussie");
         if (token) api.setToken(token);
         dispatch(setYoung(young));
-        await cohortsInit();
         const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
         if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });

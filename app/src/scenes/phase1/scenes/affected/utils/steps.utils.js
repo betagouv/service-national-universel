@@ -26,7 +26,7 @@ export const STEPS = {
 export function isStepDone(step, young) {
   switch (step) {
     case STEPS.PDR:
-      return hasPDR(young) || pdrChoiceExpired(young?.cohort);
+      return hasPDR(young) || pdrChoiceExpired(young?.cohortData);
     case STEPS.AGREEMENT:
       return young?.youngPhase1Agreement === "true";
     case STEPS.CONVOCATION:

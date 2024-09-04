@@ -7,7 +7,6 @@ import hero from "../../assets/hero.png";
 import { supportURL } from "../../config";
 import Container from "./components/Container";
 import Files from "./Files";
-import { getCohort } from "@/utils/cohorts";
 
 export default function WaitingList({ young }) {
   return (
@@ -19,7 +18,7 @@ export default function WaitingList({ young }) {
               Mon séjour de cohésion
               <br />
               <strong className="flex items-center">
-                {getCohortPeriod(getCohort(young.cohort))}{" "}
+                {getCohortPeriod(young.cohortData)}{" "}
                 {youngCanChangeSession(young) ? (
                   <Link to="/changer-de-sejour">
                     <img src={edit} alt="edit icon" className="ml-2 h-9 w-9 hover:h-10 hover:w-10 hover:cursor-pointer" />

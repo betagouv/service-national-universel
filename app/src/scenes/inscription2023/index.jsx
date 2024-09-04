@@ -20,7 +20,6 @@ import { YOUNG_STATUS, inscriptionCreationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
 import { supportURL } from "../../config";
-import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
 import Stepper from "@/components/dsfr/ui/Stepper";
@@ -105,7 +104,6 @@ const StepCorrection = () => {
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const { isCLE } = useAuth();
-  const cohort = getCohort(young.cohort);
 
   if (!young) return <Redirect to="/preinscription" />;
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir") {
@@ -130,12 +128,12 @@ export default function Index() {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  if (!inscriptionCreationOpenForYoungs(cohort) && [YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
+  if (!inscriptionCreationOpenForYoungs(young.cohortData) && [YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
     return <InscriptionClosed young={young} isCLE={isCLE} />;
   }
 
   //si la periode de modification est finie
-  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
+  const isInscriptionModificationOpenForYoungs = new Date() < new Date(young.cohortData.inscriptionModificationEndDate);
   if (!isInscriptionModificationOpenForYoungs && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
     return <InscriptionClosed young={young} isCLE={isCLE} />;
   }

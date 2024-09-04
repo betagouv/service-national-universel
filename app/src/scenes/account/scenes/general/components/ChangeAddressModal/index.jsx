@@ -11,7 +11,6 @@ import { updateYoung } from "../../../../../../services/young.service";
 import { capture } from "../../../../../../sentry";
 import { isCohortDone } from "../../../../../../utils/cohorts";
 import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod, isCle } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
 import api from "../../../../../../services/api";
 import { setYoung } from "../../../../../../redux/auth/actions";
 
@@ -25,7 +24,7 @@ const changeAddressSteps = {
 };
 
 const ChangeAddressModal = ({ onClose, isOpen, young }) => {
-  const currentCohort = getCohort(young?.cohort);
+  const currentCohort = young.cohortData;
   const [newCohortName, setNewCohortName] = useState();
   const [newAddress, setNewAddress] = useState();
   const [step, setStep] = useState(changeAddressSteps.CONFIRM);
@@ -157,7 +156,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   };
 
-  const cantChangeAddress = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !isCohortDone(young.cohort);
+  const cantChangeAddress = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !isCohortDone(young.cohortData);
 
   return (
     <Modal
@@ -193,7 +192,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
             <ChooseCohortModalContent
               onCancel={onCancel}
               onConfirm={chooseNewCohort}
-              cohorts={availableCohorts.map((cohort) => ({ value: cohort, label: cohort === "à venir" ? "Séjour à venir" : `Séjour ${getCohortPeriod(getCohort(cohort))}` }))}
+              cohorts={availableCohorts.map((cohort) => ({ value: cohort, label: cohort === "à venir" ? "Séjour à venir" : `Séjour ${getCohortPeriod(young.cohortData)}` }))}
               currentCohortPeriod={getCohortPeriod(currentCohort)}
               isLoading={isLoading}
             />

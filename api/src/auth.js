@@ -1,3 +1,5 @@
+import { is } from "date-fns/locale";
+
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Joi = require("joi");
@@ -128,7 +130,7 @@ class Auth {
 
       const cohortModel = await CohortModel.findOne({ name: cohort });
 
-      const user = await this.model.create({
+      let user = await this.model.create({
         email,
         phone,
         phoneZone,
@@ -181,6 +183,8 @@ class Auth {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+
+      user = await this.model.populate({ path: "cohortData" });
 
       return res.status(200).send({
         ok: true,
@@ -294,7 +298,7 @@ class Auth {
         cohortId: cohort?._id,
       };
 
-      const user = await this.model.create(userData);
+      let user = await this.model.create(userData);
       if (!user) {
         throw new Error("Error while creating user");
       }
@@ -322,6 +326,9 @@ class Auth {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+
+      user = await this.model.populate({ path: "cohortData" });
+
       return res.status(200).send({
         ok: true,
         token,
@@ -341,7 +348,7 @@ class Auth {
     const { password, email } = value;
     try {
       const now = new Date();
-      const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
+      let user = await this.model.findOne({ email, deletedAt: { $exists: false } });
 
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
@@ -426,6 +433,10 @@ class Auth {
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
+      if (isYoung(user)) {
+        user = await user.populate({ path: "cohortData" });
+      }
+
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       data.featureFlags = await getFeatureFlagsAvailable();
       return res.status(200).send({
@@ -451,7 +462,7 @@ class Auth {
         .validate(req.body);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       const { email, token_2fa, rememberMe } = value;
-      const user = await this.model.findOne({
+      let user = await this.model.findOne({
         email,
         attempts2FA: { $lt: 3 },
         token2FAExpires: { $gt: Date.now() },
@@ -478,6 +489,7 @@ class Auth {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       if (isYoung(user)) {
+        user = await user.populate({ path: "cohortData" });
         if (rememberMe) {
           const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC });
           res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
@@ -513,12 +525,16 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const user = await this.model.findOne({
+      let user = await this.model.findOne({
         email: req.user.email,
         emailVerified: "false",
       });
 
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+
+      if (isYoung(user)) {
+        user = await user.populate({ path: "cohortData" });
+      }
 
       const existingUser = await this.model.findOne({
         email: value.email,
@@ -599,7 +615,7 @@ class Auth {
       const { error, value } = Joi.object({ token_email_validation: Joi.string().required() }).unknown().validate(req.body);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       const { token_email_validation } = value;
-      const user = await this.model.findOne({
+      let user = await this.model.findOne({
         email: req.user.email,
         attemptsEmailValidation: { $lt: 3 },
         tokenEmailValidationExpires: { $gt: Date.now() },
@@ -622,6 +638,10 @@ class Auth {
       user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null });
       await user.save();
 
+      if (isYoung(user)) {
+        user = await user.populate({ path: "cohortData" });
+      }
+
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       data.featureFlags = await getFeatureFlagsAvailable();
 
@@ -640,7 +660,7 @@ class Auth {
       const { error, value } = Joi.object({ token_email_validation: Joi.string().required() }).unknown().validate(req.body);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       const { token_email_validation } = value;
-      const user = await this.model.findOne({
+      let user = await this.model.findOne({
         email: req.user.email,
         attemptsEmailValidation: { $lt: 3 },
         tokenEmailValidationExpires: { $gt: Date.now() },
@@ -672,6 +692,7 @@ class Auth {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       if (isYoung(user)) {
+        user = await user.populate({ path: "cohortData" });
         const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC });
         res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
         res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
@@ -751,9 +772,14 @@ class Auth {
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
     try {
-      const { user } = req;
+      let { user } = req;
       user.set({ lastActivityAt: Date.now() });
       await user.save();
+
+      if (isYoung(user)) {
+        user = await user.populate({ path: "cohortData" });
+      }
+
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       data.featureFlags = await getFeatureFlagsAvailable();
       const token = isYoung(user) ? value.token_young : value.token_ref;
@@ -773,9 +799,14 @@ class Auth {
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
     try {
-      const { user } = req;
+      let { user } = req;
       user.set({ lastActivityAt: Date.now() });
       await user.save();
+
+      if (isYoung(user)) {
+        user = await user.populate({ path: "cohortData" });
+      }
+
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       data.featureFlags = await getFeatureFlagsAvailable();
 
@@ -861,7 +892,7 @@ class Auth {
       if (newPassword !== verifyPassword) return res.status(422).send({ ok: false, code: ERRORS.PASSWORDS_NOT_MATCH });
       if (newPassword === password) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
-      const user = await this.model.findById(req.user._id);
+      let user = await this.model.findById(req.user._id);
       const passwordChangedAt = Date.now();
       user.set({ password: newPassword, passwordChangedAt, loginAttempts: 0 });
       await user.save();
@@ -871,6 +902,10 @@ class Auth {
       });
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+
+      if (isYoung(user)) {
+        user = await user.populate({ path: "cohortData" });
+      }
 
       return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
     } catch (error) {
