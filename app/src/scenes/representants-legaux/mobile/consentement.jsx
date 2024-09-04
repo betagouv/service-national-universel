@@ -42,7 +42,7 @@ function ConsentementForm({ young, token, step, parentId }) {
   const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
   const [data, setData] = useState(getDataForConsentStep(young, parentId));
 
-  const { data: classe, isPending } = useQuery({
+  const { data: classe, isLoading } = useQuery({
     queryKey: ["class", young?.classeId],
     queryFn: () => fetchClass(young?.classeId),
     enabled: young?.source === YOUNG_SOURCE.CLE && validateId(young?.classeId),
@@ -244,7 +244,7 @@ function ConsentementForm({ young, token, step, parentId }) {
     }
   }
 
-  if (isPending) return <Loader />;
+  if (isLoading) return <Loader />;
 
   const cohortYear = young.source === YOUNG_SOURCE.CLE ? classe?.schoolYear : getCohortYear(young.cohort);
 
