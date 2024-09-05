@@ -47,31 +47,33 @@ function App() {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { ok, user, token } = await api.checkToken();
-        if (!ok) {
-          api.setToken(null);
-          dispatch(setYoung(null));
-        }
-        await cohortsInit();
-        if (token) api.setToken(token);
-        if (ok && user) {
-          dispatch(setYoung(user));
-          const cohort = await getCohort(user.cohort);
-
-          const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
-          const forceEmailValidation =
-            isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
-          if (forceEmailValidation) return history.push("/preinscription");
-        }
-      } catch (e) {
-        console.log(e);
-      } finally {
-        setLoading(false);
+  async function fetchData() {
+    try {
+      const { ok, user, token } = await api.checkToken();
+      if (!ok) {
+        api.setToken(null);
+        dispatch(setYoung(null));
+        return;
       }
+      await cohortsInit();
+      if (token) api.setToken(token);
+      if (ok && user) {
+        dispatch(setYoung(user));
+        const cohort = await getCohort(user.cohort);
+
+        const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
+        const forceEmailValidation =
+          isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
+        if (forceEmailValidation && history) return history.push("/preinscription");
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -120,7 +122,7 @@ function PublicRoute({ path, component }) {
   const user = useSelector((state) => state.Auth.young);
   const location = useLocation();
 
-  if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
+  // if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
   return <SentryRoute path={path} component={component} />;
 }
 

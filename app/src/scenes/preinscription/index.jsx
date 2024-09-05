@@ -90,6 +90,9 @@ const PreInscriptionPublic = () => {
 
 const PreInscriptionPrivate = () => {
   const young = useSelector((state) => state.Auth.young);
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+  if (!young && token) return <Redirect to={`/auth?redirect=${window.location.pathname}?token=${token}`} />;
   if (!young) return <Redirect to="/preinscription" />;
   return (
     <Switch>
