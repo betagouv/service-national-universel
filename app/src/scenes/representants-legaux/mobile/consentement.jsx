@@ -8,7 +8,7 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/dsfr/forms/toggle";
-import { translate, getCohortYear, PHONE_ZONES, isPhoneNumberWellFormated, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
+import { translate, getCohortYear, PHONE_ZONES, isPhoneNumberWellFormated, YOUNG_SOURCE } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -42,7 +42,7 @@ function ConsentementForm({ young, token, step, parentId }) {
   const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
   const [data, setData] = useState(getDataForConsentStep(young, parentId));
 
-  const { data: classe } = useQuery({
+  const { data: classe, isPending } = useQuery({
     queryKey: ["class", young?.classeId],
     queryFn: () => fetchClass(young?.classeId),
     enabled: young?.source === YOUNG_SOURCE.CLE && validateId(young?.classeId),
@@ -50,7 +50,6 @@ function ConsentementForm({ young, token, step, parentId }) {
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
-  const cohortYear = young.source === YOUNG_SOURCE.CLE ? getSchoolYear(classe?.etablissement) : getCohortYear(young.cohort);
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
@@ -244,6 +243,10 @@ function ConsentementForm({ young, token, step, parentId }) {
       history.push(`/representants-legaux/done-parent2?token=${token}`);
     }
   }
+
+  if (isPending) return <Loader />;
+
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? classe?.schoolYear : getCohortYear(young.cohort);
 
   return (
     <>
