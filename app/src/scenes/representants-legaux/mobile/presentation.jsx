@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { getCohortPeriod } from "snu-lib";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
 import LinkTo from "../../../assets/icons/LinkTo";
@@ -15,7 +14,7 @@ import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
-  const { young, token } = useContext(RepresentantsLegauxContext);
+  const { young, token, cohort } = useContext(RepresentantsLegauxContext);
 
   if (!young) return <Loader />;
 
@@ -30,8 +29,6 @@ export default function Presentation({ step, parentId }) {
     if (status === "REFUSED") return "est refusé";
   };
 
-  // const isCLE = young?.cohort.name.includes("CLE");
-  const sejourDate = getCohortPeriod(young.cohort);
   const title = parentId === 2 ? `${young.firstName} s'est inscrit(e) au SNU !` : `${young.firstName} souhaite s'inscrire au SNU !`;
 
   function onSubmit() {
@@ -95,7 +92,10 @@ export default function Presentation({ step, parentId }) {
               </div>
               <p className="font-400 mt-3 text-center text-[15px] leading-[19px]">
                 {young.firstName} a choisi le séjour <br />
-                <strong>{sejourDate}</strong>.
+                <strong>
+                  du {new Date(cohort.dateStart).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} au{" "}
+                  {new Date(cohort.dateEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+                </strong>
               </p>
             </div>
           </div>
