@@ -19,7 +19,7 @@ import { ReferentDto } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
-import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
+import { ClasseModel, EtablissementModel, ReferentModel, EtablissementType } from "../../models";
 import { UserRequest } from "../../controllers/request";
 import { idSchema } from "../../utils/validator";
 import { sendTemplate } from "../../brevo";
@@ -249,11 +249,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!etablissementFromAnnuaire) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const formatedEtablissement = mapEtablissementFromAnnuaireToEtablissement(etablissementFromAnnuaire, []);
-
-    const etablissement = await EtablissementModel.create({ ...formatedEtablissement, coordinateurIds: [] });
-
-    if (!etablissement) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Etablissement not created." });
+    const formatedEtablissement = mapEtablissementFromAnnuaireToEtablissement(etablissementFromAnnuaire, []) as EtablissementType;
 
     const preReferent = {
       firstName: value.refFirstName,
@@ -261,13 +257,16 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       email: value.email,
     };
 
-    const referent = await findOrCreateReferent(preReferent, { etablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
+    const referent = await findOrCreateReferent(preReferent, { etablissement: formatedEtablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Referent not created." });
     if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-    await inviteReferent(referent, { role: ROLES.ADMINISTRATEUR_CLE, from: null }, etablissement);
+    await inviteReferent(referent, { role: ROLES.ADMINISTRATEUR_CLE, from: null }, formatedEtablissement);
 
-    etablissement.set({ referentEtablissementIds: [referent._id] });
+    const etablissement = await EtablissementModel.create({ ...formatedEtablissement, referentEtablissementIds: [referent._id], coordinateurIds: [] });
+
+    if (!etablissement) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Etablissement not created." });
+
     await etablissement.save({ fromUser: { firstName: "CREATED_BY_ADMIN" } });
 
     return res.status(200).send({ ok: true, data: etablissement });

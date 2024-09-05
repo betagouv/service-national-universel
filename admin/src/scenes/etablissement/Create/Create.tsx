@@ -56,7 +56,7 @@ export default function Create() {
         return toastr.error("Oups, une erreur est survenue lors de la création de l'établissement", translate(code));
       }
       setIdEtablissementCreated(data._id);
-      toastr.success("La classe a bien été créée", "");
+      setModalValidation(true);
     } catch (e) {
       capture(e);
       if (e.code === ERRORS.USER_ALREADY_REGISTERED) {
@@ -80,8 +80,6 @@ export default function Create() {
       }
 
       toastr.error("Oups, une erreur est survenue lors de la création de l'établissement", "");
-    } finally {
-      setModalValidation(true);
     }
   };
 
