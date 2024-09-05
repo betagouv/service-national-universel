@@ -23,7 +23,7 @@ exports.handler = async () => {
 
       if (isInscriptionOpen) {
         //we fetch all the classes of the cohort because we need to update them or recompute them (prevent from edge case)
-        const classes = await ClasseModel.find({ cohortId: cohort._id.toString() });
+        const classes = await ClasseModel.find({ cohortId: cohort._id.toString() }).select("status");
         //if some classe are in status CLOSED or ASSIGNED, we need to update them
         const needUpdate = classes.some((c) => ["CLOSED", "ASSIGNED"].includes(c.status));
         if (needUpdate) {
@@ -37,7 +37,7 @@ exports.handler = async () => {
 
       if (isInscriptionClosed) {
         //we fetch all the classes of the cohort because we need to update them or recompute them (prevent from edge case)
-        const classes = await ClasseModel.find({ cohortId: cohort._id.toString() });
+        const classes = await ClasseModel.find({ cohortId: cohort._id.toString() }).select("status");
         //if some classe are in status OPEN, we need to update them
         const needUpdate = classes.some((c) => c.status === "OPEN");
         if (needUpdate) {
