@@ -25,7 +25,7 @@ const ClasseStateManager = {
     const inscriptionStartDate = new Date(classeCohort.inscriptionStartDate);
     const inscriptionEndDate = new Date(classeCohort.inscriptionEndDate);
     const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
-    const isInscriptionClosed = now >= inscriptionEndDate;
+    const isInscriptionClosed = now >= inscriptionEndDate || now <= inscriptionStartDate;
 
     // Open
     if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status as any) && isInscriptionOpen) {
