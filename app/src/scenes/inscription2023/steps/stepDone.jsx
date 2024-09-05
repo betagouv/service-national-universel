@@ -112,7 +112,7 @@ export default function StepWaitingConsent() {
               </div>
             </div>
             <span className="flex items-center justify-end">
-              <Link className="mt-8 flex items-center justify-end text-blue-france-sun-113" to="/inscription2023/confirm">
+              <Link className="mt-8 flex items-center justify-end text-blue-france-sun-113" to="/inscription/confirm">
                 <RiEditFill className="h-5 w-5" />
                 Modifier mes informations
               </Link>

@@ -322,7 +322,7 @@ export default function StepProfil() {
                 label: (
                   <span className="inline flex-1 text-sm leading-5 text-[#3A3A3A]">
                     J&apos;ai pris connaissance des{" "}
-                    <a href="https://www.snu.gouv.fr/donnees-personelles" target="_blank" rel="noreferrer">
+                    <a href="https://www.snu.gouv.fr/donnees-personnelles/" target="_blank" rel="noreferrer">
                       modalités de traitement de mes données personnelles.
                     </a>
                   </span>
