@@ -14,6 +14,7 @@ import {
   isChefEtablissement,
   isReferentOrAdmin,
   SENDINBLUE_TEMPLATES,
+  canSearchByUAI,
 } from "snu-lib";
 import { ReferentDto } from "snu-lib";
 import { capture } from "../../sentry";
@@ -26,6 +27,7 @@ import { sendTemplate } from "../../brevo";
 import { buildUniqueClasseKey } from "../classe/classeService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 import { apiEducation } from "../../services/gouv.fr/api-education";
+import { mapEtablissementFromAnnuaireToEtablissement } from "./etablissementMapper";
 
 const router = express.Router();
 
@@ -238,27 +240,33 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    //if (!(await isUAIValid(value.uai))) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+    if (!(await isUAIValid(value.uai))) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
     const etablissementFromAnnuaire = await apiEducation({
       filters: [{ key: "uai", value: value.uai }],
       page: 0,
       size: -1,
-    });
+    }).then((etablissements) => etablissements[0]);
 
-    console.log("etablissementFromAnnuaire", etablissementFromAnnuaire);
+    if (!etablissementFromAnnuaire) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const etablissement = await EtablissementModel.create({
-      uai: value.uai,
-    });
+    const formatedEtablissement = mapEtablissementFromAnnuaireToEtablissement(etablissementFromAnnuaire, []);
+
+    const etablissement = await EtablissementModel.create({ ...formatedEtablissement, coordinateurIds: [] });
 
     if (!etablissement) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Etablissement not created." });
 
-    const referent = await findOrCreateReferent(value.referent, { etablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
+    const preReferent = {
+      firstName: value.refFirstName,
+      lastName: value.refLastName,
+      email: value.email,
+    };
+
+    const referent = await findOrCreateReferent(preReferent, { etablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not created." });
     if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-    await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, from: isAdmin(req.user) ? null : req.user }, etablissement);
+    await inviteReferent(referent, { role: ROLES.ADMINISTRATEUR_CLE, from: null }, etablissement);
 
     etablissement.set({ referentEtablissementIds: [referent._id] });
     await etablissement.save();

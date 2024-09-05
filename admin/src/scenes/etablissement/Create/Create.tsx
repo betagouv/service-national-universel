@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { HiHome } from "react-icons/hi";
 import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { translate, ERRORS } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { Page, Header, Container, Label, InputText, Button } from "@snu/ds/admin";
+import { Page, Header, Container, Label, InputText, Button, Select } from "@snu/ds/admin";
 
 import { Etablissement } from "./type";
 import ModaleWarning from "./ModalWarning";
@@ -21,6 +21,11 @@ interface FormError {
   uai?: string;
 }
 
+type UAIOption = {
+  label: string;
+  value: string;
+};
+
 export default function Create() {
   const [etablissement, setEtablissement] = useState<Etablissement>({});
   const [errors, setErrors] = useState<FormError>({});
@@ -29,7 +34,29 @@ export default function Create() {
   const [modalError, setModalError] = useState(false);
   const [titleError, setTitleError] = useState("");
   const [textError, setTextError] = useState("");
+  const [uaiList, setUaiList] = useState<UAIOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const history = useHistory();
+
+  const getListUAI = async () => {
+    setIsLoading(true);
+    try {
+      const { ok, data } = await api.get("/cle/etablissement/list-uai");
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération des UAI", "");
+      }
+      console.log(data);
+      //const formattedUai = uais.map((uai) => ({ label: uai, value: uai }));
+
+      //setUaiList(formattedUai);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des UAI", "");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = () => {
     setErrors({});
@@ -71,9 +98,13 @@ export default function Create() {
         return setModalError(true);
       }
 
-      toastr.error("Oups, une erreur est survenue lors de la création de la classe", "");
+      toastr.error("Oups, une erreur est survenue lors de la création de l'établissement", "");
     }
   };
+
+  useEffect(() => {
+    getListUAI();
+  }, []);
 
   return (
     <Page>
@@ -87,14 +118,18 @@ export default function Create() {
             <div>
               <Label title="UAI de l'établissement" name="uai" className="!font-[500]" />
               <div className="flex items-center justify-between gap-3">
-                <InputText
-                  name="uai"
+                <Select
                   className="flex-1"
-                  active={true}
-                  placeholder="Choisir"
-                  value={etablissement.uai!}
+                  isActive={!isLoading}
+                  disabled={isLoading}
+                  placeholder={"Sélectionner un UAI"}
+                  options={uaiList}
+                  closeMenuOnSelect={true}
+                  value={etablissement?.uai ? { value: etablissement.uai, label: etablissement.uai } : null}
+                  onChange={(options) => {
+                    setEtablissement({ ...etablissement, uai: options.value });
+                  }}
                   error={errors.uai}
-                  onChange={(e) => setEtablissement({ ...etablissement, uai: e.target.value })}
                 />
               </div>
             </div>
