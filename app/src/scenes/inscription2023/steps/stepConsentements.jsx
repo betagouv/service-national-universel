@@ -29,7 +29,7 @@ export default function StepConsentements() {
     consentment2: young?.acceptCGU === "true",
   });
 
-  const { data: classe, isPending } = useQuery({
+  const { data: classe, isLoading } = useQuery({
     queryKey: ["class", young?.classeId],
     queryFn: () => fetchClass(young?.classeId),
     enabled: isCLE && validateId(young?.classeId),
@@ -64,7 +64,7 @@ export default function StepConsentements() {
     else setDisabled(true);
   }, [data]);
 
-  if (isPending) return <Loader />;
+  if (isLoading) return <Loader />;
 
   const cohortYear = isCLE ? classe?.schoolYear : getCohortYear(getCohort(young.cohort));
 
