@@ -31,6 +31,9 @@ const { initDB } = require("../mongo");
     case "dsnj":
       await require("./dsnjExport/index").handler();
       break;
+    case "classe-status":
+      await require("./classesStatusUpdate").handler();
+      break;
   }
   process.exit(0);
 })();

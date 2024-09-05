@@ -28,7 +28,7 @@ exports.handler = async () => {
         const needUpdate = classes.some((c) => ["CLOSED", "ASSIGNED"].includes(c.status));
         if (needUpdate) {
           for (const classe of classes) {
-            await ClasseStateManager.compute(classe._id.toString(), {}, { YoungModel });
+            await ClasseStateManager.compute(classe._id.toString(), { fromUser: { firstName: "Ouverture automatique des inscriptions " + cohort.name } }, { YoungModel });
           }
           resultOpen.push(cohort.name);
           totalOpen += classes.length;
@@ -42,7 +42,7 @@ exports.handler = async () => {
         const needUpdate = classes.some((c) => c.status === "OPEN");
         if (needUpdate) {
           for (const classe of classes) {
-            await ClasseStateManager.compute(classe._id.toString(), {}, { YoungModel });
+            await ClasseStateManager.compute(classe._id.toString(), { fromUser: { firstName: "Fermeture automatique des inscriptions " + cohort.name } }, { YoungModel });
           }
           resultClosed.push(cohort.name);
           totalClosed += classes.length;
