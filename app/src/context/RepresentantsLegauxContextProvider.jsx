@@ -24,7 +24,6 @@ const RepresentantsLegauxContextProvider = ({ children, parentId }) => {
         if (!token || !parentId) setError(true);
         const { ok, data } = await api.get(`/representants-legaux/young?token=${token}&parent=${parentId}`);
         if (!ok) return setError(true);
-        console.log("🚀 ~ getYoungFromToken ~ data:", data);
         setYoung(data);
 
         if (data.cohortId) {
@@ -33,7 +32,7 @@ const RepresentantsLegauxContextProvider = ({ children, parentId }) => {
         }
 
         if (data.classeId) {
-          const { ok, data: classe } = await fetchClass(data.classeId);
+          const classe = await fetchClass(data.classeId);
           if (ok) setClasse(classe);
         }
       } catch (e) {
