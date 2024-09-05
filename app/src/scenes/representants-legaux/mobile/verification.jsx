@@ -142,7 +142,8 @@ const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
         <hr className="mt-4" />
         <div className="flex flex-col gap-1">
           <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
-          <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div>
+          {/* <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div> */}
+          <div className="text-lg font-normal text-[#161616]">{young?.cohort}</div>
         </div>
         <hr className="mt-4" />
         <div className="flex items-center justify-between">

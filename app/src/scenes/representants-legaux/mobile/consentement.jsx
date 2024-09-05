@@ -246,7 +246,7 @@ function ConsentementForm({ young, token, step, parentId }) {
 
   if (isLoading) return <Loader />;
 
-  const cohortYear = young.source === YOUNG_SOURCE.CLE ? classe?.schoolYear : getCohortYear(young.cohort);
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? classe?.schoolYear : young?.cohort.includes("2024") ? "2024" : "2025";
 
   return (
     <>
