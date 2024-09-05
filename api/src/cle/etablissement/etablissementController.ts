@@ -14,7 +14,6 @@ import {
   isChefEtablissement,
   isReferentOrAdmin,
   SENDINBLUE_TEMPLATES,
-  canSearchByUAI,
 } from "snu-lib";
 import { ReferentDto } from "snu-lib";
 import { capture } from "../../sentry";
@@ -263,13 +262,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     };
 
     const referent = await findOrCreateReferent(preReferent, { etablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
-    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not created." });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Referent not created." });
     if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
     await inviteReferent(referent, { role: ROLES.ADMINISTRATEUR_CLE, from: null }, etablissement);
 
     etablissement.set({ referentEtablissementIds: [referent._id] });
-    await etablissement.save();
+    await etablissement.save({ fromUser: { firstName: "CREATED_BY_ADMIN" } });
 
     return res.status(200).send({ ok: true, data: etablissement });
   } catch (error) {

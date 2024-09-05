@@ -1028,10 +1028,6 @@ function canCreateEtablissement(user: UserDto) {
   return [ROLES.ADMIN].includes(user.role);
 }
 
-function canSearchByUAI(user: UserDto) {
-  return [ROLES.ADMIN].includes(user.role);
-}
-
 export {
   ROLES,
   SUB_ROLES,
@@ -1185,5 +1181,4 @@ export {
   canManageMig,
   canUpdateReferentClasse,
   canCreateEtablissement,
-  canSearchByUAI,
 };

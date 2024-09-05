@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { HiHome } from "react-icons/hi";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
 
 import { translate, ERRORS } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { Page, Header, Container, Label, InputText, Button, Select } from "@snu/ds/admin";
+import { Page, Header, Container, Label, InputText, Button } from "@snu/ds/admin";
 
 import { Etablissement } from "./type";
 import ModaleWarning from "./ModalWarning";
 import ModaleConfirmation from "./ModalConfirmation";
 import ModaleError from "./ModalError";
+import ModalValidation from "./ModalValidation";
 
 interface FormError {
   lastName?: string;
@@ -21,42 +22,16 @@ interface FormError {
   uai?: string;
 }
 
-type UAIOption = {
-  label: string;
-  value: string;
-};
-
 export default function Create() {
   const [etablissement, setEtablissement] = useState<Etablissement>({});
   const [errors, setErrors] = useState<FormError>({});
   const [modalWarning, setModalWarning] = useState(true);
   const [modalConfirmation, setModalConfirmation] = useState(false);
+  const [modalValidation, setModalValidation] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [titleError, setTitleError] = useState("");
   const [textError, setTextError] = useState("");
-  const [uaiList, setUaiList] = useState<UAIOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const history = useHistory();
-
-  const getListUAI = async () => {
-    setIsLoading(true);
-    try {
-      const { ok, data } = await api.get("/cle/etablissement/list-uai");
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération des UAI", "");
-      }
-      console.log(data);
-      //const formattedUai = uais.map((uai) => ({ label: uai, value: uai }));
-
-      //setUaiList(formattedUai);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des UAI", "");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [idEtablissementCreated, setIdEtablissementCreated] = useState("");
 
   const handleSubmit = () => {
     setErrors({});
@@ -80,8 +55,8 @@ export default function Create() {
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la création de l'établissement", translate(code));
       }
+      setIdEtablissementCreated(data._id);
       toastr.success("La classe a bien été créée", "");
-      history.push("/etablissement/" + data._id);
     } catch (e) {
       capture(e);
       if (e.code === ERRORS.USER_ALREADY_REGISTERED) {
@@ -98,13 +73,17 @@ export default function Create() {
         return setModalError(true);
       }
 
+      if (e.code === ERRORS.NOT_FOUND) {
+        setTitleError("Erreur : UAI inconnu !");
+        setTextError("Cet UAI n'est pas reconnu dans l'annuaire des établissements. Veuillez vérifier et recommencer svp.");
+        return setModalError(true);
+      }
+
       toastr.error("Oups, une erreur est survenue lors de la création de l'établissement", "");
+    } finally {
+      setModalValidation(true);
     }
   };
-
-  useEffect(() => {
-    getListUAI();
-  }, []);
 
   return (
     <Page>
@@ -118,18 +97,15 @@ export default function Create() {
             <div>
               <Label title="UAI de l'établissement" name="uai" className="!font-[500]" />
               <div className="flex items-center justify-between gap-3">
-                <Select
+                <InputText
+                  name="uai"
                   className="flex-1"
-                  isActive={!isLoading}
-                  disabled={isLoading}
-                  placeholder={"Sélectionner un UAI"}
-                  options={uaiList}
-                  closeMenuOnSelect={true}
-                  value={etablissement?.uai ? { value: etablissement.uai, label: etablissement.uai } : null}
-                  onChange={(options) => {
-                    setEtablissement({ ...etablissement, uai: options.value });
-                  }}
+                  active={true}
+                  placeholder="Préciser"
+                  value={etablissement.uai!}
                   error={errors.uai}
+                  max={8}
+                  onChange={(e) => setEtablissement({ ...etablissement, uai: e.target.value })}
                 />
               </div>
             </div>
@@ -192,6 +168,7 @@ export default function Create() {
       <ModaleWarning isOpen={modalWarning} onClose={() => setModalWarning(false)} />
       <ModaleConfirmation isOpen={modalConfirmation} onClose={() => setModalConfirmation(false)} etablissement={etablissement} onConfirmSubmit={confirmSubmit} />
       <ModaleError isOpen={modalError} onClose={() => setModalError(false)} title={titleError} text={textError} />
+      <ModalValidation isOpen={modalValidation} onClose={() => setModalValidation(false)} id={idEtablissementCreated} />
     </Page>
   );
 }
