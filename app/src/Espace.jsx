@@ -73,6 +73,8 @@ const Espace = () => {
     }
   }, [young, cohort]);
 
+  if (!young || !cohort) return <PageLoader />;
+
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
   if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
