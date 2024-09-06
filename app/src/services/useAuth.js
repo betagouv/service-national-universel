@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { setYoung } from "../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { logoutYoung } from "./young.service";
@@ -10,7 +10,6 @@ export const useAuth = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
-  const { pathname } = useLocation();
 
   const logout = async ({ redirect } = { redirect: true }) => {
     await logoutYoung();
@@ -24,7 +23,7 @@ export const useAuth = () => {
   };
 
   const login = () => {
-    history.push("/auth?redirect=" + pathname);
+    history.push("/auth");
   };
 
   const isLoggedIn = !!young;
