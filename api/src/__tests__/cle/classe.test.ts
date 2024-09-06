@@ -873,7 +873,7 @@ describe("POST /elasticsearch/cle/etablissement/export", () => {
 describe("PUT /cle/classe/:id/referent", () => {
   it("should create a new referent then link its id to classe", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
-    const classe = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+    const classe = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
 
     const newReferentDetails = {
       firstName: "John",
@@ -895,7 +895,7 @@ describe("PUT /cle/classe/:id/referent", () => {
   it("should update the link of the new referent to classe", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
     const referent2 = await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.REFERENT_CLASSE }));
-    const classe1 = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
+    const classe1 = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
 
     const newReferentDetails = {
       firstName: "John",
@@ -914,6 +914,46 @@ describe("PUT /cle/classe/:id/referent", () => {
     expect(res.status).toBe(200);
   });
 
+  it("should return 422 if classe is not CREATED for non super admin", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const classe1 = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.VERIFIED, referentClasseIds: [referent?._id] }));
+
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "b@b.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe1._id}/referent`).send(newReferentDetails); // sending new referent data
+
+    expect(res.ok).toBe(false);
+    expect(res.text).toContain(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    expect(res.status).toBe(422);
+  });
+
+  it("should create a new referent if classe is not CREATED for super admin", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const classe = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
+    passport.user.role = ROLES.ADMIN;
+    passport.user.subrole = "god";
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+    };
+
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe._id}/referent`).send(newReferentDetails); // sending new referent data
+    const updatedReferent: ReferentDocument = (await ReferentModel.findOne({ email: newReferentDetails.email }))!;
+
+    expect(updatedReferent).toBeTruthy();
+    expect(updatedReferent.firstName).toBe(newReferentDetails.firstName);
+    expect(updatedReferent.lastName).toBe(newReferentDetails.lastName);
+    expect(updatedReferent.email).toBe(newReferentDetails.email);
+    expect(updatedReferent.metadata.isFirstInvitationPending).toBe(true);
+    expect(res.status).toBe(200);
+    passport.user.subrole = "";
+  });
+
   it("should throw an error if role not referent nor admin cle", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
     const referent2 = await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.VISITOR }));
@@ -927,8 +967,25 @@ describe("PUT /cle/classe/:id/referent", () => {
 
     const res = await request(getAppHelper()).put(`/cle/classe/${classe1._id}/referent`).send(newReferentDetails); // sending new referent data
 
+    expect(res.ok).toBe(false);
     expect(res.text).toContain(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
     expect(res.status).toBe(422);
+  });
+
+  it("should return 403 if the user is not authorized to update the referent classe", async () => {
+    const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
+    const classe = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
+    passport.user.role = ROLES.REFERENT_CLASSE; // Assuming this role is not authorized to update the referent classe
+    const newReferentDetails = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+    };
+    const res = await request(getAppHelper()).put(`/cle/classe/${classe._id}/referent`).send(newReferentDetails); // sending new referent data
+    expect(res.ok).toBe(false);
+    expect(res.text).toContain(ERRORS.OPERATION_UNAUTHORIZED);
+    expect(res.status).toBe(403);
+    passport.user.role = ROLES.ADMIN; // Resetting the role for other tests
   });
 });
 

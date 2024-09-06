@@ -26,7 +26,7 @@ import { TStatus } from "@/types";
 import { getHeaderActionList } from "./header";
 
 export default function View() {
-  const [classe, setClasse] = useState<ClasseDto | null>(null);
+  const [classe, setClasse] = useState<ClasseDto | undefined>();
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
   const [showModaleCohort, setShowModaleCohort] = useState(false);

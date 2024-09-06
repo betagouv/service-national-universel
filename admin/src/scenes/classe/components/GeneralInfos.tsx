@@ -104,7 +104,7 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
         <div className="flex-1">
           {rights.showCohort && (
             <>
-              <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la validation des dates d'affectation." />
+              <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la reception des cohortes depuis le SI SNU" />
               <Select
                 className="mb-3"
                 isActive={edit && rights.canEditCohort}

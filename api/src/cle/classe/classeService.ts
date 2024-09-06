@@ -1,10 +1,12 @@
 import crypto from "crypto";
-import { FUNCTIONAL_ERRORS, InvitationType, ReferentCreatedBy, ROLES, YOUNG_STATUS, ClasseCertificateKeys } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, InvitationType, isSuperAdmin, ReferentCreatedBy, ROLES, STATUS_CLASSE, SUB_ROLES, YOUNG_STATUS, ClasseCertificateKeys } from "snu-lib";
 
 import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, ReferentModel, ReferentType, YoungModel } from "../../models";
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs, generateImageRightForMultipleYoungs, generateConsentementForMultipleYoungs } from "../../young/youngService";
 
 import { mapRegionToTrigramme } from "../../services/regionService";
+
+export type UpdateReferentClasse = Pick<ReferentType, "firstName" | "lastName" | "email">;
 
 export const generateCertificateByKey = async (key: string, id: string) => {
   let certificates;
@@ -148,7 +150,7 @@ export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
   return classe;
 };
 
-export const updateReferent = async (classeId: string, newReferent: Pick<ReferentType, "firstName" | "lastName" | "email">, fromUser: object) => {
+export const updateReferentByClasseId = async (classeId: string, newReferent: UpdateReferentClasse, fromUser: object) => {
   const classe = await ClasseModel.findById(classeId);
   const referent = await ReferentModel.findOne({ email: newReferent.email });
 
@@ -173,3 +175,22 @@ export const updateReferent = async (classeId: string, newReferent: Pick<Referen
   classe?.set({ referentClasseIds: [newReferentClasseCreated._id] });
   return classe?.save({ fromUser });
 };
+
+export const canUpdateReferentClasseBasedOnStatus = async (user, classeId: string) => {
+  if (!isSuperAdmin(user)) {
+    const isClasseCreated = await isClasseStatusCreated(classeId);
+    if (!isClasseCreated) {
+      throw new Error(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    }
+  }
+  return true;
+};
+
+export const isClasseStatusCreated = async (classeId: string) => {
+  const classe = await ClasseModel.findById(classeId);
+  if (!classe) {
+    throw new Error(ERRORS.CLASSE_NOT_FOUND);
+  }
+  return classe.status === STATUS_CLASSE.CREATED;
+};
+

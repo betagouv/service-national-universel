@@ -11,11 +11,22 @@ import {
   canEditTotalSeats,
   CLE_COLORATION,
   ClasseCertificateKeys,
+  ERRORS,
+  FUNCTIONAL_ERRORS,
 } from "snu-lib";
 
 import { ClasseModel, CohortModel, YoungModel, EtablissementDocument, EtablissementType } from "../../models";
 
-import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement, generateCertificateByKey } from "./classeService";
+import {
+  buildUniqueClasseId,
+  buildUniqueClasseKey,
+  canUpdateReferentClasseBasedOnStatus,
+  deleteClasse,
+  getEstimatedSeatsByEtablissement,
+  isClasseStatusCreated,
+  generateCertificateByKey,
+} from "./classeService";
+
 import * as youngService from "../../young/youngService";
 import ClasseStateManager from "./stateManager";
 import * as classService from "./classeService";
@@ -630,5 +641,89 @@ describe("getEffectifPrevisionnelByEtablissement", () => {
 
     expect(result).toEqual(expectedResult);
     expect(ClasseModel.find).toHaveBeenCalledWith({ etablissementId: mockEtablissement._id });
+  });
+});
+
+describe("isClasseStatusCreated", () => {
+  it("should return true if classe status is CREATED", async () => {
+    const classeId = "123";
+    const mockClasse = { status: STATUS_CLASSE.CREATED };
+    const findByIdSpy = jest.spyOn(ClasseModel, "findById");
+    findByIdSpy.mockResolvedValue(mockClasse);
+
+    const result = await isClasseStatusCreated(classeId);
+
+    expect(result).toBe(true);
+    expect(findByIdSpy).toHaveBeenCalledWith(classeId);
+    findByIdSpy.mockRestore();
+  });
+
+  it("should return false if classe status is not CREATED", async () => {
+    const classeId = "123";
+    const mockClasse = { status: STATUS_CLASSE.VERIFIED };
+    const findByIdSpy = jest.spyOn(ClasseModel, "findById");
+    findByIdSpy.mockResolvedValue(mockClasse);
+
+    const result = await isClasseStatusCreated(classeId);
+
+    expect(result).toBe(false);
+    expect(findByIdSpy).toHaveBeenCalledWith(classeId);
+    findByIdSpy.mockRestore();
+  });
+
+  it("should throw an error if classe is not found", async () => {
+    const classeId = "123";
+    const findByIdSpy = jest.spyOn(ClasseModel, "findById");
+    findByIdSpy.mockResolvedValue(null);
+
+    await expect(isClasseStatusCreated(classeId)).rejects.toThrow(ERRORS.CLASSE_NOT_FOUND);
+    expect(findByIdSpy).toHaveBeenCalledWith(classeId);
+    findByIdSpy.mockRestore();
+  });
+});
+
+describe("canUpdateReferentClasseBasedOnStatus", () => {
+  it("should return true for super admin", async () => {
+    const user = { role: ROLES.ADMIN, subRole: "god" };
+    const classeId = new ObjectId().toString();
+    const isClasseStatusCreatedSpy = jest.spyOn(classService, "isClasseStatusCreated");
+
+    const result = await canUpdateReferentClasseBasedOnStatus(user, classeId);
+    console.log("result", result);
+
+    expect(result).toBe(true);
+    expect(isClasseStatusCreatedSpy).not.toHaveBeenCalled();
+  });
+
+  it("should return true if classe status is created", async () => {
+    const user = { role: ROLES.REFERENT_CLASSE };
+    const classeId = new ObjectId().toString();
+    const isClasseStatusCreatedSpy = jest.spyOn(classService, "isClasseStatusCreated");
+    isClasseStatusCreatedSpy.mockResolvedValue(true);
+
+    const result = await canUpdateReferentClasseBasedOnStatus(user, classeId);
+
+    expect(result).toBe(true);
+    expect(isClasseStatusCreated).toHaveBeenCalledWith(classeId);
+  });
+
+  it("should throw an error if classe status is not created", async () => {
+    const user = { role: ROLES.REFERENT_CLASSE };
+    const classeId = "testId";
+    const isClasseStatusCreatedSpy = jest.spyOn(classService, "isClasseStatusCreated");
+    isClasseStatusCreatedSpy.mockResolvedValue(false);
+
+    await expect(canUpdateReferentClasseBasedOnStatus(user, classeId)).rejects.toThrow(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    expect(isClasseStatusCreated).toHaveBeenCalledWith(classeId);
+  });
+
+  it("should throw an error if user is not super admin and classe status is not created", async () => {
+    const user = { role: ROLES.REFERENT_CLASSE };
+    const classeId = new ObjectId().toString();
+    const isClasseStatusCreatedSpy = jest.spyOn(classService, "isClasseStatusCreated");
+    isClasseStatusCreatedSpy.mockResolvedValue(false);
+
+    await expect(canUpdateReferentClasseBasedOnStatus(user, classeId)).rejects.toThrow(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    expect(isClasseStatusCreatedSpy).toHaveBeenCalledWith(classeId);
   });
 });
