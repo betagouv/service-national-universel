@@ -25,12 +25,8 @@ interface FormError {
 export default function Create() {
   const [etablissement, setEtablissement] = useState<Etablissement>({});
   const [errors, setErrors] = useState<FormError>({});
-  const [modalWarning, setModalWarning] = useState(true);
-  const [modalConfirmation, setModalConfirmation] = useState(false);
-  const [modalValidation, setModalValidation] = useState(false);
-  const [modalError, setModalError] = useState(false);
-  const [titleError, setTitleError] = useState("");
-  const [textError, setTextError] = useState("");
+  const [showModal, setShowModal] = useState<"warning" | "confirm" | "validation" | "error" | null>("warning");
+  const [modaleContent, setModaleContent] = useState({ title: "", text: "" });
   const [idEtablissementCreated, setIdEtablissementCreated] = useState("");
 
   const handleSubmit = () => {
@@ -40,46 +36,47 @@ export default function Create() {
     if (!etablissement.refFirstName) errors.firstName = "Ce champ est obligatoire";
     if (!etablissement.email || !validator.isEmail(etablissement.email)) errors.email = "L'email est incorrect";
     if (!etablissement.uai) errors.uai = "Ce champ est obligatoire";
+    if (etablissement.uai && etablissement.uai.length !== 8) errors.uai = "Un UAI est composé de 8 caractères";
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       return;
     }
-    setModalConfirmation(true);
+    setShowModal("confirm");
   };
 
   const confirmSubmit = async () => {
-    setModalConfirmation(false);
+    setShowModal(null);
     try {
       const { ok, code, data } = await api.post("/cle/etablissement", etablissement);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la création de l'établissement", translate(code));
       }
       setIdEtablissementCreated(data._id);
-      setModalValidation(true);
+      setShowModal("validation");
     } catch (e) {
       capture(e);
       if (e.code === ERRORS.USER_ALREADY_REGISTERED) {
-        setTitleError("Erreur : adresse email déjà utilisée !");
-        setTextError(
-          "Cette adresse email est déjà utilisée sur la plateforme : un compte a déjà été créé avec cette adresse email et il n’est pas possible d’en créer un deuxième. Veuillez vérifier et recommencer svp.",
-        );
-        return setModalError(true);
+        setModaleContent({
+          title: "Erreur : adresse email déjà utilisée !",
+          text: "Cette adresse email est déjà utilisée sur la plateforme : un compte a déjà été créé avec cette adresse email et il n’est pas possible d’en créer un deuxième. Veuillez vérifier et recommencer svp.",
+        });
       }
 
       if (e.code === ERRORS.ALREADY_EXISTS) {
-        setTitleError("Erreur : code UAI déjà utilisé !");
-        setTextError("Cet UAI est déjà utilisé sur la plateforme : la fiche de cet établissement a déjà été créée. Veuillez vérifier et recommencer svp.");
-        return setModalError(true);
+        setModaleContent({
+          title: "Erreur : code UAI déjà utilisé !",
+          text: "Cet UAI est déjà utilisé sur la plateforme : la fiche de cet établissement a déjà été créée. Veuillez vérifier et recommencer svp.",
+        });
       }
 
       if (e.code === ERRORS.NOT_FOUND) {
-        setTitleError("Erreur : UAI inconnu !");
-        setTextError("Cet UAI n'est pas reconnu dans l'annuaire des établissements. Veuillez vérifier et recommencer svp.");
-        return setModalError(true);
+        setModaleContent({
+          title: "Erreur : UAI inconnu !",
+          text: "Cet UAI n'est pas reconnu dans l'annuaire des établissements. Veuillez vérifier et recommencer svp.",
+        });
       }
-
-      toastr.error("Oups, une erreur est survenue lors de la création de l'établissement", "");
+      return setShowModal("error");
     }
   };
 
@@ -130,7 +127,7 @@ export default function Create() {
                 <InputText
                   name="lastName"
                   className="flex-1"
-                  active={true}
+                  active
                   placeholder="Préciser"
                   value={etablissement.refLastName!}
                   error={errors.lastName}
@@ -163,10 +160,10 @@ export default function Create() {
           <Button key="create" title="Enregistrer et créer cet établissement" onClick={() => handleSubmit()} />
         </div>
       </Container>
-      <ModaleWarning isOpen={modalWarning} onClose={() => setModalWarning(false)} />
-      <ModaleConfirmation isOpen={modalConfirmation} onClose={() => setModalConfirmation(false)} etablissement={etablissement} onConfirmSubmit={confirmSubmit} />
-      <ModaleError isOpen={modalError} onClose={() => setModalError(false)} title={titleError} text={textError} />
-      <ModalValidation isOpen={modalValidation} onClose={() => setModalValidation(false)} id={idEtablissementCreated} />
+      <ModaleWarning isOpen={showModal === "warning"} onClose={() => setShowModal(null)} />
+      <ModaleConfirmation isOpen={showModal === "confirm"} onClose={() => setShowModal(null)} etablissement={etablissement} onConfirmSubmit={confirmSubmit} />
+      <ModaleError isOpen={showModal === "error"} onClose={() => setShowModal(null)} content={modaleContent} />
+      <ModalValidation isOpen={showModal === "validation"} onClose={() => setShowModal(null)} id={idEtablissementCreated} />
     </Page>
   );
 }
