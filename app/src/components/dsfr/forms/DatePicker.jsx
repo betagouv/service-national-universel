@@ -7,7 +7,7 @@ export default function DatePicker({ initialValue, onChange, disabled = false, s
   const [month, setMonth] = useState(initialValue ? initialValue.getMonth() + 1 : null);
   const [year, setYear] = useState(initialValue ? initialValue.getFullYear() : null);
   const maxYear = new Date().getFullYear();
-  const minYear = 1990;
+  const minYear = 2000;
   const error = state == "error" || displayError;
 
   const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
