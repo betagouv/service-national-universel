@@ -1,3 +1,5 @@
+import { isCohortInscriptionClosed, isCohortInscriptionOpen } from "../cohort/cohortService";
+
 // const config = require("../../config");
 const slack = require("../slack");
 const { capture } = require("../sentry");
@@ -6,52 +8,58 @@ const ClasseStateManager = require("../cle/classe/stateManager").default;
 
 exports.handler = async () => {
   try {
-    const resultOpen = [];
-    let totalOpen = 0;
-    const resultClosed = [];
-    let totalClosed = 0;
-
+    let totalOpen = {};
+    let totalClosed = {};
     //For now this logic (perf wise) is ok but we need to monitor after the first 2025 cohort opening
-    const cursor = CohortModel.find({ type: "CLE" }).cursor(); //dateStart: { $gte: new Date() }
+    const cursor = CohortModel.find({ type: "CLE", dateStart: { $gte: new Date() } }).cursor();
 
     await cursor.addCursorFlag("noCursorTimeout", true).eachAsync(async (cohort) => {
-      // Get inscription date
-      const now = new Date();
-      const inscriptionStartDate = new Date(cohort.inscriptionStartDate);
-      const inscriptionEndDate = new Date(cohort.inscriptionEndDate);
-      const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
-      const isInscriptionClosed = now >= inscriptionEndDate || now <= inscriptionStartDate;
+      //handle open inscription
+      const nbClassesOpen = await handleOpenInscription({ cohort });
+      if (nbClassesOpen > 0) totalOpen[cohort.name] = nbClassesOpen;
 
-      if (isInscriptionOpen) {
-        const { result, total } = await updatesClassesStatus({
-          statusList: ["CLOSED", "ASSIGNED"],
-          cohort,
-          fromUser: { firstName: "Ouverture automatique des inscriptions " + cohort.name },
-        });
-        resultOpen.push(...result);
-        totalOpen = total;
-      }
-
-      if (isInscriptionClosed) {
-        const { result, total } = await updatesClassesStatus({
-          statusList: ["OPEN"],
-          cohort,
-          fromUser: { firstName: "Fermeture automatique des inscriptions " + cohort.name },
-        });
-        resultClosed.push(...result);
-        totalClosed = total;
-      }
+      //handle closed inscription
+      const nbClassesClosed = await handleClosedInscription({ cohort });
+      if (nbClassesClosed > 0) totalClosed[cohort.name] = nbClassesClosed;
     });
 
     await slack.success({
       title: "ClassesStatusUpdate",
-      text: `Open: ${totalOpen} classes updated for cohorts: ${resultOpen.join(", ")}. Closed: ${totalClosed} classes updated for cohorts: ${resultClosed.join(", ")}`,
+      text: `Open : ${JSON.stringify(totalOpen)} - Closed : ${JSON.stringify(totalClosed)}`,
     });
   } catch (e) {
     capture(e);
     slack.error({ title: "ClassesStatusUpdate", text: JSON.stringify(e) });
     throw e;
   }
+};
+
+const handleOpenInscription = async ({ cohort }) => {
+  // Get inscription open date
+  const isInscriptionOpen = isCohortInscriptionOpen(cohort);
+  if (isInscriptionOpen) {
+    const total = await updatesClassesStatus({
+      statusList: ["CLOSED", "ASSIGNED"],
+      cohort,
+      fromUser: { firstName: "Ouverture automatique des inscriptions " + cohort.name },
+    });
+    return total;
+  }
+  return 0;
+};
+
+const handleClosedInscription = async ({ cohort }) => {
+  // Get inscription close date
+  const isInscriptionClosed = isCohortInscriptionClosed(cohort);
+  if (isInscriptionClosed) {
+    const total = await updatesClassesStatus({
+      statusList: ["OPEN"],
+      cohort,
+      fromUser: { firstName: "Fermeture automatique des inscriptions " + cohort.name },
+    });
+    return total;
+  }
+  return 0;
 };
 
 const updatesClassesStatus = async ({ statusList, cohort, fromUser }) => {
@@ -61,13 +69,10 @@ const updatesClassesStatus = async ({ statusList, cohort, fromUser }) => {
   const classes = await ClasseModel.find({ cohortId: cohort._id.toString(), status: { $ne: "WITHDRAWN" } }).select({ status: 1 });
   //if some classe are in status CLOSED or ASSIGNED, we need to update them
   const needUpdate = classes.some((c) => statusList.includes(c.status));
-  if (needUpdate) {
-    for (const classe of classes) {
-      await ClasseStateManager.compute(classe._id.toString(), fromUser, { YoungModel });
-    }
-    result.push(cohort.name);
-    total += classes.length;
+  if (!needUpdate) return { result, total };
 
-    return { result, total };
+  for (const classe of classes) {
+    await ClasseStateManager.compute(classe._id.toString(), fromUser, { YoungModel });
   }
+  return classes.length;
 };
