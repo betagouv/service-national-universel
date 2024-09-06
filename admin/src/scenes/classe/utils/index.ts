@@ -52,7 +52,7 @@ export const statusClassForBadge = (status) => {
   return statusClasse;
 };
 
-export function getRights(user: User, classe: ClasseDto, cohort: CohortDto | undefined) {
+export function getRights(user: User, classe: ClasseDto | null, cohort: CohortDto | undefined) {
   if (!user || !classe) return {};
   return {
     canEdit:
