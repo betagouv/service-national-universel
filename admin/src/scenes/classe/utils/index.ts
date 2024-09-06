@@ -64,7 +64,7 @@ export function getRights(user: User, classe: ClasseDto, cohort: CohortDto | und
     canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
     canEditRef: classe.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role),
 
-    canEditCohort: canUpdateCohort(cohort, user, classe),
+    canEditCohort: cohort ? canUpdateCohort(cohort, user) : user.role === ROLES.ADMIN && classe.status === STATUS_CLASSE.VERIFIED,
     canEditCenter: cohort ? canUpdateCenter(cohort, user) : false,
     canEditPDR: cohort ? user?.role === ROLES.ADMIN : false,
     showCohort: showCohort(cohort, user, classe),

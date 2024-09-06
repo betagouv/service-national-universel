@@ -53,8 +53,6 @@ export default function GeneralInfos({
       return [];
     }
   };
-  console.log(rights.canEditCohort);
-  console.log("disabled=", !rights.canEditCohort);
 
   return (
     <Container title="Informations générales" actions={containerActionList({ edit, setEdit, canEdit: rights.canEdit })}>
