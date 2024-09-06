@@ -1,10 +1,11 @@
 import { ROLES } from "../roles";
-import { CohortDto, ReferentDto, UserDto } from "../dto";
+import { CohortDto, ReferentDto, UserDto, ClasseDto } from "../dto";
 import { isNowBetweenDates } from "../utils/date";
+import { STATUS_CLASSE } from "../constants/constants";
 
-export const canUpdateCohort = (cohort?: CohortDto, user?: UserDto | ReferentDto): boolean => {
+export const canUpdateCohort = (cohort?: CohortDto, user?: UserDto | ReferentDto, classe?: ClasseDto): boolean => {
   if (!user) return false;
-  if (!cohort) return true;
+  if (!cohort) return user.role === ROLES.ADMIN && classe?.status === STATUS_CLASSE.VERIFIED;
 
   return (
     [ROLES.ADMIN].includes(user.role) ||

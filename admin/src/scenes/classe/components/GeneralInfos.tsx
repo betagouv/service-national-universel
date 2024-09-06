@@ -3,14 +3,7 @@ import { BsTrash3 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
-import {
-  translate,
-  ROLES,
-  translateGrade,
-  formatDateFRTimezoneUTC,
-  CohortDto,
-  ClasseDto,
-} from "snu-lib";
+import { translate, ROLES, translateGrade, formatDateFRTimezoneUTC, CohortDto, ClasseDto } from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
 import { Rights } from "./types";
@@ -60,6 +53,8 @@ export default function GeneralInfos({
       return [];
     }
   };
+  console.log(rights.canEditCohort);
+  console.log("disabled=", !rights.canEditCohort);
 
   return (
     <Container title="Informations générales" actions={containerActionList({ edit, setEdit, canEdit: rights.canEdit })}>
@@ -125,7 +120,7 @@ export default function GeneralInfos({
         <div className="flex-1">
           {rights.showCohort && (
             <>
-              <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la validation des dates d'affectation." />
+              <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la reception des cohortes depuis le SI SNU" />
               <Select
                 className="mb-3"
                 isActive={edit && rights.canEditCohort}

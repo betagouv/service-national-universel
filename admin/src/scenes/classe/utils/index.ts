@@ -13,6 +13,7 @@ import {
   translateGrade,
   CLE_COLORATION_LIST,
   translate,
+  ClasseDto,
 } from "snu-lib";
 import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
@@ -51,28 +52,30 @@ export const statusClassForBadge = (status) => {
   return statusClasse;
 };
 
-export function getRights(user: User, classe, cohort: CohortDto | undefined) {
+export function getRights(user: User, classe: ClasseDto, cohort: CohortDto | undefined) {
   if (!user || !classe) return {};
   return {
     canEdit:
       ([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN) ||
-      ([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe?.status) && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)),
+      (([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED] as (keyof typeof STATUS_CLASSE)[]).includes(classe?.status) &&
+        [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)),
     canEditEstimatedSeats: canEditEstimatedSeats(user),
     canEditTotalSeats: canEditTotalSeats(user),
     canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
-    canEditRef: classe.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN,ROLES.ADMINISTRATEUR_CLE].includes(user.role),
+    canEditRef: classe.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role),
 
-    canEditCohort: cohort ? canUpdateCohort(cohort, user) : false,
+    canEditCohort: canUpdateCohort(cohort, user, classe),
     canEditCenter: cohort ? canUpdateCenter(cohort, user) : false,
     canEditPDR: cohort ? user?.role === ROLES.ADMIN : false,
-    showCohort: cohort ? showCohort(cohort, user) : false,
+    showCohort: showCohort(cohort, user, classe),
     showCenter: cohort ? showCenter(cohort, user) : false,
     showPDR: cohort ? showPdr(cohort, user) : false,
   };
 }
 
-const showCohort = (cohort: CohortDto | undefined, user: User | undefined): boolean => {
-  if (!user || !cohort) return false;
+const showCohort = (cohort: CohortDto | undefined, user: User | undefined, classe: ClasseDto): boolean => {
+  if (!user) return false;
+  if (!cohort) return user.role === ROLES.ADMIN && classe.status === STATUS_CLASSE.VERIFIED;
   let showCohort = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role);
   if (!showCohort && user?.role === ROLES.ADMINISTRATEUR_CLE) {
     showCohort = !!cohort.cleDisplayCohortsForAdminCLE && isNowBetweenDates(cohort.cleDisplayCohortsForAdminCLEDate?.from, cohort.cleDisplayCohortsForAdminCLEDate?.to);
