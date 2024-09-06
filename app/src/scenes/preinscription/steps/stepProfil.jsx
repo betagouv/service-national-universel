@@ -243,11 +243,14 @@ export default function StepProfil() {
           onChange={(e) => setData({ ...data, firstName: e })}
         />
 
-        <label className="w-full">
-          {isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
-          <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })} />
-          {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
-        </label>
+        <Input
+          label={isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
+          value={data.lastName}
+          onChange={(e) => setData({ ...data, lastName: e })}
+          onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })}
+          state={error.firstName ? "error" : "default"}
+          stateRelatedMessage={error.firstName}
+        />
 
         {isCLE && (
           <label className="w-full">
@@ -273,17 +276,23 @@ export default function StepProfil() {
           Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte {isCLE ? "élève" : "volontaire"}.
         </p>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <label className="w-full">
-            E-mail
-            <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} type="email" />
-            {error.email ? <span className="text-sm text-red-500">{error.email}</span> : null}
-          </label>
+          <Input
+            label="E-mail"
+            value={data.email}
+            onChange={(e) => setData({ ...data, email: e })}
+            type="email"
+            state={error.email ? "error" : "default"}
+            stateRelatedMessage={error.email}
+          />
 
-          <label className="w-full">
-            Confirmez votre e-mail
-            <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} type="email" />
-            {error.emailConfirm ? <span className="text-sm text-red-500">{error.emailConfirm}</span> : null}
-          </label>
+          <Input
+            label="Confirmez votre e-mail"
+            value={data.emailConfirm}
+            onChange={(e) => setData({ ...data, emailConfirm: e })}
+            type="email"
+            state={error.emailConfirm ? "error" : "default"}
+            stateRelatedMessage={error.emailConfirm}
+          />
 
           <InputPassword
             hintText="Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole."
