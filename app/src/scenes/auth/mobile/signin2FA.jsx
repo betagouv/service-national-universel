@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "@/services/plausible";
 import { useHistory } from "react-router-dom";
@@ -10,7 +10,6 @@ import api from "../../../services/api";
 import Error from "../../../components/error";
 import { BsShieldLock } from "react-icons/bs";
 import { isValidRedirectUrl } from "snu-lib";
-import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
 import { DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
 import { cohortsInit } from "@/utils/cohorts";
@@ -18,46 +17,49 @@ import { cohortsInit } from "@/utils/cohorts";
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN = DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS / 60 / 1000;
 
 export default function Signin() {
-  const [disabled, setDisabled] = React.useState(true);
+  const params = queryString.parse(location.search);
+  const { redirect, disconnected, email } = params;
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState({});
+  const [error, setError] = React.useState(
+    disconnected
+      ? {
+          text: "Votre session a expiré",
+          subText: "Merci de vous reconnecter.",
+        }
+      : {},
+  );
   const history = useHistory();
   const [token2FA, setToken2FA] = React.useState("");
   const [rememberMe, setRememberMe] = React.useState(false);
-
   const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young);
-
-  const params = queryString.parse(location.search);
-  const { redirect, disconnected, email } = params;
-
-  React.useEffect(() => {
-    if (!young && disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
-    if (young) history.push("/" + (redirect || ""));
-  }, [young]);
+  const disabled = !token2FA || loading;
 
   const onSubmit = async ({ email, token, rememberMe }) => {
-    if (loading || disabled) return;
     setLoading(true);
     try {
-      setLoading(true);
       const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
-      setLoading(false);
-      if (response.token) api.setToken(response.token);
+
+      if (!response.token || !response.user) return;
+
+      api.setToken(response.token);
       await cohortsInit();
-      if (response.user) {
-        plausibleEvent("2FA/ Connexion réussie");
-        dispatch(setYoung(response.user));
-        const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
-        if (!redirectionApproved) {
-          captureMessage("Invalid redirect url", { extra: { redirect } });
-          toastr.error("Url de redirection invalide : " + redirect);
-          return history.push("/");
-        }
-        return (window.location.href = redirect);
+      plausibleEvent("2FA/ Connexion réussie");
+      dispatch(setYoung(response.user));
+
+      if (!redirect) {
+        history.push("/");
+        return;
       }
+
+      const redirectionApproved = isValidRedirectUrl(redirect);
+
+      if (!redirectionApproved) {
+        captureMessage("Invalid redirect url", { extra: { redirect } });
+        toastr.error("Url de redirection invalide : " + redirect);
+        return history.push("/");
+      }
+      history.push(redirect);
     } catch (e) {
-      setLoading(false);
       toastr.error(
         "Code non reconnu.",
         `Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de ${DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN} minutes, veuillez retenter de vous connecter.`,
@@ -66,12 +68,8 @@ export default function Signin() {
         },
       );
     }
+    setLoading(false);
   };
-
-  React.useEffect(() => {
-    if (token2FA) setDisabled(false);
-    else setDisabled(true);
-  }, [token2FA]);
 
   return (
     <>
@@ -113,7 +111,10 @@ export default function Signin() {
           utilisez un ordinateur partagé ou public
         </label>
 
-        <button className="flex w-full cursor-pointer items-center justify-center p-2 bg-[#000091] text-white" onClick={() => onSubmit({ email, token: token2FA, rememberMe })}>
+        <button
+          disabled={disabled}
+          className="flex w-full cursor-pointer items-center justify-center p-2 bg-[#000091] text-white"
+          onClick={() => onSubmit({ email, token: token2FA, rememberMe })}>
           Connexion
         </button>
         <hr className="mt-4"></hr>
