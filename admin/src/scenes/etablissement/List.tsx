@@ -8,13 +8,13 @@ import * as FileSaver from "file-saver";
 import { AuthState } from "@/redux/auth/reducer";
 import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
-import { getDepartmentNumber, translate, ROLES, YoungDto } from "snu-lib";
+import { getDepartmentNumber, translate, YoungDto, isAdmin } from "snu-lib";
 import { capture } from "@/sentry";
 import dayjs from "@/utils/dayjs.utils";
 import api from "@/services/api";
 
 export default function List() {
-  const [data, setData] = useState([]);
+  const [youngs, setYoungs] = useState<YoungDto[]>([]);
   const user = useSelector((state: AuthState) => state.Auth.user);
   const pageId = "etablissement-list";
   const [selectedFilters, setSelectedFilters] = useState({});
@@ -52,7 +52,7 @@ export default function List() {
 
   const getActionsList = () => {
     const actionsList = [<Button key="export" title="Exporter" onClick={() => exportData()} />];
-    if (user.role === ROLES.ADMIN) {
+    if (isAdmin(user)) {
       actionsList.push(
         <Link to="/etablissement/create">
           <Button type="wired" leftIcon={<HiPlus size={20} className="mt-1" />} title="Créer un établissement" className="ml-2" />
@@ -75,7 +75,7 @@ export default function List() {
             <Filters
               pageId={pageId}
               route="/elasticsearch/cle/etablissement/search"
-              setData={(value) => setData(value)}
+              setData={(value) => setYoungs(value)}
               filters={filterArray}
               searchPlaceholder="Rechercher par mots clés, ville, code postal..."
               selectedFilters={selectedFilters}
@@ -110,7 +110,7 @@ export default function List() {
           <ResultTable
             paramData={paramData}
             setParamData={setParamData}
-            currentEntryOnPage={data?.length}
+            currentEntryOnPage={youngs?.length}
             size={size}
             setSize={setSize}
             render={
@@ -124,7 +124,7 @@ export default function List() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {data.map((hit: YoungDto) => (
+                  {youngs.map((hit) => (
                     <Hit key={hit._id} hit={hit} />
                   ))}
                 </tbody>

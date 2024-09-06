@@ -225,7 +225,7 @@ router.delete("/:id/referents", passport.authenticate("referent", { session: fal
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error, value } = Joi.object({
+    const { error, value: payload } = Joi.object<{ uai: string; email: string; refLastName: string; refFirstName: string }>({
       uai: Joi.string().required(),
       email: Joi.string().email().required(),
       refLastName: Joi.string().required(),
@@ -239,10 +239,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (!(await isUAIValid(value.uai))) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+    if (!(await isUAIValid(payload.uai))) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
     const etablissementFromAnnuaire = await apiEducation({
-      filters: [{ key: "uai", value: value.uai }],
+      filters: [{ key: "uai", value: payload.uai }],
       page: 0,
       size: -1,
     }).then((etablissements) => etablissements[0]);
@@ -252,9 +252,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const formatedEtablissement = mapEtablissementFromAnnuaireToEtablissement(etablissementFromAnnuaire, []) as EtablissementType;
 
     const preReferent = {
-      firstName: value.refFirstName,
-      lastName: value.refLastName,
-      email: value.email,
+      firstName: payload.refFirstName,
+      lastName: payload.refLastName,
+      email: payload.email,
     };
 
     const referent = await findOrCreateReferent(preReferent, { etablissement: formatedEtablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
