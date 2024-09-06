@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Redirect, Switch, useParams } from "react-router-dom";
+import { Redirect, Switch, useHistory, useLocation, useParams } from "react-router-dom";
 import api from "@/services/api";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
 import { SentryRoute, capture } from "../../sentry";
@@ -89,8 +89,10 @@ const PreInscriptionPublic = () => {
 };
 
 const PreInscriptionPrivate = () => {
-  const young = useSelector((state) => state.Auth.young);
-  if (!young) return <Redirect to="/preinscription" />;
+  const { young } = useAuth();
+  const { pathname, search } = useLocation();
+  const history = useHistory();
+  if (!young) return history.push(`/auth?redirect=${pathname}${search}`);
   return (
     <Switch>
       <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />;
