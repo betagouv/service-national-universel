@@ -347,7 +347,7 @@ function ConsentementForm({ young, token, step, parentId, cohort, classe }) {
                     </Check>
                     <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
                       <div className="block">
-                        Accepte la collecte et le traitement des données personnelles de&nbsp;<b>{youngFullname}</b> dans le cadre d’une mission d’intérêt public
+                        Accepte la collecte et le traitement des données personnelles de&nbsp;<b>{youngFullname}</b> dans le cadre d’une mission d’intérêt public.
                       </div>
                     </Check>
                   </div>
