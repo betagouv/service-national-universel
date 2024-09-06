@@ -67,7 +67,6 @@ class Auth {
         },
       ])
       .toArray();
-    console.log(countResult.length);
     return countResult.length > 0 ? countResult[0].count : 0;
   }
 
