@@ -133,14 +133,11 @@ class Auth {
       const formatedDate = new Date(birthdateAt);
       formatedDate.setUTCHours(11, 0, 0);
 
-      const normalizedDate = new Date(birthdateAt);
-      normalizedDate.setUTCHours(0, 0, 0);
-
       if (!validateBirthDate(formatedDate)) return res.status(400).send({ ok: false, user: null, code: ERRORS.INVALID_PARAMS });
       const normalizedFirstName = normalizeString(firstName);
       const normalizedLastName = normalizeString(lastName);
-      const count = await this.countDocumentsInView(normalizedFirstName, normalizedLastName, normalizedDate);
 
+      const count = await this.countDocumentsInView(normalizedFirstName, normalizedLastName, formatedDate);
       if (count > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
       if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
