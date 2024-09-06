@@ -10,3 +10,14 @@ export interface GetClasseRoute extends BasicRoute {
   };
   response: RouteResponseBody<ClasseDto>;
 }
+
+export const getClasseRoute: Pick<GetClasseRoute, "method" | "path"> = {
+  method: "GET",
+  path: "/cle/classe/{id}",
+};
+// OU
+export const buildGetClasseRoute = (id: string): Pick<GetClasseRoute, "method" | "path" | "params"> => ({
+  method: "GET",
+  path: "/cle/classe/{id}",
+  params: { id },
+});

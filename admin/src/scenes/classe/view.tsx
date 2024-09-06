@@ -60,6 +60,17 @@ export default function View() {
         method: "GET",
         params: { id },
       })();
+
+      // OU
+
+      // const {
+      //   ok,
+      //   code,
+      //   data: classe,
+      // } = await buildRequest<ClassesRoutes["Get"]>({
+      //   ...buildGetClasseRoute(id),
+      // })();
+
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
