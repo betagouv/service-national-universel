@@ -1,15 +1,14 @@
 import { isCohortInscriptionClosed, isCohortInscriptionOpen } from "../cohort/cohortService";
+import { ClasseModel, CohortModel, CohortType, YoungModel } from "../models";
+import { capture } from "../sentry";
+import slack from "../slack";
+import ClasseStateManager from "../cle/classe/stateManager";
+import { UserSaved } from "../models/types";
 
-// const config = require("../../config");
-const slack = require("../slack");
-const { capture } = require("../sentry");
-const { CohortModel, ClasseModel, YoungModel } = require("../models");
-const ClasseStateManager = require("../cle/classe/stateManager").default;
-
-exports.handler = async () => {
+export const handler = async () => {
   try {
-    let totalOpen = {};
-    let totalClosed = {};
+    const totalOpen = {};
+    const totalClosed = {};
     //For now this logic (perf wise) is ok but we need to monitor after the first 2025 cohort opening
     const cursor = CohortModel.find({ type: "CLE", dateStart: { $gte: new Date() } }).cursor();
 
@@ -34,7 +33,7 @@ exports.handler = async () => {
   }
 };
 
-const handleOpenInscription = async ({ cohort }) => {
+const handleOpenInscription = async ({ cohort }: { cohort: CohortType }): Promise<number> => {
   // Get inscription open date
   const isInscriptionOpen = isCohortInscriptionOpen(cohort);
   if (isInscriptionOpen) {
@@ -48,7 +47,7 @@ const handleOpenInscription = async ({ cohort }) => {
   return 0;
 };
 
-const handleClosedInscription = async ({ cohort }) => {
+const handleClosedInscription = async ({ cohort }: { cohort: CohortType }): Promise<number> => {
   // Get inscription close date
   const isInscriptionClosed = isCohortInscriptionClosed(cohort);
   if (isInscriptionClosed) {
@@ -62,14 +61,12 @@ const handleClosedInscription = async ({ cohort }) => {
   return 0;
 };
 
-const updatesClassesStatus = async ({ statusList, cohort, fromUser }) => {
-  const result = [];
-  let total = 0;
+const updatesClassesStatus = async ({ statusList, cohort, fromUser }: { statusList: string[]; cohort: CohortType; fromUser: UserSaved }) => {
   //we fetch all the classes of the cohort because we need to update them or recompute them (prevent from edge case)
   const classes = await ClasseModel.find({ cohortId: cohort._id.toString(), status: { $ne: "WITHDRAWN" } }).select({ status: 1 });
   //if some classe are in status CLOSED or ASSIGNED, we need to update them
   const needUpdate = classes.some((c) => statusList.includes(c.status));
-  if (!needUpdate) return { result, total };
+  if (!needUpdate) return 0;
 
   for (const classe of classes) {
     await ClasseStateManager.compute(classe._id.toString(), fromUser, { YoungModel });
