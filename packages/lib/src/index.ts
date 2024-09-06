@@ -28,3 +28,4 @@ export * from "./utils/date";
 export * from "./utils/file";
 export * from "./utils/isValidRedirectUrl";
 export * from "./young";
+export * from "./routes";

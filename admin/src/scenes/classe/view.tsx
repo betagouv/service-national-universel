@@ -8,7 +8,7 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Badge } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes } from "snu-lib";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
@@ -24,6 +24,7 @@ import ModaleCohort from "./components/modaleCohort";
 import { InfoBus, Rights } from "./components/types";
 import { TStatus } from "@/types";
 import { getHeaderActionList } from "./header";
+import { buildRequest } from "@/utils/buildRequest";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | undefined>();
@@ -49,7 +50,16 @@ export default function View() {
 
   const getClasse = async () => {
     try {
-      const { ok, code, data: classe } = await api.get(`/cle/classe/${id}`);
+      // const { ok, code, data: classe } = await api.get(`/cle/classe/${id}`);
+      const {
+        ok,
+        code,
+        data: classe,
+      } = await buildRequest<ClassesRoutes["Get"]>({
+        path: "/cle/classe/{id}",
+        method: "GET",
+        params: { id },
+      })();
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }

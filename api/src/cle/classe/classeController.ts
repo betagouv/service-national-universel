@@ -17,6 +17,7 @@ import {
   canViewClasse,
   canWithdrawClasse,
   ClasseSchoolYear,
+  ClassesRoutes,
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
   CLE_GRADE_LIST,
@@ -38,7 +39,7 @@ import { capture, captureMessage } from "../../sentry";
 import { ERRORS, isReferent } from "../../utils";
 import { validateId } from "../../utils/validator";
 import emailsEmitter from "../../emails";
-import { UserRequest } from "../../controllers/request";
+import { RouteRequest, RouteResponse, UserRequest } from "../../controllers/request";
 import {
   ClasseDocument,
   ClasseModel,
@@ -79,7 +80,7 @@ import {
 } from "./export/classeExportService";
 import ClasseStateManager from "./stateManager";
 
-const querySchema = Joi.object({
+const querySchema = Joi.object<{ withDetails?: boolean }>({
   withDetails: Joi.boolean().default(true),
   // Ajoutez d'autres paramètres si nécessaire
 });
@@ -458,33 +459,37 @@ router.put("/:id/referent", passport.authenticate("referent", { session: false, 
   }
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value } = validateId(req.params.id);
-    if (error) {
+router.get(
+  "/:id",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  async (req: RouteRequest<ClassesRoutes["Get"]>, res: RouteResponse<ClassesRoutes["Get"]>) => {
+    try {
+      const { error, value } = validateId(req.params.id);
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      // Validate and transform query parameters
+      const { error: queryError, value: queryParams } = querySchema.validate(req.query);
+      if (queryError) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
+      }
+
+      const data = await getClasseById(value, queryParams?.withDetails);
+
+      return res.status(200).send({ ok: true, data });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error.message === "Classe not found") {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // Validate and transform query parameters
-    const { error: queryError, value: queryParams } = querySchema.validate(req.query);
-    if (queryError) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
-    }
-
-    const data = await getClasseById(value, queryParams?.withDetails);
-
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    if (error.message === "Classe not found") {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.get("/public/:id", async (req, res) => {
   try {
