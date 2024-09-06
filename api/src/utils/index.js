@@ -957,10 +957,10 @@ const validateBirthDate = (date) => {
 
 const normalizeString = (str) => {
   return str
-    .normalize("NFD") // Normalise la chaîne de caractères
+    .normalize("NFD") // Normalise la chaîne de caractères (décompose les accents)
     .replace(/[\u0300-\u036f]/g, "") // Supprime les diacritiques (accents)
-    .replace(/[-\s]/g, "") // Remplace les tirets et les espaces par rien
-    .toLowerCase(); // Convertit tout en minuscules pour une comparaison insensible à la casse
+    .replace(/[-\s.']/g, "") // Supprime les tirets, espaces, points, et apostrophes
+    .toLowerCase(); // Convertit tout en minuscules
 };
 
 module.exports = {
