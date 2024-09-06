@@ -34,7 +34,7 @@ import ButtonRelanceVerif from "./components/ButtonRelanceVerif";
 import VerifClassButton from "./components/VerifClassButton";
 
 export default function View() {
-  const [classe, setClasse] = useState<ClasseDto | null>(null);
+  const [classe, setClasse] = useState<ClasseDto | undefined>(undefined);
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
   const [showModaleWithdraw, setShowModaleWithdraw] = useState(false);
