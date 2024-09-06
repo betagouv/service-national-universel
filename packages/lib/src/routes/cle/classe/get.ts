@@ -1,3 +1,4 @@
+import Joi from "joi";
 import { ClasseDto } from "src/dto";
 import { BasicRoute, RouteResponseBody } from "src/routes";
 
@@ -6,10 +7,16 @@ export interface GetClasseRoute extends BasicRoute {
   path: "/cle/classe/{id}";
   params: { id: string };
   query?: {
-    withDetails?: number;
+    withDetails?: boolean;
   };
   response: RouteResponseBody<ClasseDto>;
 }
+
+export const GetClasseRouteSchema = {
+  query: Joi.object<GetClasseRoute["query"]>({
+    withDetails: Joi.boolean().default(true),
+  }),
+};
 
 export const getClasseRoute: Pick<GetClasseRoute, "method" | "path"> = {
   method: "GET",

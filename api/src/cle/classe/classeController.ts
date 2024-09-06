@@ -18,6 +18,7 @@ import {
   canWithdrawClasse,
   ClasseSchoolYear,
   ClassesRoutes,
+  ClassesRoutesSchema,
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
   CLE_GRADE_LIST,
@@ -79,11 +80,6 @@ import {
   getYoungsGroupByClasses,
 } from "./export/classeExportService";
 import ClasseStateManager from "./stateManager";
-
-const querySchema = Joi.object<{ withDetails?: boolean }>({
-  withDetails: Joi.boolean().default(true),
-  // Ajoutez d'autres paramètres si nécessaire
-});
 
 const router = express.Router();
 router.post(
@@ -206,110 +202,93 @@ router.post("/export", passport.authenticate("referent", { session: false, failW
   }
 });
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({
-      // Classe
-      name: Joi.string().required(),
-      cohort: Joi.string().allow("").allow(null).optional(),
-      estimatedSeats: Joi.number().min(1).required(),
-      coloration: Joi.string()
-        .valid(...CLE_COLORATION_LIST)
-        .required(),
-      filiere: Joi.string().valid(...CLE_FILIERE_LIST),
-      grades: Joi.array().items(Joi.string().valid(...CLE_GRADE_LIST)),
-      type: Joi.string()
-        .valid(...TYPE_CLASSE_LIST)
-        .required(),
-      etablissementId: Joi.string().required(),
-      // Referent
-      referent: Joi.object({
-        _id: Joi.string().optional(),
-        firstName: Joi.string().required(),
-        lastName: Joi.string().required(),
-        email: Joi.string().required(),
-      }).required(),
-    }).validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    if (!canCreateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const etablissement = await EtablissementModel.findById(value.etablissementId);
-    if (!etablissement) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Etablissement not found." });
-    }
-
-    let cohortName: string | null = null;
-    const isCleClasseCohortEnabled = await isFeatureAvailable(FeatureFlagName.CLE_CLASSE_ADD_COHORT_ENABLED);
-    if (value.cohort) {
-      if (!isCleClasseCohortEnabled) {
+router.post(
+  "/",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  async (req: RouteRequest<ClassesRoutes["Create"]>, res: RouteResponse<ClassesRoutes["Create"]>) => {
+    try {
+      const { error, value } = ClassesRoutesSchema.Create.payload.validate(req.body, { stripUnknown: true });
+      if (error) {
+        capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      const defaultCleCohort = await CohortModel.findOne({ name: value.cohort });
-      if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
-      cohortName = defaultCleCohort.name;
+
+      if (!canCreateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const etablissement = await EtablissementModel.findById(value.etablissementId);
+      if (!etablissement) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Etablissement not found." });
+      }
+
+      let cohortName: string | null = null;
+      const isCleClasseCohortEnabled = await isFeatureAvailable(FeatureFlagName.CLE_CLASSE_ADD_COHORT_ENABLED);
+      if (value.cohort) {
+        if (!isCleClasseCohortEnabled) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+        }
+        const defaultCleCohort = await CohortModel.findOne({ name: value.cohort });
+        if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
+        cohortName = defaultCleCohort.name;
+      }
+
+      const uniqueClasseKey = buildUniqueClasseKey(etablissement);
+      const uniqueClasseId = buildUniqueClasseId(etablissement, {
+        name: value.name,
+        coloration: value.coloration,
+        estimatedSeats: value.estimatedSeats,
+      });
+      const previousClasse = await findClasseByUniqueKeyAndUniqueId(uniqueClasseKey, uniqueClasseId);
+      if (previousClasse) {
+        return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS, message: "Classe already exists." });
+      }
+
+      const referent = await findOrCreateReferent(value.referent, { etablissement, role: ROLES.REFERENT_CLASSE });
+      if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
+      if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+      const cohort = await CohortModel.findOne({ name: cohortName });
+
+      const classe = await ClasseModel.create({
+        ...value,
+        status: STATUS_CLASSE.CREATED,
+        statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
+        academy: etablissement.academy,
+        region: etablissement.region,
+        department: etablissement.department,
+        cohort: cohortName,
+        schoolYear: ClasseSchoolYear.YEAR_2024_2025,
+        totalSeats: value.estimatedSeats,
+        uniqueId: uniqueClasseId,
+        uniqueKey: uniqueClasseKey,
+        uniqueKeyAndId: `${uniqueClasseKey}-${uniqueClasseId}`,
+        referentClasseIds: [referent._id],
+        cohortId: cohort?._id,
+      });
+
+      if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
+
+      if (!etablissement.schoolYears.includes(ClasseSchoolYear.YEAR_2024_2025)) {
+        etablissement.set({ schoolYears: [...etablissement.schoolYears, ClasseSchoolYear.YEAR_2024_2025] });
+        await etablissement.save();
+      }
+
+      if (!value.referent?._id) {
+        // Un nouveau référent de classe a été créé
+        await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, from: isAdmin(req.user) ? null : req.user }, etablissement);
+      } else {
+        // Un référent existant a été affecté à la classe
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, classe);
+      }
+
+      emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_CREATED, classe);
+
+      return res.status(200).json({ ok: true, data: classe });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    const uniqueClasseKey = buildUniqueClasseKey(etablissement);
-    const uniqueClasseId = buildUniqueClasseId(etablissement, {
-      name: value.name,
-      coloration: value.coloration,
-      estimatedSeats: value.estimatedSeats,
-    });
-    const previousClasse = await findClasseByUniqueKeyAndUniqueId(uniqueClasseKey, uniqueClasseId);
-    if (previousClasse) {
-      return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS, message: "Classe already exists." });
-    }
-
-    const referent = await findOrCreateReferent(value.referent, { etablissement, role: ROLES.REFERENT_CLASSE });
-    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
-    if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-
-    const cohort = await CohortModel.findOne({ name: cohortName });
-
-    const classe = await ClasseModel.create({
-      ...value,
-      status: STATUS_CLASSE.CREATED,
-      statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
-      academy: etablissement.academy,
-      region: etablissement.region,
-      department: etablissement.department,
-      cohort: cohortName,
-      schoolYear: ClasseSchoolYear.YEAR_2024_2025,
-      totalSeats: value.estimatedSeats,
-      uniqueId: uniqueClasseId,
-      uniqueKey: uniqueClasseKey,
-      uniqueKeyAndId: `${uniqueClasseKey}-${uniqueClasseId}`,
-      referentClasseIds: [referent._id],
-      cohortId: cohort?._id,
-    });
-
-    if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
-
-    if (!etablissement.schoolYears.includes(ClasseSchoolYear.YEAR_2024_2025)) {
-      etablissement.set({ schoolYears: [...etablissement.schoolYears, ClasseSchoolYear.YEAR_2024_2025] });
-      await etablissement.save();
-    }
-
-    if (!value.referent?._id) {
-      // Un nouveau référent de classe a été créé
-      await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, from: isAdmin(req.user) ? null : req.user }, etablissement);
-    } else {
-      // Un référent existant a été affecté à la classe
-      emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, classe);
-    }
-
-    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_CREATED, classe);
-
-    return res.status(200).send({ ok: true, data: classe });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
@@ -464,7 +443,7 @@ router.get(
   passport.authenticate("referent", { session: false, failWithError: true }),
   async (req: RouteRequest<ClassesRoutes["Get"]>, res: RouteResponse<ClassesRoutes["Get"]>) => {
     try {
-      const { error, value } = validateId(req.params.id);
+      const { error, value: id } = validateId(req.params.id);
       if (error) {
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -473,12 +452,12 @@ router.get(
       if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       // Validate and transform query parameters
-      const { error: queryError, value: queryParams } = querySchema.validate(req.query);
+      const { error: queryError, value: queryParams } = ClassesRoutesSchema.Get.query.validate(req.query);
       if (queryError) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
       }
 
-      const data = await getClasseById(value, queryParams?.withDetails);
+      const data = await getClasseById(id, queryParams?.withDetails);
 
       return res.status(200).send({ ok: true, data });
     } catch (error) {
@@ -493,19 +472,19 @@ router.get(
 
 router.get("/public/:id", async (req, res) => {
   try {
-    const { error, value } = validateId(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     // Validate and transform query parameters
-    const { error: queryError, value: queryParams } = querySchema.validate(req.query);
+    const { error: queryError, value: queryParams } = ClassesRoutesSchema.Get.query.validate(req.query);
     if (queryError) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
     }
 
-    const data = await getClasseByIdPublic(value, queryParams?.withDetails);
+    const data = await getClasseByIdPublic(id, queryParams?.withDetails);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
