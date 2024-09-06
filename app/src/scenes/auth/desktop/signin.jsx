@@ -1,14 +1,13 @@
 import plausibleEvent from "@/services/plausible";
 import queryString from "query-string";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib";
 import { isValidRedirectUrl } from "snu-lib";
 import RightArrow from "../../../assets/icons/RightArrow";
 import Error from "../../../components/error";
-import { environment } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture, captureMessage } from "../../../sentry";
 import api from "../../../services/api";
@@ -17,63 +16,67 @@ import { cohortsInit } from "../../../utils/cohorts";
 import { Input, InputPassword, Button } from "@snu/ds/dsfr";
 
 export default function Signin() {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [disabled, setDisabled] = React.useState(true);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState({});
-  const [isInscriptionOpen, setInscriptionOpen] = React.useState(false);
-  const history = useHistory();
-
-  const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young);
-
   const params = queryString.parse(location.search);
   const { redirect, disconnected } = params;
-
-  if (!young && disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
-  if (young) history.push("/" + (redirect || ""));
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(disconnected === "1" ? { text: "Votre session a expiré", subText: "Merci de vous reconnecter." } : {});
+  const [isInscriptionOpen, setInscriptionOpen] = React.useState(false);
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const disabled = !email || !password || loading;
 
   const onSubmit = async () => {
-    if (loading || disabled) return;
     setLoading(true);
     try {
       const { user: young, token, code } = await api.post(`/young/signin`, { email, password });
+
       if (code === "2FA_REQUIRED") {
         plausibleEvent("2FA demandée");
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
-      if (young && token) {
-        plausibleEvent("Connexion réussie");
-        api.setToken(token);
-        dispatch(setYoung(young));
-        await cohortsInit();
-        const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
-        if (!redirectionApproved) {
-          captureMessage("Invalid redirect url", { extra: { redirect } });
-          toastr.error("Url de redirection invalide : " + redirect);
-          return history.push("/");
-        }
-        return (window.location.href = redirect);
+
+      if (!young || !token) {
+        console.log("no young or token", young, token);
+        return;
       }
+
+      plausibleEvent("Connexion réussie");
+      api.setToken(token);
+      dispatch(setYoung(young));
+      await cohortsInit();
+
+      if (!redirect) {
+        history.push("/");
+        return;
+      }
+
+      const redirectionApproved = isValidRedirectUrl(redirect);
+
+      if (!redirectionApproved) {
+        captureMessage("Invalid redirect url", { extra: { redirect } });
+        toastr.error("Url de redirection invalide : " + redirect);
+        return history.push("/");
+      }
+
+      history.push(redirect);
     } catch (e) {
       setPassword("");
-      setError({ text: "  E-mail et/ou mot de passe incorrect(s)" });
       if (e.code === "TOO_MANY_REQUESTS") {
         let date = formatToActualTime(e?.data?.nextLoginAttemptIn);
         setError({
-          text: " Vous avez atteint le maximum de tentatives de connexion autorisées.",
+          text: "Vous avez atteint le maximum de tentatives de connexion autorisées.",
           subText: `Votre accès est bloqué jusqu'à ${date !== "-" ? `à ${date}.` : "demain."}. Revenez d'ici quelques minutes.`,
+        });
+      } else {
+        setError({
+          text: "E-mail et/ou mot de passe incorrect(s)",
         });
       }
     }
     setLoading(false);
   };
-
-  React.useEffect(() => {
-    if (email && password) setDisabled(false);
-    else setDisabled(true);
-  }, [email, password]);
 
   React.useEffect(() => {
     const fetchInscriptionOpen = async () => {
@@ -110,14 +113,13 @@ export default function Signin() {
         <InputPassword label="Mot de passe" value={password} onChange={setPassword} />
         <a href="/auth/forgot">Mot de passe perdu ?</a>
         <div className="flex w-full justify-end">
-          <Button disabled={disabled || loading} onClick={onSubmit}>
+          <Button disabled={disabled} onClick={onSubmit}>
             Connexion
           </Button>
         </div>
         <hr className="mt-3 border-b-1 text-[#E5E5E5]" />
         <div className="mt-3 text-[#E5E5E5] space-y-3">
           <div className="mt-3 mb-2 text-center text-xl font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
-          {/* <p className="text-center text-base text-[#161616] my-3">Les inscriptions sont actuellement fermées.</p> */}
           {isInscriptionOpen ? (
             <div className="flex w-full justify-center">
               <Button
