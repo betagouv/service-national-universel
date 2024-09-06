@@ -14,6 +14,7 @@ import {
   CLE_COLORATION_LIST,
   translate,
   ClasseDto,
+  isAdmin,
 } from "snu-lib";
 import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
@@ -52,7 +53,7 @@ export const statusClassForBadge = (status) => {
   return statusClasse;
 };
 
-export function getRights(user: User, classe: ClasseDto | null, cohort: CohortDto | undefined) {
+export function getRights(user: User, classe?: ClasseDto, cohort?: CohortDto) {
   if (!user || !classe) return {};
   return {
     canEdit:
@@ -64,9 +65,9 @@ export function getRights(user: User, classe: ClasseDto | null, cohort: CohortDt
     canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
     canEditRef: classe.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role),
 
-    canEditCohort: cohort ? canUpdateCohort(cohort, user) : user.role === ROLES.ADMIN && classe.status === STATUS_CLASSE.VERIFIED,
+    canEditCohort: cohort ? canUpdateCohort(cohort, user) : isAdmin(user) && classe.status === STATUS_CLASSE.VERIFIED,
     canEditCenter: cohort ? canUpdateCenter(cohort, user) : false,
-    canEditPDR: cohort ? user?.role === ROLES.ADMIN : false,
+    canEditPDR: cohort ? isAdmin(user) : false,
     showCohort: showCohort(cohort, user, classe),
     showCenter: cohort ? showCenter(cohort, user) : false,
     showPDR: cohort ? showPdr(cohort, user) : false,
@@ -75,7 +76,7 @@ export function getRights(user: User, classe: ClasseDto | null, cohort: CohortDt
 
 const showCohort = (cohort: CohortDto | undefined, user: User | undefined, classe: ClasseDto): boolean => {
   if (!user) return false;
-  if (!cohort) return user.role === ROLES.ADMIN && classe.status === STATUS_CLASSE.VERIFIED;
+  if (!cohort) return isAdmin(user) && classe.status === STATUS_CLASSE.VERIFIED;
   let showCohort = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role);
   if (!showCohort && user?.role === ROLES.ADMINISTRATEUR_CLE) {
     showCohort = !!cohort.cleDisplayCohortsForAdminCLE && isNowBetweenDates(cohort.cleDisplayCohortsForAdminCLEDate?.from, cohort.cleDisplayCohortsForAdminCLEDate?.to);
