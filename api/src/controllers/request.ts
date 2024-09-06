@@ -1,11 +1,17 @@
 import { Request, Response } from "express";
 import { UserDto, BasicRoute } from "snu-lib";
 
-export interface UserRequest<T = {}> extends Request {
+export interface UserRequest extends Request {
   user: UserDto;
   files?: any;
 }
 
-export type RouteRequest<T extends BasicRoute> = UserRequest & Request<T["params"], T["response"], T["payload"], T["query"]>;
-
-export type RouteResponse<T extends BasicRoute> = Response<T["response"]>;
+// @ts-expect-error params is optinonal
+export interface RouteRequest<T extends BasicRoute> extends UserRequest {
+  body: T["payload"];
+  query: T["query"];
+  params: T["params"];
+}
+export interface RouteResponse<T extends BasicRoute> extends Response<T["response"]> {
+  json: (body: T["response"]) => this;
+}

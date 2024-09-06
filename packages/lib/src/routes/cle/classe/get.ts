@@ -1,5 +1,5 @@
 import { ClasseDto } from "src/dto";
-import { BasicRoute, RouteResponse } from "src/routes";
+import { BasicRoute, RouteResponseBody } from "src/routes";
 
 export interface GetClasseRoute extends BasicRoute {
   method: "GET";
@@ -8,5 +8,5 @@ export interface GetClasseRoute extends BasicRoute {
   query?: {
     withDetails?: number;
   };
-  response: RouteResponse<ClasseDto>;
+  response: RouteResponseBody<ClasseDto>;
 }
