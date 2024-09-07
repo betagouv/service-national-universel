@@ -4,6 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import ReduxToastr from "react-redux-toastr";
+import { captureMessage } from "./sentry";
 import "react-redux-toastr/lib/css/react-redux-toastr.min.css";
 import "react-day-picker/dist/style.css";
 
@@ -14,8 +15,8 @@ import store from "./redux/store";
 import App from "./app.jsx";
 
 window.addEventListener("vite:preloadError", (event) => {
-  console.log("An error occured while preloading a page, reloading the page to prevent future errors.");
-  window.location.reload();
+  captureMessage("Preloading Error", event);
+  window.location.reload(true);
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
