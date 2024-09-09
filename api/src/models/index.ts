@@ -26,8 +26,8 @@ export { WaitingListModel, WaitingListDocument, WaitingListType } from "./waitin
 export { YoungModel, YoungDocument, YoungType } from "./young";
 
 export { ClasseModel, ClasseDocument } from "./cle/classe";
-export { ClasseType } from "snu-lib";
-export { EtablissementModel, EtablissementDocument, EtablissementType } from "./cle/etablissement";
+export { EtablissementModel, EtablissementDocument } from "./cle/etablissement";
+export { ClasseType, EtablissementType } from "snu-lib";
 
 export { ImportPlanTransportModel, ImportPlanTransportDocument, ImportPlanTransportType } from "./PlanDeTransport/importPlanTransport";
 export { LigneBusModel, LigneBusDocument, LigneBusType } from "./PlanDeTransport/ligneBus";
