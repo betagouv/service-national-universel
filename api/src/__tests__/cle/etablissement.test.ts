@@ -2,16 +2,21 @@ import { Types } from "mongoose";
 const { ObjectId } = Types;
 import request from "supertest";
 import passport from "passport";
-import { ROLES, SUB_ROLES } from "snu-lib";
+import { ROLES, SUB_ROLES, ERRORS } from "snu-lib";
 import { ClasseModel, ReferentModel, EtablissementModel } from "../../models";
 import getAppHelper from "../helpers/app";
 import { createEtablissement } from "../helpers/etablissement";
 import { createFixtureEtablissement } from "../fixtures/etablissement";
 import { createClasse } from "../helpers/classe";
 import { createFixtureClasse } from "../fixtures/classe";
-import { getNewReferentFixture } from "../fixtures/referent";
+import { getNewReferentFixture, getNewSignupReferentFixture } from "../fixtures/referent";
 import { createReferentHelper } from "../helpers/referent";
+
 import { dbConnect, dbClose } from "../helpers/db";
+
+import * as apiEducationModule from "../../services/gouv.fr/api-education";
+import { getEtablissementsFromAnnuaire } from "../fixtures/providers/annuaireEtablissement";
+import { Etablissement } from "../../../../admin/src/scenes/etablissement/Create/type";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -452,5 +457,70 @@ describe("DELETE /cle/etablissement/:id/referents", () => {
     expect(updatedReferent?.deletedAt).toBeDefined();
     const updatedEtablissement = await EtablissementModel.findById(etablissement._id).lean();
     expect(updatedEtablissement?.coordinateurIds).toEqual([]);
+  });
+});
+
+describe("POST /cle/etablissement", () => {
+  beforeEach(async () => {
+    await EtablissementModel.deleteMany({});
+    await ReferentModel.deleteMany({});
+  });
+  const validBody = {
+    uai: "UAI_42",
+    email: "test@osef.fr",
+    refLastName: "Doe",
+    refFirstName: "John",
+  };
+  it("should return 400 if the request body is invalid", async () => {
+    const response = await request(getAppHelper()).post("/cle/etablissement").send({});
+    expect(response.status).toBe(400);
+  });
+
+  it("should return 403 if the user is not authorized to create an etablissement", async () => {
+    const response = await request(getAppHelper({ role: ROLES.VISITOR }))
+      .post("/cle/etablissement")
+      .send(validBody);
+    expect(response.status).toBe(403);
+    // @ts-ignore
+    passport.user.role = ROLES.ADMIN;
+  });
+
+  it("should return 409 if UAI is already in the platform", async () => {
+    await createEtablissement(createFixtureEtablissement({ uai: validBody.uai }));
+
+    const response = await request(getAppHelper()).post("/cle/etablissement").send(validBody);
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe(ERRORS.ALREADY_EXISTS);
+  });
+
+  it("should return 404 if UAIdoesn't exist in apiEducation", async () => {
+    const apiEductionMock = jest.spyOn(apiEducationModule, "apiEducation");
+    apiEductionMock.mockResolvedValue([]);
+
+    const response = await request(getAppHelper()).post("/cle/etablissement").send(validBody);
+    expect(response.status).toBe(404);
+    expect(response.body.code).toBe(ERRORS.NOT_FOUND);
+    expect(apiEductionMock).toHaveBeenCalledWith({ filters: [{ key: "uai", value: validBody.uai }], page: 0, size: -1 });
+  });
+
+  it("should return 409 if the referent is already registered", async () => {
+    const apiEductionMock = jest.spyOn(apiEducationModule, "apiEducation");
+    apiEductionMock.mockImplementation(() => Promise.resolve(getEtablissementsFromAnnuaire()));
+    await createReferentHelper(getNewSignupReferentFixture({ email: validBody.email }));
+
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/cle/etablissement")
+      .send(validBody);
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe(ERRORS.USER_ALREADY_REGISTERED);
+  });
+
+  it("should return 200 if the etablissement is created successfully", async () => {
+    const apiEductionMock = jest.spyOn(apiEducationModule, "apiEducation");
+    apiEductionMock.mockImplementation(() => Promise.resolve(getEtablissementsFromAnnuaire()));
+
+    const response = await request(getAppHelper({})).post("/cle/etablissement").send(validBody);
+    expect(response.status).toBe(200);
+    expect(response.body.data.uai).toBe(validBody.uai);
   });
 });

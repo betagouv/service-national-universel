@@ -29,7 +29,7 @@ export default function Filters({
   defaultUrlParam = undefined,
   size,
   intermediateFilters = undefined,
-  disabled,
+  disabled = false,
 }) {
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState({});

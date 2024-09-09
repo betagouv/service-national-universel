@@ -4,7 +4,7 @@ import { DropDown } from "./filters/FilterPopOver";
 import { Popover } from "@headlessui/react";
 import Trash from "../../../assets/icons/Trash";
 
-export default function SelectedFilters({ filterArray, selectedFilters, setSelectedFilters, paramData, setParamData, disabled }) {
+export default function SelectedFilters({ filterArray, selectedFilters, setSelectedFilters, paramData, setParamData, disabled = false }) {
   // check if all filters are defaultValue if yes, we don't show the delete button
   const hasOnlyDefaultFiltersSelected = useMemo(
     () =>
