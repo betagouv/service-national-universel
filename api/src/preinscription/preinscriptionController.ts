@@ -1,4 +1,4 @@
-import { ERRORS } from "snu-lib";
+import { calculateAge, ERRORS } from "snu-lib";
 import { createLead } from "./preinscriptionService";
 import express from "express";
 import Joi from "joi";
@@ -45,6 +45,7 @@ const schemaLead = {
   firstname: Joi.string().required(),
   lastname: Joi.string().required(),
   region: Joi.string().required(),
+  birthdateAt: Joi.date().required(),
 };
 
 router.post("/create-lead", async (req, res) => {
@@ -52,6 +53,10 @@ router.post("/create-lead", async (req, res) => {
 
   if (error) {
     return res.status(400).json({ ok: false, code: 400, message: ERRORS.INVALID_BODY });
+  }
+
+  if (calculateAge(value.birthdateAt, new Date()) > 18) {
+    return res.status(400).json({ ok: false, code: 400, message: ERRORS.BAD_REQUEST });
   }
 
   try {
