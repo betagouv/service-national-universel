@@ -1,17 +1,43 @@
 import crypto from "crypto";
-import { ERRORS, FUNCTIONAL_ERRORS, InvitationType, isSuperAdmin, ReferentCreatedBy, ROLES, STATUS_CLASSE, SUB_ROLES, YOUNG_STATUS } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, InvitationType, isSuperAdmin, ReferentCreatedBy, ROLES, STATUS_CLASSE, SUB_ROLES, YOUNG_STATUS, ClasseCertificateKeys } from "snu-lib";
 
 import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, ReferentModel, ReferentType, YoungModel } from "../../models";
-import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs, generateImageRightForMultipleYoungs, generateConsentementForMultipleYoungs } from "../../young/youngService";
 
 import { mapRegionToTrigramme } from "../../services/regionService";
 
 export type UpdateReferentClasse = Pick<ReferentType, "firstName" | "lastName" | "email">;
 
+export const generateCertificateByKey = async (key: string, id: string) => {
+  let certificates;
+  if (key === ClasseCertificateKeys.IMAGE) {
+    certificates = await generateImageRightByClasseId(id);
+  }
+  if (key === ClasseCertificateKeys.CONSENT) {
+    certificates = await generateConsentementByClasseId(id);
+  }
+  if (key === ClasseCertificateKeys.CONVOCATION) {
+    certificates = await generateConvocationsByClasseId(id);
+  }
+  return certificates;
+};
+
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
 
   return await generateConvocationsForMultipleYoungs(youngsInClasse);
+};
+
+export const generateImageRightByClasseId = async (classeId: string) => {
+  const youngsInClasse = await findYoungsByClasseId(classeId);
+
+  return await generateImageRightForMultipleYoungs(youngsInClasse);
+};
+
+export const generateConsentementByClasseId = async (classeId: string) => {
+  const youngsInClasse = await findYoungsByClasseId(classeId);
+
+  return await generateConsentementForMultipleYoungs(youngsInClasse);
 };
 
 export const deleteClasse = async (_id: string, fromUser: object) => {

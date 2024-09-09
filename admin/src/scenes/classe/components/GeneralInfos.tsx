@@ -1,5 +1,4 @@
 import React from "react";
-import { BsTrash3 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
@@ -8,6 +7,7 @@ import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
 import { Rights } from "./types";
 import { colorOptions, filiereOptions, gradeOptions, typeOptions } from "../utils";
+import WithdrawButton from "./WithdrawButton";
 interface Props {
   classe: ClasseDto;
   setClasse: (classe: ClasseDto) => void;
@@ -17,28 +17,14 @@ interface Props {
   rights: Rights;
   cohorts: CohortDto[];
   user: User;
-  setShowModaleWithdraw: (b: boolean) => void;
   isLoading: boolean;
+  setIsLoading: (b: boolean) => void;
   onCancel: () => void;
   onCheckInfo: () => void;
   validatedYoung: number;
 }
 
-export default function GeneralInfos({
-  classe,
-  setClasse,
-  edit,
-  setEdit,
-  errors,
-  rights,
-  cohorts,
-  user,
-  setShowModaleWithdraw,
-  isLoading,
-  onCancel,
-  onCheckInfo,
-  validatedYoung,
-}: Props) {
+export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors, rights, cohorts, user, isLoading, setIsLoading, onCancel, onCheckInfo, validatedYoung }: Props) {
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
       return [
@@ -205,14 +191,7 @@ export default function GeneralInfos({
             <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
           </Link>
 
-          {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? (
-            <div className="flex items-center justify-end mt-6">
-              <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={() => setShowModaleWithdraw(true)}>
-                <BsTrash3 className="mr-2" />
-                Désister la classe
-              </button>
-            </div>
-          ) : null}
+          {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && <WithdrawButton classe={classe} setIsLoading={setIsLoading} />}
         </div>
       </div>
     </Container>
