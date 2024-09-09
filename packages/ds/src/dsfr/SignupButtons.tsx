@@ -60,7 +60,7 @@ export default function SignupButtons({
         )}
       </div>
       {text && (
-        <p className="reset text-center md:text-right text-sm mt-3">{text}</p>
+        <p className="reset text-center md:text-right text-sm mt-2">{text}</p>
       )}
     </div>
   );
