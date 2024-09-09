@@ -132,13 +132,13 @@ function ConsentementForm({ young, token, step, parentId, cohort, classe }) {
 
     // --- address
     let validAddress = validate("address", "empty", validator.isEmpty(data.address, { ignore_whitespace: true }));
-    if (validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }))) {
-      validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
-    }
+    validAddress = validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }));
     validAddress = validate("city", "empty", validator.isEmpty(data.city, { ignore_whitespace: true })) && validAddress;
 
     if (data.livesInFrance === ABROAD) {
       validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true })) && validAddress;
+    } else {
+      validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
     }
 
     if (!validAddress) {
