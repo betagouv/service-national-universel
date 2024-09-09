@@ -24,7 +24,7 @@ import ModaleCohort from "./components/modaleCohort";
 import { InfoBus, Rights } from "./components/types";
 import { TStatus } from "@/types";
 import { getHeaderActionList } from "./header";
-import { buildRequest } from "@/utils/buildRequest";
+import { ClasseService } from "@/services/classeService";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | undefined>();
@@ -50,31 +50,7 @@ export default function View() {
 
   const getClasse = async () => {
     try {
-      // const { ok, code, data: classe } = await api.get(`/cle/classe/${id}`);
-      const {
-        ok,
-        code,
-        data: classe,
-      } = await buildRequest<ClassesRoutes["GetOne"]>({
-        path: "/cle/classe/{id}",
-        method: "GET",
-        params: { id },
-      })();
-
-      // OU
-      // await ClasseService.getOne(id);
-
-      // const {
-      //   ok,
-      //   code,
-      //   data: classe,
-      // } = await buildRequest<ClassesRoutes["GetOne"]>({
-      //   ...buildGetClasseRoute(id),
-      // })();
-
-      if (!ok || !classe) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
-      }
+      const classe = await ClasseService.getOne(id);
       setClasse(classe);
       setOldClasseCohort(classe.cohort);
       if (classe?.ligneId) {
@@ -102,7 +78,7 @@ export default function View() {
       }
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(e.message));
     }
   };
 

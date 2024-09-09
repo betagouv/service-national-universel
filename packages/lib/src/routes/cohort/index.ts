@@ -1,13 +1,9 @@
-import { GetCohortRoute } from "./get";
-
-export const CohortsRoutesSchema = {
-  // Create: CreateCohortRouteSchema,
-};
+import { GetOneCohortRoute } from "./get";
 
 export type CohortsRoutes = {
-  Get: GetCohortRoute;
+  // Get: GetCohortRoute;
   // Create: CreateCohortRoute,
-  // GetOne: GetOneCohortRoute,
+  GetOne: GetOneCohortRoute;
   // Update: UpdateCohortRoute,
   // Delete: DeleteCohortRoute,
 };

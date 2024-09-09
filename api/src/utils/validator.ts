@@ -745,7 +745,7 @@ export function validateHeadOfCenterCohortChange(values) {
     .validate(values, { stripUnknown: true });
 }
 
-const representantSchema = (isRequired) => {
+export const representantSchema = (isRequired) => {
   return {
     parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
     parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
@@ -798,7 +798,7 @@ export function validateParents(values, isRequired) {
   return Joi.object(representantSchema(isRequired)).validate(values, { stripUnknown: true });
 }
 
-const needRequired = (joi, isRequired) => {
+export const needRequired = (joi, isRequired) => {
   if (isRequired) return joi.required();
   else return joi.allow(null, "");
 };
