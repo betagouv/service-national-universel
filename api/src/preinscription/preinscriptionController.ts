@@ -19,14 +19,14 @@ const schemaEligibility = {
 };
 
 router.post("/eligibilite", async (req, res) => {
+  const { error, value } = Joi.object(schemaEligibility).validate(req.body);
+
+  if (error) {
+    capture(error);
+    return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+  }
+
   try {
-    const { error, value } = Joi.object(schemaEligibility).validate(req.body);
-
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-
     const cohorts = await getFilteredSessions(value, req.headers["x-user-timezone"] as string);
 
     if (cohorts.length === 0) {
@@ -52,10 +52,12 @@ router.post("/create-lead", async (req, res) => {
   const { error, value } = Joi.object(schemaLead).validate(req.body);
 
   if (error) {
+    capture(error);
     return res.status(400).json({ ok: false, code: 400, message: ERRORS.INVALID_BODY });
   }
 
   if (calculateAge(value.birthdateAt, new Date()) > 18) {
+    capture(new Error("User is too old"));
     return res.status(400).json({ ok: false, code: 400, message: ERRORS.BAD_REQUEST });
   }
 
