@@ -1,15 +1,12 @@
-import { GetClasseRoute, GetClasseRouteSchema } from "./get";
-import { CreateClasseRoute, CreateClasseRouteSchema } from "./create";
-
-export const ClassesRoutesSchema = {
-  Get: GetClasseRouteSchema,
-  Create: CreateClasseRouteSchema,
-};
+import { GetOneClasseRoute } from "./getOne";
+import { CreateClasseRoute } from "./create";
+import { UpdateClasseRoute } from "./update";
+import { DeleteClasseRoute } from "./delete";
 
 export type ClassesRoutes = {
-  Get: GetClasseRoute;
+  // Get: GetClasseRoute;
   Create: CreateClasseRoute;
-  // GetOne: GetOneClasseRoute,
-  // Update: UpdateClasseRoute,
-  // Delete: DeleteClasseRoute,
+  GetOne: GetOneClasseRoute;
+  Update: UpdateClasseRoute;
+  Delete: DeleteClasseRoute;
 };

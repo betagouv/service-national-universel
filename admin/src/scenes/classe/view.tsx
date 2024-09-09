@@ -37,7 +37,7 @@ export default function View() {
   const [editRef, setEditRef] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [oldClasseCohort, setOldClasseCohort] = useState();
+  const [oldClasseCohort, setOldClasseCohort] = useState<string>();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
 
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -55,7 +55,7 @@ export default function View() {
         ok,
         code,
         data: classe,
-      } = await buildRequest<ClassesRoutes["Get"]>({
+      } = await buildRequest<ClassesRoutes["GetOne"]>({
         path: "/cle/classe/{id}",
         method: "GET",
         params: { id },
@@ -67,7 +67,7 @@ export default function View() {
       //   ok,
       //   code,
       //   data: classe,
-      // } = await buildRequest<ClassesRoutes["Get"]>({
+      // } = await buildRequest<ClassesRoutes["GetOne"]>({
       //   ...buildGetClasseRoute(id),
       // })();
 

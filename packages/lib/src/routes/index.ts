@@ -1,4 +1,4 @@
-import { buildGetClasseRoute, getClasseRoute } from "./cle/classe/get";
+import { buildGetClasseRoute, getClasseRoute } from "./cle/classe/getOne";
 
 export interface BasicRoute {
   path: string;
@@ -12,5 +12,5 @@ export interface BasicRoute {
 export type RouteResponseBody<T> = { ok: boolean; code?: string; data: T };
 
 export { CohortsRoutes } from "./cohort";
-export { ClassesRoutes, ClassesRoutesSchema } from "./cle/classe";
+export { ClassesRoutes } from "./cle/classe";
 export { getClasseRoute, buildGetClasseRoute };
