@@ -364,6 +364,8 @@ const translate = (value) => {
       return "Actif";
     case "inactive":
       return "Inactif";
+    case "psc1Info":
+      return "A réalisé la formation PSC1";
     default:
       return value;
   }
