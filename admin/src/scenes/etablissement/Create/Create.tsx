@@ -13,7 +13,7 @@ import { Etablissement } from "./type";
 import ModaleWarning from "./ModalWarning";
 import ModaleConfirmation from "./ModalConfirmation";
 import ModaleError from "./ModalError";
-import ModalValidation from "./ModalValidation";
+import ModaleValidation from "./ModalValidation";
 
 interface FormError {
   lastName?: string;
@@ -163,7 +163,7 @@ export default function Create() {
       <ModaleWarning isOpen={showModal === "warning"} onClose={() => setShowModal(null)} />
       <ModaleConfirmation isOpen={showModal === "confirm"} onClose={() => setShowModal(null)} etablissement={etablissement} onConfirmSubmit={confirmSubmit} />
       <ModaleError isOpen={showModal === "error"} onClose={() => setShowModal(null)} content={modaleContent} />
-      <ModalValidation isOpen={showModal === "validation"} onClose={() => setShowModal(null)} id={idEtablissementCreated} />
+      <ModaleValidation isOpen={showModal === "validation"} onClose={() => setShowModal(null)} id={idEtablissementCreated} />
     </Page>
   );
 }

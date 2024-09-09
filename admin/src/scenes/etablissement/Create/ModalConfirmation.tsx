@@ -12,14 +12,14 @@ interface Props {
   onConfirmSubmit: () => void;
 }
 
-export default function ModaleWarning({ isOpen, onClose, etablissement, onConfirmSubmit }: Props) {
+export default function ModaleConfirmation({ isOpen, onClose, etablissement, onConfirmSubmit }: Props) {
   return (
     <ModalConfirmation
       isOpen={isOpen}
       onClose={() => {
         onClose();
       }}
-      className="md:max-w-[700px]"
+      className="md:max-w-[650px]"
       icon={<HiOutlineEye className="bg-gray-100 rounded-full p-2" size={48} />}
       title="Validation des informations saisies"
       text={
