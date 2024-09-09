@@ -1,5 +1,3 @@
-import { buildGetClasseRoute, getClasseRoute } from "./cle/classe/getOne";
-
 export interface BasicRoute {
   path: string;
   params?: Record<string, number | string | null | undefined>;
@@ -13,4 +11,3 @@ export type RouteResponseBody<T> = { ok: boolean; data?: T; code?: string; messa
 
 export { CohortsRoutes } from "./cohort";
 export { ClassesRoutes } from "./cle/classe";
-export { getClasseRoute, buildGetClasseRoute };
