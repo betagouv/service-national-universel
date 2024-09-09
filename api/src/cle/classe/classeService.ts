@@ -193,4 +193,3 @@ export const isClasseStatusCreated = async (classeId: string) => {
   }
   return classe.status === STATUS_CLASSE.CREATED;
 };
-
