@@ -38,6 +38,7 @@ export function injectRoutes(app) {
   app.use("/young-edition", require("./young/edition/youngEditionController").default);
   app.use("/SNUpport", require("./controllers/SNUpport"));
   app.use("/cle", require("./cle").default);
+  app.use("/preinscription", require("./preinscription/preinscriptionController"));
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));

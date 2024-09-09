@@ -107,7 +107,7 @@ export default function StepEligibilite() {
       return;
     }
 
-      onSubmit();
+    onSubmit();
   };
 
   const onSubmit = async () => {
@@ -140,7 +140,7 @@ export default function StepEligibilite() {
       code,
       data: sessions,
       message,
-    } = await api.post(`/cohort-session/eligibility/2023`, {
+    } = await api.post(`/preinscription/eligibilite`, {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
       schoolRegion: data.school?.region,
