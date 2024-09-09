@@ -62,6 +62,7 @@ export default function View() {
       })();
 
       // OU
+      // await ClasseService.getOne(id);
 
       // const {
       //   ok,
@@ -71,7 +72,7 @@ export default function View() {
       //   ...buildGetClasseRoute(id),
       // })();
 
-      if (!ok) {
+      if (!ok || !classe) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
       setClasse(classe);
@@ -96,7 +97,7 @@ export default function View() {
 
       //Logical stuff
       setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
-      if (![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe.status)) {
+      if (!([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED] as string[]).includes(classe.status)) {
         getStudents(classe._id);
       }
     } catch (e) {
@@ -159,7 +160,7 @@ export default function View() {
     }
 
     const errors: Errors = {};
-    if (classe?.cohort !== oldClasseCohort && classe.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
+    if (classe?.cohort !== oldClasseCohort && classe?.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
     if (!classe?.name) errors.name = "Ce champ est obligatoire";
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";

@@ -9,7 +9,7 @@ export interface BasicRoute {
   method: "GET" | "POST" | "DELETE" | "PUT";
 }
 
-export type RouteResponseBody<T> = { ok: boolean; code?: string; data: T };
+export type RouteResponseBody<T> = { ok: boolean; data?: T; code?: string; message?: string };
 
 export { CohortsRoutes } from "./cohort";
 export { ClassesRoutes } from "./cle/classe";

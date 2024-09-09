@@ -1,11 +1,11 @@
 import Joi from "joi";
-import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR } from "snu-lib";
+import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, UserDto, YoungDto } from "snu-lib";
 import { isYoung } from "../utils";
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
 const idRegex = /^[0-9a-fA-F]{24}$/;
 
-const idSchema = () => Joi.string().regex(idRegex, "id");
+export const idSchema = () => Joi.string().regex(idRegex, "id");
 
 export function validateId(id?: string) {
   return idSchema().required().validate(id, { stripUnknown: true });
@@ -312,7 +312,7 @@ export function validateSessionPhase1(session) {
   return Joi.object().keys(sessionPhase1Keys).validate(session, { stripUnknown: true });
 }
 
-export function validateYoung(young, user) {
+export function validateYoung(young: YoungDto, user?: UserDto) {
   const keys = {
     firstName: Joi.string().allow(null, ""),
     lastName: Joi.string().allow(null, ""),

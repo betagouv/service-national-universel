@@ -1,5 +1,5 @@
 import { isEmpty, isNil } from "lodash";
-import qs from "qs";
+import qs from "query-string";
 
 import { BasicRoute } from "snu-lib";
 
@@ -27,7 +27,7 @@ function buildQueryString(query: BasicRoute["query"] = {}): string {
   if (isEmpty(query)) {
     return "";
   }
-  return qs.stringify(query, { addQueryPrefix: true });
+  return `?${qs.stringify(query)}`;
 }
 
 export const buildURL = ({ params, path, query }: Pick<BasicRoute, "params" | "path" | "query">) => {

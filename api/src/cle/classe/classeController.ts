@@ -278,7 +278,7 @@ router.post(
 
       emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_CREATED, classe);
 
-      return res.status(200).json({ ok: true, data: classe });
+      return res.status(200).json({ ok: true, data: classe.toJSON() });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -382,7 +382,7 @@ router.put(
 
       classe = await classe.save({ fromUser: req.user });
 
-      return res.status(200).json({ ok: true, data: classe });
+      return res.status(200).json({ ok: true, data: classe.toJSON() });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -439,7 +439,7 @@ router.get(
 
       const data = await getClasseById(id, queryParams?.withDetails);
 
-      return res.status(200).json({ ok: true, data });
+      return res.status(200).json({ ok: true, data: data?.toJSON() });
     } catch (error) {
       capture(error);
       if (error.message === "Classe not found") {
