@@ -361,6 +361,7 @@ const getDepartmentForEligibility = (young) => {
     if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
     else dep = departmentLookUp[dep];
   }
+  if (!dep) dep = "Etranger";
   return dep;
 };
 
