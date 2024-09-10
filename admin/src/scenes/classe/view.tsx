@@ -8,7 +8,7 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Badge } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes } from "snu-lib";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
@@ -24,6 +24,7 @@ import ModaleCohort from "./components/modaleCohort";
 import { InfoBus, Rights } from "./components/types";
 import { TStatus } from "@/types";
 import { getHeaderActionList } from "./header";
+import { ClasseService } from "@/services/classeService";
 
 export default function View() {
   const [classe, setClasse] = useState<ClasseDto | undefined>();
@@ -36,7 +37,7 @@ export default function View() {
   const [editRef, setEditRef] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [oldClasseCohort, setOldClasseCohort] = useState();
+  const [oldClasseCohort, setOldClasseCohort] = useState<string>();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
 
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -49,10 +50,7 @@ export default function View() {
 
   const getClasse = async () => {
     try {
-      const { ok, code, data: classe } = await api.get(`/cle/classe/${id}`);
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
-      }
+      const classe = await ClasseService.getOne(id);
       setClasse(classe);
       setOldClasseCohort(classe.cohort);
       if (classe?.ligneId) {
@@ -75,12 +73,12 @@ export default function View() {
 
       //Logical stuff
       setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
-      if (![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe.status)) {
+      if (!([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED] as string[]).includes(classe.status)) {
         getStudents(classe._id);
       }
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(e.message));
     }
   };
 
@@ -138,7 +136,7 @@ export default function View() {
     }
 
     const errors: Errors = {};
-    if (classe?.cohort !== oldClasseCohort && classe.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
+    if (classe?.cohort !== oldClasseCohort && classe?.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
     if (!classe?.name) errors.name = "Ce champ est obligatoire";
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
