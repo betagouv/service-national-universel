@@ -65,10 +65,11 @@ export const inviteReferent = async (
   const fromName = `${from?.firstName || null} ${from?.lastName || null}`;
   const toName = `${referent.firstName} ${referent.lastName}`;
   const name_school = `${etablissement.name}`;
+  const emailEtablissement = `${referent.email}`;
 
   return await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[role], {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { cta, fromName, toName, name_school },
+    params: { cta, fromName, toName, name_school, emailEtablissement },
   });
 };
 

@@ -1,29 +1,29 @@
-const Joi = require("joi");
-const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
-const { isYoung } = require("../utils");
+import Joi from "joi";
+import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, UserDto, YoungDto } from "snu-lib";
+import { isYoung } from "../utils";
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
 const idRegex = /^[0-9a-fA-F]{24}$/;
 
-const idSchema = () => Joi.string().regex(idRegex, "id");
+export const idSchema = () => Joi.string().regex(idRegex, "id");
 
-function validateId(id) {
+export function validateId(id?: string) {
   return idSchema().required().validate(id, { stripUnknown: true });
 }
 
-function validateOptionalId(id) {
+export function validateOptionalId(id) {
   return idSchema().optional().validate(id, { stripUnknown: true });
 }
 
-function validateString(string) {
+export function validateString(string) {
   return Joi.string().validate(string, { stripUnknown: true });
 }
 
-function validateArray(array) {
+export function validateArray(array) {
   return Joi.array().items(Joi.string().allow(null, "")).validate(array, { stripUnknown: true });
 }
 
-function validateMission(mission) {
+export function validateMission(mission) {
   return Joi.object()
     .keys({
       name: Joi.string().allow(null, ""),
@@ -71,7 +71,7 @@ function validateMission(mission) {
     .validate(mission, { stripUnknown: true });
 }
 
-function validateStructure(structure) {
+export function validateStructure(structure) {
   return Joi.object()
     .keys({
       name: Joi.string().allow(null, ""),
@@ -109,7 +109,7 @@ function validateStructure(structure) {
     .validate(structure, { stripUnknown: true });
 }
 
-function validateProgram(program) {
+export function validateProgram(program) {
   return Joi.object()
     .keys({
       name: Joi.string().allow(null, ""),
@@ -131,7 +131,7 @@ function validateProgram(program) {
     .validate(program, { stripUnknown: true });
 }
 
-function validateContract(program) {
+export function validateContract(program) {
   return Joi.object()
     .keys({
       youngId: Joi.string().allow(null, ""),
@@ -200,7 +200,7 @@ function validateContract(program) {
     .validate(program, { stripUnknown: true });
 }
 
-function validateFirstName() {
+export function validateFirstName() {
   const formatPart = (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
 
   return Joi.string().custom((value) =>
@@ -237,7 +237,7 @@ const applicationKeys = {
   statusComment: Joi.string().allow(null, ""),
 };
 
-function validateUpdateApplication(application, user) {
+export function validateUpdateApplication(application, user) {
   return Joi.object()
     .keys({
       ...applicationKeys,
@@ -248,7 +248,7 @@ function validateUpdateApplication(application, user) {
     .validate(application, { stripUnknown: true });
 }
 
-function validateNewApplication(application, user) {
+export function validateNewApplication(application, user) {
   return Joi.object()
     .keys({
       ...applicationKeys,
@@ -286,11 +286,11 @@ const cohesionCenterKeys = () => {
   return data;
 };
 
-function validateNewCohesionCenter(application) {
+export function validateNewCohesionCenter(application) {
   return Joi.object().keys(cohesionCenterKeys()).validate(application, { stripUnknown: true });
 }
 
-function validateUpdateCohesionCenter(application) {
+export function validateUpdateCohesionCenter(application) {
   return Joi.object().keys(cohesionCenterKeys()).validate(application, { stripUnknown: true });
 }
 
@@ -308,11 +308,11 @@ const sessionPhase1Keys = {
   sanitaryContactEmail: Joi.string().allow(null, ""),
 };
 
-function validateSessionPhase1(session) {
+export function validateSessionPhase1(session) {
   return Joi.object().keys(sessionPhase1Keys).validate(session, { stripUnknown: true });
 }
 
-function validateYoung(young, user) {
+export function validateYoung(young: YoungDto, user?: UserDto) {
   const keys = {
     firstName: Joi.string().allow(null, ""),
     lastName: Joi.string().allow(null, ""),
@@ -581,13 +581,14 @@ function validateYoung(young, user) {
   };
 
   if (!isYoung(user)) {
+    // @ts-ignore
     keys.password = Joi.string().allow(null, "");
   }
 
   return Joi.object().keys(keys).validate(young, { stripUnknown: true });
 }
 
-function validateDepartmentService(departmentService) {
+export function validateDepartmentService(departmentService) {
   return Joi.object()
     .keys({
       contacts: Joi.array().items(Joi.any().allow(null, "")),
@@ -604,7 +605,7 @@ function validateDepartmentService(departmentService) {
     })
     .validate(departmentService, { stripUnknown: true });
 }
-function validateWaitingList(waitingList) {
+export function validateWaitingList(waitingList) {
   return Joi.object()
     .keys({
       zip: Joi.string().allow(null, ""),
@@ -614,7 +615,7 @@ function validateWaitingList(waitingList) {
     .validate(waitingList, { stripUnknown: true });
 }
 
-function validateReferent(referent) {
+export function validateReferent(referent) {
   return Joi.object()
     .keys({
       firstName: validateFirstName().allow(null, ""),
@@ -643,7 +644,7 @@ function validateReferent(referent) {
     .validate(referent, { stripUnknown: true });
 }
 
-function validateEvent(event) {
+export function validateEvent(event) {
   return Joi.object()
     .keys({
       category: Joi.string().allow(null, ""),
@@ -653,7 +654,7 @@ function validateEvent(event) {
     .validate(event, { stripUnknown: true });
 }
 
-function validateSelf(referent) {
+export function validateSelf(referent) {
   // Referents can not update their role.
   return Joi.object()
     .keys({
@@ -670,7 +671,7 @@ function validateSelf(referent) {
     .validate(referent, { stripUnknown: true });
 }
 
-function validatePhase1Document(phase1document, key) {
+export function validatePhase1Document(phase1document, key) {
   switch (key) {
     case "imageRight":
       return Joi.object({
@@ -696,7 +697,7 @@ function validatePhase1Document(phase1document, key) {
   }
 }
 
-function validatePhase2Preference(preferences) {
+export function validatePhase2Preference(preferences) {
   return Joi.object()
     .keys({
       professionnalProject: Joi.string().allow(null, ""),
@@ -721,7 +722,7 @@ function validatePhase2Preference(preferences) {
     .validate(preferences, { stripUnknown: true });
 }
 
-function validateStructureManager(structureManager) {
+export function validateStructureManager(structureManager) {
   return Joi.object()
     .keys({
       firstName: validateFirstName().required(),
@@ -733,7 +734,7 @@ function validateStructureManager(structureManager) {
     .validate(structureManager, { stripUnknown: true });
 }
 
-function validateHeadOfCenterCohortChange(values) {
+export function validateHeadOfCenterCohortChange(values) {
   return Joi.object()
     .keys({
       cohesionCenterId: Joi.string().regex(idRegex, "id").required(),
@@ -744,7 +745,7 @@ function validateHeadOfCenterCohortChange(values) {
     .validate(values, { stripUnknown: true });
 }
 
-const representantSchema = (isRequired) => {
+export const representantSchema = (isRequired) => {
   return {
     parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
     parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
@@ -793,41 +794,11 @@ const representantSchema = (isRequired) => {
   };
 };
 
-function validateParents(values, isRequired) {
+export function validateParents(values, isRequired) {
   return Joi.object(representantSchema(isRequired)).validate(values, { stripUnknown: true });
 }
 
-const needRequired = (joi, isRequired) => {
+export const needRequired = (joi, isRequired) => {
   if (isRequired) return joi.required();
   else return joi.allow(null, "");
-};
-
-module.exports = {
-  idSchema,
-  validateId,
-  validateString,
-  validateArray,
-  validateMission,
-  validateStructure,
-  validateProgram,
-  validateFirstName,
-  validateNewCohesionCenter,
-  validateUpdateCohesionCenter,
-  validateYoung,
-  validateDepartmentService,
-  validateReferent,
-  validateSelf,
-  validateNewApplication,
-  validateUpdateApplication,
-  validateWaitingList,
-  validateContract,
-  validateOptionalId,
-  validateEvent,
-  validateSessionPhase1,
-  validatePhase1Document,
-  validatePhase2Preference,
-  validateStructureManager,
-  validateHeadOfCenterCohortChange,
-  validateParents,
-  representantSchema,
 };

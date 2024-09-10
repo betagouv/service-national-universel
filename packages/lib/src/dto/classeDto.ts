@@ -1,4 +1,4 @@
-import { STATUS_CLASSE, STATUS_PHASE1_CLASSE_LIST } from "../constants/constants";
+import { STATUS_CLASSE, STATUS_PHASE1_CLASSE_LIST, CLE_COLORATION } from "../constants/constants";
 
 import { ReferentDto } from "./referentDto";
 
@@ -13,7 +13,7 @@ export type ClasseDto = {
   uniqueId: string;
   uniqueKeyAndId: string;
   name: string;
-  coloration?: string;
+  coloration?: keyof typeof CLE_COLORATION;
   estimatedSeats: number;
   totalSeats: number;
   seatsTaken: number;
