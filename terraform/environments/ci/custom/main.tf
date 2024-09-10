@@ -77,6 +77,7 @@ resource "scaleway_secret_version" "initial" {
 data "scaleway_secret_version" "latest" {
   secret_id = scaleway_secret.custom.id
   revision  = "latest_enabled"
+  project_id  = local.project_id
 
   depends_on = [scaleway_secret_version.initial]
 }
