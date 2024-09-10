@@ -118,7 +118,7 @@ export const getClasseById = async (classeId, withPopulate = true) => {
       .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })
       .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
       .populate({ path: "session", options: { select: { _id: 1 } } })
-      .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
+      .populate({ path: "pointDeRassemblement", options: { select: { _id: 1, name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
       .populate({ path: "cohortDetails", options: { select: { dateStart: 1, dateEnd: 1 } } });
   }
 
