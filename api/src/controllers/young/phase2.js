@@ -7,7 +7,18 @@ const config = require("config");
 const { capture } = require("../../sentry");
 const { YoungModel, CohortModel, ReferentModel, MissionEquivalenceModel, ApplicationModel } = require("../../models");
 const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2, getFile } = require("../../utils");
-const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
+const {
+  canApplyToPhase2,
+  SENDINBLUE_TEMPLATES,
+  ROLES,
+  SUB_ROLES,
+  canEditYoung,
+  UNSS_TYPE,
+  EQUIVALENCE_STATUS,
+  APPLICATION_STATUS,
+  ENGAGEMENT_TYPES,
+  ENGAGEMENT_LYCEEN_TYPES,
+} = require("snu-lib");
 const { sendTemplate } = require("../../brevo");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
 const { decrypt } = require("../../cryptoUtils");
@@ -58,7 +69,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       young.set({ status_equivalence: "WAITING_VERIFICATION" });
     }
     if (!isYoung) {
-      young.set({ status_equivalence: "VALIDATED", statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
+      young.set({ status_equivalence: EQUIVALENCE_STATUS.VALIDATED, statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
       const applications = await ApplicationModel.find({ youngId: young._id });
       const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
       await cancelPendingApplications(pendingApplication, req.user);

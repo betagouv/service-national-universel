@@ -419,10 +419,16 @@ async function updateYoungPhase2Hours(young, fromUser) {
         .map((equivalence) => equivalence?.missionDuration || 0)
         .reduce((acc, current) => acc + current, 0);
 
-    const totalHoursEstimated = applications
-      .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
-      .map((application) => Number(application.missionDuration || 0))
-      .reduce((acc, current) => acc + current, 0);
+    const totalHoursEstimated =
+      applications
+        .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
+        .map((application) => Number(application.missionDuration || 0))
+        .reduce((acc, current) => acc + current, 0) +
+      equivalences
+        .filter((equivalence) => equivalence.status === "VALIDATED")
+        .map((equivalence) => equivalence?.missionDuration || 0)
+        .reduce((acc, current) => acc + current, 0);
+
     young.set({
       phase2NumberHoursDone: String(totalHoursDone),
       phase2NumberHoursEstimated: String(totalHoursEstimated),
