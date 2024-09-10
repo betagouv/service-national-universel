@@ -1,4 +1,3 @@
-import { isEmpty, isNil } from "lodash";
 import qs from "query-string";
 
 import { BasicRoute } from "../routes";
@@ -17,10 +16,10 @@ export function isValidRedirectUrl(url) {
 
 export function buildRequestPath(path: BasicRoute["path"], params: BasicRoute["params"]): string {
   let finalPath = path;
-  if (!isEmpty(params)) {
+  if (params && Object.keys(params).length > 0) {
     for (const paramKey in params) {
       const value = params[paramKey];
-      if (isNil(value)) {
+      if (value === null || value === undefined) {
         finalPath = finalPath.replace(`{${paramKey}}`, "");
         finalPath = finalPath.replace(`{${paramKey}?}`, "");
       } else {
@@ -34,7 +33,7 @@ export function buildRequestPath(path: BasicRoute["path"], params: BasicRoute["p
 }
 
 export function buildRequestQueryString(query: BasicRoute["query"] = {}): string {
-  if (isEmpty(query)) {
+  if (!query || Object.keys(query).length > 0) {
     return "";
   }
   return `?${qs.stringify(query)}`;
