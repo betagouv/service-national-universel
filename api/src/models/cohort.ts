@@ -1,6 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import { isAfter, isWithinInterval } from "date-fns";
-import { COHORT_TYPE, COHORT_TYPE_LIST, getDateTimeByTimeZoneOffset } from "snu-lib";
+import { COHORT_TYPE, COHORT_TYPE_LIST, departmentLookUp, getDateTimeByTimeZoneOffset } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "./types";
@@ -16,7 +16,7 @@ const DSNJExportDates = new Schema({
 const Eligibility = new Schema({
   zones: {
     type: [String],
-    enum: ["A", "B", "C", "DOM", "PF", "Etranger", "NC", "Corse", "Mayotte", "La Réunion", "Guadeloupe", "Guyane", "Martinique"],
+    enum: ["A", "B", "C", "DOM", "PF", "Etranger", "NC", ...Object.values(departmentLookUp)],
     required: true,
   },
   schoolLevels: {
