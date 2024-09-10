@@ -1,5 +1,5 @@
-import { ClasseDto } from "src/dto";
-import { BasicRoute, RouteResponseBody } from "src/routes";
+import { ClasseType } from "../../../mongoSchema";
+import { BasicRoute, RouteResponseBody } from "../..";
 
 export interface UpdateClasseRoute extends BasicRoute {
   method: "PUT";
@@ -8,7 +8,7 @@ export interface UpdateClasseRoute extends BasicRoute {
     id: string;
   };
   payload: Pick<
-    ClasseDto,
+    ClasseType,
     | "name"
     | "totalSeats"
     | "cohort"
@@ -22,5 +22,5 @@ export interface UpdateClasseRoute extends BasicRoute {
     | "cohesionCenterId"
     | "pointDeRassemblementId"
   >;
-  response: RouteResponseBody<ClasseDto>;
+  response: RouteResponseBody<ClasseType>;
 }

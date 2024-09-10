@@ -1,5 +1,5 @@
-import { ClasseDto } from "src/dto";
-import { BasicRoute, RouteResponseBody } from "src/routes";
+import { ClasseType } from "../../../mongoSchema";
+import { BasicRoute, RouteResponseBody } from "../..";
 
 export interface DeleteClasseRoute extends BasicRoute {
   method: "DELETE";
@@ -8,5 +8,5 @@ export interface DeleteClasseRoute extends BasicRoute {
   query: {
     type: "delete" | "withdraw";
   };
-  response: RouteResponseBody<ClasseDto>;
+  response: RouteResponseBody<ClasseType>;
 }

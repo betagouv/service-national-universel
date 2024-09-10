@@ -115,11 +115,11 @@ export const getClasseById = async (classeId, withPopulate = true) => {
   if (withPopulate) {
     query = query
       .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
-      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })
-      .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
+      .populate({ path: "referents", options: { select: { _id: 1, firstName: 1, lastName: 1, role: 1, email: 1 } } })
+      .populate({ path: "cohesionCenter", options: { select: { _id: 1, name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
       .populate({ path: "session", options: { select: { _id: 1 } } })
-      .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
-      .populate({ path: "cohortDetails", options: { select: { dateStart: 1, dateEnd: 1 } } });
+      .populate({ path: "pointDeRassemblement", options: { select: { _id: 1, name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
+      .populate({ path: "cohortDetails", options: { select: { _id: 1, dateStart: 1, dateEnd: 1 } } });
   }
 
   const classe = await query.exec();
@@ -193,4 +193,3 @@ export const isClasseStatusCreated = async (classeId: string) => {
   }
   return classe.status === STATUS_CLASSE.CREATED;
 };
-

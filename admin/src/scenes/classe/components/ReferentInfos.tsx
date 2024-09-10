@@ -1,24 +1,22 @@
 import React from "react";
 import { HiOutlinePencil } from "react-icons/hi";
-import { Container, InputText, Button, Label } from "@snu/ds/admin";
-import { ClasseDto } from "snu-lib";
-import { User } from "@/types";
+import { Container, InputText, Button } from "@snu/ds/admin";
+import { ClassesRoutes } from "snu-lib";
 import { Rights } from "./types";
 
 interface Props {
-  classe: ClasseDto;
-  setClasse: (classe: ClasseDto) => void;
+  classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
+  setClasse: (classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>) => void;
   editRef: boolean;
   setEditRef: (edit: boolean) => void;
   errors: { [key: string]: string };
   rights: Rights;
-  user: User;
   isLoading: boolean;
   onCancel: () => void;
   onCheckInfo: () => void;
 }
 
-export default function ReferentInfos({ classe, setClasse, editRef, setEditRef, errors, rights, user, isLoading, onCancel, onCheckInfo }: Props) {
+export default function ReferentInfos({ classe, setClasse, editRef, setEditRef, errors, rights, isLoading, onCancel, onCheckInfo }: Props) {
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
       return [
@@ -40,13 +38,13 @@ export default function ReferentInfos({ classe, setClasse, editRef, setEditRef, 
           <InputText
             name="refName"
             className="mb-3"
-            value={classe.referents[0].lastName}
+            value={classe.referents?.[0].lastName || ""}
             label={"Nom"}
             readOnly={!editRef}
             active={editRef}
             error={errors.refLastName}
             onChange={(e) => {
-              const updatedReferents = [...classe.referents];
+              const updatedReferents = classe.referents ? [...classe.referents] : [];
               updatedReferents[0].lastName = e.target.value;
               setClasse({ ...classe, referents: updatedReferents });
             }}
@@ -54,13 +52,13 @@ export default function ReferentInfos({ classe, setClasse, editRef, setEditRef, 
           <InputText
             name="refFirstName"
             className="mb-3"
-            value={classe.referents[0].firstName}
+            value={classe.referents?.[0].firstName || ""}
             label={"Prénom"}
             readOnly={!editRef}
             active={editRef}
             error={errors.refFirstName}
             onChange={(e) => {
-              const updatedReferents = [...classe.referents];
+              const updatedReferents = classe.referents ? [...classe.referents] : [];
               updatedReferents[0].firstName = e.target.value;
               setClasse({ ...classe, referents: updatedReferents });
             }}
@@ -72,12 +70,12 @@ export default function ReferentInfos({ classe, setClasse, editRef, setEditRef, 
             name="refMail"
             className="mb-3"
             label={"Adresse Email"}
-            value={classe.referents[0].email}
+            value={classe.referents?.[0].email || ""}
             readOnly={!editRef}
             active={editRef}
             error={errors.refEmail}
             onChange={(e) => {
-              const updatedReferents = [...classe.referents];
+              const updatedReferents = classe.referents ? [...classe.referents] : [];
               updatedReferents[0].email = e.target.value;
               setClasse({ ...classe, referents: updatedReferents });
             }}

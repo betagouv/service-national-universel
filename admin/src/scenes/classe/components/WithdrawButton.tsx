@@ -7,11 +7,11 @@ import { toastr } from "react-redux-toastr";
 
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, ClasseDto } from "snu-lib";
+import { translate, ClasseType } from "snu-lib";
 import { ModalConfirmation } from "@snu/ds/admin";
 
 interface Props {
-  classe: ClasseDto;
+  classe: Pick<ClasseType, "_id" | "name">;
   setIsLoading: (b: boolean) => void;
 }
 
