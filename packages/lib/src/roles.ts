@@ -1,7 +1,7 @@
 import { ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
-import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "./constants/constants";
+import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE } from "./constants/constants";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -1028,6 +1028,14 @@ function canCreateEtablissement(user: UserDto) {
   return [ROLES.ADMIN].includes(user.role);
 }
 
+//CLE
+function canValidateMultipleYoungsInClass(actor, classe) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+}
+function canValidateYoungInClass(actor, classe) {
+  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -1181,4 +1189,6 @@ export {
   canManageMig,
   canUpdateReferentClasse,
   canCreateEtablissement,
+  canValidateMultipleYoungsInClass,
+  canValidateYoungInClass,
 };
