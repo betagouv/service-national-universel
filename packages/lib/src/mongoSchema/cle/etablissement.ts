@@ -5,7 +5,6 @@ import { CLE_TYPE_LIST, CLE_SECTOR_LIST, InterfaceExtended } from "../..";
 export const EtablissementSchema = {
   schoolId: {
     type: String,
-    required: false,
     documentation: {
       description: "School Ramses rataché à l'établissement",
     },
