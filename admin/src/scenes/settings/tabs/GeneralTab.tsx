@@ -88,8 +88,8 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     </ul>
                   </ReactTooltip>
                 </div>
-                <InputText label="Nom de la cohort" value={data.name} disabled onChange placeholder readOnly error={false} />
-                <InputText label="Identifiant" value={data.snuId} disabled onChange placeholder readOnly error={false} />
+                <InputText label="Nom de la cohort" value={data.name} disabled readOnly />
+                <InputText label="Identifiant" value={data.snuId} disabled readOnly />
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
@@ -108,8 +108,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     onChange={(e) => setData({ ...data, dateStart: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
-                    className={""}
-                    isTime={false}
                     placeholder={"JJ/MM/AAAA"}
                   />
                   <DatePickerInput
@@ -120,8 +118,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     onChange={(e) => setData({ ...data, dateEnd: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
-                    className={""}
-                    isTime={false}
                     placeholder={"JJ/MM/AAAA"}
                   />
                 </div>
@@ -145,8 +141,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   readOnly={readOnly}
                   value={data.uselessInformation?.toolkit || ""}
                   onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, toolkit: e.target.value } })}
-                  error={""}
-                  label={""}
                 />
               </div>
               <div className="flex flex-col gap-3">
@@ -166,7 +160,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   value={data?.uselessInformation?.zones || ""}
                   onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, zones: e.target.value } })}
                   rows={2}
-                  error={""}
                 />
               </div>
               <div className="flex flex-col gap-3">
@@ -186,7 +179,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   value={data?.uselessInformation?.eligibility || ""}
                   onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, eligibility: e.target.value } })}
                   rows={2}
-                  error={""}
                 />
               </div>
             </div>
@@ -221,7 +213,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   onChange={(e) => setData({ ...data, inscriptionStartDate: e })}
                   readOnly={readOnly}
                   disabled={isLoading}
-                  className={""}
                 />
                 <DatePickerInput
                   mode="single"
@@ -233,7 +224,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   readOnly={readOnly}
                   disabled={isLoading}
                   error={error.inscriptionEndDate}
-                  className={""}
                 />
               </div>
               <div className="flex flex-col gap-3">
@@ -261,7 +251,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       onChange={(e) => setData({ ...data, reInscriptionStartDate: e })}
                       readOnly={readOnly}
                       disabled={isLoading}
-                      className={""}
                     />
                     <DatePickerInput
                       mode="single"
@@ -273,7 +262,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       onChange={(e) => setData({ ...data, reInscriptionEndDate: e })}
                       readOnly={readOnly}
                       disabled={isLoading || !data.inscriptionEndDate}
-                      className={""}
                     />
                   </>
                 )}
@@ -307,7 +295,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     readOnly={readOnly}
                     disabled={isLoading}
                     error={error.inscriptionModificationEndDate}
-                    className={""}
                   />
                 </div>
               </div>
@@ -333,7 +320,6 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     readOnly={readOnly}
                     disabled={isLoading}
                     error={error.instructionEndDate}
-                    className={""}
                   />
                 </div>
               </div>
@@ -717,13 +703,11 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       mode="single"
                       label="Fin"
                       placeholder={"Date"}
-                      isTime={false}
                       disabled={isLoading}
                       readOnly={readOnly}
                       value={data.pdrChoiceLimitDate}
                       onChange={(value) => setData({ ...data, pdrChoiceLimitDate: value })}
                       error={error.pdrChoiceLimitDate}
-                      className={""}
                     />
                   </div>
                 </>
