@@ -585,6 +585,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
     }
 
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && !young.reinscriptionStep2023) {
+      newYoung.inscriptionStep2023 = "DONE";
+    }
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.reinscriptionStep2023) {
+      newYoung.reinscriptionStep2023 = "DONE";
+    }
+
     if (newYoung.status === YOUNG_STATUS.VALIDATED && young.source === YOUNG_SOURCE.CLE) {
       const classe = await ClasseModel.findById(young.classeId);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

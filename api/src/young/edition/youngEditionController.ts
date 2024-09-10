@@ -401,13 +401,6 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
       [`parent${value.parent}AllowSNU`]: value.allow ? "true" : "false",
     };
 
-    if (value.allow && young.inscriptionStep2023 === "WAITING_CONSENT") {
-      changes.inscriptionStep2023 = "DONE";
-    }
-    if (value.allow && young.reinscriptionStep2023 === "WAITING_CONSENT") {
-      changes.reinscriptionStep2023 = "DONE";
-    }
-
     let notification: string | null = null;
     const futureYoung = { ...young, ...changes } as YoungType;
     if (futureYoung.parent1AllowSNU === "false" || futureYoung.parent2AllowSNU === "false") {

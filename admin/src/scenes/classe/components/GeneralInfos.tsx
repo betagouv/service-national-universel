@@ -40,6 +40,12 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
     }
   };
 
+  const isUserCLE = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role);
+  const isUserAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+
+  const linkPath = isUserCLE ? "/mes-eleves" : "/inscription";
+  const showButton = (isUserCLE && classe.schoolYear === "2024-2025") || isUserAdminOrReferent;
+
   return (
     <Container title="Informations générales" actions={containerActionList({ edit, setEdit, canEdit: rights.canEdit })}>
       <div className="flex items-stretch justify-stretch">
@@ -187,10 +193,11 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
               </Link>
             </>
           )}
-          <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
-            <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
-          </Link>
-
+          {showButton && (
+            <Link key="list-students" to={`${linkPath}?classeId=${classe._id}`}>
+              <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
+            </Link>
+          )}
           {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && <WithdrawButton classe={classe} setIsLoading={setIsLoading} />}
         </div>
       </div>

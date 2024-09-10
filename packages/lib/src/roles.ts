@@ -1001,8 +1001,8 @@ function canEditEstimatedSeats(actor) {
 function canEditTotalSeats(actor) {
   if (actor.role === ROLES.ADMIN) {
     const now = new Date();
-    const limitDateEstimatedSeat = new Date(LIMIT_DATE_ESTIMATED_SEATS);
-    if (now <= limitDateEstimatedSeat) {
+    const limitDateTotalSeat = new Date(LIMIT_DATE_TOTAL_SEATS);
+    if (now <= limitDateTotalSeat) {
       return false;
     } else {
       return true;
@@ -1033,7 +1033,8 @@ function canValidateMultipleYoungsInClass(actor, classe) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
 }
 function canValidateYoungInClass(actor, classe) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+  if (isAdmin(actor)) return true;
+  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
 }
 
 export {
