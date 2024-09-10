@@ -354,6 +354,16 @@ const getRegionForEligibility = (young) => {
   return region;
 };
 
+const getDepartmentForEligibility = (young) => {
+  let dep = young.schooled === "true" ? young.schoolDepartment : young.department;
+  if (!dep) dep = getDepartmentByZip(young?.zip);
+  if (dep && (!isNaN(dep) || ["2A", "2B", "02A", "02B"].includes(dep))) {
+    if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
+    else dep = departmentLookUp[dep];
+  }
+  return dep;
+};
+
 const isFromMetropole = (young) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "A" || region2zone[region] === "B" || region2zone[region] === "C";
@@ -387,6 +397,7 @@ export {
   getRegionByZip,
   region2zone,
   getRegionForEligibility,
+  getDepartmentForEligibility,
   isFromMetropole,
   isFromDOMTOM,
   isFromFrenchPolynesia,
@@ -404,6 +415,7 @@ export default {
   getRegionByZip,
   region2zone,
   getRegionForEligibility,
+  getDepartmentForEligibility,
   isFromMetropole,
   isFromDOMTOM,
   isFromFrenchPolynesia,
