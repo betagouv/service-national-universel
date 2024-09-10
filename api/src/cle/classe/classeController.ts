@@ -54,7 +54,7 @@ import {
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 
-import { ClassesRoutesSchema } from "./classeValidation";
+import { ClassesRoutesSchema } from "./classeValidator";
 import {
   buildUniqueClasseId,
   buildUniqueClasseKey,
