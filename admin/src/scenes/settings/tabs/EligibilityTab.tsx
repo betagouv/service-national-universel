@@ -14,19 +14,27 @@ type EligibilityTabsProps = {
   getCohort: () => void;
 };
 
-type EligibilityTabsState = {
+type EligibilityForm = {
   zones: string[];
   schoolLevels: string[];
   bornAfter: Date | null;
   bornBefore: Date | null;
 };
 
+type ErrorForm = {
+  zones?: string;
+  schoolLevels?: string;
+  bornAfter?: string;
+  bornBefore?: string;
+  interval?: string;
+};
+
 region2department["Étranger"] = ["Etranger"]; // Add Etranger to the list of regions because eligibility can be set to Etranger
 
 export default function EligibilityTab({ cohort, readOnly, getCohort }: EligibilityTabsProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<{ [key: string]: string }>({});
-  const [values, setValues] = useState<EligibilityTabsState>({
+  const [error, setError] = useState<ErrorForm>({});
+  const [formValues, setFormValues] = useState<EligibilityForm>({
     zones: [],
     schoolLevels: [],
     bornAfter: null,
@@ -34,7 +42,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
   });
 
   useEffect(() => {
-    setValues({
+    setFormValues({
       zones: cohort.eligibility?.zones || [],
       schoolLevels: cohort.eligibility?.schoolLevels || [],
       bornAfter: cohort.eligibility?.bornAfter || null,
@@ -44,35 +52,31 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
 
   const onSubmit = async () => {
     try {
-      const err = {} as { [key: string]: string };
-      if (!values.bornAfter) err.bornAfter = "La date est obligatoire";
-      if (!values.bornBefore) err.bornBefore = "La date est obligatoire";
-      if (values.bornAfter && values.bornBefore && values.bornAfter > values.bornBefore) {
+      const err: ErrorForm = {};
+      if (!formValues.bornAfter) err.bornAfter = "La date est obligatoire";
+      if (!formValues.bornBefore) err.bornBefore = "La date est obligatoire";
+      if (formValues.bornAfter && formValues.bornBefore && formValues.bornAfter > formValues.bornBefore) {
         err.interval = "L'interval de date n'est pas valide";
       }
 
-      if (values.zones.length === 0) err.zones = "Veuillez sélectionner au moins un département";
-      if (values.schoolLevels.length === 0) err.schoolLevels = "Veuillez sélectionner au moins un niveau scolaire";
+      if (formValues.zones.length === 0) err.zones = "Veuillez sélectionner au moins un département";
+      if (formValues.schoolLevels.length === 0) err.schoolLevels = "Veuillez sélectionner au moins un niveau scolaire";
 
       setError(err);
-      console.log("err", err);
       if (Object.values(err).length > 0) {
         return toastr.warning("Information", "Veuillez corriger les erreurs dans le formulaire");
       }
 
       setIsLoading(true);
-      const { ok, code } = await api.put(`/cohort/${cohort._id?.toString()}/eligibility`, values);
+      const { ok, code } = await api.put(`/cohort/${cohort._id?.toString()}/eligibility`, formValues);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la mise à jour de l'élégibilité", translate(code));
-        await getCohort();
-        return setIsLoading(false);
       }
       toastr.success("Information", "La session a bien été mise à jour");
-      await getCohort();
-      setIsLoading(false);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", "");
+    } finally {
       await getCohort();
       setIsLoading(false);
     }
@@ -90,8 +94,8 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
               label="Né après le"
               placeholder="JJ/MM/AAAA"
               isTime={false}
-              value={values.bornAfter}
-              onChange={(e) => setValues({ ...values, bornAfter: e })}
+              value={formValues.bornAfter}
+              onChange={(e) => setFormValues({ ...formValues, bornAfter: e })}
               error={error?.bornAfter || ""}
               readOnly={false}
               disabled={isLoading || readOnly}
@@ -102,8 +106,8 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
               label="Né avant le"
               placeholder="JJ/MM/AAAA"
               isTime={false}
-              value={values.bornBefore}
-              onChange={(e) => setValues({ ...values, bornBefore: e })}
+              value={formValues.bornBefore}
+              onChange={(e) => setFormValues({ ...formValues, bornBefore: e })}
               error={error.bornBefore || ""}
               readOnly={false}
               disabled={isLoading || readOnly}
@@ -123,11 +127,11 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
                   name={grade}
                   type="checkbox"
                   disabled={isLoading || readOnly}
-                  checked={values.schoolLevels.includes(grade)}
+                  checked={formValues.schoolLevels.includes(grade)}
                   className="h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer"
                   onChange={(e) => {
-                    const newValues = e.target.checked ? [...values.schoolLevels, grade] : values.schoolLevels.filter((g) => g !== grade);
-                    setValues((prev) => ({ ...prev, schoolLevels: newValues }) as EligibilityTabsState);
+                    const newValues = e.target.checked ? [...formValues.schoolLevels, grade] : formValues.schoolLevels.filter((g) => g !== grade);
+                    setFormValues((prev: EligibilityForm) => ({ ...prev, schoolLevels: newValues }));
                   }}
                 />
                 <label htmlFor={grade} className="mt-1.5 ml-2 text-sm cursor-pointer whitespace-nowrap">
@@ -152,22 +156,19 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
                 label={region}
                 disabled={isLoading || readOnly}
                 options={region2department[region].map((dep) => ({ label: dep, value: dep }))}
-                value={values?.zones?.filter((dep) => region2department[region].includes(dep)).map((dep) => ({ label: dep, value: dep }))}
+                value={formValues?.zones?.filter((dep) => region2department[region].includes(dep)).map((dep) => ({ label: dep, value: dep }))}
                 onChange={(data) => {
                   const newValues = data.map((option) => option.value);
-                  setValues(
-                    (prev) =>
-                      ({
-                        ...prev,
-                        zones: [...prev.zones.filter((dep) => !region2department[region].includes(dep)), ...newValues],
-                      }) as EligibilityTabsState,
-                  );
+                  setFormValues((prev: EligibilityForm) => ({
+                    ...prev,
+                    zones: [...prev.zones.filter((dep) => !region2department[region].includes(dep)), ...newValues],
+                  }));
                 }}
               />
             ))}
           </div>
         </div>
-        {error?.zones && <div className="text-[#EF4444]">{error?.zones}</div>}
+        {error?.zones && <div className="text-[#EF4444]">{error.zones}</div>}
       </div>
       {!readOnly && (
         <div className="flex items-center justify-center gap-3 ">

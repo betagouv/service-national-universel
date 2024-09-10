@@ -11,6 +11,7 @@ import { ERRORS, getFile, deleteFile } from "../utils";
 import { decrypt } from "../cryptoUtils";
 import { validateCohortDto } from "./cohortValidator";
 import { UserRequest } from "../controllers/request";
+import { validateId } from "../utils/validator";
 
 const router = express.Router({ mergeParams: true });
 
@@ -326,11 +327,12 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
 
 router.put("/:id/eligibility", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
   try {
-    const { error: idError, value: cohortId } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    const { error: idError, value: cohortId } = validateId(req.params.id);
     if (idError) {
       capture(idError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
     const { error: bodyError, value: body } = Joi.object({
       zones: Joi.array().items(Joi.string()).required(),
       schoolLevels: Joi.array().items(Joi.string()).required(),

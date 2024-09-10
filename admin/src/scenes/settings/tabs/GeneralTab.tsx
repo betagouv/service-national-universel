@@ -23,7 +23,7 @@ import { CleSettings } from "../components/CleSettings";
 import { InformationsConvoyage } from "../components/InformationsConvoyage";
 
 export default function GeneralTab({ data, setData, cohort, readOnly, getCohort, isLoading, setIsLoading, noChange, mounted, setNoChange }) {
-  const [error, setError] = useState({});
+  const [error, setError] = useState<{ [key: string]: string }>({});
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(false);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
 
   const onSubmit = async () => {
     try {
-      let err = {};
+      const err = {} as { [key: string]: string };
       if (!data.dateStart) err.dateStart = "La date de début est obligatoire";
       if (!data.dateEnd) err.dateEnd = "La date de fin est obligatoire";
       if (!data.inscriptionStartDate) err.inscriptionStartDate = "La date d'ouverture des inscriptions est obligatoire";
@@ -49,7 +49,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
         err.reInscriptionEndDate = "Les dates de cloture de réinscription ne peuvent pas etre postérieures a celles de réinscription.";
       setError(err);
       if (Object.values(err).length > 0) {
-        return toastr.warning("Veuillez corriger les erreurs dans le formulaire");
+        return toastr.warning("Veuillez corriger les erreurs dans le formulaire", "");
       }
 
       setIsLoading(true);
@@ -60,12 +60,12 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
         await getCohort();
         return setIsLoading(false);
       }
-      toastr.success("La session a bien été mise à jour");
+      toastr.success("La session a bien été mise à jour", "");
       await getCohort();
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session");
+      toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", "");
       await getCohort();
       setIsLoading(false);
     }
@@ -81,21 +81,21 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Identification</p>
                   <MdInfoOutline data-tip data-for="identification" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="identification" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
+                  <ReactTooltip id="identification" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md ">
                     <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       <li>Nom donné à la cohorte.</li>
                       <li>Identifiant techniq§ue donné à la cohorte.</li>
                     </ul>
                   </ReactTooltip>
                 </div>
-                <InputText label="Nom de la cohort" value={data.name} disabled />
-                <InputText label="Identifiant" value={data.snuId} disabled />
+                <InputText label="Nom de la cohort" value={data.name} disabled onChange placeholder readOnly error={false} />
+                <InputText label="Identifiant" value={data.snuId} disabled onChange placeholder readOnly error={false} />
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Dates du séjour</p>
                   <MdInfoOutline data-tip data-for="dates_du_séjour" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="dates_du_séjour" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
+                  <ReactTooltip id="dates_du_séjour" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md ">
                     <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Précision de la date de départ en séjour et de celle de retour.</p>
                   </ReactTooltip>
                 </div>
@@ -108,6 +108,9 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     onChange={(e) => setData({ ...data, dateStart: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
+                    className={""}
+                    isTime={false}
+                    placeholder={"JJ/MM/AAAA"}
                   />
                   <DatePickerInput
                     mode="single"
@@ -117,6 +120,9 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     onChange={(e) => setData({ ...data, dateEnd: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
+                    className={""}
+                    isTime={false}
+                    placeholder={"JJ/MM/AAAA"}
                   />
                 </div>
               </div>
@@ -129,7 +135,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Toolkit d’aide</p>
                   <MdInfoOutline data-tip data-for="toolkit" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="toolkit" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="toolkit" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Liens vers un articles d&apos;aide pour suivre la cohorte.</p>
                   </ReactTooltip>
                 </div>
@@ -139,13 +145,15 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   readOnly={readOnly}
                   value={data.uselessInformation?.toolkit || ""}
                   onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, toolkit: e.target.value } })}
+                  error={""}
+                  label={""}
                 />
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Zones concernées</p>
                   <MdInfoOutline data-tip data-for="zones_concernées" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="zones_concernées" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="zones_concernées" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       Précision de la ou des zones géographiques ou scolaires concernées par le séjour.
                     </p>
@@ -157,13 +165,15 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   readOnly={readOnly}
                   value={data?.uselessInformation?.zones || ""}
                   onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, zones: e.target.value } })}
+                  rows={2}
+                  error={""}
                 />
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Éligibilité</p>
                   <MdInfoOutline data-tip data-for="eligibilité" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="eligibilité" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="eligibilité" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       Précision des critères d’éligibilité des volontaires pour le séjour (niveau scolaire).
                     </p>
@@ -175,6 +185,8 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   readOnly={readOnly}
                   value={data?.uselessInformation?.eligibility || ""}
                   onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, eligibility: e.target.value } })}
+                  rows={2}
+                  error={""}
                 />
               </div>
             </div>
@@ -192,7 +204,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-gray-900  text-xs font-medium">Inscriptions</p>
                   <MdInfoOutline data-tip data-for="inscriptions" className="text-gray-400 h-5 w-5 cursor-pointer" />
-                  <ReactTooltip id="inscriptions" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="inscriptions" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
                       <li>Ouverture et fermeture de la proposition du séjour sur le formulaire d’inscription.</li>
                       <li>Blocage de l’accès au dossier des dossiers d’inscription “en cours”.</li>
@@ -209,16 +221,19 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   onChange={(e) => setData({ ...data, inscriptionStartDate: e })}
                   readOnly={readOnly}
                   disabled={isLoading}
+                  className={""}
                 />
                 <DatePickerInput
                   mode="single"
-                  isTime
+                  isTime={true}
                   label="Fermeture"
                   placeholder="Date et heure"
                   value={data.inscriptionEndDate}
                   onChange={(e) => setData({ ...data, inscriptionEndDate: e })}
                   readOnly={readOnly}
                   disabled={isLoading}
+                  error={error.inscriptionEndDate}
+                  className={""}
                 />
               </div>
               <div className="flex flex-col gap-3">
@@ -246,6 +261,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       onChange={(e) => setData({ ...data, reInscriptionStartDate: e })}
                       readOnly={readOnly}
                       disabled={isLoading}
+                      className={""}
                     />
                     <DatePickerInput
                       mode="single"
@@ -254,10 +270,10 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       placeholder="Date et heure"
                       value={data.reInscriptionEndDate || data.inscriptionEndDate}
                       error={error.reInscriptionEndDate}
-                      // onChange={(e) => {}}
                       onChange={(e) => setData({ ...data, reInscriptionEndDate: e })}
                       readOnly={readOnly}
                       disabled={isLoading || !data.inscriptionEndDate}
+                      className={""}
                     />
                   </>
                 )}
@@ -271,7 +287,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-gray-900  text-xs font-medium">Modification de son dossier déposé par un volontaire</p>
                   <MdInfoOutline data-tip data-for="modification_volontaire" className="text-gray-400 h-5 w-5 cursor-pointer" />
-                  <ReactTooltip id="modification_volontaire" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="modification_volontaire" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
                       <li>
                         Fermeture de la possibilité de modifier ou corriger son dossier d’inscription (pour les dossiers “en attente de validation” et “en attente de correction”).
@@ -290,6 +306,8 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     onChange={(e) => setData({ ...data, inscriptionModificationEndDate: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
+                    error={error.inscriptionModificationEndDate}
+                    className={""}
                   />
                 </div>
               </div>
@@ -297,7 +315,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-gray-900  text-xs font-medium">Instruction</p>
                   <MdInfoOutline data-tip data-for="instruction" className="text-gray-400 h-5 w-5 cursor-pointer" />
-                  <ReactTooltip id="instruction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="instruction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
                       <li> Fermeture de la proposition de séjour pour le changement de séjour.</li>
                       <li>Le lendemain, les dossiers restants “en attente de validation” et “en attente de correction” seront basculés sur un autre séjour via script.</li>
@@ -314,6 +332,8 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     onChange={(e) => setData({ ...data, instructionEndDate: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
+                    error={error.instructionEndDate}
+                    className={""}
                   />
                 </div>
               </div>
@@ -333,7 +353,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Remplissage des centres </p>
                   <MdInfoOutline data-tip data-for="remplissage_centres" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="remplissage_centres" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="remplissage_centres" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       <li>Ouverture ou fermeture pour les utilisateurs de la possibilité de déclarer un centre sur le séjour.</li>
                       <li>Ouverture et fermeture pour les utilisateurs de la possibilité de modifier le nombre de places ouvertes sur le séjour</li>
@@ -364,7 +384,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Remplissage des points de rassemblement</p>
                   <MdInfoOutline data-tip data-for="remplissage_PDR" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="remplissage_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="remplissage_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       Ouverture ou fermerture pour les utilisateurs de la possibilité de déclarer un point de rassemblement sur le séjour.
                     </p>
@@ -405,7 +425,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Création de groupe et modification du schéma de répartition</p>
                       <MdInfoOutline data-tip data-for="création_groupe" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="création_groupe" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                      <ReactTooltip id="création_groupe" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                         <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           Ouverture ou fermeture pour les utilisateurs de la possibilité de créer et modifier des groupes sur le schéma de répartition.
                         </p>
@@ -437,7 +457,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Accès au schéma de répartition </p>
                       <MdInfoOutline data-tip data-for="acces_schema" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="acces_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                      <ReactTooltip id="acces_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                         <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           Autoriser ou bloquer l’accès à la consultation du schéma de répartition.
                         </p>
@@ -462,7 +482,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Téléchargement du schéma de répartition</p>
                   <MdInfoOutline data-tip data-for="téléchargement_schema" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="téléchargement_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="téléchargement_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       Ouverture ou fermeture pour les utilisateurs de la possibilité de télécharger le schéma de répartition. L’ouverture active les notifications au transporteur
                       lors des modifications sur le schéma de répartition.
@@ -495,7 +515,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Modification du plan de transport</p>
                   <MdInfoOutline data-tip data-for="demande_correction" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="demande_correction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="demande_correction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       Ouverture ou fermeture pour les utilisateurs de la possibilité de modifier le plan de transport au niveau d'une ligne"
                     </p>
@@ -512,7 +532,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Demande de correction sur le plan de transport</p>
                   <MdInfoOutline data-tip data-for="demande_correction" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="demande_correction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="demande_correction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       Ouverture ou fermeture pour les utilisateurs de la possibilité de demander une correction sur le plan de transport.
                     </p>
@@ -555,7 +575,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Annonce et visibilité des affectations par les volontaires</p>
                   <MdInfoOutline data-tip data-for="annonce_affectation" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="annonce_affectation" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="annonce_affectation" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       <li>Ouverture ou fermeture de la visibilité sur l’affectation par le volontaire sur son compte.</li>
                       <li>Blocage des emails envoyés automatiquement par la plateforme lors de l’affectation manuelle.</li>
@@ -592,7 +612,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                         Affectation manuelle des volontaires et modification de leur affectation et de leur point de rassemblement
                       </p>
                       <MdInfoOutline data-tip data-for="affectation_manuelle" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="affectation_manuelle" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                      <ReactTooltip id="affectation_manuelle" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                         <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           Ouverture ou fermeture pour les utilisateurs du droit à affecter manuellement des volontaires et/ou à modifier leur centre d’affectation ou point de
                           rassemblement.
@@ -682,7 +702,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Confirmation du point de rassemblement par les volontaires</p>
                       <MdInfoOutline data-tip data-for="confirmation_PDR" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="confirmation_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                      <ReactTooltip id="confirmation_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                         <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                           <li>Fin de la possibilité de confirmer le point de rassemblement pour le volontaire sur son compte.</li>
                           <li>
@@ -696,10 +716,14 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     <DatePickerInput
                       mode="single"
                       label="Fin"
+                      placeholder={"Date"}
+                      isTime={false}
                       disabled={isLoading}
                       readOnly={readOnly}
                       value={data.pdrChoiceLimitDate}
                       onChange={(value) => setData({ ...data, pdrChoiceLimitDate: value })}
+                      error={error.pdrChoiceLimitDate}
+                      className={""}
                     />
                   </div>
                 </>
@@ -714,7 +738,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Disponibilité des listes de transport par centre (envoi par email)</p>
                   <MdInfoOutline data-tip data-for="disponibilité_liste" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="disponibilité_liste" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="disponibilité_liste" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       <li>
                         Ouverture ou fermeture de l’accès à la liste des volontaires d’un même centre par ligne de transport et par point de rassemblement envoyé par email
@@ -750,7 +774,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Pointage</p>
                   <MdInfoOutline data-tip data-for="pointage" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="pointage" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="pointage" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       Ouverture ou fermeture pour les utilisateurs de la possibilité de réaliser le pointage des volontaires.
                     </p>
@@ -845,7 +869,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <div className="flex items-center gap-2">
                   <p className="text-xs  font-medium text-gray-900">Début de validation de la phase 1</p>
                   <MdInfoOutline data-tip data-for="validation_phase" className="h-5 w-5 cursor-pointer text-gray-400" />
-                  <ReactTooltip id="validation_phase" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                  <ReactTooltip id="validation_phase" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Par défaut 9e jour après le début du séjour.</p>
                   </ReactTooltip>
                 </div>

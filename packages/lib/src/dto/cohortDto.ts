@@ -64,14 +64,14 @@ export type CohortDto = {
     editionOpenForHeadOfCenter?: boolean;
   } | null;
   eligibility?: {
-    zones: string[];
-    schoolLevels: string[];
-    bornAfter: Date | null;
-    bornBefore: Date | null;
+    zones?: string[];
+    schoolLevels?: string[];
+    bornAfter?: Date | null;
+    bornBefore?: Date | null;
   };
 };
 
-export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId">;
+export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId" | "eligibility">;
 
 type ToFromDate = {
   from?: string | null;
