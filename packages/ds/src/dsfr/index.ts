@@ -4,6 +4,7 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 
 // Form
 import InputPhone from "./form/InputPhone";
@@ -22,7 +23,6 @@ import List from "./List";
 
 // UI
 import Notice from "./ui/Notice";
-import Highlight from "./ui/Highlight";
 
 export {
   Button,

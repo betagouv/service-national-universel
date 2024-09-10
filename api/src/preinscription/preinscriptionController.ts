@@ -74,7 +74,7 @@ router.post("/create-lead", async (req, res) => {
         REGION: value.region,
       },
     });
-    return res.status(201).json({ ok: true, code: 201, data: JSON.stringify(data) });
+    return res.status(201).json({ ok: true, code: 201, data });
   } catch (error) {
     capture(error);
     return res.status(500).json({ ok: false, code: 500, message: ERRORS.SERVER_ERROR });

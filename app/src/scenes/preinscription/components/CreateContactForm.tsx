@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import Highlight from "@codegouvfr/react-dsfr/Highlight";
-import Error from "@/components/error";
+import ErrorComponent from "@/components/error";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
 import validator from "validator";
-import { Button, Input } from "@snu/ds/dsfr";
+import { Button, Highlight, Input } from "@snu/ds/dsfr";
 import { calculateAge } from "snu-lib";
 import { capture } from "@/sentry";
 import { createLead } from "../preinscription.repository";
@@ -17,7 +16,6 @@ export default function CreateContactForm({ data, onSuccess }) {
   const [fetchError, setFetchError] = useState(false);
 
   async function handleSubmit(e) {
-    console.log("handleSubmit");
     e.preventDefault();
 
     let isError = false;
@@ -40,7 +38,7 @@ export default function CreateContactForm({ data, onSuccess }) {
     }
 
     if (birthdate && calculateAge(birthdate, new Date()) > 18) {
-      isError;
+      isError = true;
       setBirthdateError("Vous devez être âgé de moins de 18 ans");
     }
 
@@ -48,12 +46,16 @@ export default function CreateContactForm({ data, onSuccess }) {
 
     setLoading(true);
     try {
-      await createLead({
+      const { id } = await createLead({
         email: trimmedEmail,
         birthdate,
         region: data.school?.region || data.region,
         isAbroad: data.isAbroad,
       });
+
+      if (!id) {
+        throw new Error("An error occured while creating the lead");
+      }
 
       onSuccess();
     } catch (e) {
@@ -69,7 +71,7 @@ export default function CreateContactForm({ data, onSuccess }) {
 
       {fetchError && (
         <div className="mt-12">
-          <Error text="Une erreur est survenue" subText="Veuillez réessayer plus tard." onClose={() => setFetchError(false)} />
+          <ErrorComponent text="Une erreur est survenue" subText="Veuillez réessayer plus tard." onClose={() => setFetchError(false)} />
         </div>
       )}
 
