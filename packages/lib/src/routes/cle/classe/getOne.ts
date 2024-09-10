@@ -1,5 +1,6 @@
-import { ClasseDto } from "src/dto";
-import { BasicRoute, RouteResponseBody } from "src/routes";
+import { ClasseType, EtablissementType } from "../../../mongoSchema";
+import { ClasseDto, CohortDto, ReferentDto } from "../../../dto";
+import { BasicRoute, RouteResponseBody } from "../..";
 
 export interface GetOneClasseRoute extends BasicRoute {
   method: "GET";
@@ -8,5 +9,14 @@ export interface GetOneClasseRoute extends BasicRoute {
   query?: {
     withDetails?: boolean;
   };
-  response: RouteResponseBody<ClasseDto>;
+  response: RouteResponseBody<
+    ClasseType & {
+      etablissement?: Omit<EtablissementType, "referentEtablissementIds" | "coordinateurIds" | "createdAt" | "updatedAt">;
+      referents?: Pick<ReferentDto, "_id" | "firstName" | "lastName" | "role" | "email">[];
+      cohesionCenter?: Pick<ClasseDto["cohesionCenter"], "_id" | "name" | "address" | "zip" | "city" | "department" | "region">;
+      session?: Pick<ClasseDto["session"], "_id">;
+      pointDeRassemblement?: Pick<ClasseDto["pointDeRassemblement"], "_id" | "name" | "address" | "zip" | "city" | "department" | "region">;
+      cohortDetails?: Pick<CohortDto, "_id" | "dateStart" | "dateEnd">;
+    }
+  >;
 }

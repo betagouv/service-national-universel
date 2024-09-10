@@ -213,6 +213,10 @@ router.post("/signup", async (req: UserRequest, res: Response) => {
     user.set({ structureId: structure._id });
     await user.save({ fromUser: user });
 
+    await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent.STRUCTURE_WELCOME, {
+      emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+      params: { firstName: user.firstName, email: user.email },
+    });
     return res.status(200).send({ user, token, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });

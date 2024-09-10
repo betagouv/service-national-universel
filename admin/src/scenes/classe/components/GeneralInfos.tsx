@@ -2,15 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
-import { translate, ROLES, translateGrade, formatDateFRTimezoneUTC, CohortDto, ClasseDto } from "snu-lib";
+import { translate, ROLES, translateGrade, formatDateFRTimezoneUTC, CohortDto, ClassesRoutes } from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
 import { Rights } from "./types";
 import { colorOptions, filiereOptions, gradeOptions, typeOptions } from "../utils";
 import WithdrawButton from "./WithdrawButton";
 interface Props {
-  classe: ClasseDto;
-  setClasse: (classe: ClasseDto) => void;
+  classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
+  setClasse: (classe: ClassesRoutes["GetOne"]["response"]["data"]) => void;
   edit: boolean;
   setEdit: (edit: boolean) => void;
   errors: { [key: string]: string };
@@ -56,7 +56,7 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
           <InputText
             name="nameClasse"
             className="flex-1 mb-3"
-            value={classe.name}
+            value={classe.name || ""}
             onChange={(e) => setClasse({ ...classe, name: e.target.value })}
             error={errors.name}
             readOnly={!edit}
@@ -187,7 +187,7 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
           />
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
             <>
-              <InputText name="etablissementName" className="mb-3" value={classe.etablissement?.name} readOnly={true} label="Établissement" />
+              <InputText name="etablissementName" className="mb-3" value={classe.etablissement?.name || ""} readOnly={true} label="Établissement" />
               <Link to={`/etablissement/${classe.etablissementId}`} className="w-full">
                 <Button type="tertiary" title="Voir l'établissement" className="w-full max-w-none" />
               </Link>
