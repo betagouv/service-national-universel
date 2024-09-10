@@ -207,6 +207,10 @@ router.post("/signup", async (req: UserRequest, res: Response) => {
       sousType,
     });
 
+    await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent.STRUCTURE_WELCOME, {
+      emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+      params: { firstName: user.firstName, email: user.email },
+    });
     //Update user with structureId
     user.set({ structureId: structure._id });
     await user.save({ fromUser: user });
