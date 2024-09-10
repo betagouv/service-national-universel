@@ -22,6 +22,7 @@ import List from "./List";
 
 // UI
 import Notice from "./ui/Notice";
+import Highlight from "./ui/Highlight";
 
 export {
   Button,
@@ -41,4 +42,5 @@ export {
   Field,
   List,
   Notice,
+  Highlight,
 };

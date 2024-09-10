@@ -25,6 +25,7 @@ import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
+import Error from "@/components/error";
 
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -33,6 +34,7 @@ export default function StepEligibilite() {
     : [PREINSCRIPTION_STEPS, PreInscriptionContext, false, "preinscription", "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const [data, setData] = React.useContext(context);
   const [error, setError] = React.useState({});
+  const [fetchError, setFetchError] = React.useState("");
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
@@ -111,6 +113,8 @@ export default function StepEligibilite() {
   };
 
   const onSubmit = async () => {
+    plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
+
     // Check if young is more than 17 years old
     const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
@@ -121,7 +125,7 @@ export default function StepEligibilite() {
         const { ok, code } = await api.put("/young/reinscription/not-eligible");
         if (!ok) {
           capture(new Error(code));
-          setError({ text: "Impossible de vérifier votre éligibilité" });
+          setFetchError({ text: "Impossible de vérifier votre éligibilité" });
           return;
         }
         // setData({ ...data, message: "age", step: REINSCRIPTION_STEPS.INELIGIBLE });
@@ -129,40 +133,44 @@ export default function StepEligibilite() {
       }
     }
 
-    setLoading(true);
-    plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
     if (data.frenchNationality === "false") {
       setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
       return history.push(`/${uri}/noneligible`);
     }
-    const {
-      ok,
-      code,
-      data: sessions,
-      message,
-    } = await api.post(`/preinscription/eligibilite`, {
-      schoolDepartment: data.school?.departmentName,
-      department: data.school?.department,
-      schoolRegion: data.school?.region,
-      birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
-      grade: data.scolarity,
-      zip: data.zip,
-      isReInscription: !!data.isReInscription,
-    });
 
-    if (!ok) {
-      capture(new Error(code));
-      setError({ text: "Impossible de vérifier votre éligibilité" });
+    setLoading(true);
+
+    try {
+      const {
+        ok,
+        code,
+        data: sessions,
+        message,
+      } = await api.post(`/preinscription/eligibilite`, {
+        schoolDepartment: data.school?.departmentName,
+        department: data.school?.department,
+        schoolRegion: data.school?.region,
+        birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
+        grade: data.scolarity,
+        zip: data.zip,
+        isReInscription: !!data.isReInscription,
+      });
+
+      if (sessions.length === 0) {
+        setData({ ...data, message, step: STEPS.NO_SEJOUR });
+        return history.push(`/${uri}/no_sejour`);
+      }
+
+      setData({ ...data, sessions, step: STEPS.SEJOUR });
+      return history.push(`/${uri}/sejour`);
+    } catch (e) {
+      capture(e);
+      setFetchError({
+        text: "Impossible de vérifier votre éligibilité",
+        subText: "Veuillez réessayer plus tard",
+      });
       setLoading(false);
     }
-
-    if (sessions.length === 0) {
-      setData({ ...data, message, step: STEPS.NO_SEJOUR });
-      return history.push(`/${uri}/no_sejour`);
-    }
-
-    setData({ ...data, sessions, step: STEPS.SEJOUR });
-    return history.push(`/${uri}/sejour`);
   };
 
   return (
@@ -191,6 +199,8 @@ export default function StepEligibilite() {
       )}
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
         <div className="space-y-5">
+          {fetchError && <Error text={fetchError.text} subText={fetchError.subText} onClose={() => setFetchError("")} />}
+
           {!isLoggedIn && (
             <Checkbox
               state={error.frenchNationality && "error"}
