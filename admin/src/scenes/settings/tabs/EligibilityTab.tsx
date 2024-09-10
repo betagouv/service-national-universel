@@ -7,7 +7,6 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { tr } from "date-fns/locale";
 
 type EligibilityTabsProps = {
   cohort: CohortDto;
