@@ -29,3 +29,4 @@ export * from "./utils/date";
 export * from "./utils/file";
 export * from "./utils/request";
 export * from "./young";
+export * from "./mongoSchema";

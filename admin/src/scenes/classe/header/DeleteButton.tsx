@@ -6,12 +6,12 @@ import { MdOutlineDangerous } from "react-icons/md";
 import { HiOutlineExclamation } from "react-icons/hi";
 
 import { ModalConfirmation } from "@snu/ds/admin";
-import { translate, ClasseDto } from "snu-lib";
+import { translate, ClassesRoutes } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 
 interface Props {
-  classe: ClasseDto;
+  classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
   onLoading: (isLoading: boolean) => void;
 }
 
