@@ -25,7 +25,7 @@ import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
-import Error from "@/components/error";
+import ErrorComponent from "@/components/error";
 
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -199,7 +199,7 @@ export default function StepEligibilite() {
       )}
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
         <div className="space-y-5">
-          {fetchError && <Error text={fetchError.text} subText={fetchError.subText} onClose={() => setFetchError("")} />}
+          {fetchError && <ErrorComponent text={fetchError.text} subText={fetchError.subText} onClose={() => setFetchError("")} />}
 
           {!isLoggedIn && (
             <Checkbox
