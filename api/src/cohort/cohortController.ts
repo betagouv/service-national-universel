@@ -324,4 +324,47 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
   }
 });
 
+router.put("/:id/eligibility", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
+  try {
+    const { error: idError, value: cohortId } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const { error: bodyError, value: body } = Joi.object({
+      zones: Joi.array().items(Joi.string()).required(),
+      schoolLevels: Joi.array().items(Joi.string()).required(),
+      bornAfter: Joi.date().required(),
+      bornBefore: Joi.date().required(),
+    }).validate(req.body, { stripUnknown: true });
+
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+    const cohort = await CohortModel.findOne({ _id: cohortId });
+
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    cohort.set({
+      eligibility: {
+        zones: body.zones,
+        schoolLevels: body.schoolLevels,
+        bornAfter: body.bornAfter,
+        bornBefore: body.bornBefore,
+      },
+    });
+
+    await cohort.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: cohort });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;

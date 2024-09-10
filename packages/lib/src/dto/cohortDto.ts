@@ -63,6 +63,12 @@ export type CohortDto = {
     editionOpenForReferentDepartment?: boolean;
     editionOpenForHeadOfCenter?: boolean;
   } | null;
+  eligibility?: {
+    zones: string[];
+    schoolLevels: string[];
+    bornAfter: Date | null;
+    bornBefore: Date | null;
+  };
 };
 
 export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId">;
