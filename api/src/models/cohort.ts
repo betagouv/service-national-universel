@@ -16,7 +16,7 @@ const DSNJExportDates = new Schema({
 const Eligibility = new Schema({
   zones: {
     type: [String],
-    enum: ["A", "B", "C", "DOM", "PF", "Etranger", "NC", "Corse", "Mayotte", "La Réunion", "Guadeloupe", "Guyane", "Martinique"],
+    enum: ["A", "B", "C", "DOM", "PF", "Etranger", "NC", ...Object.values(departmentLookUp)],
     required: true,
   },
   schoolLevels: {
