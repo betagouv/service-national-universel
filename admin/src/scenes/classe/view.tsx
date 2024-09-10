@@ -8,25 +8,25 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Badge } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
-import { getRights, statusClassForBadge } from "./utils";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes } from "snu-lib";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
-import { ClasseDto } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
+import { ClasseService } from "@/services/classeService";
+import { TStatus } from "@/types";
 
+import { getRights, statusClassForBadge } from "./utils";
 import GeneralInfos from "./components/GeneralInfos";
 import ReferentInfos from "./components/ReferentInfos";
 import SejourInfos from "./components/SejourInfos";
 import StatsInfos from "./components/StatsInfos";
 import ModaleCohort from "./components/modaleCohort";
 import { InfoBus, Rights } from "./components/types";
-import { TStatus } from "@/types";
 import { getHeaderActionList } from "./header";
 
 export default function View() {
-  const [classe, setClasse] = useState<ClasseDto | undefined>();
+  const [classe, setClasse] = useState<ClassesRoutes["GetOne"]["response"]["data"]>();
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
   const [showModaleCohort, setShowModaleCohort] = useState(false);
@@ -36,7 +36,7 @@ export default function View() {
   const [editRef, setEditRef] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [oldClasseCohort, setOldClasseCohort] = useState();
+  const [oldClasseCohort, setOldClasseCohort] = useState<string>();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
 
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -49,10 +49,7 @@ export default function View() {
 
   const getClasse = async () => {
     try {
-      const { ok, code, data: classe } = await api.get(`/cle/classe/${id}`);
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
-      }
+      const classe = await ClasseService.getOne(id);
       setClasse(classe);
       setOldClasseCohort(classe.cohort);
       if (classe?.ligneId) {
@@ -75,12 +72,12 @@ export default function View() {
 
       //Logical stuff
       setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
-      if (![STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED].includes(classe.status)) {
+      if (!([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED] as string[]).includes(classe.status)) {
         getStudents(classe._id);
       }
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(e.message));
     }
   };
 
@@ -110,9 +107,9 @@ export default function View() {
       refEmail?: string;
     }
     const errors: Errors = {};
-    if (!classe?.referents[0].firstName) errors.refFirstName = "Ce champ est obligatoire";
-    if (!classe?.referents[0].lastName) errors.refLastName = "Ce champ est obligatoire";
-    if (!classe?.referents[0].email) errors.refEmail = "Ce champ est obligatoire";
+    if (!classe?.referents?.[0].firstName) errors.refFirstName = "Ce champ est obligatoire";
+    if (!classe?.referents?.[0].lastName) errors.refLastName = "Ce champ est obligatoire";
+    if (!classe?.referents?.[0].email) errors.refEmail = "Ce champ est obligatoire";
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       setIsLoading(false);
@@ -138,7 +135,7 @@ export default function View() {
     }
 
     const errors: Errors = {};
-    if (classe?.cohort !== oldClasseCohort && classe.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
+    if (classe?.cohort !== oldClasseCohort && classe?.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
     if (!classe?.name) errors.name = "Ce champ est obligatoire";
     if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
     if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
@@ -151,9 +148,9 @@ export default function View() {
     const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
     if (classe?.totalSeats && classe.estimatedSeats && classe.totalSeats > classe.estimatedSeats && now > limitDateEstimatedSeats)
       errors.totalSeats = "L'effectif ajusté ne peut pas être supérieur à l'effectif prévisionnel";
-    if (!classe?.referents[0].firstName) errors.refFirstName = "Ce champ est obligatoire";
-    if (!classe?.referents[0].lastName) errors.refLastName = "Ce champ est obligatoire";
-    if (!classe?.referents[0].email) errors.refEmail = "Ce champ est obligatoire";
+    if (!classe?.referents?.[0].firstName) errors.refFirstName = "Ce champ est obligatoire";
+    if (!classe?.referents?.[0].lastName) errors.refLastName = "Ce champ est obligatoire";
+    if (!classe?.referents?.[0].email) errors.refEmail = "Ce champ est obligatoire";
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -194,9 +191,9 @@ export default function View() {
       setShowModaleCohort(false);
       setIsLoading(true);
       const referent = {
-        firstName: classe?.referents[0].firstName,
-        lastName: classe?.referents[0].lastName,
-        email: classe?.referents[0].email,
+        firstName: classe?.referents?.[0].firstName,
+        lastName: classe?.referents?.[0].lastName,
+        email: classe?.referents?.[0].email,
       };
 
       const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}/referent`, referent);
@@ -261,7 +258,7 @@ export default function View() {
         validatedYoung={validatedYoung}
       />
 
-      {classe.referents?.length > 0 && (
+      {classe.referents?.length && (
         <ReferentInfos
           classe={classe}
           setClasse={setClasse}
@@ -269,7 +266,6 @@ export default function View() {
           setEditRef={setEditRef}
           errors={errors}
           rights={rights}
-          user={user}
           isLoading={isLoading}
           onCancel={handleCancel}
           onCheckInfo={checkRefInfo}

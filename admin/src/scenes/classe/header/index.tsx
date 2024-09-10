@@ -1,7 +1,7 @@
 import React from "react";
 import { HiOutlineClipboardList } from "react-icons/hi";
 
-import { ROLES, STATUS_CLASSE, YOUNG_STATUS, ClasseDto, ClasseFileKeys, ClasseCertificateKeys } from "snu-lib";
+import { ROLES, STATUS_CLASSE, YOUNG_STATUS, ClasseFileKeys, ClasseCertificateKeys, ClassesRoutes } from "snu-lib";
 import { User } from "@/types";
 import { DropdownButton } from "@snu/ds/admin";
 
@@ -16,8 +16,8 @@ import DeleteButton from "./DeleteButton";
 
 interface Props {
   user: User;
-  classe: ClasseDto;
-  setClasse: (classe: ClasseDto) => void;
+  classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
+  setClasse: (classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>) => void;
   isLoading: boolean;
   setIsLoading: (b: boolean) => void;
   url: string;

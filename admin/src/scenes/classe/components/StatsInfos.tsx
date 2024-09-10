@@ -1,11 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Container, Button } from "@snu/ds/admin";
-import { ROLES, YOUNG_STATUS, ClasseDto } from "snu-lib";
+import { ROLES, YOUNG_STATUS, ClassesRoutes } from "snu-lib";
 import { User } from "@/types";
 
 interface Props {
-  classe: ClasseDto;
+  classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
   user: User;
   studentStatus: { [key: string]: number };
   validatedYoung: number;
