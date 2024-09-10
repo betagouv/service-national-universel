@@ -6,9 +6,6 @@ async function getFilteredSessions(young, timeZoneOffset = "") {
   const region = getRegionForEligibility(young);
   const department = getDepartmentForEligibility(young);
 
-  console.log("region", region);
-  console.log("department", department);
-
   const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart)?.getFullYear() : undefined;
 
   const sessions = cohorts.filter(
