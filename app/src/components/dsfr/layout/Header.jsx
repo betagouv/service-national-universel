@@ -46,7 +46,6 @@ const Header = ({ title }) => {
   return (
     <DSFRHeader
       id="fr-header-header-with-quick-access-items"
-      // className="lg:px-[5rem]"
       brandTop={
         <>
           RÉPUBLIQUE

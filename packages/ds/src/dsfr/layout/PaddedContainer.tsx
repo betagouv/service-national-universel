@@ -22,7 +22,7 @@ export default function PaddedContainer({
 }: OwnProps) {
   return (
     <Container
-      className={`relative md:my-10 mx-auto w-full bg-white px-[1rem] py-[2rem] md:w-[56rem] md:px-[6rem] md:pt-[4rem] ${className}`}
+      className={`relative bg-white mx-auto w-full md:my-10 px-[1rem] md:px-[6rem] py-[30px] md:pt-[4rem] md:w-[56rem] ${className}`}
     >
       {title && (
         <>
