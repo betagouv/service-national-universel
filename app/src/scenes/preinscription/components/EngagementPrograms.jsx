@@ -27,7 +27,7 @@ export default function EngagementPrograms() {
       </div>
       <div className="mt-6 flex justify-center">
         <Link
-          className="mx-auto my-4 w-full border-[1px] border-blue-france-sun-113 p-2 text-center text-blue-france-sun-113 hover:border-blue-france-sun-113-hover hover:text-blue-france-sun-113-hover md:w-96 underline-none"
+          className="mx-auto my-4 w-full border-[1px] border-blue-france-sun-113 p-2 text-center text-blue-france-sun-113 hover:border-blue-france-sun-113-hover hover:text-blue-france-sun-113-hover md:w-96"
           to="/public-engagements">
           Voir plus de formes d’engagement
         </Link>

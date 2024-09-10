@@ -1,7 +1,7 @@
 import { apiURL } from "@/config";
 
 export async function createLead({ email, birthdate, isAbroad, region }: { email: string; birthdate: string; isAbroad: boolean; region?: string }) {
-  const res = await fetch(`${apiURL}/preinscription/create-leads`, {
+  const res = await fetch(`${apiURL}/preinscription/create-lead`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, birthdate, region, isAbroad }),

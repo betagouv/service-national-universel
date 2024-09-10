@@ -63,9 +63,9 @@ const Step = () => {
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
 
   const isCLE = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase() === YOUNG_SOURCE.CLE;
-  // if (!isCLE && currentStepIndex > eligibleStepIndex) {
-  //   return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
-  // }
+  if (!isCLE && currentStepIndex > eligibleStepIndex) {
+    return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
+  }
 
   if (isInscriptionOpenLoading) return <Loader />;
 
