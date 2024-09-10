@@ -62,6 +62,7 @@ data "scaleway_secret" "ci" {
 data "scaleway_secret_version" "ci_latest" {
   secret_id = data.scaleway_secret.ci.id
   revision  = "latest_enabled"
+  project_id  = local.project_id
 }
 
 resource "scaleway_secret_version" "initial" {
