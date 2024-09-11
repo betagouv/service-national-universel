@@ -53,7 +53,7 @@ export const statusClassForBadge = (status) => {
   return statusClasse;
 };
 
-export function getRights(user: User, classe?: Pick<ClasseType, "status">, cohort?: CohortDto) {
+export function getRights(user: User, classe?: Pick<ClasseType, "status" | "schoolYear">, cohort?: CohortDto) {
   if (!user || !classe) return {};
   return {
     canEdit:
