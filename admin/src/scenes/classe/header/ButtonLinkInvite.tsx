@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { BsSend } from "react-icons/bs";
 import { MdContentCopy } from "react-icons/md";
 
+import plausibleEvent from "@/services/plausible";
 import { Modal, Button } from "@snu/ds/admin";
 import { ProfilePic } from "@snu/ds";
 import { copyToClipboard } from "@/utils";
@@ -15,7 +16,13 @@ export default function ButtonLinkInvite({ url }: Props) {
   const [showModal, setShowModal] = useState(false);
   return (
     <>
-      <button type="button" className="flex items-center justify-start w-full text-sm leading-5 font-normal" onClick={() => setShowModal(true)}>
+      <button
+        type="button"
+        className="flex items-center justify-start w-full text-sm leading-5 font-normal"
+        onClick={() => {
+          plausibleEvent("Inscriptions/CTA - Ouverture modale Inscription via lien CLE");
+          setShowModal(true);
+        }}>
         Inviter les élèves via un lien
       </button>
       <Modal
