@@ -330,6 +330,13 @@ const schema = new mongoose.Schema({
     },
   },
 
+  siIds: {
+    type: [String],
+    documentation: {
+      description: "Liste des ids de sessions du module SI répartition",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
