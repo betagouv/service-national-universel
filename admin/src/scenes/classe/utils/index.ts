@@ -53,7 +53,7 @@ export const statusClassForBadge = (status) => {
   return statusClasse;
 };
 
-export function getRights(user: User, classe?: Pick<ClasseType, "status" | "schoolYear">, cohort?: CohortDto) {
+export function getRights(user: User, classe?: Pick<ClasseDto, "status" | "schoolYear">, cohort?: CohortDto) {
   if (!user || !classe) return {};
   return {
     canEdit:
@@ -73,7 +73,7 @@ export function getRights(user: User, classe?: Pick<ClasseType, "status" | "scho
   };
 }
 
-const showCohort = (cohort: CohortDto | undefined, user: User | undefined, classe: ClasseDto): boolean => {
+const showCohort = (cohort: CohortDto | undefined, user: User | undefined, classe: Pick<ClasseDto, "status">): boolean => {
   if (!user) return false;
   if (!cohort) return isAdmin(user) && classe.status === STATUS_CLASSE.VERIFIED;
   let showCohort = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role);
