@@ -53,13 +53,12 @@ export const statusClassForBadge = (status) => {
   return statusClasse;
 };
 
-export function getRights(user: User, classe?: ClasseDto, cohort?: CohortDto) {
+export function getRights(user: User, classe?: Pick<ClasseType, "status" | "schoolYear">, cohort?: CohortDto) {
   if (!user || !classe) return {};
   return {
     canEdit:
       ([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN) ||
-      (([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED] as (keyof typeof STATUS_CLASSE)[]).includes(classe?.status) &&
-        [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)),
+      (classe?.status !== STATUS_CLASSE.WITHDRAWN && classe?.schoolYear === "2024-2025" && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)),
     canEditEstimatedSeats: canEditEstimatedSeats(user),
     canEditTotalSeats: canEditTotalSeats(user),
     canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
