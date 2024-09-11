@@ -94,6 +94,8 @@ import {
   EQUIVALENCE_STATUS,
   YOUNG_SITUATIONS,
   CLE_FILIERE,
+  canValidateMultipleYoungsInClass,
+  canValidateYoungInClass,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -587,6 +589,21 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
     }
 
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && !young.reinscriptionStep2023) {
+      newYoung.inscriptionStep2023 = "DONE";
+    }
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.reinscriptionStep2023) {
+      newYoung.reinscriptionStep2023 = "DONE";
+    }
+
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.source === YOUNG_SOURCE.CLE) {
+      const classe = await ClasseModel.findById(young.classeId);
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!canValidateYoungInClass(req.user, classe)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
@@ -629,12 +646,18 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(req.user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
-    }
-
     const youngs = await YoungModel.find({ _id: { $in: payload.youngIds }, source: "CLE" });
+    if (!youngs) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (youngs.length !== payload.youngIds.length) return res.status(404).send({ ok: false, code: ERRORS.BAD_REQUEST });
+
+    const classeId = youngs[0].classeId;
+
+    const classe = await ClasseModel.findById(classeId);
+    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canValidateMultipleYoungsInClass(req.user, classe)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     for (const young of youngs) {
       young.set({ status: payload.status });
