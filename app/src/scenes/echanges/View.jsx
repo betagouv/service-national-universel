@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import * as FileSaver from "file-saver";
+import dayjs from "dayjs";
 
 import API from "@/services/api";
 import { formatStringLongDate, colors, translateState, translate } from "@/utils";
@@ -44,6 +46,7 @@ export default function TicketView(props) {
   const young = useSelector((state) => state.Auth.young);
   const inputRef = React.useRef();
   const [lastMessageDate, setLastMessageDate] = useState(null);
+  const isDiscussionClosed = dayjs().diff(dayjs(lastMessageDate), "month") > 1;
 
   const { files, addFiles, deleteFile, resetFiles, error } = useFileUpload();
 
@@ -173,9 +176,13 @@ export default function TicketView(props) {
             </Messages>
           </>
         ) : null}
-        {new Date() - new Date(lastMessageDate) > 30 * 24 * 60 * 60 * 1000 ? (
+        {isDiscussionClosed ? (
           <div className="bg-gray-100 p-4 rounded-md text-center text-gray-600 italic">
-            Cette conversation est à présent terminée. Nous vous invitons à effectuer une nouvelle demande depuis le formulaire de contact.
+            Cette conversation est à présent terminée. Nous vous invitons à effectuer une nouvelle demande depuis le{" "}
+            <Link to="/besoin-d-aide" className="text-blue-500 hover:text-blue-700">
+              formulaire de contact
+            </Link>
+            .
           </div>
         ) : (
           <>
