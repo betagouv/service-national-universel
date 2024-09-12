@@ -233,15 +233,18 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
+            <label className={`${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
               Date de naissance
               <DatePicker
                 initialValue={new Date(data.birthDate)}
                 onChange={(date) => setData({ ...data, birthDate: date })}
+                setError={(isError) => {
+                  setError({ error, birthDate: isError ? "Date invalide" : "" });
+                }}
                 disabled={isBirthdayModificationDisabled}
                 state={error.birthDate ? "error" : "default"}
+                errorText={"Date invalide"}
               />
-              {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           </div>
 
