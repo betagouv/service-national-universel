@@ -43,7 +43,7 @@ export default function TicketView(props) {
   const [messages, setMessages] = useState([]);
   const young = useSelector((state) => state.Auth.young);
   const inputRef = React.useRef();
-  const [lastMessageDate, setLastMessageDate] = useState(null); // Use state for lastMessageDate
+  const [lastMessageDate, setLastMessageDate] = useState(null);
 
   const { files, addFiles, deleteFile, resetFiles, error } = useFileUpload();
 
