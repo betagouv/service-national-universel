@@ -89,7 +89,7 @@ export default function StepConfirm() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mon profil</h1>
-            <Link to="/inscription2023/coordonnee">
+            <Link to="/inscription/coordonnee">
               <EditPen
                 onClick={() => {
                   const eventName = isCLE ? "CLE/CTA inscription - modifier profil" : "Phase0/CTA inscription - modifier profil";
@@ -137,7 +137,7 @@ export default function StepConfirm() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mes représentants légaux</h1>
-            <Link to="/inscription2023/representants">
+            <Link to="/inscription/representants">
               <EditPen
                 onClick={() => {
                   const eventName = isCLE ? "CLE/CTA inscription - modifier rl" : "Phase0/CTA inscription - modifier rl";

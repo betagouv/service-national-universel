@@ -67,6 +67,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       response = await populateWithReferentInfo(response, req.params.action);
       response = await populateWithEtablissementInfo(response);
       response = await populateWithReferentEtablissementInfo(response, req.params.action);
+      response = await populateWithCoordinatorInfo(response, req.params.action);
 
       if (req.query?.type === "schema-de-repartition") {
         if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -167,9 +168,9 @@ const populateWithReferentInfo = async (classes, action) => {
 
   return classes.map((item) => {
     if (action === "search") {
-      item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+      item._source.referents = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
     } else {
-      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
+      item.referents = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
     }
     return item;
   });
@@ -232,6 +233,25 @@ const populateWithYoungsInfo = async (classes) => {
     item.studentAbandoned = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length;
     item.studentNotAutorized = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length;
     item.studentWithdrawn = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length;
+    return item;
+  });
+};
+
+const populateWithCoordinatorInfo = async (classes, action) => {
+  const refIds =
+    action === "search"
+      ? [...new Set(classes.map((item) => item._source.etablissement?.coordinateurIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.etablissement?.coordinateurIds).filter(Boolean))];
+
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
+  const referentsData = serializeReferents(referents);
+
+  return classes.map((item) => {
+    if (action === "search") {
+      item._source.coordinateurs = referentsData?.filter((e) => item._source.etablissement.coordinateurIds.includes(e._id.toString()));
+    } else {
+      item.coordinateurs = referentsData?.filter((e) => item.etablissement?.coordinateurIds.includes(e._id.toString()));
+    }
     return item;
   });
 };

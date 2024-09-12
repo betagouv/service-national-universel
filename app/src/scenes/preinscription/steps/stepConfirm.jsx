@@ -71,7 +71,7 @@ export default function StepConfirm() {
       } else {
         plausibleEvent("Phase0/CTA reinscription - inscription");
         dispatch(setYoung(data));
-        history.push("/inscription2023");
+        history.push("/inscription");
       }
     } catch (e) {
       setLoading(false);

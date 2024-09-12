@@ -165,7 +165,7 @@ export default function List() {
       {!students && (
         <Container className="!p-8">
           <div className="py-6 bg-gray-50">
-            <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore d'élèves inscrit</div>
+            <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore d'élèves inscrits</div>
             <div className="flex items-start justify-center h-[136px]">
               <Link to="/classes">
                 <Button type="wired" title="Voir mes classes" />

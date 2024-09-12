@@ -1,7 +1,7 @@
 const { YOUNG_STATUS, region2zone, getRegionForEligibility, regionsListDROMS, COHORT_TYPE } = require("snu-lib");
 const { YoungModel, CohortModel, InscriptionGoalModel } = require("../models");
 
-async function getFilteredSessions(young, timeZoneOffset = null) {
+async function getFilteredSessions(young, timeZoneOffset = "") {
   const cohorts = await CohortModel.find({});
   const region = getRegionForEligibility(young);
 

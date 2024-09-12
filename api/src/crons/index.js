@@ -26,6 +26,7 @@ const dsnjExport = require("./dsnjExport");
 const clotureMissionReminder = require("./clotureInscriptionReminder");
 const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
 const mongoMonitoring = require("./mongoMonitoring");
+const classesStatusUpdate = require("./classesStatusUpdate");
 
 // doubt ? -> https://crontab.guru/
 
@@ -69,6 +70,7 @@ const everyHours = (x) => `0 */${x} * * *`;
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
 // mongoMonitoring.handler() : toutes les 5 minutes
+// classesStatusUpdate.handler() : toutes les heures à la 2ème minute
 
 function cron(name, crontab, handlers) {
   return { name, crontab, handlers: handlers instanceof Array ? handlers : [handlers] };
@@ -103,6 +105,7 @@ const CRONS = [
   cron("syncReferentSupport", "45 2 * * *", syncReferentSupport.handler),
   cron("syncContactSupport", "15 1 * * *", syncContactSupport.handler),
   cron("mongoMonitoring", "*/5 * * * *", mongoMonitoring.handler),
+  cron("classesStatusUpdate", "2 */1 * * *", classesStatusUpdate.handler),
 ];
 
 module.exports = CRONS;

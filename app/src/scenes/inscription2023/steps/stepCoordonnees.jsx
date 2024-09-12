@@ -467,7 +467,7 @@ export default function StepCoordonnees() {
     <>
       <DSFRContainer
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
-        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
         supportEvent="Phase0/aide inscription - coordonnees">
         {young.cohort === "Toussaint 2024" && (
           <div className="flex flex-col text-base w-fit rounded-md px-2 py-1 font-bold bg-[#E8EDFF] text-[#0063CB] px-4 py-2 mb-4">
@@ -761,6 +761,7 @@ export default function StepCoordonnees() {
                 />
                 <BooleanRadioButtons
                   legend="Pour le séjour de cohésion, avez-vous besoin d’être affecté(e) dans un centre proche de chez vous pour raison médicale ?"
+                  hintText="Ne cochez cette case qu’en cas de nécessité."
                   value={handicapInSameDepartment}
                   onChange={(e) => updateData("handicapInSameDepartment")(e.target.value)}
                   orientation="horizontal"

@@ -1,13 +1,14 @@
 import express, { Response } from "express";
 import passport from "passport";
 
-import { canSearchStudent, ROLES, YOUNG_STATUS } from "snu-lib";
+import { canSearchStudent, ROLES, YOUNG_STATUS, YoungDto } from "snu-lib";
 
 import { validateId } from "../../utils/validator";
 import { ERRORS } from "../../utils";
 import { capture } from "../../sentry";
 import { ClasseModel, YoungModel, EtablissementModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
+import { getValidatedYoungsWithSession, getYoungsImageRight, getYoungsParentAllowSNU } from "../../young/youngService";
 
 const router = express.Router();
 
@@ -34,15 +35,19 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
       }
     }
 
-    const students = await YoungModel.find({ classeId: value })?.lean();
+    const students: YoungDto[] = await YoungModel.find({ classeId: value });
 
     const statusCount = students.reduce((acc, student) => {
-      const status = student.status;
+      const status = student.status || "";
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     }, {});
 
-    const result = { total: students.length };
+    const parentAllowSNUCount = getYoungsParentAllowSNU(students).length;
+    const studentImageRightCount = getYoungsImageRight(students).length;
+    const validatedYoungsWithSession = getValidatedYoungsWithSession(students).length;
+
+    const result = { parentAllowSNU: parentAllowSNUCount, imageRight: studentImageRightCount, youngWithSession: validatedYoungsWithSession, total: students.length };
     Object.keys(statusCount).forEach((status) => {
       result[YOUNG_STATUS[status]] = statusCount[status];
     });

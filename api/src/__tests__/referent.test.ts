@@ -1,7 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE } from "snu-lib";
 
 import { CohortModel, ReferentModel, YoungModel } from "../models";
 
@@ -26,6 +26,7 @@ import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
 import { ObjectId } from "bson";
+import passport from "passport";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -183,11 +184,43 @@ describe("Referent", () => {
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(404);
     });
+    it("should return 403 if user cannot validate youngs", async () => {
+      const userId = "123";
+      const etablissement = await createEtablissement(createFixtureEtablissement());
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const classe: any = await createClasse(
+        createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id, status: STATUS_CLASSE.OPEN }),
+      );
+      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
+
+      const youngIds = [young._id.toString()];
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
+      expect(res.statusCode).toEqual(403);
+    });
+    it("should return 403 if classe is not open", async () => {
+      const userId = "123";
+      const etablissement = await createEtablissement(createFixtureEtablissement());
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const classe: any = await createClasse(
+        createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id, status: STATUS_CLASSE.CLOSED }),
+      );
+      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
+
+      const youngIds = [young._id.toString()];
+      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
+      expect(res.statusCode).toEqual(403);
+    });
     it("should return 200 if youngs updated", async () => {
       const userId = "123";
       const etablissement = await createEtablissement(createFixtureEtablissement());
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
-      const classe: any = await createClasse(createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id }));
+      const classe: any = await createClasse(
+        createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id, status: STATUS_CLASSE.OPEN }),
+      );
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];

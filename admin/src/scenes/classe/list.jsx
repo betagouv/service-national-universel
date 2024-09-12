@@ -214,6 +214,7 @@ export default function List() {
 
 function exportExcelSheet({ data: classes, type }) {
   let sheetData = classes.map((c) => ({
+    //classe
     id: c._id.toString(),
     uniqueKeyAndId: c.uniqueKeyAndId,
     dossier: c.metadata?.numeroDossierDS ?? "Non renseigné",
@@ -228,14 +229,24 @@ function exportExcelSheet({ data: classes, type }) {
     department: c.department,
     createdAt: dayjs(c.createdAt).format("DD/MM/YYYY HH:mm"),
     updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
+    // ref classe
     classeRefLastName: c.referents ? c.referents[0]?.lastName : "",
     classeRefFirstName: c.referents ? c.referents[0]?.firstName : "",
     classeRefEmail: c.referents ? c.referents[0]?.email : "",
+    //etablissement
     uai: c.etablissement?.uai,
     etablissementName: c.etablissement?.name,
+    // chef d'etablissement
     etabRefLastName: c.referentEtablissement ? c.referentEtablissement[0]?.lastName : "",
     etabRefFirstName: c.referentEtablissement ? c.referentEtablissement[0]?.firstName : "",
     etabRefEmail: c.referentEtablissement ? c.referentEtablissement[0]?.email : "",
+    //coordinateurs
+    coordinateur1FirstName: c.coordinateurs ? c.coordinateurs[0]?.firstName : "",
+    coordinateur1LastName: c.coordinateurs ? c.coordinateurs[0]?.lastName : "",
+    coordinateur1Email: c.coordinateurs ? c.coordinateurs[0]?.email : "",
+    coordinateur2FirstName: c.coordinateurs ? c.coordinateurs[1]?.firstName : "",
+    coordinateur2LastName: c.coordinateurs ? c.coordinateurs[1]?.lastName : "",
+    coordinateur2Email: c.coordinateurs ? c.coordinateurs[1]?.email : "",
   }));
   let headers = [
     "ID",
@@ -260,6 +271,12 @@ function exportExcelSheet({ data: classes, type }) {
     "Nom du chef d'établissement",
     "Prénom du chef d'établissement",
     "Email du chef d'établissement",
+    "Nom du coordinateur 1",
+    "Prénom du coordinateur 1",
+    "Email du coordinateur 1",
+    "Nom du coordinateur 2",
+    "Prénom du coordinateur 2",
+    "Email du coordinateur 2",
   ];
 
   if (type === "schema-de-repartition") {

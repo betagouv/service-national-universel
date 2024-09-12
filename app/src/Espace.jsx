@@ -16,6 +16,7 @@ import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
+import { shouldForceRedirectToEmailValidation } from "./utils/navigation";
 
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
@@ -73,13 +74,19 @@ const Espace = () => {
     }
   }, [young, cohort]);
 
+  if (!young || !cohort) return <PageLoader />;
+
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
+
+  if (shouldForceRedirectToEmailValidation(young)) {
+    return <Redirect to="/preinscription/email-validation" />;
+  }
 
   if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
   const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
 
-  if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription2023" />;
+  if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription" />;
 
   return (
     <ClassicLayout>
