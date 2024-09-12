@@ -1,3 +1,5 @@
+import { ERRORS } from "./constants/errors";
+
 const translate = (value) => {
   switch (value) {
     case "WAITING_REALISATION":
@@ -364,6 +366,8 @@ const translate = (value) => {
       return "Actif";
     case "inactive":
       return "Inactif";
+    case ERRORS.INSCRIPTION_GOAL_REACHED:
+      return "L'objectif d'inscription du département a été atteint !";
     default:
       return value;
   }

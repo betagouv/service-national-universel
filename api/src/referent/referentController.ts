@@ -1,5 +1,5 @@
 import express, { Response } from "express";
-const { logger } = require("../logger");
+import { logger } from "../logger";
 import passport from "passport";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
@@ -97,6 +97,7 @@ import {
   canValidateMultipleYoungsInClass,
   canValidateYoungInClass,
   ClasseSchoolYear,
+  canUpdateInscriptionGoals,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -104,6 +105,7 @@ import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
 import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
+import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -195,7 +197,7 @@ router.post("/signup", async (req: UserRequest, res: Response) => {
 
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
 
     //Create structure
     const { name, description, legalStatus, types, zip, region, department, sousType } = value;
@@ -252,12 +254,12 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
-    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     else if (type === "young") {
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     }
 
-    return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
+    return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -285,8 +287,8 @@ router.post("/restore_signin", passport.authenticate("referent", { session: fals
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
-    return res.status(200).send({ ok: true, token, data: serializeReferent(user, user) });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+    return res.status(200).send({ ok: true, token, data: serializeReferent(user) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -366,7 +368,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
     });
 
-    return res.status(200).send({ data: serializeReferent(referent, req.user), ok: true });
+    return res.status(200).send({ data: serializeReferent(referent), ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
@@ -422,7 +424,7 @@ router.post("/signup_verify", async (req: UserRequest, res: Response) => {
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    return res.status(200).send({ ok: true, token, data: serializeReferent(referent, referent) });
+    return res.status(200).send({ ok: true, token, data: serializeReferent(referent) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -465,7 +467,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
@@ -486,7 +488,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
       });
     }
 
-    return res.status(200).send({ data: serializeReferent(referent, referent), token, ok: true });
+    return res.status(200).send({ data: serializeReferent(referent), token, ok: true });
   } catch (error) {
     capture(error);
     return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -520,6 +522,14 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
+
+    // Vérification des objectifs à la validation d'un jeune
+    if (value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
+      const fillingRate = await getFillingRate(young.department, young.cohort);
+      if (fillingRate >= FILLING_RATE_LIMIT) {
+        return res.status(400).send({ ok: false, code: ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
+      }
+    }
 
     if (newYoung.status === "REINSCRIPTION") {
       newYoung.cohesionStayPresence = undefined;
@@ -753,7 +763,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       youngStatus = getYoungStatus(young) as YoungType["status"];
     }
 
-    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
+    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] as string);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
@@ -1182,7 +1192,7 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        const scanResult = await scanFile(tempFilePath, name, req.user);
+        const scanResult = await scanFile(tempFilePath, name);
         if (scanResult.infected) {
           return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }

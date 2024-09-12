@@ -33,6 +33,7 @@ const {
   ROLES,
   SUB_ROLES,
   EQUIVALENCE_STATUS,
+  ERRORS: LIB_ERRORS,
 } = require("snu-lib");
 const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
@@ -867,6 +868,7 @@ const getTransporter = async () => {
   return toReferent;
 };
 
+// TODO: move to snu-lib
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -908,6 +910,7 @@ const ERRORS = {
   ALREADY_EXISTS: "ALREADY_EXISTS",
   YOUNG_NOT_FOUND: "YOUNG_NOT_FOUND",
   FEATURE_NOT_AVAILABLE: "FEATURE_NOT_AVAILABLE",
+  INSCRIPTION_GOAL_REACHED: LIB_ERRORS.INSCRIPTION_GOAL_REACHED,
 };
 
 const YOUNG_SITUATIONS = {
