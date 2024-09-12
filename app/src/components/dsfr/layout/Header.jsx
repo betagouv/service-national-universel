@@ -3,7 +3,7 @@ import SNU from "@/assets/logo-snu.png";
 import useAuth from "../../../services/useAuth";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Header as DSFRHeader } from "@codegouvfr/react-dsfr/Header";
-import { supportURL } from "@/config";
+import { appURL, supportURL } from "@/config";
 
 const Header = ({ title }) => {
   const { isCLE, isLoggedIn, loginOrLogout } = useAuth();
@@ -21,7 +21,7 @@ const Header = ({ title }) => {
     !isInscription &&
       isLoggedIn && {
         linkProps: {
-          href: "/",
+          href: appURL,
         },
         text: isCLE ? "Mon compte élève" : "Mon compte volontaire",
         iconId: fr.cx("ri-account-box-line"),
