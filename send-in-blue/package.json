@@ -16,7 +16,7 @@
   "dependencies": {
     "@sentry/integrations": "^7.64.0",
     "@sentry/node": "^7.61.0",
-    "body-parser": "^1.20.2",
+    "body-parser": "^1.20.3",
     "dotenv": "^16.3.1",
     "express": "^4.19.2",
     "joi": "^17.9.2",
