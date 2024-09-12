@@ -1,6 +1,5 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
@@ -55,7 +54,7 @@ export default function StepEligibilite() {
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
-  const onVerify = async () => {
+  function validateForm() {
     let errors = {};
 
     if (data.frenchNationality === "false" || !data.frenchNationality) {
@@ -86,42 +85,43 @@ export default function StepEligibilite() {
         }
       }
     }
-    function validateSchool(data) {
-      if (data.isAbroad) {
-        if (!data?.school?.fullName) return false;
-        if (!data?.school?.country) return false;
-        return true;
-      } else {
-        if (!data?.school?.fullName) return false;
-        if (!data?.school?.city) return false;
-        if (!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip && !data?.school?.codePays) return false;
-        return true;
-      }
+
+    return errors;
+  }
+
+  function validateSchool(data) {
+    if (data.isAbroad) {
+      if (!data?.school?.fullName) return false;
+      if (!data?.school?.country) return false;
+      return true;
+    } else {
+      if (!data?.school?.fullName) return false;
+      if (!data?.school?.city) return false;
+      if (!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip && !data?.school?.codePays) return false;
+      return true;
     }
+  }
 
-    setError(errors);
-    setToggleVerify(!toggleVerify);
+  const handleSubmit = async () => {
+    plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
 
-    // ! Gestion erreur a reprendre
-    if (Object.keys(errors).length) {
-      console.warn("Pb avec ce champ : " + Object.keys(errors)[0] + " pour la raison : " + Object.values(errors)[0]);
-      toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
+    const errors = validateForm();
+
+    if (Object.values(errors).length) {
+      setError(errors);
+      setToggleVerify(!toggleVerify);
       return;
     }
-
-    onSubmit();
-  };
-
-  const onSubmit = async () => {
-    plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
 
     // Check if young is more than 17 years old
     const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
       if (!isLoggedIn) {
+        // Preinscription
         setData({ ...data, message: "age", step: PREINSCRIPTION_STEPS.INELIGIBLE });
         return history.push("/preinscription/noneligible");
       } else {
+        // Reinscription
         const { ok, code } = await api.put("/young/reinscription/not-eligible");
         if (!ok) {
           capture(new Error(code));
@@ -279,7 +279,7 @@ export default function StepEligibilite() {
               ) : null}
             </>
           )}
-          <SignupButtons onClickNext={onVerify} disabled={loading} />
+          <SignupButtons onClickNext={handleSubmit} disabled={loading} />
         </div>
       </DSFRContainer>
     </>
