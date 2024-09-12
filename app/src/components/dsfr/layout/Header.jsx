@@ -10,22 +10,6 @@ const Header = ({ title }) => {
   const isInscription = location.pathname.includes("inscription");
 
   const quickAccessItems = [
-    isInscription && {
-      linkProps: {
-        href: "https://www.snu.gouv.fr/",
-        target: "_blank",
-      },
-      text: "Programme",
-      iconId: fr.cx("fr-icon-clipboard-line"),
-    },
-    !isInscription &&
-      isLoggedIn && {
-        linkProps: {
-          href: appURL,
-        },
-        text: isCLE ? "Mon compte élève" : "Mon compte volontaire",
-        iconId: fr.cx("ri-account-box-line"),
-      },
     {
       linkProps: {
         href: supportURL,
@@ -42,6 +26,27 @@ const Header = ({ title }) => {
       text: isLoggedIn ? "Se déconnecter" : "Se connecter",
     },
   ];
+
+  if (isInscription) {
+    quickAccessItems.push({
+      linkProps: {
+        href: "https://www.snu.gouv.fr/",
+        target: "_blank",
+      },
+      text: "Programme",
+      iconId: fr.cx("fr-icon-clipboard-line"),
+    });
+  }
+
+  if (!isInscription && isLoggedIn) {
+    quickAccessItems.push({
+      linkProps: {
+        href: appURL,
+      },
+      text: isCLE ? "Mon compte élève" : "Mon compte volontaire",
+      iconId: fr.cx("ri-account-box-line"),
+    });
+  }
 
   return (
     <DSFRHeader
