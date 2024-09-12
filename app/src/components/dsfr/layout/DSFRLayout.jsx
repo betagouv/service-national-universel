@@ -9,7 +9,7 @@ export default function DSFRLayout({ children, title = "" }) {
   return (
     <Page className="flex min-h-screen flex-col justify-between">
       <Header title={title} />
-      {children}
+      <div className="mx-auto grid grid-cols-1 md:gap-8 md:my-8">{children}</div>
       <Footer />
     </Page>
   );

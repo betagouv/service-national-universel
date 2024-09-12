@@ -20,7 +20,7 @@ const ProgressBar = ({ isReinscription = false }) => {
   };
 
   return STEPS.includes(currentStep) ? (
-    <div className="mx-auto flex w-full flex-col justify-center px-[1rem] py-[1rem] md:w-[56rem] md:px-[6rem] md:pt-[2rem] md:pb-[0rem]">
+    <div className="flex flex-col justify-center px-[1rem] py-[1rem] max-w-[56rem] md:px-[6rem]">
       <div className="text-sm">Étape {currentStep === "ELIGIBILITE" ? "1" : currentStep === "SEJOUR" ? "2" : currentStep === "PROFIL" && "3"} sur 3</div>
       <div className="mt-2 text-lg font-bold">
         {currentStep === "ELIGIBILITE" ? "Avant d'aller plus loin" : currentStep === "SEJOUR" ? "Séjour de cohésion" : currentStep === "PROFIL" && "Mon compte volontaire SNU"}
