@@ -239,7 +239,7 @@ export default function StepEligibilite() {
                 initialValue={new Date(data.birthDate)}
                 onChange={(date) => setData({ ...data, birthDate: date })}
                 setError={(isError) => {
-                  setError({ error, birthDate: isError ? "Date invalide" : "" });
+                  setError({ ...error, birthDate: isError ? "Date invalide" : "" });
                 }}
                 disabled={isBirthdayModificationDisabled}
                 state={error.birthDate ? "error" : "default"}

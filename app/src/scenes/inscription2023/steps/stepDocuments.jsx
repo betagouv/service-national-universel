@@ -53,14 +53,14 @@ export default function StepDocuments() {
       ok,
       code,
       data: responseData,
-    } = await api.put("/young/inscription2023/documents/next", { date: young.latestCNIFileExpirationDate, latestCNIFileCategory: young?.latestCNIFileCategory });
+    } = await api.put("/young/inscription/documents/next", { date: young.latestCNIFileExpirationDate, latestCNIFileCategory: young?.latestCNIFileCategory });
     if (!ok) {
       capture(new Error(code));
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
       return;
     }
     dispatch(setYoung(responseData));
-    history.push("/inscription2023/confirm");
+    history.push("/inscription/confirm");
   }
 
   function handleClick(doc) {
@@ -71,7 +71,7 @@ export default function StepDocuments() {
   }
 
   function goBack() {
-    return history.push("/inscription2023/representants");
+    return history.push("/inscription/representants");
   }
 
   const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
