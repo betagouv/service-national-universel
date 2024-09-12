@@ -1,3 +1,5 @@
+// Commande pour verifier depuis le terminal (remplacer admin par api ou moncompte pour tester les autres domaines) :
+// echo | openssl s_client -connect domain.par.clever-cloud.com:443 -servername admin.snu.gouv.fr 2>/dev/null | openssl x509 -noout -dates
 const https = require("https");
 const slack = require("../slack");
 const { capture } = require("../sentry");
