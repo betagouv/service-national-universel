@@ -62,6 +62,13 @@ export default function InfoMessage({ title, message, priority, className }: Pro
             a({ node, ...rest }) {
               return <a className="underline" {...rest} />;
             },
+            p: ({ node, children, ...rest }) => {
+              return (
+                <p className="mb-2" {...rest}>
+                  {children}
+                </p>
+              );
+            },
           }}>
           {message}
         </Markdown>

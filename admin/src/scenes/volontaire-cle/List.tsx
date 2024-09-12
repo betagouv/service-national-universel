@@ -23,12 +23,27 @@ import ButtonActionGroupConsent from "./consent/ButtonActionGroupConsent";
 import ButtonActionGroupValidation from "./validation/ButtonActionGroupValidation";
 import ButtonActionGroupImageRight from "./imageRight/ButtonActionGroupImageRight";
 import YoungListHeader from "./components/YoungListHeader";
+import InfoMessage from "../dashboardV2/components/ui/InfoMessage";
 
 const pageId = "youngCle-list";
 
 interface YoungDtoWithClasse extends YoungDto {
   classe: ClasseDto;
 }
+
+const AnnonceRefClassMarkdown = {
+  title: "Vous constatez une différence entre les résultats ?",
+  message: `
+**Actions groupées :** vous pouvez mener une action élève par élève (ligne par ligne) ou en masse (cocher les élèves concernés et choisir dans le menu "Actions groupées" l'action à mener).
+
+**Onglet par onglet, retrouvez :**
+
+- Général : tous les élèves de votre classe, quelques soient leurs statuts.
+- Récolte des consentements : tous les élèves qui ont finalisé leur inscription mais qui n'ont pas encore le consentement des représentants légaux.
+- Validation des inscriptions : tous les élèves dont l'inscription et la récolte du consentement sont finalisés mais qui doivent être validés par l'établissement.
+- Récolte des droits à l'image : tous les élèves qui n'ont pas encore renseignés leurs droits à l'image (non bloquant pour la validation d'inscriptions).
+`,
+};
 
 export default function List() {
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
@@ -160,6 +175,7 @@ export default function List() {
 
   return (
     <Page>
+      <InfoMessage title={AnnonceRefClassMarkdown.title} message={AnnonceRefClassMarkdown.message} className="mb-6" />
       <Header
         title="Liste de mes élèves"
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes élèves" }]}

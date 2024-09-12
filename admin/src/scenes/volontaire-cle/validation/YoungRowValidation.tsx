@@ -104,7 +104,7 @@ export default function YoungRowValidation({ young, selectedYoungs, onYoungSelec
           <Badge
             title={<HiOutlineCheck size={20} />}
             mode="editable"
-            className="rounded-[50%] !p-0 !w-10 !h-10 text-white !bg-blue-600 hover:!bg-white hover:!text-blue-600 hover:!border hover:!border-blue-600"
+            className="rounded-[50%] !p-0 !w-10 !h-10 text-white !bg-blue-600 !border-blue-600 hover:!bg-white hover:!text-blue-600 hover:!border hover:!border-blue-600"
             onClick={() => {
               setAuthorized(true);
               setShowModale(true);

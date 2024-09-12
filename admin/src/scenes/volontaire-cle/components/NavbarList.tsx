@@ -18,7 +18,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
       tab={[
         {
           title: "Général",
-          leftIcon: <HiOutlineClipboardList size={20} className="mt-0.5 ml-2.5" />,
+          leftIcon: <HiOutlineClipboardList size={20} className="ml-2.5" />,
           isActive: currentTab === "general",
           onClick: () => {
             history.push(`/mes-eleves`);
@@ -26,7 +26,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
         },
         {
           title: (
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-x-2">
               <span>Récolte des consentements</span>
               <div className={`rounded-full h-6 w-[26px] flex justify-center items-center ${currentTab === "consent" ? "bg-blue-600 text-white" : "bg-white text-blue-600"}`}>
                 {studentsWaitingConsent}
@@ -34,7 +34,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
             </div>
           ),
           label: "Étape 1",
-          leftIcon: <HiOutlineClipboardCheck size={20} className="mt-0.5 ml-2.5" />,
+          leftIcon: <HiOutlineClipboardCheck size={20} className="ml-2.5" />,
           isActive: currentTab === "consent",
           onClick: () => {
             history.push(`/mes-eleves/consent`);
@@ -42,7 +42,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
         },
         {
           title: (
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-x-2">
               <span>Validation des inscriptions</span>
               <div className={`rounded-full h-6 w-[26px] flex justify-center items-center ${currentTab === "validation" ? "bg-blue-600 text-white" : "bg-white text-blue-600"}`}>
                 {studentsWaitingValidation}
@@ -50,7 +50,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
             </div>
           ),
           label: "Étape 2",
-          leftIcon: <HiOutlineClipboardCheck size={20} className="mt-0.5 ml-2.5" />,
+          leftIcon: <HiOutlineClipboardCheck size={20} className="ml-2.5" />,
           isActive: currentTab === "validation",
           onClick: () => {
             history.push(`/mes-eleves/validation`);
@@ -58,7 +58,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
         },
         {
           title: (
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-x-2">
               <span>Récolte des droits à l'image</span>
               <div className={`rounded-full h-6 w-[26px] pb-0.5 flex justify-center items-center ${currentTab === "image" ? "bg-blue-600 text-white" : "bg-white text-blue-600"}`}>
                 {studentsWaitingImageRights}
@@ -66,7 +66,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
             </div>
           ),
           label: "Étape 3 (non bloquante)",
-          leftIcon: <HiOutlineClipboardCheck size={20} className="mt-0.5 ml-2.5" />,
+          leftIcon: <HiOutlineClipboardCheck size={20} className="ml-2.5" />,
           isActive: currentTab === "image",
           onClick: () => {
             history.push(`/mes-eleves/image`);
