@@ -471,19 +471,19 @@ function canSendPlanDeTransport(user) {
   return [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.TRANSPORTER].includes(user.role);
 }
 
-function isAdmin(user) {
+function isAdmin(user: UserDto) {
   return ROLES.ADMIN === user.role;
 }
 
-function isReferentRegDep(user) {
+function isReferentRegDep(user: UserDto) {
   return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 }
 
-function isSupervisor(user) {
+function isSupervisor(user: UserDto) {
   return ROLES.SUPERVISOR === user.role;
 }
 
-function isReferentOrAdmin(user) {
+function isReferentOrAdmin(user: UserDto) {
   return isAdmin(user) || isReferentRegDep(user);
 }
 
