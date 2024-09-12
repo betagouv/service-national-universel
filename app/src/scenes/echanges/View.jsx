@@ -43,6 +43,7 @@ export default function TicketView(props) {
   const [messages, setMessages] = useState([]);
   const young = useSelector((state) => state.Auth.young);
   const inputRef = React.useRef();
+  const [lastMessageDate, setLastMessageDate] = useState(null); // Use state for lastMessageDate
 
   const { files, addFiles, deleteFile, resetFiles, error } = useFileUpload();
 
@@ -59,6 +60,7 @@ export default function TicketView(props) {
       const { data, ok } = await API.get(`/SNUpport/ticket/${id}?`);
       if (!ok) return;
       setTicket(data.ticket);
+      setLastMessageDate(data?.messages?.length > 0 ? data.messages[data.messages.length - 1].createdAt : null);
       const SNUpportMessages = data?.messages
         .map((message) => {
           return {
@@ -171,30 +173,38 @@ export default function TicketView(props) {
             </Messages>
           </>
         ) : null}
-        <InputContainer>
-          <textarea
-            ref={inputRef}
-            rows={2}
-            placeholder="Mon message..."
-            className="form-control"
-            onChange={(e) => {
-              setMessage(e.target.value);
-              updateHeightElement(e.target);
-            }}
-            value={message}
-          />
-          <ButtonContainer>
-            {sending ? (
-              <Loader size="25px" />
-            ) : (
-              <LoadingButton onClick={send} disabled={!message || sending} color="white">
-                <SendIcon color={!message ? "grey" : null} />
-              </LoadingButton>
-            )}
-          </ButtonContainer>
-        </InputContainer>
-        {sending && files.length > 0 && <div className="mt-1 text-sm text-gray-500">{translate("UPLOAD_IN_PROGRESS")}</div>}
-        <FileUpload files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
+        {new Date() - new Date(lastMessageDate) > 30 * 24 * 60 * 60 * 1000 ? (
+          <div className="bg-gray-100 p-4 rounded-md text-center text-gray-600 italic">
+            Cette conversation est à présent terminée. Nous vous invitons à effectuer une nouvelle demande depuis le formulaire de contact.
+          </div>
+        ) : (
+          <>
+            <InputContainer>
+              <textarea
+                ref={inputRef}
+                rows={2}
+                placeholder="Mon message..."
+                className="form-control"
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  updateHeightElement(e.target);
+                }}
+                value={message}
+              />
+              <ButtonContainer>
+                {sending ? (
+                  <Loader size="25px" />
+                ) : (
+                  <LoadingButton onClick={send} disabled={!message || sending} color="white">
+                    <SendIcon color={!message ? "grey" : null} />
+                  </LoadingButton>
+                )}
+              </ButtonContainer>
+            </InputContainer>
+            {sending && files.length > 0 && <div className="mt-1 text-sm text-gray-500">{translate("UPLOAD_IN_PROGRESS")}</div>}
+            <FileUpload files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
+          </>
+        )}
       </div>
     </Container>
   );
