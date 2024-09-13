@@ -934,7 +934,9 @@ describe("PUT /cle/classe/:id/referent", () => {
   it("should create a new referent if classe is not CREATED for super admin", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
     const classe = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
+    // @ts-ignore
     passport.user.role = ROLES.ADMIN;
+    // @ts-ignore
     passport.user.subrole = "god";
     const newReferentDetails = {
       firstName: "John",
@@ -951,6 +953,7 @@ describe("PUT /cle/classe/:id/referent", () => {
     expect(updatedReferent.email).toBe(newReferentDetails.email);
     expect(updatedReferent.metadata.isFirstInvitationPending).toBe(true);
     expect(res.status).toBe(200);
+    // @ts-ignore
     passport.user.subrole = "";
   });
 
@@ -975,6 +978,7 @@ describe("PUT /cle/classe/:id/referent", () => {
   it("should return 403 if the user is not authorized to update the referent classe", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
     const classe = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
+    // @ts-ignore
     passport.user.role = ROLES.REFERENT_CLASSE; // Assuming this role is not authorized to update the referent classe
     const newReferentDetails = {
       firstName: "John",
@@ -985,6 +989,7 @@ describe("PUT /cle/classe/:id/referent", () => {
     expect(res.ok).toBe(false);
     expect(res.text).toContain(ERRORS.OPERATION_UNAUTHORIZED);
     expect(res.status).toBe(403);
+    // @ts-ignore
     passport.user.role = ROLES.ADMIN; // Resetting the role for other tests
   });
 });
