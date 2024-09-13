@@ -54,7 +54,7 @@ const getCohortPeriod = (cohort, withBold = false) => {
   }
 
   // Si `withBold` est activé, on retourne le texte avec des balises <b>
-  if (withBold) return `du <b>${formattedPeriod}</b>`;
+  if (withBold) return `<b>${formattedPeriod}</b>`;
 
   return formattedPeriod;
 };
