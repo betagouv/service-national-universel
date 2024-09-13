@@ -41,15 +41,21 @@ export default function StepUploadDesktop({
 
   function validate() {
     if (!dayjs(date).isValid()) {
+      setError({ text: "Date invalide. Veuillez entrer une date valide." });
       return false;
     }
     if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) {
+      setError({ text: "Date hors des limites. Veuillez entrer une date comprise entre 1990 et 2070." });
       return false;
     }
     if (corrections?.length) {
       return hasChanged && !loading && !error.text;
     } else {
-      return (young?.files?.cniFiles?.length || (recto && (verso || category === "passport"))) && date && !loading && !error.text;
+      if (!recto || (category !== "passport" && !verso)) {
+        setError({ text: "Veuillez télécharger le recto et le verso de votre pièce d'identité." });
+        return false;
+      }
+      return true;
     }
   }
 
@@ -64,7 +70,6 @@ export default function StepUploadDesktop({
   const handleOnClickNext = async () => {
     const isEnabled = validate();
     if (!isEnabled) {
-      setError({ text: "Veuillez vérifier les champs requis." });
       return;
     }
     //si correction on passe directement à la vérification
@@ -173,6 +178,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
   const [error, setError] = useState(false);
 
   const handleChange = (date) => {
+
     setDate(date);
     onChange && onChange();
 

@@ -6,7 +6,7 @@ export default function DatePicker({ initialValue, onChange, setError = (isError
   const [day, setDay] = useState(initialValue ? initialValue.getDate() : null);
   const [month, setMonth] = useState(initialValue ? initialValue.getMonth() + 1 : null);
   const [year, setYear] = useState(initialValue ? initialValue.getFullYear() : null);
-  const maxYear = new Date().getFullYear();
+  const maxYear = 2070;
   const minYear = 1990;
   const error = state == "error" || displayError;
 
