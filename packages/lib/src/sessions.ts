@@ -32,16 +32,24 @@ const getCohortPeriod = (cohort, withBold = false) => {
     return format(new Date(dateString), dateFormat, { locale: fr });
   };
 
-  // On simplifie le rendu
+  // Formater les mois et années pour comparaison
   const startMonthYear = formatDate(cohort.dateStart, "MMMM yyyy");
   const endMonthYear = formatDate(cohort.dateEnd, "MMMM yyyy");
+  const startYear = formatDate(cohort.dateStart, "yyyy");
+  const endYear = formatDate(cohort.dateEnd, "yyyy");
 
   let formattedPeriod;
+
+  // Si même mois et même année
   if (startMonthYear === endMonthYear) {
-    // Si même mois et même année, on affiche juste les jours avec le mois et l'année à la fin
     formattedPeriod = `du ${formatDate(cohort.dateStart, "dd")} au ${formatDate(cohort.dateEnd, "dd MMMM yyyy")}`;
-  } else {
-    // Si les mois ou les années sont différents, on affiche les deux dates complètes
+  } 
+  // Si même année mais mois différents
+  else if (startYear === endYear) {
+    formattedPeriod = `du ${formatDate(cohort.dateStart, "dd MMMM")} au ${formatDate(cohort.dateEnd, "dd MMMM yyyy")}`;
+  } 
+  // Si mois et années différents
+  else {
     formattedPeriod = `du ${formatDate(cohort.dateStart, "dd MMMM yyyy")} au ${formatDate(cohort.dateEnd, "dd MMMM yyyy")}`;
   }
 
@@ -50,6 +58,7 @@ const getCohortPeriod = (cohort, withBold = false) => {
 
   return formattedPeriod;
 };
+
 
 
 const formatShortCohortPeriod = (cohort) => {
