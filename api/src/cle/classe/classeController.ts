@@ -41,6 +41,7 @@ import {
   ClasseModel,
   CohesionCenterDocument,
   CohortModel,
+  CohortType,
   EtablissementDocument,
   EtablissementModel,
   LigneBusDocument,
@@ -76,6 +77,8 @@ import {
   getYoungsGroupByClasses,
 } from "./export/classeExportService";
 import ClasseStateManager from "./stateManager";
+import { isCohortInscriptionOpen } from "../../cohort/cohortService";
+import { is } from "date-fns/locale";
 
 const router = express.Router();
 router.post(
@@ -218,6 +221,7 @@ router.post(
 
       let cohortName: string | null = null;
       let cohortId: string | null = null;
+      let isInscriptionOpen: boolean = false;
       const isCleClasseCohortEnabled = await isFeatureAvailable(FeatureFlagName.CLE_CLASSE_ADD_COHORT_ENABLED);
       if (payload.cohortId) {
         if (!isCleClasseCohortEnabled) {
@@ -227,6 +231,7 @@ router.post(
         if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
         cohortName = defaultCleCohort.name;
         cohortId = defaultCleCohort._id;
+        isInscriptionOpen = isCohortInscriptionOpen(defaultCleCohort as CohortType);
       }
 
       const uniqueClasseKey = buildUniqueClasseKey(etablissement);
@@ -244,7 +249,7 @@ router.post(
       if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
       if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      const classeStatus = isCleClasseCohortEnabled ? STATUS_CLASSE.ASSIGNED : STATUS_CLASSE.CREATED;
+      const classeStatus = isCleClasseCohortEnabled ? (isInscriptionOpen ? STATUS_CLASSE.OPEN : STATUS_CLASSE.ASSIGNED) : STATUS_CLASSE.CREATED;
 
       const classe = await ClasseModel.create({
         ...payload,
@@ -351,6 +356,7 @@ router.put(
         }
         if (oldCohortId !== payload.cohortId && !classe.ligneId) {
           const cohort = await CohortModel.findById({ name: payload.cohortId });
+          const classeStatus = isCohortInscriptionOpen(cohort as CohortType) ? STATUS_CLASSE.OPEN : STATUS_CLASSE.ASSIGNED;
 
           const youngs = await YoungModel.find({ classeId: classe._id });
           await Promise.all(
@@ -370,7 +376,7 @@ router.put(
             cohesionCenterId: undefined,
             pointDeRassemblementId: undefined,
             cohortId: cohort?._id,
-            status: STATUS_CLASSE.ASSIGNED,
+            status: classeStatus,
           });
           emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
         } else {
