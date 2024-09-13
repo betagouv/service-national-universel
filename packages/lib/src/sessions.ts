@@ -42,15 +42,15 @@ const getCohortPeriod = (cohort, withBold = false) => {
 
   // Si même mois et même année
   if (startMonthYear === endMonthYear) {
-    formattedPeriod = `du ${formatDate(cohort.dateStart, "dd")} au ${formatDate(cohort.dateEnd, "dd MMMM yyyy")}`;
+    formattedPeriod = `du ${formatDate(cohort.dateStart, "d")} au ${formatDate(cohort.dateEnd, "d MMMM yyyy")}`;
   } 
   // Si même année mais mois différents
   else if (startYear === endYear) {
-    formattedPeriod = `du ${formatDate(cohort.dateStart, "dd MMMM")} au ${formatDate(cohort.dateEnd, "dd MMMM yyyy")}`;
+    formattedPeriod = `du ${formatDate(cohort.dateStart, "d MMMM")} au ${formatDate(cohort.dateEnd, "d MMMM yyyy")}`;
   } 
   // Si mois et années différents
   else {
-    formattedPeriod = `du ${formatDate(cohort.dateStart, "dd MMMM yyyy")} au ${formatDate(cohort.dateEnd, "dd MMMM yyyy")}`;
+    formattedPeriod = `du ${formatDate(cohort.dateStart, "d MMMM yyyy")} au ${formatDate(cohort.dateEnd, "d MMMM yyyy")}`;
   }
 
   // Si `withBold` est activé, on retourne le texte avec des balises <b>
