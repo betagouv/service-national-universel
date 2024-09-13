@@ -40,9 +40,9 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
     const query = {};
     let valueField: any = { $in: [req.user._id] };
     if (req.user.role === ROLES.REFERENT_CLASSE) {
-      const classe: ClasseType[] = await ClasseModel.find({ referentClasseIds: { $in: req.user._id } });
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const lastClasse = classe.find((classe) => classe.schoolYear === ClasseSchoolYear.YEAR_2024_2025) || classe[0];
+      const classes: ClasseType[] = await ClasseModel.find({ referentClasseIds: { $in: req.user._id } });
+      if (!classes) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const lastClasse = classes.find((classe) => classe.schoolYear === ClasseSchoolYear.YEAR_2024_2025) || classes[0];
       valueField = lastClasse.etablissementId;
     }
     query[searchField] = valueField;
