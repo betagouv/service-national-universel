@@ -959,7 +959,7 @@ const normalizeString = (str) => {
   return str
     .normalize("NFD") // Normalise la chaîne de caractères (décompose les accents)
     .replace(/[\u0300-\u036f]/g, "") // Supprime les diacritiques (accents)
-    .replace(/[-\s.']/g, "") // Supprime les tirets, espaces, points, et apostrophes
+    .replace(/[-\s._']/g, "") // Supprime les tirets, espaces, points, apostrophes, et underscores
     .toLowerCase(); // Convertit tout en minuscules
 };
 
