@@ -2,7 +2,8 @@ export { AlerteMessageModel, AlerteMessageDocument, AlerteMessageType } from "./
 export { ApplicationModel, ApplicationDocument, ApplicationType } from "./application";
 export { AreasModel, AreasDocument, AreasType } from "./areas";
 export { BusModel } from "./bus";
-export { CohesionCenterModel, CohesionCenterDocument, CohesionCenterType } from "./cohesionCenter";
+export { CohesionCenterModel, CohesionCenterDocument } from "./cohesionCenter";
+export { CohesionCenterType } from "snu-lib";
 export { CohortModel, CohortDocument, CohortType } from "./cohort";
 export { ContractModel, ContractDocument, ContractType } from "./contract";
 export { DepartmentServiceModel, DepartmentServiceDocument, DepartmentServiceType } from "./departmentService";
@@ -34,7 +35,8 @@ export { LigneBusModel, LigneBusDocument, LigneBusType } from "./PlanDeTransport
 export { LigneToPointModel, LigneToPointDocument, LigneToPointType } from "./PlanDeTransport/ligneToPoint";
 export { ModificationBusModel, ModificationBusDocument, ModificationBusType } from "./PlanDeTransport/modificationBus";
 export { PlanTransportModel, PlanTransportDocument, PlanTransportType } from "./PlanDeTransport/planTransport";
-export { PointDeRassemblementModel, PointDeRassemblementDocument, PointDeRassemblementType } from "./PlanDeTransport/pointDeRassemblement";
+export { PointDeRassemblementModel, PointDeRassemblementDocument } from "./PlanDeTransport/pointDeRassemblement";
+export { PointDeRassemblementType } from "snu-lib";
 export { SchemaDeRepartitionModel, SchemaDeRepartitionDocument, SchemaDeRepartitionType } from "./PlanDeTransport/schemaDeRepartition";
 export { TableDeRepartitionModel, TableDeRepartitionDocument, TableDeRepartitionType } from "./PlanDeTransport/tableDeRepartition";
 

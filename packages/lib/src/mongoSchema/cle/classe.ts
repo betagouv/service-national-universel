@@ -13,6 +13,8 @@ import {
   ReferentDto,
   ClasseDto,
   CohortDto,
+  CohesionCenterType,
+  PointDeRassemblementType,
 } from "../..";
 
 const classeMetadataSchema = {
@@ -267,8 +269,8 @@ const schema = new Schema(ClasseSchema);
 export type ClasseType = InterfaceExtended<InferSchemaType<typeof schema>> & {
   etablissement?: EtablissementType;
   referents?: ReferentDto[]; // TODO: utiliser ReferentType
-  cohesionCenter?: ClasseType;
+  cohesionCenter?: CohesionCenterType;
   session?: ClasseDto["session"]; // TODO: utiliser SessionPhase1Type
-  pointDeRassemblement?: ClasseDto["pointDeRassemblement"]; // TODO: utiliser PointDeRassemblementType
+  pointDeRassemblement?: PointDeRassemblementType;
   cohortDetails?: CohortDto; // TODO: utiliser CohortType
 };
