@@ -8,7 +8,7 @@ describe("updateReferentsForMultipleClasses", () => {
     jest.resetAllMocks();
   });
   it("should update referents for multiple classes", async () => {
-    const referentsClassesToUpdate = [{ idClasse: "1", email: "new@email.com", lastName: "Last", firstName: "First" }];
+    const referentsClassesToUpdate = [{ classeId: "1", email: "new@email.com", lastName: "Last", firstName: "First" }];
     const user = {} as UserDto;
 
     jest.spyOn(ClasseModel, "findById").mockResolvedValue({ referentClasseIds: ["oldId"] });
@@ -20,7 +20,7 @@ describe("updateReferentsForMultipleClasses", () => {
 
     expect(result).toEqual([
       {
-        idClasse: "1",
+        classeId: "1",
         previousReferent: { email: "old@email.com", lastName: "Old", firstName: "Old" },
         updatedReferentClasse: { email: "new@email.com", lastName: "Last", firstName: "First" },
       },
@@ -28,8 +28,7 @@ describe("updateReferentsForMultipleClasses", () => {
   });
 
   it("should handle errors when the classe is not found", async () => {
-    // Mock the data
-    const referentsClassesToUpdate = [{ idClasse: "nonexistent", email: "new@email.com", lastName: "Last", firstName: "First" }];
+    const referentsClassesToUpdate = [{ classeId: "nonexistent", email: "new@email.com", lastName: "Last", firstName: "First" }];
     const user = {} as UserDto;
 
     jest.spyOn(ClasseModel, "findById").mockResolvedValue(null);
@@ -38,7 +37,7 @@ describe("updateReferentsForMultipleClasses", () => {
 
     expect(result).toEqual([
       {
-        idClasse: "nonexistent",
+        classeId: "nonexistent",
         error: ERRORS.CLASSE_NOT_FOUND,
       },
     ]);
