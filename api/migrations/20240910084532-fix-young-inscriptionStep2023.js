@@ -1,8 +1,6 @@
-const { YoungModel } = require("../src/models");
-
 module.exports = {
-  async up() {
-    const inscriptionStep = await YoungModel.updateMany(
+  async up(db) {
+    await db.collection("youngs").updateMany(
       {
         inscriptionStep2023: "WAITING_CONSENT",
         parentAllowSNU: "true",
@@ -12,7 +10,7 @@ module.exports = {
         $set: { inscriptionStep2023: "DONE" },
       },
     );
-    const reinscriptionStep2023 = await YoungModel.updateMany(
+    await db.collection("youngs").updateMany(
       {
         reinscriptionStep2023: "WAITING_CONSENT",
         parentAllowSNU: "true",
