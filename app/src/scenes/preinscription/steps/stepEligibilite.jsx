@@ -177,13 +177,10 @@ export default function StepEligibilite() {
     <>
       <ProgressBar isReinscription={isLoggedIn} />
       {!isLoggedIn && (
-        <PaddedContainer className="flex py-4 sm:flex-row-reverse md:flex-row">
-          <div className="pt-3 md:pr-4 sm:w-80 md:w-40">
-            <img src={School} alt="" />
-          </div>
+        <PaddedContainer className="flex px-[1rem] py-4 md:py-5 md:px-[1.5rem] md:flex-row-reverse gap-5 border-b md:border-none">
           <div>
-            <p className="mb-2 text-xl font-bold">Classes engagées</p>
-            <p className="text-sm sm:mr-4 md:mr-0">
+            <p className="m-0 text-xl font-bold">Classes engagées</p>
+            <p className="m-0 text-sm sm:mr-4 md:mr-0">
               Si vous envisagez une participation au SNU dans le cadre des classes engagées, vous ne pouvez pas vous inscrire ici. Veuillez attendre que votre référent classe vous
               indique la procédure à suivre.
             </p>
@@ -194,6 +191,9 @@ export default function StepEligibilite() {
               href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
               En savoir plus →
             </a>
+          </div>
+          <div className="flex-none w-16 md:w-auto">
+            <img src={School} alt="" className="" />
           </div>
         </PaddedContainer>
       )}
