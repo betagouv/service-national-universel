@@ -1,4 +1,4 @@
-import { ERRORS } from "./constants/errors";
+import { FUNCTIONAL_ERRORS } from "./constants/functionalErrors";
 
 const translate = (value) => {
   switch (value) {
@@ -366,7 +366,7 @@ const translate = (value) => {
       return "Actif";
     case "inactive":
       return "Inactif";
-    case ERRORS.INSCRIPTION_GOAL_REACHED:
+    case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED:
       return "L'objectif d'inscription du département a été atteint !";
     default:
       return value;

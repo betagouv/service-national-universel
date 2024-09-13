@@ -1,7 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, ERRORS, YoungDto } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS } from "snu-lib";
 
 import { CohortModel, YoungModel } from "../models";
 import { getInscriptionGoalStats } from "../services/inscription-goal";
@@ -120,7 +120,7 @@ describe("Referent", () => {
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(ERRORS.INSCRIPTION_GOAL_REACHED);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
       // admin: ajout d'un jeune au departement avec depassement
       passport.user.role = ROLES.ADMIN;
       response = (
@@ -132,7 +132,7 @@ describe("Referent", () => {
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(ERRORS.INSCRIPTION_GOAL_REACHED);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
       // admin: force l'ajout d'un jeune au departement meme si depassement
       response = (
         await createYoungThenUpdate(

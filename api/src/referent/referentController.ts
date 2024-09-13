@@ -98,6 +98,7 @@ import {
   canValidateYoungInClass,
   ClasseSchoolYear,
   canUpdateInscriptionGoals,
+  FUNCTIONAL_ERRORS,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -527,7 +528,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
       const fillingRate = await getFillingRate(young.department, young.cohort);
       if (fillingRate >= FILLING_RATE_LIMIT) {
-        return res.status(400).send({ ok: false, code: ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
+        return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
       }
     }
 
