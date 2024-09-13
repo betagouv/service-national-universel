@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
-import { YOUNG_SOURCE, YOUNG_STATUS, YoungSchema, YoungType } from "snu-lib";
+import { YOUNG_SOURCE, YOUNG_STATUS, YoungSchema, YoungSchemaCorrectionRequest, YoungSchemaFile, YoungSchemaNote, YoungType } from "snu-lib";
 import esClient from "../es";
 import * as brevo from "../brevo";
 import config from "config";
@@ -13,7 +13,23 @@ const MODELNAME = "young";
 
 const ClasseStateManager = require("../cle/classe/stateManager").default;
 
-const schema = new Schema(YoungSchema);
+const schema = new Schema({
+  ...YoungSchema,
+  files: {
+    ...Object.keys(YoungSchema.files).reduce((acc, key) => {
+      acc[key] = [YoungSchemaFile];
+      return acc;
+    }, {}),
+  },
+  correctionRequests: {
+    ...YoungSchema.correctionRequests,
+    type: [new Schema(YoungSchemaCorrectionRequest)],
+  },
+  notes: {
+    ...YoungSchema.notes,
+    type: [new Schema(YoungSchemaNote)],
+  },
+});
 
 schema.virtual("fromUser").set<SchemaExtended>(function (fromUser: UserSaved) {
   if (fromUser) {

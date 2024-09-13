@@ -1,7 +1,7 @@
 import { Schema, Types, InferSchemaType } from "mongoose";
 import { ROLES_LIST, PHONE_ZONES_NAMES_ARR, YOUNG_SOURCE_LIST, YOUNG_SOURCE, InterfaceExtended } from "..";
 
-const File = {
+export const YoungSchemaFile = {
   name: String,
   uploadedAt: Date,
   size: Number,
@@ -11,7 +11,7 @@ const File = {
   side: String,
 };
 
-const CorrectionRequest = {
+export const YoungSchemaCorrectionRequest = {
   moderatorId: {
     type: Types.ObjectId,
     required: true,
@@ -94,7 +94,7 @@ const CorrectionRequest = {
   },
 };
 
-const Note = {
+export const YoungSchemaNote = {
   phase: {
     type: String,
     enum: ["INSCRIPTION", "PHASE_1", "PHASE_2", "PHASE_3", ""],
@@ -1924,17 +1924,17 @@ export const YoungSchema = {
   },
 
   files: {
-    cniFiles: [File],
-    highSkilledActivityProofFiles: [File],
-    dataProcessingConsentmentFiles: [File],
-    parentConsentmentFiles: [File],
-    imageRightFiles: [File],
-    autoTestPCRFiles: [File],
-    rulesFiles: [File],
-    militaryPreparationFilesIdentity: [File],
-    militaryPreparationFilesCensus: [File],
-    militaryPreparationFilesAuthorization: [File],
-    militaryPreparationFilesCertificate: [File],
+    cniFiles: [YoungSchemaFile],
+    highSkilledActivityProofFiles: [YoungSchemaFile],
+    dataProcessingConsentmentFiles: [YoungSchemaFile],
+    parentConsentmentFiles: [YoungSchemaFile],
+    imageRightFiles: [YoungSchemaFile],
+    autoTestPCRFiles: [YoungSchemaFile],
+    rulesFiles: [YoungSchemaFile],
+    militaryPreparationFilesIdentity: [YoungSchemaFile],
+    militaryPreparationFilesCensus: [YoungSchemaFile],
+    militaryPreparationFilesAuthorization: [YoungSchemaFile],
+    militaryPreparationFilesCertificate: [YoungSchemaFile],
   },
 
   latestCNIFileExpirationDate: {
@@ -1990,14 +1990,14 @@ export const YoungSchema = {
 
   // --- demandes de corrections : phase 0
   correctionRequests: {
-    type: [CorrectionRequest],
+    type: [YoungSchemaCorrectionRequest],
     default: undefined,
     documentation: {
       description: "Liste des demandes de corrections faites sur le dossier du jeune.",
     },
   },
   notes: {
-    type: [Note],
+    type: [YoungSchemaNote],
     documentation: {
       description: "Liste des notes faites sur le dossier du jeune.",
     },
@@ -2032,5 +2032,22 @@ export const YoungSchema = {
   updatedAt: { type: Date, default: Date.now },
 };
 
-const schema = new Schema(YoungSchema);
+// le schéma doit être défini ici pour l'inferage, mais dupliqué dans l'api pour une bonne interpretation du model
+const schema = new Schema({
+  ...YoungSchema,
+  files: {
+    ...Object.keys(YoungSchema.files).reduce((acc, key) => {
+      acc[key] = [YoungSchemaFile];
+      return acc;
+    }, {}),
+  },
+  correctionRequests: {
+    ...YoungSchema.correctionRequests,
+    type: [new Schema(YoungSchemaCorrectionRequest)],
+  },
+  notes: {
+    ...YoungSchema.notes,
+    type: [new Schema(YoungSchemaNote)],
+  },
+});
 export type YoungType = InterfaceExtended<InferSchemaType<typeof schema>>;
