@@ -38,7 +38,6 @@ export default function StepUploadDesktop({
   const [step, setStep] = useState(0);
   const history = useHistory();
   const imageFileTypes = ["image/jpeg", "image/png", "image/jpg"];
-  const isEnabled = validate();
 
   function validate() {
     if (!dayjs(date).isValid()) {
@@ -63,6 +62,11 @@ export default function StepUploadDesktop({
   }
 
   const handleOnClickNext = async () => {
+    const isEnabled = validate();
+    if (!isEnabled) {
+      setError({ text: "Veuillez vérifier les champs requis." });
+      return;
+    }
     //si correction on passe directement à la vérification
     if (corrections?.length) return onCorrect(resetState);
     //si pas de nouveaux fichiers on passe directement à la vérification
@@ -159,7 +163,7 @@ export default function StepUploadDesktop({
       {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      <SignupButtons onClickNext={handleOnClickNext} disabled={!isEnabled} onClickPrevious={() => history.push("/inscription2023/documents")} />
+      <SignupButtons onClickNext={handleOnClickNext} disabled={loading} onClickPrevious={() => history.push("/inscription2023/documents")} />
     </>
   );
 }
