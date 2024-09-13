@@ -168,7 +168,17 @@ export default function StepUploadDesktop({
       {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      <SignupButtons onClickNext={handleOnClickNext} disabled={loading} onClickPrevious={() => history.push("/inscription2023/documents")} />
+      <SignupButtons
+        onClickNext={handleOnClickNext}
+        disabled={loading}
+        onClickPrevious={() => {
+          if (corrections?.length) {
+            history.push("/inscription/correction/documents");
+          } else {
+            history.push("/inscription/documents");
+          }
+        }}
+      />
     </>
   );
 }
@@ -178,7 +188,6 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
   const [error, setError] = useState(false);
 
   const handleChange = (date) => {
-
     setDate(date);
     onChange && onChange();
 
