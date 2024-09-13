@@ -9,7 +9,7 @@ const config = {
   coveragePathIgnorePatterns: ["/node_modules/", "/__mocks__/", "/helpers/", "/fixtures/", "/scripts/", "/config/"],
   globals: {
     "ts-jest": {
-      tsconfig: "build.tsconfig.json",
+      tsconfig: "tsconfig.build.json",
     },
   },
 };
