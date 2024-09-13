@@ -9,6 +9,10 @@ import {
   TYPE_CLASSE_LIST,
   ReferentCreatedBy,
   InterfaceExtended,
+  EtablissementType,
+  ReferentDto,
+  ClasseDto,
+  CohortDto,
 } from "../..";
 
 const classeMetadataSchema = {
@@ -260,4 +264,11 @@ export const ClasseSchema = {
 };
 
 const schema = new Schema(ClasseSchema);
-export type ClasseType = InterfaceExtended<InferSchemaType<typeof schema>>;
+export type ClasseType = InterfaceExtended<InferSchemaType<typeof schema>> & {
+  etablissement?: EtablissementType;
+  referents?: ReferentDto[]; // TODO: utiliser ReferentType
+  cohesionCenter?: ClasseType;
+  session?: ClasseDto["session"]; // TODO: utiliser SessionPhase1Type
+  pointDeRassemblement?: ClasseDto["pointDeRassemblement"]; // TODO: utiliser PointDeRassemblementType
+  cohortDetails?: CohortDto; // TODO: utiliser CohortType
+};
