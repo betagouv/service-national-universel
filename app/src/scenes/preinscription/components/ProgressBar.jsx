@@ -1,8 +1,25 @@
 import React from "react";
 import { useParams } from "react-router-dom";
+import { getStepFromUrlParam, PREINSCRIPTION_STEPS, PREINSCRIPTION_STEPS_LIST, REINSCRIPTION_STEPS_LIST } from "../../../utils/navigation";
+import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 
-import useDevice from "../../../hooks/useDevice";
-import { getStepFromUrlParam, PREINSCRIPTION_STEPS_LIST, REINSCRIPTION_STEPS_LIST } from "../../../utils/navigation";
+const STEPS = [
+  {
+    id: PREINSCRIPTION_STEPS.ELIGIBILITE,
+    title: "Avant d'aller plus loin",
+    parcours: ["preinscription", "reinscription"],
+  },
+  {
+    id: PREINSCRIPTION_STEPS.SEJOUR,
+    title: "Séjour de cohésion",
+    parcours: ["preinscription", "reinscription"],
+  },
+  {
+    id: PREINSCRIPTION_STEPS.PROFIL,
+    title: "Mon compte volontaire SNU",
+    parcours: ["preinscription"],
+  },
+];
 
 const ProgressBar = ({ isReinscription = false }) => {
   const STEPS_LIST = isReinscription ? REINSCRIPTION_STEPS_LIST : PREINSCRIPTION_STEPS_LIST;
@@ -12,33 +29,16 @@ const ProgressBar = ({ isReinscription = false }) => {
     step = "eligibilite";
   }
   const currentStep = getStepFromUrlParam(step, STEPS_LIST);
-  const device = useDevice();
-  const STEPS = isReinscription ? ["ELIGIBILITE", "SEJOUR"] : ["ELIGIBILITE", "SEJOUR", "PROFIL"];
-  const NEXT_STEP = {
-    ELIGIBILITE: "Séjour de cohésion",
-    SEJOUR: !isReinscription && "Mon compte volontaire SNU",
-  };
+  const parcours = isReinscription ? "reinscription" : "preinscription";
+  const filteredSteps = STEPS.filter((e) => e.parcours.includes(parcours));
+  const currentStepIndex = filteredSteps.findIndex((e) => e.id === currentStep);
+  const currentStepTitle = filteredSteps[currentStepIndex].title;
+  const nextStepTitle = filteredSteps[currentStepIndex + 1]?.title || "";
 
-  return STEPS.includes(currentStep) ? (
-    <div className="flex flex-col justify-center px-[1rem] py-[1rem] max-w-[56rem] md:px-[6rem]">
-      <div className="text-sm">Étape {currentStep === "ELIGIBILITE" ? "1" : currentStep === "SEJOUR" ? "2" : currentStep === "PROFIL" && "3"} sur 3</div>
-      <div className="mt-2 text-lg font-bold">
-        {currentStep === "ELIGIBILITE" ? "Avant d'aller plus loin" : currentStep === "SEJOUR" ? "Séjour de cohésion" : currentStep === "PROFIL" && "Mon compte volontaire SNU"}
-      </div>
-      <div className="mt-2 flex w-full space-x-2">
-        {STEPS.map((step) => (
-          <div key={`step-${step}`} className={`h-2 basis-1/${STEPS.length} ${currentStep === step ? "bg-[#000091]" : "bg-[#C6C6FB]"}`}></div>
-        ))}
-      </div>
-      {device === "desktop" && NEXT_STEP[currentStep] && (
-        <div className="mt-2 flex space-x-1 text-xs text-[#666666]">
-          <div className="font-bold">Étape suivante:</div>
-          <div>{NEXT_STEP[currentStep]}</div>
-        </div>
-      )}
+  return (
+    <div className="p-2 md:p-0">
+      <Stepper stepCount={filteredSteps.length} currentStep={currentStepIndex + 1} title={currentStepTitle} nextTitle={nextStepTitle} style={{ margin: 0 }} />
     </div>
-  ) : (
-    <div className="m-4 hidden md:block" />
   );
 };
 
