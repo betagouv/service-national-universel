@@ -1,4 +1,4 @@
-import { CohortDto } from "src/dto";
+import { CohortDto } from "../../dto";
 import { BasicRoute, RouteResponseBody } from "..";
 
 export interface GetOneCohortRoute extends BasicRoute {

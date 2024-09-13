@@ -12,13 +12,20 @@ interface Props {
 }
 
 export default function StatsInfos({ classe, user, studentStatus, validatedYoung }: Props) {
+  const isUserCLE = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role);
+  const isUserAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+
+  const linkPath = isUserCLE ? "/mes-eleves" : "/inscription";
+  const showButton = (isUserCLE && classe.schoolYear === "2024-2025") || isUserAdminOrReferent;
   return (
     <Container
       title="Suivi de la classe"
       actions={[
-        <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
-          <Button type="tertiary" title="Voir la liste des élèves" />
-        </Link>,
+        showButton && (
+          <Link key="list-students" to={`${linkPath}?classeId=${classe._id}`}>
+            <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
+          </Link>
+        ),
       ]}>
       <div className="flex justify-between">
         <table className="flex-1">
