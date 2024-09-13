@@ -147,7 +147,7 @@ export default function StepEligibilite() {
         data: sessions,
         message,
       } = await api.post(`/preinscription/eligibilite`, {
-        schoolDepartment: data.school?.departmentName,
+        schoolDepartment: data.school?.departmentName || data.school?.department,
         department: data.department,
         schoolRegion: data.school?.region,
         birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
