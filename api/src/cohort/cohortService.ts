@@ -20,7 +20,7 @@ export const isInscriptionOpen = async (cohortName: String | undefined): Promise
   return isInscriptionOpenOnSomeCohorts();
 };
 
-export const isReInscriptionOpen = async (cohortName: String | undefined): Promise<Boolean> => {
+export const isReInscriptionOpen = async (cohortName?: String): Promise<Boolean> => {
   if (cohortName) {
     const cohort = await CohortModel.findOne({ name: cohortName });
     if (!cohort) return false;

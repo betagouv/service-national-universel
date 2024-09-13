@@ -28,7 +28,7 @@ router.post("/eligibilite", async (req, res) => {
   }
 
   try {
-    const cohorts = await getFilteredSessions(value, req.headers["x-user-timezone"] as string);
+    const cohorts = await getFilteredSessions(value, Number(req.headers["x-user-timezone"]) || null);
 
     if (cohorts.length === 0) {
       return res.send({ ok: true, data: [], message: "no_session_found" });
