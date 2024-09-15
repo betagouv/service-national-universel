@@ -364,6 +364,8 @@ const translate = (value) => {
       return "Actif";
     case "inactive":
       return "Inactif";
+    case "psc1Info":
+      return "A effectué la formation PSC1";
     default:
       return value;
   }
@@ -981,7 +983,8 @@ const translateField = (field) => {
       return "Date d'expiration de la pièce d'identité";
     case "latestCNIFileCategory":
       return "Type de pièce d'identité";
-
+    case "psc1Info":
+      return "A effectué la formation PSC1";
     default:
       return field;
   }
