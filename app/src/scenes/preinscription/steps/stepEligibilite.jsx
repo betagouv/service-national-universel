@@ -105,7 +105,7 @@ export default function StepEligibilite() {
   const handleSubmit = async () => {
     plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
 
-    const errors = validateForm();
+    const errors = { ...error, ...validateForm() };
 
     if (Object.values(errors).length) {
       setError(errors);
@@ -239,7 +239,12 @@ export default function StepEligibilite() {
                 initialValue={new Date(data.birthDate)}
                 onChange={(date) => setData({ ...data, birthDate: date })}
                 setError={(isError) => {
-                  setError({ ...error, birthDate: isError ? "Date invalide" : "" });
+                  if (isError) setError({ ...error, birthDate: "Date invalide" });
+                  else
+                    setError((error) => {
+                      delete error.birthDate;
+                      return error;
+                    });
                 }}
                 disabled={isBirthdayModificationDisabled}
                 state={error.birthDate ? "error" : "default"}
