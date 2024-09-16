@@ -18,11 +18,9 @@ import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
-import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 import ErrorComponent from "@/components/error";
 
@@ -33,7 +31,6 @@ export default function StepEligibilite() {
     : [PREINSCRIPTION_STEPS, PreInscriptionContext, false, "preinscription", "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const [data, setData] = React.useContext(context);
   const [error, setError] = React.useState({});
-  const [errorDate, setErrorDate] = React.useState(false);
   const [fetchError, setFetchError] = React.useState("");
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -67,8 +64,17 @@ export default function StepEligibilite() {
       errors.scolarity = "Choisissez un niveau de scolarité";
     }
     // Birthdate
-    if (!data?.birthDate || !validateBirthDate(data?.birthDate)) {
-      errors.birthDate = "Vous devez saisir une date de naissance valide";
+    if (!isLoggedIn) {
+      // Don't validate date for reinscription
+      if (!data?.day || data?.day < 1 || data?.day > 31) {
+        errors.day = "Vous devez saisir un jour valide";
+      }
+      if (!data?.month || data?.month < 1 || data?.month > 12) {
+        errors.month = "Vous devez saisir un mois valide";
+      }
+      if (!data?.year || data?.year < 2000 || data?.year > new Date().getFullYear()) {
+        errors.year = "Vous devez saisir une année valide";
+      }
     }
 
     if (data.scolarity) {
@@ -108,14 +114,17 @@ export default function StepEligibilite() {
 
     const errors = validateForm();
 
-    if (Object.values(errors).length || errorDate) {
+    if (Object.values(errors).length) {
       setError(errors);
       setToggleVerify(!toggleVerify);
       return;
     }
 
+    const birthdate = new Date(data.year, data.month - 1, data.day);
+    setData({ ...data, birthDate: dayjs(birthdate).format("YYYY-MM-DD") });
+
     // Check if young is more than 17 years old
-    const age = dayjs().diff(dayjs(data.birthDate), "year");
+    const age = dayjs().diff(dayjs(birthdate), "year");
     if (age > 17) {
       if (!isLoggedIn) {
         // Preinscription
@@ -151,7 +160,7 @@ export default function StepEligibilite() {
         schoolDepartment: data.school?.departmentName || data.school?.department,
         department: data.department,
         schoolRegion: data.school?.region,
-        birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
+        birthdateAt: isLoggedIn ? dayjs(data.birthDate).format("YYYY-MM-DD") : dayjs(birthdate).locale("fr").format("YYYY-MM-DD"),
         grade: data.scolarity,
         zip: data.zip,
         isReInscription: !!data.isReInscription,
@@ -173,6 +182,8 @@ export default function StepEligibilite() {
       setLoading(false);
     }
   };
+
+  const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
 
   return (
     <>
@@ -234,18 +245,57 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className={`${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
+
+            <label className="mt-2">
               Date de naissance
-              <DatePicker
-                initialValue={new Date(data.birthDate)}
-                onChange={(date) => setData({ ...data, birthDate: date })}
-                setError={(isError) => setErrorDate(isError)}
-                disabled={isBirthdayModificationDisabled}
-                state={errorDate ? "error" : "default"}
-                errorText={"Date invalide"}
-              />
+              <div className="grid grid-cols-3 gap-4">
+                <Input
+                  id="day"
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={isLoggedIn ? dayjs(data.birthDate).format("DD") : data.day}
+                  onKeyDown={blockInvalidChar}
+                  onChange={(e) => setData({ ...data, day: e })}
+                  placeholder="Exemple : 14"
+                  hintText="Jour"
+                  maxLength="2"
+                  disabled={isBirthdayModificationDisabled}
+                  state={error.day ? "error" : "default"}
+                  stateRelatedMessage={error.day}
+                />
+                <Input
+                  id="month"
+                  type="number"
+                  min="1"
+                  max="12"
+                  value={isLoggedIn ? dayjs(data.birthDate).format("MM") : data.month}
+                  onKeyDown={blockInvalidChar}
+                  onChange={(e) => setData({ ...data, month: e })}
+                  placeholder="Exemple : 12"
+                  hintText="Mois"
+                  maxLength="2"
+                  disabled={isBirthdayModificationDisabled}
+                  state={error.month ? "error" : "default"}
+                  stateRelatedMessage={error.month}
+                />
+                <Input
+                  id="year"
+                  type="number"
+                  min="2000"
+                  max={new Date().getFullYear()}
+                  value={isLoggedIn ? dayjs(data.birthDate).format("YYYY") : data.year}
+                  onKeyDown={blockInvalidChar}
+                  onChange={(e) => setData({ ...data, year: e })}
+                  placeholder="Exemple : 2004"
+                  hintText="Année"
+                  maxLength="4"
+                  disabled={isBirthdayModificationDisabled}
+                  state={error.year ? "error" : "default"}
+                  stateRelatedMessage={error.year}
+                />
+              </div>
             </label>
-            {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
           </div>
 
           {data.scolarity && (

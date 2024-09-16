@@ -32,7 +32,7 @@ const ProgressBar = ({ isReinscription = false }) => {
   const parcours = isReinscription ? "reinscription" : "preinscription";
   const filteredSteps = STEPS.filter((e) => e.parcours.includes(parcours));
   const currentStepIndex = filteredSteps.findIndex((e) => e.id === currentStep);
-  const currentStepTitle = filteredSteps[currentStepIndex].title;
+  const currentStepTitle = filteredSteps[currentStepIndex]?.title;
   const nextStepTitle = filteredSteps[currentStepIndex + 1]?.title || "";
 
   return (
