@@ -4,7 +4,6 @@ import { Link, useHistory } from "react-router-dom";
 import { getCohortPeriod, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import Alert from "../../../components/dsfr/ui/Alert";
 import { supportURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";

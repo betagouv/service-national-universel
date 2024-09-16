@@ -3,7 +3,7 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
-const { YoungModel } = require("../../models");
+const { YoungModel, CohortModel } = require("../../models");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023 } = require("../../utils");
@@ -50,6 +50,9 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    const cohortObj = await CohortModel.findOne({ name: value.cohort });
+    if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     // complete values
     value.status = YOUNG_STATUS.REINSCRIPTION;
     value.originalCohort = young.cohort;
@@ -67,6 +70,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // Update young
     young.set({
       ...value,
+      cohortId: cohortObj._id,
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,
