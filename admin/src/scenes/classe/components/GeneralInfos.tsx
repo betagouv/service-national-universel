@@ -121,7 +121,8 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
                 closeMenuOnSelect={true}
                 value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
                 onChange={(options) => {
-                  setClasse({ ...classe, cohort: options.value });
+                  const cohortId = cohorts?.find((c) => c.name === options.value)?._id;
+                  setClasse({ ...classe, cohortId });
                 }}
                 error={errors.cohort}
               />

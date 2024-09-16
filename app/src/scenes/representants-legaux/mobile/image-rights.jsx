@@ -236,7 +236,7 @@ function ImageRightsForm({ young, token, parentId }) {
   }
 
   function done() {
-    history.push(`/representants-legaux/droits-image-done${parentId.toString() === "2" ? "2" : ""}?token=${token}}&parent=${parentId}`);
+    history.push(`/representants-legaux/droits-image-done${parentId.toString() === "2" ? "2" : ""}?token=${token}&parent=${parentId}`);
   }
 
   return (
