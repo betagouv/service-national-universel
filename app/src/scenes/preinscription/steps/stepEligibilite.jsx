@@ -29,7 +29,7 @@ import ErrorComponent from "@/components/error";
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
   const [STEPS, context, isBirthdayModificationDisabled, uri, bdcUri] = isLoggedIn
-    ? [REINSCRIPTION_STEPS, ReinscriptionContext, true, "reinscription", "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    ? [REINSCRIPTION_STEPS, ReinscriptionContext, true, "reinscription", "jetais-inscrit-en-2023-2024-comment-me-reinscrire-en-2024-2025"]
     : [PREINSCRIPTION_STEPS, PreInscriptionContext, false, "preinscription", "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const [data, setData] = React.useContext(context);
   const [error, setError] = React.useState({});
