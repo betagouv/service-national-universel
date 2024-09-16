@@ -16,6 +16,7 @@ import DidNotReceiveActivationCodeModal from "./components/DidNotReceiveActivati
 import ModifyEmailModal from "./components/ModifyEmailModal";
 import useAuth from "@/services/useAuth";
 import { SignupButtons } from "@snu/ds/dsfr";
+import { cohortsInit } from "@/utils/cohorts";
 
 //@todo:
 // - move from preinscription folder to be reused for "class engagee" also /preinscription/email-validation => /email-validation
@@ -43,6 +44,7 @@ export default function StepEmailValidation() {
         setError(`Une erreur s'est produite : ${translate(code)}`);
       }
       if (token) api.setToken(token);
+      await cohortsInit();
       if (user) dispatch(setYoung(user));
       const eventName = isCLE ? "CLE/CTA preinscription - validation email" : "Phase0/CTA preinscription - validation email";
       plausibleEvent(eventName);

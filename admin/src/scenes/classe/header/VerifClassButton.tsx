@@ -4,13 +4,13 @@ import { HiOutlineCheck } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
 
 import { ModalConfirmation, Button } from "@snu/ds/admin";
-import { translate, ClasseDto } from "snu-lib";
+import { translate, ClassesRoutes } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 
 interface Props {
-  classe: ClasseDto;
-  setClasse: (classe: ClasseDto) => void;
+  classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
+  setClasse: (classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>) => void;
   isLoading: boolean;
   setLoading: (isLoading: boolean) => void;
 }

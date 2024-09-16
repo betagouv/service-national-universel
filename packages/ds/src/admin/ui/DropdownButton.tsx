@@ -35,7 +35,7 @@ type OwnProps = {
   mode?: "default" | "badge";
   rightIcon?: boolean;
   status?: TStatus;
-  type?: "primary" | "secondary" | "tertiary";
+  type?: "primary" | "secondary" | "tertiary" | "wired";
   disabled?: boolean;
   icon?: React.ReactNode;
   buttonClassName?: string;
@@ -105,9 +105,7 @@ export default function DropdownButton({
           <Button
             title={loading ? loadingLabel : title}
             type={type}
-            className={`${buttonClassName} ${loading && "cursor-wait"} ${
-              open && "!text-blue-600"
-            }`}
+            className={`${buttonClassName} ${loading && "cursor-wait"}`}
             leftIcon={icon}
             rightIcon={
               rightIcon && (
@@ -162,9 +160,9 @@ const getDivClass = ({
   open?: boolean;
   position: "left" | "right";
 }) => {
-  const baseClass = `absolute top-[45px] min-w-[250px] rounded-lg bg-white transition ${
+  const baseClass = `absolute top-[45px] min-w-[250px] max-w-[350px] rounded-lg bg-white transition ${
     position === "left" ? "left-0" : "right-0"
-  } border-3 z-50 overflow-hidden shadow-md border border-gray-100`;
+  } border-3 z-50 overflow-hidden shadow-md border border-gray-100 text-ellipsis whitespace-nowrap`;
   if (open) {
     return classNames(baseClass, "block");
   } else {

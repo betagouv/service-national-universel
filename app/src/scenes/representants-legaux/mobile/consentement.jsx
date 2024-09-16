@@ -8,7 +8,7 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/dsfr/forms/toggle";
-import { translate, getCohortYear, PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
+import { translate, PHONE_ZONES, isPhoneNumberWellFormated, YOUNG_SOURCE } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -23,16 +23,16 @@ import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Consentement({ step, parentId }) {
-  const { young, token } = useContext(RepresentantsLegauxContext);
+  const { young, token, classe, cohort } = useContext(RepresentantsLegauxContext);
   if (!young) return <Loader />;
   if (isReturningParent(young, parentId)) {
     const route = parentId === 2 ? "done-parent2" : "done";
     return <Redirect to={`/representants-legaux/${route}?token=${token}`} />;
   }
-  return <ConsentementForm young={young} token={token} step={step} parentId={parentId} />;
+  return <ConsentementForm young={young} token={token} step={step} parentId={parentId} cohort={cohort} classe={classe} />;
 }
 
-function ConsentementForm({ young, token, step, parentId }) {
+function ConsentementForm({ young, token, step, parentId, cohort, classe }) {
   const history = useHistory();
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = React.useState(false);
@@ -41,7 +41,6 @@ function ConsentementForm({ young, token, step, parentId }) {
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
-  const cohortYear = getCohortYear(young.cohort);
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
@@ -236,6 +235,8 @@ function ConsentementForm({ young, token, step, parentId }) {
     }
   }
 
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? classe?.schoolYear : new Date(cohort.dateStart).getFullYear();
+
   return (
     <>
       <Navbar step={step} />
@@ -346,7 +347,7 @@ function ConsentementForm({ young, token, step, parentId }) {
                     </Check>
                     <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
                       <div className="block">
-                        Accepte la collecte et le traitement des données personnelles de&nbsp;<b>{youngFullname}</b>
+                        Accepte la collecte et le traitement des données personnelles de&nbsp;<b>{youngFullname}</b> dans le cadre d’une mission d’intérêt public
                       </div>
                     </Check>
                   </div>

@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import { useHistory } from "react-router-dom";
 
-export default function Save({ filterArray, selectedFilters, page = 1, pageId, disabled }) {
+export default function Save({ filterArray, selectedFilters, page = 1, pageId, disabled = false }) {
   // handle click outside
   const ref = React.useRef();
   const [nameView, setNameView] = React.useState("");

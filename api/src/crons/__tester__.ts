@@ -1,7 +1,10 @@
 // To test run:
-// node ./src/crons/__tester__.js patch/young
+// ts-node ./src/crons/__tester__.js patch/young
 
-const config = require("config");
+// uncomment when running in local
+// process.env["NODE_CONFIG_DIR"] = "<RELATIVE PATH>/service-national-universel/api/config/";
+
+require("config");
 const { initDB } = require("../mongo");
 
 // You need to run in local apps and target the right database (Prod usually)
@@ -30,6 +33,12 @@ const { initDB } = require("../mongo");
       break;
     case "dsnj":
       await require("./dsnjExport/index").handler();
+      break;
+    case "classe-status":
+      await require("./classesStatusUpdate").handler();
+      break;
+    case "goal":
+      await require("./computeGoalsInscription").handler();
       break;
   }
   process.exit(0);

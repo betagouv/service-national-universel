@@ -8,5 +8,6 @@ router.use("/etablissement", require("./etablissement/etablissementController").
 router.use("/referent", require("./referent/referentController").default);
 router.use("/referent-signup", require("./referent/referentSignupController").default);
 router.use("/young", require("./young/youngController").default);
+router.use("/classes", require("./classes/classesController").default);
 
 export default router;

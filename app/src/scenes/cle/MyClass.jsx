@@ -8,7 +8,7 @@ export default function MyClass({ classe }) {
     return format(new Date(dateString), "dd MMMM yyyy", { locale: fr });
   };
 
-  const fields = [
+  let fields = [
     {
       label: "Nom",
       value: classe?.name,
@@ -21,11 +21,14 @@ export default function MyClass({ classe }) {
       label: "Établissement scolaire",
       value: classe?.etablissement?.name,
     },
-    {
-      label: "Date de séjour",
-      value: formatDate(classe?.cohortDetails?.dateStart),
-    },
   ];
+
+  if (classe?.cohortDetails?.dateStart && classe?.cohortDetails?.dateEnd) {
+    fields.push({
+      label: "Date de séjour",
+      value: `Du ${formatDate(classe?.cohortDetails?.dateStart)} au ${formatDate(classe?.cohortDetails?.dateEnd)}`,
+    });
+  }
 
   return <List title={"Ma classe engagée"} fields={fields} className="w-full" />;
 }

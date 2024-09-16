@@ -39,7 +39,7 @@ describe("POST /cle/classe-import", () => {
   };
 
   it("should return 200 and the import results when the request is successful", async () => {
-    const classe1 = await ClasseModel.create(createFixtureClasse());
+    const classe1 = await ClasseModel.create(createFixtureClasse({ estimatedSeats: 1 }));
     const classe2 = await ClasseModel.create(createFixtureClasse());
     const classe3 = await ClasseModel.create(createFixtureClasse());
     const cohort = await CohortModel.create(getNewCohortFixture({ name: "à venir", snuId: "A_VENIR" }));
@@ -47,8 +47,8 @@ describe("POST /cle/classe-import", () => {
     const notExistingClasseId = new mongoose.Types.ObjectId().toString();
     const notExistingCohortCode = "not-existing-cohort";
 
-    const mockFileBody = `Identifiant de la classe engagée,Session : Code de la session
-${classe1?._id},${cohort?.snuId}
+    const mockFileBody = `Identifiant de la classe engagée,Session formule,Effectif de jeunes concernés
+${classe1?._id},${cohort?.snuId},42
 ${notExistingClasseId},${cohort?.snuId}
 ${classe2?._id},${notExistingCohortCode}
 ${classe3?._id},""
@@ -63,6 +63,7 @@ ${classe3?._id},""
       {
         classeId: classe1._id.toString(),
         classeStatus: STATUS_CLASSE.ASSIGNED,
+        classeEstimatedSeats: 42,
         cohortId: cohort._id.toString(),
         result: "success",
         cohortCode: cohort.snuId,

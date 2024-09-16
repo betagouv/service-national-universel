@@ -28,7 +28,7 @@ export default function WaitingValidation() {
         return;
       }
       dispatch(setYoung(data));
-      history.push("/inscription2023/profil");
+      history.push("/inscription/profil");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue :", translate(e.code));

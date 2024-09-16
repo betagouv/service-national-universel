@@ -88,7 +88,7 @@ const OnBoarding = () => {
     return (
       <DSFRLayout title="Inscription de l'élève">
         <DSFRContainer title="Les inscriptions sont cloturées">
-          <p className="leading-relaxed">Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023 - 2024.</p>
+          <p className="leading-relaxed">Les inscriptions dans le cadre des classes engagées sont clôturées pour cette classe.</p>
         </DSFRContainer>
       </DSFRLayout>
     );

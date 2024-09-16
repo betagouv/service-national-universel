@@ -2,16 +2,16 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
+import { ROLES, ClassesRoutes } from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
 import { searchSessions, searchPointDeRassemblements } from "../utils";
-import { ROLES, ClasseDto } from "snu-lib";
 
 import { Rights, InfoBus } from "./types";
 
 interface Props {
-  classe: ClasseDto;
-  setClasse: (classe: ClasseDto) => void;
+  classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
+  setClasse: (classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>) => void;
   editStay: boolean;
   setEditStay: (edit: boolean) => void;
   errors: { [key: string]: string };
@@ -123,7 +123,7 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
               closeMenuOnSelect={true}
               value={
                 classe.pointDeRassemblement?.name && classe.pointDeRassemblement?.department
-                  ? { value: classe.pointDeRassemblement.id, label: `${classe.pointDeRassemblement.name}, ${classe.pointDeRassemblement.department}` }
+                  ? { value: classe.pointDeRassemblement._id, label: `${classe.pointDeRassemblement.name}, ${classe.pointDeRassemblement.department}` }
                   : null
               }
               onChange={(option) =>

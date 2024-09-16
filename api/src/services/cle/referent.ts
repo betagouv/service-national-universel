@@ -65,10 +65,11 @@ export const inviteReferent = async (
   const fromName = `${from?.firstName || null} ${from?.lastName || null}`;
   const toName = `${referent.firstName} ${referent.lastName}`;
   const name_school = `${etablissement.name}`;
+  const emailEtablissement = `${referent.email}`;
 
   return await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[role], {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { cta, fromName, toName, name_school },
+    params: { cta, fromName, toName, name_school, emailEtablissement },
   });
 };
 
@@ -167,13 +168,18 @@ export const doInviteReferentClasse = async (referentClasse: ReferentDocument, u
   const referent = await generateInvitationTokenAndSaveReferent(referentClasse, user);
   const invitationType = referent.metadata.invitationType;
 
-  const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
+  const classe = await ClasseModel.findOne({ referentClasseIds: referent._id, status: STATUS_CLASSE.VERIFIED, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
   if (!classe) {
     throw new Error("Classe not found for referent : " + referent._id);
   }
   const etablissement = await EtablissementModel.findById(classe.etablissementId);
   if (!etablissement) {
     throw new Error("Etablissement not found for referent : " + referent._id);
+  }
+
+  const chefEtab = await ReferentModel.findById(etablissement.referentEtablissementIds[0]);
+  if (!chefEtab) {
+    throw new Error("Chef Etablissement not found for referent : " + referent._id);
   }
 
   let inscriptionUrl = `${config.ADMIN_URL}/creer-mon-compte?token=${referent.invitationToken}`;
@@ -185,10 +191,11 @@ export const doInviteReferentClasse = async (referentClasse: ReferentDocument, u
   }
 
   const toName = `${referent.firstName} ${referent.lastName}`;
+  const fromName = `${chefEtab.firstName} ${chefEtab.lastName}`;
   const name_school = `${etablissement.name}`;
   return await sendTemplate(templateId, {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { cta: inscriptionUrl, toName, name_school, emailEtablissement: referent.email },
+    params: { cta: inscriptionUrl, toName, name_school, emailEtablissement: referent.email, class_code: classe.uniqueKeyAndId, fromName },
   });
 };
 
