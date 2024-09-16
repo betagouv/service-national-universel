@@ -18,7 +18,7 @@ export { ProgramModel, ProgramDocument, ProgramType } from "./program";
 export { ReferentModel, ReferentDocument } from "./referent";
 export { SchoolModel, SchoolDocument, SchoolType } from "./school";
 export { SchoolRAMSESModel, SchoolRAMSESDocument, SchoolRAMSESType } from "./schoolRAMSES";
-export { SessionPhase1Model, SessionPhase1Document, SessionPhase1Type } from "./sessionPhase1";
+export { SessionPhase1Model, SessionPhase1Document } from "./sessionPhase1";
 export { SessionPhase1TokenModel } from "./sessionPhase1Token";
 export { StructureModel, StructureDocument, StructureType } from "./structure";
 export { TagsModel, TagsDocument, TagsType } from "./tags";
