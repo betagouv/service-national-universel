@@ -3,7 +3,6 @@ export { ApplicationModel, ApplicationDocument, ApplicationType } from "./applic
 export { AreasModel, AreasDocument, AreasType } from "./areas";
 export { BusModel } from "./bus";
 export { CohesionCenterModel, CohesionCenterDocument } from "./cohesionCenter";
-export { CohesionCenterType } from "snu-lib";
 export { CohortModel, CohortDocument, CohortType } from "./cohort";
 export { ContractModel, ContractDocument, ContractType } from "./contract";
 export { DepartmentServiceModel, DepartmentServiceDocument, DepartmentServiceType } from "./departmentService";
@@ -36,7 +35,6 @@ export { LigneToPointModel, LigneToPointDocument, LigneToPointType } from "./Pla
 export { ModificationBusModel, ModificationBusDocument, ModificationBusType } from "./PlanDeTransport/modificationBus";
 export { PlanTransportModel, PlanTransportDocument, PlanTransportType } from "./PlanDeTransport/planTransport";
 export { PointDeRassemblementModel, PointDeRassemblementDocument } from "./PlanDeTransport/pointDeRassemblement";
-export { PointDeRassemblementType } from "snu-lib";
 export { SchemaDeRepartitionModel, SchemaDeRepartitionDocument, SchemaDeRepartitionType } from "./PlanDeTransport/schemaDeRepartition";
 export { TableDeRepartitionModel, TableDeRepartitionDocument, TableDeRepartitionType } from "./PlanDeTransport/tableDeRepartition";
 

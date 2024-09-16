@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { CohesionCenterType } from "../../models";
+import { CohesionCenterType } from "snu-lib";
 
 function getNewCohesionCenterFixture(object: Partial<CohesionCenterType> = {}): Partial<CohesionCenterType> {
   const placesLeft = 15;
