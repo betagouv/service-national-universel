@@ -96,6 +96,7 @@ import {
   CLE_FILIERE,
   canValidateMultipleYoungsInClass,
   canValidateYoungInClass,
+  ClasseSchoolYear,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -1270,7 +1271,8 @@ async function populateReferent(ref) {
     if (!classes) throw new Error(ERRORS.NOT_FOUND);
     ref.classe = classes;
 
-    const etablissement = await EtablissementModel.findById(classes[0].etablissementId).lean();
+    const lastClasse = classes.find((classe) => classe.schoolYear === ClasseSchoolYear.YEAR_2024_2025) || classes[0];
+    const etablissement = await EtablissementModel.findById(lastClasse.etablissementId).lean();
     if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
     ref.etablissement = etablissement;
   }
@@ -1287,7 +1289,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     let referent = await ReferentModel.findById(checkedId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    referent = serializeReferent(referent, req.user);
+    referent = serializeReferent(referent);
 
     await populateReferent(referent);
 

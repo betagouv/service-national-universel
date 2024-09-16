@@ -12,7 +12,7 @@ const CreateClasseRouteSchema = {
   payload: Joi.object<ClassesRoutes["Create"]["payload"]>({
     // Classe
     name: Joi.string().required(),
-    cohort: Joi.string().allow("").allow(null).optional(),
+    cohortId: Joi.string().allow("").allow(null).optional(),
     estimatedSeats: Joi.number().min(1).required(),
     coloration: Joi.string()
       .valid(...CLE_COLORATION_LIST)
@@ -38,7 +38,7 @@ const UpdateClasseRouteSchema = {
     name: Joi.string().required(),
     estimatedSeats: Joi.number().required(),
     totalSeats: Joi.number().required(),
-    cohort: Joi.string().optional(),
+    cohortId: Joi.string().optional(),
     coloration: Joi.string()
       .valid(...CLE_COLORATION_LIST)
       .required(),
