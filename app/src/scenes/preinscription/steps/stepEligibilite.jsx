@@ -33,6 +33,7 @@ export default function StepEligibilite() {
     : [PREINSCRIPTION_STEPS, PreInscriptionContext, false, "preinscription", "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const [data, setData] = React.useContext(context);
   const [error, setError] = React.useState({});
+  const [errorDate, setErrorDate] = React.useState(false);
   const [fetchError, setFetchError] = React.useState("");
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -105,9 +106,9 @@ export default function StepEligibilite() {
   const handleSubmit = async () => {
     plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
 
-    const errors = { ...error, ...validateForm() };
+    const errors = validateForm();
 
-    if (Object.values(errors).length) {
+    if (Object.values(errors).length || errorDate) {
       setError(errors);
       setToggleVerify(!toggleVerify);
       return;
@@ -238,16 +239,9 @@ export default function StepEligibilite() {
               <DatePicker
                 initialValue={new Date(data.birthDate)}
                 onChange={(date) => setData({ ...data, birthDate: date })}
-                setError={(isError) => {
-                  if (isError) setError({ ...error, birthDate: "Date invalide" });
-                  else
-                    setError((error) => {
-                      delete error.birthDate;
-                      return error;
-                    });
-                }}
+                setError={(isError) => setErrorDate(isError)}
                 disabled={isBirthdayModificationDisabled}
-                state={error.birthDate ? "error" : "default"}
+                state={errorDate ? "error" : "default"}
                 errorText={"Date invalide"}
               />
             </label>
