@@ -15,7 +15,7 @@ const { getRedisClient } = require("../../redis");
 const config = require("config");
 const { logger } = require("../../logger");
 const { capture, captureMessage } = require("../../sentry");
-const { ReferentModel, YoungModel, ApplicationModel, MissionModel, SessionPhase1Model, LigneBusModel, ClasseModel } = require("../../models");
+const { ReferentModel, YoungModel, ApplicationModel, MissionModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel } = require("../../models");
 const AuthObject = require("../../auth");
 const YoungAuth = new AuthObject(YoungModel);
 const {
@@ -485,6 +485,9 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
     const previousYoung = { ...young.toObject() };
 
+    const cohortObj = await CohortModel.findOne({ name: cohort });
+    if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
     const oldCohort = young.cohort;
@@ -517,7 +520,14 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const session = sessions.find(({ name }) => name === cohort);
     if (!session && cohort !== "à venir") return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    young.set({ cohort, cohortChangeReason, cohortDetailedChangeReason, cohesionStayPresence: undefined, cohesionStayMedicalFileReceived: undefined });
+    young.set({
+      cohort,
+      cohortId: cohortObj._id,
+      cohortChangeReason,
+      cohortDetailedChangeReason,
+      cohesionStayPresence: undefined,
+      cohesionStayMedicalFileReceived: undefined,
+    });
 
     if (cohort !== "à venir") {
       const fillingRate = await getFillingRate(young.department, cohort);

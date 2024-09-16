@@ -102,7 +102,7 @@ const sameGeography = (actor, target) => {
   }
 };
 
-const referentInSameGeography = (actor, target) => isReferent(actor) && sameGeography(actor, target);
+const referentInSameGeography = (actor, target) => isReferentRegDep(actor) && sameGeography(actor, target);
 
 function canInviteUser(actorRole, targetRole) {
   // Admins can invite any user
@@ -471,20 +471,20 @@ function canSendPlanDeTransport(user) {
   return [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.TRANSPORTER].includes(user.role);
 }
 
-function isAdmin(user) {
+function isAdmin(user: UserDto) {
   return ROLES.ADMIN === user.role;
 }
 
-function isReferent(user) {
+function isReferentRegDep(user: UserDto) {
   return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 }
 
-function isSupervisor(user) {
+function isSupervisor(user: UserDto) {
   return ROLES.SUPERVISOR === user.role;
 }
 
-function isReferentOrAdmin(user) {
-  return isAdmin(user) || isReferent(user);
+function isReferentOrAdmin(user: UserDto) {
+  return isAdmin(user) || isReferentRegDep(user);
 }
 
 function isAdminCle(user) {
@@ -518,7 +518,7 @@ const canEditPresenceYoung = (actor) => {
 
 const canSigninAs = (actor, target, source) => {
   if (isAdmin(actor)) return true;
-  if (!isReferent(actor)) return false;
+  if (!isReferentRegDep(actor)) return false;
 
   if (source === "referent") {
     const allowedTargetRoles = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];

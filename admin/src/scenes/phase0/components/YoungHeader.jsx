@@ -57,7 +57,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   const history = useHistory();
   const [statusOptions, setStatusOptions] = useState([]);
   const [withdrawn, setWithdrawn] = useState({ reason: "", message: "" });
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (young) {
@@ -67,11 +66,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
-            if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
-              options = [YOUNG_STATUS.WITHDRAWN];
-            } else {
-              options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
-            }
+            options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
             break;
           case YOUNG_STATUS.WITHDRAWN:
             if (user.role === ROLES.ADMIN) {
@@ -86,7 +81,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       //referent can withdraw a young from every status except withdrawn
       if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && young.status !== "WITHDRAWN") options.push(YOUNG_STATUS.WITHDRAWN);
       options = [...new Set(options)];
-
       setStatusOptions(options.map((opt) => ({ value: opt, label: translateInscriptionStatus(opt) })));
     } else {
       setStatusOptions([]);
@@ -163,7 +157,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     } else {
       young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note: values?.note });
     }
-    young.status = status;
+    young.status = status; // FIXME: immutable
     const now = new Date();
     young.lastStatusAt = now.toISOString();
     if (status === "WITHDRAWN" && (values?.withdrawnReason || values?.withdrawnMessage)) {
@@ -386,7 +380,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       {confirmModal && (
         <ConfirmationModal
           isOpen={true}
-          loading={loading}
           icon={confirmModal.icon}
           title={confirmModal.title}
           message={confirmModal.message}

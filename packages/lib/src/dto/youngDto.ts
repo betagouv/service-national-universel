@@ -54,6 +54,7 @@ export interface YoungDto {
   gender?: string;
   birthdateAt?: Date;
   cohort?: string;
+  cohortId?: string;
   originalCohort?: string;
   cohortChangeReason?: string;
   cohortDetailedChangeReason?: string;
