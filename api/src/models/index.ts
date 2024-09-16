@@ -24,7 +24,6 @@ export { StructureModel, StructureDocument, StructureType } from "./structure";
 export { TagsModel, TagsDocument, TagsType } from "./tags";
 export { WaitingListModel, WaitingListDocument, WaitingListType } from "./waitingList";
 export { YoungModel, YoungDocument } from "./young";
-export { YoungType } from "snu-lib";
 
 export { ClasseModel, ClasseDocument } from "./cle/classe";
 export { EtablissementModel, EtablissementDocument } from "./cle/etablissement";
