@@ -1,13 +1,9 @@
 import { List } from "@snu/ds/dsfr";
-import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { getCohortPeriod } from "snu-lib";
 import React from "react";
 
 export default function MyClass({ classe }) {
-  const formatDate = (dateString) => {
-    return format(new Date(dateString), "dd MMMM yyyy", { locale: fr });
-  };
-
   let fields = [
     {
       label: "Nom",
@@ -26,7 +22,7 @@ export default function MyClass({ classe }) {
   if (classe?.cohortDetails?.dateStart && classe?.cohortDetails?.dateEnd) {
     fields.push({
       label: "Date de séjour",
-      value: `Du ${formatDate(classe?.cohortDetails?.dateStart)} au ${formatDate(classe?.cohortDetails?.dateEnd)}`,
+      value: getCohortPeriod(classe?.cohortDetails),
     });
   }
 
