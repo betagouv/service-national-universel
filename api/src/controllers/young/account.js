@@ -70,7 +70,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       department: Joi.string().trim().required(),
       region: Joi.string().trim().required(),
       cityCode: Joi.string().trim().default("").allow("", null),
-      status: Joi.string().valid("VALIDATED", "WAITING_LIST", "NOT_ELIGIBLE").allow(null),
+      status: Joi.string().valid("VALIDATED", "WAITING_LIST", "NOT_ELIGIBLE", "WAITING_VALIDATION").allow(null),
       cohort: Joi.string().allow(null),
     }).validate(req.body, { stripUnknown: true });
 
