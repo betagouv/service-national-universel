@@ -340,8 +340,6 @@ export default function Details({ user, setUser, currentUser }) {
     ? MODE_EDITION
     : MODE_DEFAULT;
 
-  console.log(data);
-
   return (
     <>
       <ConfirmationModal

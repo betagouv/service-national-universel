@@ -78,7 +78,6 @@ import {
 } from "./export/classeExportService";
 import ClasseStateManager from "./stateManager";
 import { isCohortInscriptionOpen } from "../../cohort/cohortService";
-import { is } from "date-fns/locale";
 
 const router = express.Router();
 router.post(
@@ -249,7 +248,12 @@ router.post(
       if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
       if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      const classeStatus = isCleClasseCohortEnabled ? (isInscriptionOpen ? STATUS_CLASSE.OPEN : STATUS_CLASSE.ASSIGNED) : STATUS_CLASSE.CREATED;
+      let classeStatus;
+      if (isCleClasseCohortEnabled) {
+        classeStatus = isInscriptionOpen ? STATUS_CLASSE.OPEN : STATUS_CLASSE.ASSIGNED;
+      } else {
+        classeStatus = STATUS_CLASSE.CREATED;
+      }
 
       const classe = await ClasseModel.create({
         ...payload,
