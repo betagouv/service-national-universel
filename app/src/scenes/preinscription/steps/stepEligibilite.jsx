@@ -32,9 +32,7 @@ export default function StepEligibilite() {
     ? [REINSCRIPTION_STEPS, ReinscriptionContext, true, "reinscription", "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
     : [PREINSCRIPTION_STEPS, PreInscriptionContext, false, "preinscription", "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const [data, setData] = React.useContext(context);
-  console.log("🚀 ~ StepEligibilite ~ data:", data);
   const [error, setError] = React.useState({});
-  console.log("🚀 ~ StepEligibilite ~ error:", error);
   const [errorDate, setErrorDate] = React.useState(false);
   const [fetchError, setFetchError] = React.useState("");
   const [toggleVerify, setToggleVerify] = React.useState(false);
