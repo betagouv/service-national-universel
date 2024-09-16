@@ -366,13 +366,10 @@ const translate = (value) => {
       return "Actif";
     case "inactive":
       return "Inactif";
-<<<<<<< fix-psc1-toussaint
     case "psc1Info":
       return "PSC1";
-=======
     case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED:
       return "L'objectif d'inscription du département a été atteint !";
->>>>>>> main
     default:
       return value;
   }
