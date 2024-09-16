@@ -314,11 +314,12 @@ describe("PUT /cle/classe/:id", () => {
   it("should return 404 when user try to change cohort that doesn't exist", async () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
+    const cohortId = new ObjectId().toString();
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: "New Cohort",
+        cohortId: cohortId,
       });
     expect(res.status).toBe(404);
   });
@@ -337,7 +338,7 @@ describe("PUT /cle/classe/:id", () => {
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
     expect(res.status).toBe(403);
     // @ts-ignore
@@ -355,7 +356,7 @@ describe("PUT /cle/classe/:id", () => {
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
 
     expect(res.status).toBe(403);
@@ -451,7 +452,7 @@ describe("PUT /cle/classe/:id", () => {
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
 
     expect(res.status).toBe(403);
@@ -476,14 +477,14 @@ describe("PUT /cle/classe/:id", () => {
     const cohort = await createCohortHelper(getNewCohortFixture({ name: "CLE juin 2024" }));
     const classe = createFixtureClasse({});
     const validId = (await createClasse(classe))._id;
-    const young = getNewYoungFixture({ classeId: validId, cohort: "CLE mai 2024" });
+    const young = getNewYoungFixture({ classeId: validId, cohortId: cohort._id });
     await createYoungHelper(young);
 
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
     expect(res.status).toBe(200);
     expect(res.body.data.name).toBe(classe.name);
@@ -777,9 +778,10 @@ describe("POST /cle/classe", () => {
   it("should return 404 if the cohort is not found", async () => {
     jest.spyOn(featureService, "isFeatureAvailable").mockResolvedValueOnce(true);
     const etablissement = await createEtablissement(createFixtureEtablissement());
+    const cohortId = new ObjectId().toString();
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/cle/classe")
-      .send({ ...validBody, cohort: "invalidCohort", etablissementId: etablissement._id.toString() });
+      .send({ ...validBody, cohortId: cohortId, etablissementId: etablissement._id.toString() });
 
     expect(response.status).toBe(404);
     expect(response.body.message).toBe("Cohort not found.");
@@ -790,7 +792,7 @@ describe("POST /cle/classe", () => {
     const cohort = await createCohortHelper(getNewCohortFixture());
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/cle/classe")
-      .send({ ...validBody, cohort: cohort.name, etablissementId: etablissement._id.toString() });
+      .send({ ...validBody, cohortId: cohort._id, etablissementId: etablissement._id.toString() });
 
     expect(response.status).toBe(400);
   });
@@ -801,7 +803,7 @@ describe("POST /cle/classe", () => {
     const cohort = await createCohortHelper(getNewCohortFixture());
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/cle/classe")
-      .send({ ...validBody, cohort: cohort.name, etablissementId: etablissement._id.toString() });
+      .send({ ...validBody, cohortId: cohort._id, etablissementId: etablissement._id.toString() });
 
     expect(response.status).toBe(200);
     const classe = await ClasseModel.findById(response.body.data._id).lean();

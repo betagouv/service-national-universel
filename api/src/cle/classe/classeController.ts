@@ -359,7 +359,7 @@ router.put(
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
         if (oldCohortId !== payload.cohortId && !classe.ligneId) {
-          const cohort = await CohortModel.findById({ name: payload.cohortId });
+          const cohort = await CohortModel.findById({ _id: payload.cohortId });
           const classeStatus = isCohortInscriptionOpen(cohort as CohortType) ? STATUS_CLASSE.OPEN : STATUS_CLASSE.ASSIGNED;
 
           const youngs = await YoungModel.find({ classeId: classe._id });
