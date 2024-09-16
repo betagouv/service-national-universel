@@ -16,6 +16,7 @@ import DidNotReceiveActivationCodeModal from "./components/DidNotReceiveActivati
 import ModifyEmailModal from "./components/ModifyEmailModal";
 import useAuth from "@/services/useAuth";
 import { SignupButtons } from "@snu/ds/dsfr";
+import { emailValidationNoticeModal, updateEmailModal } from "./components/Modals";
 
 //@todo:
 // - move from preinscription folder to be reused for "class engagee" also /preinscription/email-validation => /email-validation
@@ -28,10 +29,8 @@ export default function StepEmailValidation() {
   const { young, isCLE } = useAuth();
   const [error, setError] = useState("");
   const [emailValidationToken, setEmailValidationToken] = useState(token || "");
-  const [isDidNotReceiveCodeModalOpen, setDidNotReceiveCodeModalOpen] = useState(false);
-  const [isModifyEmailModalOpen, setModifyEmailOpen] = useState(false);
 
-  if (young && young.emailVerified === "true") return <Redirect to="/inscription2023" />;
+  if (young && young.emailVerified === "true") return <Redirect to="/inscription" />;
 
   async function handleClick() {
     try {
@@ -57,29 +56,10 @@ export default function StepEmailValidation() {
     try {
       const { code, ok } = await api.get("/young/email-validation/token");
       if (!ok) {
-        setError(`Une erreur s'est produite : ${translate(code)}`);
-      } else {
-        toastr.success("Un nouveau code d'activation vous a été envoyé par e-mail", "", { timeOut: 6000 });
-        setModifyEmailOpen(false);
-        setDidNotReceiveCodeModalOpen(false);
-        setEmailValidationToken("");
-      }
-    } catch (e) {
-      capture(e);
-      toastr.error(`Une erreur s'est produite : ${translate(e.code)}`, "");
-    }
-  }
-
-  async function handleRequestEmailChange(email) {
-    try {
-      const { code, ok, user } = await api.post("/young/signup/email", { email });
-      if (!ok) {
         toastr.error(`Une erreur s'est produite : ${translate(code)}`, "");
-      } else {
-        dispatch(setYoung(user));
-        setModifyEmailOpen(false);
-        toastr.success("Votre adresse mail a bien été mise à jour et un code d'activation vous a été envoyé à cette adresse", "", { timeOut: 6000 });
+        return;
       }
+      toastr.success("Un nouveau code d'activation vous a été envoyé par e-mail", "", { timeOut: 6000 });
     } catch (e) {
       capture(e);
       toastr.error(`Une erreur s'est produite : ${translate(e.code)}`, "");
@@ -88,22 +68,14 @@ export default function StepEmailValidation() {
 
   return (
     <DSFRContainer>
-      <DidNotReceiveActivationCodeModal
-        onRequestNewToken={handleRequestNewToken}
-        isOpen={isDidNotReceiveCodeModalOpen}
-        onClose={() => setDidNotReceiveCodeModalOpen(false)}
-        onRequestEmailModification={() => {
-          setDidNotReceiveCodeModalOpen(false);
-          setModifyEmailOpen(true);
-        }}
-      />
-      <ModifyEmailModal isOpen={isModifyEmailModalOpen} onClose={() => setModifyEmailOpen(false)} onEmailChange={handleRequestEmailChange} />
+      <DidNotReceiveActivationCodeModal onRequestNewToken={handleRequestNewToken} />
+      <ModifyEmailModal />
       <h1 className="text-2xl font-semibold text-[#161616]">Entrer le code d'activation</h1>
       <p className="mt-4 text-[#3A3A3A]">
         Pour valider la création de votre compte, vous devez entrer le code d’activation reçu sur la boîte mail <strong>{young?.email}</strong>
         <InlineButton
           onClick={() => {
-            setModifyEmailOpen(true);
+            updateEmailModal.open();
           }}
           className="ml-1"
         />
@@ -123,7 +95,7 @@ export default function StepEmailValidation() {
       <InlineButton
         className="mt-3"
         onClick={() => {
-          setDidNotReceiveCodeModalOpen(true);
+          emailValidationNoticeModal.open();
         }}>
         Je n'ai rien reçu
       </InlineButton>

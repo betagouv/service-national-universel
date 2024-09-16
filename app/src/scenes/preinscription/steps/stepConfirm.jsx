@@ -17,6 +17,7 @@ import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
 import { SignupButtons } from "@snu/ds/dsfr";
+import { cohortsInit } from "@/utils/cohorts";
 
 export default function StepConfirm() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -70,7 +71,7 @@ export default function StepConfirm() {
       } else {
         plausibleEvent("Phase0/CTA reinscription - inscription");
         dispatch(setYoung(data));
-        history.push("/inscription2023");
+        history.push("/inscription");
       }
     } catch (e) {
       setLoading(false);
@@ -114,6 +115,7 @@ export default function StepConfirm() {
         if (user) {
           plausibleEvent("Phase0/CTA preinscription - inscription");
           if (token) api.setToken(token);
+          await cohortsInit();
           dispatch(setYoung(user));
           removePersistedData();
           history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
@@ -134,7 +136,6 @@ export default function StepConfirm() {
 
   return (
     <>
-      <ProgressBar isReinscription={isLoggedIn} />
       <DSFRContainer title="Ces informations sont-elles correctes ?" supportEvent="Phase0/aide preinscription - recap" supportLink={`${supportURL}/base-de-connaissance/${bdcURI}`}>
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="my-6 flex items-center justify-between">

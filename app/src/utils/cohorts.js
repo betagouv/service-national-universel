@@ -1,15 +1,17 @@
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
-import API from "@/services/api";
+import api from "@/services/api";
 import { capture } from "../sentry";
 import dayjs from "dayjs";
+import { apiURL } from "@/config";
+
 let cohorts = null;
 let cohortsCachedAt = null;
 
 export async function cohortsInit() {
   if (isCohortsInitialized()) return;
   try {
-    const result = await API.get("/cohort");
+    const result = await api.get("/cohort");
     if (result?.status === 401) {
       return;
     }
@@ -94,3 +96,11 @@ export const canYoungResumePhase1 = (y) => {
     ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.NOT_DONE].includes(y.statusPhase1)
   );
 };
+
+export async function fetchCohort(cohortId) {
+  const res = await fetch(`${apiURL}/cohort/${cohortId}/public`);
+  if (!res.ok) {
+    throw new Error("Unable to fetch cohort");
+  }
+  return res.json();
+}

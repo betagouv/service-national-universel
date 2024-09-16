@@ -1,9 +1,10 @@
-const { YOUNG_STATUS, region2zone, getRegionForEligibility, regionsListDROMS, COHORT_TYPE } = require("snu-lib");
+const { YOUNG_STATUS, getRegionForEligibility, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility } = require("snu-lib");
 const { YoungModel, CohortModel, InscriptionGoalModel } = require("../models");
 
-async function getFilteredSessions(young, timeZoneOffset = null) {
+async function getFilteredSessions(young, timeZoneOffset = "") {
   const cohorts = await CohortModel.find({});
   const region = getRegionForEligibility(young);
+  const department = getDepartmentForEligibility(young);
 
   const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart)?.getFullYear() : undefined;
 
@@ -11,7 +12,7 @@ async function getFilteredSessions(young, timeZoneOffset = null) {
     (session) =>
       // if the young has already a cohort, he can only apply for the cohorts of the same year
       (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
-      session.eligibility?.zones.includes(region2zone[region]) &&
+      session.eligibility?.zones.includes(department) &&
       session.eligibility?.schoolLevels.includes(young.grade) &&
       session.eligibility?.bornAfter <= young.birthdateAt &&
       session.eligibility?.bornBefore.setTime(session.eligibility?.bornBefore.getTime() + 11 * 60 * 60 * 1000) >= young.birthdateAt &&

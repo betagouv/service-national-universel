@@ -170,9 +170,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       await updateStatusPhase2(young, req.user);
     }
 
-    if (young.statusPhase2 !== "VALIDATED" && !["VALIDATED"].includes(value.status)) {
-      young.set({ status_equivalence: value.status });
-    }
+    young.set({ status_equivalence: value.status });
 
     await young.save({ fromUser: req.user });
 

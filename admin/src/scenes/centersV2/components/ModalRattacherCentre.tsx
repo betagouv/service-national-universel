@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
-import { translate, isSessionEditionOpen, validateEmailAcademique } from "snu-lib";
+import { translate, isSessionEditionOpen, validateEmailAcademique, COHORT_TYPE } from "snu-lib";
 import { InputText, Label, Select } from "@snu/ds/admin";
 import Sejour from "@/scenes/dashboardV2/components/ui/icons/Sejour";
 import { Center, User } from "@/types";
@@ -33,6 +33,8 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
   const [errors, setErrors] = React.useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = React.useState(false);
   const disabled = !selectedCohort || !selectedCentre || !placesTotal || isLoading;
+
+  const selectedCohortData = cohorts.find((c) => c.name === selectedCohort);
 
   const fetchCenters = async (q: string) => {
     const { responses } = await api.post("/elasticsearch/cohesioncenter/not-in-cohort/" + selectedCohort, { filters: { searchbar: [q] } });
@@ -134,15 +136,19 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
             <InputText name="placesTotal" label="Nombre de places ouvertes" onChange={(e) => setPlacesTotal(e.target.value)} value={placesTotal} className="mt-3" />
           </>
         )}
-        <>
-          <Label
-            title="Réception des fiches sanitaires (facultatif)"
-            tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
-            name="email"
-            className="my-3"
-          />
-          <InputText name="email" label="Adresse email académique" onChange={(e) => setEmail(e.target.value)} value={email} error={errors.email} />
-        </>
+
+        {selectedCohortData?.type === COHORT_TYPE.VOLONTAIRE && (
+          <>
+            <Label
+              title="Réception des fiches sanitaires (facultatif)"
+              tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
+              name="email"
+              className="my-3"
+            />
+            <InputText name="email" label="Adresse email académique" onChange={(e) => setEmail(e.target.value)} value={email} error={errors.email} />
+          </>
+        )}
+
         <div className="mt-10 flex items-center gap-4">
           <button type="button" onClick={onCancel} className="w-1/2 rounded-lg border-[1px] border-gray-300 py-2">
             Annuler

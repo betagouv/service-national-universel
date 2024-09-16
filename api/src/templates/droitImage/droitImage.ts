@@ -1,34 +1,10 @@
-const path = require("path");
-const PDFDocument = require("pdfkit");
-const config = require("config");
-const { logger } = require("../../logger");
-const datefns = require("date-fns");
-const { withPipeStream } = require("../utils");
+import { withPipeStream } from "../utils";
+import { FONT, FONT_BOLD, FONT_ITALIC, LIST_INDENT, checkBox, initDocument, getLogo } from "../templateService";
+import { format } from "date-fns";
+import { logger } from "../../logger";
 
-const FONT = "Marianne";
-const FONT_BOLD = `${FONT}-Bold`;
-const FONT_ITALIC = `${FONT}_Italic`;
-
-const FILL_COLOR = "#444";
-const LIST_INDENT = 15;
+const FILL_COLOR = "#000000";
 const MARGIN = 75;
-
-const CHECKBOX_SIZE = 15;
-
-function checkBox(doc, x, y, checked = false) {
-  doc.lineWidth(1).fillColor("fff").roundedRect(x, y, CHECKBOX_SIZE, CHECKBOX_SIZE, 2).stroke().fillColor(FILL_COLOR);
-  if (checked) {
-    const center = CHECKBOX_SIZE / 2;
-    const gap = CHECKBOX_SIZE / 4;
-    doc
-      .lineWidth(1.5)
-      .lineCap("round")
-      .moveTo(x + gap, y + center)
-      .lineTo(x + center, y + CHECKBOX_SIZE - gap)
-      .lineTo(x + CHECKBOX_SIZE - gap, y + gap)
-      .stroke();
-  }
-}
 
 function render(doc, young) {
   let _y;
@@ -37,8 +13,7 @@ function render(doc, young) {
 
   doc.font(FONT);
 
-  doc.image(path.join(config.IMAGES_ROOTDIR, "republique-francaise.png"), 0, 0);
-  doc.image(path.join(config.IMAGES_ROOTDIR, "logo-snu.png"), 100, 15, { width: 40, height: 40 });
+  getLogo(doc);
 
   doc.fontSize(11).fillColor("#385EA9").text("AUTORISATION DE PRISE DE VUES D’UN MINEUR ET D’UTILISATION D'IMAGES", {
     paragraphGap: 10,
@@ -74,8 +49,8 @@ function render(doc, young) {
   }
 
   _y = doc.y;
-  checkBox(doc, 150, _y + 1, allow);
-  checkBox(doc, 350, _y + 1, !allow);
+  checkBox(doc, 150, _y + 1, FILL_COLOR, allow);
+  checkBox(doc, 350, _y + 1, FILL_COLOR, !allow);
 
   doc.text(hasParent2 ? " autorisons " : " autorise ", 150 + 20, _y);
   doc.text(hasParent2 ? " n'autorisons pas " : " n'autorise pas ", 350 + 20, _y);
@@ -140,10 +115,10 @@ function render(doc, young) {
   _y = doc.y;
   doc.font(FONT);
   if (young.parent1ValidationDate) {
-    doc.text(`Validé le : ${datefns.format(young.parent1ValidationDate, "dd/MM/yyyy à HH:mm")}`, MARGIN, _y);
+    doc.text(`Validé le : ${format(young.parent1ValidationDate, "dd/MM/yyyy à HH:mm")}`, MARGIN, _y);
   }
   if (young.parent2ValidationDate) {
-    doc.text(`Validé le : ${datefns.format(young.parent2ValidationDate, "dd/MM/yyyy à HH:mm")}`, 300, _y);
+    doc.text(`Validé le : ${format(young.parent2ValidationDate, "dd/MM/yyyy à HH:mm")}`, 300, _y);
   }
 
   doc.moveDown(4);
@@ -157,29 +132,9 @@ function render(doc, young) {
     );
 }
 
-function initDocument(options = {}) {
-  const doc = new PDFDocument({
-    layout: "portrait",
-    size: "A4",
-    margins: {
-      top: MARGIN,
-      bottom: 30,
-      left: MARGIN,
-      right: MARGIN,
-    },
-    ...options,
-  });
-
-  doc.registerFont(FONT, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
-  doc.registerFont(FONT_ITALIC, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
-
-  return doc;
-}
-
 function generateDroitImage(outStream, young) {
   const timer = logger.startTimer();
-  const doc = initDocument();
+  const doc = initDocument(MARGIN, 30, MARGIN, MARGIN, {});
   withPipeStream(doc, outStream, () => {
     render(doc, young);
   });
@@ -188,7 +143,7 @@ function generateDroitImage(outStream, young) {
 
 function generateBatchDroitImage(outStream, youngs) {
   const timer = logger.startTimer();
-  const doc = initDocument({ autoFirstPage: false });
+  const doc = initDocument(MARGIN, 30, MARGIN, MARGIN, { autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
     for (const young of youngs) {
       doc.addPage();
