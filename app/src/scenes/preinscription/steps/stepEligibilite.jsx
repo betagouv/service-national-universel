@@ -120,11 +120,12 @@ export default function StepEligibilite() {
       return;
     }
 
-    const birthdate = new Date(data.year, data.month - 1, data.day);
-    setData({ ...data, birthDate: dayjs(birthdate).format("YYYY-MM-DD") });
+    if (!isLoggedIn) {
+      data.birthDate = new Date(data.year, data.month - 1, data.day);
+    }
 
     // Check if young is more than 17 years old
-    const age = dayjs().diff(dayjs(birthdate), "year");
+    const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
       if (!isLoggedIn) {
         // Preinscription
@@ -160,7 +161,7 @@ export default function StepEligibilite() {
         schoolDepartment: data.school?.departmentName || data.school?.department,
         department: data.department,
         schoolRegion: data.school?.region,
-        birthdateAt: isLoggedIn ? dayjs(data.birthDate).format("YYYY-MM-DD") : dayjs(birthdate).locale("fr").format("YYYY-MM-DD"),
+        birthdateAt: data.birthDate,
         grade: data.scolarity,
         zip: data.zip,
         isReInscription: !!data.isReInscription,
