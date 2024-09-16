@@ -45,7 +45,6 @@ export default function CreateContactForm({ data, onSuccess }) {
       setBirthdateError("Vous devez être âgé de moins de 18 ans");
     }
 
-    console.log("🚀 ~ handleSubmit ~ isError:", isError);
     if (isError) return;
 
     setLoading(true);
