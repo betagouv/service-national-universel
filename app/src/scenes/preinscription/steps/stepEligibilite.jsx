@@ -257,8 +257,8 @@ export default function StepEligibilite() {
                   value={isLoggedIn ? dayjs(data.birthDate).format("DD") : data.day}
                   onKeyDown={blockInvalidChar}
                   onChange={(e) => setData({ ...data, day: e })}
-                  placeholder="Exemple : 14"
-                  hintText="Jour"
+                  placeholder="Jour"
+                  hintText="Exemple : 14"
                   maxLength="2"
                   disabled={isBirthdayModificationDisabled}
                   state={error.day ? "error" : "default"}
@@ -272,8 +272,8 @@ export default function StepEligibilite() {
                   value={isLoggedIn ? dayjs(data.birthDate).format("MM") : data.month}
                   onKeyDown={blockInvalidChar}
                   onChange={(e) => setData({ ...data, month: e })}
-                  placeholder="Exemple : 12"
-                  hintText="Mois"
+                  placeholder="Mois"
+                  hintText="Exemple : 12"
                   maxLength="2"
                   disabled={isBirthdayModificationDisabled}
                   state={error.month ? "error" : "default"}
@@ -287,8 +287,8 @@ export default function StepEligibilite() {
                   value={isLoggedIn ? dayjs(data.birthDate).format("YYYY") : data.year}
                   onKeyDown={blockInvalidChar}
                   onChange={(e) => setData({ ...data, year: e })}
-                  placeholder="Exemple : 2004"
-                  hintText="Année"
+                  placeholder="Année"
+                  hintText="Exemple : 2004"
                   maxLength="4"
                   disabled={isBirthdayModificationDisabled}
                   state={error.year ? "error" : "default"}
