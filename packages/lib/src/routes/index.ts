@@ -9,5 +9,5 @@ export interface BasicRoute {
 
 export type RouteResponseBody<T> = { ok: boolean; data?: T; code?: string; message?: string };
 
-export { CohortsRoutes } from "./cohort";
-export { ClassesRoutes } from "./cle/classe";
+export type { CohortsRoutes } from "./cohort";
+export type { ClassesRoutes } from "./cle/classe";

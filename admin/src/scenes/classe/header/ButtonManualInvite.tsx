@@ -8,7 +8,7 @@ export default function ButtonManualInvite({ id }) {
   const history = useHistory();
 
   const onInscription = () => {
-    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
+    plausibleEvent("Inscriptions/CTA - Nouvelle inscription CLE Manuelle");
 
     history.push(`/volontaire/create?classeId=${id}`);
   };
