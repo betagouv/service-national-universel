@@ -48,7 +48,7 @@ export default function Done() {
             </div>
           </>
         )}
-        <div className="bg-white fixed md:absolute flex md:flex-col w-full md:w-fit z-10 bottom-20 left-0 md:left-80 shadow-ninaInverted md:shadow-none justify-center pt-3 md:py-0 md:items-end gap-2">
+        <div className="bg-white fixed md:absolute flex md:flex-col w-full md:w-fit z-10 bottom-18 left-0 md:left-80 shadow-ninaInverted md:shadow-none justify-center pt-3 md:py-0 md:items-end gap-2">
           <p className="font-caveat text-xl text-gray-400 font-semibold">Participez au séjour de cohésion</p>
           <img src={GrayArrow} alt="Flèche" className="md:w-10 rotate-90 md:rotate-0 -scale-y-100 md:scale-100" />
         </div>
