@@ -12,8 +12,8 @@ const formatWeekdayName = (day) => {
 };
 
 type DatePickerProps = {
-  value?: { from?: Date; to?: Date } | Date;
-  onChange: (date: Date | { from?: Date; to?: Date }) => void;
+  value?: { from?: Date | string | null; to?: Date | string | null } | Date | string;
+  onChange: (date: Date | string | { from?: Date | string | null; to?: Date | string | null }) => void;
   disabled?: boolean;
   fromYear?: number;
   toYear?: number;

@@ -11,7 +11,7 @@ function classNames(...classes) {
 
 interface DatePickerWrapperProps {
   label: string;
-  value: Date;
+  value: Date | null;
   onChange: (date: Date) => void;
   disabled?: boolean;
   error?: string;
