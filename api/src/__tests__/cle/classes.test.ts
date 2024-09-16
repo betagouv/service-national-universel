@@ -1,11 +1,11 @@
+// @ts-ignore
 import request from "supertest";
 import passport from "passport";
-import mongoose, { Types } from "mongoose";
-const { ObjectId } = Types;
+import mongoose from "mongoose";
+// @ts-ignore
 import emailsEmitter from "../../emails";
-import snuLib, { ROLES, ERRORS } from "snu-lib";
-import { dbConnect, dbClose } from "../helpers/db";
-import { mockEsClient } from "../helpers/es";
+import { ERRORS, ROLES } from "snu-lib";
+import { dbClose, dbConnect } from "../helpers/db";
 import getAppHelper from "../helpers/app";
 import { createClasse } from "../helpers/classe";
 import { createFixtureClasse } from "../fixtures/classe";
@@ -47,12 +47,12 @@ describe("PUT /classes/update-referents", () => {
     const classe = await createClasse(createFixtureClasse());
     const res = await request(getAppHelper())
       .put(`/cle/classes/update-referents`)
-      .send([{ idClasse: classe._id.toString(), ...newReferent }]);
+      .send([{ classeId: classe._id.toString(), ...newReferent }]);
 
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(res.body.data).toHaveLength(1);
-    expect(res.body.data[0].idClasse).toBe(classe._id.toString());
+    expect(res.body.data[0].classeId).toBe(classe._id.toString());
     expect(res.body.data[0].updatedReferentClasse).toEqual(newReferent);
     expect(res.body.data[0].previousReferent).toBeUndefined();
   });
@@ -68,11 +68,11 @@ describe("PUT /classes/update-referents", () => {
     };
     const res = await request(getAppHelper())
       .put(`/cle/classes/update-referents`)
-      .send([{ idClasse: classe._id.toString(), ...newReferent }]);
+      .send([{ classeId: classe._id.toString(), ...newReferent }]);
 
     const expectedReport = [
       {
-        idClasse: classe._id.toString(),
+        classeId: classe._id.toString(),
         updatedReferentClasse: newReferent,
         previousReferent: {
           firstName: previousReferent.firstName,
@@ -106,13 +106,13 @@ describe("PUT /classes/update-referents", () => {
     const res = await request(getAppHelper())
       .put(`/cle/classes/update-referents`)
       .send([
-        { idClasse: classe._id.toString(), ...newReferent },
-        { idClasse: unknownId, ...newReferent },
+        { classeId: classe._id.toString(), ...newReferent },
+        { classeId: unknownId, ...newReferent },
       ]);
 
     const expectedReport = [
       {
-        idClasse: classe._id.toString(),
+        classeId: classe._id.toString(),
         updatedReferentClasse: newReferent,
         previousReferent: {
           firstName: previousReferent.firstName,
@@ -121,7 +121,7 @@ describe("PUT /classes/update-referents", () => {
         },
       },
       {
-        idClasse: unknownId,
+        classeId: unknownId,
         error: ERRORS.CLASSE_NOT_FOUND,
       },
     ];
@@ -135,5 +135,50 @@ describe("PUT /classes/update-referents", () => {
     expect(updatedReferent?.firstName).toBe(newReferent.firstName);
     expect(updatedReferent?.lastName).toBe(newReferent.lastName);
     expect(updatedReferent?.email).toBe(newReferent.email);
+  });
+});
+
+describe("PUT /update-referents-by-csv", () => {
+  it("should return 400 when no file is provided", async () => {
+    const res = await request(getAppHelper()).put("/cle/classes/update-referents-by-csv");
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe(ERRORS.INVALID_BODY);
+  });
+
+  it("should return 403 when user is not a super admin", async () => {
+    passport.user.role = ROLES.RESPONSIBLE;
+    const res = await request(getAppHelper()).put("/cle/classes/update-referents-by-csv");
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe(ERRORS.OPERATION_UNAUTHORIZED);
+  });
+
+  it("should return 400 when the CSV file is invalid", async () => {
+    passport.user.role = ROLES.ADMIN;
+    passport.user.subRole = "god";
+    const res = await request(getAppHelper()).put("/cle/classes/update-referents-by-csv").attach("file", Buffer.from("invalid csv data"), "invalid.csv");
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe(ERRORS.INVALID_BODY);
+  });
+
+  it("should return 200 and update referents when the CSV file is valid", async () => {
+    passport.user.role = ROLES.ADMIN;
+    passport.user.subRole = "god";
+    const classe = await createClasse(createFixtureClasse());
+    const newReferent = { firstName: "New", lastName: "Referent", email: "new.referent@example.com" };
+    const csvData = `classeId,firstName,lastName,email\n${classe._id.toString()},${newReferent.firstName},${newReferent.lastName},${newReferent.email}`;
+    const res = await request(getAppHelper()).put("/cle/classes/update-referents-by-csv").attach("file", Buffer.from(csvData), "valid.csv");
+
+    const expectedReport = {
+      classeId: classe._id.toString(),
+      updatedReferentClasse: newReferent,
+    };
+
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].classeId).toBe(classe._id.toString());
+    expect(res.body.data[0].updatedReferentClasse).toEqual(newReferent);
+
+    expect(res.body.data[0]).toEqual(expectedReport);
   });
 });
