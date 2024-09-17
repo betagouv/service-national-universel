@@ -13,9 +13,10 @@ import {
   ClasseCertificateKeys,
   ERRORS,
   FUNCTIONAL_ERRORS,
+  EtablissementType,
 } from "snu-lib";
 
-import { ClasseModel, CohortModel, YoungModel, EtablissementDocument, EtablissementType } from "../../models";
+import { ClasseModel, CohortModel, YoungModel, EtablissementDocument } from "../../models";
 
 import {
   buildUniqueClasseId,
