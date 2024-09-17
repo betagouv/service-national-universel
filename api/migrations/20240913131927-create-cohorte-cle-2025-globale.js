@@ -1,8 +1,8 @@
-const { STATUS_CLASSE } = require("snu-lib");
+const { STATUS_CLASSE, COHORT_TYPE } = require("snu-lib");
 const { CohortModel, ClasseModel } = require("../src/models");
 const { logger } = require("../src/logger");
 
-const cohortName = "CLE 2025";
+const cohortName = "2025 CLE Globale";
 
 module.exports = {
   async up() {
@@ -13,6 +13,7 @@ module.exports = {
         name: cohortName,
         dateStart: new Date("2024-01-01"),
         dateEnd: new Date("2024-12-31"),
+        type: COHORT_TYPE.CLE,
         eligibility: {
           zones: ["A", "B", "C"],
           schoolLevels: ["4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "1ereCAP", "2ndeCAP", "Autre", "NOT_SCOLARISE"],
@@ -29,7 +30,10 @@ module.exports = {
       const cohortCle2025Saved = await cohort.save();
       logger.info(`Cohorte ${cohortName} is created with success (id: ${cohortCle2025Saved._id})`);
 
-      const updateResult = await ClasseModel.updateMany({ _id: { $in: classesVerifiedAndNoCohort.map((classe) => classe._id) } }, { $set: { cohortId: cohortCle2025Saved._id } });
+      const updateResult = await ClasseModel.updateMany(
+        { _id: { $in: classesVerifiedAndNoCohort.map((classe) => classe._id) } },
+        { $set: { cohortId: cohortCle2025Saved._id, cohort: cohortCle2025Saved.name } },
+      );
       logger.info(`${updateResult.modifiedCount} classes added to cohort ${cohortName}`);
     } catch (error) {
       logger.error(`Error while migration up: ${error.message}`);
@@ -46,7 +50,7 @@ module.exports = {
         return;
       }
 
-      const updateResult = await ClasseModel.updateMany({ cohortId: cohortCle2025ToDelete._id }, { $set: { cohortId: null } });
+      const updateResult = await ClasseModel.updateMany({ cohortId: cohortCle2025ToDelete._id }, { $set: { cohortId: null, cohort: null } });
       logger.info(`${updateResult.modifiedCount} Classes removed from cohort ${cohortName}`);
       await CohortModel.deleteOne({ name: cohortName });
       logger.info(`Cohorte ${cohortName} is deleted with success`);

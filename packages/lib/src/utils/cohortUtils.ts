@@ -2,7 +2,7 @@
  * List of cohorts for which the date should not be displayed.
  * Any cohort name that appears in this array will be excluded from date display.
  */
-const excludedCohortsForDateDisplay: string[] = ["à venir", "CLE 2025"];
+const excludedCohortsForDateDisplay: string[] = ["à venir", "2025 CLE Globale"];
 
 /**
  * Determines whether the date should be displayed based on the cohort name.
