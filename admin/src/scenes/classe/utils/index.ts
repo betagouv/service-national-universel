@@ -19,14 +19,10 @@ import {
   ClasseType,
   isAdmin,
   translateStatusClasse,
-  EtablissementType,
-  CohesionCenterType,
 } from "snu-lib";
 import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { User } from "@/types";
-import { Etablissement } from "@/scenes/etablissement/Create/type";
-import { ReferentDto } from "../../../../../packages/lib/.rollup.cache/Users/charlelie/projects/service-national-universel/packages/lib/dist/dto/referentDto";
 
 export const statusClassForBadge = (status) => {
   let statusClasse;
