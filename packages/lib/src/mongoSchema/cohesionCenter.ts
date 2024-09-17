@@ -85,7 +85,7 @@ export const CohesionCenterSchema = {
 
   typology: {
     type: String,
-    enum: ["PUBLIC_ETAT", "PUBLIC_COLLECTIVITE", "PRIVE_ASSOCIATION", "PRIVE_AUTRE"],
+    enum: ["PUBLIC_ETAT", "PUBLIC_COLLECTIVITE", "PRIVE_ASSOCIATION", "PRIVE_AUTRE", "AUTRE"],
     documentation: {
       description: "Typologie du centre",
     },
@@ -170,6 +170,13 @@ export const CohesionCenterSchema = {
     enum: ["VALIDATED", "DRAFT", "WAITING_VALIDATION"],
     documentation: {
       description: "Status de la globalité des cohortes d'un centre",
+    },
+  },
+
+  matricule: {
+    type: String,
+    documentation: {
+      description: "Matricule du centre sur le SI-SNU",
     },
   },
 
