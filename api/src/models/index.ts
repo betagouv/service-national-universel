@@ -3,7 +3,7 @@ export { ApplicationModel, ApplicationDocument, ApplicationType } from "./applic
 export { AreasModel, AreasDocument, AreasType } from "./areas";
 export { BusModel } from "./bus";
 export { CohesionCenterModel, CohesionCenterDocument } from "./cohesionCenter";
-export { CohortModel, CohortDocument, CohortType } from "./cohort";
+export { CohortModel, CohortDocument } from "./cohort";
 export { ContractModel, ContractDocument, ContractType } from "./contract";
 export { DepartmentServiceModel, DepartmentServiceDocument, DepartmentServiceType } from "./departmentService";
 export { EmailModel, EmailDocument, EmailType } from "./email";

@@ -19,6 +19,7 @@ import {
   ClasseSchoolYear,
   ClassesRoutes,
   CohortDto,
+  CohortType,
   FeatureFlagName,
   isAdmin,
   LIMIT_DATE_ESTIMATED_SEATS,
@@ -33,7 +34,7 @@ import {
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
-import { ERRORS, isReferent, validateBirthDate } from "../../utils";
+import { ERRORS, isReferent } from "../../utils";
 import { validateId } from "../../utils/validator";
 import emailsEmitter from "../../emails";
 import { RouteRequest, RouteResponse, UserRequest } from "../../controllers/request";
@@ -42,7 +43,6 @@ import {
   ClasseModel,
   CohesionCenterDocument,
   CohortModel,
-  CohortType,
   EtablissementDocument,
   EtablissementModel,
   LigneBusDocument,
@@ -93,7 +93,7 @@ router.post(
         .valid(...certificateValues)
         .required()
         .validate(req.params.key, { stripUnknown: true });
-      
+
       if (exportDateKeyError) {
         capture(exportDateKeyError);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
