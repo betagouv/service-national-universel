@@ -389,6 +389,7 @@ router.put(
             cohesionCenterId: undefined,
             pointDeRassemblementId: undefined,
             cohortId: cohort?._id,
+            cohort: cohort?.name,
             status: classeStatus,
           });
           emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);

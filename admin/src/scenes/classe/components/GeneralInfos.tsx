@@ -121,8 +121,18 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
                 closeMenuOnSelect={true}
                 value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
                 onChange={(options) => {
-                  const cohortId = cohorts?.find((c) => c.name === options.value)?._id;
-                  setClasse({ ...classe, cohortId });
+                  const cohort = cohorts?.find((c) => c.name === options.value);
+                  if (!cohort) return;
+                  setClasse({
+                    ...classe,
+                    cohortId: cohort._id,
+                    cohort: cohort.name,
+                    cohortDetails: {
+                      _id: cohort._id ?? "",
+                      dateStart: cohort.dateStart,
+                      dateEnd: cohort.dateEnd,
+                    },
+                  });
                 }}
                 error={errors.cohort}
               />
@@ -130,10 +140,10 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
                 <p className="text-left text-sm  text-gray-800">Dates</p>
                 <div className="flex items-center">
                   <p className="text-left text-xs text-gray-500 flex-1">
-                    Début : <strong>{formatDateFRTimezoneUTC(cohorts?.find((c) => c.name === classe?.cohort)?.dateStart)}</strong>
+                    Début : <strong>{formatDateFRTimezoneUTC(classe.cohortDetails?.dateStart)}</strong>
                   </p>
                   <p className="text-left text-xs text-gray-500 flex-1">
-                    Fin : <strong>{formatDateFRTimezoneUTC(cohorts?.find((c) => c.name === classe?.cohort)?.dateEnd)}</strong>
+                    Fin : <strong>{formatDateFRTimezoneUTC(classe.cohortDetails?.dateEnd)}</strong>
                   </p>
                 </div>
               </div>
