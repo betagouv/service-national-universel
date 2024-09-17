@@ -12,6 +12,7 @@ import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import { SignupButtons } from "@snu/ds/dsfr";
 import Verify from "./VerifyDocument";
+import Input from "@/components/dsfr/forms/input";
 
 export default function StepUploadMobile({
   recto,
@@ -170,46 +171,113 @@ function Verso({ corrections, category, setVerso, setStep, setHasChanged, setErr
   );
 }
 
-function ExpirationDate({ corrections, category, young, date, setDate, setHasChanged }) {
-  const [error, setError] = useState(false);
-  const handleChange = (date) => {
-    setDate(date);
-    setHasChanged(true);
+function ExpirationDate({ date, setDate, onChange, corrections, category }) {
+  const young = useSelector((state) => state.Auth.young);
+  const [error, setError] = useState({});
 
-    if (!date) return setError("Veuillez renseigner une date d'expiration.");
-    if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) return setError("Veuillez renseigner une date d'expiration valide. Elle doit être comprise entre 1990 et 2070.");
-    setError(false);
+  const [day, setDay] = useState(date ? dayjs(date).format("DD") : "");
+  const [month, setMonth] = useState(date ? dayjs(date).format("MM") : "");
+  const [year, setYear] = useState(date ? dayjs(date).format("YYYY") : "");
+
+  const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
+
+  const handleDateChange = () => {
+    if (day && month && year) {
+      const fullDate = new Date(year, month - 1, day);
+      if (dayjs(fullDate).isValid() && dayjs(fullDate).year() >= 1990 && dayjs(fullDate).year() <= 2070) {
+        setError({});
+        setDate(fullDate);
+        onChange && onChange(fullDate);
+      } else {
+        setError({ date: "Veuillez renseigner une date valide entre 1990 et 2070." });
+      }
+    } else {
+      setDate(null);
+    }
   };
+
+  React.useEffect(() => {
+    handleDateChange();
+  }, [day, month, year]);
+
   return (
     <>
-      <div className="mb-4">
-        {corrections
-          ?.filter(({ field }) => field === "latestCNIFileExpirationDate")
-          ?.map((e) => (
-            <ErrorMessage key={e._id}>
-              <strong>Date d&apos;expiration incorrecte</strong>
-              {e.message && ` : ${e.message}`}
-            </ErrorMessage>
-          ))}
+      <hr className="my-8" />
+      <div className="my-4 flex w-full">
+        <div className="w-1/2">
+          <div className="text-xl font-medium">Renseignez la date d’expiration</div>
+          {young.cohort !== "à venir" && (
+            <div className="mt-2 mb-8 leading-loose text-gray-600">
+              Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {dayjs(young.cohort.dateStart).format("DD/MM/YYYY")}).
+            </div>
+          )}
+          {corrections
+            ?.filter(({ field }) => field === "latestCNIFileExpirationDate")
+            .map((e) => (
+              <ErrorMessage key={e._id}>
+                <strong>Date d&apos;expiration incorrecte</strong>
+                {e.message && ` : ${e.message}`}
+              </ErrorMessage>
+            ))}
+        </div>
+        <div className="w-1/2">
+          <img className="mx-auto h-32" src={ID[category].imgDate} alt={ID.title} />
+        </div>
       </div>
-      <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-      {young.cohort !== "à venir" && (
-        <div className="my-2 text-gray-600">
-          Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(getCohort(young.cohort).dateStart)}
-          ).
+      <div>
+        <label className="flex-start mt-2 flex w-full flex-col text-base">
+          Date d&apos;expiration
+          <div className="grid grid-cols-3 gap-4">
+            <Input
+              id="day"
+              type="number"
+              min="1"
+              max="31"
+              value={day}
+              onKeyDown={blockInvalidChar}
+              onChange={(e) => setDay(e)}
+              placeholder="Jour"
+              hintText="Exemple : 14"
+              maxLength="2"
+              state={error.day ? "error" : "default"}
+              stateRelatedMessage={error.day}
+            />
+            <Input
+              id="month"
+              type="number"
+              min="1"
+              max="12"
+              value={month}
+              onKeyDown={blockInvalidChar}
+              onChange={(e) => setMonth(e)}
+              placeholder="Mois"
+              hintText="Exemple : 12"
+              maxLength="2"
+              state={error.month ? "error" : "default"}
+              stateRelatedMessage={error.month}
+            />
+            <Input
+              id="year"
+              type="number"
+              min="1990"
+              max="2070"
+              value={year}
+              onKeyDown={blockInvalidChar}
+              onChange={(e) => setYear(e)}
+              placeholder="Année"
+              hintText="Exemple : 2024"
+              maxLength="4"
+              state={error.year ? "error" : "default"}
+              stateRelatedMessage={error.year}
+            />
+          </div>
+        </label>
+      </div>
+      {error.date && (
+        <div className="h-8">
+          <span className="text-sm text-red-500">{error.date}</span>
         </div>
       )}
-      <div className="mx-auto w-3/4">
-        <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
-      </div>
-      <DatePicker
-        state={error ? "error" : "default"}
-        errorText={error}
-        initialValue={date}
-        onChange={(date) => {
-          handleChange(date);
-        }}
-      />
     </>
   );
 }
