@@ -10,3 +10,4 @@
 *.tsbuildinfo
 !/src/scripts
 *.email.html
+*.d.ts

@@ -32,7 +32,7 @@ import {
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
-import { ERRORS, isReferent } from "../../utils";
+import { ERRORS, isReferent, validateBirthDate } from "../../utils";
 import { validateId } from "../../utils/validator";
 import emailsEmitter from "../../emails";
 import { RouteRequest, RouteResponse, UserRequest } from "../../controllers/request";
@@ -41,6 +41,7 @@ import {
   ClasseModel,
   CohesionCenterDocument,
   CohortModel,
+  CohortType,
   EtablissementDocument,
   EtablissementModel,
   LigneBusDocument,
@@ -76,6 +77,7 @@ import {
   getYoungsGroupByClasses,
 } from "./export/classeExportService";
 import ClasseStateManager from "./stateManager";
+import { isCohortInscriptionOpen } from "../../cohort/cohortService";
 
 const router = express.Router();
 router.post(
@@ -91,13 +93,13 @@ router.post(
         .valid(...certificateValues)
         .required()
         .validate(req.params.key, { stripUnknown: true });
-
-      const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-
+      
       if (exportDateKeyError) {
         capture(exportDateKeyError);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
+
+      const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
 
       if (idError) {
         capture(idError);
@@ -128,19 +130,28 @@ router.post(
 
 router.post("/export", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
+    const allowedRoles = req.query.type === "schema-de-repartition" ? [ROLES.ADMIN, ROLES.REFERENT_REGION] : [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const queryParams = {};
+
     if (req.query.type === "schema-de-repartition") {
+      // Validate the request body
       const validation = Joi.object({ cohort: Joi.array().min(1).items(Joi.string()).required() })
         .unknown()
         .validate(req.body, { stripUnknown: true });
+
       if (validation.error) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else {
-      if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      queryParams["cohort"] = req.body.cohort;
+      queryParams["status"] = { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] };
     }
 
-    const queryParams = req.query.type === "schema-de-repartition" ? { cohort: req.body.cohort, status: { $in: [STATUS_CLASSE.OPEN, STATUS_CLASSE.CLOSED] } } : {};
     if (req.user.role === ROLES.REFERENT_REGION) queryParams["region"] = req.user.region;
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) queryParams["department"] = req.user.department;
 
@@ -217,14 +228,18 @@ router.post(
       }
 
       let cohortName: string | null = null;
+      let cohortId: string | null = null;
+      let isInscriptionOpen: boolean = false;
       const isCleClasseCohortEnabled = await isFeatureAvailable(FeatureFlagName.CLE_CLASSE_ADD_COHORT_ENABLED);
-      if (payload.cohort) {
+      if (payload.cohortId) {
         if (!isCleClasseCohortEnabled) {
           return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
         }
-        const defaultCleCohort = await CohortModel.findOne({ name: payload.cohort });
+        const defaultCleCohort = await CohortModel.findById({ _id: payload.cohortId });
         if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
         cohortName = defaultCleCohort.name;
+        cohortId = defaultCleCohort._id;
+        isInscriptionOpen = isCohortInscriptionOpen(defaultCleCohort as CohortType);
       }
 
       const uniqueClasseKey = buildUniqueClasseKey(etablissement);
@@ -242,11 +257,16 @@ router.post(
       if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
       if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      const cohort = await CohortModel.findOne({ name: cohortName });
+      let classeStatus;
+      if (isCleClasseCohortEnabled) {
+        classeStatus = isInscriptionOpen ? STATUS_CLASSE.OPEN : STATUS_CLASSE.ASSIGNED;
+      } else {
+        classeStatus = STATUS_CLASSE.CREATED;
+      }
 
       const classe = await ClasseModel.create({
         ...payload,
-        status: STATUS_CLASSE.CREATED,
+        status: classeStatus,
         statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
         academy: etablissement.academy,
         region: etablissement.region,
@@ -258,7 +278,7 @@ router.post(
         uniqueKey: uniqueClasseKey,
         uniqueKeyAndId: `${uniqueClasseKey}-${uniqueClasseId}`,
         referentClasseIds: [referent._id],
-        cohortId: cohort?._id,
+        cohortId: cohortId,
       });
 
       if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
@@ -312,12 +332,11 @@ router.put(
         }
       }
 
-      let youngs;
-      if (classe.cohort !== payload.cohort) {
-        const cohort = await CohortModel.findOne({ name: payload.cohort });
+      if (classe.cohortId !== payload.cohortId) {
+        const cohort = await CohortModel.findById({ _id: payload.cohortId });
         if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         if (!canUpdateCohort(cohort as CohortDto, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        youngs = await YoungModel.find({ classeId: classe._id });
+        const youngs = await YoungModel.find({ classeId: classe._id });
         // * Impossible to change cohort if a young has already completed phase1
         const youngWithStatusPhase1Done = youngs.find((y) => y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE);
         if (youngWithStatusPhase1Done) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -341,35 +360,37 @@ router.put(
         if (payload.totalSeats > payload.estimatedSeats) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const oldCohort = classe.cohort;
+      const oldCohortId = classe.cohortId;
       classe.set({ ...payload, sessionId: classe.sessionId || null });
 
       if (canUpdateClasseStay(req.user)) {
-        if (oldCohort !== payload.cohort && classe.ligneId) {
+        if (oldCohortId !== payload.cohortId && classe.ligneId) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
-        if (oldCohort !== payload.cohort && !classe.ligneId) {
-          classe.set({
-            sessionId: undefined,
-            cohesionCenterId: undefined,
-            pointDeRassemblementId: undefined,
-          });
-
-          const cohort = await CohortModel.findOne({ name: payload.cohort });
+        if (oldCohortId !== payload.cohortId && !classe.ligneId) {
+          const cohort = await CohortModel.findById({ _id: payload.cohortId });
+          const classeStatus = isCohortInscriptionOpen(cohort as CohortType) ? STATUS_CLASSE.OPEN : STATUS_CLASSE.ASSIGNED;
 
           const youngs = await YoungModel.find({ classeId: classe._id });
           await Promise.all(
             youngs.map((y) => {
               y.set({
-                cohort: payload.cohort,
                 sessionPhase1Id: undefined,
                 cohesionCenterId: undefined,
                 meetingPointId: undefined,
+                cohort: cohort?.name,
                 cohortId: cohort?._id,
               });
               return y.save({ fromUser: req.user });
             }),
           );
+          classe.set({
+            sessionId: undefined,
+            cohesionCenterId: undefined,
+            pointDeRassemblementId: undefined,
+            cohortId: cohort?._id,
+            status: classeStatus,
+          });
           emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
         } else {
           classe.set({

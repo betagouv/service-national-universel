@@ -1,15 +1,20 @@
 import React from "react";
 import { BsInfoSquareFill } from "react-icons/bs";
-
+import { emailValidationNoticeModal, updateEmailModal } from "@/scenes/preinscription/components/Modals";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 
-const DidNotReceiveActivationReasons = ({ modifiyEmail, className }) => {
+const DidNotReceiveActivationReasons = ({ className }) => {
   return (
     <ul className={`mt-4 list-none text-[#0063CB] flex flex-col gap-1 ${className}`}>
       <li>
         <BsInfoSquareFill className="inline mb-1 mr-1" />
         L'adresse e-mail que vous utilisez est bien celle que vous avez renseignée
-        <InlineButton className="ml-1 text-xs text-[#0063CB]" onClick={modifiyEmail}>
+        <InlineButton
+          className="ml-1 text-[#0063CB]"
+          onClick={() => {
+            emailValidationNoticeModal.close();
+            updateEmailModal.open();
+          }}>
           Modifier mon adresse e-mail
         </InlineButton>
       </li>

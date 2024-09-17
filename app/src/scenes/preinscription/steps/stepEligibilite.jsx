@@ -1,6 +1,5 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
@@ -19,11 +18,9 @@ import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
-import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 import ErrorComponent from "@/components/error";
 
@@ -55,7 +52,7 @@ export default function StepEligibilite() {
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
-  const onVerify = async () => {
+  function validateForm() {
     let errors = {};
 
     if (data.frenchNationality === "false" || !data.frenchNationality) {
@@ -67,8 +64,17 @@ export default function StepEligibilite() {
       errors.scolarity = "Choisissez un niveau de scolarité";
     }
     // Birthdate
-    if (!data?.birthDate || !validateBirthDate(data?.birthDate)) {
-      errors.birthDate = "Vous devez saisir une date de naissance valide";
+    if (!isLoggedIn) {
+      // Don't validate date for reinscription
+      if (!data?.day || data?.day < 1 || data?.day > 31) {
+        errors.day = "Vous devez saisir un jour valide";
+      }
+      if (!data?.month || data?.month < 1 || data?.month > 12) {
+        errors.month = "Vous devez saisir un mois valide";
+      }
+      if (!data?.year || data?.year < 2000 || data?.year > new Date().getFullYear()) {
+        errors.year = "Vous devez saisir une année valide";
+      }
     }
 
     if (data.scolarity) {
@@ -86,42 +92,47 @@ export default function StepEligibilite() {
         }
       }
     }
-    function validateSchool(data) {
-      if (data.isAbroad) {
-        if (!data?.school?.fullName) return false;
-        if (!data?.school?.country) return false;
-        return true;
-      } else {
-        if (!data?.school?.fullName) return false;
-        if (!data?.school?.city) return false;
-        if (!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip && !data?.school?.codePays) return false;
-        return true;
-      }
+
+    return errors;
+  }
+
+  function validateSchool(data) {
+    if (data.isAbroad) {
+      if (!data?.school?.fullName) return false;
+      if (!data?.school?.country) return false;
+      return true;
+    } else {
+      if (!data?.school?.fullName) return false;
+      if (!data?.school?.city) return false;
+      if (!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip && !data?.school?.codePays) return false;
+      return true;
     }
+  }
 
-    setError(errors);
-    setToggleVerify(!toggleVerify);
+  const handleSubmit = async () => {
+    plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
 
-    // ! Gestion erreur a reprendre
-    if (Object.keys(errors).length) {
-      console.warn("Pb avec ce champ : " + Object.keys(errors)[0] + " pour la raison : " + Object.values(errors)[0]);
-      toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
+    const errors = validateForm();
+
+    if (Object.values(errors).length) {
+      setError(errors);
+      setToggleVerify(!toggleVerify);
       return;
     }
 
-    onSubmit();
-  };
-
-  const onSubmit = async () => {
-    plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
+    if (!isLoggedIn) {
+      data.birthDate = new Date(data.year, data.month - 1, data.day);
+    }
 
     // Check if young is more than 17 years old
     const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
       if (!isLoggedIn) {
+        // Preinscription
         setData({ ...data, message: "age", step: PREINSCRIPTION_STEPS.INELIGIBLE });
         return history.push("/preinscription/noneligible");
       } else {
+        // Reinscription
         const { ok, code } = await api.put("/young/reinscription/not-eligible");
         if (!ok) {
           capture(new Error(code));
@@ -147,10 +158,10 @@ export default function StepEligibilite() {
         data: sessions,
         message,
       } = await api.post(`/preinscription/eligibilite`, {
-        schoolDepartment: data.school?.departmentName,
+        schoolDepartment: data.school?.departmentName || data.school?.department,
         department: data.department,
         schoolRegion: data.school?.region,
-        birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
+        birthdateAt: data.birthDate,
         grade: data.scolarity,
         zip: data.zip,
         isReInscription: !!data.isReInscription,
@@ -173,17 +184,16 @@ export default function StepEligibilite() {
     }
   };
 
+  const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
+
   return (
     <>
       <ProgressBar isReinscription={isLoggedIn} />
       {!isLoggedIn && (
-        <PaddedContainer className="flex py-4 sm:flex-row-reverse md:flex-row">
-          <div className="pt-3 md:pr-4 sm:w-80 md:w-40">
-            <img src={School} alt="" />
-          </div>
+        <PaddedContainer className="flex px-[1rem] py-4 md:py-5 md:px-[1.5rem] md:flex-row-reverse gap-5 border-b md:border-none">
           <div>
-            <p className="mb-2 text-xl font-bold">Classes engagées</p>
-            <p className="text-sm sm:mr-4 md:mr-0">
+            <p className="m-0 text-xl font-bold">Classes engagées</p>
+            <p className="m-0 text-sm sm:mr-4 md:mr-0">
               Si vous envisagez une participation au SNU dans le cadre des classes engagées, vous ne pouvez pas vous inscrire ici. Veuillez attendre que votre référent classe vous
               indique la procédure à suivre.
             </p>
@@ -194,6 +204,9 @@ export default function StepEligibilite() {
               href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
               En savoir plus →
             </a>
+          </div>
+          <div className="flex-none w-16 md:w-auto">
+            <img src={School} alt="" className="" />
           </div>
         </PaddedContainer>
       )}
@@ -233,15 +246,56 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
+
+            <label className="mt-2">
               Date de naissance
-              <DatePicker
-                initialValue={new Date(data.birthDate)}
-                onChange={(date) => setData({ ...data, birthDate: date })}
-                disabled={isBirthdayModificationDisabled}
-                state={error.birthDate ? "error" : "default"}
-              />
-              {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
+              <div className="grid grid-cols-3 gap-4">
+                <Input
+                  id="day"
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={isLoggedIn ? dayjs(data.birthDate).format("DD") : data.day}
+                  onKeyDown={blockInvalidChar}
+                  onChange={(e) => setData({ ...data, day: e })}
+                  placeholder="Jour"
+                  hintText="Exemple : 14"
+                  maxLength="2"
+                  disabled={isBirthdayModificationDisabled}
+                  state={error.day ? "error" : "default"}
+                  stateRelatedMessage={error.day}
+                />
+                <Input
+                  id="month"
+                  type="number"
+                  min="1"
+                  max="12"
+                  value={isLoggedIn ? dayjs(data.birthDate).format("MM") : data.month}
+                  onKeyDown={blockInvalidChar}
+                  onChange={(e) => setData({ ...data, month: e })}
+                  placeholder="Mois"
+                  hintText="Exemple : 12"
+                  maxLength="2"
+                  disabled={isBirthdayModificationDisabled}
+                  state={error.month ? "error" : "default"}
+                  stateRelatedMessage={error.month}
+                />
+                <Input
+                  id="year"
+                  type="number"
+                  min="2000"
+                  max={new Date().getFullYear()}
+                  value={isLoggedIn ? dayjs(data.birthDate).format("YYYY") : data.year}
+                  onKeyDown={blockInvalidChar}
+                  onChange={(e) => setData({ ...data, year: e })}
+                  placeholder="Année"
+                  hintText="Exemple : 2004"
+                  maxLength="4"
+                  disabled={isBirthdayModificationDisabled}
+                  state={error.year ? "error" : "default"}
+                  stateRelatedMessage={error.year}
+                />
+              </div>
             </label>
           </div>
 
@@ -279,7 +333,7 @@ export default function StepEligibilite() {
               ) : null}
             </>
           )}
-          <SignupButtons onClickNext={onVerify} disabled={loading} />
+          <SignupButtons onClickNext={handleSubmit} disabled={loading} />
         </div>
       </DSFRContainer>
     </>
