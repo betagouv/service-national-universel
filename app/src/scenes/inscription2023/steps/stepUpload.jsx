@@ -44,7 +44,6 @@ export default function StepUpload() {
     }
 
     if (recto) {
-      console.log(recto.type);
       if (!["application/pdf", "image/jpeg", "image/png", "image/jpg", "image/heif", "image/heic"].includes(recto.type)) {
         captureMessage("CNI recto upload", { extra: { file: recto.name, type: recto.type } });
         setError({ text: "Le format de votre fichier n'est pas supporté." });
@@ -82,7 +81,6 @@ export default function StepUpload() {
   async function onSubmit(resetState) {
     try {
       setLoading(true);
-
       const { ok: uploadOk } = await uploadFiles(resetState);
       if (!uploadOk) return;
 

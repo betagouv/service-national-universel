@@ -39,25 +39,34 @@ export default function StepUploadDesktop({
   const [step, setStep] = useState(0);
   const history = useHistory();
   const imageFileTypes = ["image/jpeg", "image/png", "image/jpg"];
+  const [day, setDay] = useState(date ? dayjs(date).format("DD") : "");
+  const [month, setMonth] = useState(date ? dayjs(date).format("MM") : "");
+  const [year, setYear] = useState(date ? dayjs(date).format("YYYY") : "");
+  const fullDate = day && month && year ? new Date(year, month - 1, day) : null;
 
   function validate() {
-    if (!dayjs(date).isValid()) {
-      setError({ text: "Date invalide. Veuillez entrer une date valide." });
-      return false;
+    let error = {};
+
+    if (!day || day < 1 || day > 31) {
+      error.day = "Veuillez entrer un jour valide, compris entre 1 et 31";
     }
-    if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) {
-      setError({ text: "Date hors des limites. Veuillez entrer une date comprise entre 1990 et 2070." });
-      return false;
+    if (!month || month < 1 || month > 12) {
+      error.month = "Veuillez entrer un mois valide, compris entre 1 et 12";
+    }
+    if (!year || year < 1990 || year > 2070) {
+      error.year = "Veuillez entrer un mois valide, comprise entre 1990 et 2070.";
+    }
+    if (!dayjs(fullDate).isValid()) {
+      error.text = "Date invalide. Veuillez entrer une date valide.";
     }
     if (corrections?.length) {
-      return hasChanged && !loading && !error.text;
+      return !hasChanged && !loading && !error.text;
     } else {
       if (!recto || (category !== "passport" && !verso)) {
-        setError({ text: "Veuillez télécharger le recto et le verso de votre pièce d'identité." });
-        return false;
+        error.text = "Veuillez télécharger le recto et le verso de votre pièce d'identité.";
       }
-      return true;
     }
+    return error;
   }
 
   function resetState() {
@@ -69,10 +78,12 @@ export default function StepUploadDesktop({
   }
 
   const handleOnClickNext = async () => {
-    const isEnabled = validate();
-    if (!isEnabled) {
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setError(errors);
       return;
     }
+    setDate(fullDate);
     //si correction on passe directement à la vérification
     if (corrections?.length) return onCorrect(resetState);
     //si pas de nouveaux fichiers on passe directement à la vérification
@@ -166,7 +177,21 @@ export default function StepUploadDesktop({
         .
       </div>
 
-      {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
+      {(recto || verso || date) && (
+        <ExpirationDate
+          day={day}
+          setDay={setDay}
+          month={month}
+          setMonth={setMonth}
+          year={year}
+          setYear={setYear}
+          onChange={() => setHasChanged(true)}
+          error={error}
+          setError={setError}
+          corrections={corrections}
+          category={category}
+        />
+      )}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <SignupButtons
@@ -184,35 +209,10 @@ export default function StepUploadDesktop({
   );
 }
 
-function ExpirationDate({ date, setDate, onChange, corrections, category }) {
+function ExpirationDate({ day, setDay, month, setMonth, year, setYear, onChange, error, corrections, category }) {
   const young = useSelector((state) => state.Auth.young);
-  const [error, setError] = useState({});
-
-  const [day, setDay] = useState(date ? dayjs(date).format("DD") : "");
-  const [month, setMonth] = useState(date ? dayjs(date).format("MM") : "");
-  const [year, setYear] = useState(date ? dayjs(date).format("YYYY") : "");
 
   const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
-
-  const handleDateChange = () => {
-    if (day && month && year) {
-      const fullDate = new Date(year, month - 1, day);
-      console.log(fullDate);
-      if (dayjs(fullDate).isValid() && dayjs(fullDate).year() >= 1990 && dayjs(fullDate).year() <= 2070) {
-        setError({});
-        setDate(fullDate);
-        onChange && onChange(fullDate);
-      } else {
-        setError({ date: "Veuillez renseigner une date valide entre 1990 et 2070." });
-      }
-    } else {
-      setDate(null);
-    }
-  };
-
-  React.useEffect(() => {
-    handleDateChange();
-  }, [day, month, year]);
 
   return (
     <>
@@ -249,7 +249,10 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
               max="31"
               value={day}
               onKeyDown={blockInvalidChar}
-              onChange={(e) => setDay(e)}
+              onChange={(e) => {
+                setDay(e);
+                onChange();
+              }}
               placeholder="Jour"
               hintText="Exemple : 14"
               maxLength="2"
@@ -263,7 +266,10 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
               max="12"
               value={month}
               onKeyDown={blockInvalidChar}
-              onChange={(e) => setMonth(e)}
+              onChange={(e) => {
+                setMonth(e);
+                onChange();
+              }}
               placeholder="Mois"
               hintText="Exemple : 12"
               maxLength="2"
@@ -277,7 +283,10 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
               max="2070"
               value={year}
               onKeyDown={blockInvalidChar}
-              onChange={(e) => setYear(e)}
+              onChange={(e) => {
+                setYear(e);
+                onChange();
+              }}
               placeholder="Année"
               hintText="Exemple : 2024"
               maxLength="4"
@@ -287,11 +296,6 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
           </div>
         </label>
       </div>
-      {error.date && (
-        <div className="h-8">
-          <span className="text-sm text-red-500">{error.date}</span>
-        </div>
-      )}
     </>
   );
 }
