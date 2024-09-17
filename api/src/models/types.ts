@@ -5,6 +5,7 @@ export type UserExtension = { user?: UserSaved; _user?: UserSaved; fromUser?: Us
 export type InterfaceExtended<T> = T & { _id: string; _doc?: T }; // TODO: remove this one (only available in snu-lib)
 export type DocumentExtended<T> = Document &
   T & {
-    save(params: CustomSaveParams): Promise<Document & T>;
+    save(params: CustomSaveParams): Promise<Document & T & { _doc?: T }>;
+    _doc?: T;
   };
 export type CustomSaveParams = SaveOptions & { fromUser?: UserSaved };

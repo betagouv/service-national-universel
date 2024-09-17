@@ -108,7 +108,7 @@ export default function StepProfil() {
             <>
               <div className="flex items-center gap-2 mb-3">
                 <label htmlFor="nationalite" className="m-0">
-                  Je suis de nationalié française
+                  Je suis de nationalité française
                 </label>
                 <IconFrance />
               </div>

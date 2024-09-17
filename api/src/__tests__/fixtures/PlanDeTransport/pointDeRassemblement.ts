@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { PointDeRassemblementType } from "../../../models";
+import { PointDeRassemblementType } from "snu-lib";
 
 function getNewPointDeRassemblementFixture(object: Partial<PointDeRassemblementType> = {}): Partial<PointDeRassemblementType> {
   return {

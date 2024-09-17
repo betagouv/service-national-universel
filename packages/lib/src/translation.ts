@@ -366,6 +366,8 @@ const translate = (value) => {
       return "Actif";
     case "inactive":
       return "Inactif";
+    case "psc1Info":
+      return "PSC1";
     case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED:
       return "L'objectif d'inscription du département a été atteint !";
     default:
@@ -985,7 +987,8 @@ const translateField = (field) => {
       return "Date d'expiration de la pièce d'identité";
     case "latestCNIFileCategory":
       return "Type de pièce d'identité";
-
+    case "psc1Info":
+      return "PSC1";
     default:
       return field;
   }
