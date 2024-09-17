@@ -1,9 +1,9 @@
-import { ReferentCreatedBy, ClasseSchoolYear } from "snu-lib";
+import { ReferentCreatedBy, ClasseSchoolYear, EtablissementType } from "snu-lib";
 
 import { IAppelAProjet, IAppelAProjetOptions } from "./appelAProjetType";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
 import { mapEtablissementFromAnnuaireToEtablissement } from "../etablissement/etablissementMapper";
-import { EtablissementModel, EtablissementType } from "../../models";
+import { EtablissementModel } from "../../models";
 
 import { logger } from "../../logger";
 

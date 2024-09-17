@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { EtablissementType } from "../../models";
+import { EtablissementType } from "snu-lib";
 const { ObjectId } = Types;
 
 export function createFixtureEtablissement(fields: Partial<EtablissementType> = {}): Partial<EtablissementType> {
