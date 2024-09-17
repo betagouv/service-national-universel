@@ -1,8 +1,8 @@
-const { STATUS_CLASSE, COHORT_TYPE } = require("snu-lib");
+const { STATUS_CLASSE, COHORT_TYPE, COHORTS } = require("snu-lib");
 const { CohortModel, ClasseModel } = require("../src/models");
 const { logger } = require("../src/logger");
 
-const cohortName = "2025 CLE Globale";
+const cohortName = COHORTS.CLEGLOBALE2025;
 
 module.exports = {
   async up() {
