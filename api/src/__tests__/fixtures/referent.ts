@@ -1,7 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { ROLES } from "snu-lib";
-import { ReferentType } from "../../models";
+import { ROLES, ReferentType } from "snu-lib";
 
 export function getNewReferentFixture(object: Partial<ReferentType> = {}): Partial<ReferentType> {
   return {
