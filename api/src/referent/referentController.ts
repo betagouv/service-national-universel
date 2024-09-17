@@ -26,7 +26,6 @@ import {
   CohesionCenterModel,
   EtablissementDocument,
   ClasseDocument,
-  YoungType,
   CohortModel,
 } from "../models";
 
@@ -99,6 +98,7 @@ import {
   ClasseSchoolYear,
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
+  YoungType,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";

@@ -17,7 +17,7 @@
 
 import express, { Response } from "express";
 import Joi from "joi";
-import { YoungModel, LigneBusModel, SessionPhase1Model, CohortModel, ApplicationModel, YoungType } from "../../models";
+import { YoungModel, LigneBusModel, SessionPhase1Model, CohortModel, ApplicationModel } from "../../models";
 import { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } from "../../utils";
 import { capture } from "../../sentry";
 import { validateFirstName } from "../../utils/validator";
@@ -34,6 +34,7 @@ import {
   YOUNG_STATUS,
   canEditYoung,
   canAllowSNU,
+  YoungType,
 } from "snu-lib";
 import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
