@@ -10,17 +10,21 @@ export type CohortDocumentWithPlaces = CohortDocument<{
   isEligible?: boolean;
 }>;
 
+type YoungInfo = Pick<YoungType, "_id" | "cohort" | "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip"> & {
+  isReInscription?: boolean;
+};
+
 // TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
-export async function getFilteredSessions(young: YoungType & { isReInscription?: boolean }, timeZoneOffset?: string | number | null) {
+export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
   const cohorts = await CohortModel.find({});
   const region = getRegionForEligibility(young);
   const department = getDepartmentForEligibility(young);
 
   const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart || "")?.getFullYear() : undefined;
 
-  const sessions: CohortDocumentWithPlaces[] = cohorts.filter(
-    (session) =>
+  const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
       // if the young has already a cohort, he can only apply for the cohorts of the same year
+    return (
       (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
       session.eligibility?.zones.includes(department) &&
       session.eligibility?.schoolLevels.includes(young.grade || "") &&
@@ -30,15 +34,16 @@ export async function getFilteredSessions(young: YoungType & { isReInscription?:
       session.eligibility?.bornBefore.setTime(session.eligibility?.bornBefore.getTime() + 11 * 60 * 60 * 1000) >= young.birthdateAt &&
       (session.getIsInscriptionOpen(Number(timeZoneOffset)) ||
         (session.getIsReInscriptionOpen(Number(timeZoneOffset)) && young.isReInscription) ||
-        (session.getIsInstructionOpen(Number(timeZoneOffset)) && ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION] as string[]).includes(young.status))),
+        (session.getIsInstructionOpen(Number(timeZoneOffset)) && ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION] as string[]).includes(young.status)))
   );
+  });
   for (let session of sessions) {
     session.isEligible = true;
   }
   return getPlaces(sessions, region);
 }
 
-export async function getAllSessions(young: YoungType) {
+export async function getAllSessions(young: YoungInfo) {
   const cohorts = await CohortModel.find({});
   const region = getRegionForEligibility(young);
   const sessionsWithPlaces = await getPlaces(cohorts, region);

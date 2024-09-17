@@ -1,6 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
+import { addYears } from "date-fns";
 import { departmentList, regionList, YoungType } from "snu-lib";
 
 function randomDepartment() {
@@ -24,7 +25,7 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     phone: faker.phone.number(),
     phoneZone: "FRANCE",
     gender: faker.person.gender(),
-    birthdateAt: faker.date.past({ years: 1, refDate: "01/01/2007" }),
+    birthdateAt: faker.date.past({ years: 3, refDate: addYears(new Date(), -15) }),
     cohort: "Juillet 2023",
     acceptCGU: "true",
     phase: "CONTINUE",

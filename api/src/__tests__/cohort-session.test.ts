@@ -1,9 +1,10 @@
 import request from "supertest";
 import { fakerFR as faker } from "@faker-js/faker";
+import { addDays, addYears } from "date-fns";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
-import { COHORT_TYPE, ERRORS, ROLES } from "snu-lib";
+import { COHORT_TYPE, ERRORS, GRADES, ROLES, YOUNG_STATUS } from "snu-lib";
 
 import { CohortModel } from "../models";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -54,9 +55,40 @@ describe("Cohort Session Controller", () => {
           zip: "",
         });
       expect(response.status).toBe(200);
+      expect(response.body.ok).toBe(true);
     });
 
-    it("should return filtered sessions if young is valid and admin cle", async () => {
+    it("should return 200 if young data is valid", async () => {
+      const young = {
+        department: "Loire-Atlantique",
+        region: "Pays de la Loire",
+        schoolRegion: "",
+        birthdateAt: faker.date.past({ years: 3, refDate: addYears(new Date(), -15) }),
+        grade: GRADES["2ndeGT"],
+        status: YOUNG_STATUS.REFUSED,
+        zip: faker.location.zipCode(),
+      };
+      await createCohortHelper(
+        getNewCohortFixture({
+          inscriptionEndDate: faker.date.future(),
+          eligibility: {
+            zones: [young.department!],
+            schoolLevels: [young.grade || ""],
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
+          },
+        }),
+      );
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post("/cohort-session/eligibility/2023/")
+        .send(young);
+      expect(response.status).toBe(200);
+      expect(response.body.ok).toBe(true);
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it("admin cle, should return filtered sessions if young is valid", async () => {
       const young = await createYoungHelper(
         getNewYoungFixture({
           schooled: "false", // not HTZ
@@ -72,8 +104,8 @@ describe("Cohort Session Controller", () => {
           eligibility: {
             zones: [young.department!],
             schoolLevels: [young.grade || ""],
-            bornAfter: new Date("2000-01-01"),
-            bornBefore: new Date("2010-01-01"),
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
           },
         }),
       );
@@ -85,8 +117,8 @@ describe("Cohort Session Controller", () => {
           eligibility: {
             zones: [young.department!],
             schoolLevels: [young.grade || ""],
-            bornAfter: new Date("2000-01-01"),
-            bornBefore: new Date("2010-01-01"),
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
           },
         }),
       );
@@ -98,7 +130,7 @@ describe("Cohort Session Controller", () => {
       expect(response.body.data.length).toBe(1);
     });
 
-    it("should bypass sessions filter if young is valid and ref dep with getAllSessions is true", async () => {
+    it("referent dep, should bypass sessions filter with getAllSessions is true if young is valid", async () => {
       const young = await createYoungHelper(
         getNewYoungFixture({
           schooled: "false", // not HTZ
@@ -114,8 +146,8 @@ describe("Cohort Session Controller", () => {
           eligibility: {
             zones: [young.department!],
             schoolLevels: [young.grade || ""],
-            bornAfter: new Date("2000-01-01"),
-            bornBefore: new Date("2010-01-01"),
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
           },
         }),
       );
@@ -127,8 +159,8 @@ describe("Cohort Session Controller", () => {
           eligibility: {
             zones: [young.department!],
             schoolLevels: [young.grade || ""],
-            bornAfter: new Date("2000-01-01"),
-            bornBefore: new Date("2010-01-01"),
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
           },
         }),
       );
@@ -140,7 +172,8 @@ describe("Cohort Session Controller", () => {
       expect(response.body.data.length).toBe(2);
     });
 
-    it("should return sessions if young is valid and cohort available", async () => {
+    it("admin, should return sessions if young is valid and cohort available", async () => {
+      //  résidant+scolarisé dans dép X : si le dép X a un séjour, vérifier que le jeune peut candidater
       const young = await createYoungHelper(
         getNewYoungFixture({
           schooled: "false", // not HTZ
@@ -156,8 +189,8 @@ describe("Cohort Session Controller", () => {
           eligibility: {
             zones: [young.department!],
             schoolLevels: [young.grade || ""],
-            bornAfter: new Date("2000-01-01"),
-            bornBefore: new Date("2010-01-01"),
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
           },
         }),
       );
@@ -168,7 +201,37 @@ describe("Cohort Session Controller", () => {
       expect(response.body.data.length).toBe(1);
     });
 
-    it("should return sessions if young is valid and cohort available (HTZ)", async () => {
+    it("should return no sessions if young is valid and cohort not available for his department", async () => {
+      // résidant+scolarisé dans dép X : si le dép X n’a PAS de séjour, vérifier que le jeune peut PAS candidater
+      const young = await createYoungHelper(
+        getNewYoungFixture({
+          schooled: "false", // not HTZ
+          region: "Pays de la Loire",
+          department: "Loire-Atlantique",
+          schoolDepartment: "Loire-Atlantique",
+        }),
+      );
+      await createCohortHelper(
+        getNewCohortFixture({
+          name: young.cohort,
+          inscriptionEndDate: faker.date.future(),
+          eligibility: {
+            zones: ["Morbihan"],
+            schoolLevels: [young.grade || ""],
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
+          },
+        }),
+      );
+      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      expect(response.status).toBe(200);
+      expect(response.body.ok).toBe(true);
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it("admin, should return sessions if young is valid and cohort available (HTZ)", async () => {
+      //  résidant dans dép Y + scolarisé dans dép X : si le dép X a un séjour, vérifier que le jeune peut candidater
       const young = await createYoungHelper(
         getNewYoungFixture({
           schooled: "true", // HTZ
@@ -184,8 +247,8 @@ describe("Cohort Session Controller", () => {
           eligibility: {
             zones: [young.schoolDepartment!],
             schoolLevels: [young.grade || ""],
-            bornAfter: new Date("2000-01-01"),
-            bornBefore: new Date("2010-01-01"),
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
           },
         }),
       );
@@ -196,17 +259,25 @@ describe("Cohort Session Controller", () => {
       expect(response.body.data.length).toBe(1);
     });
 
-    it("should return no sessions if young is valid and cohort not available (wrong dep)", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ region: "Pays de la Loire", department: "Loire-Atlantique", schoolDepartment: "Loire-Atlantique" }));
+    it("admin, should not return sessions if young is valid and cohort not available in his department (HTZ)", async () => {
+      // résidant dans dép Y + scolarisé dans dép X : si le dép X n’a PAS de séjour, alors vérifier que le jeune ne peut PAS candidaté
+      const young = await createYoungHelper(
+        getNewYoungFixture({
+          schooled: "true", // HTZ
+          region: "Pays de la Loire",
+          department: "Morbihan",
+          schoolDepartment: "Loire-Atlantique",
+        }),
+      );
       await createCohortHelper(
         getNewCohortFixture({
           name: young.cohort,
           inscriptionEndDate: faker.date.future(),
           eligibility: {
-            zones: ["A"],
+            zones: [young.department!],
             schoolLevels: [young.grade || ""],
-            bornAfter: new Date("2000-01-01"),
-            bornBefore: new Date("2010-01-01"),
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
           },
         }),
       );
@@ -217,7 +288,35 @@ describe("Cohort Session Controller", () => {
       expect(response.body.data.length).toBe(0);
     });
 
-    it("should return no sessions if young is valid and cohort not available (inscriptionEnded)", async () => {
+    it("admin, should return no sessions if young is valid and cohort not available (wrong dep)", async () => {
+      //  Cas d’une région qui ne participe pas en totalité à un séjour (seul un département participe)
+      const young = await createYoungHelper(
+        getNewYoungFixture({
+          region: "Pays de la Loire",
+          department: "Loire-Atlantique",
+          schoolDepartment: "Loire-Atlantique",
+        }),
+      );
+      await createCohortHelper(
+        getNewCohortFixture({
+          name: young.cohort,
+          inscriptionEndDate: faker.date.future(),
+          eligibility: {
+            zones: ["Morbihan"],
+            schoolLevels: [young.grade || ""],
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
+          },
+        }),
+      );
+      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      expect(response.status).toBe(200);
+      expect(response.body.ok).toBe(true);
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it("admin, should return no sessions if young is valid and cohort not available (inscriptionEnded)", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ region: "Pays de la Loire", department: "Loire-Atlantique", schoolDepartment: "Loire-Atlantique" }));
       await createCohortHelper(
         getNewCohortFixture({
@@ -225,8 +324,8 @@ describe("Cohort Session Controller", () => {
           eligibility: {
             zones: [young.department!],
             schoolLevels: [young.grade || ""],
-            bornAfter: new Date("2000-01-01"),
-            bornBefore: new Date("2010-01-01"),
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
           },
         }),
       );
@@ -236,10 +335,67 @@ describe("Cohort Session Controller", () => {
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBe(0);
     });
+
+    it("admin, should return no sessions if young has invalid birthdate and cohort is available", async () => {
+      const cohort = await createCohortHelper(
+        getNewCohortFixture({
+          inscriptionEndDate: faker.date.future(),
+          dateStart: addDays(addYears(new Date(), -18), -7),
+          dateEnd: addDays(addYears(new Date(), -18), 0),
+          eligibility: {
+            zones: ["Loire-Atlantique"],
+            schoolLevels: [GRADES["2ndeGT"]],
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
+          },
+        }),
+      );
+      // 15 ans à J-1
+      let young = await createYoungHelper(
+        getNewYoungFixture({
+          cohort: cohort.name,
+          region: "Pays de la Loire",
+          department: cohort.eligibility.zones[0],
+          schoolDepartment: cohort.eligibility.zones[0],
+          birthdateAt: addDays(addYears(new Date(), -15), 1),
+        }),
+      );
+      let response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+
+      // 18 ans au cours du jour du séjour
+      young = await createYoungHelper(
+        getNewYoungFixture({
+          cohort: cohort.name,
+          region: "Pays de la Loire",
+          department: cohort.eligibility.zones[0],
+          schoolDepartment: cohort.eligibility.zones[0],
+          birthdateAt: addDays(addYears(new Date(), -18), 3),
+        }),
+      );
+      response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+
+      // 18 au dernier jour du séjour
+      young = await createYoungHelper(
+        getNewYoungFixture({
+          cohort: cohort.name,
+          region: "Pays de la Loire",
+          department: cohort.eligibility.zones[0],
+          schoolDepartment: cohort.eligibility.zones[0],
+          birthdateAt: addDays(addYears(new Date(), -18), 0),
+        }),
+      );
+      response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
   });
 
   describe("GET /api/cohort-session/isReInscriptionOpen", () => {
-    it("should return 200 OK with data", async () => {
+    it("admin, should return 200 OK with data", async () => {
       await createCohortHelper(
         getNewCohortFixture({
           type: COHORT_TYPE.VOLONTAIRE,

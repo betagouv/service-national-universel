@@ -20,7 +20,7 @@ export interface GetEligibilityRoute extends BasicRoute {
   };
   response: RouteResponseBody<
     Array<
-      CohortType & {
+      Pick<CohortType, "_id" | "name" | "type" | "event" | "dateStart" | "dateEnd"> & {
         numberOfCandidates?: number;
         numberOfValidated?: number;
         goal?: number;
