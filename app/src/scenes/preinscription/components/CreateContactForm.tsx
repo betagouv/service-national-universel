@@ -56,7 +56,7 @@ export default function CreateContactForm({ data, setState, setStateRelatedMessa
 
       if (code === "duplicate_parameter") {
         setState("info");
-        setStateRelatedMessage("Vous êtes déjà inscrit(e) à notre liste de diffusion.");
+        setStateRelatedMessage("Votre adresse e-mail est déjà enregistrée. Nous vous tiendrons informés lors de l’ouverture des inscriptions.");
         return;
       }
 
@@ -68,7 +68,7 @@ export default function CreateContactForm({ data, setState, setStateRelatedMessa
     } catch (e) {
       capture(e);
       setState("error");
-      setStateRelatedMessage("Impossible de vous inscrire à notre liste de diffusion, veuillez réessayer plus tard.");
+      setStateRelatedMessage("Veuillez réessayer plus tard.");
     }
     setLoading(false);
   }

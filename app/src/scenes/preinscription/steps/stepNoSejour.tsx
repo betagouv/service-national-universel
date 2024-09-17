@@ -14,8 +14,8 @@ export default function NonEligible() {
   const { isLoggedIn } = useAuth();
   const context = isLoggedIn ? ReinscriptionContext : PreInscriptionContext;
   const [data, removePersistedData] = useContext(context);
-  const [state, setState] = useState<"default" | "success" | "info" | "error">("error");
-  const [stateRelatedMessage, setStateRelatedMessage] = useState<string>("Impossible de vous inscrire à notre liste de diffusion, veuillez réessayer plus tard.");
+  const [state, setState] = useState<"success" | "info" | "error" | "">("");
+  const [stateRelatedMessage, setStateRelatedMessage] = useState<string>("");
 
   const onClickButton = () => {
     removePersistedData();
@@ -23,25 +23,21 @@ export default function NonEligible() {
   };
 
   return (
-    <>
-      <DSFRContainer title="Nous n'avons pas trouvé de séjour correspondant à votre situation.">
-        <div className="mt-2 mb-12">
-          <Highlight>
-            📬 Soyez informé(e) de l’ouverture des inscriptions pour les prochaines sessions SNU en renseignant votre adresse e-mail et votre date de naissance.
-          </Highlight>
-        </div>
+    <DSFRContainer title="Nous n'avons pas trouvé de séjour correspondant à votre situation.">
+      <div className="mt-2 mb-12">
+        <Highlight>📬 Soyez informé(e) de l’ouverture des inscriptions pour les prochaines sessions SNU en renseignant votre adresse e-mail et votre date de naissance.</Highlight>
+      </div>
 
-        {state === "error" && <Alert severity="error" title="Une erreur est survenue" description={stateRelatedMessage} closable />}
-        {state === "success" && <Alert severity="success" title="Merci !" description="Nous vous tiendrons informé(e) de l'ouverture des inscriptions." closable />}
-        {state === "info" && <Alert severity="info" title="Information" description={stateRelatedMessage} closable />}
+      {state === "error" && <Alert severity="error" title="Une erreur est survenue" description={stateRelatedMessage} closable />}
+      {state === "success" && <Alert severity="success" title="Merci !" description="Nous vous tiendrons informé(e) de l'ouverture des inscriptions." closable />}
+      {state === "info" && <Alert severity="info" title="Information" description={stateRelatedMessage} closable />}
 
-        {state !== "success" && <CreateContactForm data={data} setState={setState} setStateRelatedMessage={setStateRelatedMessage} />}
+      {state !== "success" && <CreateContactForm data={data} setState={setState} setStateRelatedMessage={setStateRelatedMessage} />}
 
-        <hr className="my-8" />
+      <hr className="my-8" />
 
-        <EngagementPrograms />
-        <SignupButtons onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
-      </DSFRContainer>
-    </>
+      <EngagementPrograms />
+      <SignupButtons onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
+    </DSFRContainer>
   );
 }
