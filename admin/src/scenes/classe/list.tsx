@@ -23,7 +23,7 @@ interface ClasseProps extends ClasseType {
 export default function List() {
   const user = useSelector((state: AuthState) => state.Auth.user);
 
-  const [isClasses, setIsClasses] = useState<boolean | null>(null);
+  const [isClasses, setIsClasses] = useState<boolean>(false);
   const [data, setData] = useState<ClasseProps[]>([]);
   const [selectedFilters, setSelectedFilters] = useState<Record<string, any>>({});
   const [etablissements, setEtablissements] = useState<EtablissementType[]>([]);
@@ -75,7 +75,7 @@ export default function List() {
     setExportLoading(false);
   };
 
-  if (isClasses === null || !etablissements) return null;
+  if (!isClasses || !etablissements) return null;
 
   const filterArray = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné" },
@@ -105,7 +105,7 @@ export default function List() {
     { title: "Année scolaire", name: "schoolYear", missingLabel: "Non renseigné", defaultValue: ["2024-2025"] },
   ].filter(Boolean);
 
-  if (isClasses === null) return null;
+  if (!isClasses) return null;
   const isCohortSelected = selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0;
 
   return (

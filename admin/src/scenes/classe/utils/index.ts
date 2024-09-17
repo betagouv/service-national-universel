@@ -19,10 +19,14 @@ import {
   ClasseType,
   isAdmin,
   translateStatusClasse,
+  EtablissementType,
+  CohesionCenterType,
 } from "snu-lib";
 import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { User } from "@/types";
+import { Etablissement } from "@/scenes/etablissement/Create/type";
+import { ReferentDto } from "../../../../../packages/lib/.rollup.cache/Users/charlelie/projects/service-national-universel/packages/lib/dist/dto/referentDto";
 
 export const statusClassForBadge = (status) => {
   let statusClasse;
@@ -184,20 +188,14 @@ export const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
   label: translate(TYPE_CLASSE_LIST[value]),
 }));
 
+interface ReferentWithFullName extends ReferentDto {
+  fullName: string;
+}
+
 export interface ClasseExport extends ClasseType {
   nb_classe: number;
   nb_young: number;
-  referents: {
-    fullName: string;
-    phone: string;
-    email: string;
-  }[];
-  etablissement: {
-    uai: string;
-    name: string;
-    region: string;
-    department: string;
-  };
+  referents: ReferentWithFullName[];
   referentEtablissement: {
     fullName: string;
     phone: string;
@@ -209,20 +207,6 @@ export interface ClasseExport extends ClasseType {
     email: string;
   }[];
   //Schema de répartition
-  cohesionCenter?: {
-    name: string;
-    address: string;
-    zip: string;
-    city: string;
-    department: string;
-    region: string;
-  };
-  pointDeRassemblement?: {
-    name: string;
-    address: string;
-    zip: string;
-    city: string;
-  };
   studentInProgress?: number;
   studentWaiting?: number;
   studentValidated?: number;
