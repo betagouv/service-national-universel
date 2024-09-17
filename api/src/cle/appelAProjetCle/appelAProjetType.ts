@@ -1,5 +1,4 @@
-import { ClasseType, EtablissementType } from "snu-lib";
-import { ReferentType } from "../../models";
+import { ClasseType, EtablissementType, ReferentType } from "snu-lib";
 
 export type IAppelAProjet = {
   numberDS: number;

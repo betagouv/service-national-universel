@@ -6,7 +6,7 @@ export function injectRoutes(app) {
   app.use("/cohort", require("./cohort/cohortController"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
   app.use("/contract", require("./controllers/contract"));
-  app.use("/correction-request", require("./controllers/correction-request"));
+  app.use("/correction-request", require("./controllers/correction-request").default);
   app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
   app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
   app.use("/department-service", require("./controllers/department-service"));

@@ -11,9 +11,11 @@ import {
   ClasseCertificateKeys,
   ClasseType,
   EtablissementType,
+  ReferentType,
 } from "snu-lib";
 
-import { ClasseDocument, ClasseModel, EtablissementDocument, ReferentModel, ReferentType, YoungModel } from "../../models";
+import { ClasseDocument, ClasseModel, EtablissementDocument, ReferentModel, YoungModel } from "../../models";
+
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs, generateImageRightForMultipleYoungs, generateConsentementForMultipleYoungs } from "../../young/youngService";
 
 import { mapRegionToTrigramme } from "../../services/regionService";

@@ -1,5 +1,6 @@
+import { CohortType } from "snu-lib";
 import { isCohortInscriptionClosed, isCohortInscriptionOpen } from "../cohort/cohortService";
-import { ClasseModel, CohortModel, CohortType, YoungModel } from "../models";
+import { ClasseModel, CohortModel, YoungModel } from "../models";
 import { capture } from "../sentry";
 import slack from "../slack";
 import ClasseStateManager from "../cle/classe/stateManager";
