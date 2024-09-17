@@ -4,14 +4,14 @@ import crypto from "crypto";
 import config from "config";
 const { logger } = require("../../logger");
 
-import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ClasseSchoolYear, STATUS_CLASSE } from "snu-lib";
+import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ClasseSchoolYear, STATUS_CLASSE, EtablissementType } from "snu-lib";
 
 import { ERRORS } from "../../utils";
 import { sendTemplate } from "../../brevo";
 import { inSevenDays } from "../../utils";
 import { capture } from "../../sentry";
 
-import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument, ClasseModel, EtablissementType } from "../../models";
+import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument, ClasseModel } from "../../models";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { UserDto } from "snu-lib";
 import { findReferentsClasseToSendInvitationByClasseStatus } from "../../cle/referent/referentRepository";
