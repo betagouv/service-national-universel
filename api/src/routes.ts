@@ -2,7 +2,7 @@ export function injectRoutes(app) {
   app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
   app.use("/application", require("./controllers/application"));
   app.use("/bus", require("./controllers/bus"));
-  app.use("/cohesion-center", require("./controllers/cohesion-center"));
+  app.use("/cohesion-center", require("./cohesionCenter").default);
   app.use("/cohort", require("./cohort/cohortController"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
   app.use("/contract", require("./controllers/contract"));
