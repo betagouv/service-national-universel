@@ -93,6 +93,7 @@ function ImageRightsForm({ young, token, parentId }) {
     { label: "En France (Métropolitaine ou Outre-mer)", value: FRANCE },
     { label: "À l’étranger", value: ABROAD },
   ];
+  console.log("🚀 ~ ImageRightsForm ~ data:", data);
 
   function toggleConfirmAddress() {
     if (data.confirmAddress) {
@@ -128,6 +129,7 @@ function ImageRightsForm({ young, token, parentId }) {
     setSaving(true);
     setErrors({});
     const errors = validateData();
+    console.log("🚀 ~ onSubmit ~ errors:", errors);
     if (errors) {
       setErrors(errors);
     } else if (await saveData()) {
@@ -168,9 +170,15 @@ function ImageRightsForm({ young, token, parentId }) {
     validAddress = validate("city", "empty", validator.isEmpty(data.city, { ignore_whitespace: true })) && validAddress;
     validAddress = validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }));
 
+    if (data.addressType === ABROAD && data.country.toLowerCase() === "france") {
+      errors.country = "Le pays ne peut pas être France si vous résidez à l'étranger";
+      validAddress = false;
+    }
     if (data.addressType === ABROAD) {
+      console.log("ABROAD");
       validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true }));
     } else {
+      console.log("FRANCE");
       validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
     }
 
@@ -190,6 +198,7 @@ function ImageRightsForm({ young, token, parentId }) {
 
   async function saveData() {
     const ownAddress = data.address.trim() !== young.address || data.zip.trim() !== young.zip || data.city !== young.city;
+    console.log("🚀 ~ saveData ~ ownAddress:", ownAddress);
     let address;
     if (ownAddress) {
       address = {
