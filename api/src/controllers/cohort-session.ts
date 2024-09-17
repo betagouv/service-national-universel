@@ -1,15 +1,18 @@
 import express, { Response } from "express";
+import passport from "passport";
 import Joi from "joi";
+import config from "config";
+
+import { CohortsRoutes, ROLES, YoungType } from "snu-lib";
+
 import { capture } from "../sentry";
 import { ERRORS } from "../utils";
-import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE, CohortDocumentWithPlaces } from "../utils/cohort";
+import { YoungModel } from "../models";
+import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { validateId } from "../utils/validator";
-import { YoungModel, YoungType } from "../models";
-import passport from "passport";
-import { ROLES } from "snu-lib";
-import config from "config";
+
+import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE, CohortDocumentWithPlaces } from "../utils/cohort";
 import { isReInscriptionOpen, isInscriptionOpen } from "../cohort/cohortService";
-import { UserRequest } from "./request";
 
 const router = express.Router();
 
@@ -78,13 +81,13 @@ router.post("/eligibility/2023/:id?", passport.authenticate("referent"), async f
   }
 });
 
-router.get("/isReInscriptionOpen", async (req: UserRequest, res: Response) => {
+router.get("/isReInscriptionOpen", async (req: RouteRequest<CohortsRoutes["GetIsReincriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsReincriptionOpen"]>) => {
   try {
-    const data = await isReInscriptionOpen();
+    const isOpen = await isReInscriptionOpen();
 
-    return res.send({
+    return res.json({
       ok: true,
-      data,
+      data: isOpen,
     });
   } catch (error) {
     capture(error);
@@ -92,22 +95,20 @@ router.get("/isReInscriptionOpen", async (req: UserRequest, res: Response) => {
   }
 });
 
-router.get("/isInscriptionOpen", async (req: UserRequest, res: Response) => {
-  const { error, value } = Joi.object({
+router.get("/isInscriptionOpen", async (req: RouteRequest<CohortsRoutes["GetIsIncriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsIncriptionOpen"]>) => {
+  const { error, value: query } = Joi.object<CohortsRoutes["GetIsIncriptionOpen"]["query"]>({
     sessionName: Joi.string(),
   })
     .unknown()
     .validate(req.query, { stripUnknown: true });
-
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-  const { sessionName } = value;
 
   try {
-    const data = await isInscriptionOpen(sessionName);
+    const isOpen = await isInscriptionOpen(query.sessionName);
 
-    return res.send({
+    return res.json({
       ok: true,
-      data,
+      data: isOpen,
     });
   } catch (error) {
     capture(error);

@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { ROLES } from "snu-lib";
 
 import Pencil from "@/assets/icons/Pencil";
-import api from "@/services/api";
+import { CohortService } from "@/services/cohortService";
 
 import { AuthState } from "@/redux/auth/reducer";
 import { ChangeCohortModal } from "./modal/ChangeCohortModal";
@@ -34,9 +34,11 @@ export function ChangeCohortPen({ young, onChange }) {
       //   setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
       //   return;
       // }
-      const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
-      if (Array.isArray(data)) {
-        const cohorts: CohortAvailable[] = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible, type: c.type })).filter((c) => c.name !== young.cohort);
+      const eligibilities = await CohortService.getEligibility(young._id);
+      if (Array.isArray(eligibilities)) {
+        const cohorts: CohortAvailable[] = eligibilities
+          .map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible, type: c.type }))
+          .filter((c) => c.name !== young.cohort);
         // TODO: rajouter un flag hidden pour les cohort non visible
         cohorts.push({ name: "à venir", type: "VOLONTAIRE" });
         setOptions(cohorts);
