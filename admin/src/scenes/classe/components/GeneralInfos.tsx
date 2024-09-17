@@ -122,11 +122,16 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
                 value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
                 onChange={(options) => {
                   const cohort = cohorts?.find((c) => c.name === options.value);
+                  if (!cohort) return;
                   setClasse({
                     ...classe,
-                    cohortId: cohort?._id,
-                    cohort: cohort?.name,
-                    cohortDetails: cohort,
+                    cohortId: cohort._id,
+                    cohort: cohort.name,
+                    cohortDetails: {
+                      _id: cohort._id,
+                      dateStart: cohort.dateStart,
+                      dateEnd: cohort.dateEnd,
+                    },
                   });
                 }}
                 error={errors.cohort}

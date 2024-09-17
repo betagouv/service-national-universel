@@ -272,5 +272,5 @@ export type ClasseType = InterfaceExtended<InferSchemaType<typeof schema>> & {
   cohesionCenter?: CohesionCenterType;
   session?: ClasseDto["session"]; // TODO: utiliser SessionPhase1Type
   pointDeRassemblement?: PointDeRassemblementType;
-  cohortDetails?: CohortDto; // TODO: utiliser CohortType
+  cohortDetails?: Pick<CohortDto, "_id" | "dateStart" | "dateEnd">; // TODO: utiliser CohortType
 };
