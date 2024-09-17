@@ -1,6 +1,8 @@
 import { Schema, InferSchemaType } from "mongoose";
 
-import { CLE_TYPE_LIST, CLE_SECTOR_LIST, InterfaceExtended } from "../..";
+import { CLE_SECTOR_LIST, CLE_TYPE_LIST } from "../../constants/constants";
+
+import { InterfaceExtended } from "..";
 
 export const EtablissementSchema = {
   schoolId: {

@@ -1,21 +1,10 @@
 import { Schema, InferSchemaType } from "mongoose";
 
-import {
-  STATUS_CLASSE_LIST,
-  STATUS_PHASE1_CLASSE_LIST,
-  CLE_FILIERE_LIST,
-  CLE_GRADE_LIST,
-  CLE_COLORATION_LIST,
-  TYPE_CLASSE_LIST,
-  ReferentCreatedBy,
-  InterfaceExtended,
-  EtablissementType,
-  ReferentDto,
-  ClasseDto,
-  CohortDto,
-  CohesionCenterType,
-  PointDeRassemblementType,
-} from "../..";
+import { ReferentDto, ClasseDto, CohortDto } from "../../dto";
+import { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST, TYPE_CLASSE_LIST } from "../../constants/constants";
+import { ReferentCreatedBy } from "../../constants/referentConstants";
+
+import { InterfaceExtended, EtablissementType, CohesionCenterType, PointDeRassemblementType } from "../../mongoSchema";
 
 const classeMetadataSchema = {
   createdBy: {
