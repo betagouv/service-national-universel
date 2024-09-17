@@ -5,6 +5,7 @@ import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { shouldDisplayDateByCohortName } from "./utils/cohortUtils";
 
 const COHORTS_WITH_JDM_COUNT = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
 
@@ -25,7 +26,10 @@ const getCohortYear = (cohort) => cohort?.dateStart?.slice(0, 4);
 
 const getCohortPeriod = (cohort, withBold = false) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
-  if (cohort.name === "à venir") return "à venir";
+
+  if(!shouldDisplayDateByCohortName(cohort.name)) {
+    return "à venir";
+  }
 
   // Fonction pour formater les dates avec la localisation française
   const formatDate = (dateString, dateFormat) => {
@@ -43,11 +47,11 @@ const getCohortPeriod = (cohort, withBold = false) => {
   // Si même mois et même année
   if (startMonthYear === endMonthYear) {
     formattedPeriod = `du ${formatDate(cohort.dateStart, "d")} au ${formatDate(cohort.dateEnd, "d MMMM yyyy")}`;
-  } 
+  }
   // Si même année mais mois différents
   else if (startYear === endYear) {
     formattedPeriod = `du ${formatDate(cohort.dateStart, "d MMMM")} au ${formatDate(cohort.dateEnd, "d MMMM yyyy")}`;
-  } 
+  }
   // Si mois et années différents
   else {
     formattedPeriod = `du ${formatDate(cohort.dateStart, "d MMMM yyyy")} au ${formatDate(cohort.dateEnd, "d MMMM yyyy")}`;
