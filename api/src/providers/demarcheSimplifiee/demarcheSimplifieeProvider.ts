@@ -2,9 +2,8 @@ import fetch from "node-fetch";
 import config from "config";
 import { logger } from "../../logger";
 
-import { CLE_COLORATION, TYPE_CLASSE } from "snu-lib";
+import { CLE_COLORATION, TYPE_CLASSE, ClasseType } from "snu-lib";
 
-import { ClasseType } from "../../models";
 import { IAppelAProjet, IAppelAProjetOptions } from "../../cle/appelAProjetCle/appelAProjetType";
 import { buildDemarcheSimplifieeBody } from "./demarcheSimplifieeQueryBuilder";
 import { DemarcheSimplifieeDto, DossierState } from "./demarcheSimplifieeDto";

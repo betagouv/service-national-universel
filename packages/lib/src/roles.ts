@@ -1,7 +1,8 @@
 import { ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
-import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "./constants/constants";
+import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE } from "./constants/constants";
+import { ClasseType, SessionPhase1Type } from "./mongoSchema";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -101,7 +102,7 @@ const sameGeography = (actor, target) => {
   }
 };
 
-const referentInSameGeography = (actor, target) => isReferent(actor) && sameGeography(actor, target);
+const referentInSameGeography = (actor, target) => isReferentRegDep(actor) && sameGeography(actor, target);
 
 function canInviteUser(actorRole, targetRole) {
   // Admins can invite any user
@@ -347,7 +348,7 @@ function canCreateOrUpdateCohesionCenter(actor) {
 function canCreateEvent(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
-function canCreateOrUpdateSessionPhase1(actor, target) {
+function canCreateOrUpdateSessionPhase1(actor: UserDto, target?: SessionPhase1Type | null) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferent = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
   const isHeadCenter = actor.role === ROLES.HEAD_CENTER && target && actor._id.toString() === target.headCenterId;
@@ -470,20 +471,20 @@ function canSendPlanDeTransport(user) {
   return [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.TRANSPORTER].includes(user.role);
 }
 
-function isAdmin(user) {
+function isAdmin(user: UserDto) {
   return ROLES.ADMIN === user.role;
 }
 
-function isReferent(user) {
+function isReferentRegDep(user: UserDto) {
   return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 }
 
-function isSupervisor(user) {
+function isSupervisor(user: UserDto) {
   return ROLES.SUPERVISOR === user.role;
 }
 
-function isReferentOrAdmin(user) {
-  return isAdmin(user) || isReferent(user);
+function isReferentOrAdmin(user: UserDto) {
+  return isAdmin(user) || isReferentRegDep(user);
 }
 
 function isAdminCle(user) {
@@ -517,7 +518,7 @@ const canEditPresenceYoung = (actor) => {
 
 const canSigninAs = (actor, target, source) => {
   if (isAdmin(actor)) return true;
-  if (!isReferent(actor)) return false;
+  if (!isReferentRegDep(actor)) return false;
 
   if (source === "referent") {
     const allowedTargetRoles = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];
@@ -541,7 +542,7 @@ function canSearchAssociation(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-function canViewCohesionCenter(actor) {
+function canViewCohesionCenter(actor: UserDto) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(
     actor.role,
   );
@@ -1001,8 +1002,8 @@ function canEditEstimatedSeats(actor) {
 function canEditTotalSeats(actor) {
   if (actor.role === ROLES.ADMIN) {
     const now = new Date();
-    const limitDateEstimatedSeat = new Date(LIMIT_DATE_ESTIMATED_SEATS);
-    if (now <= limitDateEstimatedSeat) {
+    const limitDateTotalSeat = new Date(LIMIT_DATE_TOTAL_SEATS);
+    if (now <= limitDateTotalSeat) {
       return false;
     } else {
       return true;
@@ -1022,6 +1023,19 @@ function canVerifyClasse(actor) {
 
 function canManageMig(user: ReferentDto) {
   return ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role);
+}
+
+function canCreateEtablissement(user: UserDto) {
+  return [ROLES.ADMIN].includes(user.role);
+}
+
+//CLE
+function canValidateMultipleYoungsInClass(actor: UserDto, classe: ClasseType) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+}
+function canValidateYoungInClass(actor: UserDto, classe: ClasseType) {
+  if (isAdmin(actor)) return true;
+  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
 }
 
 export {
@@ -1176,4 +1190,7 @@ export {
   canVerifyClasse,
   canManageMig,
   canUpdateReferentClasse,
+  canCreateEtablissement,
+  canValidateMultipleYoungsInClass,
+  canValidateYoungInClass,
 };

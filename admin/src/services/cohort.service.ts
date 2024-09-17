@@ -56,6 +56,27 @@ export const getCohortGroups = (parentFilterKey: string = "cohort"): IIntermedia
     key: parentFilterKey,
     filters: [
       {
+        title: "CLE 2025",
+        name: CohortGroup.CLE_2025,
+        parentGroup: "Cohorte",
+        parentFilter: parentFilterKey,
+        missingLabel: "Non renseigné",
+        sort: (data) => orderCohort(data),
+        filter: (data: DataFilter) => data,
+        filterRootFilter: (dataFiltered: DataFilter[]) =>
+          dataFiltered?.filter((cohort) => (cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2025")) || cohort.key.toLowerCase().includes("cle 25")),
+      },
+      {
+        title: "HTS 2025",
+        name: CohortGroup.HTS_2025,
+        parentGroup: "Cohorte",
+        parentFilter: parentFilterKey,
+        missingLabel: "Non renseigné",
+        sort: (data) => orderCohort(data),
+        filter: (data: DataFilter) => data,
+        filterRootFilter: (dataFiltered: DataFilter[]) => dataFiltered?.filter((cohort) => !cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2025")),
+      },
+      {
         title: "CLE 2024",
         name: CohortGroup.CLE_2024,
         parentGroup: "Cohorte",
@@ -114,6 +135,8 @@ export const getCohortGroups = (parentFilterKey: string = "cohort"): IIntermedia
 };
 
 export enum CohortGroup {
+  CLE_2025 = "CLE_2025",
+  HTS_2025 = "HTS_2025",
   CLE_2024 = "CLE_2024",
   HTS_2024 = "HTS_2024",
   _2023 = "2023",

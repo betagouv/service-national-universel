@@ -13,7 +13,7 @@ import {
   translateGrade,
   CLE_COLORATION_LIST,
   translate,
-  ClasseDto,
+  ClasseType,
   isAdmin,
 } from "snu-lib";
 import { CohortDto } from "snu-lib/src/dto";
@@ -43,7 +43,7 @@ export const statusClassForBadge = (status) => {
       statusClasse = "CANCEL";
       break;
     case STATUS_CLASSE.OPEN:
-      statusClasse = "OPEN";
+      statusClasse = "VALIDATED";
       break;
 
     default:
@@ -53,13 +53,12 @@ export const statusClassForBadge = (status) => {
   return statusClasse;
 };
 
-export function getRights(user: User, classe?: ClasseDto, cohort?: CohortDto) {
+export function getRights(user: User, classe?: Pick<ClasseType, "status" | "schoolYear">, cohort?: CohortDto) {
   if (!user || !classe) return {};
   return {
     canEdit:
       ([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN) ||
-      (([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED] as (keyof typeof STATUS_CLASSE)[]).includes(classe?.status) &&
-        [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)),
+      (classe?.status !== STATUS_CLASSE.WITHDRAWN && classe?.schoolYear === "2024-2025" && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)),
     canEditEstimatedSeats: canEditEstimatedSeats(user),
     canEditTotalSeats: canEditTotalSeats(user),
     canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
@@ -74,7 +73,7 @@ export function getRights(user: User, classe?: ClasseDto, cohort?: CohortDto) {
   };
 }
 
-const showCohort = (cohort: CohortDto | undefined, user: User | undefined, classe: ClasseDto): boolean => {
+const showCohort = (cohort: CohortDto | undefined, user: User | undefined, classe: Pick<ClasseType, "status">): boolean => {
   if (!user) return false;
   if (!cohort) return isAdmin(user) && classe.status === STATUS_CLASSE.VERIFIED;
   let showCohort = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role);

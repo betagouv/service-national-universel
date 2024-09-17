@@ -5,8 +5,8 @@ import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { translate, canCreateClasse, ERRORS, FeatureFlagName, translateGrade, COHORT_TYPE, canUpdateCohort } from "snu-lib";
-import { ClasseDto, ReferentDto } from "snu-lib/src/dto";
+import { translate, canCreateClasse, ERRORS, FeatureFlagName, translateGrade, COHORT_TYPE, canUpdateCohort, ClasseType } from "snu-lib";
+import { ReferentDto } from "snu-lib/src/dto";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Label, InputText, ModalConfirmation, Select, InputNumber } from "@snu/ds/admin";
 
@@ -37,13 +37,7 @@ export default function Create() {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortState) => state.Cohorts).filter((cohort) => cohort.type === COHORT_TYPE.CLE && canUpdateCohort(cohort, user));
 
-  const [classe, setClasse] = useState<Partial<ClasseDto & { referent?: Partial<ReferentDto> }>>({
-    name: "",
-    cohort: "",
-    estimatedSeats: 0,
-    coloration: "",
-    type: "",
-  });
+  const [classe, setClasse] = useState<Partial<ClasseType & { referent?: Partial<ReferentDto> }>>({});
   const [errors, setErrors] = useState<FormError>({});
   const [referentClasse, setReferentClasse] = useState<Partial<ReferentDto>>({
     firstName: "",
@@ -69,7 +63,7 @@ export default function Create() {
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
       }
-      setClasse({ ...classe, uniqueKey: response.uniqueKey + "-XXXXXX", etablissementId: response._id, etablissement: response });
+      setClasse({ ...classe, uniqueKey: response.uniqueKey + "-XXXXXX", etablissementId: response._id });
       loadReferents({
         etablissementId: response._id,
         coordinateurs: response.coordinateurs.map((referent) => ({ ...referent, value: referent._id, label: `${referent.firstName} ${referent.lastName}` })),
@@ -199,7 +193,8 @@ export default function Create() {
                   closeMenuOnSelect={true}
                   value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
                   onChange={(options) => {
-                    setClasse({ ...classe, cohort: options.value });
+                    const cohortId = cohorts.find((c) => c.name === options.value)?._id;
+                    setClasse({ ...classe, cohortId });
                   }}
                   error={errors.cohort}
                 />

@@ -1,4 +1,4 @@
-import { ClasseType } from "../../models";
+import { ClasseType } from "snu-lib";
 
 export function createFixtureClasse(fields: Partial<ClasseType> = {}): Partial<ClasseType> {
   const classe: Partial<ClasseType> = {

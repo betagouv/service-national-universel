@@ -1,44 +1,30 @@
 import React from "react";
-import { BsTrash3 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
-import { translate, ROLES, translateGrade, formatDateFRTimezoneUTC, CohortDto, ClasseDto } from "snu-lib";
+import { translate, ROLES, translateGrade, formatDateFRTimezoneUTC, CohortDto, ClassesRoutes } from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
 import { Rights } from "./types";
 import { colorOptions, filiereOptions, gradeOptions, typeOptions } from "../utils";
+import WithdrawButton from "./WithdrawButton";
 interface Props {
-  classe: ClasseDto;
-  setClasse: (classe: ClasseDto) => void;
+  classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
+  setClasse: (classe: ClassesRoutes["GetOne"]["response"]["data"]) => void;
   edit: boolean;
   setEdit: (edit: boolean) => void;
   errors: { [key: string]: string };
   rights: Rights;
   cohorts: CohortDto[];
   user: User;
-  setShowModaleWithdraw: (b: boolean) => void;
   isLoading: boolean;
+  setIsLoading: (b: boolean) => void;
   onCancel: () => void;
   onCheckInfo: () => void;
   validatedYoung: number;
 }
 
-export default function GeneralInfos({
-  classe,
-  setClasse,
-  edit,
-  setEdit,
-  errors,
-  rights,
-  cohorts,
-  user,
-  setShowModaleWithdraw,
-  isLoading,
-  onCancel,
-  onCheckInfo,
-  validatedYoung,
-}: Props) {
+export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors, rights, cohorts, user, isLoading, setIsLoading, onCancel, onCheckInfo, validatedYoung }: Props) {
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
       return [
@@ -54,6 +40,12 @@ export default function GeneralInfos({
     }
   };
 
+  const isUserCLE = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role);
+  const isUserAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+
+  const linkPath = isUserCLE ? "/mes-eleves" : "/inscription";
+  const showButton = (isUserCLE && classe.schoolYear === "2024-2025") || isUserAdminOrReferent;
+
   return (
     <Container title="Informations générales" actions={containerActionList({ edit, setEdit, canEdit: rights.canEdit })}>
       <div className="flex items-stretch justify-stretch">
@@ -64,7 +56,7 @@ export default function GeneralInfos({
           <InputText
             name="nameClasse"
             className="flex-1 mb-3"
-            value={classe.name}
+            value={classe.name || ""}
             onChange={(e) => setClasse({ ...classe, name: e.target.value })}
             error={errors.name}
             readOnly={!edit}
@@ -129,7 +121,8 @@ export default function GeneralInfos({
                 closeMenuOnSelect={true}
                 value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
                 onChange={(options) => {
-                  setClasse({ ...classe, cohort: options.value });
+                  const cohortId = cohorts?.find((c) => c.name === options.value)?._id;
+                  setClasse({ ...classe, cohortId });
                 }}
                 error={errors.cohort}
               />
@@ -195,24 +188,18 @@ export default function GeneralInfos({
           />
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
             <>
-              <InputText name="etablissementName" className="mb-3" value={classe.etablissement?.name} readOnly={true} label="Établissement" />
+              <InputText name="etablissementName" className="mb-3" value={classe.etablissement?.name || ""} readOnly={true} label="Établissement" />
               <Link to={`/etablissement/${classe.etablissementId}`} className="w-full">
                 <Button type="tertiary" title="Voir l'établissement" className="w-full max-w-none" />
               </Link>
             </>
           )}
-          <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
-            <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
-          </Link>
-
-          {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? (
-            <div className="flex items-center justify-end mt-6">
-              <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={() => setShowModaleWithdraw(true)}>
-                <BsTrash3 className="mr-2" />
-                Désister la classe
-              </button>
-            </div>
-          ) : null}
+          {showButton && (
+            <Link key="list-students" to={`${linkPath}?classeId=${classe._id}`}>
+              <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
+            </Link>
+          )}
+          {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && <WithdrawButton classe={classe} setIsLoading={setIsLoading} />}
         </div>
       </div>
     </Container>

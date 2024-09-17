@@ -761,6 +761,7 @@ export default function StepCoordonnees() {
                 />
                 <BooleanRadioButtons
                   legend="Pour le séjour de cohésion, avez-vous besoin d’être affecté(e) dans un centre proche de chez vous pour raison médicale ?"
+                  hintText="Ne cochez cette case qu’en cas de nécessité."
                   value={handicapInSameDepartment}
                   onChange={(e) => updateData("handicapInSameDepartment")(e.target.value)}
                   orientation="horizontal"

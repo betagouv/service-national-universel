@@ -4,14 +4,14 @@ import crypto from "crypto";
 import config from "config";
 const { logger } = require("../../logger");
 
-import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ClasseSchoolYear, STATUS_CLASSE } from "snu-lib";
+import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ReferentType, EtablissementType, ClasseSchoolYear, STATUS_CLASSE } from "snu-lib";
 
 import { ERRORS } from "../../utils";
 import { sendTemplate } from "../../brevo";
 import { inSevenDays } from "../../utils";
 import { capture } from "../../sentry";
 
-import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument, ClasseModel, EtablissementType } from "../../models";
+import { EtablissementModel, ReferentModel, ReferentDocument, ClasseModel } from "../../models";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { UserDto } from "snu-lib";
 import { findReferentsClasseToSendInvitationByClasseStatus } from "../../cle/referent/referentRepository";
@@ -65,10 +65,11 @@ export const inviteReferent = async (
   const fromName = `${from?.firstName || null} ${from?.lastName || null}`;
   const toName = `${referent.firstName} ${referent.lastName}`;
   const name_school = `${etablissement.name}`;
+  const emailEtablissement = `${referent.email}`;
 
   return await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[role], {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { cta, fromName, toName, name_school },
+    params: { cta, fromName, toName, name_school, emailEtablissement },
   });
 };
 

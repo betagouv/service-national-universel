@@ -4,8 +4,8 @@ import { Types } from "mongoose";
 const { ObjectId } = Types;
 import emailsEmitter from "../../emails";
 import snuLib, { FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
-import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS } from "snu-lib";
-
+import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS, ClasseCertificateKeys } from "snu-lib";
+import * as classeService from "../../cle/classe/classeService";
 import { dbConnect, dbClose } from "../helpers/db";
 import { mockEsClient } from "../helpers/es";
 import getAppHelper from "../helpers/app";
@@ -314,11 +314,12 @@ describe("PUT /cle/classe/:id", () => {
   it("should return 404 when user try to change cohort that doesn't exist", async () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
+    const cohortId = new ObjectId().toString();
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: "New Cohort",
+        cohortId: cohortId,
       });
     expect(res.status).toBe(404);
   });
@@ -337,7 +338,7 @@ describe("PUT /cle/classe/:id", () => {
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
     expect(res.status).toBe(403);
     // @ts-ignore
@@ -355,7 +356,7 @@ describe("PUT /cle/classe/:id", () => {
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
 
     expect(res.status).toBe(403);
@@ -451,7 +452,7 @@ describe("PUT /cle/classe/:id", () => {
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
 
     expect(res.status).toBe(403);
@@ -476,14 +477,14 @@ describe("PUT /cle/classe/:id", () => {
     const cohort = await createCohortHelper(getNewCohortFixture({ name: "CLE juin 2024" }));
     const classe = createFixtureClasse({});
     const validId = (await createClasse(classe))._id;
-    const young = getNewYoungFixture({ classeId: validId, cohort: "CLE mai 2024" });
+    const young = getNewYoungFixture({ classeId: validId, cohortId: cohort._id });
     await createYoungHelper(young);
 
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
     expect(res.status).toBe(200);
     expect(res.body.data.name).toBe(classe.name);
@@ -777,9 +778,10 @@ describe("POST /cle/classe", () => {
   it("should return 404 if the cohort is not found", async () => {
     jest.spyOn(featureService, "isFeatureAvailable").mockResolvedValueOnce(true);
     const etablissement = await createEtablissement(createFixtureEtablissement());
+    const cohortId = new ObjectId().toString();
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/cle/classe")
-      .send({ ...validBody, cohort: "invalidCohort", etablissementId: etablissement._id.toString() });
+      .send({ ...validBody, cohortId: cohortId, etablissementId: etablissement._id.toString() });
 
     expect(response.status).toBe(404);
     expect(response.body.message).toBe("Cohort not found.");
@@ -790,7 +792,7 @@ describe("POST /cle/classe", () => {
     const cohort = await createCohortHelper(getNewCohortFixture());
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/cle/classe")
-      .send({ ...validBody, cohort: cohort.name, etablissementId: etablissement._id.toString() });
+      .send({ ...validBody, cohortId: cohort._id, etablissementId: etablissement._id.toString() });
 
     expect(response.status).toBe(400);
   });
@@ -801,7 +803,7 @@ describe("POST /cle/classe", () => {
     const cohort = await createCohortHelper(getNewCohortFixture());
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/cle/classe")
-      .send({ ...validBody, cohort: cohort.name, etablissementId: etablissement._id.toString() });
+      .send({ ...validBody, cohortId: cohort._id, etablissementId: etablissement._id.toString() });
 
     expect(response.status).toBe(200);
     const classe = await ClasseModel.findById(response.body.data._id).lean();
@@ -934,7 +936,9 @@ describe("PUT /cle/classe/:id/referent", () => {
   it("should create a new referent if classe is not CREATED for super admin", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
     const classe = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
+    // @ts-ignore
     passport.user.role = ROLES.ADMIN;
+    // @ts-ignore
     passport.user.subrole = "god";
     const newReferentDetails = {
       firstName: "John",
@@ -951,6 +955,7 @@ describe("PUT /cle/classe/:id/referent", () => {
     expect(updatedReferent.email).toBe(newReferentDetails.email);
     expect(updatedReferent.metadata.isFirstInvitationPending).toBe(true);
     expect(res.status).toBe(200);
+    // @ts-ignore
     passport.user.subrole = "";
   });
 
@@ -975,6 +980,7 @@ describe("PUT /cle/classe/:id/referent", () => {
   it("should return 403 if the user is not authorized to update the referent classe", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
     const classe = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
+    // @ts-ignore
     passport.user.role = ROLES.REFERENT_CLASSE; // Assuming this role is not authorized to update the referent classe
     const newReferentDetails = {
       firstName: "John",
@@ -985,6 +991,107 @@ describe("PUT /cle/classe/:id/referent", () => {
     expect(res.ok).toBe(false);
     expect(res.text).toContain(ERRORS.OPERATION_UNAUTHORIZED);
     expect(res.status).toBe(403);
+    // @ts-ignore
     passport.user.role = ROLES.ADMIN; // Resetting the role for other tests
+  });
+});
+
+describe("POST /:id/certificate/:key", () => {
+  it("should return 400 when id is invalid", async () => {
+    const invalidId = "invalidId";
+    const res = await request(getAppHelper()).post(`/cle/classe/${invalidId}/certificate/IMAGE`);
+    expect(res.status).toBe(400);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe(ERRORS.INVALID_PARAMS);
+  });
+
+  it("should return 400 when certificate key is invalid", async () => {
+    const validId = new ObjectId();
+    const invalidKey = "invalidKey";
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${invalidKey}`);
+    expect(res.status).toBe(400);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe(ERRORS.INVALID_PARAMS);
+  });
+
+  it("should return 403 when the user is not authorized to download certificates", async () => {
+    const validId = new ObjectId();
+    // @ts-ignore
+    const previousUser = passport.user;
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.DSNJ }));
+    // @ts-ignore
+    passport.user = referent;
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${ClasseCertificateKeys.CONVOCATION}`);
+    expect(res.status).toBe(403);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe(ERRORS.OPERATION_NOT_ALLOWED);
+    // @ts-ignore
+    passport.user = previousUser;
+  });
+
+  it("should return 404 when class is not found", async () => {
+    const nonExistingId = "104a49ba503555e4d8853003";
+    const res = await request(getAppHelper()).post(`/cle/classe/${nonExistingId}/certificate/${ClasseCertificateKeys.CONVOCATION}`);
+    expect(res.status).toBe(404);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe(ERRORS.NOT_FOUND);
+  });
+
+  it("should return 500 if an error occurs during certificate generation", async () => {
+    const validId = (await createClasse(createFixtureClasse()))._id;
+    const key = ClasseCertificateKeys.CONSENT;
+    const generateConsentementSpy = jest.spyOn(classeService, "generateConsentementByClasseId").mockRejectedValue(new Error("Test Error"));
+
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${key}`);
+    expect(res.status).toBe(500);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.code).toBe("Test Error");
+
+    generateConsentementSpy.mockRestore();
+  });
+
+  it("should return 200 and send the convocations when request is successful", async () => {
+    const validId = (await createClasse(createFixtureClasse()))._id;
+    const key = ClasseCertificateKeys.CONVOCATION;
+
+    const mockCertificate = Buffer.from("PDF content");
+    const generateConvocationsSpy = jest.spyOn(classeService, "generateConvocationsByClasseId").mockResolvedValue(mockCertificate);
+
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${key}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(mockCertificate);
+
+    generateConvocationsSpy.mockRestore();
+  });
+
+  it("should return 200 and send the consentements when request is successful", async () => {
+    const validId = (await createClasse(createFixtureClasse()))._id;
+    const key = ClasseCertificateKeys.CONSENT;
+
+    const mockCertificate = Buffer.from("PDF content");
+    const generateConsentementsSpy = jest.spyOn(classeService, "generateConsentementByClasseId").mockResolvedValue(mockCertificate);
+
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${key}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(mockCertificate);
+
+    generateConsentementsSpy.mockRestore();
+  });
+
+  it("should return 200 and send the imageRight when request is successful", async () => {
+    const validId = (await createClasse(createFixtureClasse()))._id;
+    const key = ClasseCertificateKeys.IMAGE;
+
+    const mockCertificate = Buffer.from("PDF content");
+    const generateImageRightSpy = jest.spyOn(classeService, "generateImageRightByClasseId").mockResolvedValue(mockCertificate);
+
+    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${key}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(mockCertificate);
+
+    generateImageRightSpy.mockRestore();
   });
 });

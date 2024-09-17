@@ -1,5 +1,5 @@
-import { ReferentCreatedBy, ROLES, SUB_ROLES, InvitationType } from "snu-lib";
-import { ReferentModel, ReferentType, EtablissementType } from "../../models";
+import { ReferentCreatedBy, ROLES, SUB_ROLES, InvitationType, EtablissementType, ReferentType } from "snu-lib";
+import { ReferentModel } from "../../models";
 import { IAppelAProjet } from "./appelAProjetType";
 import { logger } from "../../logger";
 
