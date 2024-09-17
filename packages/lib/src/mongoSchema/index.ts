@@ -6,4 +6,5 @@ export * from "./cohesionCenter";
 export * from "./cohort";
 export * from "./pointDeRassemblement";
 export * from "./referent";
+export * from "./sessionPhase1";
 export * from "./young";
