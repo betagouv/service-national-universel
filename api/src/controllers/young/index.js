@@ -1127,7 +1127,7 @@ router.use("/:id/phase1", require("./phase1"));
 router.use("/:id/phase2", require("./phase2"));
 router.use("/reinscription", require("./reinscription"));
 router.use("/inscription2023", require("./inscription2023"));
-router.use("/note", require("./note"));
+router.use("/note", require("./note").default);
 router.use("/:id/point-de-rassemblement", require("./point-de-rassemblement"));
 router.use("/account", require("./account"));
 
