@@ -128,7 +128,7 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
                     cohortId: cohort._id,
                     cohort: cohort.name,
                     cohortDetails: {
-                      _id: cohort._id,
+                      _id: cohort._id ?? "",
                       dateStart: cohort.dateStart,
                       dateEnd: cohort.dateEnd,
                     },
