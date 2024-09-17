@@ -1,5 +1,5 @@
-import { ClasseType, EtablissementType, ReferentType } from "../../../mongoSchema";
-import { ClasseDto, CohortDto } from "../../../dto";
+import { ClasseType, CohesionCenterType, CohortType, EtablissementType, ReferentType, PointDeRassemblementType } from "../../../mongoSchema";
+import { ClasseDto } from "../../../dto";
 import { BasicRoute, RouteResponseBody } from "../..";
 
 export interface GetOneClasseRoute extends BasicRoute {
@@ -13,10 +13,10 @@ export interface GetOneClasseRoute extends BasicRoute {
     ClasseType & {
       etablissement?: Omit<EtablissementType, "referentEtablissementIds" | "coordinateurIds" | "createdAt" | "updatedAt">;
       referents?: Pick<ReferentType, "_id" | "firstName" | "lastName" | "role" | "email">[];
-      cohesionCenter?: Pick<ClasseDto["cohesionCenter"], "_id" | "name" | "address" | "zip" | "city" | "department" | "region">;
+      cohesionCenter?: Pick<CohesionCenterType, "_id" | "name" | "address" | "zip" | "city" | "department" | "region">;
       session?: Pick<ClasseDto["session"], "_id">;
-      pointDeRassemblement?: Pick<ClasseDto["pointDeRassemblement"], "_id" | "name" | "address" | "zip" | "city" | "department" | "region">;
-      cohortDetails?: Pick<CohortDto, "_id" | "dateStart" | "dateEnd">;
+      pointDeRassemblement?: Pick<PointDeRassemblementType, "_id" | "name" | "address" | "zip" | "city" | "department" | "region">;
+      cohortDetails?: Pick<CohortType, "_id" | "dateStart" | "dateEnd">;
     }
   >;
 }
