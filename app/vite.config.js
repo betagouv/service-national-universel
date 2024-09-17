@@ -51,7 +51,7 @@ export default defineConfig(({ mode }) => {
     );
   } else {
     // autp-reload when changes detected in snu-lib
-    // plugins.push(VitePluginWatchPackages());
+    plugins.push(VitePluginWatchPackages());
   }
   return {
     server: {
@@ -79,7 +79,7 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       include: ["snu-lib", "@snu/ds"],
-      // force: true,
+      force: true,
     },
     resolve: {
       alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }],
