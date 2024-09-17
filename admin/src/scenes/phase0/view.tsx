@@ -26,7 +26,7 @@ import { BorderButton, PlainButton } from "./components/Buttons";
 import { ConfirmModalContent, ConfirmModalContentData } from "./components/ConfirmModalContent";
 import SectionConsentements from "./components/sections/consentements/SectionConsentements";
 import SectionParents from "./components/sections/SectionParents";
-import SectionIdentite from "./components/sections/identite/SectionIdentite";
+import SectionContact from "./components/sections/identite/SectionContact";
 import SectionOldConsentements from "./components/sections/consentements/SectionOldConsentements";
 
 const REJECTION_REASONS = {
@@ -240,7 +240,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
             </p>
           </div>
         )}
-        <SectionIdentite
+        <SectionContact
           cohort={cohort}
           young={young}
           globalMode={globalMode}

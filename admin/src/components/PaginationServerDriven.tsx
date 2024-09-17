@@ -62,6 +62,7 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
             placeholder="par page"
             defaultValue={sizeOptions[0].value}
             options={sizeOptions}
+            closeMenuOnSelect={true}
             value={sizeOptions.find((option) => Number(option.value) === size) || null}
             onChange={(option) => {
               checkSize(Number(option.value));
