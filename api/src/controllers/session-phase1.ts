@@ -1,29 +1,29 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const Joi = require("joi");
-const crypto = require("crypto");
-const datefns = require("date-fns");
-const { fr } = require("date-fns/locale");
-const fileUpload = require("express-fileupload");
-const fs = require("fs");
-const mongoose = require("mongoose");
+import express, { Response } from "express";
+import passport from "passport";
+import Joi from "joi";
+import crypto from "crypto";
+import * as datefns from "date-fns";
+import { fr } from "date-fns/locale";
+import fileUpload from "express-fileupload";
+import fs from "fs";
+import mongoose from "mongoose";
 
-const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
-const { generateBatchDroitImage } = require("../templates/droitImage/droitImage");
-const { capture } = require("../sentry");
-const { SessionPhase1Model } = require("../models");
-const { CohesionCenterModel } = require("../models");
-const { CohortModel } = require("../models");
-const { YoungModel } = require("../models");
-const { ReferentModel } = require("../models");
-const { PointDeRassemblementModel } = require("../models");
-const { LigneBusModel } = require("../models");
-const { SessionPhase1TokenModel } = require("../models");
-const { SchemaDeRepartitionModel } = require("../models");
-
-const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
-const {
+import { generateBatchCertifPhase1 } from "../templates/certificate/phase1";
+import { generateBatchDroitImage } from "../templates/droitImage/droitImage";
+import { capture } from "../sentry";
+import {
+  SessionPhase1Model,
+  CohesionCenterModel,
+  CohortModel,
+  YoungModel,
+  ReferentModel,
+  PointDeRassemblementModel,
+  LigneBusModel,
+  SessionPhase1TokenModel,
+  SchemaDeRepartitionModel,
+} from "../models";
+import { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } from "../utils";
+import {
   ROLES,
   SENDINBLUE_TEMPLATES,
   getCohortStartDate,
@@ -40,17 +40,21 @@ const {
   canSendTimeScheduleReminderForSessionPhase1,
   canSendImageRightsForSessionPhase1,
   formatDateTimeZone,
-} = require("snu-lib");
-const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
-const { validateSessionPhase1, validateId } = require("../utils/validator");
-const { sendTemplate } = require("../brevo");
-const config = require("config");
-const { encrypt, decrypt } = require("../cryptoUtils");
-const scanFile = require("../utils/virusScanner");
+  YoungDto,
+  SessionPhase1Type,
+} from "snu-lib";
+import { serializeSessionPhase1, serializeCohesionCenter } from "../utils/serializer";
+import { validateSessionPhase1, validateId } from "../utils/validator";
+import { sendTemplate } from "../brevo";
+import config from "config";
+import { encrypt, decrypt } from "../cryptoUtils";
+import scanFile from "../utils/virusScanner";
+import { getMimeFromFile } from "../utils/file";
+import { UserRequest } from "./request";
 
-const { getMimeFromFile } = require("../utils/file");
+const router = express.Router();
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = validateSessionPhase1(req.body);
     if (error) {
@@ -70,7 +74,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.get("/:id/schema-repartition", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/schema-repartition", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -93,7 +97,7 @@ router.get("/:id/schema-repartition", passport.authenticate("referent", { sessio
 
 router.use("/", require("../sessionPhase1/sessionPhase1Controller"));
 
-router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -108,8 +112,8 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
     if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user)) {
-      if (session._id.toString() !== req.user.sessionPhase1Id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else if (!canViewCohesionCenter(req.user, cohesionCenter)) {
+      if (session._id.toString() !== req.user.sessionPhase1Id?.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else if (!canViewCohesionCenter(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -120,7 +124,7 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
   }
 });
 
-router.get("/:id", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -131,7 +135,7 @@ router.get("/:id", passport.authenticate(["referent"], { session: false, failWit
     const session = await SessionPhase1Model.findById(id);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canViewSessionPhase1(req.user, session)) {
+    if (!canViewSessionPhase1(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -142,7 +146,7 @@ router.get("/:id", passport.authenticate(["referent"], { session: false, failWit
   }
 });
 
-router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await SessionPhase1Model.find({});
@@ -153,7 +157,7 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.TRANSPORTER].includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -186,7 +190,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
-    if (cohesionCenter.placesTotal < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if ((cohesionCenter?.placesTotal || 0) < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     let oldHeadCenterId = sessionPhase1.headCenterId;
     const hasHeadCenterChanged = oldHeadCenterId !== value.oldHeadCenterId;
@@ -214,7 +218,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -252,7 +256,7 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
   }
 });
 
-router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -266,7 +270,8 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
     if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canDownloadYoungDocuments(req.user, cohesionCenter)) {
+    // FIXME: any, young et cohesion se parteg les champs nécessaire à canDownloadYoungDocuments
+    if (!canDownloadYoungDocuments(req.user, cohesionCenter as any)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -289,7 +294,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -299,7 +304,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const sessionPhase1 = await SessionPhase1Model.findById(id);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user, sessionPhase1)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // check if youngs are registered to the session
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
@@ -311,6 +316,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     // delete cohort in cohesion center
     const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
+    if (!cohesionCenter) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     cohesionCenter.set({ cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
     cohesionCenter.save({ fromUser: req.user });
 
@@ -323,7 +331,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.post("/:sessionId/share", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:sessionId/share", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       sessionId: Joi.string().required(),
@@ -353,7 +361,7 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
     for (const email of value.emails) {
       await sendTemplate(SENDINBLUE_TEMPLATES.SHARE_SESSION_PHASE1, {
         emailTo: [{ email: email }],
-        params: { link: `${config.ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort.toLowerCase() },
+        params: { link: `${config.ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort?.toLowerCase() },
       });
     }
 
@@ -364,7 +372,7 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
   }
 });
 
-router.post("/check-token/:token", async (req, res) => {
+router.post("/check-token/:token", async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       token: Joi.string().required(),
@@ -385,7 +393,16 @@ router.post("/check-token/:token", async (req, res) => {
     if (!cohortParam) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (cohortParam?.busListAvailability) {
-      let result = {
+      let result: {
+        noMeetingPoint: {
+          youngs: YoungDto[];
+          meetingPoint: string[];
+        };
+        transportInfoGivenByLocal: {
+          youngs: YoungDto[];
+          meetingPoint: string[];
+        };
+      } = {
         noMeetingPoint: {
           youngs: [],
           meetingPoint: [],
@@ -399,7 +416,7 @@ router.post("/check-token/:token", async (req, res) => {
 
       const ligneBus = await LigneBusModel.find({ cohortId: sessionPhase1.cohortId, centerId: sessionPhase1.cohesionCenterId });
 
-      let arrayMeetingPoints = [];
+      let arrayMeetingPoints: string[] = [];
       ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
 
       const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
@@ -461,7 +478,7 @@ router.post("/check-token/:token", async (req, res) => {
   }
 });
 
-router.put("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     if (!isReferentOrAdmin(req.user) && req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -479,6 +496,9 @@ router.put("/:id/headCenter", passport.authenticate("referent", { session: false
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const referent = await ReferentModel.findById(checkedIdHeadCenter);
+    if (!referent) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     if (referent.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Cannot be head of center in more than one centers for the same cohort
@@ -496,7 +516,7 @@ router.put("/:id/headCenter", passport.authenticate("referent", { session: false
   }
 });
 
-router.delete("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     if (!isReferentOrAdmin(req.user) && req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -525,7 +545,7 @@ router.post(
   "/:id/:key",
   passport.authenticate(["referent"], { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
-  async (req, res) => {
+  async (req: UserRequest, res: Response) => {
     try {
       // --- validate
       const { error, value } = Joi.object({
@@ -555,7 +575,7 @@ router.post(
       }
       const file = files[0];
 
-      const { name, tempFilePath, mimetype, size } = file;
+      const { name, tempFilePath, mimetype, size } = file as any;
       const filetype = await getMimeFromFile(tempFilePath);
       const mimeFromMagicNumbers = filetype || "application/pdf";
       const validTypes = ["image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
@@ -564,16 +584,16 @@ router.post(
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      const scanResult = await scanFile(tempFilePath, name, req.user.id);
+      const scanResult = await scanFile(tempFilePath, name, req.user._id);
       if (scanResult.infected) {
         return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
       }
 
-      const newFile = {
-        _id: mongoose.Types.ObjectId(),
+      const newFile: Partial<SessionPhase1Type["timeScheduleFiles"][0]> = {
+        _id: new mongoose.Types.ObjectId().toString(),
         name,
         size,
-        uploadedAt: Date.now(),
+        uploadedAt: new Date(),
         mimetype,
       };
       const data = fs.readFileSync(tempFilePath);
@@ -583,7 +603,7 @@ router.post(
       fs.unlinkSync(tempFilePath);
 
       // Add file to session & save
-      newFile._id = newFile._id.toString();
+      newFile._id = newFile._id!.toString();
       if (key === "time-schedule") {
         session.timeScheduleFiles.push(newFile);
         session.set("hasTimeSchedule", "true");
@@ -606,7 +626,7 @@ router.post(
 /**
  * Delete a time schedule file (fileId) in session (sessionId)
  */
-router.delete("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // --- validate
     const { error, value } = Joi.object({
@@ -669,7 +689,7 @@ router.delete("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { 
 /**
  * Download a time schedule file (fileId) from session (sessionId).
  */
-router.get("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // --- validate
     const { error, value } = Joi.object({
@@ -709,7 +729,7 @@ router.get("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { ses
     // --- Send
     return res.status(200).send({
       data: Buffer.from(decrypt(downloaded.Body), "base64"),
-      mimeType: file.mime,
+      mimeType: file.mimetype,
       fileName: file.name,
       ok: true,
     });
@@ -719,7 +739,7 @@ router.get("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { ses
   }
 });
 
-router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // --- validate
     const { error, value } = Joi.object({
@@ -773,7 +793,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
   }
 });
 
-router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // --- validate
     const { error, value } = Joi.object({
