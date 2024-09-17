@@ -188,14 +188,9 @@ export const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
   label: translate(TYPE_CLASSE_LIST[value]),
 }));
 
-interface ReferentWithFullName extends ReferentDto {
-  fullName: string;
-}
-
 export interface ClasseExport extends ClasseType {
   nb_classe: number;
   nb_young: number;
-  referents: ReferentWithFullName[];
   referentEtablissement: {
     fullName: string;
     phone: string;
@@ -241,7 +236,7 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       createdAt: dayjs(c.createdAt).format("DD/MM/YYYY HH:mm"),
       updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
       // ref classe
-      classeRefFullName: c.referents ? c.referents[0]?.fullName : "",
+      classeRefFullName: c.referents ? `${c.referents[0]?.firstName} ${c.referents[0]?.lastName}` : "",
       classeRefPhone: c.referents ? c.referents[0]?.phone : "",
       classeRefEmail: c.referents ? c.referents[0]?.email : "",
       //etablissement
@@ -306,7 +301,7 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       department: c.etablissement?.department,
       uai: c.etablissement?.uai,
       etablissementName: c.etablissement?.name,
-      classeRefFullName: c.referents ? c.referents[0]?.fullName : "",
+      classeRefFullName: c.referents ? `${c.referents[0]?.firstName} ${c.referents[0]?.lastName}` : "",
       classeRefPhone: c.referents ? c.referents[0]?.phone : "",
       classeRefEmail: c.referents ? c.referents[0]?.email : "",
       youngsVolume: c.totalSeats ?? 0,
