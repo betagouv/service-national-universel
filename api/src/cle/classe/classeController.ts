@@ -29,6 +29,7 @@ import {
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
   ClasseCertificateKeys,
+  ReferentType,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -48,7 +49,6 @@ import {
   PointDeRassemblementDocument,
   ReferentDocument,
   ReferentModel,
-  ReferentType,
   YoungModel,
 } from "../../models";
 
