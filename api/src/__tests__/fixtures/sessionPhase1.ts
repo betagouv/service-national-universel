@@ -1,4 +1,4 @@
-import { SessionPhase1Type } from "../../models";
+import { SessionPhase1Type } from "snu-lib";
 
 function getNewSessionPhase1Fixture(object: Partial<SessionPhase1Type> = {}): Partial<SessionPhase1Type> {
   const placesLeft = 15;

@@ -7,18 +7,21 @@
  *   DELETE  /note/:youngId/:noteId   -> delete note
  */
 
-const express = require("express");
-const router = express.Router({ mergeParams: true });
-const Joi = require("joi");
-const passport = require("passport");
-const { YoungModel } = require("../../models");
-const { capture } = require("../../sentry");
-const { serializeYoung } = require("../../utils/serializer");
-const { ERRORS } = require("../../utils");
+import express, { Response } from "express";
+import Joi from "joi";
+import passport from "passport";
+import { YoungModel } from "../../models";
+import { capture } from "../../sentry";
+import { serializeYoung } from "../../utils/serializer";
+import { ERRORS } from "../../utils";
+import { UserRequest } from "../request";
+import { validateId } from "../../utils/validator";
 
-router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+const router = express.Router({ mergeParams: true });
+
+router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    const { error: error_id, value: id } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
+    const { error: error_id, value: id } = validateId(req.params.youngId);
     if (error_id) {
       capture(error_id);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -72,7 +75,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.put("/:youngId/:noteId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:youngId/:noteId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_young_id, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
     const { error: error_note_id, value: noteId } = Joi.string().required().validate(req.params.noteId, { stripUnknown: true });
@@ -105,17 +108,17 @@ router.put("/:youngId/:noteId", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const updatedNote = young.notes?.find((note) => note._id.toString() === noteId);
+    const updatedNote = young.notes?.find((note) => note._id?.toString() === noteId);
     if (!updatedNote) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (updatedNote.referent._id.toString() !== req.user._id.toString()) {
+    if (updatedNote.referent?._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const updatedNotes = young.notes.map((currentNote) => {
-      if (currentNote._id.toString() === noteId) {
+      if (currentNote._id?.toString() === noteId) {
         return { _id: currentNote._id, note, phase, updatedAt: new Date(), createdAt: currentNote.createdAt, referent: currentNote.referent };
       }
       return currentNote;
@@ -131,7 +134,7 @@ router.put("/:youngId/:noteId", passport.authenticate("referent", { session: fal
   }
 });
 
-router.delete("/:youngId/:noteId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:youngId/:noteId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_young_id, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
     const { error: error_note_id, value: noteId } = Joi.string().required().validate(req.params.noteId, { stripUnknown: true });
@@ -150,16 +153,16 @@ router.delete("/:youngId/:noteId", passport.authenticate("referent", { session: 
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const deletedNote = young.notes?.find((note) => note._id.toString() === noteId);
+    const deletedNote = young.notes?.find((note) => note._id?.toString() === noteId);
     if (!deletedNote) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (deletedNote.referent._id.toString() !== req.user._id.toString()) {
+    if (deletedNote.referent?._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const updatedNotes = young.notes.filter((currentNote) => !(currentNote._id.toString() === noteId));
+    const updatedNotes = young.notes.filter((currentNote) => !(currentNote._id?.toString() === noteId));
 
     young.set({
       notes: updatedNotes,
@@ -174,4 +177,4 @@ router.delete("/:youngId/:noteId", passport.authenticate("referent", { session: 
   }
 });
 
-module.exports = router;
+export default router;

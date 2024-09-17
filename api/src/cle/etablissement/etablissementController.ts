@@ -14,14 +14,14 @@ import {
   isChefEtablissement,
   isReferentOrAdmin,
   SENDINBLUE_TEMPLATES,
-  ClasseType,
   ClasseSchoolYear,
+  EtablissementType,
 } from "snu-lib";
 import { ReferentDto } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
-import { ClasseModel, EtablissementModel, ReferentModel, EtablissementType } from "../../models";
+import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
 import { idSchema } from "../../utils/validator";
 import { sendTemplate } from "../../brevo";
@@ -40,7 +40,7 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
     const query = {};
     let valueField: any = { $in: [req.user._id] };
     if (req.user.role === ROLES.REFERENT_CLASSE) {
-      const classes: ClasseType[] = await ClasseModel.find({ referentClasseIds: { $in: req.user._id } });
+      const classes = await ClasseModel.find({ referentClasseIds: { $in: req.user._id } });
       if (!classes || classes.length === 0) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const lastClasse = classes.find((classe) => classe.schoolYear === ClasseSchoolYear.YEAR_2024_2025) || classes[0];
       valueField = lastClasse.etablissementId;

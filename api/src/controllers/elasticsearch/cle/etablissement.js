@@ -7,7 +7,7 @@ const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
-const { populateWithReferentInfo, populateEtablissementWithNumber } = require("../populate/populateEtablissement");
+const { populateWithReferentInfo, populateWithCoordinatorInfo, populateEtablissementWithNumber } = require("../populate/populateEtablissement");
 const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
 
 async function buildEtablisssementContext(user) {
@@ -77,6 +77,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       let etablissements = await allRecords("etablissement", hitsRequestBody.query, esClient, exportFields);
       if (req.query.needReferentInfo) {
         etablissements = await populateWithReferentInfo({ etablissements, isExport: true });
+        etablissements = await populateWithCoordinatorInfo({ etablissements, isExport: true });
       }
       etablissements = await populateEtablissementWithNumber({ etablissements, index: "classe" });
       etablissements = await populateEtablissementWithNumber({ etablissements, index: "young" });

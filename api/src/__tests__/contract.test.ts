@@ -1,6 +1,9 @@
 import crypto from "crypto";
 import { Types } from "mongoose";
 import request from "supertest";
+
+import { YoungType } from "snu-lib";
+
 import getAppHelper from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewContractFixture from "./fixtures/contract";
@@ -9,7 +12,6 @@ import getNewYoungFixture from "./fixtures/young";
 import { createApplication, getApplicationByIdHelper } from "./helpers/application";
 import { getYoungByIdHelper, createYoungHelper } from "./helpers/young";
 import { expectContractToEqual, getContractByIdHelper, createContractHelper } from "./helpers/contract";
-import { YoungType } from "../models";
 
 const { ObjectId } = Types;
 

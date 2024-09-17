@@ -18,6 +18,9 @@ export default function CreateContactForm({ data, onSuccess }) {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    setEmailError("");
+    setBirthdateError("");
+
     let isError = false;
 
     if (!email) {
