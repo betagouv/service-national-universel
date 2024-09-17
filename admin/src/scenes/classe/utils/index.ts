@@ -188,12 +188,14 @@ export interface ClasseExport extends ClasseType {
   nb_classe: number;
   nb_young: number;
   referentEtablissement: {
-    fullName: string;
+    firstName: string;
+    lastName: string;
     phone: string;
     email: string;
   }[];
   coordinateurs: {
-    fullName: string;
+    firstName: string;
+    lastName: string;
     phone: string;
     email: string;
   }[];
@@ -232,21 +234,21 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       createdAt: dayjs(c.createdAt).format("DD/MM/YYYY HH:mm"),
       updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
       // ref classe
-      classeRefFullName: c.referents ? `${c.referents[0]?.firstName} ${c.referents[0]?.lastName}` : "",
+      classeRefFullName: c.referents?.length ? `${c.referents[0]?.firstName} ${c.referents[0]?.lastName}` : "",
       classeRefPhone: c.referents ? c.referents[0]?.phone : "",
       classeRefEmail: c.referents ? c.referents[0]?.email : "",
       //etablissement
       uai: c.etablissement?.uai,
       etablissementName: c.etablissement?.name,
       // chef d'etablissement
-      etabRefFullName: c.referentEtablissement ? c.referentEtablissement[0]?.fullName : "",
+      etabRefFullName: c.referentEtablissement.length ? `${c.referentEtablissement[0]?.firstName} ${c.referentEtablissement[0]?.lastName}` : "",
       etabRefPhone: c.referentEtablissement ? c.referentEtablissement[0]?.phone : "",
       etabRefEmail: c.referentEtablissement ? c.referentEtablissement[0]?.email : "",
       //coordinateurs
-      coordinateur1FullName: c.coordinateurs ? c.coordinateurs[0]?.fullName : "",
+      coordinateur1FullName: c.coordinateurs.length ? `${c.coordinateurs[0]?.firstName} ${c.coordinateurs[0]?.lastName}` : "",
       coordinateur1Phone: c.coordinateurs ? c.coordinateurs[0]?.phone : "",
       coordinateur1Email: c.coordinateurs ? c.coordinateurs[0]?.email : "",
-      coordinateur2FullName: c.coordinateurs ? c.coordinateurs[1]?.fullName : "",
+      coordinateur2FullName: c.coordinateurs.length > 1 ? `${c.coordinateurs[1]?.firstName} ${c.coordinateurs[1]?.lastName}` : "",
       coordinateur2Phone: c.coordinateurs ? c.coordinateurs[1]?.phone : "",
       coordinateur2Email: c.coordinateurs ? c.coordinateurs[1]?.email : "",
     }));
