@@ -17,7 +17,7 @@ const schema = new Schema({
   ...YoungSchema,
   files: {
     ...Object.keys(YoungSchema.files).reduce((acc, key) => {
-      acc[key] = [YoungSchemaFile];
+      acc[key] = [new Schema(YoungSchemaFile)];
       return acc;
     }, {}),
   },
