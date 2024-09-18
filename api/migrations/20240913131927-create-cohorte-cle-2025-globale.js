@@ -11,8 +11,8 @@ module.exports = {
       const cohort = new CohortModel({
         snuId: cohortName,
         name: cohortName,
-        dateStart: new Date("2024-01-01"),
-        dateEnd: new Date("2024-12-31"),
+        dateStart: new Date("2025-01-01"),
+        dateEnd: new Date("2024-06-30"),
         type: COHORT_TYPE.CLE,
         eligibility: {
           zones: ["A", "B", "C"],
