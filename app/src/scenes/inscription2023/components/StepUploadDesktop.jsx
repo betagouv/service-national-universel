@@ -60,7 +60,11 @@ export default function StepUploadDesktop({
       error.text = "Date invalide. Veuillez entrer une date valide.";
     }
     if (corrections?.length) {
-      return !hasChanged && !loading && !error.text;
+      if (!hasChanged && !loading) {
+        error.text = "Veuillez Modifier vos informations personnelles";
+      } else {
+        return error;
+      }
     } else {
       if (!recto || (category !== "passport" && !verso)) {
         error.text = "Veuillez télécharger le recto et le verso de votre pièce d'identité.";
