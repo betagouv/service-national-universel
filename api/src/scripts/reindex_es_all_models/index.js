@@ -1,3 +1,4 @@
+// process.env["NODE_CONFIG_DIR"] = "/ABSOLUTE_PATH/service-national-universel/api/config/";
 const config = require("config");
 
 const fs = require("fs");
@@ -131,9 +132,12 @@ async function reindexESAllModels() {
           delete objFormatted._id;
           return [{ index: { _index: index, _id: obj._id.toString() } }, objFormatted];
         });
-        await esClient.bulk({ refresh: true, body: bodyES });
-        console.log("INDEXED", bulk.length);
+        const currentBulk = [...bulk];
         bulk = [];
+        setImmediate(async () => {
+          await esClient.bulk({ refresh: true, body: bodyES });
+          console.log("INDEXED", currentBulk.length);
+        });
       }
 
       async function findAll(Model, where, cb) {
@@ -144,20 +148,25 @@ async function reindexESAllModels() {
         await find
           .cursor()
           .addCursorFlag("noCursorTimeout", true)
-          .eachAsync(async (doc) => {
-            try {
-              await cb(doc, count++, total);
-            } catch (e) {
-              console.log("e", e);
-            }
-          });
+          .eachAsync(
+            async (docs) => {
+              for (const doc of docs) {
+                try {
+                  await cb(doc, count++, total);
+                } catch (e) {
+                  console.log("e", e);
+                }
+              }
+            },
+            { batchSize: 1000, parallel: 5 },
+          );
       }
 
       await findAll(model, {}, async (doc, i, total) => {
         try {
           console.log(`Indexing ${index} ${i + 1}/${total}`);
           bulk.push(doc);
-          if (bulk.length >= 1000) await flush();
+          if (bulk.length >= 5000) await flush();
         } catch (e) {
           console.log("Error", e);
         }
@@ -168,6 +177,7 @@ async function reindexESAllModels() {
 
     console.time("Indexing models");
     await initDB();
+
     for (const model of models_indexed) {
       await cleanIndex(model);
     }
