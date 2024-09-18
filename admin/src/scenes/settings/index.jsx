@@ -91,7 +91,7 @@ export default function Settings() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Paramétrage dynamique" }]} />
+      <Breadcrumbs items={[{ label: "Paramétrages dynamiques" }]} />
       <div className="flex w-full flex-col px-8 pb-8">
         <div className="flex items-center justify-between py-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrages dynamiques</div>
