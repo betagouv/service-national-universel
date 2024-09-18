@@ -9,6 +9,7 @@ import Navbar from "../components/Navbar";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import plausibleEvent from "@/services/plausible";
 import { SignupButtons } from "@snu/ds/dsfr";
+import { shouldDisplayDateByCohortName } from "snu-lib";
 
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
@@ -92,8 +93,14 @@ export default function Presentation({ step, parentId }) {
               <p className="font-400 mt-3 text-center text-[15px] leading-[19px]">
                 {young.firstName} a choisi le séjour <br />
                 <strong>
-                  du {new Date(cohort.dateStart).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} au{" "}
-                  {new Date(cohort.dateEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+                  {shouldDisplayDateByCohortName(cohort.name) ? (
+                    <>
+                      du {new Date(cohort.dateStart).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} au{" "}
+                      {new Date(cohort.dateEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+                    </>
+                  ) : (
+                    "à venir"
+                  )}
                 </strong>
               </p>
             </div>
