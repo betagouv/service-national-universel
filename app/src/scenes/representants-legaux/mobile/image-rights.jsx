@@ -165,13 +165,17 @@ function ImageRightsForm({ young, token, parentId }) {
 
     // --- address
     let validAddress = validate("address", "empty", validator.isEmpty(data.address, { ignore_whitespace: true }));
-    if (validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }))) {
-      validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
-    }
     validAddress = validate("city", "empty", validator.isEmpty(data.city, { ignore_whitespace: true })) && validAddress;
+    validAddress = validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }));
 
+    if (data.addressType === ABROAD && data.country.toLowerCase() === "france") {
+      errors.country = "Le pays ne peut pas être France si vous résidez à l'étranger";
+      validAddress = false;
+    }
     if (data.addressType === ABROAD) {
-      validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true })) && validAddress;
+      validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true }));
+    } else {
+      validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
     }
 
     if (!validAddress) {
@@ -217,9 +221,6 @@ function ImageRightsForm({ young, token, parentId }) {
       ...address,
       [`parent${parentId}AllowImageRights`]: data.allowImageRights ? "true" : "false",
     };
-
-    // if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - Consentement valide - reinscription");
-    // else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
 
     try {
       const { code, ok } = await api.post(API_CONSENT_IMAGE_RIGHTS + `?token=${token}&parent=${parentId}`, body);
@@ -273,8 +274,6 @@ function ImageRightsForm({ young, token, parentId }) {
               placeholder={PHONE_ZONES[data.phoneZone]?.example}
               error={errors.phone || errors.phoneZone}
             />
-
-            {/* <Input value={data.phone} label="Votre téléphone" onChange={(e) => setData({ ...data, phone: e })} error={errors.phone} /> */}
           </div>
 
           <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] py-[20px]">

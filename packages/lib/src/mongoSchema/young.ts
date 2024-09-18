@@ -1,5 +1,10 @@
-import { Schema, Types, InferSchemaType } from "mongoose";
-import { ROLES_LIST, PHONE_ZONES_NAMES_ARR, YOUNG_SOURCE_LIST, YOUNG_SOURCE, InterfaceExtended } from "..";
+import mongoose, { Schema, InferSchemaType } from "mongoose";
+
+import { YOUNG_SOURCE_LIST, YOUNG_SOURCE } from "../constants/constants";
+import { PHONE_ZONES_NAMES_ARR } from "../phone-number";
+import { ROLES_LIST } from "../roles";
+
+import { InterfaceExtended } from "..";
 
 export const YoungSchemaFile = {
   name: String,
@@ -13,7 +18,7 @@ export const YoungSchemaFile = {
 
 export const YoungSchemaCorrectionRequest = {
   moderatorId: {
-    type: Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     documentation: {
       description: "Identifiant du demandeur",
@@ -101,7 +106,7 @@ export const YoungSchemaNote = {
   },
   note: { type: String, required: true },
   referent: {
-    _id: { type: Types.ObjectId, required: true },
+    _id: { type: mongoose.Schema.Types.ObjectId, required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     role: {
@@ -2037,7 +2042,7 @@ const schema = new Schema({
   ...YoungSchema,
   files: {
     ...Object.keys(YoungSchema.files).reduce((acc, key) => {
-      acc[key] = [YoungSchemaFile];
+      acc[key] = [new Schema(YoungSchemaFile)];
       return acc;
     }, {}),
   },

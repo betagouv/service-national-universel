@@ -1,5 +1,4 @@
 import { List } from "@snu/ds/dsfr";
-import { fr } from "date-fns/locale";
 import { getCohortPeriod } from "snu-lib";
 import React from "react";
 

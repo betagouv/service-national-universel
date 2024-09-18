@@ -2,11 +2,9 @@ import React, { useContext } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
-import LinkTo from "../../../assets/icons/LinkTo";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import { isReturningParent } from "../commons";
-import { BorderButton } from "../components/Buttons";
 import Navbar from "../components/Navbar";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import plausibleEvent from "@/services/plausible";
@@ -47,16 +45,17 @@ export default function Presentation({ step, parentId }) {
       <Navbar step={step} />
       <>
         <DSFRContainer title={title}>
-          <p className="mb-8 text-sm text-[#161616]">
-            {parentId === 2 ? (
-              <>Nous avons besoin de votre consentement au droit à l’image.</>
-            ) : (
-              <>Nous avons besoin de votre accord pour que {young.firstName} vive l’aventure du SNU.</>
-            )}
+          <p>
+            {parentId === 2
+              ? "Nous avons besoin de votre consentement au droit à l’image."
+              : `Nous avons besoin de votre accord pour que ${young.firstName} vive l’aventure du SNU.`}
           </p>
-          <BorderButton href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
-            Découvrir le SNU <LinkTo className="ml-2" />
-          </BorderButton>
+
+          <p>
+            <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
+              Découvrir le SNU
+            </a>
+          </p>
 
           <div className="flex flex-col bg-[#fbfbfb] p-4">
             <ul>

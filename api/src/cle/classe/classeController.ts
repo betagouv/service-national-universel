@@ -1,9 +1,7 @@
-import passport from "passport";
 import express, { Response } from "express";
 import Joi from "joi";
 
 import {
-  canCreateClasse,
   canDeleteClasse,
   canDownloadYoungDocuments,
   canEditEstimatedSeats,
@@ -16,6 +14,7 @@ import {
   canVerifyClasse,
   canViewClasse,
   canWithdrawClasse,
+  ClasseCertificateKeys,
   ClasseSchoolYear,
   ClassesRoutes,
   CohortDto,
@@ -29,13 +28,12 @@ import {
   STATUS_PHASE1_CLASSE,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
-  ClasseCertificateKeys,
   ReferentType,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
 import { ERRORS, isReferent } from "../../utils";
-import { validateId } from "../../utils/validator";
+import { idSchema, validateId } from "../../utils/validator";
 import emailsEmitter from "../../emails";
 import { RouteRequest, RouteResponse, UserRequest } from "../../controllers/request";
 import {
@@ -77,58 +75,54 @@ import {
   getYoungsGroupByClasses,
 } from "./export/classeExportService";
 import ClasseStateManager from "./stateManager";
+import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
+import { authMiddleware } from "../../middlewares/authMiddleware";
+import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { isCohortInscriptionOpen } from "../../cohort/cohortService";
 
 const router = express.Router();
-router.post(
-  "/:id/certificate/:key",
-  passport.authenticate("referent", {
-    session: false,
-    failWithError: true,
-  }),
-  async (req: UserRequest, res: Response) => {
-    try {
-      const certificateValues = Object.values(ClasseCertificateKeys);
-      const { error: exportDateKeyError, value: certificateKey } = Joi.string()
-        .valid(...certificateValues)
-        .required()
-        .validate(req.params.key, { stripUnknown: true });
+router.use(authMiddleware("referent"));
+router.post("/:id/certificate/:key", async (req: UserRequest, res: Response) => {
+  try {
+    const certificateValues = Object.values(ClasseCertificateKeys);
+    const { error: exportDateKeyError, value: certificateKey } = Joi.string()
+      .valid(...certificateValues)
+      .required()
+      .validate(req.params.key, { stripUnknown: true });
 
-      if (exportDateKeyError) {
-        capture(exportDateKeyError);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-
-      if (idError) {
-        capture(idError);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-      if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, undefined, "certificate")) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-
-      const classe = await ClasseModel.findById(id);
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      const certificates = await generateCertificateByKey(certificateKey, id);
-
-      res.set({
-        "content-length": certificates.length,
-        "content-disposition": `inline; filename="convocations.pdf"`,
-        "content-type": "application/pdf",
-        "cache-control": "public, max-age=1",
-      });
-      res.send(certificates);
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: error.message });
+    if (exportDateKeyError) {
+      capture(exportDateKeyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-  },
-);
 
-router.post("/export", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+    const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, undefined, "certificate")) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    const classe = await ClasseModel.findById(id);
+    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const certificates = await generateCertificateByKey(certificateKey, id);
+
+    res.set({
+      "content-length": certificates.length,
+      "content-disposition": `inline; filename="convocations.pdf"`,
+      "content-type": "application/pdf",
+      "cache-control": "public, max-age=1",
+    });
+    res.send(certificates);
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: error.message });
+  }
+});
+
+router.post("/export", async (req: UserRequest, res: Response) => {
   try {
     const allowedRoles = req.query.type === "schema-de-repartition" ? [ROLES.ADMIN, ROLES.REFERENT_REGION] : [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
 
@@ -211,17 +205,12 @@ router.post("/export", passport.authenticate("referent", { session: false, failW
 
 router.post(
   "/",
-  passport.authenticate("referent", { session: false, failWithError: true }),
+  requestValidatorMiddleware({ body: ClassesRoutesSchema.Create.payload }),
+  accessControlMiddleware([ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE]),
   async (req: RouteRequest<ClassesRoutes["Create"]>, res: RouteResponse<ClassesRoutes["Create"]>) => {
     try {
-      const { error, value: payload } = ClassesRoutesSchema.Create.payload.validate(req.body, { stripUnknown: true });
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      if (!canCreateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+      const payload = req.validatedBody;
+      req.validatedParams;
       const etablissement = await EtablissementModel.findById(payload.etablissementId);
       if (!etablissement) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Etablissement not found." });
@@ -306,112 +295,109 @@ router.post(
   },
 );
 
-router.put(
-  "/:id",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req: RouteRequest<ClassesRoutes["Update"]>, res: RouteResponse<ClassesRoutes["Update"]>) => {
-    try {
-      const { error: errorId, value: id } = validateId(req.params.id);
-      const { error, value: payload } = ClassesRoutesSchema.Update.payload.validate(req.body, { stripUnknown: true });
-      if (errorId || error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      let classe = await ClasseModel.findById(id);
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      if (req.user.role === ROLES.REFERENT_CLASSE && !classe.referentClasseIds.includes(req.user._id))
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
-        const etablissement = await EtablissementModel.findById(classe.etablissementId);
-        if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (etablissement.referentEtablissementIds.includes(req.user._id) && etablissement.coordinateurIds.includes(req.user._id)) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        }
-      }
-
-      if (classe.cohortId !== payload.cohortId) {
-        const cohort = await CohortModel.findById({ _id: payload.cohortId });
-        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (!canUpdateCohort(cohort as CohortDto, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        const youngs = await YoungModel.find({ classeId: classe._id });
-        // * Impossible to change cohort if a young has already completed phase1
-        const youngWithStatusPhase1Done = youngs.find((y) => y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE);
-        if (youngWithStatusPhase1Done) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
-
-      if (payload.estimatedSeats !== classe.estimatedSeats) {
-        if (!canEditEstimatedSeats(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        if (payload.estimatedSeats > classe.estimatedSeats) {
-          emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INCREASE_OBJECTIVE, classe);
-        }
-        const now = new Date();
-        const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
-        if (now <= limitDateEstimatedSeats) {
-          classe.set({ ...classe, estimatedSeats: payload.estimatedSeats, totalSeats: payload.estimatedSeats });
-          payload.totalSeats = payload.estimatedSeats;
-        }
-      }
-
-      if (payload.totalSeats !== classe.totalSeats) {
-        if (!canEditTotalSeats(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        if (payload.totalSeats > payload.estimatedSeats) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const oldCohortId = classe.cohortId;
-      classe.set({ ...payload, sessionId: classe.sessionId || null });
-
-      if (canUpdateClasseStay(req.user)) {
-        if (oldCohortId !== payload.cohortId && classe.ligneId) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        }
-        if (oldCohortId !== payload.cohortId && !classe.ligneId) {
-          const cohort = await CohortModel.findById({ _id: payload.cohortId });
-          const classeStatus = isCohortInscriptionOpen(cohort as CohortType) ? STATUS_CLASSE.OPEN : STATUS_CLASSE.ASSIGNED;
-
-          const youngs = await YoungModel.find({ classeId: classe._id });
-          await Promise.all(
-            youngs.map((y) => {
-              y.set({
-                sessionPhase1Id: undefined,
-                cohesionCenterId: undefined,
-                meetingPointId: undefined,
-                cohort: cohort?.name,
-                cohortId: cohort?._id,
-              });
-              return y.save({ fromUser: req.user });
-            }),
-          );
-          classe.set({
-            sessionId: undefined,
-            cohesionCenterId: undefined,
-            pointDeRassemblementId: undefined,
-            cohortId: cohort?._id,
-            status: classeStatus,
-          });
-          emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
-        } else {
-          classe.set({
-            sessionId: payload.sessionId,
-            cohesionCenterId: payload.cohesionCenterId,
-            pointDeRassemblementId: payload.pointDeRassemblementId,
-          });
-        }
-      }
-
-      classe = await classe.save({ fromUser: req.user });
-
-      return res.status(200).json({ ok: true, data: classe.toJSON() });
-    } catch (error) {
+router.put("/:id", async (req: RouteRequest<ClassesRoutes["Update"]>, res: RouteResponse<ClassesRoutes["Update"]>) => {
+  try {
+    const { error: errorId, value: id } = validateId(req.params.id);
+    const { error, value: payload } = ClassesRoutesSchema.Update.payload.validate(req.body, { stripUnknown: true });
+    if (errorId || error) {
       capture(error);
-      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-  },
-);
 
-router.put("/:id/referent", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+    if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let classe = await ClasseModel.findById(id);
+    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role === ROLES.REFERENT_CLASSE && !classe.referentClasseIds.includes(req.user._id))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (etablissement.referentEtablissementIds.includes(req.user._id) && etablissement.coordinateurIds.includes(req.user._id)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    if (classe.cohortId !== payload.cohortId) {
+      const cohort = await CohortModel.findById({ _id: payload.cohortId });
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!canUpdateCohort(cohort as unknown as CohortDto, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const youngs = await YoungModel.find({ classeId: classe._id });
+      // * Impossible to change cohort if a young has already completed phase1
+      const youngWithStatusPhase1Done = youngs.find((y) => y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE);
+      if (youngWithStatusPhase1Done) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (payload.estimatedSeats !== classe.estimatedSeats) {
+      if (!canEditEstimatedSeats(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (payload.estimatedSeats > classe.estimatedSeats) {
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INCREASE_OBJECTIVE, classe);
+      }
+      const now = new Date();
+      const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
+      if (now <= limitDateEstimatedSeats) {
+        classe.set({ ...classe, estimatedSeats: payload.estimatedSeats, totalSeats: payload.estimatedSeats });
+        payload.totalSeats = payload.estimatedSeats;
+      }
+    }
+
+    if (payload.totalSeats !== classe.totalSeats) {
+      if (!canEditTotalSeats(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (payload.totalSeats > payload.estimatedSeats) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const oldCohortId = classe.cohortId;
+    classe.set({ ...payload, sessionId: classe.sessionId || null });
+
+    if (canUpdateClasseStay(req.user)) {
+      if (oldCohortId !== payload.cohortId && classe.ligneId) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+      if (oldCohortId !== payload.cohortId && !classe.ligneId) {
+        const cohort = await CohortModel.findById({ _id: payload.cohortId });
+        const classeStatus = isCohortInscriptionOpen(cohort as CohortType) ? STATUS_CLASSE.OPEN : STATUS_CLASSE.ASSIGNED;
+
+        const youngs = await YoungModel.find({ classeId: classe._id });
+        await Promise.all(
+          youngs.map((y) => {
+            y.set({
+              sessionPhase1Id: undefined,
+              cohesionCenterId: undefined,
+              meetingPointId: undefined,
+              cohort: cohort?.name,
+              cohortId: cohort?._id,
+            });
+            return y.save({ fromUser: req.user });
+          }),
+        );
+        classe.set({
+          sessionId: undefined,
+          cohesionCenterId: undefined,
+          pointDeRassemblementId: undefined,
+          cohortId: cohort?._id,
+          cohort: cohort?.name,
+          status: classeStatus,
+        });
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
+      } else {
+        classe.set({
+          sessionId: payload.sessionId,
+          cohesionCenterId: payload.cohesionCenterId,
+          pointDeRassemblementId: payload.pointDeRassemblementId,
+        });
+      }
+    }
+
+    classe = await classe.save({ fromUser: req.user });
+
+    return res.status(200).json({ ok: true, data: classe.toJSON() });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/referent", async (req: UserRequest, res) => {
   try {
     if (!canUpdateReferentClasse(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -441,24 +427,18 @@ router.put("/:id/referent", passport.authenticate("referent", { session: false, 
 
 router.get(
   "/:id",
-  passport.authenticate("referent", { session: false, failWithError: true }),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+      query: Joi.object({ withDetails: Joi.boolean().default(true) }),
+    }),
+    accessControlMiddleware([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+  ],
   async (req: RouteRequest<ClassesRoutes["GetOne"]>, res: RouteResponse<ClassesRoutes["GetOne"]>) => {
     try {
-      const { error, value: id } = validateId(req.params.id);
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
+      const { validatedParams, validatedQuery } = req;
 
-      if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-      // Validate and transform query parameters
-      const { error: queryError, value: queryParams } = ClassesRoutesSchema.GetOne.query.validate(req.query);
-      if (queryError) {
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: queryError.message });
-      }
-
-      const data = await getClasseById(id, queryParams?.withDetails);
+      const data = await getClasseById(validatedParams.id, validatedQuery?.withDetails);
 
       return res.status(200).json({ ok: true, data: data?.toJSON() });
     } catch (error) {
@@ -497,7 +477,7 @@ router.get("/public/:id", async (req, res) => {
   }
 });
 
-router.get("/from-etablissement/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.get("/from-etablissement/:id", async (req: UserRequest, res) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
@@ -531,49 +511,45 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
   }
 });
 
-router.delete(
-  "/:id",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req: RouteRequest<ClassesRoutes["Delete"]>, res: RouteResponse<ClassesRoutes["Delete"]>) => {
-    try {
-      const { error: errorId, value: id } = validateId(req.params.id);
-      const { error: errorType, value: queryParams } = ClassesRoutesSchema.Delete.query.validate(req.query);
-      if (errorId) {
-        capture(errorId);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-      if (errorType) {
-        capture(errorType);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      if (queryParams.type === "withdraw" && !canWithdrawClasse(req.user)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
-      if (queryParams.type === "delete" && !canDeleteClasse(req.user)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
-
-      const classe = await ClasseModel.findById(id);
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      if (queryParams.type === "delete") {
-        await deleteClasse(id, req.user);
-      } else if (queryParams.type === "withdraw") {
-        await ClasseStateManager.withdraw(id, req.user, { YoungModel });
-      } else {
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      res.status(200).json({ ok: true });
-    } catch (error) {
-      capture(error);
-      res.status(500).send({ ok: false, code: error });
+router.delete("/:id", async (req: RouteRequest<ClassesRoutes["Delete"]>, res: RouteResponse<ClassesRoutes["Delete"]>) => {
+  try {
+    const { error: errorId, value: id } = validateId(req.params.id);
+    const { error: errorType, value: queryParams } = ClassesRoutesSchema.Delete.query.validate(req.query);
+    if (errorId) {
+      capture(errorId);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-  },
-);
+    if (errorType) {
+      capture(errorType);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
-router.get("/:id/notifyRef", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+    if (queryParams.type === "withdraw" && !canWithdrawClasse(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (queryParams.type === "delete" && !canDeleteClasse(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const classe = await ClasseModel.findById(id);
+    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (queryParams.type === "delete") {
+      await deleteClasse(id, req.user);
+    } else if (queryParams.type === "withdraw") {
+      await ClasseStateManager.withdraw(id, req.user, { YoungModel });
+    } else {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: error });
+  }
+});
+
+router.get("/:id/notifyRef", async (req: UserRequest, res) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
@@ -608,7 +584,7 @@ router.get("/:id/notifyRef", passport.authenticate("referent", { session: false,
   }
 });
 
-router.put("/:id/verify", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.put("/:id/verify", async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),

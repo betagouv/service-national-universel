@@ -106,11 +106,12 @@ const OnboardingContent = ({ classe }) => {
       <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
         <MyClass classe={classe} />
         <hr className="my-4" />
-        <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-          <Button className="md:pr-4 pt-2 pb-1" priority="tertiary no outline" onClick={() => setShowContactSupport(true)}>
+        <div className="fixed sm:z-10 md:z-auto shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-4 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
+          <Button className={`sm:!w-full items-center justify-center bg md:!w-auto`} priority="tertiary no outline" onClick={() => setShowContactSupport(true)}>
             J'ai déjà un compte
           </Button>
           <Button
+            className={`sm:!w-full items-center justify-center bg md:!w-auto`}
             onClick={() => {
               plausibleEvent("CLE/CTA preinscription - demarrer");
               history.push(`/preinscription/profil?parcours=CLE&classeId=${classe.id}`);
