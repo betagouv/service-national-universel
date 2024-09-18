@@ -7,34 +7,36 @@ const { initDB } = require("../../mongo");
 
 const esClient = require("../../es");
 
-const { ApplicationModel } = require("../../models");
-const { CohortModel } = require("../../models");
-const { CohesionCenterModel } = require("../../models");
-const { ContractModel } = require("../../models");
-const { DepartmentServiceModel } = require("../../models");
-const { EventModel } = require("../../models");
-const { InscriptionGoalModel } = require("../../models");
-const { MeetingPointModel } = require("../../models");
-const { MissionModel } = require("../../models");
-const { MissionAPIModel } = require("../../models");
-const { MissionEquivalenceModel } = require("../../models");
-const { ProgramModel } = require("../../models");
-const { ReferentModel } = require("../../models");
-const { SessionPhase1Model } = require("../../models");
-const { SessionPhase1TokenModel } = require("../../models");
+const {
+  ApplicationModel,
+  CohortModel,
+  CohesionCenterModel,
+  ContractModel,
+  DepartmentServiceModel,
+  EventModel,
+  InscriptionGoalModel,
+  MeetingPointModel,
+  MissionModel,
+  MissionAPIModel,
+  MissionEquivalenceModel,
+  ProgramModel,
+  ReferentModel,
+  SessionPhase1Model,
+  SessionPhase1TokenModel,
+  StructureModel,
+  WaitingListModel,
+  YoungModel,
+  PointDeRassemblementModel,
+  ModificationBusModel,
+  PlanTransportModel,
+  LigneBusModel,
+  LigneToPointModel,
+  EmailModel,
+  ClasseModel,
+  EtablissementModel,
+} = require("../../models");
+
 const StatsYoungCenterModel = require("../../models/legacy/stats-young-center");
-const { StructureModel } = require("../../models");
-const { WaitingListModel } = require("../../models");
-const { YoungModel } = require("../../models");
-const { PointDeRassemblementModel } = require("../../models");
-const { ModificationBusModel } = require("../../models");
-const { PlanTransportModel } = require("../../models");
-const { LigneBusModel } = require("../../models");
-const { LigneToPointModel } = require("../../models");
-const { EmailModel } = require("../../models");
-// CLE
-const { ClasseModel } = require("../../models");
-const { EtablissementModel } = require("../../models");
 
 const MAPPING_DIR = path.join(dir, "./mappings");
 
