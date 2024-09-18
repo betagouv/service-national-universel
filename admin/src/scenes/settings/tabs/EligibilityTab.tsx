@@ -7,6 +7,8 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import api from "@/services/api";
+import { IoWarningOutline } from "react-icons/io5";
+import ReactTooltip from "react-tooltip";
 
 type EligibilityTabsProps = {
   cohort: CohortDto;
@@ -86,7 +88,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
     <div className="flex w-full flex-col gap-8">
       <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
         <div className="flex w-full flex-col gap-8">
-          <p className="text-lg font-medium leading-5 text-gray-900">Date de naissances</p>
+          <p className="text-lg font-medium leading-5 text-gray-900">Éligibilités par dates de naissance</p>
           <div className="flex w-full gap-4">
             <DatePickerInput
               className={""}
@@ -118,7 +120,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
       </div>
       <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
         <div className="flex w-full flex-col gap-8">
-          <p className="text-lg font-medium leading-5 text-gray-900">Situation scolaire</p>
+          <p className="text-lg font-medium leading-5 text-gray-900">Éligibilités par situations scolaire</p>
           <div className="flex row w-full gap-4 justify-center">
             {Object.keys(GRADES).map((grade, index) => (
               <div key={grade + "grade" + index} className="flex h-6 items-center">
@@ -145,27 +147,63 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
       </div>
       <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
         <div className="flex w-full flex-col gap-8">
-          <p className="text-lg font-medium leading-5 text-gray-900">Eligibilité par départements</p>
+          <p className="text-lg font-medium leading-5 text-gray-900">Éligibilités par départements</p>
 
-          <div className="grid grid-cols-2 gap-4">
-            {Object.keys(region2department).map((region, index) => (
-              <Select
-                key={region + "select" + index}
-                isMulti={true}
-                isClearable={true}
-                label={region}
-                disabled={isLoading || readOnly}
-                options={region2department[region].map((dep) => ({ label: dep, value: dep }))}
-                value={formValues?.zones?.filter((dep) => region2department[region].includes(dep)).map((dep) => ({ label: dep, value: dep }))}
-                onChange={(data) => {
-                  const newValues = data.map((option) => option.value);
-                  setFormValues((prev: EligibilityForm) => ({
-                    ...prev,
-                    zones: [...prev.zones.filter((dep) => !region2department[region].includes(dep)), ...newValues],
-                  }));
-                }}
-              />
-            ))}
+          <div className="grid grid-cols-2 gap-10">
+            {Object.keys(region2department).map((region, index) => {
+              const departmentsSelected = formValues?.zones?.filter((dep) => region2department[region].includes(dep));
+              const allDepartmentSelected = departmentsSelected.length === region2department[region].length;
+
+              return (
+                <div key={region + "eligibility" + index} className="flex flex-col gap-0">
+                  <div className="flex justify-between">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-500 mt-1.5 ml-2">{region}</label>
+                      {!departmentsSelected.length && (
+                        <>
+                          <IoWarningOutline className="h-4 w-4 text-amber-500 cursor-pointer" data-tip data-for={region + "tooltip"} />
+                          <ReactTooltip id={region + "tooltip"} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                            <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Aucun département n'a été sélectionné dans cette région</p>
+                          </ReactTooltip>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label htmlFor={region + "selectAll"} className="mt-1.5 ml-2 text-sm cursor-pointer whitespace-nowrap">
+                        Sélectionner tout
+                      </label>
+                      <input
+                        id={region + "selectAll"}
+                        name={region + "selectAll"}
+                        type="checkbox"
+                        checked={allDepartmentSelected}
+                        disabled={isLoading || readOnly}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer"
+                        onChange={(e) => {
+                          const newValues = e.target.checked ? region2department[region] : formValues.zones.filter((dep) => !region2department[region].includes(dep));
+                          setFormValues((prev: EligibilityForm) => ({ ...prev, zones: newValues }));
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <Select
+                    isMulti={true}
+                    isClearable={true}
+                    placeholder="Sélectionner un ou plusieurs départements"
+                    disabled={isLoading || readOnly}
+                    options={region2department[region].map((dep) => ({ label: dep, value: dep }))}
+                    value={departmentsSelected.map((dep) => ({ label: dep, value: dep }))}
+                    onChange={(data) => {
+                      const newValues = data.map((option) => option.value);
+                      setFormValues((prev: EligibilityForm) => ({
+                        ...prev,
+                        zones: [...prev.zones.filter((dep) => !region2department[region].includes(dep)), ...newValues],
+                      }));
+                    }}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
         {error?.zones && <div className="text-[#EF4444]">{error.zones}</div>}

@@ -12,15 +12,16 @@ import { capture } from "@/sentry";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
-import GeneralTab from "./tabs/GeneralTab";
-import { settings, uselessSettings } from "./utils";
 import { Navbar } from "@snu/ds/admin";
 import { CiSettings } from "react-icons/ci";
 import { MdOutlinePlace } from "react-icons/md";
 import EligibilityTab from "./tabs/EligibilityTab";
+import GeneralTab from "./tabs/GeneralTab";
+import { settings, uselessSettings } from "./utils";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
+  const eligibilityTabAccess = isSuperAdmin(user);
 
   const urlParams = new URLSearchParams(window.location.search);
   const cohort = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : "Février 2024 - C";
@@ -93,7 +94,7 @@ export default function Settings() {
       <Breadcrumbs items={[{ label: "Paramétrage dynamique" }]} />
       <div className="flex w-full flex-col px-8 pb-8">
         <div className="flex items-center justify-between py-8">
-          <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrage dynamique</div>
+          <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrages dynamiques</div>
           <SelectCohort cohort={cohort} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} />
         </div>
         <Navbar
@@ -104,13 +105,15 @@ export default function Settings() {
               isActive: isActive.tab1,
               onClick: () => setIsActive({ tab1: true, tab2: false }),
             },
-            {
-              title: "Eligibilité",
-              isActive: isActive.tab2,
-              leftIcon: <MdOutlinePlace size={20} className="mt-0.5" />,
-              onClick: () => setIsActive({ tab1: false, tab2: true }),
-            },
-          ]}
+            eligibilityTabAccess
+              ? {
+                  title: "Éligibilités",
+                  isActive: isActive.tab2,
+                  leftIcon: <MdOutlinePlace size={20} className="mt-0.5" />,
+                  onClick: () => setIsActive({ tab1: false, tab2: true }),
+                }
+              : null,
+          ].filter(Boolean)}
         />
         {/* Informations générales */}
         {isActive.tab1 && (
@@ -128,7 +131,7 @@ export default function Settings() {
           />
         )}
         {/* Eligibilité */}
-        {isActive.tab2 && <EligibilityTab cohort={data} readOnly={readOnly} getCohort={getCohort} />}
+        {isActive.tab2 && eligibilityTabAccess && <EligibilityTab cohort={data} readOnly={readOnly} getCohort={getCohort} />}
       </div>
     </>
   );
