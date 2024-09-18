@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
-import { getDepartmentByZip, translate, translateGrade, YOUNG_SOURCE } from "snu-lib";
+import { getDepartmentByZip, translate, translateGrade, YOUNG_SOURCE, shouldDisplayDateByCohortName } from "snu-lib";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 import { concatPhoneNumberWithZone } from "snu-lib";
@@ -142,8 +142,14 @@ const ProfileDetails = ({ young, isCLE, hasHandicap, cohort }) => {
         <div className="flex flex-col gap-1">
           <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
           <div className="font-normal text-[#161616]">
-            Du {new Date(cohort.dateStart).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} au{" "}
-            {new Date(cohort.dateEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+            {shouldDisplayDateByCohortName(cohort.name) ? (
+              <>
+                Du {new Date(cohort.dateStart).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} au{" "}
+                {new Date(cohort.dateEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+              </>
+            ) : (
+              "à venir"
+            )}
           </div>
         </div>
         <hr className="mt-4" />
@@ -182,6 +188,8 @@ const ProfileDetails = ({ young, isCLE, hasHandicap, cohort }) => {
         ) : (
           <Details title="Situation particulière" value="Non" />
         )}
+        <Details title="PSC1" value={translate(young.psc1Info)} />
+
         <hr className="mt-4" />
         <p className="text-[16px] leading-[20px] text-[#666666] text-left">
           {young.firstName} {young.lastName} a déclaré le(s) détenteur(s) de l'autorité parentale suivant(s) :{" "}

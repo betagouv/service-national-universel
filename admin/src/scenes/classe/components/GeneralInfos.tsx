@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
-import { translate, ROLES, translateGrade, formatDateFRTimezoneUTC, CohortDto, ClassesRoutes } from "snu-lib";
+import { translate, ROLES, translateGrade, formatDateFRTimezoneUTC, CohortDto, ClassesRoutes, shouldDisplayDateByCohortName } from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
 import { Rights } from "./types";
@@ -39,6 +39,12 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
       return [];
     }
   };
+
+  const isUserCLE = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role);
+  const isUserAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+
+  const linkPath = isUserCLE ? "/mes-eleves" : "/inscription";
+  const showButton = (isUserCLE && classe.schoolYear === "2024-2025") || isUserAdminOrReferent;
 
   return (
     <Container title="Informations générales" actions={containerActionList({ edit, setEdit, canEdit: rights.canEdit })}>
@@ -115,21 +121,34 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
                 closeMenuOnSelect={true}
                 value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
                 onChange={(options) => {
-                  setClasse({ ...classe, cohort: options.value });
+                  const cohort = cohorts?.find((c) => c.name === options.value);
+                  if (!cohort) return;
+                  setClasse({
+                    ...classe,
+                    cohortId: cohort._id,
+                    cohort: cohort.name,
+                    cohortDetails: {
+                      _id: cohort._id ?? "",
+                      dateStart: cohort.dateStart,
+                      dateEnd: cohort.dateEnd,
+                    },
+                  });
                 }}
                 error={errors.cohort}
               />
-              <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2 mb-3">
-                <p className="text-left text-sm  text-gray-800">Dates</p>
-                <div className="flex items-center">
-                  <p className="text-left text-xs text-gray-500 flex-1">
-                    Début : <strong>{formatDateFRTimezoneUTC(cohorts?.find((c) => c.name === classe?.cohort)?.dateStart)}</strong>
-                  </p>
-                  <p className="text-left text-xs text-gray-500 flex-1">
-                    Fin : <strong>{formatDateFRTimezoneUTC(cohorts?.find((c) => c.name === classe?.cohort)?.dateEnd)}</strong>
-                  </p>
+              {shouldDisplayDateByCohortName(cohorts?.find((c) => c.name === classe?.cohort)?.name || "") ? (
+                <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2 mb-3">
+                  <p className="text-left text-sm  text-gray-800">Dates</p>
+                  <div className="flex items-center">
+                    <p className="text-left text-xs text-gray-500 flex-1">
+                      Début : <strong>{formatDateFRTimezoneUTC(classe.cohortDetails?.dateStart)}</strong>
+                    </p>
+                    <p className="text-left text-xs text-gray-500 flex-1">
+                      Fin : <strong>{formatDateFRTimezoneUTC(classe.cohortDetails?.dateEnd)}</strong>
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </>
           )}
           <Label title="Type de groupe" name="type" />
@@ -187,10 +206,11 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
               </Link>
             </>
           )}
-          <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
-            <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
-          </Link>
-
+          {showButton && (
+            <Link key="list-students" to={`${linkPath}?classeId=${classe._id}`}>
+              <Button type="tertiary" title="Voir la liste des élèves" className="w-full max-w-none mt-3" />
+            </Link>
+          )}
           {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && <WithdrawButton classe={classe} setIsLoading={setIsLoading} />}
         </div>
       </div>

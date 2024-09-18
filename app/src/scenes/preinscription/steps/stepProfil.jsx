@@ -163,188 +163,200 @@ export default function StepProfil() {
   };
 
   return (
-    <DSFRContainer
-      title="Créez votre compte"
-      supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}`}
-      supportEvent="Phase0/aide preinscription - infos persos">
-      {isCLE && (
-        <>
-          <div className="flex items-center gap-2 mb-3">
-            <label htmlFor="nationalite" className="m-0">
-              Je suis de nationalié française
-            </label>
-            <IconFrance />
-
-            <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-              <span className="text-gray-800">
-                Cette information est nécessaire pour l’obtention du certificat individuel de participation à la JDC après réalisation du séjour de cohésion.
-              </span>
-            </ReactTooltip>
-
-            <div data-tip data-for="tooltip-nationalite">
-              <RiInformationLine className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row mb-4">
-            <div className="pr-4 border-r">
-              <input
-                className="mr-2"
-                type="radio"
-                id="oui"
-                name="nationalite"
-                value="true"
-                checked={data.frenchNationality === "true" || false}
-                onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
-              />
-              <label className="mb-0" htmlFor="oui">
-                Oui
-              </label>
-            </div>
-            <div className="md:px-6">
-              <input
-                className="mr-2"
-                type="radio"
-                id="non"
-                name="nationalite"
-                value="false"
-                checked={data.frenchNationality === "false" || false}
-                onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
-              />
-              <label className="mb-0" htmlFor="non">
-                Non
-              </label>
-            </div>
-          </div>
-          <ErrorMessage>{error?.frenchNationality}</ErrorMessage>
-        </>
-      )}
-      {isCLE && (
-        <div className="flex w-full flex-col mb-4">
-          <SearchableSelect
-            label="Niveau de scolarité"
-            value={data.grade}
-            options={optionsScolarite}
-            onChange={(value) => {
-              setData({ ...data, grade: value });
-            }}
-            placeholder="Sélectionnez une option"
-          />
-          {error.grade ? <span className="text-sm text-red-500">{error.grade}</span> : null}
-        </div>
-      )}
-
-      <div className="space-y-5">
-        <Input
-          label={isCLE ? "Prénom de l'élève" : "Prénom du volontaire"}
-          state={error.firstName ? "error" : "default"}
-          stateRelatedMessage={error.firstName}
-          value={data.firstName}
-          onChange={(e) => setData({ ...data, firstName: e })}
-        />
-
-        <label className="w-full">
-          {isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
-          <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })} />
-          {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
-        </label>
-
+    <>
+      <ProgressBar isReinscription={false} />
+      <DSFRContainer
+        title="Créez votre compte"
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}`}
+        supportEvent="Phase0/aide preinscription - infos persos">
         {isCLE && (
-          <label className="w-full">
-            Date de naissance
-            <DatePicker initialValue={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} />
-            {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
-          </label>
+          <>
+            <div className="flex items-center gap-2 mb-3">
+              <label htmlFor="nationalite" className="m-0">
+                Je suis de nationalité française
+              </label>
+              <IconFrance />
+
+              <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                <span className="text-gray-800">
+                  Cette information est nécessaire pour l’obtention du certificat individuel de participation à la JDC après réalisation du séjour de cohésion.
+                </span>
+              </ReactTooltip>
+
+              <div data-tip data-for="tooltip-nationalite">
+                <RiInformationLine className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row mb-4">
+              <div className="pr-4 border-r">
+                <input
+                  className="mr-2"
+                  type="radio"
+                  id="oui"
+                  name="nationalite"
+                  value="true"
+                  checked={data.frenchNationality === "true" || false}
+                  onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
+                />
+                <label className="mb-0" htmlFor="oui">
+                  Oui
+                </label>
+              </div>
+              <div className="md:px-6">
+                <input
+                  className="mr-2"
+                  type="radio"
+                  id="non"
+                  name="nationalite"
+                  value="false"
+                  checked={data.frenchNationality === "false" || false}
+                  onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
+                />
+                <label className="mb-0" htmlFor="non">
+                  Non
+                </label>
+              </div>
+            </div>
+            <ErrorMessage>{error?.frenchNationality}</ErrorMessage>
+          </>
+        )}
+        {isCLE && (
+          <div className="flex w-full flex-col mb-4">
+            <SearchableSelect
+              label="Niveau de scolarité"
+              value={data.grade}
+              options={optionsScolarite}
+              onChange={(value) => {
+                setData({ ...data, grade: value });
+              }}
+              placeholder="Sélectionnez une option"
+            />
+            {error.grade ? <span className="text-sm text-red-500">{error.grade}</span> : null}
+          </div>
         )}
 
-        <InputPhone
-          label="Téléphone"
-          onChange={(e) => setData({ ...data, phone: e })}
-          onChangeZone={(e) => setData({ ...data, phoneZone: e })}
-          value={data.phone}
-          zoneValue={data.phoneZone}
-          placeholder={PHONE_ZONES[data.phoneZone]?.example}
-          error={error.phone || error.phoneZone}
-          className="w-full"
-        />
-        <hr className="my-4" />
-        <h2 className="text-base font-bold my-4">Mes identifiants de connexion</h2>
-        <p className="pl-3 border-l-4 border-l-indigo-500">
-          Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte {isCLE ? "élève" : "volontaire"}.
-        </p>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <label className="w-full">
-            E-mail
-            <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} type="email" />
-            {error.email ? <span className="text-sm text-red-500">{error.email}</span> : null}
-          </label>
-
-          <label className="w-full">
-            Confirmez votre e-mail
-            <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} type="email" />
-            {error.emailConfirm ? <span className="text-sm text-red-500">{error.emailConfirm}</span> : null}
-          </label>
-
-          <InputPassword
-            hintText="Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole."
-            label="Mot de passe"
-            error={error?.password}
-            value={data.password}
-            onChange={(password) => setData({ ...data, password })}></InputPassword>
-          <InputPassword
-            label="Confirmez votre mot de passe"
-            error={error?.confirmPassword}
-            value={data.confirmPassword}
-            onChange={(confirmPassword) => setData({ ...data, confirmPassword })}></InputPassword>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <Checkbox
-            state={error.acceptCGU || error.rulesYoung ? "error" : "default"}
-            stateRelatedMessage={error.acceptCGU || error.rulesYoung}
-            options={[
-              {
-                label: (
-                  <span className="inline flex-1  text-sm leading-5 text-[#3A3A3A]">
-                    J&apos;ai lu et j&apos;accepte les{" "}
-                    <a href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
-                      Conditions Générales d&apos;Utilisation (CGU)
-                    </a>{" "}
-                    de la plateforme du Service National Universel.
-                  </span>
-                ),
-                nativeInputProps: {
-                  checked: data?.acceptCGU === "true",
-                  onChange: () => setData({ ...data, acceptCGU: data?.acceptCGU === "true" ? "false" : "true" }),
-                },
-              },
-              {
-                label: (
-                  <span className="inline flex-1 text-sm leading-5 text-[#3A3A3A]">
-                    J&apos;ai pris connaissance des{" "}
-                    <a href="https://www.snu.gouv.fr/donnees-personnelles/" target="_blank" rel="noreferrer">
-                      modalités de traitement de mes données personnelles.
-                    </a>
-                  </span>
-                ),
-                nativeInputProps: {
-                  checked: data?.rulesYoung === "true",
-                  onChange: () => setData({ ...data, rulesYoung: data?.rulesYoung === "true" ? "false" : "true" }),
-                },
-              },
-            ]}
+        <div className="space-y-5">
+          <Input
+            label={isCLE ? "Prénom de l'élève" : "Prénom du volontaire"}
+            state={error.firstName ? "error" : "default"}
+            stateRelatedMessage={error.firstName}
+            value={data.firstName}
+            onChange={(e) => setData({ ...data, firstName: e })}
           />
+
+          <Input
+            label={isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
+            value={data.lastName}
+            onChange={(e) => setData({ ...data, lastName: e })}
+            onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })}
+            state={error.firstName ? "error" : "default"}
+            stateRelatedMessage={error.firstName}
+          />
+
+          {isCLE && (
+            <label className="w-full">
+              Date de naissance
+              <DatePicker initialValue={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} />
+              {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
+            </label>
+          )}
+
+          <InputPhone
+            label="Téléphone"
+            onChange={(e) => setData({ ...data, phone: e })}
+            onChangeZone={(e) => setData({ ...data, phoneZone: e })}
+            value={data.phone}
+            zoneValue={data.phoneZone}
+            placeholder={PHONE_ZONES[data.phoneZone]?.example}
+            error={error.phone || error.phoneZone}
+            className="w-full"
+          />
+          <hr className="my-4" />
+          <h2 className="text-base font-bold my-4">Mes identifiants de connexion</h2>
+          <p className="pl-3 border-l-4 border-l-indigo-500">
+            Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte {isCLE ? "élève" : "volontaire"}.
+          </p>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <Input
+              label="E-mail"
+              value={data.email}
+              onChange={(e) => setData({ ...data, email: e })}
+              type="email"
+              state={error.email ? "error" : "default"}
+              stateRelatedMessage={error.email}
+            />
+
+            <Input
+              label="Confirmez votre e-mail"
+              value={data.emailConfirm}
+              onChange={(e) => setData({ ...data, emailConfirm: e })}
+              type="email"
+              state={error.emailConfirm ? "error" : "default"}
+              stateRelatedMessage={error.emailConfirm}
+            />
+
+            <InputPassword
+              hintText="Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole."
+              label="Mot de passe"
+              error={error?.password}
+              value={data.password}
+              onChange={(password) => setData({ ...data, password })}></InputPassword>
+            <InputPassword
+              label="Confirmez votre mot de passe"
+              error={error?.confirmPassword}
+              value={data.confirmPassword}
+              onChange={(confirmPassword) => setData({ ...data, confirmPassword })}></InputPassword>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Checkbox
+              state={error.acceptCGU || error.rulesYoung ? "error" : "default"}
+              stateRelatedMessage={error.acceptCGU || error.rulesYoung}
+              options={[
+                {
+                  label: (
+                    <span className="inline flex-1  text-sm leading-5 text-[#3A3A3A]">
+                      J&apos;ai lu et j&apos;accepte les{" "}
+                      <a href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
+                        Conditions Générales d&apos;Utilisation (CGU)
+                      </a>{" "}
+                      de la plateforme du Service National Universel.
+                    </span>
+                  ),
+                  nativeInputProps: {
+                    checked: data?.acceptCGU === "true",
+                    onChange: () => setData({ ...data, acceptCGU: data?.acceptCGU === "true" ? "false" : "true" }),
+                  },
+                },
+                {
+                  label: (
+                    <span className="inline flex-1 text-sm leading-5 text-[#3A3A3A]">
+                      J&apos;ai pris connaissance des{" "}
+                      <a href="https://www.snu.gouv.fr/donnees-personnelles/" target="_blank" rel="noreferrer">
+                        modalités de traitement de mes données personnelles.
+                      </a>
+                    </span>
+                  ),
+                  nativeInputProps: {
+                    checked: data?.rulesYoung === "true",
+                    onChange: () => setData({ ...data, rulesYoung: data?.rulesYoung === "true" ? "false" : "true" }),
+                  },
+                },
+              ]}
+            />
+          </div>
         </div>
-      </div>
-      <ErrorMessage>{error?.text}</ErrorMessage>
-      <SignupButtons
-        onClickNext={() => onSubmit()}
-        onClickPrevious={isCLE ? () => history.push(`/je-rejoins-ma-classe-engagee?id=${classeId}`) : () => history.push("/preinscription/sejour")}
-        labelNext={isCLE ? "Recevoir un code d’activation par e-mail" : "Continuer"}
-        labelPrevious="Retour"
-        collapsePrevious={true}
-        disabled={loading}
-      />
-    </DSFRContainer>
+        <ErrorMessage>{error?.text}</ErrorMessage>
+        <SignupButtons
+          onClickNext={() => onSubmit()}
+          onClickPrevious={isCLE ? () => history.push(`/je-rejoins-ma-classe-engagee?id=${classeId}`) : () => history.push("/preinscription/sejour")}
+          labelNext={isCLE ? "Recevoir un code d’activation par e-mail" : "Continuer"}
+          labelPrevious="Retour"
+          collapsePrevious={true}
+          disabled={loading}
+        />
+      </DSFRContainer>
+    </>
   );
 }

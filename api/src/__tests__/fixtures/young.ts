@@ -1,6 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { departmentList, regionList } from "snu-lib";
-import { YoungType } from "../../models";
+import { departmentList, regionList, YoungType } from "snu-lib";
 
 function randomDepartment() {
   const index = Math.floor(Math.random() * departmentList.length);

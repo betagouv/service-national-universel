@@ -33,6 +33,7 @@ const {
   ROLES,
   SUB_ROLES,
   EQUIVALENCE_STATUS,
+  ERRORS: LIB_ERRORS,
 } = require("snu-lib");
 const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
@@ -867,6 +868,7 @@ const getTransporter = async () => {
   return toReferent;
 };
 
+// TODO: move to snu-lib
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -893,6 +895,7 @@ const ERRORS = {
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",
   INVALID_BODY: "INVALID_BODY",
   INVALID_PARAMS: "INVALID_PARAMS",
+  INVALID_QUERY: "INVALID_QUERY",
   EMAIL_OR_PASSWORD_INVALID: "EMAIL_OR_PASSWORD_INVALID",
   EMAIL_OR_API_KEY_INVALID: "EMAIL_OR_API_KEY_INVALID",
   TOKEN_INVALID: "TOKEN_INVALID",
@@ -955,6 +958,14 @@ const validateBirthDate = (date) => {
   return true;
 };
 
+const normalizeString = (str) => {
+  return str
+    .normalize("NFD") // Normalise la chaîne de caractères (décompose les accents)
+    .replace(/[\u0300-\u036f]/g, "") // Supprime les diacritiques (accents)
+    .replace(/[-\s._']/g, "") // Supprime les tirets, espaces, points, apostrophes, et underscores
+    .toLowerCase(); // Convertit tout en minuscules
+};
+
 module.exports = {
   timeout,
   uploadFile,
@@ -1002,4 +1013,5 @@ module.exports = {
   getMetaDataFile,
   deleteFilesByList,
   validateBirthDate,
+  normalizeString,
 };

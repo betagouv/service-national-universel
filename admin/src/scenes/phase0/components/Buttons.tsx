@@ -1,7 +1,17 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { Spinner } from "reactstrap";
 
-export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel, mode = "" }) {
+interface BorderButtonProps {
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+  href?: string;
+  target?: string;
+  rel?: string;
+  mode?: string;
+}
+
+export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel, mode = "" }: BorderButtonProps) {
   let color;
   switch (mode) {
     case "blue":

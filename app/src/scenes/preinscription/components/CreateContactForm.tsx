@@ -18,6 +18,9 @@ export default function CreateContactForm({ data, onSuccess }) {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    setEmailError("");
+    setBirthdateError("");
+
     let isError = false;
 
     if (!email) {
@@ -92,7 +95,13 @@ export default function CreateContactForm({ data, onSuccess }) {
 
       <label className="w-full mt-4">
         Votre date de naissance
-        <DatePicker initialValue={new Date(data.birthDate)} onChange={(date) => setBirthdate(date)} state={birthdateError ? "error" : "default"} errorText={birthdateError} />
+        <DatePicker
+          setError={(isError: boolean) => setBirthdateError(isError ? "Date invalide" : "")}
+          initialValue={new Date(data.birthDate)}
+          onChange={(date: Date) => setBirthdate(date)}
+          state={birthdateError ? "error" : "default"}
+          errorText={birthdateError}
+        />
       </label>
 
       <div className="flex">

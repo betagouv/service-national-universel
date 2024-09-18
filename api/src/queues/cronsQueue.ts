@@ -1,13 +1,15 @@
 import config from "config";
-import { Worker, Queue, Job } from "bullmq";
+import { logger } from "../logger";
+import { Worker, Queue, Job, RepeatableJob } from "bullmq";
 import { capture, captureMessage } from "../sentry";
 import CRONS from "../crons";
 
 import { captureCheckIn } from "@sentry/node";
 import { MonitorConfig } from "@sentry/types";
-import { logAddedTask, logStartedTask, logSucceedTask, logFailedTask } from "./taskLoggerService";
+import { logStartedTask, logSucceedTask, logFailedTask } from "./taskLoggerService";
 
 const CRONS_QUEUE = `${config.get("TASK_QUEUE_PREFIX")}_crons`;
+const CONCURRENCY = 2;
 
 let queue: Queue | null = null;
 let worker: Worker | null = null;
@@ -20,6 +22,12 @@ export function initQueue(connection) {
         type: "exponential",
         delay: 2000,
       },
+      removeOnComplete: {
+        age: 7 * 24 * 3600, // 1 week
+      },
+      removeOnFail: {
+        age: 30 * 24 * 3600, // 1 month
+      },
     },
     connection,
   });
@@ -27,20 +35,50 @@ export function initQueue(connection) {
 }
 
 export async function scheduleCrons() {
-  for (const cron of CRONS) {
-    // @ts-ignore
-    const job = await queue.add(
-      cron.name,
-      {},
-      {
-        repeat: {
-          pattern: cron.crontab,
-        },
-        jobId: cron.name,
-      },
-    );
-    logAddedTask(job);
+  // @ts-ignore
+  const jobs = await queue.getRepeatableJobs();
+  const unchangedJobs: RepeatableJob[] = [];
+  const outdatedJobs: RepeatableJob[] = [];
+
+  for (const job of jobs) {
+    if (CRONS.find((cron) => cron.name === job.name && cron.crontab === job.pattern)) {
+      unchangedJobs.push(job);
+    } else {
+      // cron deleted or updated in code
+      outdatedJobs.push(job);
+    }
   }
+
+  // Remove outdated Jobs :
+  // - cron not declared in CRONS with existing RepeatableJob (deleted)
+  // - cron declared in CRONS with existing RepeatableJob but different name & crontab (updated)
+  await Promise.all(
+    outdatedJobs.map((job) => {
+      logger.info(`Deleting outdated cron ${job.name} (${job.pattern})`);
+      // @ts-ignore
+      return queue.removeRepeatableByKey(job.key);
+    }),
+  );
+
+  // Add new Jobs :
+  // - cron declared in CRONS with no existing RepeatableJob
+  const newCrons = CRONS.filter((cron) => !unchangedJobs.some((job) => job.name === cron.name));
+  await Promise.all(
+    newCrons.map((cron) => {
+      logger.info(`Adding new cron ${cron.name} (${cron.crontab})`);
+      // @ts-ignore
+      return queue.add(
+        cron.name,
+        {},
+        {
+          repeat: {
+            pattern: cron.crontab,
+          },
+          jobId: cron.name,
+        },
+      );
+    }),
+  );
 }
 
 export function initWorker(connection) {
@@ -90,7 +128,7 @@ export function initWorker(connection) {
         throw err;
       }
     },
-    { connection },
+    { connection, concurrency: CONCURRENCY },
   );
   worker.on("completed", (job) => {
     logSucceedTask(job);

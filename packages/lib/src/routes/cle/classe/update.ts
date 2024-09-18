@@ -11,7 +11,7 @@ export interface UpdateClasseRoute extends BasicRoute {
     ClasseType,
     | "name"
     | "totalSeats"
-    | "cohort"
+    | "cohortId"
     | "estimatedSeats"
     | "coloration"
     | "filiere"

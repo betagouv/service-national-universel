@@ -17,11 +17,14 @@ async function buildYoungCleContext(user) {
   if (user.role === ROLES.ADMINISTRATEUR_CLE) {
     const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
     if (!etablissement) return { youngCleContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push({ term: { "etablissementId.keyword": etablissement._id.toString() } });
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id, schoolYear: "2024-2025" });
+    if (!classes) return { youngCleContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    contextFilters.push({ terms: { "classeId.keyword": classes.map((c) => c._id.toString()) } });
   }
 
   if (user.role === ROLES.REFERENT_CLASSE) {
-    const classes = await ClasseModel.find({ referentClasseIds: user._id });
+    const classes = await ClasseModel.find({ referentClasseIds: user._id, schoolYear: "2024-2025" });
+    if (!classes) return { youngCleContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     contextFilters.push({ terms: { "classeId.keyword": classes.map((c) => c._id.toString()) } });
   }
 

@@ -53,26 +53,26 @@ const DashboardHeadCenterV2 = lazy(() => import("./scenes/dashboardV2/head-cente
 const DashboardV2 = lazy(() => import("./scenes/dashboardV2/moderator-ref"));
 const DashboardResponsibleV2 = lazy(() => import("./scenes/dashboardV2/responsible"));
 const DashboardVisitorV2 = lazy(() => import("./scenes/dashboardV2/visitor"));
+const Team = lazy(() => import("./scenes/team"));
 
 import Loader from "./components/Loader";
-const Footer = lazy(() => import("./components/footer"));
+import Footer from "./components/footer";
 
 import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST } from "./utils";
 
-const ModalCGU = lazy(() => import("./components/modals/ModalCGU"));
+import ModalCGU from "./components/modals/ModalCGU";
 import "./index.css";
-const Team = lazy(() => import("./scenes/team"));
 
 import { getCohorts } from "./services/cohort.service";
-const RestorePreviousSignin = lazy(() => import("./components/RestorePreviousSignin"));
+import RestorePreviousSignin from "./components/RestorePreviousSignin";
 import useRefreshToken from "./hooks/useRefreshToken";
 
-const SideBar = lazy(() => import("./components/drawer/SideBar"));
-const ApplicationError = lazy(() => import("./components/layout/ApplicationError"));
-const NotFound = lazy(() => import("./components/layout/NotFound"));
+import SideBar from "./components/drawer/SideBar";
+import ApplicationError from "./components/layout/ApplicationError";
+import NotFound from "./components/layout/NotFound";
 import { getDefaultSession } from "./utils/session";
 import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
 

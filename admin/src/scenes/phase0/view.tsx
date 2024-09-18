@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { isBefore } from "date-fns";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import cx from "classnames";
 
-import { translate, YOUNG_STATUS, ROLES, SENDINBLUE_TEMPLATES, YOUNG_SOURCE, isCle } from "snu-lib";
+import { translate, YOUNG_STATUS, ROLES, SENDINBLUE_TEMPLATES, YOUNG_SOURCE, isCle, YoungDto, CohortDto } from "snu-lib";
+import { Button } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
 import api from "@/services/api";
+import { AuthState } from "@/redux/auth/reducer";
+import { CohortState } from "@/redux/cohorts/reducer";
 
 import ChevronDown from "@/assets/icons/ChevronDown";
 import dayjs from "@/utils/dayjs.utils";
@@ -15,12 +20,10 @@ import CheckCircle from "@/assets/icons/CheckCircle";
 import XCircle from "@/assets/icons/XCircle";
 
 import Modal from "@/components/ui/modals/Modal";
-import ButtonLight from "@/components/ui/buttons/ButtonLight";
-import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 
 import YoungHeader from "./components/YoungHeader";
 import { BorderButton, PlainButton } from "./components/Buttons";
-import { ConfirmModalContent } from "./components/ConfirmModalContent";
+import { ConfirmModalContent, ConfirmModalContentData } from "./components/ConfirmModalContent";
 import SectionConsentements from "./components/sections/consentements/SectionConsentements";
 import SectionParents from "./components/sections/SectionParents";
 import SectionIdentite from "./components/sections/identite/SectionIdentite";
@@ -33,12 +36,12 @@ const REJECTION_REASONS = {
 };
 
 export default function VolontairePhase0View({ young, onChange, globalMode }) {
-  const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
-  const [requests, setRequests] = useState([]);
+  const [requests, setRequests] = useState<NonNullable<YoungDto["correctionRequests"]>>([]);
   const [processing, setProcessing] = useState(false);
-  const [cohort, setCohort] = useState(undefined);
+  const [cohort, setCohort] = useState<CohortDto>();
   const [oldCohort, setOldCohort] = useState(true);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
   const [footerClass, setFooterClass] = useState("");
@@ -79,7 +82,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   useEffect(() => {
     if (requests.some((r) => r.status === "PENDING")) {
       setFooterMode("PENDING");
-    } else if (requests.some((r) => ["SENT", "REMINDED"].includes(r.status))) {
+    } else if (requests.some((r) => ["SENT", "REMINDED"].includes(r.status || ""))) {
       setFooterMode("WAITING");
     } else {
       setFooterMode("NO_REQUEST");
@@ -103,7 +106,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           setProcessing(true);
           try {
             await api.remove(`/correction-request/${young._id}/${request.field}`);
-            toastr.success("La demande a bien été annulée.");
+            toastr.success("La demande a bien été annulée.", "");
             onChange && onChange();
             // requests.splice(requestIndex, 1);
             // setRequests(requests);
@@ -156,7 +159,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
     if (pendingRequests.length > 0) {
       try {
         await api.post(`/correction-request/${young._id}`, pendingRequests);
-        toastr.success("Demandes de corrections envoyées.");
+        toastr.success("Demandes de corrections envoyées.", "");
         onChange && onChange();
       } catch (err) {
         console.error(err);
@@ -170,7 +173,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
     setProcessing(true);
     try {
       await api.post(`/correction-request/${young._id}/remind`, {});
-      toastr.success("Le volontaire a été relancé.");
+      toastr.success("Le volontaire a été relancé.", "");
       onChange && onChange();
     } catch (err) {
       console.error(err);
@@ -182,10 +185,11 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   async function processRegistration(state, data) {
     setProcessing(true);
     try {
-      let body = {
+      const body = {
         lastStatusAt: Date.now(),
         phase: "INSCRIPTION",
         status: state,
+        inscriptionRefusedMessage: "",
       };
 
       if (state === "REFUSED") {
@@ -214,7 +218,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           break;
       }
 
-      toastr.success("Votre action a été enregistrée.");
+      toastr.success("Votre action a été enregistrée.", "");
       onChange && onChange();
     } catch (err) {
       console.error(err);
@@ -246,7 +250,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
           readonly={user.role === ROLES.HEAD_CENTER}
-          user={user}
         />
         <SectionParents
           young={young}
@@ -331,8 +334,8 @@ function FooterSent({ young, requests, reminding, onRemindRequests, footerClass 
     setSentRequestsCount(requests.filter((r) => r.status === "SENT" || r.status === "REMINDED").length);
   }, [requests]);
 
-  let sentDate = null;
-  let remindedDate = null;
+  let sentDate: Date | null = null;
+  let remindedDate: Date | null = null;
   for (const req of requests) {
     if (req.status === "SENT") {
       if (sentDate === null || req.sentAt.valueOf() > sentDate.valueOf()) {
@@ -361,34 +364,39 @@ function FooterSent({ young, requests, reminding, onRemindRequests, footerClass 
         </p>
       </div>
       <div>
-        <BorderButton spinner={reminding} onClick={onRemindRequests}>
-          Relancer {young.gender === "female" ? "la" : "le"} volontaire
-        </BorderButton>
+        <BorderButton onClick={onRemindRequests}>Relancer {young.gender === "female" ? "la" : "le"} volontaire</BorderButton>
       </div>
     </div>
   );
 }
 
 function FooterNoRequest({ processing, onProcess, young, footerClass }) {
-  const [confirmModal, setConfirmModal] = useState(null);
+  const history = useHistory();
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalContentData | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const isDatePassed = young.latestCNIFileExpirationDate ? isBefore(new Date(young.latestCNIFileExpirationDate), new Date()) : false;
 
   async function validate() {
     try {
       if (young.source === YOUNG_SOURCE.CLE) {
-        return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate: 0, isDatePassed, young }));
+        return setConfirmModal(ConfirmModalContent({ source: young.source, isDatePassed, young }));
       } else {
-        const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
-        if (!res.ok) throw new Error(res);
-        const fillingRate = res.data;
-        return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate, isDatePassed, young }));
+        // on vérifie la completion des objectifs pour le département
+        const { ok, code, data: fillingRate } = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
+        if (!ok) throw new Error(code);
+        const isGoalReached = fillingRate >= 1;
+        // on vérifie qu'il n'y pas de jeunes en LC
+        const { responses } = await api.post("/elasticsearch/young/search", {
+          filters: { cohort: [young.cohort], status: [YOUNG_STATUS.WAITING_LIST] },
+        });
+        const isLCavailable = (responses?.[0]?.hits?.total?.value || 0) > 0;
+        return setConfirmModal(ConfirmModalContent({ source: young.source, isGoalReached, isLCavailable, isDatePassed, young }));
       }
     } catch (e) {
       capture(e);
-      toastr.error("Erreur lors de la récupération des objectifs: " + e.message);
+      toastr.error("Erreur lors de la récupération des objectifs: " + e.message, "");
     }
   }
 
@@ -425,7 +433,7 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   }
 
   function confirm() {
-    if (confirmModal.type === "REFUSED") {
+    if (confirmModal?.type === "REFUSED") {
       if (rejectionReason === "") {
         setError("Vous devez obligatoirement sélectionner un motif.");
         return;
@@ -437,8 +445,8 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
       }
     }
     onProcess(
-      confirmModal.type,
-      confirmModal.type === "REFUSED"
+      confirmModal?.type,
+      confirmModal?.type === "REFUSED"
         ? {
             reason: rejectionReason,
             message: rejectionMessage,
@@ -492,7 +500,7 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
                       value={rejectionMessage}
                       onChange={(e) => setRejectionMessage(e.target.value)}
                       className="w-[100%] rounded-[6px] border-[1px] border-[#D1D5DB] bg-white p-[15px]"
-                      rows="5"
+                      rows={5}
                       placeholder="Précisez la raison de votre refus ici"
                     />
                   )}
@@ -501,13 +509,19 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
               )}
             </Modal.Content>
             <Modal.Footer>
-              <div className="flex items-center justify-between gap-2">
-                <ButtonLight className="grow" onClick={() => setConfirmModal(null)}>
-                  Annuler
-                </ButtonLight>
-                <ButtonPrimary onClick={confirm} className="grow">
-                  {confirmModal.confirmLabel || "Confirmer"}
-                </ButtonPrimary>
+              <div className={cx("flex items-center justify-between gap-2", { "flex-row-reverse": confirmModal.mainAction === "cancel" })}>
+                <Button
+                  className="grow"
+                  type={confirmModal.mainAction === "cancel" ? "primary" : "secondary"}
+                  title={confirmModal.cancelLabel || "Annuler"}
+                  onClick={() => {
+                    if (confirmModal.cancelUrl) {
+                      history.push(confirmModal.cancelUrl);
+                    }
+                    setConfirmModal(null);
+                  }}
+                />
+                <Button type={confirmModal.mainAction !== "cancel" ? "primary" : "secondary"} title={confirmModal.confirmLabel || "Confirmer"} onClick={confirm} className="grow" />
               </div>
               {confirmModal.infoLink && (
                 <div className="flex items-center justify-center pt-6">

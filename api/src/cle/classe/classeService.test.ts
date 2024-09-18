@@ -13,9 +13,10 @@ import {
   ClasseCertificateKeys,
   ERRORS,
   FUNCTIONAL_ERRORS,
+  EtablissementType,
 } from "snu-lib";
 
-import { ClasseModel, CohortModel, YoungModel, EtablissementDocument, EtablissementType } from "../../models";
+import { ClasseModel, CohortModel, YoungModel, EtablissementDocument } from "../../models";
 
 import {
   buildUniqueClasseId,
@@ -415,13 +416,13 @@ describe("canEditTotalSeats", () => {
 
   it("should return false if user is ADMIN and date is before LIMIT_DATES_ESTIMATED_SEATS", () => {
     const user = { role: ROLES.ADMIN };
-    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000));
+    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user)).toBe(false);
   });
 
   it("should return true if user is ADMIN and date is after LIMIT_DATES_ESTIMATED_SEATS", () => {
     const user = { role: ROLES.ADMIN };
-    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() + 24 * 60 * 60 * 1000));
+    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() + 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user)).toBe(true);
   });
 

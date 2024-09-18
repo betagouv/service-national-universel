@@ -1,12 +1,10 @@
-import { ReferentDto } from "snu-lib";
-
-export type RouteResponse<T> = { ok: boolean; code?: string; data: T };
+import { UserDto } from "snu-lib";
 
 export type Young = { _id: string };
 
 export type BusLine = { _id: string };
 
-export type User = ReferentDto & { featureFlags?: { [key: string]: boolean } };
+export type User = UserDto & { featureFlags?: { [key: string]: boolean } };
 
 export type Center = {
   academy: string;
