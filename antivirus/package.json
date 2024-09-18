@@ -17,10 +17,10 @@
     "@sentry/integrations": "^7.61.0",
     "@sentry/node": "^7.61.0",
     "clamscan": "^2.1.2",
-    "express": "^4.19.2",
+    "express": "^4.20.0",
     "express-fileupload": "^1.4.3",
     "joi": "^17.12.1",
-    "jsonwebtoken": "^9.0.0" 
+    "jsonwebtoken": "^9.0.0"
   },
   "engines": {
     "node": "^18.20",
