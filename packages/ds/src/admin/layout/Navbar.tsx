@@ -1,4 +1,5 @@
 import React from "react";
+import cx from "classnames";
 
 type OwnProps = {
   tab: Array<{
@@ -18,27 +19,31 @@ export default function Navbar({ tab, button }: OwnProps) {
         {tab.map((tabItem, index) => (
           <div
             key={`tab-${index}`}
-            className={`flex items-end gap-x-1.5 text-sm leading-5 font-medium text-gray-500 cursor-pointer pb-3.5
-            ${
-              tabItem.isActive
-                ? "border-spacing-y-2 border-b-2 border-blue-600 !text-blue-600"
-                : "border-b-2 border-transparent"
-            }
-            `}
+            className={cx(
+              "flex items-end gap-x-1.5 text-sm leading-5 font-medium text-gray-500 cursor-pointer pb-3.5",
+              {
+                "border-b-2 border-blue-600 text-blue-600": tabItem.isActive,
+                "border-b-2 border-transparent": !tabItem.isActive,
+              },
+            )}
             onClick={tabItem.onClick}
           >
             <div className="mb-1">{tabItem.leftIcon}</div>
             <div className="flex flex-col">
               {tabItem.label ? (
                 <span
-                  className={`text-[10px] leading-4 ${
-                    !tabItem.isActive && "text-gray-400"
-                  }`}
+                  className={cx("text-[10px] leading-4", {
+                    "text-gray-400": !tabItem.isActive,
+                  })}
                 >
                   {tabItem.label}
                 </span>
               ) : null}
-              <div className={`truncate mr-3 ${!tabItem.label && "mb-1"}`}>
+              <div
+                className={cx("truncate mr-3", {
+                  "mb-1": !tabItem.label,
+                })}
+              >
                 {tabItem.title}
               </div>
             </div>
