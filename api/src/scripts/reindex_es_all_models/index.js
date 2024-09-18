@@ -114,6 +114,9 @@ async function reindexESAllModels() {
       models_indexed = [CohesionCenterModel, PointDeRassemblementModel];
     } else if (groupName === "cle") {
       models_indexed = [ClasseModel, EtablissementModel];
+    } else if (groupName === "none") {
+      process.exit(1);
+      return;
     }
 
     async function cleanIndex(model) {
