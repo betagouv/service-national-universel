@@ -180,7 +180,9 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
                         disabled={isLoading || readOnly}
                         className="h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer"
                         onChange={(e) => {
-                          const newValues = e.target.checked ? region2department[region] : formValues.zones.filter((dep) => !region2department[region].includes(dep));
+                          const newValues = e.target.checked
+                            ? [...new Set([...formValues.zones, ...region2department[region]])]
+                            : formValues.zones.filter((dep) => !region2department[region].includes(dep));
                           setFormValues((prev: EligibilityForm) => ({ ...prev, zones: newValues }));
                         }}
                       />
