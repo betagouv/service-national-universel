@@ -13,6 +13,6 @@ resource scaleway_job_definition reindex_es {
     "SCW_PROJECT_ID" = scaleway_account_project.main.id
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
     "GROUP_NAME" = "useful"
-    "NODE_ENV" = "staging"
+    "NODE_ENV" = "ci"
   }
 }
