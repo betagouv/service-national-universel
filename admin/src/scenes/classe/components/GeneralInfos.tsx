@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
-import { translate, ROLES, translateGrade, formatDateFRTimezoneUTC, CohortDto, ClassesRoutes } from "snu-lib";
+import { translate, ROLES, translateGrade, formatDateFRTimezoneUTC, CohortDto, ClassesRoutes, shouldDisplayDateByCohortName } from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
 import { Rights } from "./types";
@@ -136,17 +136,19 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
                 }}
                 error={errors.cohort}
               />
-              <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2 mb-3">
-                <p className="text-left text-sm  text-gray-800">Dates</p>
-                <div className="flex items-center">
-                  <p className="text-left text-xs text-gray-500 flex-1">
-                    Début : <strong>{formatDateFRTimezoneUTC(classe.cohortDetails?.dateStart)}</strong>
-                  </p>
-                  <p className="text-left text-xs text-gray-500 flex-1">
-                    Fin : <strong>{formatDateFRTimezoneUTC(classe.cohortDetails?.dateEnd)}</strong>
-                  </p>
+              {shouldDisplayDateByCohortName(cohorts?.find((c) => c.name === classe?.cohort)?.name || "") ? (
+                <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2 mb-3">
+                  <p className="text-left text-sm  text-gray-800">Dates</p>
+                  <div className="flex items-center">
+                    <p className="text-left text-xs text-gray-500 flex-1">
+                      Début : <strong>{formatDateFRTimezoneUTC(classe.cohortDetails?.dateStart)}</strong>
+                    </p>
+                    <p className="text-left text-xs text-gray-500 flex-1">
+                      Fin : <strong>{formatDateFRTimezoneUTC(classe.cohortDetails?.dateEnd)}</strong>
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </>
           )}
           <Label title="Type de groupe" name="type" />
