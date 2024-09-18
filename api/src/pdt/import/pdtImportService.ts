@@ -75,10 +75,9 @@ export const validatePdtFile = async (
   const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
   //Check columns names
-  const columns = Object.keys(lines[0]);
+  const columns = Object.keys(lines[0]).filter((e) => !e.includes("__EMPTY"));
   const expectedColumns = Object.keys(errors);
   const missingColumns = expectedColumns.filter((e) => !columns.includes(e));
-
   //check if all columns are present
   if (missingColumns.length) {
     missingColumns.forEach((e) => {
@@ -99,9 +98,15 @@ export const validatePdtFile = async (
     return { ok: false, code: ERRORS.INVALID_BODY, errors };
   }
 
+
+
   // Format errors.
   // Check format, add errors for each line
   for (const [i, line] of lines.entries()) {
+    // Remove empty colums from the line
+    for (const key in line) {
+      if (line[key] === "0") line[key] = "";
+    }
     // We need to have the "line number" as of the excel file, so we add 2 to the index.
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
     if (!line["NUMERO DE LIGNE"]) {
@@ -126,7 +131,7 @@ export const validatePdtFile = async (
     // Check each PDR
     for (let i = 1; i <= countPdr; i++) {
       // Skip empty PDR
-      if (i > 1 && !line[`ID PDR ${i}`]) continue;
+      if (i > 1 && !line[`ID PDR ${i}`] ) continue;
 
       if (!line[`N° DE DEPARTEMENT PDR ${i}`]) {
         errors[`N° DE DEPARTEMENT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
