@@ -49,8 +49,6 @@ function initSentry() {
       tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
       ignoreErrors: [
         /^No error$/,
-        /Unable to preload CSS/,
-
         /__show__deepen/,
         /_avast_submit/,
         /Access is denied/,
