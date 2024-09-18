@@ -10,4 +10,4 @@ if [ -z $GROUP_NAME -o $GROUP_NAME === "none"]; then
     exit 1
 fi
 
-npx -y ts-node ../reindex_es_all_models/index.js $1
+npx -y ts-node ../reindex_es_all_models/index.js $GROUP_NAME
