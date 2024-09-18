@@ -75,7 +75,7 @@ export const validatePdtFile = async (
   const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
   //Check columns names
-  const columns = Object.keys(lines[0]).filter((e) => !e.includes("__EMPTY"));
+  const columns = Object.keys(lines[0]).filter((col) => !col.includes("__EMPTY"));
   const expectedColumns = Object.keys(errors);
   const missingColumns = expectedColumns.filter((e) => !columns.includes(e));
   //check if all columns are present
