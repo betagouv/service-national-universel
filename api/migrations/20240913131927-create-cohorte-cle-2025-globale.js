@@ -32,7 +32,7 @@ module.exports = {
 
       const updateResult = await ClasseModel.updateMany(
         { _id: { $in: classesVerifiedAndNoCohort.map((classe) => classe._id) } },
-        { $set: { cohortId: cohortCle2025Saved._id, cohort: cohortCle2025Saved.name } },
+        { $set: { cohortId: cohortCle2025Saved._id, cohort: cohortCle2025Saved.name, status: STATUS_CLASSE.ASSIGNED } },
       );
       logger.info(`${updateResult.modifiedCount} classes added to cohort ${cohortName}`);
     } catch (error) {
