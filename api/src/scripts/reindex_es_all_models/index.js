@@ -38,6 +38,12 @@ const { EtablissementModel } = require("../../models");
 
 const MAPPING_DIR = path.join(dir, "./mappings");
 
+const args = process.argv.slice(2);
+let groupName = null;
+if (args.length > 0) {
+  groupName = args[0];
+}
+
 async function reindexESAllModels() {
   try {
     const all_models = [
@@ -98,7 +104,17 @@ async function reindexESAllModels() {
     };
 
     // const models_indexed = [CohortModel]; // useful_models;
-    const models_indexed = useful_models;
+    let models_indexed = useful_models;
+
+    if (groupName === "all") {
+      models_indexed = all_models;
+    } else if (groupName === "useful") {
+      models_indexed = useful_models;
+    } else if (groupName === "centre") {
+      models_indexed = [CohesionCenterModel, PointDeRassemblementModel];
+    } else if (groupName === "cle") {
+      models_indexed = [ClasseModel, EtablissementModel];
+    }
 
     async function cleanIndex(model) {
       const index = model.modelName;

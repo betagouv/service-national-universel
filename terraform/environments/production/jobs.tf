@@ -13,3 +13,35 @@ resource scaleway_job_definition anonymize_db {
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }
+
+resource scaleway_job_definition reindex_db_centre {
+  project_id  = scaleway_account_project.main.id
+  name = "reindex_db_centre"
+  description = "Reindex [CohesionCenterModel, PointDeRassemblementModel] in Elasticsearch"
+  cpu_limit = 2048
+  memory_limit = 4096
+  image_uri = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
+  command = "./api/src/scripts/reindex_es_all_models/docker/start_reindex_db.sh centre"
+  timeout = "2h"
+
+  env = {
+    "SCW_PROJECT_ID" = scaleway_account_project.main.id
+    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  }
+}
+
+resource scaleway_job_definition reindex_db_cle {
+  project_id  = scaleway_account_project.main.id
+  name = "reindex_db_cle"
+  description = "Reindex [ClasseModel, EtablissementModel] in Elasticsearch"
+  cpu_limit = 2048
+  memory_limit = 4096
+  image_uri = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
+  command = "./api/src/scripts/reindex_es_all_models/docker/start_reindex_db.sh cle"
+  timeout = "2h"
+
+  env = {
+    "SCW_PROJECT_ID" = scaleway_account_project.main.id
+    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  }
+}
