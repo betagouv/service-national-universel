@@ -1,4 +1,4 @@
-import { COHORTS } from "src/constants/cohort";
+import { COHORTS } from "../constants/cohort";
 
 /**
  * List of cohorts for which the date should not be displayed.
