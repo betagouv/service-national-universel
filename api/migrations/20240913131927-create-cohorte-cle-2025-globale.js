@@ -23,6 +23,7 @@ module.exports = {
         inscriptionStartDate: new Date("2024-09-18"),
         inscriptionEndDate: new Date("2024-11-30"),
         instructionEndDate: new Date("2024-11-30"),
+        inscriptionModificationEndDate: new Date("2024-11-30"),
         buffer: 1,
         event: "Event Name",
       });
