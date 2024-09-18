@@ -57,6 +57,7 @@ export default function CreateContactForm({ data, setState, setStateRelatedMessa
       if (code === "duplicate_parameter") {
         setState("info");
         setStateRelatedMessage("Votre adresse e-mail est déjà enregistrée. Nous vous tiendrons informé(e) lors de l’ouverture des inscriptions.");
+        setLoading(false);
         return;
       }
 
