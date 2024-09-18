@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
-import { PaddedContainer } from "@snu/ds/dsfr";
+import { Container } from "@snu/ds/dsfr";
 
 import IconFrance from "../../../assets/IconFrance";
 import School from "../../../assets/school.png";
@@ -190,7 +190,7 @@ export default function StepEligibilite() {
     <>
       <ProgressBar isReinscription={isLoggedIn} />
       {!isLoggedIn && (
-        <PaddedContainer className="flex px-[1rem] py-4 md:py-5 md:px-[1.5rem] md:flex-row-reverse gap-5 border-b md:border-none">
+        <Container className="py-[12px] px-[20px] md:pl-[40px] md:pr-[80px] md:py-[30px] flex md:flex-row-reverse gap-5 md:gap-8 border-b md:border-none">
           <div>
             <p className="m-0 text-xl font-bold">Classes engagées</p>
             <p className="m-0 text-sm sm:mr-4 md:mr-0">
@@ -206,9 +206,9 @@ export default function StepEligibilite() {
             </a>
           </div>
           <div className="flex-none w-16 md:w-auto">
-            <img src={School} alt="" className="" />
+            <img src={School} alt="" className="md:w-20" />
           </div>
-        </PaddedContainer>
+        </Container>
       )}
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
         <div className="space-y-5">

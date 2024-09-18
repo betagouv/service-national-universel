@@ -1,9 +1,13 @@
-import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
-import { YoungDocument, YoungModel, YoungType } from "../models";
-import { ERRORS, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto, FUNCTIONAL_ERRORS } from "snu-lib";
-import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 import { format } from "date-fns";
+
+import { ERRORS, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto, FUNCTIONAL_ERRORS, YoungType } from "snu-lib";
+
+import { YoungDocument, YoungModel } from "../models";
+import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
+
+import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 import { isLocalTransport } from "./youngCertificateService";
+
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
   const validatedYoungsWithSession = getValidatedYoungsWithSession(youngs);
 

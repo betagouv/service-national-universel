@@ -81,14 +81,14 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
             />
             {classe.cohesionCenter && (
               <>
-                <InputText name="centerAddress" className="mb-3" label="Numéro et nom de la voie" value={classe.cohesionCenter.address} disabled />
+                <InputText name="centerAddress" className="mb-3" label="Numéro et nom de la voie" value={classe.cohesionCenter.address || ""} disabled />
                 <div className="flex items-center justify-between gap-3 mb-3">
-                  <InputText name="centerZip" className="flex-1" label="Code Postal" value={classe.cohesionCenter.zip} disabled />
-                  <InputText name="centerCity" className="flex-1" label="Ville" value={classe.cohesionCenter.city} disabled />
+                  <InputText name="centerZip" className="flex-1" label="Code Postal" value={classe.cohesionCenter.zip || ""} disabled />
+                  <InputText name="centerCity" className="flex-1" label="Ville" value={classe.cohesionCenter.city || ""} disabled />
                 </div>
                 <div className="flex items-center justify-between gap-3 mb-3">
-                  <InputText name="centerDepartment" className="flex-1" label="Département" value={classe.cohesionCenter.department} disabled />
-                  <InputText name="centerRegion" className="flex-1" label="Région" value={classe.cohesionCenter.region} disabled />
+                  <InputText name="centerDepartment" className="flex-1" label="Département" value={classe.cohesionCenter.department || ""} disabled />
+                  <InputText name="centerRegion" className="flex-1" label="Région" value={classe.cohesionCenter.region || ""} disabled />
                 </div>
                 {![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
                   <Link to={`/centre/` + classe.cohesionCenter._id} className="w-full">

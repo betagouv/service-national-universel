@@ -26,8 +26,9 @@ import {
   CohesionCenterModel,
   EtablissementDocument,
   ClasseDocument,
-  YoungType,
   CohortModel,
+  SessionPhase1Document,
+  CohesionCenterDocument,
 } from "../models";
 
 import emailsEmitter from "../emails";
@@ -99,6 +100,7 @@ import {
   ClasseSchoolYear,
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
+  YoungType,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -525,7 +527,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     let { __v, ...newYoung } = value;
 
     // Vérification des objectifs à la validation d'un jeune
-    if (value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
+    if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
       const fillingRate = await getFillingRate(young.department, young.cohort);
       if (fillingRate >= FILLING_RATE_LIMIT) {
         return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
@@ -1511,12 +1513,11 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    let sessions = await SessionPhase1Model.find({ headCenterId: checkedId });
+    let sessions: SessionPhase1Document<{ cohesionCenter?: CohesionCenterDocument }>[] = await SessionPhase1Model.find({ headCenterId: checkedId });
     const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId?.toString()) } });
     if (JoiQueryWithCohesionCenter.value === "true") {
       sessions = sessions.map((s) => {
-        // @ts-expect-error FIXME: populate cohesionCenter does not exist in SessionPhase1Type
-        s._doc.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId?.toString());
+        s._doc!.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId?.toString());
         return s;
       });
     }
