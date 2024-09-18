@@ -8,21 +8,26 @@
  *   POST   /:youngId/remind-cni  -> remind parent1 for Invalid CNI honor certificate
  */
 
-const express = require("express");
-const router = express.Router({ mergeParams: true });
-const Joi = require("joi");
-const { YoungModel } = require("../models");
-const { capture } = require("../sentry");
-const { serializeYoung } = require("../utils/serializer");
-const { ERRORS, deleteFile } = require("../utils");
-const passport = require("passport");
-const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { sendTemplate } = require("../brevo");
-const config = require("config");
+import express, { Response } from "express";
+import Joi from "joi";
+import passport from "passport";
+import config from "config";
 
-router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+import { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES } from "snu-lib";
+
+import { YoungModel } from "../models";
+import { capture } from "../sentry";
+import { serializeYoung } from "../utils/serializer";
+import { ERRORS, deleteFile } from "../utils";
+import { sendTemplate } from "../brevo";
+import { UserRequest } from "./request";
+import { validateId } from "../utils/validator";
+
+const router = express.Router({ mergeParams: true });
+
+router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    const { error: error_id, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
+    const { error: error_id, value: youngId } = validateId(req.params.youngId);
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { error, value: newRequests } = Joi.array()
@@ -44,7 +49,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const requests = young.correctionRequests ? young.correctionRequests : [];
+    const requests = young.correctionRequests ? young.correctionRequests : ([] as NonNullable<typeof young.correctionRequests>);
 
     const sentAt = Date.now();
     for (const request of newRequests) {
@@ -54,7 +59,9 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
 
       // If unreadable/incorrect/other issue with id proof, delete it.
       if (request.field === "cniFile" && ["UNREADABLE", "OTHER", "NOT_SUITABLE"].includes(request.reason)) {
-        for (const file of young.files.cniFiles) await deleteFile(`app/young/${young._id}/cniFiles/${file._id}`);
+        if (young.files) {
+          for (const file of young.files.cniFiles) await deleteFile(`app/young/${young._id}/cniFiles/${file._id}`);
+        }
         young.set({ "files.cniFiles": [] });
       }
 
@@ -92,7 +99,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.delete("/:youngId/:field", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:youngId/:field", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
     if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
@@ -109,9 +116,10 @@ router.delete("/:youngId/:field", passport.authenticate("referent", { session: f
     for (const request of requests) {
       if (request.field === field) {
         found = true;
+        // @ts-expect-error moderatorId is a string
         request.moderatorId = req.user._id;
         request.status = "CANCELED";
-        request.canceledAt = Date.now();
+        request.canceledAt = new Date();
       } else {
         if (request.status === "SENT" || request.status === "REMINDED") {
           stillWaitingCorrection = true;
@@ -141,7 +149,7 @@ router.delete("/:youngId/:field", passport.authenticate("referent", { session: f
   }
 });
 
-router.post("/:youngId/remind", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:youngId/remind", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
     if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
@@ -154,9 +162,10 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
 
     for (const request of requests) {
       found = true;
+      // @ts-expect-error moderatorId is a string
       request.moderatorId = req.user._id;
       request.status = "REMINDED";
-      request.remindedAt = Date.now();
+      request.remindedAt = new Date();
     }
 
     if (found) {
@@ -185,7 +194,7 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
   }
 });
 
-router.post("/:youngId/remind-cni", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:youngId/remind-cni", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
     if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
@@ -194,7 +203,7 @@ router.post("/:youngId/remind-cni", passport.authenticate("referent", { session:
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
       params: {
         cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
         youngFirstName: young.firstName,
@@ -209,4 +218,4 @@ router.post("/:youngId/remind-cni", passport.authenticate("referent", { session:
   }
 });
 
-module.exports = router;
+export default router;
