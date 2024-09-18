@@ -1,5 +1,10 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
-import { ROLES_LIST, PHONE_ZONES_NAMES_ARR, YOUNG_SOURCE_LIST, YOUNG_SOURCE, InterfaceExtended } from "..";
+
+import { YOUNG_SOURCE_LIST, YOUNG_SOURCE } from "../constants/constants";
+import { PHONE_ZONES_NAMES_ARR } from "../phone-number";
+import { ROLES_LIST } from "../roles";
+
+import { InterfaceExtended } from "..";
 
 export const YoungSchemaFile = {
   name: String,
