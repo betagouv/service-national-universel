@@ -14,13 +14,13 @@ export default function DatePicker({ initialValue, onChange, setError = (isError
 
   const validateForm = (day, month, year) => {
     let isValid = true;
-    if (!day && (day < 1 || day > 31)) {
+    if (day && (day < 1 || day > 31)) {
       isValid = false;
     }
-    if (!month && (month < 1 || month > 12)) {
+    if (month && (month < 1 || month > 12)) {
       isValid = false;
     }
-    if (!year && (year < minYear || year > maxYear)) {
+    if (year && (year < minYear || year > maxYear)) {
       isValid = false;
     }
     return isValid;

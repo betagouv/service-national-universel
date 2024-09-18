@@ -29,10 +29,14 @@ export default function StepUpload() {
 
   const [recto, setRecto] = useState();
   const [verso, setVerso] = useState();
-  const [date, setDate] = useState(young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) : null);
+  const date = young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) : null;
+  const [day, setDay] = useState(date ? dayjs(date).format("DD") : "");
+  const [month, setMonth] = useState(date ? dayjs(date).format("MM") : "");
+  const [year, setYear] = useState(date ? dayjs(date).format("YYYY") : "");
+  const fullDate = day && month && year ? new Date(year, month - 1, day) : null;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
-  const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
+  const expirationDate = dayjs(fullDate).locale("fr").format("YYYY-MM-DD");
   const [checked, setChecked] = useState({ lisible: false, pas_coupe: false, nette: false });
 
   async function uploadFiles(resetState) {
@@ -44,6 +48,7 @@ export default function StepUpload() {
     }
 
     if (recto) {
+      console.log(recto.type);
       if (!["application/pdf", "image/jpeg", "image/png", "image/jpg", "image/heif", "image/heic"].includes(recto.type)) {
         captureMessage("CNI recto upload", { extra: { file: recto.name, type: recto.type } });
         setError({ text: "Le format de votre fichier n'est pas supporté." });
@@ -81,6 +86,7 @@ export default function StepUpload() {
   async function onSubmit(resetState) {
     try {
       setLoading(true);
+
       const { ok: uploadOk } = await uploadFiles(resetState);
       if (!uploadOk) return;
 
@@ -112,7 +118,7 @@ export default function StepUpload() {
       const { ok: uploadOk } = await uploadFiles(resetState);
       if (!uploadOk) return;
 
-      const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
+      const data = { latestCNIFileExpirationDate: expirationDate, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
       if (!ok) {
         capture(new Error(code));
@@ -141,7 +147,6 @@ export default function StepUpload() {
             verso={verso}
             setVerso={setVerso}
             date={date}
-            setDate={setDate}
             error={error}
             setError={setError}
             loading={loading}
@@ -152,6 +157,12 @@ export default function StepUpload() {
             setChecked={setChecked}
             onSubmit={onSubmit}
             onCorrect={onCorrect}
+            day={day}
+            setDay={setDay}
+            month={month}
+            setMonth={setMonth}
+            year={year}
+            setYear={setYear}
           />
         ) : (
           <StepUploadDesktop
@@ -160,7 +171,6 @@ export default function StepUpload() {
             verso={verso}
             setVerso={setVerso}
             date={date}
-            setDate={setDate}
             error={error}
             setError={setError}
             loading={loading}
@@ -171,6 +181,12 @@ export default function StepUpload() {
             setChecked={setChecked}
             onSubmit={onSubmit}
             onCorrect={onCorrect}
+            day={day}
+            setDay={setDay}
+            month={month}
+            setMonth={setMonth}
+            year={year}
+            setYear={setYear}
           />
         )}
       </DSFRContainer>

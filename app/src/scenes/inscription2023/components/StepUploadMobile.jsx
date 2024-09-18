@@ -2,24 +2,21 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { resizeImage } from "../../../services/file.service";
 import { ID } from "../utils";
-import { getCohort } from "@/utils/cohorts";
-import { formatDateFR, translateCorrectionReason } from "snu-lib";
+import { translateCorrectionReason } from "snu-lib";
 import dayjs from "dayjs";
 
-import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import { SignupButtons } from "@snu/ds/dsfr";
 import Verify from "./VerifyDocument";
+import Input from "@/components/dsfr/forms/input";
 
 export default function StepUploadMobile({
   recto,
   setRecto,
   verso,
   setVerso,
-  date,
-  setDate,
   error,
   setError,
   loading,
@@ -30,23 +27,63 @@ export default function StepUploadMobile({
   setChecked,
   onSubmit,
   onCorrect,
+  day,
+  setDay,
+  month,
+  setMonth,
+  year,
+  setYear,
 }) {
   const young = useSelector((state) => state.Auth.young);
   const [step, setStep] = useState(getStep());
   const [hasChanged, setHasChanged] = useState(false);
-  const isEnabled = validate();
+  const fullDate = day && month && year ? new Date(year, month - 1, day) : null;
 
   function validate() {
-    if (!dayjs(date).isValid()) {
+    let error = {};
+
+    if (!day || day < 1 || day > 31) {
+      error.day = "Veuillez entrer un jour valide, compris entre 1 et 31";
+    }
+    if (!month || month < 1 || month > 12) {
+      error.month = "Veuillez entrer un mois valide, compris entre 1 et 12";
+    }
+    if (!year || year < 1990 || year > 2070) {
+      error.year = "Veuillez entrer une année valide, comprise entre 1990 et 2070";
+    }
+    if (!dayjs(fullDate).isValid()) {
+      error.text = "Date invalide. Veuillez entrer une date valide.";
+    }
+    if (corrections?.length) {
+      if (!hasChanged && !loading) {
+        error.text = "Veuillez Modifier vos informations personnelles";
+      } else {
+        return error;
+      }
+    }
+    // Check if there are errors
+    if (Object.keys(error).length > 0) {
+      setError(error);
       return false;
     }
-    if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) return false;
-    if (corrections?.length) {
-      return hasChanged && !loading && !error.text;
-    } else {
-      return (young?.files?.cniFiles?.length || (recto && (verso || category === "passport"))) && date && !loading && !error.text;
-    }
+    setError({});
+    return true;
   }
+
+  // Handle the next button click
+  const handleOnClickNext = () => {
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setError(errors);
+      return;
+    }
+
+    if (corrections?.length) {
+      onCorrect(resetState); // If there are corrections
+    } else {
+      onSubmit(resetState); // If it's a new submission
+    }
+  };
 
   function getStep() {
     if (corrections?.some(({ reason }) => reason === "MISSING_BACK")) return "verso";
@@ -62,14 +99,17 @@ export default function StepUploadMobile({
     if (step === "date")
       return (
         <ExpirationDate
-          corrections={corrections}
-          category={category}
+          day={day}
+          setDay={setDay}
+          month={month}
+          setMonth={setMonth}
+          year={year}
+          setYear={setYear}
+          onChange={() => setHasChanged(true)}
           error={error}
           setError={setError}
-          young={young}
-          date={date}
-          setDate={setDate}
-          onChange={() => setHasChanged(true)}
+          corrections={corrections}
+          category={category}
         />
       );
   }
@@ -104,12 +144,7 @@ export default function StepUploadMobile({
           disabled={Object.values(checked).some((e) => e === false)}
         />
       )}
-      {step === "date" &&
-        (corrections?.length ? (
-          <SignupButtons onClickNext={() => onCorrect(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Corriger"} disabled={!isEnabled} />
-        ) : (
-          <SignupButtons onClickNext={() => onSubmit(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Continuer"} disabled={!isEnabled} />
-        ))}
+      {step === "date" && <SignupButtons onClickNext={handleOnClickNext} labelNext={loading ? "Scan antivirus en cours" : "Continuer"} />}
     </>
   );
 }
@@ -182,41 +217,11 @@ function Verso({ corrections, category, setVerso, setStep, setHasChanged, setErr
   );
 }
 
-function ExpirationDate({ corrections, category, error, setError, young, date, setDate, onChange }) {
-  const [day, setDay] = useState(date ? dayjs(date).format("DD") : "");
-  const [month, setMonth] = useState(date ? dayjs(date).format("MM") : "");
-  const [year, setYear] = useState(date ? dayjs(date).format("YYYY") : "");
-  const fullDate = day && month && year ? new Date(year, month - 1, day) : null;
+function ExpirationDate({ day, setDay, month, setMonth, year, setYear, onChange, error, corrections, category }) {
+  const young = useSelector((state) => state.Auth.young);
+
   const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
 
-  function validate() {
-    let error = {};
-
-    if (!day || day < 1 || day > 31) {
-      error.day = "Veuillez entrer un jour valide, compris entre 1 et 31";
-    }
-    if (!month || month < 1 || month > 12) {
-      error.month = "Veuillez entrer un mois valide, compris entre 1 et 12";
-    }
-    if (!year || year < 1990 || year > 2070) {
-      error.year = "Veuillez entrer un mois valide, comprise entre 1990 et 2070.";
-    }
-    if (!dayjs(fullDate).isValid()) {
-      error.text = "Date invalide. Veuillez entrer une date valide.";
-    }
-
-    return error;
-  }
-  const handleChange = (date) => {
-    const errors = validate();
-    if (Object.key(errors).length < 0) {
-      setDate(fullDate);
-      onChange;
-    }
-
-    if (!date) return setError("Veuillez renseigner une date d'expiration.");
-    setError(false);
-  };
   return (
     <>
       <>

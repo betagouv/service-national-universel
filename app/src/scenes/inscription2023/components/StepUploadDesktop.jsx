@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { ID } from "../utils";
-import { getCohort } from "@/utils/cohorts";
 import dayjs from "dayjs";
-import { formatDateFR, translateCorrectionReason } from "snu-lib";
-import DatePicker from "../../../components/dsfr/forms/DatePicker";
+import { translateCorrectionReason } from "snu-lib";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
@@ -13,7 +11,6 @@ import FileImport from "@/components/dsfr/forms/FileImport";
 import Verify from "./VerifyDocument";
 import plausibleEvent from "@/services/plausible";
 import { SignupButtons } from "@snu/ds/dsfr";
-import { set } from "date-fns";
 import Input from "@/components/dsfr/forms/input";
 
 export default function StepUploadDesktop({
@@ -22,7 +19,6 @@ export default function StepUploadDesktop({
   verso,
   setVerso,
   date,
-  setDate,
   error,
   setError,
   loading,
@@ -33,15 +29,18 @@ export default function StepUploadDesktop({
   setChecked,
   onSubmit,
   onCorrect,
+  day,
+  setDay,
+  month,
+  setMonth,
+  year,
+  setYear,
 }) {
   const young = useSelector((state) => state.Auth.young);
   const [hasChanged, setHasChanged] = useState(false);
   const [step, setStep] = useState(0);
   const history = useHistory();
   const imageFileTypes = ["image/jpeg", "image/png", "image/jpg"];
-  const [day, setDay] = useState(date ? dayjs(date).format("DD") : "");
-  const [month, setMonth] = useState(date ? dayjs(date).format("MM") : "");
-  const [year, setYear] = useState(date ? dayjs(date).format("YYYY") : "");
   const fullDate = day && month && year ? new Date(year, month - 1, day) : null;
 
   function validate() {
@@ -87,7 +86,6 @@ export default function StepUploadDesktop({
       setError(errors);
       return;
     }
-    setDate(fullDate);
     //si correction on passe directement à la vérification
     if (corrections?.length) return onCorrect(resetState);
     //si pas de nouveaux fichiers on passe directement à la vérification
@@ -97,7 +95,7 @@ export default function StepUploadDesktop({
     if (areAllFilesImages) return setStep(1);
     else return onSubmit(resetState);
   };
-
+  console.log(error);
   if (step === 1)
     return (
       <>
@@ -151,7 +149,7 @@ export default function StepUploadDesktop({
 
       <hr className="my-8" />
 
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+      {Object.keys(error).length > 0 && error?.text && <Error {...error} onClose={() => setError({})} />}
 
       <p className="my-4">
         Ajouter <strong>le recto</strong>
@@ -197,7 +195,7 @@ export default function StepUploadDesktop({
         />
       )}
 
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+      {Object.keys(error).length > 0 && error?.text && <Error {...error} onClose={() => setError({})} />}
       <SignupButtons
         onClickNext={handleOnClickNext}
         disabled={loading}
