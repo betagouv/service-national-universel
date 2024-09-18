@@ -131,7 +131,7 @@ export const validatePdtFile = async (
     // Check each PDR
     for (let i = 1; i <= countPdr; i++) {
       // Skip empty PDR
-      if (i > 1 && !line[`ID PDR ${i}`] ) continue;
+      if (i > 1 && !line[`ID PDR ${i}`]) continue;
 
       if (!line[`N° DE DEPARTEMENT PDR ${i}`]) {
         errors[`N° DE DEPARTEMENT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
