@@ -182,6 +182,8 @@ const ProfileDetails = ({ young, isCLE, hasHandicap, cohort }) => {
         ) : (
           <Details title="Situation particulière" value="Non" />
         )}
+        <Details title="PSC1" value={translate(young.psc1Info)} />
+
         <hr className="mt-4" />
         <p className="text-[16px] leading-[20px] text-[#666666] text-left">
           {young.firstName} {young.lastName} a déclaré le(s) détenteur(s) de l'autorité parentale suivant(s) :{" "}

@@ -32,11 +32,11 @@ const ProgressBar = ({ isReinscription = false }) => {
   const parcours = isReinscription ? "reinscription" : "preinscription";
   const filteredSteps = STEPS.filter((e) => e.parcours.includes(parcours));
   const currentStepIndex = filteredSteps.findIndex((e) => e.id === currentStep);
-  const currentStepTitle = filteredSteps[currentStepIndex].title;
+  const currentStepTitle = filteredSteps[currentStepIndex]?.title;
   const nextStepTitle = filteredSteps[currentStepIndex + 1]?.title || "";
 
   return (
-    <div className="p-2 md:p-0">
+    <div className="px-[0.5rem] md:px-[6rem] py-[0.5rem]">
       <Stepper stepCount={filteredSteps.length} currentStep={currentStepIndex + 1} title={currentStepTitle} nextTitle={nextStepTitle} style={{ margin: 0 }} />
     </div>
   );

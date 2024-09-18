@@ -117,4 +117,4 @@ function generateBatchCertifPhase1(outStream, youngs, session, cohort, cohesionC
   timer.done({ message: "RENDERING", level: "debug" });
 }
 
-module.exports = { generateCertifPhase1, generateBatchCertifPhase1 };
+export { generateCertifPhase1, generateBatchCertifPhase1 };

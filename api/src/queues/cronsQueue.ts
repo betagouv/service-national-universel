@@ -6,9 +6,10 @@ import CRONS from "../crons";
 
 import { captureCheckIn } from "@sentry/node";
 import { MonitorConfig } from "@sentry/types";
-import { logAddedTask, logStartedTask, logSucceedTask, logFailedTask } from "./taskLoggerService";
+import { logStartedTask, logSucceedTask, logFailedTask } from "./taskLoggerService";
 
 const CRONS_QUEUE = `${config.get("TASK_QUEUE_PREFIX")}_crons`;
+const CONCURRENCY = 2;
 
 let queue: Queue | null = null;
 let worker: Worker | null = null;
@@ -20,6 +21,12 @@ export function initQueue(connection) {
       backoff: {
         type: "exponential",
         delay: 2000,
+      },
+      removeOnComplete: {
+        age: 7 * 24 * 3600, // 1 week
+      },
+      removeOnFail: {
+        age: 30 * 24 * 3600, // 1 month
       },
     },
     connection,
@@ -121,7 +128,7 @@ export function initWorker(connection) {
         throw err;
       }
     },
-    { connection },
+    { connection, concurrency: CONCURRENCY },
   );
   worker.on("completed", (job) => {
     logSucceedTask(job);

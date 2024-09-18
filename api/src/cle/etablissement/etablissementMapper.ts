@@ -1,6 +1,5 @@
-import { EtablissementType } from "../../models";
 import { EtablissementProviderDto } from "../../services/gouv.fr/etablissementType";
-import { ClasseSchoolYear, CLE_SECTOR, CLE_TYPE } from "snu-lib";
+import { ClasseSchoolYear, CLE_SECTOR, CLE_TYPE, EtablissementType } from "snu-lib";
 import { capture } from "../../sentry";
 
 export function mapEtablissementFromAnnuaireToEtablissement(
