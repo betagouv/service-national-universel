@@ -290,6 +290,7 @@ describe("addInProgressStatusToPatch", () => {
     await mightAddInProgressStatus(mockYoung, mockUser);
     expect(findSpy).toHaveBeenCalled();
     expect(mockYoung.save).toHaveBeenCalledWith({ fromUser: mockUser });
+    expect(mockYoung.save).toHaveBeenCalledTimes(2);
   });
 
   it("should not add IN_PROGRESS status to patch if already present", async () => {
