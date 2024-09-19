@@ -71,13 +71,13 @@ const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCit
 const requiredMoreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
 const defaultState = {
-  birthCountry: FRANCE,
+  birthCountry: "",
   birthCityZip: "",
   birthCity: "",
-  gender: "female",
+  gender: "",
   phone: "",
   phoneZone: "",
-  livesInFrance: "true",
+  livesInFrance: "",
   address: "",
   zip: "",
   city: "",
@@ -106,7 +106,6 @@ const defaultState = {
 };
 
 export default function StepCoordonnees() {
-  const [wasBornInFrance, setWasBornInFrance] = useState("true");
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
   const [corrections, setCorrections] = useState({});
@@ -123,9 +122,18 @@ export default function StepCoordonnees() {
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
   const { isCLE } = useAuth();
-  const [hasSpecialSituation, setSpecialSituation] = useState(
-    young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true",
-  );
+  const [hasSpecialSituation, setSpecialSituation] = useState(getInitialSpecialSituation());
+  const [wasBornInFrance, setWasBornInFrance] = useState(getInitalWasBornInFrance());
+
+  function getInitialSpecialSituation() {
+    if (!young?.handicap && !young?.allergies && !young?.ppsBeneficiary && !young?.paiBeneficiary) return undefined;
+    return young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true";
+  }
+
+  function getInitalWasBornInFrance() {
+    if (!young?.birthCountry) return undefined;
+    return young.birthCountry === FRANCE ? "true" : "false";
+  }
 
   const {
     birthCountry,
@@ -156,7 +164,7 @@ export default function StepCoordonnees() {
 
   const debouncedBirthCity = useDebounce(birthCity, 200);
 
-  const wasBornInFranceBool = wasBornInFrance === "true";
+  const wasBornInFranceBool = data.birthCountry ? wasBornInFrance === "true" : undefined;
   const isFrenchResident = livesInFrance === "true";
 
   const moreInformation = handicap === "true" || ppsBeneficiary === "true" || paiBeneficiary === "true";
@@ -166,12 +174,6 @@ export default function StepCoordonnees() {
       const situationOptions = young.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions;
       setSituationOptions(situationOptions);
 
-      if (young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true") {
-        setSpecialSituation(true);
-      }
-
-      setWasBornInFrance(!young.birthCountry || young.birthCountry === FRANCE ? "true" : "false");
-
       setData({
         ...data,
         schooled: young.schooled || data.schooled,
@@ -180,7 +182,7 @@ export default function StepCoordonnees() {
         birthCity: young.birthCity || data.birthCity,
         birthCityZip: young.birthCityZip || data.birthCityZip,
         gender: young.gender || data.gender,
-        livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
+        livesInFrance: young.foreignCountry ? "false" : young?.department ? "true" : undefined,
         address: young.address || data.address,
         addressVerified: young.addressVerified || data.addressVerified,
         coordinatesAccuracyLevel: young.coordinatesAccuracyLevel || data.coordinatesAccuracyLevel,
@@ -329,7 +331,7 @@ export default function StepCoordonnees() {
       (!psc1Info || psc1Info === "") && (errors.psc1Info = "Ce champ est obligatoire");
     }
 
-    if (hasSpecialSituation === null) {
+    if (hasSpecialSituation === undefined) {
       errors.hasSelectedSpecialSituation = "Ce champ est obligatoire";
     }
 
@@ -349,6 +351,10 @@ export default function StepCoordonnees() {
       data.cityCode = "";
       data.coordinatesAccuracyLevel = "";
       errors.address = "Veuillez saisir une nouvelle adresse.";
+    }
+
+    if (hasSpecialSituation === undefined) {
+      errors.hasSpecialSituation = "Ce champ est obligatoire";
     }
 
     errors = { ...errors, ...getErrors() };
@@ -484,9 +490,11 @@ export default function StepCoordonnees() {
           value={wasBornInFrance}
           onChange={(e) => updateWasBornInFrance(e.target.value)}
           orientation="horizontal"
+          state={(corrections?.birthCountry || errors.birthCountry) && "error"}
+          stateRelatedMessage={corrections?.birthCountry || errors.birthCountry}
         />
 
-        {!wasBornInFranceBool && (
+        {wasBornInFrance === "false" && (
           <SearchableSelect
             label="Pays de naissance"
             value={birthCountry}
@@ -570,9 +578,8 @@ export default function StepCoordonnees() {
           state={(corrections?.livesInFrance || errors.livesInFrance) && "error"}
           stateRelatedMessage={corrections?.livesInFrance || errors.livesInFrance}
         />
-        {isFrenchResident ? (
-          <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections} />
-        ) : (
+        {isFrenchResident && <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections} />}
+        {livesInFrance === "false" && (
           <>
             <SearchableSelect
               label="Pays de résidence"
