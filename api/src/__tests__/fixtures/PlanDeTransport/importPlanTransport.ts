@@ -39,6 +39,7 @@ function getNewImportPlanTransportFixture() {
         "PAUSE DÉJEUNER RETOUR": "Non",
         "TEMPS DE ROUTE": "14:00",
         "LIGNES FUSIONNÉES": "",
+        "__EMPTY": "",
       },
       {
         "NUMERO DE LIGNE": "OCC034008",
@@ -76,7 +77,8 @@ function getNewImportPlanTransportFixture() {
         "PAUSE DÉJEUNER ALLER": "Non",
         "PAUSE DÉJEUNER RETOUR": "Non",
         "TEMPS DE ROUTE": "15:00",
-        "LIGNES FUSIONNÉES": "",
+        "LIGNES FUSIONNÉES": "OCC034006",
+        "__EMPTY": "",
       },
     ],
   };
