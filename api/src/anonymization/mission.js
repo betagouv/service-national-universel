@@ -1,4 +1,5 @@
 const { generateAddress, generateRandomName, starify } = require("../utils/anonymise");
+const { missionSchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.name && (item.name = `Mission ${generateRandomName()}`);
@@ -12,7 +13,10 @@ function anonymize(item) {
   item.contraintes && (item.contraintes = starify(item.contraintes));
   item.frequence && (item.frequence = starify(item.frequence));
   item.jvaRawData && (item.jvaRawData = undefined);
-  return item;
+
+  const knownFields = ["name", "description", "address", "actions", "structureName", "tutorName", "justifications", "contraintes", "frequence", "jvaRawData"];
+
+  return anonymizeNewFields(item, knownFields, missionSchemaFields);
 }
 
 module.exports = anonymize;

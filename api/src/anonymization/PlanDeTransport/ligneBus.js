@@ -1,4 +1,5 @@
 const { generateRandomName, generateBirthdate, generateRandomEmail, generateNewPhoneNumber } = require("../../utils/anonymise");
+const { ligneBusSchemaFields, anonymizeNewFields } = require("../../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.team &&
@@ -10,7 +11,10 @@ function anonymize(item) {
       t.phone && (t.phone = generateNewPhoneNumber());
       return t;
     }));
-  return item;
+
+  const knownFields = ["team.lastName", "team.firstName", "team.birthdate", "team.mail", "team.phone"];
+
+  return anonymizeNewFields(item, knownFields, ligneBusSchemaFields);
 }
 
 module.exports = anonymize;

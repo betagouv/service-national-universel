@@ -1,4 +1,5 @@
 const { generateRandomName, generateRandomEmail, generateAddress, starify } = require("../utils/anonymise");
+const { missionEquivalenceSchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.message && (item.message = starify(item.message));
@@ -7,7 +8,10 @@ function anonymize(item) {
   item.contactFullName && (item.contactFullName = generateRandomName() + generateRandomName());
   item.structureName && (item.structureName = generateRandomName());
   item.files && (item.files = []);
-  return item;
+
+  const knownFields = ["message", "address", "contactEmail", "contactFullName", "structureName", "files"];
+
+  return anonymizeNewFields(item, knownFields, missionEquivalenceSchemaFields);
 }
 
 module.exports = anonymize;

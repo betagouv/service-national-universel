@@ -1,4 +1,5 @@
 const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
+const { youngSchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.email && (item.email = generateRandomEmail());
@@ -70,7 +71,59 @@ function anonymize(item) {
   item.parent1Inscription2023Token = "";
   item.parent2Inscription2023Token = "";
 
-  return item;
+  const knownFields = [
+    "email",
+    "newEmail",
+    "parent1Email",
+    "parent2Email",
+    "firstName",
+    "lastName",
+    "parent1FirstName",
+    "parent1LastName",
+    "parent2FirstName",
+    "parent2LastName",
+    "historic",
+    "phone",
+    "parent1Phone",
+    "parent2Phone",
+    "address",
+    "parent1Address",
+    "parent2Address",
+    "birthdateAt",
+    "engagedDescription",
+    "motivations",
+    "parentConsentmentFilesCompliantInfo",
+    "withdrawnReason",
+    "withdrawnMessage",
+    "correctionRequests.message",
+    "correctionRequests.reason",
+    "notes.note",
+    "notes.referent.firstName",
+    "notes.referent.lastName",
+    "location",
+    "cniFiles",
+    "highSkilledActivityProofFiles",
+    "dataProcessingConsentmentFiles",
+    "parentConsentmentFiles",
+    "imageRightFiles",
+    "autoTestPCRFiles",
+    "rulesFiles",
+    "militaryPreparationFilesIdentity",
+    "militaryPreparationFilesCensus",
+    "militaryPreparationFilesAuthorization",
+    "militaryPreparationFilesCertificate",
+    "militaryPreparationCorrectionMessage",
+    "files",
+    "token2FA",
+    "tokenEmailValidation",
+    "forgotPasswordResetToken",
+    "invitationToken",
+    "phase3Token",
+    "parent1Inscription2023Token",
+    "parent2Inscription2023Token",
+  ];
+
+  return anonymizeNewFields(item, knownFields, youngSchemaFields);
 }
 
 module.exports = anonymize;

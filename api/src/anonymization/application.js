@@ -1,4 +1,5 @@
 const { starify } = require("../utils/anonymise");
+const { applicationSchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.youngEmail && (item.youngEmail = "*****@*******.***");
@@ -14,7 +15,21 @@ function anonymize(item) {
   item.feedBackExperienceFiles && (item.feedBackExperienceFiles = []);
   item.othersFiles && (item.othersFiles = []);
 
-  return item;
+  const knownFields = [
+    "youngEmail",
+    "youngFirstName",
+    "youngLastName",
+    "youngBirthdateAt",
+    "tutorName",
+    "missionName",
+    "contractStatus",
+    "contractAvenantFiles",
+    "justificatifsFiles",
+    "feedBackExperienceFiles",
+    "othersFiles",
+  ];
+
+  return anonymizeNewFields(item, knownFields, applicationSchemaFields);
 }
 
 module.exports = anonymize;

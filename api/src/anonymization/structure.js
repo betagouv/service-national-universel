@@ -1,4 +1,5 @@
 const { generateAddress, generateRandomName, starify, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+const { structureSchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.name && (item.name = generateRandomName().toUpperCase());
@@ -14,7 +15,23 @@ function anonymize(item) {
   item.structureManager?.lastName && (item.structureManager.lastName = generateRandomName());
   item.structureManager?.mobile && (item.structureManager.mobile = generateNewPhoneNumber());
   item.structureManager?.email && (item.structureManager.email = generateRandomEmail());
-  return item;
+
+  const knownFields = [
+    "name",
+    "siret",
+    "address",
+    "website",
+    "description",
+    "twitter",
+    "facebook",
+    "instagram",
+    "structureManager.firstName",
+    "structureManager.lastName",
+    "structureManager.mobile",
+    "structureManager.email",
+  ];
+
+  return anonymizeNewFields(item, knownFields, structureSchemaFields);
 }
 
 module.exports = anonymize;

@@ -1,4 +1,5 @@
 const { generateBirthdate, generateNewPhoneNumber, starify, STAR_EMAIL } = require("../utils/anonymise");
+const { contractSchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.tutorFirstName && (item.tutorFirstName = starify(item.tutorFirstName));
@@ -41,7 +42,48 @@ function anonymize(item) {
   item.parent2Token = "";
   item.youngContractToken = "";
 
-  return item;
+  const knownFields = [
+    "tutorFirstName",
+    "tutorLastName",
+    "tutorEmail",
+    "youngFirstName",
+    "youngLastName",
+    "youngBirthdate",
+    "youngEmail",
+    "youngPhone",
+    "youngAddress",
+    "parent1FirstName",
+    "parent1LastName",
+    "parent1Email",
+    "parent1Address",
+    "parent1Phone",
+    "parent2FirstName",
+    "parent2LastName",
+    "parent2Email",
+    "parent2Address",
+    "parent2Phone",
+    "missionName",
+    "missionAddress",
+    "missionZip",
+    "missionObjective",
+    "missionAction",
+    "missionFrequence",
+    "missionDuration",
+    "projectManagerFirstName",
+    "projectManagerLastName",
+    "projectManagerEmail",
+    "structureName",
+    "structureManagerEmail",
+    "structureManagerFirstName",
+    "structureManagerLastName",
+    "parent1Token",
+    "projectManagerToken",
+    "structureManagerToken",
+    "parent2Token",
+    "youngContractToken",
+  ];
+
+  return anonymizeNewFields(item, knownFields, contractSchemaFields);
 }
 
 module.exports = anonymize;

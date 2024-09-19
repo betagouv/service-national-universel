@@ -1,4 +1,5 @@
 const { generateAddress, generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+const { departmentServiceSchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.email && (item.email = generateRandomEmail());
@@ -24,7 +25,9 @@ function anonymize(item) {
       email: generateRandomEmail(),
     });
 
-  return item;
+  const knownFields = ["email", "contactPhone", "address", "directionName", "contactName", "contactMail", "contacts", "representantEtat"];
+
+  return anonymizeNewFields(item, knownFields, departmentServiceSchemaFields);
 }
 
 module.exports = anonymize;

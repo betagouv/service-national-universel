@@ -1,4 +1,5 @@
 const { starify } = require("../../utils/anonymise");
+const { modificationBusSchemaFields, anonymizeNewFields } = require("../../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.requestMessage && (item.requestMessage = starify(item.requestMessage));
@@ -11,7 +12,10 @@ function anonymize(item) {
       message.userName = starify(message.userName);
       return message;
     }));
-  return item;
+
+  const knownFields = ["requestMessage", "requestUserName", "statusUserName", "opinionUserName", "messages.message", "messages.userName"];
+
+  return anonymizeNewFields(item, knownFields, modificationBusSchemaFields);
 }
 
 module.exports = anonymize;

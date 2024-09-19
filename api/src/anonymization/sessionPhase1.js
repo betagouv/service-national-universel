@@ -1,4 +1,5 @@
 const { starify } = require("../utils/anonymise");
+const { sessionPhase1SchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
 
 function anonymize(item) {
   item.zipCentre && (item.zipCentre = starify(item.zipCentre));
@@ -14,7 +15,10 @@ function anonymize(item) {
       member.phone && (member.phone = starify(member.phone));
       return member;
     }));
-  return item;
+
+  const knownFields = ["zipCentre", "codeCentre", "nameCentre", "cityCentre", "status", "team.firstName", "team.lastName", "team.email", "team.phone"];
+
+  return anonymizeNewFields(item, knownFields, sessionPhase1SchemaFields);
 }
 
 module.exports = anonymize;
