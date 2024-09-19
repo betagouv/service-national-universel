@@ -32,6 +32,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "region.keyword",
       "academy.keyword",
       "schoolYear.keyword",
+      "seatsTaken",
     ];
 
     const sortFields = ["createdAt", "name.keyword"];
@@ -68,6 +69,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       response = await populateWithEtablissementInfo(response);
       response = await populateWithReferentEtablissementInfo(response, req.params.action);
       response = await populateWithCoordinatorInfo(response, req.params.action);
+      response = await populateWithYoungsInfo(response);
 
       if (req.query?.type === "schema-de-repartition") {
         if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -91,7 +93,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       return res.status(200).send({ ok: true, data: response });
     } else {
       let response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-
       if (req.query?.needRefInfo) {
         response.body.responses[0].hits.hits = await populateWithReferentInfo(response.body.responses[0].hits.hits, req.params.action);
       }
@@ -145,7 +146,11 @@ const populateWithReferentEtablissementInfo = async (classes, action) => {
       : [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
 
   const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
-  const referentsData = serializeReferents(referents);
+  const extendedReferents = referents.map((referent) => ({
+    ...referent,
+    state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
+  }));
+  const referentsData = serializeReferents(extendedReferents);
 
   return classes.map((item) => {
     if (action === "search") {
@@ -164,7 +169,12 @@ const populateWithReferentInfo = async (classes, action) => {
       : [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
 
   const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
-  const referentsData = serializeReferents(referents);
+  const extendedReferents = referents.map((referent) => ({
+    ...referent,
+    state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
+  }));
+
+  const referentsData = serializeReferents(extendedReferents);
 
   return classes.map((item) => {
     if (action === "search") {
@@ -227,12 +237,12 @@ const populateWithYoungsInfo = async (classes) => {
 
   //populate classes with students count
   return classes.map((item) => {
-    item.studentInProgress = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length;
-    item.studentWaiting = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length;
-    item.studentValidated = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length;
-    item.studentAbandoned = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length;
-    item.studentNotAutorized = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length;
-    item.studentWithdrawn = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length;
+    item.studentInProgress = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length || 0;
+    item.studentWaiting = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length || 0;
+    item.studentValidated = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length || 0;
+    item.studentAbandoned = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length || 0;
+    item.studentNotAutorized = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length || 0;
+    item.studentWithdrawn = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length || 0;
     return item;
   });
 };

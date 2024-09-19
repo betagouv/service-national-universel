@@ -117,7 +117,17 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
 function joiElasticSearch({ filterFields, sortFields = [], body }) {
   const schema = Joi.object({
     filters: Joi.object(
-      ["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string().allow("")).max(200) }), {}),
+      ["searchbar", ...filterFields].reduce((acc, field) => {
+        const fieldWithoutKeyword = field.replace(".keyword", "");
+
+        // For the classe we need to handle the filter seatsTaken which is a number
+        if (fieldWithoutKeyword === "seatsTaken") {
+          return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.number().allow(null)).max(200) };
+        }
+
+        // Default case: filter is a string
+        return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.string().allow("")).max(200) };
+      }, {}),
     ),
     page: Joi.number()
       .integer()
