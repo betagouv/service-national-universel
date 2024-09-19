@@ -6,7 +6,7 @@ resource scaleway_job_definition reindex_es {
   cpu_limit = 2048
   memory_limit = 4096
   image_uri = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
-  command = "./api/src/scripts/reindex_es_all_models/docker/start_reindex_db.sh"
+  command = "./api/src/scripts/reindex_es_all_models/docker/start_reindex_es.sh"
   timeout = "2h"
 
   env = {
