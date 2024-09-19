@@ -107,6 +107,7 @@ export default function List() {
       title: "Classe vide",
       name: "seatsTaken",
       missingLabel: "Non renseigné",
+      translate: (item) => (item === 0 ? "Oui" : "Non"),
       filter: (item) => Number(item.key) === 0,
     },
   ].filter(Boolean);
