@@ -392,7 +392,7 @@ export default function StepCoordonnees() {
         const eventName = isCLE ? "CLE/CTA inscription - profil" : "Phase0/CTA inscription - profil";
         plausibleEvent(eventName);
         dispatch(setYoung(responseData));
-        history.push("/inscription2023/consentement");
+        history.push("/inscription/consentement");
       } catch (e) {
         capture(e);
         toastr.error("Une erreur s'est produite :", translate(e.code));
