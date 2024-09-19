@@ -199,6 +199,7 @@ export interface ClasseExport extends ClasseType {
     phone: string;
     email: string;
     state: string;
+    _id: string;
   }[];
   coordinateurs: {
     firstName: string;
@@ -235,6 +236,7 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       seatsTaken: c.seatsTaken,
       studentInProgress: c.studentInProgress ?? 0,
       studentWaiting: c.studentWaiting ?? 0,
+      studentWithdrawn: c.studentWithdrawn ?? 0,
       dossierOuvert: `${((c.studentWaiting ?? 0 + c.studentInProgress ?? 0 + c.studentValidated ?? 0) / c.totalSeats) * 100} %`,
       academy: c.academy,
       region: c.region,
@@ -243,6 +245,7 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       createdAt: dayjs(c.createdAt).format("DD/MM/YYYY HH:mm"),
       updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
       // ref classe
+      classeRefId: c.referents?.length ? c.referents[0]?._id : "",
       classeRefFullName: c.referents?.length ? `${c.referents[0]?.firstName} ${c.referents[0]?.lastName}` : "",
       classeRefPhone: c.referents ? c.referents[0]?.phone : "",
       classeRefEmail: c.referents ? c.referents[0]?.email : "",
@@ -251,6 +254,7 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       uai: c.etablissement?.uai,
       etablissementName: c.etablissement?.name,
       // chef d'etablissement
+      etabRefId: c.referentEtablissement.length ? c.referentEtablissement[0]?._id : "",
       etabRefFullName: c.referentEtablissement.length ? `${c.referentEtablissement[0]?.firstName} ${c.referentEtablissement[0]?.lastName}` : "",
       etabRefPhone: c.referentEtablissement ? c.referentEtablissement[0]?.phone : "",
       etabRefEmail: c.referentEtablissement ? c.referentEtablissement[0]?.email : "",
@@ -275,9 +279,10 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Statut",
       "Effectif prévisionnel",
       "Effectif ajusté",
-      "Élèves inscrit et validé",
+      "Élèves validés",
       "Élèves en cours d'inscription",
       "Élèves en attente de validation",
+      "Élèves désistés",
       "Dossiers ouverts / effectif ajusté (%)",
       "Académie",
       "Région",
@@ -285,12 +290,14 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Type",
       "Date de création",
       "Dernière modification",
+      "ID du référent de classe",
       "Nom du référent de classe",
       "Téléphone du référent de classe",
       "Email du référent de classe",
       "Statut du référent de classe",
       "UAI de l'établissement",
       "Nom de l'établissement",
+      "ID du chef d'établissement",
       "Nom du chef d'établissement",
       "Téléphone du chef d'établissement",
       "Email du chef d'établissement",
