@@ -29,7 +29,3 @@ exclude_patterns:
   - "**/vendor/"
   - "**/*_test.go"
   - "**/*.d.ts"
-  - "**/snu-lib/"
-  - "**/*.ts"
-  - "snu-lib/"
-  - "lib/"
