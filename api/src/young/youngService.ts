@@ -166,7 +166,9 @@ export const mightAddInProgressStatus = async (young: YoungDocument, user: UserD
   if (opsWithInProgressStatus) {
     return;
   }
-  young.set({ status: YOUNG_STATUS.IN_PROGRESS });
-  await young.save({ fromUser: user });
-  logger.info(`YoungService - mightAddInProgressStatus(), Status set to IN_PROGRESS for YoungId:${young.id}`);
+  if (young.status === YOUNG_STATUS.VALIDATED) {
+    young.set({ status: YOUNG_STATUS.IN_PROGRESS });
+    await young.save({ fromUser: user });
+    logger.info(`YoungService - mightAddInProgressStatus(), Status set to IN_PROGRESS for YoungId:${young.id}`);
+  }
 };

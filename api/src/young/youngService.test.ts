@@ -284,6 +284,7 @@ describe("addInProgressStatusToPatch", () => {
   });
 
   it("should add IN_PROGRESS status to patch if not already present", async () => {
+    mockYoung.status = YOUNG_STATUS.VALIDATED;
     const findSpy = jest.spyOn(mockYoung.patches, "find");
     findSpy.mockReturnValue(Promise.resolve([{ ops: [{ path: "/status", value: YOUNG_STATUS.WAITING_CORRECTION }] }]));
     await mightAddInProgressStatus(mockYoung, mockUser);
@@ -305,6 +306,15 @@ describe("addInProgressStatusToPatch", () => {
     findSpy.mockReturnValue(Promise.resolve([{ ops: [{ path: "/status", value: YOUNG_STATUS.WAITING_CORRECTION }] }]));
     await mightAddInProgressStatus(mockYoung, mockUser);
     expect(findSpy).not.toHaveBeenCalled();
+    expect(mockYoung.save).not.toHaveBeenCalled();
+  });
+
+  it("should not add IN_PROGRESS status if status is not VALIDATED", async () => {
+    mockYoung.status = YOUNG_STATUS.WAITING_VALIDATION;
+    const findSpy = jest.spyOn(mockYoung.patches, "find");
+    findSpy.mockReturnValue(Promise.resolve([{ ops: [{ path: "/status", value: YOUNG_STATUS.WAITING_CORRECTION }] }]));
+    await mightAddInProgressStatus(mockYoung, mockUser);
+    expect(findSpy).toHaveBeenCalled();
     expect(mockYoung.save).not.toHaveBeenCalled();
   });
 });

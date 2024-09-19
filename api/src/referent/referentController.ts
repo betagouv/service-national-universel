@@ -526,7 +526,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
-    await mightAddInProgressStatus(young, req.user);
     // Vérification des objectifs à la validation d'un jeune
     if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
       const fillingRate = await getFillingRate(young.department, young.cohort);
@@ -636,6 +635,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (await shouldSwitchYoungByIdToLC(id, value.status)) {
       await switchYoungByIdToLC(id);
     }
+    await mightAddInProgressStatus(young, req.user);
 
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
