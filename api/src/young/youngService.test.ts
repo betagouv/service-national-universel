@@ -7,10 +7,11 @@ import {
   getValidatedYoungsWithSession,
   getYoungsImageRight,
   getYoungsParentAllowSNU,
+  mightAddInProgressStatus,
 } from "./youngService";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 import { YoungDocument, YoungModel } from "../models";
-import { ERRORS, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { ERRORS, UserDto, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 const mockBuffer = Buffer.from("pdf");
 
@@ -262,6 +263,60 @@ describe("shouldSwitchYoungByIdToLC", () => {
     jest.spyOn(youngService, "findYoungByIdOrThrow").mockResolvedValue(mockYoung as any);
     const result = await shouldSwitchYoungByIdToLC("youngId", YOUNG_STATUS.VALIDATED);
     expect(result).toBe(false);
+  });
+});
+
+describe("addInProgressStatusToPatch", () => {
+  let mockYoung;
+  let mockUser;
+
+  beforeEach(() => {
+    mockYoung = {
+      status: YOUNG_STATUS.WAITING_VALIDATION,
+      save: jest.fn(),
+      patches: {
+        find: jest.fn().mockResolvedValue([{ ops: [{ path: "/status", value: YOUNG_STATUS.WAITING_CORRECTION }] }]),
+      },
+      set: jest.fn(),
+    };
+    mockUser = {} as UserDto;
+    YoungModel.find = jest.fn().mockResolvedValue(mockYoung);
+  });
+
+  it("should add IN_PROGRESS status to patch if not already present", async () => {
+    mockYoung.status = YOUNG_STATUS.VALIDATED;
+    const findSpy = jest.spyOn(mockYoung.patches, "find");
+    findSpy.mockReturnValue(Promise.resolve([{ ops: [{ path: "/status", value: YOUNG_STATUS.WAITING_CORRECTION }] }]));
+    await mightAddInProgressStatus(mockYoung, mockUser);
+    expect(findSpy).toHaveBeenCalled();
+    expect(mockYoung.save).toHaveBeenCalledWith({ fromUser: mockUser });
+    expect(mockYoung.save).toHaveBeenCalledTimes(2);
+  });
+
+  it("should not add IN_PROGRESS status to patch if already present", async () => {
+    const findSpy = jest.spyOn(mockYoung.patches, "find");
+    findSpy.mockReturnValue(Promise.resolve([{ ops: [{ path: "/status", value: YOUNG_STATUS.IN_PROGRESS }] }]));
+    await mightAddInProgressStatus(mockYoung, mockUser);
+    expect(findSpy).toHaveBeenCalled();
+    expect(mockYoung.save).not.toHaveBeenCalled();
+  });
+
+  it("should not add IN_PROGRESS status to patch if status is IN_PROGRESS", async () => {
+    mockYoung.status = YOUNG_STATUS.IN_PROGRESS;
+    const findSpy = jest.spyOn(mockYoung.patches, "find");
+    findSpy.mockReturnValue(Promise.resolve([{ ops: [{ path: "/status", value: YOUNG_STATUS.WAITING_CORRECTION }] }]));
+    await mightAddInProgressStatus(mockYoung, mockUser);
+    expect(findSpy).not.toHaveBeenCalled();
+    expect(mockYoung.save).not.toHaveBeenCalled();
+  });
+
+  it("should not add IN_PROGRESS status if status is not VALIDATED", async () => {
+    mockYoung.status = YOUNG_STATUS.WAITING_VALIDATION;
+    const findSpy = jest.spyOn(mockYoung.patches, "find");
+    findSpy.mockReturnValue(Promise.resolve([{ ops: [{ path: "/status", value: YOUNG_STATUS.WAITING_CORRECTION }] }]));
+    await mightAddInProgressStatus(mockYoung, mockUser);
+    expect(findSpy).toHaveBeenCalled();
+    expect(mockYoung.save).not.toHaveBeenCalled();
   });
 });
 
