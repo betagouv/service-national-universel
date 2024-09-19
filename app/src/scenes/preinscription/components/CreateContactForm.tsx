@@ -66,12 +66,13 @@ export default function CreateContactForm({ data, setState, setStateRelatedMessa
       }
 
       setState("success");
+      setLoading(false);
     } catch (e) {
       capture(e);
       setState("error");
       setStateRelatedMessage("Veuillez réessayer plus tard.");
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
