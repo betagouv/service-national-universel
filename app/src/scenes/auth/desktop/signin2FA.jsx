@@ -33,7 +33,7 @@ export default function Signin() {
     try {
       const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
 
-      if (!response.user || response.token) return;
+      if (!response.user || !response.token) return;
 
       api.setToken(response.token);
       plausibleEvent("2FA/ Connexion réussie");
@@ -60,7 +60,7 @@ export default function Signin() {
 
   return (
     <div className="flex bg-[#F9F6F2] py-6">
-      <div className="mx-auto my-0 basis-[50%] bg-white px-[102px] py-[60px]">
+      <div className="mx-auto my-0 bg-white px-[102px] py-[60px]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="mb-1 text-[32px] font-bold text-[#161616]">Me connecter</div>
         <div className="mb-2 flex items-center gap-4">
