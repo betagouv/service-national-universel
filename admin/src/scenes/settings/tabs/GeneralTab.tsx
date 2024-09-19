@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { isAfter } from "date-fns";
 import { BiLoaderAlt } from "react-icons/bi";
@@ -22,17 +22,9 @@ import NumberInput from "@/components/ui/forms/NumberInput";
 import { CleSettings } from "../components/CleSettings";
 import { InformationsConvoyage } from "../components/InformationsConvoyage";
 
-export default function GeneralTab({ data, setData, cohort, readOnly, getCohort, isLoading, setIsLoading, noChange, mounted, setNoChange }) {
+export default function GeneralTab({ data, setData, cohort, readOnly, getCohort, isLoading, setIsLoading }) {
   const [error, setError] = useState<{ [key: string]: string }>({});
-  const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(false);
-
-  useEffect(() => {
-    if (!mounted) return;
-    setNoChange(false);
-    if (!showSpecificDatesReInscription && (data.reInscriptionStartDate || data.reInscriptionEndDate)) {
-      setShowSpecificDatesReInscription(true);
-    }
-  }, [data]);
+  const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(data.reInscriptionStartDate || data.reInscriptionEndDate);
 
   const onSubmit = async () => {
     try {
@@ -870,7 +862,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
 
       {!readOnly && (
         <div className="flex items-center justify-center gap-3 ">
-          <ButtonPrimary disabled={isLoading || noChange} className="h-[50px] w-[300px]" onClick={onSubmit}>
+          <ButtonPrimary disabled={isLoading} className="h-[50px] w-[300px]" onClick={onSubmit}>
             {isLoading && <BiLoaderAlt className="h-4 w-4 animate-spin" />}
             Enregistrer
           </ButtonPrimary>

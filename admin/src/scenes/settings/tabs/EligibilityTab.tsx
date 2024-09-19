@@ -152,7 +152,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
           <div className="grid grid-cols-2 gap-10">
             {Object.keys(region2department).map((region, index) => {
               const departmentsSelected = formValues?.zones?.filter((dep) => region2department[region].includes(dep));
-              const allDepartmentSelected = departmentsSelected.length === region2department[region].length;
+              const isAllSelected = departmentsSelected.length === region2department[region].length;
 
               return (
                 <div key={region + "eligibility" + index} className="flex flex-col gap-0">
@@ -176,7 +176,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
                         id={region + "selectAll"}
                         name={region + "selectAll"}
                         type="checkbox"
-                        checked={allDepartmentSelected}
+                        checked={isAllSelected}
                         disabled={isLoading || readOnly}
                         className="h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer"
                         onChange={(e) => {
