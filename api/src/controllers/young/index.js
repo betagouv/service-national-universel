@@ -65,6 +65,7 @@ const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscripti
 const { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } = require("../../jwt-options");
 const scanFile = require("../../utils/virusScanner");
 const emailsEmitter = require("../../emails");
+const { updateStatusToInProgress } = require("../../young/youngService");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
@@ -254,6 +255,9 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     }
     const young = await YoungModel.create({ ...obj, fromUser: req.user });
 
+    // Analytics data need a young that has/had IN_PROGRESS status
+    const updatedYoung = updateStatusToInProgress(young, req.user);
+
     const toName = `${young.firstName} ${young.lastName}`;
     const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}&utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
     const fromName = `${req.user.firstName} ${req.user.lastName}`;
@@ -262,7 +266,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       params: { toName, cta, fromName },
     });
 
-    return res.status(200).send({ young, ok: true });
+    return res.status(200).send({ updatedYoung, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);

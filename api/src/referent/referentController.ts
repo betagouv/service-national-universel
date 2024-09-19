@@ -106,7 +106,7 @@ import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
-import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
+import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
 
@@ -526,6 +526,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
+    await mightAddInProgressStatus(young, req.user);
     // Vérification des objectifs à la validation d'un jeune
     if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
       const fillingRate = await getFillingRate(young.department, young.cohort);
