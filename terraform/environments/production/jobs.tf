@@ -17,7 +17,7 @@ resource scaleway_job_definition anonymize_db {
 resource scaleway_job_definition reindex_es {
   project_id  = scaleway_account_project.main.id
   name = "reindex_es"
-  description = "Reindex models in Elasticsearch"
+  description = "Reindex models in Elasticsearch (GROUP_NAME=usefull | cle | centre | all)"
   cpu_limit = 2048
   memory_limit = 4096
   image_uri = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
