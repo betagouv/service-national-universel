@@ -7,6 +7,9 @@ import { fakerFR as faker } from "@faker-js/faker";
 import crypto from "crypto";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
+import { createFixtureClasse } from "./fixtures/classe";
+import { ClasseModel } from "../models";
+import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 
 const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
@@ -156,6 +159,27 @@ describe("Young Auth", () => {
         frenchNationality: fixture.frenchNationality,
         schooled: fixture.schooled,
         cohort: cohort.name,
+      });
+      expect(res.status).toBe(409);
+    });
+
+    it("should return 409 when the number of users in the class exceeds the total seats", async () => {
+      const fixture = getNewYoungFixture();
+      const email = fixture.email?.toLowerCase();
+      const classe = await ClasseModel.create({ ...createFixtureClasse(), totalSeats: 1 });
+      await createYoungHelper({ ...fixture, email, classeId: classe._id, status: YOUNG_STATUS.VALIDATED });
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: "newuser@example.com",
+        phone: fixture.phone,
+        phoneZone: fixture.phoneZone,
+        firstName: "new",
+        lastName: "user",
+        password: VALID_PASSWORD,
+        birthdateAt: fixture.birthdateAt,
+        grade: fixture.grade,
+        frenchNationality: fixture.frenchNationality,
+        classeId: classe._id,
+        source: YOUNG_SOURCE.CLE,
       });
       expect(res.status).toBe(409);
     });
