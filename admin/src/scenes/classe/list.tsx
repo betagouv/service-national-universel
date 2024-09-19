@@ -103,6 +103,12 @@ export default function List() {
     { title: "Région", name: "region", missingLabel: "Non renseigné" },
     { title: "Académie", name: "academy", missingLabel: "Non renseigné" },
     { title: "Année scolaire", name: "schoolYear", missingLabel: "Non renseigné", defaultValue: ["2024-2025"] },
+    {
+      title: "Classe vide",
+      name: "seatsTaken",
+      missingLabel: "Non renseigné",
+      filter: (item) => Number(item.key) === 0,
+    },
   ].filter(Boolean);
 
   if (!isClasses) return null;
