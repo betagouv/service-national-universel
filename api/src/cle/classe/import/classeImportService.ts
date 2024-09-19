@@ -28,7 +28,7 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
       classeCohortImportResult.classeEstimatedSeats = updatedClasse.estimatedSeats;
       classeCohortImportResult.result = "success";
     } catch (error) {
-      logger.error(error.stack);
+      logger.warn(error.stack);
       classeCohortImportResult.classeEstimatedSeats = undefined;
       classeCohortImportResult.result = "error";
       classeCohortImportResult.error = error.message;
