@@ -1,4 +1,5 @@
 const applicationSchemaFields = [
+  "_id.$oid",
   "apiEngagementId",
   "youngId",
   "youngFirstName",
@@ -29,11 +30,12 @@ const applicationSchemaFields = [
   "feedBackExperienceFiles",
   "othersFiles",
   "filesType",
-  "createdAt",
-  "updatedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
 ];
 
 const cohesionCenterSchemaFields = [
+  "_id.$oid",
   "name",
   "code2022",
   "address",
@@ -60,11 +62,12 @@ const cohesionCenterSchemaFields = [
   "country",
   "departmentCode",
   "sessionStatus",
-  "createdAt",
-  "updatedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
 ];
 
 const contractSchemaFields = [
+  "_id.$oid",
   "youngId",
   "structureId",
   "applicationId",
@@ -134,11 +137,12 @@ const contractSchemaFields = [
   "tutorEmail",
   "structureSiret",
   "structureName",
-  "createdAt",
-  "updatedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
 ];
 
 const departmentServiceFields = [
+  "_id.$oid",
   "contacts.cohort",
   "contacts.cohortId",
   "contacts.contactName",
@@ -162,11 +166,12 @@ const departmentServiceFields = [
   "representantEtat.mobile",
   "representantEtat.email",
   "representantEtat.role",
-  "createdAt",
-  "updatedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
 ];
 
 const meetingPointSchemaFields = [
+  "_id.$oid",
   "isValid",
   "cohort",
   "cohortId",
@@ -186,12 +191,13 @@ const meetingPointSchemaFields = [
   "returnAt",
   "returnAtString",
   "realReturnAtString",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
+  "deletedAt.$date",
 ];
 
 const missionSchemaFields = [
+  "_id.$oid",
   "name",
   "domains",
   "mainDomain",
@@ -229,8 +235,8 @@ const missionSchemaFields = [
   "addressVerified",
   "remote",
   "isMilitaryPreparation",
-  "createdAt",
-  "updatedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
   "lastSyncAt",
   "isJvaMission",
   "jvaMissionId",
@@ -241,6 +247,7 @@ const missionSchemaFields = [
 ];
 
 const missionEquivalenceFields = [
+  "_id.$oid",
   "youngId",
   "status",
   "type",
@@ -260,11 +267,12 @@ const missionEquivalenceFields = [
   "contactEmail",
   "files",
   "message",
-  "createdAt",
-  "updatedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
 ];
 
 const referentSchemaFields = [
+  "_id.$oid",
   "firstName",
   "lastName",
   "email",
@@ -299,12 +307,13 @@ const referentSchemaFields = [
   "phone",
   "mobile",
   "metadata",
-  "deletedAt",
-  "createdAt",
-  "updatedAt",
+  "deletedAt.$date",
+  "createdAt.$date",
+  "updatedAt.$date",
 ];
 
 const sessionPhase1SchemaFields = [
+  "_id.$oid",
   "cohesionCenterId",
   "cohort",
   "cohortId",
@@ -339,11 +348,12 @@ const sessionPhase1SchemaFields = [
   "dateEnd",
   "status",
   "sanitaryContactEmail",
-  "createdAt",
-  "updatedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
 ];
 
 const structureSchemaFields = [
+  "_id.$oid",
   "name",
   "siret",
   "description",
@@ -381,13 +391,14 @@ const structureSchemaFields = [
   "structureManager.mobile",
   "structureManager.email",
   "structureManager.role",
-  "createdAt",
-  "updatedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
 ];
 
-const waitingListSchemaFields = ["zip", "mail", "birthdateAt", "createdAt", "updatedAt"];
+const waitingListSchemaFields = ["_id.$oid", "zip", "mail", "birthdateAt", "createdAt.$date", "updatedAt.$date"];
 
 const youngSchemaFields = [
+  "_id.$oid",
   "firstName",
   "lastName",
   "frenchNationality",
@@ -414,12 +425,12 @@ const youngSchemaFields = [
   "statusPhase1Motif",
   "statusPhase1MotifDetail",
   "statusPhase2",
-  "statusPhase2UpdatedAt",
+  "statusPhase2updatedAt.$date",
   "statusPhase2OpenedAt",
   "statusPhase2ValidatedAt",
   "statusPhase2Contract",
   "statusPhase3",
-  "statusPhase3UpdatedAt",
+  "statusPhase3updatedAt.$date",
   "statusPhase3ValidatedAt",
   "lastStatusAt",
   "withdrawnReason",
@@ -701,17 +712,18 @@ const youngSchemaFields = [
   "sportInterest",
   "environmentInterest",
   "citizenshipInterest",
-  "deletedAt",
-  "createdAt",
-  "updatedAt",
+  "deletedAt.$date",
+  "createdAt.$date",
+  "updatedAt.$date",
 ];
 
 const ligneBusSchemaFields = [
+  "_id.$oid",
   "cohort",
   "cohortId",
   "busId",
-  "departuredDate",
-  "returnDate",
+  "departuredDate.$date",
+  "returnDate.$date",
   "youngCapacity",
   "totalCapacity",
   "followerCapacity",
@@ -729,12 +741,14 @@ const ligneBusSchemaFields = [
   "delayedForth",
   "delayedBack",
   "mergedBusIds",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
+  "createdAt.$date.$date",
+  "updatedAt.$date.$date",
+  "deletedAt.$date.$date",
+  "__v",
 ];
 
 const modificationBusSchemaFields = [
+  "_id.$oid",
   "cohort",
   "cohortId",
   "lineId",
@@ -753,9 +767,9 @@ const modificationBusSchemaFields = [
   "opinionUserName",
   "opinionDate",
   "messages",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
+  "createdAt.$date",
+  "updatedAt.$date",
+  "deletedAt.$date",
 ];
 
 function getNestedValue(obj, path) {
@@ -769,9 +783,24 @@ function setNestedValue(obj, path, value) {
   deepObj[lastKey] = value;
 }
 
+function getAllPaths(obj, parentPath = "") {
+  let paths = [];
+  for (let key in obj) {
+    const currentPath = parentPath ? `${parentPath}.${key}` : key;
+    if (typeof obj[key] === "object" && obj[key] !== null && !Array.isArray(obj[key])) {
+      paths = paths.concat(getAllPaths(obj[key], currentPath));
+    } else {
+      paths.push(currentPath);
+    }
+  }
+  return paths;
+}
+
 function anonymizeNewFields(item, knownFields, schemaFields) {
-  for (const path of schemaFields) {
-    if (!knownFields.includes(path)) {
+  const allPaths = getAllPaths(item);
+
+  for (const path of allPaths) {
+    if (!knownFields.includes(path) && !schemaFields.includes(path)) {
       const value = getNestedValue(item, path);
       if (value !== undefined) {
         if (Array.isArray(value)) {
@@ -784,6 +813,8 @@ function anonymizeNewFields(item, knownFields, schemaFields) {
       }
     }
   }
+
+  console.log("Anonymized Item:", item);
   return item;
 }
 
