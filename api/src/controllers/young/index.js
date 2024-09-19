@@ -256,7 +256,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     const young = await YoungModel.create({ ...obj, fromUser: req.user });
 
     // Analytics data need a young that has/had IN_PROGRESS status
-    const updatedYoung = updateStatusToInProgress(young, req.user);
+    const updatedYoung = await updateStatusToInProgress(young, req.user);
 
     const toName = `${young.firstName} ${young.lastName}`;
     const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}&utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
@@ -266,7 +266,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       params: { toName, cta, fromName },
     });
 
-    return res.status(200).send({ updatedYoung, ok: true });
+    return res.status(200).send({ young: updatedYoung, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
