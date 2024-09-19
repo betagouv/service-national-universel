@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 
-import { ERRORS, FUNCTIONAL_ERRORS, UserDto, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto, YoungType } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, UserDto, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto } from "snu-lib";
 
 import { YoungDocument, YoungModel } from "../models";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
@@ -128,7 +128,8 @@ export const findYoungByIdOrThrow = async (youngId: string): Promise<YoungDocume
   return young;
 };
 
-export const switchYoungByIdToLC = async (youngId: string): Promise<YoungType> => {
+//FixMe: type have been moved to lib
+export const switchYoungByIdToLC = async (youngId: string): Promise<any> => {
   const young = await findYoungByIdOrThrow(youngId);
   young.set({
     cohesionCenterId: undefined,
