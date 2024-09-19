@@ -1746,11 +1746,11 @@ module.exports = {
       }
       const validationPatch = patches[0];
       logger.info(`young ${young._id}: ${patches.length} patches, VALIDATED ${validationPatch._id} ${validationPatch.date}`);
-      const ops = validationPatch.ops.find(({ value, path }) => path === "/status" && value === "VALIDATED");
+      const ops = validationPatch.ops.find(({ value, path }) => path === "/status" && value === YOUNG_STATUS.VALIDATED);
 
       const patchContent = {
         ref: young._id.toString(),
-        ops: [{ ...ops, value: "IN_PROGRESS", path: "/status" }],
+        ops: [{ ...ops, value: YOUNG_STATUS.IN_PROGRESS, path: "/status" }],
         date: addSeconds(validationPatch.date, -1),
         user: { firstName: "Script rattrapprage inscription manuelle" },
         modelName: "young",
