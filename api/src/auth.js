@@ -16,7 +16,7 @@ const {
   checkJwtTrustTokenVersion,
 } = require("./jwt-options");
 const { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString, YOUNG_STATUS } = require("./utils");
 const {
   SENDINBLUE_TEMPLATES,
   PHONE_ZONES_NAMES_ARR,
@@ -266,7 +266,12 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
 
-      const countOfUsersInClass = await this.model.countDocuments({ classeId, deletedAt: { $exists: false } });
+      const countOfUsersInClass = await this.model.countDocuments({
+        classeId,
+        deletedAt: { $exists: false },
+        status: YOUNG_STATUS.VALIDATED,
+      });
+      logger.info(`Auth / signup - youngs : ${countOfUsersInClass} in class ${classeId}`);
       if (countOfUsersInClass >= classe.totalSeats) {
         return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }

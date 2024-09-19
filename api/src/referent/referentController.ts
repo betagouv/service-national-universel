@@ -527,7 +527,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     let { __v, ...newYoung } = value;
 
     // Vérification des objectifs à la validation d'un jeune
-    if (value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
+    if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
       const fillingRate = await getFillingRate(young.department, young.cohort);
       if (fillingRate >= FILLING_RATE_LIMIT) {
         return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });

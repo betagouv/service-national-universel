@@ -28,5 +28,6 @@ export * from "./transport-info";
 export * from "./utils/date";
 export * from "./utils/file";
 export * from "./utils/request";
+export * from "./utils/cohortUtils";
 export * from "./young";
 export * from "./mongoSchema";
