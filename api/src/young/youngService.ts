@@ -1,12 +1,13 @@
 import { format } from "date-fns";
 
-import { ERRORS, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto, FUNCTIONAL_ERRORS, YoungType } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, UserDto, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto, YoungType } from "snu-lib";
 
 import { YoungDocument, YoungModel } from "../models";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 import { isLocalTransport } from "./youngCertificateService";
+import { logger } from "../logger";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
   const validatedYoungsWithSession = getValidatedYoungsWithSession(youngs);
@@ -147,4 +148,29 @@ export const switchYoungByIdToLC = async (youngId: string): Promise<YoungType> =
     cohesionStayMedicalFileReceived: undefined,
   });
   return await young.save();
+};
+
+export const updateStatusToInProgress = async (young: YoungDocument, user: UserDto): Promise<YoungDocument> => {
+  young.set({ status: YOUNG_STATUS.IN_PROGRESS });
+  return await young.save({ fromUser: user });
+};
+
+//@FIXME: Remove me when every young manually created are in status IN_PROGRESS or above
+export const mightAddInProgressStatus = async (young: YoungDocument, user: UserDto) => {
+  if (young.status === YOUNG_STATUS.IN_PROGRESS) {
+    return;
+  }
+  const patches: any[] = await (young as any).patches.find({ ref: young.id });
+  const flattedOps = patches?.flatMap((patch) => patch.ops);
+  const opsWithInProgressStatus = flattedOps.some((op) => op.path === "/status" && op.value === YOUNG_STATUS.IN_PROGRESS);
+  if (opsWithInProgressStatus) {
+    return;
+  }
+  if (young.status === YOUNG_STATUS.VALIDATED) {
+    young.set({ status: YOUNG_STATUS.IN_PROGRESS });
+    await young.save({ fromUser: user });
+    young.set({ status: YOUNG_STATUS.VALIDATED });
+    await young.save({ fromUser: user });
+    logger.info(`YoungService - mightAddInProgressStatus(), Status set to IN_PROGRESS for YoungId:${young.id}`);
+  }
 };
