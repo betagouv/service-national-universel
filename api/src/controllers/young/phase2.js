@@ -5,20 +5,9 @@ const Joi = require("joi");
 const config = require("config");
 
 const { capture } = require("../../sentry");
-const { YoungModel, CohortModel, ReferentModel, MissionEquivalenceModel, ApplicationModel } = require("../../models");
-const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2, getFile } = require("../../utils");
-const {
-  canApplyToPhase2,
-  SENDINBLUE_TEMPLATES,
-  ROLES,
-  SUB_ROLES,
-  canEditYoung,
-  UNSS_TYPE,
-  EQUIVALENCE_STATUS,
-  APPLICATION_STATUS,
-  ENGAGEMENT_TYPES,
-  ENGAGEMENT_LYCEEN_TYPES,
-} = require("snu-lib");
+const { YoungModel, CohortModel, ReferentModel, MissionEquivalenceModel } = require("../../models");
+const { ERRORS, getCcOfYoung, updateYoungPhase2StatusAndHours, getFile } = require("../../utils");
+const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../brevo");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
 const { decrypt } = require("../../cryptoUtils");
@@ -65,20 +54,15 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     const youngId = value.id;
     delete value.id;
     const data = await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
+    // Si c'est un jeune, on met à jour le statut d'équivalence
     if (isYoung) {
       young.set({ status_equivalence: "WAITING_VERIFICATION" });
     }
-    if (!isYoung) {
-      young.set({ status_equivalence: EQUIVALENCE_STATUS.VALIDATED, statusPhase2: "VALIDATED", statusPhase2ValidatedAt: Date.now() });
-      const applications = await ApplicationModel.find({ youngId: young._id });
-      const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
-      await cancelPendingApplications(pendingApplication, req.user);
-      const applications_v2 = await ApplicationModel.find({ youngId: young._id });
-      young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
-    }
-    await young.save({ fromUser: req.user });
 
-    await updateYoungPhase2Hours(young, req.user);
+    // Mise à jour du statut de la phase 2 et des heures du jeune
+    await updateYoungPhase2StatusAndHours(young, req.user);
+
+    await young.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.EQUIVALENCE_WAITING_VERIFICATION;
     let cc = getCcOfYoung({ template, young });
@@ -177,8 +161,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     const data = await equivalence.save({ fromUser: req.user });
 
     if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
-      await updateYoungPhase2Hours(young, req.user);
-      await updateStatusPhase2(young, req.user);
+      await updateYoungPhase2StatusAndHours(young, req.user);
     }
 
     young.set({ status_equivalence: value.status });
