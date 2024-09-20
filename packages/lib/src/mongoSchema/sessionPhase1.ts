@@ -178,6 +178,13 @@ export const SessionPhase1Schema = {
     },
   },
 
+  modaliteSnuId: {
+    type: String,
+    documentation: {
+      description: "Code de la session",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 };
