@@ -21,13 +21,13 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
   const department = getDepartmentForEligibility(young);
 
   const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart || "")?.getFullYear() : undefined;
-
   const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
-      // if the young has already a cohort, he can only apply for the cohorts of the same year
+    // if the young has already a cohort, he can only apply for the cohorts of the same year
+    console.log("currentCohortYear", young.cohort, currentCohortYear, session.dateStart.getFullYear());
     return (
       (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
       session.eligibility?.zones.includes(department) &&
-      session.eligibility?.schoolLevels.includes(young.grade || "") &&
+      session.eligibility?.schoolLevels.includes(young.grade!) &&
       young.birthdateAt &&
       session.eligibility?.bornAfter <= young.birthdateAt &&
       // @ts-expect-error comparaison d'une Date avec un number...
@@ -35,7 +35,7 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
       (session.getIsInscriptionOpen(Number(timeZoneOffset)) ||
         (session.getIsReInscriptionOpen(Number(timeZoneOffset)) && young.isReInscription) ||
         (session.getIsInstructionOpen(Number(timeZoneOffset)) && ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION] as string[]).includes(young.status)))
-  );
+    );
   });
   for (let session of sessions) {
     session.isEligible = true;

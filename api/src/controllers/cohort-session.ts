@@ -13,6 +13,8 @@ import { validateId } from "../utils/validator";
 
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE, CohortDocumentWithPlaces } from "../utils/cohort";
 import { isReInscriptionOpen, isInscriptionOpen } from "../cohort/cohortService";
+import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
+import { CohortsRoutesSchema } from "../cohort/cohortValidator";
 
 const router = express.Router();
 
@@ -95,25 +97,22 @@ router.get("/isReInscriptionOpen", async (req: RouteRequest<CohortsRoutes["GetIs
   }
 });
 
-router.get("/isInscriptionOpen", async (req: RouteRequest<CohortsRoutes["GetIsIncriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsIncriptionOpen"]>) => {
-  const { error, value: query } = Joi.object<CohortsRoutes["GetIsIncriptionOpen"]["query"]>({
-    sessionName: Joi.string(),
-  })
-    .unknown()
-    .validate(req.query, { stripUnknown: true });
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+router.get(
+  "/isInscriptionOpen",
+  requestValidatorMiddleware({ query: CohortsRoutesSchema.GetIsIncriptionOpen.query }),
+  async (req: RouteRequest<CohortsRoutes["GetIsIncriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsIncriptionOpen"]>) => {
+    try {
+      const isOpen = await isInscriptionOpen(req.validatedQuery.sessionName);
 
-  try {
-    const isOpen = await isInscriptionOpen(query.sessionName);
-
-    return res.json({
-      ok: true,
-      data: isOpen,
-    });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+      return res.json({
+        ok: true,
+        data: isOpen,
+      });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 
 export default router;

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { UpdateCohortDto } from "snu-lib";
+import { CohortsRoutes, UpdateCohortDto } from "snu-lib";
 
 export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<UpdateCohortDto> => {
   return Joi.object<UpdateCohortDto, true, Omit<UpdateCohortDto, "_id">>({
@@ -80,3 +80,13 @@ const ToFromDateValidator = Joi.object({
   from: Joi.date().allow(null, ""),
   to: Joi.date().allow(null, ""),
 });
+
+const GetIsIncriptionOpenRouteSchema = {
+  query: Joi.object<CohortsRoutes["GetIsIncriptionOpen"]["query"]>({
+    sessionName: Joi.string(),
+  }),
+};
+
+export const CohortsRoutesSchema = {
+  GetIsIncriptionOpen: GetIsIncriptionOpenRouteSchema,
+};
