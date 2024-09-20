@@ -603,10 +603,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
     }
 
-    if (newYoung.status === YOUNG_STATUS.VALIDATED && !young.reinscriptionStep2023) {
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.hasStartedReinscription === false) {
       newYoung.inscriptionStep2023 = "DONE";
-    }
-    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.reinscriptionStep2023) {
+    } else if (newYoung.status === YOUNG_STATUS.VALIDATED && young.hasStartedReinscription === true) {
       newYoung.reinscriptionStep2023 = "DONE";
     }
 
