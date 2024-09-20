@@ -1,8 +1,7 @@
 import { BasicRoute, ClasseType, CohesionCenterType, ReferentDto, RouteResponseBody } from "snu-lib";
 
 export interface CohesionCenterImportRoute extends BasicRoute {
-  centerFilePath: string;
-  sessionCenterFilePath: string;
+  cohesionCenterFilePath: string;
 }
 
 export interface ImportCohesionCenterRoute extends BasicRoute {

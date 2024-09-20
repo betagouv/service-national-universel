@@ -26,7 +26,7 @@ export const mapCohesionCentersForSept2024 = (cohesionCenters: CohesionCenterCSV
       matricule: cohesionCenter.Matricule,
     };
     if (cohesionCenter["ID temporaire"]) {
-      return { _id: cohesionCenter["ID temporaire"], ...cohesionCenterWithouId };
+      return { _id: cohesionCenter["ID temporaire"].toLowerCase(), ...cohesionCenterWithouId };
     }
     return cohesionCenterWithouId;
   });

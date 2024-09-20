@@ -14,13 +14,14 @@ export interface CohesionCenterImportReport {
   comment: string;
 }
 
-export const importCohesionCenter = async (centerFilePath: string, sessionCenterFilePath: string) => {
+export const importCohesionCenter = async (centerFilePath: string) => {
   const centerFile = await getFile(centerFilePath);
-  const sessionCenterFile = await getFile(sessionCenterFilePath);
   const centerToImport: CohesionCenterCSV[] = await readCSVBuffer<CohesionCenterCSV>(Buffer.from(centerFile.Body), true);
-  const sessionCenterToImport: CohesionCenterCSV[] = await readCSVBuffer<CohesionCenterCSV>(Buffer.from(sessionCenterFile.Body), true);
 
   const centerMapped = mapCohesionCentersForSept2024(centerToImport);
+
+  // TODO filter center by comments in "CENTRE EN COURS D'IDENTIFICATION"
+  // const center;
 
   const report: CohesionCenterImportReport[] = [];
 

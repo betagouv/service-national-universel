@@ -16,7 +16,7 @@ router.use(authMiddleware("referent"));
 router.post("/", accessControlMiddleware([]), requestValidatorMiddleware({ body: cohesionCenterImportBodySchema }), async (req: RouteRequest<ImportCohesionCenterRoute>, res) => {
   const validatedBody = req.validatedBody;
   try {
-    const importedCohesionCenter = await importCohesionCenter(validatedBody.centerFilePath, validatedBody.sessionCenterFilePath);
+    const importedCohesionCenter = await importCohesionCenter(validatedBody.cohesionCenterFilePath);
     const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
 
     const headers = getHeaders(importedCohesionCenter);
