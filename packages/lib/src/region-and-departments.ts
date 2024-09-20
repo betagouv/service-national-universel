@@ -356,7 +356,7 @@ const getRegionForEligibility = (young: Pick<YoungType, "schooled" | "schoolRegi
   return region;
 };
 
-const getDepartmentForEligibility = (young: Pick<YoungType, "_id" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip">) => {
+const getDepartmentForEligibility = (young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip"> & { _id?: YoungType["_id"] }) => {
   let dep;
   if (young._id && young.schooled === "true") dep = young.schoolDepartment;
   if (young._id && young.schooled === "false") dep = young.department;

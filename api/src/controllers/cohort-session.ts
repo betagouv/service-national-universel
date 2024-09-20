@@ -1,20 +1,18 @@
-import express, { Response } from "express";
-import passport from "passport";
-import Joi from "joi";
+import express from "express";
 import config from "config";
 
-import { CohortsRoutes, ROLES, YoungType } from "snu-lib";
+import { CohortsRoutes, ROLES } from "snu-lib";
 
 import { capture } from "../sentry";
 import { ERRORS } from "../utils";
 import { YoungModel } from "../models";
-import { RouteRequest, RouteResponse, UserRequest } from "./request";
-import { validateId } from "../utils/validator";
-
-import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE, CohortDocumentWithPlaces } from "../utils/cohort";
-import { isReInscriptionOpen, isInscriptionOpen } from "../cohort/cohortService";
+import { RouteRequest, RouteResponse } from "./request";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
+
 import { CohortsRoutesSchema } from "../cohort/cohortValidator";
+import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
+import { isReInscriptionOpen, isInscriptionOpen } from "../cohort/cohortService";
 
 const router = express.Router();
 
@@ -24,64 +22,48 @@ const router = express.Router();
 // If not, returns an array of session objects filtered by eligibility rules and inscription dates.
 // Provides updated number of places in the given region for frontend filtering and backend coherence checks.
 
-router.post("/eligibility/2023/:id?", passport.authenticate("referent"), async function (req: UserRequest, res: Response) {
-  try {
-    let young: YoungType;
-    const { value: id } = validateId(req.params.id);
-    if (id) {
-      const youngDocument = await YoungModel.findById(id);
-      if (!youngDocument) {
-        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+router.post(
+  "/eligibility/2023/:id?",
+  authMiddleware("referent"),
+  requestValidatorMiddleware({ ...CohortsRoutesSchema.PostEligibility, body: undefined }),
+  async function (req: RouteRequest<CohortsRoutes["PostEligibility"]>, res: RouteResponse<CohortsRoutes["PostEligibility"]>) {
+    try {
+      let young: NonNullable<CohortsRoutes["PostEligibility"]["payload"]>;
+      const { id } = req.validatedParams;
+      if (id) {
+        const youngDocument = await YoungModel.findById(id).lean();
+        if (!youngDocument) {
+          return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        }
+        // deparment and zip not required in the schema...
+        young = youngDocument as typeof young;
+      } else {
+        const { value: body, error: bodyError } = CohortsRoutesSchema.PostEligibility.body.validate(req.body, { stripUnknown: true });
+        if (bodyError) {
+          return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+        }
+        young = body!;
       }
-      young = youngDocument;
-    } else {
-      const { error: bodyError, value: body } = Joi.object({
-        schoolDepartment: Joi.string().allow("", null),
-        department: Joi.string(),
-        region: Joi.string(),
-        schoolRegion: Joi.string().allow("", null),
-        birthdateAt: Joi.date().required(),
-        grade: Joi.string(),
-        status: Joi.string(),
-        zip: Joi.string().allow("", null),
-      })
-        .unknown()
-        .validate(req.body);
-      if (bodyError) {
-        capture(bodyError);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+      let sessions: CohortsRoutes["PostEligibility"]["response"]["data"];
+      if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(req.user?.role)) {
+        sessions = await getFilteredSessionsForCLE();
+      } else if (
+        (req.user?.role === ROLES.ADMIN && req.get("origin") === config.ADMIN_URL) ||
+        ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(req.user?.role) && req.validatedQuery.getAllSessions)
+      ) {
+        sessions = await getAllSessions(young);
+      } else {
+        sessions = await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
       }
-      young = body;
-    }
-    const { error: errorQuery, value: query } = Joi.object({
-      getAllSessions: Joi.boolean().default(false),
-    })
-      .unknown()
-      .validate(req.query, { stripUnknown: true });
 
-    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    let sessions: CohortDocumentWithPlaces[];
-    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(req.user?.role)) {
-      sessions = await getFilteredSessionsForCLE();
-    } else if (
-      (req.user?.role === ROLES.ADMIN && req.get("origin") === config.ADMIN_URL) ||
-      ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(req.user?.role) && query.getAllSessions)
-    ) {
-      sessions = await getAllSessions(young);
-    } else {
-      sessions = await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
+      return res.json({ ok: true, data: sessions });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    if (sessions.length === 0) {
-      return res.send({ ok: true, data: [], message: "no_session_found" });
-    }
-    return res.send({ ok: true, data: sessions });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.get("/isReInscriptionOpen", async (req: RouteRequest<CohortsRoutes["GetIsReincriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsReincriptionOpen"]>) => {
   try {
@@ -99,7 +81,7 @@ router.get("/isReInscriptionOpen", async (req: RouteRequest<CohortsRoutes["GetIs
 
 router.get(
   "/isInscriptionOpen",
-  requestValidatorMiddleware({ query: CohortsRoutesSchema.GetIsIncriptionOpen.query }),
+  requestValidatorMiddleware(CohortsRoutesSchema.GetIsIncriptionOpen),
   async (req: RouteRequest<CohortsRoutes["GetIsIncriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsIncriptionOpen"]>) => {
     try {
       const isOpen = await isInscriptionOpen(req.validatedQuery.sessionName);

@@ -41,7 +41,7 @@ describe("Cohort Session Controller", () => {
       expect(response.body.code).toBe(ERRORS.INVALID_BODY);
     });
 
-    it("should return 400 if young data is valid", async () => {
+    it("should return 200 if young data is valid", async () => {
       const response = await request(getAppHelper({ role: ROLES.ADMIN }))
         .post("/cohort-session/eligibility/2023")
         .send({
@@ -58,7 +58,7 @@ describe("Cohort Session Controller", () => {
       expect(response.body.ok).toBe(true);
     });
 
-    it("should return 200 if young data is valid", async () => {
+    it("should return cohorts if young is valid and has eligibility", async () => {
       const young = {
         department: "Loire-Atlantique",
         region: "Pays de la Loire",

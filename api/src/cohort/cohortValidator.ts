@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { CohortsRoutes, UpdateCohortDto } from "snu-lib";
+import { idSchema } from "../utils/validator";
 
 export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<UpdateCohortDto> => {
   return Joi.object<UpdateCohortDto, true, Omit<UpdateCohortDto, "_id">>({
@@ -87,6 +88,26 @@ const GetIsIncriptionOpenRouteSchema = {
   }),
 };
 
+const PostEligibilityRouteSchema = {
+  params: Joi.object<CohortsRoutes["PostEligibility"]["params"]>({
+    id: idSchema(),
+  }),
+  query: Joi.object<CohortsRoutes["PostEligibility"]["query"]>({
+    getAllSessions: Joi.boolean().default(false),
+  }),
+  body: Joi.object<CohortsRoutes["PostEligibility"]["payload"]>({
+    schoolDepartment: Joi.string().allow("", null),
+    department: Joi.string(),
+    region: Joi.string(),
+    schoolRegion: Joi.string().allow("", null),
+    birthdateAt: Joi.date().required(),
+    grade: Joi.string(),
+    status: Joi.string(),
+    zip: Joi.string().allow("", null),
+  }),
+};
+
 export const CohortsRoutesSchema = {
+  PostEligibility: PostEligibilityRouteSchema,
   GetIsIncriptionOpen: GetIsIncriptionOpenRouteSchema,
 };

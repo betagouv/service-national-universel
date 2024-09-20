@@ -1,7 +1,7 @@
 import { BasicRoute, RouteResponseBody } from "..";
 import { CohortType } from "../../mongoSchema";
 
-export interface GetEligibilityRoute extends BasicRoute {
+export interface PostEligibilityRoute extends BasicRoute {
   method: "POST";
   path: "/cohort-session/eligibility/2023/{id}";
   params: { id?: string };

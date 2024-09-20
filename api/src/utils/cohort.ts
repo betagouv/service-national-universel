@@ -1,7 +1,7 @@
 import { YOUNG_STATUS, getRegionForEligibility, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType } from "snu-lib";
 import { YoungModel, CohortModel, InscriptionGoalModel, CohortDocument } from "../models";
 
-export type CohortDocumentWithPlaces = CohortDocument<{
+type CohortDocumentWithPlaces = CohortDocument<{
   numberOfCandidates?: number;
   numberOfValidated?: number;
   goal?: number;
@@ -10,7 +10,8 @@ export type CohortDocumentWithPlaces = CohortDocument<{
   isEligible?: boolean;
 }>;
 
-type YoungInfo = Pick<YoungType, "_id" | "cohort" | "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip"> & {
+type YoungInfo = Pick<YoungType, "cohort" | "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip"> & {
+  _id?: YoungType["_id"];
   isReInscription?: boolean;
 };
 
