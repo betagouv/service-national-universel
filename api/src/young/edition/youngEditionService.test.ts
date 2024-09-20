@@ -48,8 +48,10 @@ describe("generateConsentChanges", () => {
       parentAllowSNU: "false",
       imageRight: "false",
       parent1AllowSNU: false,
+      parent1ValidationDate: expect.any(Date),
       parent1AllowImageRights: "false",
       parent2AllowSNU: "false",
+      parent2ValidationDate: expect.any(Date),
       parent2AllowImageRights: "false",
     });
   });

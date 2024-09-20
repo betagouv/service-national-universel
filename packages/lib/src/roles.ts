@@ -1001,7 +1001,7 @@ function canEditEstimatedSeats(actor) {
 
 function canEditTotalSeats(actor) {
   if (isAdmin(actor)) return true;
-  if ((actor.role === ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION)) {
+  if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     const now = new Date();
     const limitDateTotalSeat = new Date(LIMIT_DATE_TOTAL_SEATS);
     return now <= limitDateTotalSeat;
