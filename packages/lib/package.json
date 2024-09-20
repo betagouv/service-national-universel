@@ -40,6 +40,7 @@
     "sanitize-html": "^2.12.1"
   },
   "peerDependencies": {
-    "@tanstack/react-query": "^5.29.0"
+    "@tanstack/react-query": "^5.29.0",
+    "date-fns": "^3.0.0"
   }
 }

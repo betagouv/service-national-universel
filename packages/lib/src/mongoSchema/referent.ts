@@ -1,6 +1,9 @@
 import { Schema, InferSchemaType } from "mongoose";
 
-import { ReferentCreatedBy, InvitationType, SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST, InterfaceExtended } from "..";
+import { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } from "../roles";
+import { ReferentCreatedBy, InvitationType } from "../constants/referentConstants";
+
+import { InterfaceExtended } from "..";
 
 const referentMetadataSchema = {
   createdBy: {

@@ -11,4 +11,5 @@ export default defaultRollupConfig({
   packageJson,
   exports: "named",
   plugins: [json()],
+  external: ["date-fns", "date-fns/locale"],
 });
