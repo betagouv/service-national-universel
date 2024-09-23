@@ -1,35 +1,29 @@
 import React from "react";
 import ErrorMessage from "../ErrorMessage";
 
-const Checkbox = ({ label = "", className = "", name = "", value = "", useCheckedAsValue = false, onChange = () => null, error = null, ...rest }) => {
-  if ("type" in rest) {
-    throw new Error(`Checkbox component cannot handle a custom type.`);
-  }
-
+const Checkbox = ({ label = "", className = "", name = "", value = false, onChange = () => null, error = null, disabled = false, ...rest }) => {
   const handleChange = (event) => {
-    if (useCheckedAsValue) {
-      onChange(event.target.checked);
-    } else {
-      onChange(event.target.value);
-    }
+    onChange(event.target.checked);
   };
 
-  const customValue = useCheckedAsValue ? { checked: value } : { value };
-
   return (
-    <div className={`mb-[1rem] ${className}`}>
-      <label className={`m-0 flex w-full gap-3 rounded-lg ${error && "border-red-500"}`}>
-        <input
-          className="rounded bg-white text-sm text-gray-900 accent-blue-600 placeholder:text-gray-500 focus:outline-none disabled:text-gray-400 disabled:accent-gray-200"
-          name={name}
-          type="checkbox"
-          onChange={handleChange}
-          {...customValue}
-          {...rest}
-        />
-        {label ? <p className="text-sm leading-4 text-gray-700">{label}</p> : null}
+    <div className={`mb-3 ${className}`}>
+      <label className={`flex items-center gap-2 ${error ? "border-red-500" : ""}`}>
+        <input type="checkbox" name={name} checked={value} onChange={handleChange} disabled={disabled} className="hidden" {...rest} />
+        <span
+          className={`w-4 h-4 flex-shrink-0 border rounded-sm flex items-center justify-center
+            ${value ? (disabled ? "bg-gray-300 border-gray-300" : "bg-blue-600 border-blue-600") : "bg-white border-gray-400"}
+            ${disabled ? "cursor-not-allowed" : "cursor-pointer"}
+          `}>
+          {value && (
+            <svg className="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M7.629 14.555l-4.784-4.784 1.414-1.414L7.629 11.727l8.12-8.12 1.414 1.414z" />
+            </svg>
+          )}
+        </span>
+        {label && <span className={`text-gray-700 text-sm`}>{label}</span>}
       </label>
-      <ErrorMessage error={error} />
+      {error && <ErrorMessage error={error} />}
     </div>
   );
 };
