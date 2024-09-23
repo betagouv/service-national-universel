@@ -1,10 +1,5 @@
-import { importCohesionCenter, processCentersByMatriculeFound, processCenterWithId, processCenterWithoutId, updateCenter } from "./cohesionCenterImportService";
-import * as cohesionCenterImportService from "./cohesionCenterImportService";
 import { CohesionCenterDocument, CohesionCenterModel } from "../../models";
-import { CohesionCenterCSV } from "./cohesionCenterImport";
-import { getFile } from "../../utils";
-import { readCSVBuffer } from "../../services/fileService";
-import { mapCohesionCentersForSept2024 } from "./cohesionCenterImportMapper";
+import { processCentersByMatriculeFound, processCenterWithId, processCenterWithoutId, updateCenter } from "./cohesionCenterImportService";
 
 jest.mock("../../models");
 jest.mock("../../logger");
@@ -89,7 +84,7 @@ describe("cohesionCenterImportService", () => {
     it("should update the center", async () => {
       const center = { name: "Test Center", matricule: "12345" };
       const foundCenter = { _id: "123", name: "Old Center", matricule: "12345", save: jest.fn(), set: jest.fn() } as unknown as CohesionCenterDocument;
-      const result = await updateCenter(center, foundCenter);
+      const result = await updateCenter(center, foundCenter, "");
       expect(result.action).toBe("updated");
       expect(foundCenter.save).toHaveBeenCalled();
       expect(foundCenter.set).toHaveBeenCalledWith(center);

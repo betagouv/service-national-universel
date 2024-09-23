@@ -1,15 +1,14 @@
 import express from "express";
 import { RouteRequest } from "../../controllers/request";
-import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
+import { authMiddleware } from "../../middlewares/authMiddleware";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
-import { cohesionCenterImportBodySchema } from "./cohesionCenterImportValidator";
+import { capture } from "../../sentry";
 import { generateCSVStream, getHeaders } from "../../services/fileService";
 import { uploadFile } from "../../utils";
-import { capture } from "../../sentry";
-import { importCohesionCenter } from "./cohesionCenterImportService";
-import { BasicRoute } from "snu-lib";
 import { ImportCohesionCenterRoute } from "./cohesionCenterImport";
+import { importCohesionCenter } from "./cohesionCenterImportService";
+import { cohesionCenterImportBodySchema } from "./cohesionCenterImportValidator";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -20,7 +19,7 @@ router.post("/", accessControlMiddleware([]), requestValidatorMiddleware({ body:
     const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
 
     const headers = getHeaders(importedCohesionCenter);
-    uploadFile(`file/center/${timestamp}-imported-cohesion-center.csv`, {
+    uploadFile(`file/session-center/${timestamp}-imported-cohesion-center.csv`, {
       data: generateCSVStream(importedCohesionCenter, headers),
       encoding: "",
       mimetype: "text/csv",

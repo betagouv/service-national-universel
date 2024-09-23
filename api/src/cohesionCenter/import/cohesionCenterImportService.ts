@@ -1,10 +1,9 @@
-import { getFile } from "../../utils";
-import { readCSVBuffer } from "../../services/fileService";
-import { mapCohesionCentersForSept2024 } from "./cohesionCenterImportMapper";
-import { CohesionCenterCSV, CohesionCenterImportMapped } from "./cohesionCenterImport";
-import { CohesionCenterDocument, CohesionCenterModel } from "../../models";
 import { logger } from "../../logger";
-import { CohesionCenterType } from "snu-lib";
+import { CohesionCenterDocument, CohesionCenterModel } from "../../models";
+import { readCSVBuffer } from "../../services/fileService";
+import { getFile } from "../../utils";
+import { CohesionCenterCSV, CohesionCenterImportMapped } from "./cohesionCenterImport";
+import { mapCohesionCentersForSept2024 } from "./cohesionCenterImportMapper";
 
 export interface CohesionCenterImportReport {
   _id?: string;
@@ -18,14 +17,12 @@ export const importCohesionCenter = async (centerFilePath: string) => {
   const centerFile = await getFile(centerFilePath);
   const centerToImport: CohesionCenterCSV[] = await readCSVBuffer<CohesionCenterCSV>(Buffer.from(centerFile.Body), true);
 
-  const centerMapped = mapCohesionCentersForSept2024(centerToImport);
-
-  // TODO filter center by comments in "CENTRE EN COURS D'IDENTIFICATION"
-  // const center;
+  const mappedCenters = mapCohesionCentersForSept2024(centerToImport);
+  const filteredCenter = filterCenter(mappedCenters);
 
   const report: CohesionCenterImportReport[] = [];
 
-  for (const center of centerMapped) {
+  for (const center of filteredCenter) {
     let processedCenter: CohesionCenterImportReport;
 
     if (center._id) {
@@ -33,7 +30,7 @@ export const importCohesionCenter = async (centerFilePath: string) => {
     } else if (center.matricule) {
       processedCenter = await processCenterWithoutId(center);
     } else {
-      logger.warn(`Center ${center.name} has no matricule and no id, skipping`);
+      logger.warn(`importCohesionCenter() - Center ${center.name} has no matricule and no id, skipping`);
       continue;
     }
 
@@ -42,33 +39,37 @@ export const importCohesionCenter = async (centerFilePath: string) => {
   return report;
 };
 
+const filterCenter = (mappedCenters: CohesionCenterImportMapped[]) => {
+  return mappedCenters.filter((center) => {
+    const isKept = center.observations !== "CENTRE EN COURS D'IDENTIFICATION";
+    if (!isKept) {
+      logger.info(`importCohesionCenter() - Center ${center.name} is not kept because comment : "CENTRE EN COURS D'IDENTIFICATION"`);
+    }
+
+    return isKept;
+  });
+};
+
 export const processCenterWithId = async (center: CohesionCenterImportMapped): Promise<CohesionCenterImportReport> => {
   const { _id, ...centerToUpdate } = center;
   const existingCenter = await CohesionCenterModel.findById(_id);
   if (existingCenter) {
-    existingCenter.set({ ...centerToUpdate });
-    await existingCenter.save({ fromUser: { firstName: "IMPORT_COHESION_CENTER" } });
-    return {
-      _id: _id,
-      matricule: existingCenter.matricule,
-      name: existingCenter.name,
-      action: "updated",
-      comment: "Center updated",
-    };
+    return await updateCenter(centerToUpdate, existingCenter, "Id provided - Center found by Id");
   }
   return {
     _id: _id,
     matricule: "",
     name: "",
     action: "error",
-    comment: "Center not found",
+    comment: "Id provided - no center found by Id",
   };
 };
 
 export const processCenterWithoutId = async (center: CohesionCenterImportMapped): Promise<CohesionCenterImportReport> => {
   const foundCenters = await CohesionCenterModel.find({ matricule: center.matricule });
   if (foundCenters.length === 1) {
-    return await updateCenter(center, foundCenters[0]);
+    logger.info(`processCenterWithoutId() - Center with matricule ${center.matricule} already exists`);
+    return await updateCenter(center, foundCenters[0], "No Id - Center found by matricule");
   } else if (foundCenters.length > 1) {
     return await processCentersByMatriculeFound(center, foundCenters);
   } else {
@@ -76,8 +77,7 @@ export const processCenterWithoutId = async (center: CohesionCenterImportMapped)
   }
 };
 
-export const updateCenter = async (center: CohesionCenterImportMapped, foundCenter: CohesionCenterDocument): Promise<CohesionCenterImportReport> => {
-  logger.info(`updateCenter() - Center with matricule ${center.matricule} already exists`);
+export const updateCenter = async (center: CohesionCenterImportMapped, foundCenter: CohesionCenterDocument, comment: string): Promise<CohesionCenterImportReport> => {
   foundCenter.set({ ...center });
   await foundCenter.save({ fromUser: { firstName: "IMPORT_COHESION_CENTER" } });
   return {
@@ -85,7 +85,7 @@ export const updateCenter = async (center: CohesionCenterImportMapped, foundCent
     matricule: foundCenter.matricule,
     name: foundCenter.name,
     action: "updated",
-    comment: "No Id - Updated center found by matricule",
+    comment: comment,
   };
 };
 

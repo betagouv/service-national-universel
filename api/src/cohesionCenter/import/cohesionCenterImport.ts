@@ -12,25 +12,25 @@ export interface ImportCohesionCenterRoute extends BasicRoute {
 }
 
 export interface CohesionCenterCSV {
-  Matricule: string;
-  Désignation: string;
+  "Matricule du Centre": string;
+  "Désignation du centre": string;
   Adresse: string;
-  Complément: string;
-  CP: string;
+  "Complément adresse": string;
+  "Code postal": string;
   Commune: string;
-  "Commentaire interne": string;
-  Capacité: string;
-  PMR: string;
-  CHS: string;
-  Date: string;
+  "Commentaire interne sur l'enregistrement": string;
+  "Capacité d'accueil Maximale": string;
+  "Acceuil PMR": string;
+  "Avis conforme": string;
+  "Date avis commission hygiène & sécurité": string;
   "Région académique": string;
   Académie: string;
   Département: string;
   "Typologie du centre": string;
   "Domaine d'activité": string;
   "Organisme de rattachement": string;
-  Début: string;
-  Fin: string;
+  "Date début validité de l'enregistrement": string;
+  "Date fin de validité de l'enregistrement": string;
   "ID temporaire": string;
 }
 
