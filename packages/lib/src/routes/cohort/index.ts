@@ -1,5 +1,5 @@
 import { GetOneCohortRoute } from "./get";
-import { PostEligibilityRoute } from "./getEligibility";
+import { PostEligibilityRoute } from "./postEligibility";
 import { GetIsIncriptionOpenRoute } from "./getIsIncriptionOpen";
 import { GetIsReincriptionOpenRoute } from "./getIsReIncriptionOpen";
 

@@ -3,7 +3,7 @@ import { CohortType } from "../../mongoSchema";
 
 export interface PostEligibilityRoute extends BasicRoute {
   method: "POST";
-  path: "/cohort-session/eligibility/2023/{id}";
+  path: "/cohort-session/eligibility/2023/{id?}";
   params: { id?: string };
   payload?: {
     schoolDepartment?: string;

@@ -24,7 +24,6 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
   const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart || "")?.getFullYear() : undefined;
   const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
     // if the young has already a cohort, he can only apply for the cohorts of the same year
-    console.log("currentCohortYear", young.cohort, currentCohortYear, session.dateStart.getFullYear());
     return (
       (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
       session.eligibility?.zones.includes(department) &&
