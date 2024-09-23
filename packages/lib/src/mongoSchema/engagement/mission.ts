@@ -1,5 +1,5 @@
 import { InferSchemaType, Schema } from "mongoose";
-import { InterfaceExtended } from "src";
+import { InterfaceExtended } from "../../mongoSchema";
 
 export const MissionSchema = {
   name: {
