@@ -4,21 +4,19 @@ import { download } from "snu-lib";
 import api from "../services/api";
 import { capture } from "../sentry";
 
-interface DownloadPDFProps {
-  url: string;
-  body?: any;
-  fileName: string;
-  redirectUrl?: string;
-  errorTitle?: string;
-}
-
 export default async function downloadPDF({
   url,
   body,
   fileName,
   redirectUrl = "/auth/login?disconnected=1",
   errorTitle = "Une erreur est survenue lors du téléchargement",
-}: DownloadPDFProps) {
+}: {
+  url: string;
+  body: any;
+  fileName: string;
+  redirectUrl?: string;
+  errorTitle?: string;
+}) {
   try {
     const file = await api.openpdf(url, body);
     download(file, fileName);
@@ -29,7 +27,8 @@ export default async function downloadPDF({
     }
     // We don't capture unauthorized. Just redirect.
     if (e?.message === "unauthorized") {
-      return (window.location.href = redirectUrl);
+      window.location.href = redirectUrl;
+      return;
     }
     // We need more info to understand download issues.
     capture(e);
