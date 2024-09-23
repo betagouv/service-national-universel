@@ -204,9 +204,8 @@ router.delete("/:id/referents", passport.authenticate("referent", { session: fal
           subRole: SUB_ROLES.none,
         });
       } else {
-        const now = new Date();
-        const newEmail = `deleted-${now.valueOf()}-${referent.email}`;
-        referent.set({ deletedAt: now, email: newEmail });
+        const newEmail = `deleted-${referent.id}-${referent.email}`;
+        referent.set({ deletedAt: new Date(), email: newEmail });
       }
       await referent.save({ fromUser: req.user });
       const toName = `${referent.firstName}  ${referent.lastName}`;
