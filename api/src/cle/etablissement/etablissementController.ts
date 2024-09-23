@@ -197,18 +197,21 @@ router.delete("/:id/referents", passport.authenticate("referent", { session: fal
     for (const referent of referents) {
       // si il est aussi référent de classe
       const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
+      const email = referent.email;
       if (classe) {
         referent.set({
           role: ROLES.REFERENT_CLASSE,
           subRole: SUB_ROLES.none,
         });
       } else {
-        referent.set({ deletedAt: new Date() });
+        const now = new Date();
+        const newEmail = `deleted-${now.valueOf()}-${referent.email}`;
+        referent.set({ deletedAt: now, email: newEmail });
       }
       await referent.save({ fromUser: req.user });
       const toName = `${referent.firstName}  ${referent.lastName}`;
       await sendTemplate(SENDINBLUE_TEMPLATES.CLE.COORIDNIATEUR_REMOVED_ETABLISSEMENT, {
-        emailTo: [{ email: referent.email, name: toName }],
+        emailTo: [{ email, name: toName }],
         params: {
           toName,
         },
