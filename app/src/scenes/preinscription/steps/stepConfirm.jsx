@@ -113,13 +113,16 @@ export default function StepConfirm() {
       } else {
         if (user) {
           plausibleEvent("Phase0/CTA preinscription - inscription");
-          if (user.source === YOUNG_SOURCE.VOLONTAIRE) {
+
+          if (user.source === YOUNG_SOURCE.VOLONTAIRE && isFeatureEnabled(FEATURES_NAME.API_ENG_TRACKING, undefined, environment)) {
             window.apieng && window.apieng("trackAccount");
           }
+
           if (token) api.setToken(token);
           await cohortsInit();
           dispatch(setYoung(user));
           removePersistedData();
+
           history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
         }
       }
