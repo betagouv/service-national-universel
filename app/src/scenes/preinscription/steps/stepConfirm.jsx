@@ -12,7 +12,6 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import ProgressBar from "../components/ProgressBar";
 import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
@@ -114,6 +113,7 @@ export default function StepConfirm() {
       } else {
         if (user) {
           plausibleEvent("Phase0/CTA preinscription - inscription");
+          window.apieng && window.apieng("trackAccount");
           if (token) api.setToken(token);
           await cohortsInit();
           dispatch(setYoung(user));
