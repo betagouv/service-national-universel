@@ -339,7 +339,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
               <div className="flex flex-col gap-2">
                 <Field
                   readOnly={!editInfo}
-                  label="Matricule"
+                  label="Code du centre"
                   onChange={(e) => setData({ ...data, code2022: e.target.value })}
                   value={data.code2022 || ""}
                   error={errors?.code2022}
