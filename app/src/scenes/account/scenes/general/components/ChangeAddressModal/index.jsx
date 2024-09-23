@@ -87,7 +87,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
   const fetchAvailableCohorts = async (address = {}) => {
     try {
       setLoading(true);
-      const { data } = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, {
+      const { data } = await api.post("/cohort-session/eligibility/2023", {
         grade: young.grade,
         birthdateAt: young.birthdateAt,
         ...address,

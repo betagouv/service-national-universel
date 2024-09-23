@@ -37,8 +37,8 @@ export function ChangeCohortPen({ young, onChange }) {
       const cohortsAvailable = await CohortService.getEligibilityForYoung({ id: young._id });
       if (Array.isArray(cohortsAvailable)) {
         const cohorts: CohortAvailable[] = cohortsAvailable
-          .map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible, type: c.type }))
-          .filter((c) => c.name !== young.cohort);
+          .filter((c) => c.name !== young.cohort)
+          .map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible, type: c.type }));
         // TODO: rajouter un flag hidden pour les cohort non visible
         cohorts.push({ name: "à venir", type: "VOLONTAIRE" });
         setOptions(cohorts);

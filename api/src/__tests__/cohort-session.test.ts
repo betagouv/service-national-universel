@@ -1,6 +1,6 @@
 import request from "supertest";
 import { fakerFR as faker } from "@faker-js/faker";
-import { addDays, addMonths, addYears } from "date-fns";
+import { addDays, addMonths, addYears, endOfDay, startOfDay } from "date-fns";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
@@ -81,6 +81,41 @@ describe("Cohort Session Controller", () => {
       );
       const response = await request(getAppHelper({ role: ROLES.ADMIN }))
         .post("/cohort-session/eligibility/2023/")
+        .send(young);
+      expect(response.status).toBe(200);
+      expect(response.body.ok).toBe(true);
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it("should return cohorts if young is valid and has eligibility (but not in time zone)", async () => {
+      const young = {
+        department: "Loire-Atlantique",
+        region: "Pays de la Loire",
+        schoolRegion: "",
+        birthdateAt: faker.date.past({ years: 3, refDate: addYears(new Date(), -15) }),
+        grade: GRADES["2ndeGT"],
+        status: YOUNG_STATUS.REFUSED,
+        zip: faker.location.zipCode(),
+      };
+      // cohort open today, but with timezone not avalaiable
+      await createCohortHelper(
+        getNewCohortFixture({
+          inscriptionStartDate: startOfDay(new Date()),
+          inscriptionEndDate: faker.date.future(),
+          eligibility: {
+            zones: [young.department!],
+            schoolLevels: [young.grade || ""],
+            bornAfter: addYears(new Date(), -18),
+            bornBefore: addYears(new Date(), -15),
+          },
+        }),
+      );
+      const timeZoneOffset = -24 * 3600; // 6 hours in seconds
+      // avec un header x-user-timezone
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post(`/cohort-session/eligibility/2023`)
+        .set("x-user-timezone", String(timeZoneOffset))
         .send(young);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
