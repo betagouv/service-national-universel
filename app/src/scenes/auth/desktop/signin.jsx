@@ -17,11 +17,11 @@ import { Input, InputPassword, Button } from "@snu/ds/dsfr";
 
 export default function Signin() {
   const params = queryString.parse(location.search);
-  const { redirect, disconnected } = params;
+  const { redirect } = params;
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(disconnected === "1" ? { text: "Votre session a expiré", subText: "Merci de vous reconnecter." } : {});
+  const [error, setError] = React.useState();
   const [isInscriptionOpen, setInscriptionOpen] = React.useState(false);
   const history = useHistory();
   const dispatch = useDispatch();
