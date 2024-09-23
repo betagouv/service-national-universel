@@ -1,6 +1,7 @@
 import React from "react";
 import WithTooltip from "../../../components/WithTooltip";
 import { MissionType } from "snu-lib";
+import ApiEngagementTracker from "./ApiEngagementTracker";
 
 type propTypes = {
   mission: MissionType & {
@@ -16,13 +17,10 @@ const ApplyButton = ({ mission, onClick }: propTypes) => {
       <WithTooltip tooltipText={mission.message}>
         <button disabled={!mission.canApply} className="rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60" onClick={onClick}>
           Candidater
-          {mission.isJvaMission === "true" ? (
-            // @ts-ignore
-            <span name="tracker_counter" data-id={mission.apiEngagementId} className="hidden" />
-          ) : null}
         </button>
       </WithTooltip>
       <p className="text-xs font-normal leading-none text-gray-500">{mission.placesLeft} places restantes</p>
+      <ApiEngagementTracker missionId={mission.apiEngagementId} />
     </div>
   );
 };
