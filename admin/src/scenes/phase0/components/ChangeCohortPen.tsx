@@ -3,20 +3,45 @@ import { IoRepeat } from "react-icons/io5";
 import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+
 import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, STATUS_CLASSE, COHORT_TYPE, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
 import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
-import Pencil from "@/assets/icons/Pencil";
-import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
-import api from "@/services/api";
-import Loader from "@/components/Loader";
+
 import { capture } from "@/sentry";
 import downloadPDF from "@/utils/download-pdf";
+import Pencil from "@/assets/icons/Pencil";
+import api from "@/services/api";
+import { CohortService } from "@/services/cohortService";
+
+import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
+import Loader from "@/components/Loader";
+import { AuthState } from "@/redux/auth/reducer";
+
+interface CohortAvailable {
+  name: string;
+  type: "VOLONTAIRE" | "CLE";
+  isEligible?: boolean | undefined;
+  goal?: boolean | undefined;
+}
+
+interface Step {
+  icon?: React.ReactNode;
+  title?: string;
+  content: React.ReactNode;
+  actions: {
+    title: string;
+    isCancel?: boolean;
+    disabled?: boolean;
+    loading?: boolean;
+    onClick?: () => void;
+  }[];
+}
 
 export function ChangeCohortPen({ young, onChange }) {
-  const user = useSelector((state) => state.Auth.user);
+  const user = useSelector((state: AuthState) => state.Auth.user);
   const [changeCohortModal, setChangeCohortModal] = useState(false);
-  const [options, setOptions] = useState(null);
+  const [options, setOptions] = useState<CohortAvailable[]>([]);
 
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 
@@ -33,7 +58,7 @@ export function ChangeCohortPen({ young, onChange }) {
       // }
       const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
       if (Array.isArray(data)) {
-        const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible, type: c.type })).filter((c) => c.name !== young.cohort);
+        const cohorts: CohortAvailable[] = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible, type: c.type })).filter((c) => c.name !== young.cohort);
         // TODO: rajouter un flag hidden pour les cohort non visible
         cohorts.push({ name: "à venir", type: "VOLONTAIRE" });
         setOptions(cohorts);
@@ -57,16 +82,26 @@ export function ChangeCohortPen({ young, onChange }) {
 
 function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) {
   const [state, setState] = useState("hts-cle");
-  const [step, setStep] = useState(undefined);
+  const [step, setStep] = useState<Step>();
   const [isSaving, setIsSaving] = useState(false);
   // HTS
-  const [motif, setMotif] = useState(undefined);
-  const [cohort, setCohort] = useState(undefined);
-  const [emailMessage, setEmailMessage] = useState(undefined);
+  const [motif, setMotif] = useState<{
+    label: string;
+    value: string;
+  }>();
+  const [cohort, setCohort] = useState<{
+    label: string;
+    value: string;
+  }>();
+  const [emailMessage, setEmailMessage] = useState<string>();
   // CLE
-  const [etablissement, setEtablissement] = useState(undefined);
-  const [classes, setClasses] = useState(undefined);
-  const [classe, setClasse] = useState(undefined);
+  const [etablissement, setEtablissement] = useState<{
+    _id: string;
+    name: string;
+    city?: string;
+  }>();
+  const [classes, setClasses] = useState<ClasseOption[]>([]);
+  const [classe, setClasse] = useState<Classe & { cohort?: string; label: string }>();
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -98,7 +133,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
   };
 
   const getCohortOptions = (cohorts) => {
-    let updatedCohorts = cohorts.filter((c) => c.type === COHORT_TYPE.VOLONTAIRE);
+    const updatedCohorts = cohorts.filter((c) => c.type === COHORT_TYPE.VOLONTAIRE);
     return updatedCohorts.map((cohort) => ({
       value: cohort.name,
       label: (
@@ -139,7 +174,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 options={motifs.map((e) => ({ label: e, value: e }))}
                 closeMenuOnSelect
                 isClearable={true}
-                value={motif}
+                value={motif || ""}
                 onChange={setMotif}
               />
               {Array.isArray(cohorts) ? (
@@ -150,7 +185,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   noOptionsMessage={"Aucune cohorte éligible n'est disponible."}
                   closeMenuOnSelect
                   isClearable={true}
-                  value={cohort}
+                  value={cohort || ""}
                   onChange={setCohort}
                 />
               ) : (
@@ -192,7 +227,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
               <div className="my-6">
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Motif de changement :</div>
-                  <div className="font-medium">{motif.label}</div>
+                  <div className="font-medium">{motif?.label}</div>
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Ancienne cohorte :</div>
@@ -200,7 +235,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Nouvelle cohorte :</div>
-                  <Badge title={cohort.value} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
+                  <Badge title={cohort?.value} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
                 </div>
               </div>
             </div>
@@ -242,7 +277,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                     {young.firstName} <span className="uppercase">{young.lastName}</span>
                   </span>
                   , votre changement de séjour pour le Service National Universel a bien été pris en compte. Vous êtes maintenant positionné(e) sur le séjour de{" "}
-                  <span className="font-medium">{cohort.value}</span>.
+                  <span className="font-medium">{cohort?.value}</span>.
                   {!young.cniFiles?.length && !young.files?.cniFiles?.length && " Veuillez ajouter votre CNI dans votre compte."}
                 </p>
                 <textarea
@@ -262,21 +297,21 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
               loading: isSaving,
               onClick: async () => {
                 try {
-                  if (!emailMessage) return toastr.error("Veuillez indiquer un message");
+                  if (!emailMessage) return toastr.error("Veuillez indiquer un message", "");
                   setIsSaving(true);
                   await api.put(`/referent/young/${young._id}/change-cohort`, {
                     source: YOUNG_SOURCE.VOLONTAIRE,
-                    cohort: cohort.value,
+                    cohort: cohort?.value,
                     message: emailMessage,
-                    cohortChangeReason: motif.label,
+                    cohortChangeReason: motif?.label,
                   });
                   // if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
                   // if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
                   await onChange();
-                  toastr.success("Cohorte modifiée avec succès");
+                  toastr.success("Cohorte modifiée avec succès", "");
                 } catch (error) {
                   capture(error);
-                  toastr.error(error.message);
+                  toastr.error(error.message, "");
                 } finally {
                   setIsSaving(false);
                 }
@@ -306,7 +341,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 closeMenuOnSelect
                 isClearable={true}
                 noOptionsMessage={"Aucun établissement ne correspond à cette recherche"}
-                value={etablissement ? { label: etablissement.name } : null}
+                value={etablissement ? { label: etablissement.name, value: "" } : null}
                 onChange={({ etablissement }) => setEtablissement(etablissement)}
               />
             </div>
@@ -317,7 +352,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
               title: "Valider",
               disabled: !etablissement,
               onClick: async () => {
-                if (!etablissement) return toastr.error("Veuillez sélectionner un établissement");
+                if (!etablissement) return toastr.error("Veuillez sélectionner un établissement", "");
                 setState("cle-classe");
                 getClasses(etablissement._id).then((classes) => setClasses(classes));
               },
@@ -339,10 +374,10 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
               <Select
                 className="my-6 text-left"
                 placeholder="Classe"
-                options={classes}
+                options={classes as any} // FIXME: use _id as value
                 closeMenuOnSelect
                 isClearable={true}
-                value={classe ? { label: classe.label } : null}
+                value={classe ? { label: classe.label, value: "" } : null}
                 onChange={({ classe }) => setClasse(classe)}
               />
             </div>
@@ -375,10 +410,10 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
               </p>
               <div className="text-left">
                 <div className="flex space-x-3 mb-3">
-                  <InputText className="flex-1" label="Prénom" value={young.firstName} />
-                  <InputText className="flex-1" label="Nom" value={young.lastName} />
+                  <InputText name="firstName" className="flex-1" label="Prénom" value={young.firstName} />
+                  <InputText name="lastName" className="flex-1" label="Nom" value={young.lastName} />
                 </div>
-                <InputText className="mb-3" label="Adresse email" value={young.email} disabled />
+                <InputText name="email" className="mb-3" label="Adresse email" value={young.email} disabled />
                 <p className="mb-3">
                   Si cette adresse email n’est pas correcte,{" "}
                   <span className="underline text-blue-500 cursor-pointer" onClick={onClose}>
@@ -421,19 +456,19 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Nouvelle cohorte :</div>
-                  <Badge title={classe.cohort} leftIcon={<HiUsers size={16} className="text-pink-500" />} />
+                  <Badge title={classe?.cohort} leftIcon={<HiUsers size={16} className="text-pink-500" />} />
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Établissement :</div>
-                  <div className="font-medium">{etablissement.name}</div>
+                  <div className="font-medium">{etablissement?.name}</div>
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Classe :</div>
-                  <div className="font-medium">{classe.label}</div>
+                  <div className="font-medium">{classe?.label}</div>
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Statut de la classe :</div>
-                  <Badge title={translateStatusClasse(classe.status)} status={classe.status} />
+                  <Badge title={translateStatusClasse(classe?.status)} status={classe?.status as any} />
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Statut de l'élève :</div>
@@ -459,15 +494,15 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   }
                   await api.put(`/referent/young/${young._id}/change-cohort`, {
                     source: YOUNG_SOURCE.CLE,
-                    cohort: classe.cohort,
-                    etablissementId: etablissement._id,
-                    classeId: classe._id,
+                    cohort: classe?.cohort,
+                    etablissementId: etablissement?._id,
+                    classeId: classe?._id,
                   });
                   await onChange();
-                  toastr.success("Cohorte modifiée avec succès");
+                  toastr.success("Cohorte modifiée avec succès", "");
                 } catch (error) {
                   capture(error);
-                  toastr.error(error.message);
+                  toastr.error(error.message, "");
                 } finally {
                   setIsSaving(false);
                 }
@@ -533,7 +568,21 @@ const searchEtablissement = async (user, q) => {
   });
 };
 
-const getClasses = async (etablissementId) => {
+interface Classe {
+  _id: string;
+  uniqueKeyAndId: string;
+  name?: string;
+  status: string;
+}
+
+interface ClasseOption {
+  value: Classe;
+  _id: string;
+  label: string;
+  classe: Classe;
+}
+
+const getClasses = async (etablissementId: string): Promise<ClasseOption[]> => {
   if (!etablissementId) return [];
 
   const query = {
