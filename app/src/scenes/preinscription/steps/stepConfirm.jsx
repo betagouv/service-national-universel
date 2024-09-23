@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
-import { PHONE_ZONES, formatDateFR, translate, translateGrade, isFeatureEnabled, FEATURES_NAME, getCohortPeriod } from "snu-lib";
+import { PHONE_ZONES, formatDateFR, translate, translateGrade, isFeatureEnabled, FEATURES_NAME, getCohortPeriod, YOUNG_SOURCE } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
@@ -113,7 +113,9 @@ export default function StepConfirm() {
       } else {
         if (user) {
           plausibleEvent("Phase0/CTA preinscription - inscription");
-          window.apieng && window.apieng("trackAccount");
+          if (user.source === YOUNG_SOURCE.VOLONTAIRE) {
+            window.apieng && window.apieng("trackAccount");
+          }
           if (token) api.setToken(token);
           await cohortsInit();
           dispatch(setYoung(user));
