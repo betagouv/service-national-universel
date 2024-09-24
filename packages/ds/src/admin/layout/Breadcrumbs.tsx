@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { HiChevronRight, HiHome } from "react-icons/hi";
+import { HiChevronRight } from "react-icons/hi";
 
 interface Props {
   items?: Array<{
@@ -23,21 +23,18 @@ export default function Breadcrumbs({ items }: Props) {
             {item.to ? (
               <NavLink
                 to={item.to}
-                className="leading-[20px] whitespace-nowrap text-ds-gray-500 hover:text-ds-gray-500 hover:underline"
+                className="leading-[20px] whitespace-nowrap text-ds-gray-400 hover:text-ds-gray-400 hover:underline"
               >
-                {item.title || item.label}
+                {item.label || item.title}
               </NavLink>
             ) : (
               <div className="leading-[20px] whitespace-nowrap text-ds-gray-500">
-                {item.title || item.label}
+                {item.label || item.title}
               </div>
             )}
           </div>
           {index < items.length - 1 ? (
-            <HiChevronRight
-              className="text-ds-gray-400 mx-1.5 mt-0.5"
-              size={16}
-            />
+            <HiChevronRight className="text-ds-gray-400 mx-1.5" size={16} />
           ) : null}
         </div>
       ))}
