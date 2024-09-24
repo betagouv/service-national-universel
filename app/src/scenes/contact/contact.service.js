@@ -93,7 +93,7 @@ export const questions = [
   {
     value: "PHASE_0_ELIGIBILITY",
     category: "QUESTION",
-    label: "Séjour -  Eligibilité aux séjours 2024",
+    label: "Séjour -  Eligibilité aux séjours",
     articles: ["je-souhaite-minscrire-au-snu"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
