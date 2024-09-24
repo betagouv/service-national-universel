@@ -30,14 +30,13 @@ RUN npm install
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
-COPY tsconfig.front.json
+COPY tsconfig.front.json tsconfig.front.json
 
 ARG RELEASE=""
 ENV RELEASE=${RELEASE}
 ARG SENTRY_AUTH_TOKEN=""
 ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 ENV APP_NAME admin
-RUN echo SENTRY_AUTH_TOKEN RELEASE
 RUN npm run build
 
 FROM nginx AS runner
