@@ -129,6 +129,16 @@ export default function EditEquivalence() {
           error = true;
         }
       }
+      if (key === "structureName") {
+        if (data[key] === undefined || data[key] === "" || data[key] == 0) {
+          error = true;
+        }
+      }
+      if (key === "contactFullName") {
+        if (data[key] === undefined || data[key] === "" || data[key] == 0) {
+          error = true;
+        }
+      }
     }
     setError(error);
 
