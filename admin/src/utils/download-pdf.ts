@@ -12,7 +12,7 @@ export default async function downloadPDF({
   errorTitle = "Une erreur est survenue lors du téléchargement",
 }: {
   url: string;
-  body: any;
+  body?: any;
   fileName: string;
   redirectUrl?: string;
   errorTitle?: string;
