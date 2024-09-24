@@ -116,6 +116,8 @@ const translate = (value) => {
       return "Modérateur";
     case "dsnj":
       return "DSNJ";
+      case "injep":
+        return "INJEP";
     case "transporter":
       return "Transporteur";
     case "referent_department":

@@ -16,6 +16,7 @@ const ROLES = {
   HEAD_CENTER: "head_center",
   VISITOR: "visitor",
   DSNJ: "dsnj",
+  INJEP: "injep",
   TRANSPORTER: "transporter",
   ADMINISTRATEUR_CLE: "administrateur_cle",
   REFERENT_CLASSE: "referent_classe",
