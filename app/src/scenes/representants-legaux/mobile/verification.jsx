@@ -135,6 +135,7 @@ const ProfileDetails = ({ young, isCLE, hasHandicap, cohort }) => {
         </div>
         <Details title="Prénom" value={young.firstName} />
         <Details title="Nom" value={young.lastName} />
+        <Details title="Date de naissance" value={new Date(young.birthdateAt).toLocaleDateString("fr-FR", { day: "numeric", month: "numeric", year: "numeric" })} />
         <Details title="Email" value={young.email} />
         <Details title="Son niveau scolaire" value={young.grade} />
         <Details title="Téléphone" value={concatPhoneNumberWithZone(young.phone, young.phoneZone)} />
@@ -159,7 +160,6 @@ const ProfileDetails = ({ young, isCLE, hasHandicap, cohort }) => {
         <Details title="Pays de naissance" value={young.birthCountry} />
         <Details title="Ville de naissance" value={young.birthCity} />
         <Details title="Code postal de naissance" value={young.birthCityZip} />
-        <Details title="Date de naissance" value={new Date(young.birthdateAt).toLocaleDateString("fr-FR", { day: "numeric", month: "numeric", year: "numeric" })} />
         <Details title="Sexe" value={translate(young.gender)} />
         <Details title="Adresse de résidence" value={young.address} />
         <Details title="Ville de résidence" value={young.city} />
