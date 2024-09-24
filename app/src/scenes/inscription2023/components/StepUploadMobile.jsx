@@ -64,10 +64,10 @@ export default function StepUploadMobile({
     // Check if there are errors
     if (Object.keys(error).length > 0) {
       setError(error);
-      return false;
+      return error;
     }
     setError({});
-    return true;
+    return error;
   }
 
   // Handle the next button click
