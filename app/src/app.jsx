@@ -19,6 +19,7 @@ import { cohortsInit } from "./utils/cohorts";
 
 import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
+import NewSejour from "./scenes/newSejour/NewSejour";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
 const AllEngagements = lazy(() => import("./scenes/all-engagements/index"));
@@ -101,6 +102,7 @@ function App() {
               <SentryRoute path="/public-engagements" component={AllEngagements} />
               <SentryRoute path="/merci" component={Thanks} />
               <SentryRoute path="/preinscription" component={PreInscription} />
+              <SentryRoute path="/choisir-un-nouveau-sejour" component={NewSejour} />
 
               <SecureRoute path="/inscription" component={Inscription2023} />
               <SecureRoute path="/reinscription" component={ReInscription} />
