@@ -20,9 +20,10 @@ import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import ProgressBar from "../components/ProgressBar";
-import { supportURL } from "@/config";
+import { environment, supportURL } from "@/config";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 import ErrorComponent from "@/components/error";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -111,6 +112,9 @@ export default function StepEligibilite() {
 
   const handleSubmit = async () => {
     plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
+    if (isFeatureEnabled(FEATURES_NAME.API_ENG_TRACKING, undefined, environment)) {
+      window.apieng && window.apieng("trackAccount");
+    }
 
     const errors = validateForm();
 
@@ -152,12 +156,7 @@ export default function StepEligibilite() {
     setLoading(true);
 
     try {
-      const {
-        ok,
-        code,
-        data: sessions,
-        message,
-      } = await api.post(`/preinscription/eligibilite`, {
+      const { data: sessions, message } = await api.post(`/preinscription/eligibilite`, {
         schoolDepartment: data.school?.departmentName || data.school?.department,
         department: data.department,
         schoolRegion: data.school?.region,
