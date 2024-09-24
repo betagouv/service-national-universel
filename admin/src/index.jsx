@@ -12,6 +12,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, LinearScale } from "char
 ChartJS.register(ArcElement, Tooltip, Legend, LinearScale);
 
 import store from "./redux/store";
+
 import App from "./app.jsx";
 
 window.addEventListener("vite:preloadError", (event) => {

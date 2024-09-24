@@ -8,6 +8,7 @@ import { CookiesProvider } from "react-cookie";
 import "react-redux-toastr/lib/css/react-redux-toastr.min.css";
 import store from "./redux/store";
 import App from "./app";
+
 import { captureMessage } from "./sentry";
 
 window.addEventListener("vite:preloadError", (event) => {
