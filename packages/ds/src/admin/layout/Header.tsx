@@ -1,18 +1,14 @@
 import React from "react";
 import Breadcrumbs from "./Breadcrumbs";
 
-type BreadcrumbItem =
-  | {
-      title: string | React.ReactNode;
-      to?: string;
-    }
-  | false;
-
 type OwnProps = {
   title: string;
   className?: string;
   classNameDivTitle?: string;
-  breadcrumb?: BreadcrumbItem[];
+  breadcrumb?: Array<{
+    title: string | React.ReactNode;
+    to?: string;
+  }>;
   titleComponent?: React.ReactNode;
   children?: React.ReactNode;
   actions?: React.ReactNode[];

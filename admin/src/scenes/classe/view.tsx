@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { HiHome } from "react-icons/hi";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
@@ -232,8 +233,9 @@ export default function View() {
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status) as TStatus} />}
         breadcrumb={[
+          { title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" to="/" /> },
           {
-            title: "Classes",
+            title: "Mes classes",
             to: "/classes",
           },
           { title: "Fiche de la classe" },

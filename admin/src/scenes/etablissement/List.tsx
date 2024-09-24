@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { HiPlus } from "react-icons/hi";
+import { HiHome, HiPlus } from "react-icons/hi";
 import { Link, useHistory } from "react-router-dom";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
@@ -66,7 +66,11 @@ export default function List() {
 
   return (
     <Page>
-      <Header title="Établissements" breadcrumb={[{ title: "Établissements" }]} actions={getActionsList()} />
+      <Header
+        title="Liste des établissements"
+        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Établissements" }]}
+        actions={getActionsList()}
+      />
       <Container className="!p-0">
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
           <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
