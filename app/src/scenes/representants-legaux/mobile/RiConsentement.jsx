@@ -48,7 +48,7 @@ export default function RiConsentement({ parentId }) {
             <p className="text-base text-[#161616]">
               Dans le cadre de la participation de {young.firstName} {young.lastName} au SNU, nous vous demandons de bien vouloir accepter le nouveau{" "}
               <a
-                href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf"
+                href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur.pdf"
                 target="_blank"
                 rel="noreferrer"
                 className="underline hover:underline">

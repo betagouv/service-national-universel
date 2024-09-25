@@ -22,7 +22,7 @@ import { cohortsInit } from "@/utils/cohorts";
 export default function StepConfirm() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
   const [context, bdcURI] = isLoggedIn
-    ? [ReinscriptionContext, "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    ? [ReinscriptionContext, "jetais-inscrit-en-2023-2024-comment-me-reinscrire-en-2024-2025"]
     : [PreInscriptionContext, "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const [error, setError] = useState({});
   const [isLoading, setLoading] = useState(false);
