@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
-import { HiPlus, HiHome } from "react-icons/hi";
+import { HiPlus } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -118,8 +118,8 @@ export default function List() {
   return (
     <Page>
       <Header
-        title="Liste de mes classes"
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes classes" }]}
+        title="Classes"
+        breadcrumb={[{ title: "Classes" }]}
         actions={[
           [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (
             <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />

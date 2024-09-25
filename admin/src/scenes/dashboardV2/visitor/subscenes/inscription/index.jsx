@@ -11,7 +11,7 @@ export default function Index() {
 
   return (
     <Page>
-      <Header title="Tableau de bord" breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]} />
+      <Header title="Tableau de bord" breadcrumb={[{ title: "Tableau de bord" }]} />
       <General selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
     </Page>
   );
