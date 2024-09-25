@@ -65,11 +65,14 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     if (req.params.action === "export") {
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
-      response = await populateWithReferentInfo(response, req.params.action);
-      response = await populateWithEtablissementInfo(response);
-      response = await populateWithReferentEtablissementInfo(response, req.params.action);
-      response = await populateWithCoordinatorInfo(response, req.params.action);
-      response = await populateWithYoungsInfo(response);
+      if (req.query?.type === "export-des-classes") {
+        response = await populateWithEtablissementInfo(response);
+        response = await populateWithAllReferentsInfo(response, req.params.action);
+        //response = await populateWithReferentInfo(response, req.params.action);
+        //response = await populateWithReferentEtablissementInfo(response, req.params.action);
+        //response = await populateWithCoordinatorInfo(response, req.params.action);
+        response = await populateWithYoungsInfo(response);
+      }
 
       if (req.query?.type === "schema-de-repartition") {
         if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -262,6 +265,63 @@ const populateWithCoordinatorInfo = async (classes, action) => {
     } else {
       item.coordinateurs = referentsData?.filter((e) => item.etablissement?.coordinateurIds.includes(e._id.toString()));
     }
+    return item;
+  });
+};
+
+//tentative d'optimisation
+const populateWithAllReferentsInfo = async (classes, action) => {
+  const referentEtablissementIds =
+    action === "search"
+      ? [...new Set(classes.map((item) => item._source.etablissement?.referentEtablissementIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
+
+  const referentClasseIds =
+    action === "search"
+      ? [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
+
+  const coordinateurIds =
+    action === "search"
+      ? [...new Set(classes.map((item) => item._source.etablissement?.coordinateurIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.etablissement?.coordinateurIds).filter(Boolean))];
+
+  const allReferentIds = [...new Set([...referentEtablissementIds, ...referentClasseIds, ...coordinateurIds].flat())];
+
+  const referents = await allRecords("referent", { ids: { values: allReferentIds } });
+
+  const extendedReferents = referents.map((referent) => ({
+    ...referent,
+    state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
+  }));
+
+  const referentsData = serializeReferents(extendedReferents);
+
+  return classes.map((item) => {
+    const referentEtablissementFiltered = referentsData?.filter((e) =>
+      action === "search"
+        ? item._source.etablissement?.referentEtablissementIds?.includes(e._id.toString())
+        : item.etablissement?.referentEtablissementIds?.includes(e._id.toString()),
+    );
+
+    const referentClasseFiltered = referentsData?.filter((e) =>
+      action === "search" ? item._source.referentClasseIds?.includes(e._id.toString()) : item.referentClasseIds?.includes(e._id.toString()),
+    );
+
+    const coordinateursFiltered = referentsData?.filter((e) =>
+      action === "search" ? item._source.etablissement?.coordinateurIds?.includes(e._id.toString()) : item.etablissement?.coordinateurIds?.includes(e._id.toString()),
+    );
+
+    if (action === "search") {
+      item._source.referentEtablissement = referentEtablissementFiltered;
+      item._source.referents = referentClasseFiltered;
+      item._source.coordinateurs = coordinateursFiltered;
+    } else {
+      item.referentEtablissement = referentEtablissementFiltered;
+      item.referents = referentClasseFiltered;
+      item.coordinateurs = coordinateursFiltered;
+    }
+
     return item;
   });
 };

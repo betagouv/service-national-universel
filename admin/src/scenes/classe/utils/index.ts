@@ -237,7 +237,7 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       studentInProgress: c.studentInProgress ?? 0,
       studentWaiting: c.studentWaiting ?? 0,
       studentWithdrawn: c.studentWithdrawn ?? 0,
-      dossierOuvert: `${((c.studentWaiting ?? 0 + c.studentInProgress ?? 0 + c.studentValidated ?? 0) / c.totalSeats) * 100} %`,
+      dossierOuvert: `${Math.round(((c.studentWaiting ?? 0 + c.studentInProgress ?? 0 + c.studentValidated ?? 0) / c.totalSeats) * 100)} %`,
       academy: c.academy,
       region: c.region,
       department: c.department,
