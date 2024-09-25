@@ -107,14 +107,13 @@ export default function StepConfirm() {
 
     try {
       setLoading(true);
-      const { code, ok, token, user } = await api.post(`/young/signup`, values);
+      const { code, ok, user } = await api.post(`/young/signup`, values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
       } else {
         if (user) {
           plausibleEvent("Phase0/CTA preinscription - inscription");
-          if (token) api.setToken(token);
           await cohortsInit();
           dispatch(setYoung(user));
           removePersistedData();

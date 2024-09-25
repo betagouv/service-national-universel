@@ -38,19 +38,18 @@ export default function Signin() {
   const onSubmit = async () => {
     setLoading(true);
     try {
-      const { user: young, token, code } = await api.post(`/young/signin`, { email, password });
+      const { user: young, code } = await api.post(`/young/signin`, { email, password });
 
       if (code === "2FA_REQUIRED") {
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
 
-      if (!young || !token) {
-        console.log("no young or token", young, token);
+      if (!young) {
+        console.log("no young or token", young);
         return;
       }
 
       plausibleEvent("Connexion réussie");
-      api.setToken(token);
       dispatch(setYoung(young));
       await cohortsInit();
 
