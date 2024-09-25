@@ -28,21 +28,20 @@ const AccountSpecialSituationsPage = () => {
           </div>
           <div className="px-4 pt-6 pb-2 lg:col-span-2 lg:col-start-2">
             <FormDescription className="lg:hidden">En fonction des situations signalées, un responsable prendra contact avec vous.</FormDescription>
-            <Checkbox label="Je suis en situation de handicap" name="handicap" value={values.handicap} disabled useCheckedAsValue />
-            <Checkbox label="Je suis bénéficiaire d'un Projet personnalisé de scolarisation (PPS)" name="ppsBeneficiary" value={values.ppsBeneficiary} disabled useCheckedAsValue />
-            <Checkbox label="Je suis bénéficiaire d'un Projet d'accueil individualisé (PAI)" name="paiBeneficiary" value={values.paiBeneficiary} disabled useCheckedAsValue />
-            <Checkbox label="J'ai des allergies ou intolérances alimentaires" name="allergies" value={values.allergies} disabled useCheckedAsValue />
-            <Checkbox label="J'ai besoin d'aménagements spécifiques" name="specificAmenagment" value={values.specificAmenagment} disabled useCheckedAsValue />
+            <Checkbox label="Je suis en situation de handicap" name="handicap" checked={values.handicap} disabled />
+            <Checkbox label="Je suis bénéficiaire d'un Projet personnalisé de scolarisation (PPS)" name="ppsBeneficiary" checked={values.ppsBeneficiary} disabled />
+            <Checkbox label="Je suis bénéficiaire d'un Projet d'accueil individualisé (PAI)" name="paiBeneficiary" checked={values.paiBeneficiary} disabled />
+            <Checkbox label="J'ai des allergies ou intolérances alimentaires" name="allergies" checked={values.allergies} disabled />
+            <Checkbox label="J'ai besoin d'aménagements spécifiques" name="specificAmenagment" checked={values.specificAmenagment} disabled />
             {values.specificAmenagment === "true" && values.specificAmenagmentType !== "Contenu supprimé" && (
-              <Textarea label="Nature de cet aménagement spécifique" name="specificAmenagmentType" value={values.specificAmenagmentType} disabled />
+              <Textarea label="Nature de cet aménagement spécifique" name="specificAmenagmentType" checked={values.specificAmenagmentType} disabled />
             )}
-            <Checkbox label="J'ai besoin d'un aménagement pour mobilité réduite" name="reducedMobilityAccess" value={values.reducedMobilityAccess} disabled useCheckedAsValue />
+            <Checkbox label="J'ai besoin d'un aménagement pour mobilité réduite" name="reducedMobilityAccess" checked={values.reducedMobilityAccess} disabled />
             <Checkbox
               label="J'ai besoin d'être affecté(e) dans un centre de mon département de résidence"
               name="handicapInSameDepartment"
-              value={values.handicapInSameDepartment}
+              checked={values.handicapInSameDepartment}
               disabled
-              useCheckedAsValue
             />
           </div>
         </div>
