@@ -18,7 +18,7 @@ export async function fetchProgram(id) {
 
 export async function fetchApplications(youngId) {
   const res = await fetch(`${apiURL}/young/${youngId}/application`, {
-    headers: { Authorization: `JWT ${API.getToken()}` },
+    credentials: "include",
   });
   const { ok, data, error } = await res.json();
   if (!ok) throw new Error(error.name, { cause: error.message });
@@ -27,7 +27,7 @@ export async function fetchApplications(youngId) {
 
 export async function fetchEquivalences(youngId) {
   const res = await fetch(`${apiURL}/young/${youngId}/phase2/equivalences`, {
-    headers: { Authorization: `JWT ${API.getToken()}` },
+    credentials: "include",
   });
   const { ok, data, error } = await res.json();
   if (!ok) throw new Error(error.name, { cause: error.message });
@@ -36,7 +36,7 @@ export async function fetchEquivalences(youngId) {
 
 export async function fetchEquivalence(youngId, id) {
   const res = await fetch(`${apiURL}/young/${youngId}/phase2/equivalence/${id}`, {
-    headers: { Authorization: `JWT ${API.getToken()}` },
+    credentials: "include",
   });
   const { ok, data, error } = await res.json();
   if (!ok) throw new Error(error.name, { cause: error.message });
@@ -50,8 +50,9 @@ export async function fetchEquivalenceFile(youngId, fileName) {
 
 export async function fetchAttestation(youngId, template, sendEmail) {
   const res = await fetch(`${apiURL}/young/${youngId}/documents/certificate/${template}${sendEmail ? "/send-email" : ""}`, {
-    headers: { "Content-Type": "application/json", Authorization: `JWT ${API.getToken()}` },
+    headers: { "Content-Type": "application/json" },
     method: "POST",
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Erreur lors du téléchargement de l'attestation");
   if (sendEmail) return;
@@ -60,11 +61,10 @@ export async function fetchAttestation(youngId, template, sendEmail) {
 }
 
 export async function fetchMissionsFromApiEngagement(filters, page, size, sort) {
-  // API.setToken(null); // For testing purposes
-
   const res = await fetch(`${apiURL}/elasticsearch/missionapi/search`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `JWT ${API.getToken()}` },
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ filters, page, size, sort }),
   });
   const { ok, data, error } = await res.json();
