@@ -106,7 +106,7 @@ import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
-import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
+import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
 
@@ -527,7 +527,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     let { __v, ...newYoung } = value;
 
     // Vérification des objectifs à la validation d'un jeune
-    if (value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
+    if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
       const fillingRate = await getFillingRate(young.department, young.cohort);
       if (fillingRate >= FILLING_RATE_LIMIT) {
         return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
@@ -603,10 +603,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
     }
 
-    if (newYoung.status === YOUNG_STATUS.VALIDATED && !young.reinscriptionStep2023) {
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.hasStartedReinscription === false) {
       newYoung.inscriptionStep2023 = "DONE";
-    }
-    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.reinscriptionStep2023) {
+    } else if (newYoung.status === YOUNG_STATUS.VALIDATED && young.hasStartedReinscription === true) {
       newYoung.reinscriptionStep2023 = "DONE";
     }
 
@@ -635,6 +634,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (await shouldSwitchYoungByIdToLC(id, value.status)) {
       await switchYoungByIdToLC(id);
     }
+    await mightAddInProgressStatus(young, req.user);
 
     res.status(200).send({ ok: true, data: young });
   } catch (error) {

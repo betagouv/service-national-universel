@@ -32,14 +32,14 @@ export const ERROR_MESSAGES = {
     invalid: "Il semble y avoir une erreur dans votre numéro de téléphone. Veuillez le vérifier.",
   },
   address: {
-    empty: "Vous devez précisez votre adresse de résidence.",
+    empty: "Vous devez préciser votre adresse de résidence.",
   },
   zip: {
     empty: "Veuillez entrer le code postal de votre adresse de résidence",
     invalid: "Le code postal semble invalide. Veuillez le vérifier.",
   },
   city: {
-    empty: "Vous devez précisez votre ville de résidence",
+    empty: "Vous devez préciser votre ville de résidence",
   },
   country: {
     empty: "Veuillez préciser votre pays de résidence",

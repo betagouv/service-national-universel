@@ -1,5 +1,9 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
-import { COHORT_TYPE, COHORT_TYPE_LIST, departmentLookUp, InterfaceExtended } from "..";
+
+import { COHORT_TYPE, COHORT_TYPE_LIST } from "../constants/constants";
+import { departmentLookUp } from "../region-and-departments";
+
+import { InterfaceExtended } from "..";
 
 export const YoungDSNJExportDatesSchema = {
   cohesionCenters: Date,

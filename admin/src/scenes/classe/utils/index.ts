@@ -19,6 +19,7 @@ import {
   ClasseType,
   isAdmin,
   translateStatusClasse,
+  ReferentType,
 } from "snu-lib";
 import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
@@ -184,26 +185,34 @@ export const typeOptions = Object.keys(TYPE_CLASSE_LIST).map((value) => ({
   label: translate(TYPE_CLASSE_LIST[value]),
 }));
 
+interface ReferentClasse extends ReferentType {
+  state: string;
+}
+
 export interface ClasseExport extends ClasseType {
   nb_classe: number;
   nb_young: number;
+  referents: ReferentClasse[];
   referentEtablissement: {
-    fullName: string;
+    firstName: string;
+    lastName: string;
     phone: string;
     email: string;
+    state: string;
+    _id: string;
   }[];
   coordinateurs: {
-    fullName: string;
+    firstName: string;
+    lastName: string;
     phone: string;
     email: string;
   }[];
-  //Schema de répartition
-  studentInProgress?: number;
-  studentWaiting?: number;
-  studentValidated?: number;
-  studentAbandoned?: number;
-  studentNotAutorized?: number;
-  studentWithdrawn?: number;
+  studentInProgress: number;
+  studentWaiting: number;
+  studentValidated: number;
+  studentAbandoned: number;
+  studentNotAutorized: number;
+  studentWithdrawn: number;
 }
 
 export type typeExport = "export-des-classes" | "schema-de-repartition";
@@ -225,6 +234,10 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       estimatedSeats: c.estimatedSeats,
       totalSeats: c.totalSeats,
       seatsTaken: c.seatsTaken,
+      studentInProgress: c.studentInProgress ?? 0,
+      studentWaiting: c.studentWaiting ?? 0,
+      studentWithdrawn: c.studentWithdrawn ?? 0,
+      dossierOuvert: `${((c.studentWaiting ?? 0 + c.studentInProgress ?? 0 + c.studentValidated ?? 0) / c.totalSeats) * 100} %`,
       academy: c.academy,
       region: c.region,
       department: c.department,
@@ -232,21 +245,25 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       createdAt: dayjs(c.createdAt).format("DD/MM/YYYY HH:mm"),
       updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
       // ref classe
-      classeRefFullName: c.referents ? `${c.referents[0]?.firstName} ${c.referents[0]?.lastName}` : "",
+      classeRefId: c.referents?.length ? c.referents[0]?._id : "",
+      classeRefFullName: c.referents?.length ? `${c.referents[0]?.firstName} ${c.referents[0]?.lastName}` : "",
       classeRefPhone: c.referents ? c.referents[0]?.phone : "",
       classeRefEmail: c.referents ? c.referents[0]?.email : "",
+      classeRefActive: c.referents ? c.referents[0]?.state : "",
       //etablissement
       uai: c.etablissement?.uai,
       etablissementName: c.etablissement?.name,
       // chef d'etablissement
-      etabRefFullName: c.referentEtablissement ? c.referentEtablissement[0]?.fullName : "",
+      etabRefId: c.referentEtablissement.length ? c.referentEtablissement[0]?._id : "",
+      etabRefFullName: c.referentEtablissement.length ? `${c.referentEtablissement[0]?.firstName} ${c.referentEtablissement[0]?.lastName}` : "",
       etabRefPhone: c.referentEtablissement ? c.referentEtablissement[0]?.phone : "",
       etabRefEmail: c.referentEtablissement ? c.referentEtablissement[0]?.email : "",
+      etabRefActive: c.referentEtablissement ? c.referentEtablissement[0]?.state : "",
       //coordinateurs
-      coordinateur1FullName: c.coordinateurs ? c.coordinateurs[0]?.fullName : "",
+      coordinateur1FullName: c.coordinateurs.length ? `${c.coordinateurs[0]?.firstName} ${c.coordinateurs[0]?.lastName}` : "",
       coordinateur1Phone: c.coordinateurs ? c.coordinateurs[0]?.phone : "",
       coordinateur1Email: c.coordinateurs ? c.coordinateurs[0]?.email : "",
-      coordinateur2FullName: c.coordinateurs ? c.coordinateurs[1]?.fullName : "",
+      coordinateur2FullName: c.coordinateurs.length > 1 ? `${c.coordinateurs[1]?.firstName} ${c.coordinateurs[1]?.lastName}` : "",
       coordinateur2Phone: c.coordinateurs ? c.coordinateurs[1]?.phone : "",
       coordinateur2Email: c.coordinateurs ? c.coordinateurs[1]?.email : "",
     }));
@@ -262,21 +279,29 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Statut",
       "Effectif prévisionnel",
       "Effectif ajusté",
-      "Effectif inscrit et validé",
+      "Élèves validés",
+      "Élèves en cours d'inscription",
+      "Élèves en attente de validation",
+      "Élèves désistés",
+      "Dossiers ouverts / effectif ajusté (%)",
       "Académie",
       "Région",
       "Département",
       "Type",
       "Date de création",
       "Dernière modification",
+      "ID du référent de classe",
       "Nom du référent de classe",
       "Téléphone du référent de classe",
       "Email du référent de classe",
+      "Statut du référent de classe",
       "UAI de l'établissement",
       "Nom de l'établissement",
+      "ID du chef d'établissement",
       "Nom du chef d'établissement",
       "Téléphone du chef d'établissement",
       "Email du chef d'établissement",
+      "Statut du chef d'établissement",
       "Nom du coordinateur 1",
       "Téléphone du coordinateur 1",
       "Email du coordinateur 1",

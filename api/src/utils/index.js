@@ -400,6 +400,102 @@ const sendAutoCancelMeetingPoint = async (young) => {
   );
 };
 
+async function updateYoungPhase2StatusAndHours(young, fromUser) {
+  try {
+    // Récupération des applications et équivalences pertinentes
+    const applications = await ApplicationModel.find({
+      youngId: young._id,
+      status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE", "WAITING_VALIDATION", "WAITING_VERIFICATION"] },
+    });
+    const equivalences = await MissionEquivalenceModel.find({
+      youngId: young._id,
+      status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
+    });
+
+    // Calcul des heures effectuées
+    const totalHoursDone =
+      applications.reduce((acc, application) => {
+        if (application.status === "DONE") {
+          return acc + Number(application.missionDuration || 0);
+        }
+        return acc;
+      }, 0) +
+      equivalences.reduce((acc, equivalence) => {
+        if (equivalence.status === "VALIDATED") {
+          return acc + (equivalence.missionDuration || 0);
+        }
+        return acc;
+      }, 0);
+
+    // Calcul des heures estimées
+    const totalHoursEstimated =
+      applications.reduce((acc, application) => {
+        if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
+          return acc + Number(application.missionDuration || 0);
+        }
+        return acc;
+      }, 0) +
+      equivalences.reduce((acc, equivalence) => {
+        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status)) {
+          return acc + (equivalence.missionDuration || 0);
+        }
+        return acc;
+      }, 0);
+
+    // Mise à jour des heures dans le modèle young
+    young.set({
+      phase2NumberHoursDone: String(totalHoursDone),
+      phase2NumberHoursEstimated: String(totalHoursEstimated),
+      statusPhase2UpdatedAt: Date.now(),
+    });
+
+    // Mise à jour du statut de la phase 2
+    const activeApplication = applications.filter((a) => ["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS", "WAITING_VERIFICATION"].includes(a.status));
+    const pendingApplication = applications.filter((a) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(a.status));
+
+    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
+      // Ne pas changer le statut si déjà VALIDATED ou WITHDRAWN
+      young.set({ statusPhase2ValidatedAt: Date.now() });
+      await cancelPendingApplications(pendingApplication, fromUser);
+    } else if (Number(young.phase2NumberHoursDone) >= 84) {
+      // Valider la phase 2 si 84 heures effectuées
+      young.set({
+        statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+        statusPhase2ValidatedAt: Date.now(),
+        "files.militaryPreparationFilesIdentity": [],
+        "files.militaryPreparationFilesCensus": [],
+        "files.militaryPreparationFilesAuthorization": [],
+        "files.militaryPreparationFilesCertificate": [],
+        statusMilitaryPreparationFiles: undefined,
+      });
+      await cancelPendingApplications(pendingApplication, fromUser);
+      let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
+      let cc = getCcOfYoung({ template, young });
+      await sendTemplate(template, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: {
+          cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
+        },
+        cc,
+      });
+    } else if (activeApplication.length) {
+      // Mettre le statut en IN_PROGRESS si une application est active
+      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
+    } else {
+      // Sinon, attendre la réalisation
+      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
+    }
+
+    // Mise à jour des statuts des applications
+    young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
+
+    // Sauvegarde du modèle young
+    await young.save({ fromUser });
+  } catch (e) {
+    capture(e);
+  }
+}
+
 async function updateYoungPhase2Hours(young, fromUser) {
   try {
     const applications = await ApplicationModel.find({
@@ -408,22 +504,35 @@ async function updateYoungPhase2Hours(young, fromUser) {
     });
     const equivalences = await MissionEquivalenceModel.find({
       youngId: young._id,
-      status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
+      status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
     });
     const totalHoursDone =
-      applications
-        .filter((application) => application.status === "DONE")
-        .map((application) => Number(application.missionDuration || 0))
-        .reduce((acc, current) => acc + current, 0) +
-      equivalences
-        .filter((equivalence) => equivalence.status === "VALIDATED")
-        .map((equivalence) => equivalence?.missionDuration || 0)
-        .reduce((acc, current) => acc + current, 0);
+      applications.reduce((acc, application) => {
+        if (application.status === "DONE") {
+          return acc + Number(application.missionDuration || 0);
+        }
+        return acc;
+      }, 0) +
+      equivalences.reduce((acc, equivalence) => {
+        if (equivalence.status === "VALIDATED") {
+          return acc + (equivalence.missionDuration || 0);
+        }
+        return acc;
+      }, 0);
+    const totalHoursEstimated =
+      applications.reduce((acc, application) => {
+        if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
+          return acc + Number(application.missionDuration || 0);
+        }
+        return acc;
+      }, 0) +
+      equivalences.reduce((acc, equivalence) => {
+        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status)) {
+          return acc + (equivalence.missionDuration || 0);
+        }
+        return acc;
+      }, 0);
 
-    const totalHoursEstimated = applications
-      .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
-      .map((application) => Number(application.missionDuration || 0))
-      .reduce((acc, current) => acc + current, 0);
     young.set({
       phase2NumberHoursDone: String(totalHoursDone),
       phase2NumberHoursEstimated: String(totalHoursEstimated),
@@ -895,6 +1004,7 @@ const ERRORS = {
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",
   INVALID_BODY: "INVALID_BODY",
   INVALID_PARAMS: "INVALID_PARAMS",
+  INVALID_QUERY: "INVALID_QUERY",
   EMAIL_OR_PASSWORD_INVALID: "EMAIL_OR_PASSWORD_INVALID",
   EMAIL_OR_API_KEY_INVALID: "EMAIL_OR_API_KEY_INVALID",
   TOKEN_INVALID: "TOKEN_INVALID",
@@ -957,6 +1067,14 @@ const validateBirthDate = (date) => {
   return true;
 };
 
+const normalizeString = (str) => {
+  return str
+    .normalize("NFD") // Normalise la chaîne de caractères (décompose les accents)
+    .replace(/[\u0300-\u036f]/g, "") // Supprime les diacritiques (accents)
+    .replace(/[-\s._']/g, "") // Supprime les tirets, espaces, points, apostrophes, et underscores
+    .toLowerCase(); // Convertit tout en minuscules
+};
+
 module.exports = {
   timeout,
   uploadFile,
@@ -980,6 +1098,7 @@ module.exports = {
   inSevenDays,
   updateYoungPhase2Hours,
   updateStatusPhase2,
+  updateYoungPhase2StatusAndHours,
   getSignedUrlForApiAssociation,
   updateYoungStatusPhase2Contract,
   checkStatusContract,
@@ -1004,4 +1123,5 @@ module.exports = {
   getMetaDataFile,
   deleteFilesByList,
   validateBirthDate,
+  normalizeString,
 };

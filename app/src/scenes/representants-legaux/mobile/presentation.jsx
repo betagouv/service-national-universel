@@ -2,15 +2,14 @@ import React, { useContext } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
-import LinkTo from "../../../assets/icons/LinkTo";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import { isReturningParent } from "../commons";
-import { BorderButton } from "../components/Buttons";
 import Navbar from "../components/Navbar";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import plausibleEvent from "@/services/plausible";
 import { SignupButtons } from "@snu/ds/dsfr";
+import { shouldDisplayDateByCohortName } from "snu-lib";
 
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
@@ -47,16 +46,17 @@ export default function Presentation({ step, parentId }) {
       <Navbar step={step} />
       <>
         <DSFRContainer title={title}>
-          <p className="mb-8 text-sm text-[#161616]">
-            {parentId === 2 ? (
-              <>Nous avons besoin de votre consentement au droit à l’image.</>
-            ) : (
-              <>Nous avons besoin de votre accord pour que {young.firstName} vive l’aventure du SNU.</>
-            )}
+          <p>
+            {parentId === 2
+              ? "Nous avons besoin de votre consentement au droit à l’image."
+              : `Nous avons besoin de votre accord pour que ${young.firstName} vive l’aventure du SNU.`}
           </p>
-          <BorderButton href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
-            Découvrir le SNU <LinkTo className="ml-2" />
-          </BorderButton>
+
+          <p>
+            <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
+              Découvrir le SNU
+            </a>
+          </p>
 
           <div className="flex flex-col bg-[#fbfbfb] p-4">
             <ul>
@@ -93,8 +93,14 @@ export default function Presentation({ step, parentId }) {
               <p className="font-400 mt-3 text-center text-[15px] leading-[19px]">
                 {young.firstName} a choisi le séjour <br />
                 <strong>
-                  du {new Date(cohort.dateStart).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} au{" "}
-                  {new Date(cohort.dateEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+                  {shouldDisplayDateByCohortName(cohort.name) ? (
+                    <>
+                      du {new Date(cohort.dateStart).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} au{" "}
+                      {new Date(cohort.dateEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+                    </>
+                  ) : (
+                    "à venir"
+                  )}
                 </strong>
               </p>
             </div>

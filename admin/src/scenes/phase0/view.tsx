@@ -200,7 +200,11 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
         }
       }
 
-      await api.put(`/referent/young/${young._id}`, body);
+      const { ok, code } = await api.put(`/referent/young/${young._id}`, body);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue", translate(code));
+        return;
+      }
 
       //Notify young
       // TODO: move notification logic to referent controller
@@ -223,8 +227,9 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
     } catch (err) {
       console.error(err);
       toastr.error("Erreur !", translate(err.code));
+    } finally {
+      setProcessing(false);
     }
-    setProcessing(false);
   }
 
   return (

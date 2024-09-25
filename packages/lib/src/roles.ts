@@ -993,21 +993,18 @@ function canAllowSNU(actor) {
 }
 
 function canEditEstimatedSeats(actor) {
-  if (actor.role === ROLES.ADMIN) return true;
+  if (isAdmin(actor)) return true;
   const now = new Date();
   const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
   return actor.role === ROLES.ADMINISTRATEUR_CLE && now <= limitDateEstimatedSeats;
 }
 
 function canEditTotalSeats(actor) {
-  if (actor.role === ROLES.ADMIN) {
+  if (isAdmin(actor)) return true;
+  if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     const now = new Date();
     const limitDateTotalSeat = new Date(LIMIT_DATE_TOTAL_SEATS);
-    if (now <= limitDateTotalSeat) {
-      return false;
-    } else {
-      return true;
-    }
+    return now <= limitDateTotalSeat;
   }
   const limitDatesEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS).toISOString();
   const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();
@@ -1035,7 +1032,7 @@ function canValidateMultipleYoungsInClass(actor: UserDto, classe: ClasseType) {
 }
 function canValidateYoungInClass(actor: UserDto, classe: ClasseType) {
   if (isAdmin(actor)) return true;
-  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
 }
 
 export {

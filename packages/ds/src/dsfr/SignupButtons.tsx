@@ -4,12 +4,12 @@ import { fr } from "@codegouvfr/react-dsfr";
 
 type OwnProps = {
   onClickNext: React.MouseEventHandler<HTMLButtonElement>;
-  onClickPrevious: React.MouseEventHandler<HTMLButtonElement>;
-  labelNext: string;
-  labelPrevious: string;
-  disabled: boolean;
-  collapsePrevious: boolean;
-  text: string;
+  onClickPrevious?: React.MouseEventHandler<HTMLButtonElement>;
+  labelNext?: string;
+  labelPrevious?: string;
+  disabled?: boolean;
+  collapsePrevious?: boolean;
+  text?: string;
 };
 
 export default function SignupButtons({
@@ -22,7 +22,7 @@ export default function SignupButtons({
   text = "",
 }: OwnProps) {
   return (
-    <div className="fixed sm:z-10 md:z-auto bottom-0 left-0 mx-auto w-full bg-white py-4 px-[1rem] shadow-ninaInverted md:relative md:px-0 md:shadow-none ">
+    <div className="fixed sm:z-10 md:z-auto bottom-0 left-0 mx-auto w-full bg-white py-[1rem] px-[1rem] shadow-ninaInverted md:relative md:px-0 md:shadow-none ">
       <div
         className={`flex ${
           !collapsePrevious && "flex-col-reverse md:flex-row"
@@ -59,7 +59,11 @@ export default function SignupButtons({
           </Button>
         )}
       </div>
-      {text && <p className="md:text-right text-sm mt-3">{text}</p>}
+      {text && (
+        <div className="flex text-center justify-center md:justify-end mt-2">
+          <p className="reset text-sm">{text}</p>
+        </div>
+      )}
     </div>
   );
 }
