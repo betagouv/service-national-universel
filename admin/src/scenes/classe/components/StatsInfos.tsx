@@ -31,12 +31,12 @@ export default function StatsInfos({ classe, user, studentStatus, validatedYoung
         <table className="flex-1">
           <tbody>
             <tr className="border-b border-gray-200">
-              <td className="font-bold pr-4 py-2">Effectif ajusté :</td>
+              <td className="font-bold pr-4 py-2">Élèves prévus :</td>
               <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats || 0}</td>
               <td className="text-gray-500 text-center py-2">Élèves</td>
             </tr>
             <tr className="border-b border-gray-200">
-              <td className="font-bold pr-4 py-2">Effectif inscrit :</td>
+              <td className="font-bold pr-4 py-2">Élèves inscrits :</td>
               <td className="px-4 font-bold text-lg text-center py-2">{validatedYoung}</td>
               <td className="text-gray-500 text-center py-2">({Math.round((validatedYoung * 100) / classe.totalSeats || 0)}%)</td>
             </tr>
