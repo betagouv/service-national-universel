@@ -238,16 +238,7 @@ const populateWithAllReferentsInfo = async (classes, action) => {
 
   const allReferentIds = [...new Set([...referentEtablissementIds, ...referentClasseIds, ...coordinateurIds].flat())];
 
-  const referents = await allRecords("referent", { ids: { values: allReferentIds } }, esClient, [
-    "_id",
-    "firstName",
-    "lastName",
-    "email",
-    "phone",
-    "invitationToken",
-    "role",
-    "subRole",
-  ]);
+  const referents = await allRecords("referent", { ids: { values: allReferentIds } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
   const extendedReferents = referents.map((referent) => ({
     ...referent,
     state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
@@ -256,9 +247,9 @@ const populateWithAllReferentsInfo = async (classes, action) => {
   const referentsData = serializeReferents(extendedReferents);
 
   return classes.map((item) => {
-    const referentEtablissementFiltered = referentsData?.filter((ref) => ref.role === ROLES.ADMINISTRATEUR_CLE && ref.subRole === SUB_ROLES.referent_etablissement);
-    const referentClasseFiltered = referentsData?.filter((ref) => ref.role === ROLES.REFERENT_CLASSE);
-    const coordinateursFiltered = referentsData?.filter((ref) => ref.role === ROLES.ADMINISTRATEUR_CLE && ref.subRole === SUB_ROLES.coordinateur_cle);
+    const referentEtablissementFiltered = referentsData?.filter((ref) => referentEtablissementIds[0].includes(ref._id));
+    const referentClasseFiltered = referentsData?.filter((ref) => referentClasseIds[0].includes(ref._id));
+    const coordinateursFiltered = referentsData?.filter((ref) => coordinateurIds[0].includes(ref._id));
 
     if (action === "search") {
       item._source.referentEtablissement = referentEtablissementFiltered;
