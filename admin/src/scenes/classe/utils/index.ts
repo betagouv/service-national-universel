@@ -190,8 +190,6 @@ interface ReferentClasse extends ReferentType {
 }
 
 export interface ClasseExport extends ClasseType {
-  nb_classe: number;
-  nb_young: number;
   referents: ReferentClasse[];
   referentEtablissement: {
     firstName: string;
