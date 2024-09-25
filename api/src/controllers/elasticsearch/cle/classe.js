@@ -247,9 +247,19 @@ const populateWithAllReferentsInfo = async (classes, action) => {
   const referentsData = serializeReferents(extendedReferents);
 
   return classes.map((item) => {
-    const referentEtablissementFiltered = referentsData?.filter((ref) => referentEtablissementIds[0].includes(ref._id));
-    const referentClasseFiltered = referentsData?.filter((ref) => referentClasseIds[0].includes(ref._id));
-    const coordinateursFiltered = referentsData?.filter((ref) => coordinateurIds[0].includes(ref._id));
+    const referentEtablissementFiltered = referentsData?.filter((e) =>
+      action === "search"
+        ? item._source.etablissement?.referentEtablissementIds?.includes(e._id.toString())
+        : item.etablissement?.referentEtablissementIds?.includes(e._id.toString()),
+    );
+
+    const referentClasseFiltered = referentsData?.filter((e) =>
+      action === "search" ? item._source.referentClasseIds?.includes(e._id.toString()) : item.referentClasseIds?.includes(e._id.toString()),
+    );
+
+    const coordinateursFiltered = referentsData?.filter((e) =>
+      action === "search" ? item._source.etablissement?.coordinateurIds?.includes(e._id.toString()) : item.etablissement?.coordinateurIds?.includes(e._id.toString()),
+    );
 
     if (action === "search") {
       item._source.referentEtablissement = referentEtablissementFiltered;
