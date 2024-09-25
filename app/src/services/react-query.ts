@@ -5,8 +5,8 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
       if (error.message === "AuthenticationError") {
-        console.log("Unauthorized, reloading app");
-        window.location.reload(true);
+        console.log("Unauthorized, redirecting to auth");
+        window.location.href = "/auth?disconnected=1";
         return;
       }
       capture(error);
