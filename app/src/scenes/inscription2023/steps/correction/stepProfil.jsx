@@ -45,6 +45,12 @@ export default function StepProfil() {
 
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm"];
 
+  const handleNameChange = (field) => (value) => {
+    const regex = /[^a-zA-ZÀ-ÿ\s'-]/g;
+    const newValue = value.replace(regex, "");
+    setData({ ...data, [field]: newValue });
+  };
+
   const validate = () => {
     let errors = {};
 
@@ -146,16 +152,10 @@ export default function StepProfil() {
               </div>
             </>
           )}
-          <Input
-            value={data.firstName}
-            onChange={(e) => setData({ ...data, firstName: e })}
-            label="Prénom du volontaire"
-            error={error.firstName}
-            correction={corrections.firstName}
-          />
+          <Input value={data.firstName} onChange={handleNameChange("firstName")} label="Prénom du volontaire" error={error.firstName} correction={corrections.firstName} />
           <Input
             value={data.lastName}
-            onChange={(e) => setData({ ...data, lastName: e })}
+            onChange={handleNameChange("lastName")}
             label="Nom de famille du volontaire"
             error={error.lastName}
             correction={corrections.lastName}

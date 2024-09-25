@@ -55,6 +55,12 @@ export default function StepProfil() {
   const trimmedEmail = data?.email?.trim();
   const trimmedEmailConfirm = data?.emailConfirm?.trim();
 
+  const handleNameChange = (field) => (value) => {
+    const regex = /[^a-zA-ZÀ-ÿ\s'-]/g;
+    const newValue = value.replace(regex, "");
+    setData({ ...data, [field]: newValue });
+  };
+
   const validate = () => {
     let errors = {};
 
@@ -242,13 +248,13 @@ export default function StepProfil() {
             state={error.firstName ? "error" : "default"}
             stateRelatedMessage={error.firstName}
             value={data.firstName}
-            onChange={(e) => setData({ ...data, firstName: e })}
+            onChange={handleNameChange("firstName")}
           />
 
           <Input
             label={isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
             value={data.lastName}
-            onChange={(e) => setData({ ...data, lastName: e })}
+            onChange={handleNameChange("lastName")}
             onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })}
             state={error.firstName ? "error" : "default"}
             stateRelatedMessage={error.firstName}
