@@ -67,7 +67,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
       if (req.query?.type === "export-des-classes") {
         response = await populateWithEtablissementInfo(response);
-        response = await populateWithAllReferentsInfo(response, req.params.action);
+        response = await populateWithAllReferentsInfo(response);
         response = await populateWithYoungsInfo(response);
       }
 
@@ -94,7 +94,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     } else {
       let response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       if (req.query?.needRefInfo) {
-        response.body.responses[0].hits.hits = await populateWithReferentClasseInfo(response.body.responses[0].hits.hits, req.params.action);
+        response.body.responses[0].hits.hits = await populateWithReferentClasseInfo(response.body.responses[0].hits.hits);
       }
 
       return res.status(200).send(response.body);
@@ -139,22 +139,16 @@ async function buildClasseContext(user) {
   return { classeContextFilters: contextFilters };
 }
 
-const populateWithReferentClasseInfo = async (classes, action) => {
-  const refIds =
-    action === "search"
-      ? [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
+const populateWithReferentClasseInfo = async (classes) => {
+  const refIds = [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))];
 
   const referents = await allRecords("referent", { ids: { values: refIds.flat() } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
 
   const referentsData = serializeReferents(referents);
 
   return classes.map((item) => {
-    if (action === "search") {
-      item._source.referents = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
-    } else {
-      item.referents = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
-    }
+    item._source.referents = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+
     return item;
   });
 };
@@ -220,25 +214,17 @@ const populateWithYoungsInfo = async (classes) => {
   });
 };
 
-const populateWithAllReferentsInfo = async (classes, action) => {
-  const referentEtablissementIds =
-    action === "search"
-      ? [...new Set(classes.map((item) => item._source.etablissement?.referentEtablissementIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
+const populateWithAllReferentsInfo = async (classes) => {
+  const referentEtablissementIds = [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
 
-  const referentClasseIds =
-    action === "search"
-      ? [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
+  const referentClasseIds = [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
 
-  const coordinateurIds =
-    action === "search"
-      ? [...new Set(classes.map((item) => item._source.etablissement?.coordinateurIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.etablissement?.coordinateurIds).filter(Boolean))];
+  const coordinateurIds = [...new Set(classes.map((item) => item.etablissement?.coordinateurIds).filter(Boolean))];
 
   const allReferentIds = [...new Set([...referentEtablissementIds, ...referentClasseIds, ...coordinateurIds].flat())];
 
   const referents = await allRecords("referent", { ids: { values: allReferentIds } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
+
   const extendedReferents = referents.map((referent) => ({
     ...referent,
     state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
@@ -247,29 +233,15 @@ const populateWithAllReferentsInfo = async (classes, action) => {
   const referentsData = serializeReferents(extendedReferents);
 
   return classes.map((item) => {
-    const referentEtablissementFiltered = referentsData?.filter((e) =>
-      action === "search"
-        ? item._source.etablissement?.referentEtablissementIds?.includes(e._id.toString())
-        : item.etablissement?.referentEtablissementIds?.includes(e._id.toString()),
-    );
+    const referentEtablissementFiltered = referentsData?.filter((e) => item.etablissement?.referentEtablissementIds?.includes(e._id.toString()));
 
-    const referentClasseFiltered = referentsData?.filter((e) =>
-      action === "search" ? item._source.referentClasseIds?.includes(e._id.toString()) : item.referentClasseIds?.includes(e._id.toString()),
-    );
+    const referentClasseFiltered = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
 
-    const coordinateursFiltered = referentsData?.filter((e) =>
-      action === "search" ? item._source.etablissement?.coordinateurIds?.includes(e._id.toString()) : item.etablissement?.coordinateurIds?.includes(e._id.toString()),
-    );
+    const coordinateursFiltered = referentsData?.filter((e) => item.etablissement?.coordinateurIds?.includes(e._id.toString()));
 
-    if (action === "search") {
-      item._source.referentEtablissement = referentEtablissementFiltered;
-      item._source.referents = referentClasseFiltered;
-      item._source.coordinateurs = coordinateursFiltered;
-    } else {
-      item.referentEtablissement = referentEtablissementFiltered;
-      item.referents = referentClasseFiltered;
-      item.coordinateurs = coordinateursFiltered;
-    }
+    item.referentEtablissement = referentEtablissementFiltered;
+    item.referents = referentClasseFiltered;
+    item.coordinateurs = coordinateursFiltered;
 
     return item;
   });
