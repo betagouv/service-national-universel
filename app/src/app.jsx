@@ -19,7 +19,6 @@ import { cohortsInit } from "./utils/cohorts";
 
 import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
-import NewSejour from "./scenes/newSejour/NewSejour";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
 const AllEngagements = lazy(() => import("./scenes/all-engagements/index"));
@@ -31,6 +30,7 @@ const ContractDone = lazy(() => import("./scenes/contract/done"));
 const Espace = lazy(() => import("./Espace"));
 const Inscription2023 = lazy(() => import("./scenes/inscription2023"));
 const Maintenance = lazy(() => import("./scenes/maintenance"));
+const NewSejour = lazy(() => import("./scenes/newSejour/NewSejour"));
 const NonEligible = lazy(() => import("./scenes/noneligible"));
 const OnBoarding = lazy(() => import("./scenes/cle/OnBoarding"));
 const PreInscription = lazy(() => import("./scenes/preinscription"));
