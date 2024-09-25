@@ -76,7 +76,7 @@ const DSNJExport = () => {
 
   const handleUpdateDate = async (key, date) => {
     setIsModalConfirmOpenByKey({ ...isModalConfirmOpenByKey, [key]: false });
-    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${currentCohort._id}/export/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
+    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${currentCohort._id}/export-dsnj/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
     if (!ok) return toastr.error("Une erreur est survenue lors de l'enregistrement de la date d'export", translate(code));
     dispatch({ type: COHORTS_ACTIONS.UPDATE_COHORT, payload: updatedCohort });
     setCurrentCohort(updatedCohort);
@@ -86,7 +86,7 @@ const DSNJExport = () => {
     plausibleEvent(`Export/DSNJ - Exporter ${key}`);
     try {
       setDownloadingByKey({ ...isLDownloadingByKey, [key]: true });
-      const file = await api.get(`/cohort/${currentCohort._id}/export/${key}`);
+      const file = await api.get(`/cohort/${currentCohort._id}/export-dsnj/${key}`);
       FileSaver.saveAs(new Blob([new Uint8Array(file.data.data)], { type: file.mimeType }), file.fileName);
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", "");

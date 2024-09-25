@@ -41,8 +41,6 @@ const INJEPExport = () => {
 
   const translateKey = (key) => {
     switch (key) {
-      case "cohesionCenters":
-        return "centres";
       case "youngsBeforeSession":
         return "volontaires affectés et sur liste complémentaire";
       case "youngsAfterSession":
@@ -53,7 +51,7 @@ const INJEPExport = () => {
   };
 
   const generateText = (key, date) => {
-    const isNewExport = currentCohort?.dsnjExportDates?.[key] === undefined;
+    const isNewExport = currentCohort?.injepExportDates?.[key] === undefined;
     const translatedKey = translateKey(isNewExport ? key : currentKey);
     const formattedDate = dayjs(isNewExport ? date : newExportDate).format("DD/MM/YYYY");
 
@@ -76,7 +74,7 @@ const INJEPExport = () => {
 
   const handleUpdateDate = async (key, date) => {
     setIsModalConfirmOpenByKey({ ...isModalConfirmOpenByKey, [key]: false });
-    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${currentCohort._id}/export/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
+    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${currentCohort._id}/export-injep/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
     if (!ok) return toastr.error("Une erreur est survenue lors de l'enregistrement de la date d'export", translate(code));
     dispatch({ type: COHORTS_ACTIONS.UPDATE_COHORT, payload: updatedCohort });
     setCurrentCohort(updatedCohort);
@@ -86,7 +84,7 @@ const INJEPExport = () => {
     plausibleEvent(`Export/INJEP - Exporter ${key}`);
     try {
       setDownloadingByKey({ ...isLDownloadingByKey, [key]: true });
-      const file = await api.get(`/cohort/${currentCohort._id}/export/${key}`);
+      const file = await api.get(`/cohort/${currentCohort._id}/export-injep/${key}`);
       FileSaver.saveAs(new Blob([new Uint8Array(file.data.data)], { type: file.mimeType }), file.fileName);
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", "");
@@ -121,25 +119,17 @@ const INJEPExport = () => {
         />
         <div className="flex gap-4">
           <ExportBox
-            title="Liste des centres"
-            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[0]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[0]])}
-            onClick={() => handleClick(exportDateKeys[0])}
-            onDownload={() => handleDownload(exportDateKeys[0])}
-            isDownloading={!!isLDownloadingByKey[exportDateKeys[0]]}
-          />
-          <ExportBox
             title="Liste des volontaires affectés et sur liste complémentaire"
-            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[1]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[1]])}
+            availableFrom={currentCohort?.injepExportDates?.[exportDateKeys[1]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.injepExportDates?.[exportDateKeys[1]])}
             onClick={() => handleClick(exportDateKeys[1])}
             onDownload={() => handleDownload(exportDateKeys[1])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[1]]}
           />
           <ExportBox
             title="Liste des volontaires après le séjour"
-            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[2]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[2]])}
+            availableFrom={currentCohort?.injepExportDates?.[exportDateKeys[2]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.injepExportDates?.[exportDateKeys[2]])}
             onClick={() => handleClick(exportDateKeys[2])}
             onDownload={() => handleDownload(exportDateKeys[2])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[2]]}
