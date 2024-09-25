@@ -21,7 +21,81 @@ const exportDateKeys = [EXPORT_COHESION_CENTERS, EXPORT_YOUNGS_BEFORE_SESSION, E
 
 const xlsxMimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.put("/:id/dsnj-export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    const { error: exportDateKeyError, value: exportDateKey } = Joi.string()
+      .valid(...exportDateKeys)
+      .required()
+      .validate(req.params.exportDateKey, { stripUnknown: true });
+
+    const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+
+    if (exportDateKeyError) {
+      capture(exportDateKeyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const bodySchema = Joi.object().keys({
+      date: Joi.date().allow(""),
+    });
+
+    const result = bodySchema.validate(req.body, { stripUnknown: true });
+    const {
+      error,
+      value: { date },
+    } = result;
+
+    //ensure that date does not change base on time zone (works only for France)
+    date.setHours(11);
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const today = new Date(new Date().setHours(0, 0, 0, 0));
+
+    if (date <= today) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    let cohort = await CohortModel.findById(id);
+    if (!cohort) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    const threeMonthsAfterCohortDateEnd = new Date(cohort.dateEnd);
+    threeMonthsAfterCohortDateEnd.setMonth(threeMonthsAfterCohortDateEnd.getMonth() + 3);
+
+    if (date > threeMonthsAfterCohortDateEnd) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    if (!cohort.dsnjExportDates) {
+      cohort.dsnjExportDates = {};
+    }
+
+    if (cohort.dsnjExportDates[exportDateKey]) {
+      await deleteFile(`dsnj/${cohort.snuId}/${exportDateKey}.xlsx`);
+    }
+
+    cohort.dsnjExportDates[exportDateKey] = date;
+
+    await cohort.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: cohort });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/injep-export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: exportDateKeyError, value: exportDateKey } = Joi.string()
       .valid(...exportDateKeys)
@@ -202,7 +276,7 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
   }
 });
 
-router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req: UserRequest, res: Response) => {
+router.get("/:id/export-dsnj/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req: UserRequest, res: Response) => {
   try {
     const { error: exportDateKeyError, value: exportKey } = Joi.string()
       .valid(...exportDateKeys)
@@ -250,6 +324,66 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
     if (exportKey === EXPORT_YOUNGS_AFTER_SESSION) {
       file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
       fileName = `DSNJ - Fichier volontaire avec validation-${cohort.snuId}-${formattedDate}.xlsx`;
+    }
+
+    const decryptedBuffer = decrypt(file.Body) as any;
+
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: xlsxMimetype,
+      fileName,
+      ok: true,
+    });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/export-injep/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req: UserRequest, res: Response) => {
+  try {
+    const { error: exportDateKeyError, value: exportKey } = Joi.string()
+      .valid(...exportDateKeys)
+      .required()
+      .validate(req.params.exportKey, { stripUnknown: true });
+
+    const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+
+    if (exportDateKeyError) {
+      capture(exportDateKeyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    let cohort = await CohortModel.findById(id);
+    if (!cohort) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    const exportAvailableFrom = new Date(cohort.injepExportDates![exportKey].setHours(0, 0, 0, 0));
+    const exportAvailableUntil = new Date(cohort.injepExportDates![exportKey]);
+    exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
+    const now = new Date();
+
+    if (!exportAvailableFrom || now < exportAvailableFrom || now > exportAvailableUntil) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    const formattedDate = exportAvailableFrom.toLocaleDateString("fr-FR");
+
+    let file, fileName;
+
+    if (exportKey === EXPORT_YOUNGS_BEFORE_SESSION) {
+      file = await getFile(`injep/${cohort.snuId}/${EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`);
+      fileName = `INJEP - Fichier volontaire-${cohort.snuId}-${formattedDate}.xlsx`;
+    }
+    if (exportKey === EXPORT_YOUNGS_AFTER_SESSION) {
+      file = await getFile(`injep/${cohort.snuId}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
+      fileName = `INJEP - Fichier volontaire avec validation-${cohort.snuId}-${formattedDate}.xlsx`;
     }
 
     const decryptedBuffer = decrypt(file.Body) as any;
