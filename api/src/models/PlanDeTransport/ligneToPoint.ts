@@ -135,7 +135,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type LigneToPointType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type LigneToPointDocument<T = {}> = DocumentExtended<LigneToPointType & T>;

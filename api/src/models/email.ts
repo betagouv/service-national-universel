@@ -23,7 +23,7 @@ const schema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type EmailType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type EmailDocument<T = {}> = DocumentExtended<EmailType & T>;

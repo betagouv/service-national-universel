@@ -304,7 +304,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 schema.index({ ligneDeBusId: 1 });
 

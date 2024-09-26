@@ -40,7 +40,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type CohesionCenterDocument<T = {}> = DocumentExtended<CohesionCenterType & T>;
 type SchemaExtended = CohesionCenterDocument & UserExtension;

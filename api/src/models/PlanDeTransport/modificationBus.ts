@@ -218,7 +218,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type ModificationBusType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type ModificationBusDocument<T = {}> = DocumentExtended<ModificationBusType & T>;

@@ -93,7 +93,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type ClasseDocument<T = {}> = DocumentExtended<
   ClasseType & {

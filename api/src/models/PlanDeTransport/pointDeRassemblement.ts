@@ -35,7 +35,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type PointDeRassemblementDocument<T = {}> = DocumentExtended<PointDeRassemblementType & T>;
 type SchemaExtended = PointDeRassemblementDocument & UserExtension;

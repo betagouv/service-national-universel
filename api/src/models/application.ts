@@ -246,7 +246,7 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type ApplicationType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type ApplicationDocument<T = {}> = DocumentExtended<ApplicationType & T>;

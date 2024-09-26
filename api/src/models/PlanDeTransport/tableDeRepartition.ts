@@ -75,7 +75,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type TableDeRepartitionType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type TableDeRepartitionDocument<T = {}> = DocumentExtended<TableDeRepartitionType & T>;

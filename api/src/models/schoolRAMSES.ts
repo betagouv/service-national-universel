@@ -50,7 +50,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["raw_data"] }), MODELNAME);
+// schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["raw_data"] }), MODELNAME);
 
 export type SchoolRAMSESType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type SchoolRAMSESDocument<T = {}> = DocumentExtended<SchoolRAMSESType & T>;

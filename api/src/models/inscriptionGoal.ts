@@ -79,7 +79,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type InscriptionGoalType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type InscriptionGoalDocument<T = {}> = DocumentExtended<InscriptionGoalType & T>;

@@ -51,7 +51,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type EtablissementDocument<T = {}> = DocumentExtended<EtablissementType & T>;
 type SchemaExtended = EtablissementDocument & UserExtension;

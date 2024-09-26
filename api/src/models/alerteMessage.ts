@@ -88,7 +88,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type AlerteMessageType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type AlerteMessageDocument<T = {}> = DocumentExtended<AlerteMessageType & T>;

@@ -138,7 +138,7 @@ schema.plugin(patchHistory, {
   excludes: ["/parent1Token", "/projectManagerToken", "/structureManagerToken", "/parent2Token", "/youngContractToken", "/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+// schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type ContractType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type ContractDocument<T = {}> = DocumentExtended<ContractType & T>;

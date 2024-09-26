@@ -324,7 +324,7 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
+// schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
 
 export type StructureType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type StructureDocument<T = {}> = DocumentExtended<StructureType & T>;
