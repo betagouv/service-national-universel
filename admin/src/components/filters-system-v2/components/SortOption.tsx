@@ -19,9 +19,10 @@ interface Props {
   pagination?: Pagnination;
   onPaginationChange: React.Dispatch<React.SetStateAction<Pagnination>>;
   selectedFilters?: { [key: string]: { filter?: string[] } };
+  className?: string;
 }
 
-const SortOption = ({ sortOptions, pagination, onPaginationChange, selectedFilters }: Props) => {
+const SortOption = ({ sortOptions, pagination, onPaginationChange, selectedFilters, className = "ml-auto" }: Props) => {
   const [isSearching, setIsSearching] = React.useState(false);
   const [lastChoice, setLastChoice] = React.useState<Option | null>(null);
 
@@ -55,7 +56,7 @@ const SortOption = ({ sortOptions, pagination, onPaginationChange, selectedFilte
   };
 
   return (
-    <div className="flex justify-center items-center text-gray-600 text-sm bg-gray-100 rounded-md px-1 cursor-pointer ml-auto">
+    <div className={`flex justify-center items-center text-gray-600 text-sm bg-gray-100 rounded-md px-1 cursor-pointer ${className}`}>
       <HiSortAscending size={16} style={{ color: "#6B7280" }} className="ml-2" />
 
       <Select

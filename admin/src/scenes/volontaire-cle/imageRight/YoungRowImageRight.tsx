@@ -49,7 +49,7 @@ export default function YoungRowImageRight({ young, selectedYoungs, onYoungSelec
 
   return (
     <>
-      <tr className="flex items-center py-3 px-4 hover:bg-gray-50">
+      <tr className="flex items-center py-3 px-4 hover:bg-gray-50 [&:not(:last-child)]:border-b border-b-gray-200">
         <td className="w-[5%]">
           <input type="checkbox" className="w-5 h-5 ml-1" checked={selectedYoungs.some((y) => y._id === young._id)} onChange={() => handleSelectYoung(young)} />
         </td>
@@ -74,7 +74,7 @@ export default function YoungRowImageRight({ young, selectedYoungs, onYoungSelec
           <Badge
             title={<HiOutlineX size={20} />}
             mode="editable"
-            className="rounded-[50%] !p-0 !w-10 !h-10 border text-gray-500 border-gray-300 !bg-white hover:!bg-gray-200 hover:!border-red-400 hover:text-red-600"
+            className="rounded-[50%] !p-0 !w-10 !h-10 border text-gray-500 border-gray-300 !bg-white hover:!border-red-400 hover:text-red-600"
             onClick={() => {
               setAuthorized(false);
               setShowModale(true);

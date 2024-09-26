@@ -18,7 +18,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
       tab={[
         {
           title: "Général",
-          leftIcon: <HiOutlineClipboardList size={20} className="ml-2.5" />,
+          leftIcon: <HiOutlineClipboardList size={20} className="ml-2.5" strokeWidth={1.5} />,
           isActive: currentTab === "general",
           onClick: () => {
             history.push(`/mes-eleves`);
@@ -34,7 +34,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
             </div>
           ),
           label: "Étape 1",
-          leftIcon: <HiOutlineClipboardCheck size={20} className="ml-2.5" />,
+          leftIcon: <HiOutlineClipboardCheck size={20} className="ml-2.5" strokeWidth={1.5} />,
           isActive: currentTab === "consent",
           onClick: () => {
             history.push(`/mes-eleves/consent`);
@@ -50,7 +50,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
             </div>
           ),
           label: "Étape 2",
-          leftIcon: <HiOutlineClipboardCheck size={20} className="ml-2.5" />,
+          leftIcon: <HiOutlineClipboardCheck size={20} className="ml-2.5" strokeWidth={1.5} />,
           isActive: currentTab === "validation",
           onClick: () => {
             history.push(`/mes-eleves/validation`);
@@ -66,7 +66,7 @@ export default function NavbarList({ currentTab, studentsWaitingConsent, student
             </div>
           ),
           label: "Étape 3 (non bloquante)",
-          leftIcon: <HiOutlineClipboardCheck size={20} className="ml-2.5" />,
+          leftIcon: <HiOutlineClipboardCheck size={20} className="ml-2.5" strokeWidth={1.5} />,
           isActive: currentTab === "image",
           onClick: () => {
             history.push(`/mes-eleves/image`);

@@ -9,12 +9,8 @@ import ViewPopOver from "./filters/SavedViewPopOver";
 
 import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl, normalizeString } from "./filters/utils";
-import { debounce } from "@/utils";
+import { debounce, classNames } from "@/utils";
 import { IntermediateFilter } from "./filters/IntermediateFilter";
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
 
 export default function Filters({
   route,
@@ -175,114 +171,112 @@ export default function Filters({
   if (disabled) return null;
 
   return (
-    <div>
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center justify-start gap-2">
-          <div className="h-[38px] w-[305px] overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
-            <input
-              name={"searchbar"}
-              placeholder={searchPlaceholder}
-              value={selectedFilters?.searchbar?.filter[0] || ""}
-              onChange={(e) => {
-                setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
-              }}
-              className={`h-full w-full text-xs text-gray-600`}
-            />
-          </div>
+    <div className="flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center justify-start gap-2">
+        <div className="h-[38px] w-[305px] overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
+          <input
+            name={"searchbar"}
+            placeholder={searchPlaceholder}
+            value={selectedFilters?.searchbar?.filter[0] || ""}
+            onChange={(e) => {
+              setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
+            }}
+            className={`h-full w-full text-xs text-gray-600`}
+          />
+        </div>
 
-          <Popover className="relative">
-            {({ open }) => (
-              <>
-                <Popover.Button
-                  ref={ref}
-                  onClick={() => setIsShowing(!isShowing)}
-                  className={classNames(
-                    open ? "ring-2 ring-blue-500 ring-offset-2" : "",
-                    "flex h-[38px] cursor-pointer items-center gap-2 rounded-lg px-3 text-[14px] font-medium  outline-none",
-                    hasSomeFilterSelected ? "bg-[#2563EB] text-white hover:bg-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-                  )}>
-                  <FilterSvg className={`${hasSomeFilterSelected ? "text-white" : "text-gray-400"} h-4 w-4`} />
-                  <span>Filtres</span>
-                </Popover.Button>
+        <Popover className="relative">
+          {({ open }) => (
+            <>
+              <Popover.Button
+                ref={ref}
+                onClick={() => setIsShowing(!isShowing)}
+                className={classNames(
+                  open ? "ring-2 ring-blue-500 ring-offset-2" : "",
+                  "flex h-[38px] cursor-pointer items-center gap-2 rounded-lg px-3 text-[14px] font-medium  outline-none",
+                  hasSomeFilterSelected ? "bg-[#2563EB] text-white hover:bg-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                )}>
+                <FilterSvg className={`${hasSomeFilterSelected ? "text-white" : "text-gray-400"} h-4 w-4`} />
+                <span>Filtres</span>
+              </Popover.Button>
 
-                <Transition
-                  as={Fragment}
-                  show={isShowing !== false}
-                  enter="transition ease-out duration-200"
-                  enterFrom="opacity-0 translate-y-1"
-                  enterTo="opacity-100 translate-y-0"
-                  leave="transition ease-in duration-150"
-                  leaveFrom="opacity-100 translate-y-0"
-                  leaveTo="opacity-0 translate-y-1">
-                  <Popover.Panel ref={refFilter} className="absolute left-0 z-10 mt-2 w-[305px]">
-                    <div className="rounded-lg shadow-lg">
-                      <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
-                        {savedView.length > 0 && (
-                          <ViewPopOver
-                            setIsShowing={(value) => setIsShowing(value)}
-                            isShowing={isShowing === "view"}
-                            savedView={savedView}
-                            handleSelect={handleSelectUrl}
-                            handleDelete={handleDeleteFilter}
-                          />
-                        )}
-                        <input
-                          type="text"
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          className="mx-2 mb-2 rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-600"
-                          placeholder="Rechercher par..."
+              <Transition
+                as={Fragment}
+                show={isShowing !== false}
+                enter="transition ease-out duration-200"
+                enterFrom="opacity-0 translate-y-1"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition ease-in duration-150"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-1">
+                <Popover.Panel ref={refFilter} className="absolute left-0 z-10 mt-2 w-[305px]">
+                  <div className="rounded-lg shadow-lg">
+                    <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
+                      {savedView.length > 0 && (
+                        <ViewPopOver
+                          setIsShowing={(value) => setIsShowing(value)}
+                          isShowing={isShowing === "view"}
+                          savedView={savedView}
+                          handleSelect={handleSelectUrl}
+                          handleDelete={handleDeleteFilter}
                         />
-                        <div className="flex flex-col overflow-y-auto">
-                          {categories.map((category, index) => (
-                            <div key={category || "default"}>
-                              {index !== 0 && <hr className="my-2 border-gray-100" />}
-                              <div className="px-4 text-xs font-light leading-5 text-gray-500">{category}</div>
-                              {filtersVisible
-                                ?.filter((f) => f.parentGroup === category)
-                                ?.map((item) => {
-                                  let customItem = item;
-                                  const intermediateFilter = intermediateFilters?.find((intermediateFilter) => intermediateFilter.key === item.name);
-                                  if (intermediateFilters.length > 0 && intermediateFilter && item.name === intermediateFilter?.key) {
-                                    customItem = {
-                                      ...item,
-                                      allowEmpty: false,
-                                      customComponent: (setFilter, filter) => (
-                                        <IntermediateFilter
-                                          selectedFilters={selectedFilters}
-                                          setSelectedFilters={setSelectedFilters}
-                                          setParamData={setParamData}
-                                          intermediateFilter={intermediateFilter}
-                                          dataFilter={dataFilter}
-                                          setFilter={setFilter}
-                                        />
-                                      ),
-                                    };
-                                  }
-                                  return (
-                                    <FilterPopOver
-                                      key={item.title}
-                                      filter={customItem}
-                                      selectedFilters={selectedFilters}
-                                      setSelectedFilters={setSelectedFilters}
-                                      data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name] || []}
-                                      isShowing={isShowing === item.name}
-                                      setIsShowing={(value) => setIsShowing(value)}
-                                      setParamData={setParamData}
-                                    />
-                                  );
-                                })}
-                            </div>
-                          ))}
-                        </div>
+                      )}
+                      <input
+                        type="text"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="mx-2 mb-2 rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-900 placeholder:text-gray-600"
+                        placeholder="Rechercher par..."
+                      />
+                      <div className="flex flex-col overflow-y-auto">
+                        {categories.map((category, index) => (
+                          <div key={category || "default"}>
+                            {index !== 0 && <hr className="my-2 border-gray-100" />}
+                            <div className="px-4 text-xs font-light leading-5 text-gray-500">{category}</div>
+                            {filtersVisible
+                              ?.filter((f) => f.parentGroup === category)
+                              ?.map((item) => {
+                                let customItem = item;
+                                const intermediateFilter = intermediateFilters?.find((intermediateFilter) => intermediateFilter.key === item.name);
+                                if (intermediateFilters.length > 0 && intermediateFilter && item.name === intermediateFilter?.key) {
+                                  customItem = {
+                                    ...item,
+                                    allowEmpty: false,
+                                    customComponent: (setFilter, filter) => (
+                                      <IntermediateFilter
+                                        selectedFilters={selectedFilters}
+                                        setSelectedFilters={setSelectedFilters}
+                                        setParamData={setParamData}
+                                        intermediateFilter={intermediateFilter}
+                                        dataFilter={dataFilter}
+                                        setFilter={setFilter}
+                                      />
+                                    ),
+                                  };
+                                }
+                                return (
+                                  <FilterPopOver
+                                    key={item.title}
+                                    filter={customItem}
+                                    selectedFilters={selectedFilters}
+                                    setSelectedFilters={setSelectedFilters}
+                                    data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name] || []}
+                                    isShowing={isShowing === item.name}
+                                    setIsShowing={(value) => setIsShowing(value)}
+                                    setParamData={setParamData}
+                                  />
+                                );
+                              })}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </Popover.Panel>
-                </Transition>
-              </>
-            )}
-          </Popover>
-        </div>
+                  </div>
+                </Popover.Panel>
+              </Transition>
+            </>
+          )}
+        </Popover>
       </div>
     </div>
   );

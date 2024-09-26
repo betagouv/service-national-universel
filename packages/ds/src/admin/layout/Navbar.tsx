@@ -20,10 +20,10 @@ export default function Navbar({ tab, button }: OwnProps) {
           <div
             key={`tab-${index}`}
             className={cx(
-              "flex items-end gap-x-1.5 text-sm leading-5 font-medium text-gray-500 cursor-pointer pb-3.5",
+              "flex items-end gap-x-1.5 text-sm leading-5 font-medium cursor-pointer pb-3.5 border-b-2",
               {
-                "border-b-2 border-blue-600 text-blue-600": tabItem.isActive,
-                "border-b-2 border-transparent": !tabItem.isActive,
+                "border-blue-600 text-blue-600": tabItem.isActive,
+                " border-transparent text-gray-500": !tabItem.isActive,
               },
             )}
             onClick={tabItem.onClick}
@@ -33,6 +33,7 @@ export default function Navbar({ tab, button }: OwnProps) {
               {tabItem.label ? (
                 <span
                   className={cx("text-[10px] leading-4", {
+                    "text-blue-500": tabItem.isActive,
                     "text-gray-400": !tabItem.isActive,
                   })}
                 >
@@ -42,6 +43,7 @@ export default function Navbar({ tab, button }: OwnProps) {
               <div
                 className={cx("truncate mr-3", {
                   "mb-1": !tabItem.label,
+                  "text-gray-500": !tabItem.isActive,
                 })}
               >
                 {tabItem.title}

@@ -17,7 +17,7 @@ export default function YoungRowGeneral({ young }: Props) {
   const history = useHistory();
 
   return (
-    <tr className="flex items-center py-3 px-4 hover:bg-gray-50">
+    <tr className="flex items-center py-3 px-4 hover:bg-gray-50 [&:not(:last-child)]:border-b border-b-gray-200">
       <td className="w-[30%] table-cell truncate cursor-pointer" onClick={() => history.push(`/volontaire/${young._id}`)}>
         <span className="font-bold text-gray-900 text-base leading-5">{young.status !== YOUNG_STATUS.DELETED ? `${young.firstName} ${young.lastName}` : "Compte supprimé"}</span>
         <p className="text-xs text-gray-500 leading-5">

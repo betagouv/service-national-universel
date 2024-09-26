@@ -3,6 +3,7 @@ import { HiChevronDown } from "react-icons/hi";
 import Button from "./Button";
 import Badge from "./Badge";
 import { classNames } from "../../utils";
+import cx from "classnames";
 
 type OptionGroupItem = {
   key: string;
@@ -105,11 +106,16 @@ export default function DropdownButton({
           <Button
             title={loading ? loadingLabel : title}
             type={type}
-            className={`${buttonClassName} ${loading && "cursor-wait"}`}
+            className={cx(buttonClassName, { "cursor-wait": loading })}
             leftIcon={icon}
             rightIcon={
               rightIcon && (
-                <HiChevronDown size={20} className={`mt-0.5 -mr-[7px]`} />
+                <HiChevronDown
+                  size={20}
+                  className={cx(`mt-0.5 -mr-[7px]`, {
+                    "text-blue-600": !disabled,
+                  })}
+                />
               )
             }
             disabled={disabled || loading}
