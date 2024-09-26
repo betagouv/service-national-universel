@@ -1,4 +1,4 @@
-import { departmentLookUp, regionList } from "snu-lib";
+import { CohesionCenterDomainEnum, CohesionCenterTypologyEnum, departmentLookUp, regionList } from "snu-lib";
 import { logger } from "../../logger";
 import { CohesionCenterCSV, CohesionCenterImportMapped } from "./cohesionCenterImport";
 
@@ -34,27 +34,27 @@ export const mapCohesionCentersForSept2024 = (cohesionCenters: CohesionCenterCSV
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // TODO: add AUTRE to front options
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-export const mapTypology = (typologyCsv: string) => {
-  let typology: "PUBLIC_ETAT" | "PUBLIC_COLLECTIVITE" | "PRIVE_ASSOCIATION" | "PRIVE_AUTRE" | "AUTRE";
+export const mapTypology = (typologyCsv: string): CohesionCenterTypologyEnum => {
   switch (typologyCsv) {
-    case "PUBLIC / ETAT" || "PUBLIC":
-      typology = "PUBLIC_ETAT";
-      break;
-    case "PUBLIC / COLLECTIVITE TERRITORIALE" || "COLLECTIVITE TERRITORIALE":
-      typology = "PUBLIC_COLLECTIVITE";
-      break;
-    case "PRIVE / ASSOCIATION OU FONDATION" || "ASSOCIATIF":
-      typology = "PRIVE_ASSOCIATION";
-      break;
-    case "PRIVE / AUTRE" || "PRIVE":
-      typology = "PRIVE_AUTRE";
-      break;
+    case "PUBLIC / ETAT":
+      return CohesionCenterTypologyEnum.PUBLIC_ETAT;
+    case "PUBLIC":
+      return CohesionCenterTypologyEnum.PUBLIC;
+    case "PUBLIC / COLLECTIVITE TERRITORIALE":
+    case "COLLECTIVITE TERRITORIALE":
+      return CohesionCenterTypologyEnum.PUBLIC_COLLECTIVITE;
+    case "PRIVE / ASSOCIATION OU FONDATION":
+    case "ASSOCIATIF":
+      return CohesionCenterTypologyEnum.PRIVE_ASSOCIATION;
+    case "PRIVE / AUTRE":
+    case "PRIVE":
+      return CohesionCenterTypologyEnum.PRIVE_AUTRE;
+    case "ENSEIGNEMENT AGRICOLE":
+      return CohesionCenterTypologyEnum.ENSEIGNEMENT_AGRICOLE;
     default:
       logger.warn(`mapTypology() - No typology found for : ${typologyCsv}`);
-      typology = "AUTRE";
-      break;
+      return CohesionCenterTypologyEnum.AUTRE;
   }
-  return typology;
 };
 
 export const mapRegion = (regionCsv: string) => {
@@ -88,19 +88,21 @@ export const mapDepartmentCode = (departmentCsv: string) => {
   return departmentCode || "NO_DEPARTMENT";
 };
 
-export const mapDomain = (domainCsv: string): "ETABLISSEMENT" | "VACANCES" | "FORMATION" | "AUTRE" => {
+export const mapDomain = (domainCsv: string): CohesionCenterDomainEnum => {
   switch (domainCsv) {
     case "ETABLISSEMENT D’ENSEIGNEMENT":
-      return "ETABLISSEMENT";
+      return CohesionCenterDomainEnum.ETABLISSEMENT;
     case "CENTRE DE VACANCES":
-      return "VACANCES";
-    case "EN COURS D'IDENTIFICATION" || "AUTRES":
-      return "AUTRE";
-    case "CENTRE DE FORMATION" || "EDUCATION":
-      return "FORMATION";
+      return CohesionCenterDomainEnum.VACANCES;
+    case "CENTRE DE FORMATION":
+      return CohesionCenterDomainEnum.FORMATION;
+    case "EDUCATION":
+      return CohesionCenterDomainEnum.EDUCATION;
+    case "ADMINISTRATIF":
+      return CohesionCenterDomainEnum.ADMINISTRATIF;
     default:
       logger.warn(`mapDomain() - No domain found for : ${domainCsv}`);
-      return "AUTRE";
+      return CohesionCenterDomainEnum.AUTRE;
   }
 };
 
