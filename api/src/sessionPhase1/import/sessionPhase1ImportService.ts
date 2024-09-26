@@ -91,11 +91,18 @@ const createSession = async (
     cohesionCenterId: foundCenter._id,
     cohortId: foundCohort._id,
     placesTotal: sessionCenter.sessionPlaces,
-    // TODO : add modaliteSnuId: sessionCenter.modaliteSnuId ?
+    department: foundCenter.department,
+    region: foundCenter.region,
+    codeCentre: foundCenter.matricule,
+    nameCentre: foundCenter.name,
+    zipCentre: foundCenter.zip,
+    cityCentre: foundCenter.city,
+    sejourSnuId: sessionCenter.sejourSnuId,
   };
 
   const createdSessionPhase1 = await SessionPhase1Model.create(sessionPhase1);
   await createdSessionPhase1.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
+  logger.info(`Session ${createdSessionPhase1._id} created for cohesion center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
 
   return {
     sessionId: createdSessionPhase1._id,

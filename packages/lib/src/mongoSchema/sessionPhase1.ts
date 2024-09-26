@@ -178,10 +178,10 @@ export const SessionPhase1Schema = {
     },
   },
 
-  modaliteSnuId: {
+  sejourSnuId: {
     type: String,
     documentation: {
-      description: "Code de la session",
+      description: "Code du centre pour la session - séjour SI-SNU",
     },
   },
 

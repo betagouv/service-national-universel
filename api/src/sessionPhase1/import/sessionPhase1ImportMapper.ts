@@ -7,7 +7,7 @@ export const mapSessionCohesionCentersForSept2024 = (sessionsCcohesionCenters: S
       sessionFormule: sessionCohesionCenter["Session formule"],
       cohesionCenterMatricule: sessionCohesionCenter["Désignation du centre"],
       sessionPlaces: getSessionPlaces(sessionCohesionCenter),
-      modaliteSnuId: sessionCohesionCenter["Code du centre pour la session"],
+      sejourSnuId: sessionCohesionCenter["Code du centre pour la session"],
     };
     if (sessionCohesionCenter["ID temporaire"]) {
       return { _id: sessionCohesionCenter["ID temporaire"].toLowerCase(), ...sessionCohesionCenterWithoutId };
@@ -19,7 +19,7 @@ export const mapSessionCohesionCentersForSept2024 = (sessionsCcohesionCenters: S
 export const getSessionPlaces = (sessionCohesionCenterCSV: SessionCohesionCenterCSV) => {
   let sessionPlaces = 0;
   if (sessionCohesionCenterCSV["Session formule"].includes("HTS")) {
-    sessionPlaces = sessionCohesionCenterCSV["Effets individuels"];
+    sessionPlaces = sessionCohesionCenterCSV["Effectif d'individuels"];
   }
   sessionPlaces = sessionCohesionCenterCSV["Effectif d'élèves (CLE)"];
   if (isNaN(sessionPlaces)) {
