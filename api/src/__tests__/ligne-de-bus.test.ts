@@ -23,6 +23,9 @@ afterAll(dbClose);
 
 describe("Meeting point", () => {
   describe("GET /all", () => {
+    beforeEach(async () => {
+      await LigneBusModel.deleteMany();
+    });
     afterEach(async () => {
       await Promise.all([LigneBusModel.deleteMany(), PointDeRassemblementModel.deleteMany(), LigneToPointModel.deleteMany()]);
     });
