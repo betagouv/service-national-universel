@@ -39,15 +39,6 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
   const fetchCenters = async (q: string) => {
     const { responses } = await api.post("/elasticsearch/cohesioncenter/not-in-cohort/" + selectedCohort, { filters: { searchbar: [q] } });
     const options = responses[0].hits.hits.map((hit) => ({ label: hit._source.name, value: hit._id, center: { ...hit._source, _id: hit._id } }));
-    options.push({
-      label: (
-        <div className="p-1 border-t-2 text-center">
-          <p className="mt-2 text-center">Le centre n'est pas dans la liste ?</p>
-          <p className="mt-2 text-blue-600">Créer un centre</p>
-        </div>
-      ),
-      value: "new",
-    });
     return options;
   };
 

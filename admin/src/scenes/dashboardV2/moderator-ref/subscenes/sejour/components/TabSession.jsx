@@ -37,7 +37,7 @@ export default function TabSession({ sessionByCenter, filters }) {
   }, [sessionByCenter]);
 
   return (
-    <div className="flex w-[60%] flex-col gap-5 rounded-lg bg-white px-8 py-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className="flex flex-col gap-5 rounded-lg bg-white px-8 py-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="flex items-center gap-3">
         <p className="text-left text-base font-bold leading-5 text-gray-900">Liste des centres</p>
         <Link to={getNewLink({ base: `/centre/liste/presence`, filter: filters, filtersUrl: [] })} target={"_blank"}>
