@@ -1,5 +1,5 @@
 import { apiURL } from "../config";
-import { createFormDataForFileUpload, ERRORS } from "snu-lib";
+import { createFormDataForFileUpload, ERRORS, YoungDto } from "snu-lib";
 import { capture } from "../sentry";
 
 interface Headers {
@@ -14,6 +14,7 @@ interface Options {
 
 interface ApiResponse {
   ok: boolean;
+  data?: unknown;
   code?: string;
 }
 
@@ -31,16 +32,9 @@ class api {
     };
   }
 
-  async checkToken(): Promise<void> {
-    const response = await fetch(`${apiURL}/young/signin_token`, {
-      ...this.options,
-      headers: new Headers({ "Content-Type": "application/json", ...this.headers }),
-    });
-    if ([401, 403, 404].includes(response.status)) {
-      throw new Error(response.status.toString());
-    }
-    const res = await response.json();
-    return res;
+  async getUser(): Promise<YoungDto> {
+    const { data: user } = await this.get(`${apiURL}/young/signin_token`);
+    return user as YoungDto;
   }
 
   async openpdf(path: string, body: unknown): Promise<Blob> {
@@ -86,29 +80,21 @@ class api {
   uploadFiles(path: string, arr: any[]): Promise<ApiResponse> {
     const formData = createFormDataForFileUpload(arr);
     return new Promise(async (resolve, reject) => {
-      try {
-        const response = await fetch(`${apiURL}${path}`, {
-          retries: 3,
-          retryDelay: 1000,
-          retryOn: [502, 503, 504],
-          mode: "cors",
-          method: "POST",
-          credentials: "include",
-          headers: this.headers,
-          body: formData,
-        });
-        if (response.status === 401) {
-          if (window?.location?.pathname !== "/auth") {
-            window.location.href = "/auth?disconnected=1";
-            return;
-          }
+      const response = await fetch(`${apiURL}${path}`, {
+        mode: "cors",
+        method: "POST",
+        credentials: "include",
+        headers: this.headers,
+        body: formData,
+      });
+      if (response.status === 401) {
+        if (window?.location?.pathname !== "/auth") {
+          window.location.href = "/auth?disconnected=1";
+          return;
         }
-        const res = await response.json();
-        resolve(res);
-      } catch (e) {
-        capture(e, { extra: { path: path, arr: arr } });
-        reject(e);
       }
+      const res = await response.json();
+      resolve(res);
     });
   }
 
