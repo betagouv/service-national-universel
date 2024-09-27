@@ -3,6 +3,13 @@ import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 initSentry();
 
+// Configure dayjs globally
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
+import "dayjs/locale/fr";
+dayjs.locale("fr");
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import React, { lazy, Suspense, useEffect, useState } from "react";
