@@ -509,7 +509,7 @@ describe("Referent", () => {
     });
   });
 
-  /*   describe("DELETE /referent/:id", () => {
+  describe("DELETE /referent/:id", () => {
     it("should return 404 if referent not found", async () => {
       const res = await request(getAppHelper()).delete(`/referent/${notExistingReferentId}`).send();
       expect(res.statusCode).toEqual(404);
@@ -527,104 +527,6 @@ describe("Referent", () => {
       const res = await request(getAppHelper()).delete(`/referent/${referent._id}`).send();
       expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
-    });
-  }); */
-
-  describe("DELETE /referent/:id", () => {
-    it("should return 404 when referent is not found", async () => {
-      const nonExistingId = new ObjectId().toString();
-      const res = await request(getAppHelper()).delete(`/cle/referent/${nonExistingId}`);
-      expect(res.status).toBe(404);
-    });
-
-    it("should return 403 when user is unauthorized to delete the referent", async () => {
-      const referent = await createFixtureReferent(); // Mocked function to create a referent
-      const validId = referent._id;
-
-      // Mock user role as unauthorized
-      passport.user.role = ROLES.USER;
-
-      const res = await request(getAppHelper()).delete(`/cle/referent/${validId}`);
-      expect(res.status).toBe(403);
-      expect(res.body).toHaveProperty("ok", false);
-      expect(res.body).toHaveProperty("code", ERRORS.OPERATION_UNAUTHORIZED);
-    });
-
-    it("should return 409 when referent is linked to a structure and is the last referent", async () => {
-      const referent = await createFixtureReferent({ role: ROLES.RESPONSIBLE });
-      const validId = referent._id;
-
-      // Ensure the referent is the last one in the structure
-      await createFixtureReferentsInStructure(1, referent.structureId);
-
-      const res = await request(getAppHelper()).delete(`/cle/referent/${validId}`);
-      expect(res.status).toBe(409);
-      expect(res.body).toHaveProperty("ok", false);
-      expect(res.body).toHaveProperty("code", ERRORS.LINKED_STRUCTURE);
-    });
-
-    it("should return 409 when referent has linked missions", async () => {
-      const referent = await createFixtureReferent({ role: ROLES.SUPERVISOR });
-      const validId = referent._id;
-
-      // Mock linked missions to this referent
-      await createFixtureMissions({ tutorId: validId });
-
-      const res = await request(getAppHelper()).delete(`/cle/referent/${validId}`);
-      expect(res.status).toBe(409);
-      expect(res.body).toHaveProperty("ok", false);
-      expect(res.body).toHaveProperty("code", ERRORS.LINKED_MISSIONS);
-    });
-
-    it("should return 409 when referent is linked to classes", async () => {
-      const referent = await createFixtureReferent({ role: ROLES.ADMINISTRATEUR_CLE });
-      const validId = referent._id;
-
-      // Mock linked classes
-      await createFixtureClasses({ referentId: validId, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
-
-      const res = await request(getAppHelper()).delete(`/cle/referent/${validId}`);
-      expect(res.status).toBe(409);
-      expect(res.body).toHaveProperty("ok", false);
-      expect(res.body).toHaveProperty("code", ERRORS.LINKED_CLASSES);
-    });
-
-    it("should return 409 when referent is linked to an establishment", async () => {
-      const referent = await createFixtureReferent({ role: ROLES.REFERENT_CLASSE, subRole: SUB_ROLES.referent_etablissement });
-      const validId = referent._id;
-
-      // Mock linked establishment
-      await createFixtureEtablissement({ referentId: validId });
-
-      const res = await request(getAppHelper()).delete(`/cle/referent/${validId}`);
-      expect(res.status).toBe(409);
-      expect(res.body).toHaveProperty("ok", false);
-      expect(res.body).toHaveProperty("code", ERRORS.LINKED_ETABLISSEMENT);
-    });
-
-    it("should return 200 and delete referent when conditions are met", async () => {
-      const referent = await createFixtureReferent({ role: ROLES.COORDINATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle });
-      const validId = referent._id;
-
-      // Ensure the referent has no linked dependencies (missions, classes, or establishment)
-      await createFixtureReferentsInStructure(2, referent.structureId); // More than 1 referent in structure
-
-      const res = await request(getAppHelper()).delete(`/cle/referent/${validId}`);
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty("ok", true);
-    });
-
-    it("should return 500 when a server error occurs", async () => {
-      // Simulate an error in ReferentModel.findById
-      jest.spyOn(ReferentModel, "findById").mockImplementation(() => {
-        throw new Error("Server error");
-      });
-
-      const validId = new ObjectId().toString();
-      const res = await request(getAppHelper()).delete(`/cle/referent/${validId}`);
-      expect(res.status).toBe(500);
-      expect(res.body).toHaveProperty("ok", false);
-      expect(res.body).toHaveProperty("code", ERRORS.SERVER_ERROR);
     });
   });
 
