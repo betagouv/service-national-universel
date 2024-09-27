@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, YOUNG_STATUS, STATUS_CLASSE, FeatureFlagName, canSearchInElasticSearch } = require("snu-lib");
+const { ROLES, YOUNG_STATUS, STATUS_CLASSE, FeatureFlagName, canSearchInElasticSearch, SUB_ROLES } = require("snu-lib");
 
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
@@ -65,11 +65,11 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     if (req.params.action === "export") {
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
-      response = await populateWithReferentInfo(response, req.params.action);
-      response = await populateWithEtablissementInfo(response);
-      response = await populateWithReferentEtablissementInfo(response, req.params.action);
-      response = await populateWithCoordinatorInfo(response, req.params.action);
-      response = await populateWithYoungsInfo(response);
+      if (req.query?.type === "export-des-classes") {
+        response = await populateWithEtablissementInfo(response);
+        response = await populateWithAllReferentsInfo(response);
+        response = await populateWithYoungsInfo(response);
+      }
 
       if (req.query?.type === "schema-de-repartition") {
         if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -94,7 +94,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     } else {
       let response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       if (req.query?.needRefInfo) {
-        response.body.responses[0].hits.hits = await populateWithReferentInfo(response.body.responses[0].hits.hits, req.params.action);
+        response.body.responses[0].hits.hits = await populateWithReferentClasseInfo(response.body.responses[0].hits.hits);
       }
 
       return res.status(200).send(response.body);
@@ -139,49 +139,16 @@ async function buildClasseContext(user) {
   return { classeContextFilters: contextFilters };
 }
 
-const populateWithReferentEtablissementInfo = async (classes, action) => {
-  const refIds =
-    action === "search"
-      ? [...new Set(classes.map((item) => item._source.etablissement?.referentEtablissementIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
+const populateWithReferentClasseInfo = async (classes) => {
+  const refIds = [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))];
 
-  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
-  const extendedReferents = referents.map((referent) => ({
-    ...referent,
-    state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
-  }));
-  const referentsData = serializeReferents(extendedReferents);
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
+
+  const referentsData = serializeReferents(referents);
 
   return classes.map((item) => {
-    if (action === "search") {
-      item._source.referentEtablissement = referentsData?.filter((e) => item._source.etablissement.referentEtablissementIds.includes(e._id.toString()));
-    } else {
-      item.referentEtablissement = referentsData?.filter((e) => item.etablissement?.referentEtablissementIds.includes(e._id.toString()));
-    }
-    return item;
-  });
-};
+    item._source.referents = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
 
-const populateWithReferentInfo = async (classes, action) => {
-  const refIds =
-    action === "search"
-      ? [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
-
-  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
-  const extendedReferents = referents.map((referent) => ({
-    ...referent,
-    state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
-  }));
-
-  const referentsData = serializeReferents(extendedReferents);
-
-  return classes.map((item) => {
-    if (action === "search") {
-      item._source.referents = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
-    } else {
-      item.referents = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
-    }
     return item;
   });
 };
@@ -224,7 +191,7 @@ const populateWithPdrInfo = async (classes) => {
 
 const populateWithYoungsInfo = async (classes) => {
   const classesIds = classes.map((item) => item._id);
-  const students = await allRecords("young", { bool: { must: [{ terms: { classeId: classesIds } }] } });
+  const students = await allRecords("young", { bool: { must: [{ terms: { classeId: classesIds } }] } }, esClient, ["_id", "classeId", "status"]);
 
   //count students by class
   const result = students.reduce((acc, cur) => {
@@ -247,21 +214,35 @@ const populateWithYoungsInfo = async (classes) => {
   });
 };
 
-const populateWithCoordinatorInfo = async (classes, action) => {
-  const refIds =
-    action === "search"
-      ? [...new Set(classes.map((item) => item._source.etablissement?.coordinateurIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.etablissement?.coordinateurIds).filter(Boolean))];
+const populateWithAllReferentsInfo = async (classes) => {
+  const referentEtablissementIds = [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
 
-  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
-  const referentsData = serializeReferents(referents);
+  const referentClasseIds = [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
+
+  const coordinateurIds = [...new Set(classes.map((item) => item.etablissement?.coordinateurIds).filter(Boolean))];
+
+  const allReferentIds = [...new Set([...referentEtablissementIds, ...referentClasseIds, ...coordinateurIds].flat())];
+
+  const referents = await allRecords("referent", { ids: { values: allReferentIds } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
+
+  const extendedReferents = referents.map((referent) => ({
+    ...referent,
+    state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
+  }));
+
+  const referentsData = serializeReferents(extendedReferents);
 
   return classes.map((item) => {
-    if (action === "search") {
-      item._source.coordinateurs = referentsData?.filter((e) => item._source.etablissement.coordinateurIds.includes(e._id.toString()));
-    } else {
-      item.coordinateurs = referentsData?.filter((e) => item.etablissement?.coordinateurIds.includes(e._id.toString()));
-    }
+    const referentEtablissementFiltered = referentsData?.filter((e) => item.etablissement?.referentEtablissementIds?.includes(e._id.toString()));
+
+    const referentClasseFiltered = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
+
+    const coordinateursFiltered = referentsData?.filter((e) => item.etablissement?.coordinateurIds?.includes(e._id.toString()));
+
+    item.referentEtablissement = referentEtablissementFiltered;
+    item.referents = referentClasseFiltered;
+    item.coordinateurs = coordinateursFiltered;
+
     return item;
   });
 };

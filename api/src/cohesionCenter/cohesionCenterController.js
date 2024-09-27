@@ -15,7 +15,10 @@ const { getReferentManagerPhase2 } = require("../utils");
 const { getTransporter } = require("../utils");
 const { getCohortIdsFromCohortName } = require("../cohort/cohortService");
 
-//To update for new affectation
+/**
+ * @deprecated center is now imported from SI-SNU
+ */
+//TODO: remove this route
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -145,7 +148,10 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
   }
 });
 
-// Modify existing center
+/**
+ * @deprecated center is now imported from SI-SNU
+ */
+//TODO: remove this route
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
@@ -327,6 +333,10 @@ router.get("/young/:youngId", passport.authenticate(["young"], { session: false,
   }
 });
 
+/**
+ * @deprecated center is now imported from SI-SNU
+ */
+//TODO: remove this route
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
