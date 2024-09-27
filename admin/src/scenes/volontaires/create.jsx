@@ -32,7 +32,6 @@ export default function Create() {
   const [selectedRepresentant, setSelectedRepresentant] = useState(1);
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState([]);
-  const [classe, setClasse] = useState([]);
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
   const user = useSelector((state) => state.Auth.user);
@@ -333,7 +332,6 @@ export default function Create() {
   const getClasseCohort = async (classeId) => {
     const { data, ok, code } = await api.get(`/cle/classe/${classeId}`);
     if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-    setClasse(data);
     setValues((prevValues) => ({ ...prevValues, cohort: data.cohort }));
   };
 
@@ -426,15 +424,7 @@ export default function Create() {
         <div className="ml-8 mb-6 text-lg font-normal">Détails</div>
         <div className={"flex pb-14"}>
           <div className="flex-[1_0_50%] pl-8 pr-14">
-            <Situation
-              values={values}
-              handleChange={handleChange}
-              required={{ situation: true }}
-              errors={errors}
-              setFieldValue={setFieldValue}
-              classeId={classeId}
-              classe={classe}
-            />
+            <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} classeId={classeId} />
           </div>
           <div className="my-16 flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-14 pr-8">
@@ -639,7 +629,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
   );
 }
 
-function Situation({ values, handleChange, errors, setFieldValue, classeId, classe }) {
+function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
   const onChange = (e) => {
     for (const key in e) {
       if (e[key] !== values[key]) {
@@ -674,12 +664,7 @@ function Situation({ values, handleChange, errors, setFieldValue, classeId, clas
     });
   };
 
-  const classeGrades = classe.grades.reduce((acc, grade) => {
-    acc[grade] = grade;
-    return acc;
-  }, {});
-  const classeType = classeId ? classeGrades : GRADES;
-  const gradeOptions = Object.keys(classeType).map((g) => ({ value: g, label: translateGrade(g) }));
+  const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
   const psc1Options = [
     { value: "true", label: "Oui" },
     { value: "false", label: "Non" },
