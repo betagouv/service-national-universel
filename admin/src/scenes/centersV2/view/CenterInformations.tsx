@@ -8,41 +8,23 @@ import ReactTooltip from "react-tooltip";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { useAddress, canUpdateMeetingPoint, departmentToAcademy } from "snu-lib";
+import { useAddress, departmentToAcademy } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 
 import { AuthState } from "@/redux/auth/reducer";
 import { capture } from "@/sentry";
 import { canCreateOrUpdateCohesionCenter, ROLES } from "@/utils";
-import Pencil from "@/assets/icons/Pencil";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import api from "@/services/api";
+import { InputText } from "@snu/ds/admin";
 
 import { Center } from "@/types";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import { Title } from "../components/commons";
-import Field from "../components/Field";
 import Toggle from "../components/Toggle";
-import Select from "../components/Select";
 
 type Error = { [key: string]: string };
-
-const optionsTypology = [
-  { label: "Public / État", value: "PUBLIC_ETAT" },
-  { label: "Public / Collectivité territoriale", value: "PUBLIC_COLLECTIVITE" },
-  { label: "Privé / Association ou fondation", value: "PRIVE_ASSOCIATION" },
-  { label: "Privé / Autre", value: "PRIVE_AUTRE" },
-  { label: "", value: "" },
-];
-
-const optionsDomain = [
-  { label: "Etablissement d’enseignement", value: "ETABLISSEMENT" },
-  { label: "Centre de vacances", value: "VACANCES" },
-  { label: "Centre de formation", value: "FORMATION" },
-  { label: "Autres", value: "AUTRE" },
-  { label: "", value: "" },
-];
 
 export default function Details({ center, setCenter, sessions, setSessions }) {
   const history = useHistory();
@@ -193,45 +175,12 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
       <div className="flex flex-col gap-8 rounded-lg bg-white px-8 pt-8 pb-12">
         <div className="flex items-center justify-between">
           <div className="text-lg font-medium leading-6 text-gray-900">Informations générales</div>
-          {canUpdateMeetingPoint(user) ? (
-            <>
-              {!editInfo ? (
-                <button
-                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => setEditInfo(true)}
-                  disabled={isLoading}>
-                  <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                  Modifier
-                </button>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <button
-                    className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    onClick={() => {
-                      setEditInfo(false);
-                      setData(center);
-                      setErrors({});
-                    }}
-                    disabled={isLoading}>
-                    Annuler
-                  </button>
-                  <button
-                    className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                    onClick={onSubmit}
-                    disabled={isLoading}>
-                    <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-                    Enregistrer les changements
-                  </button>
-                </div>
-              )}
-            </>
-          ) : null}
         </div>
         <div className="flex">
           <div className="flex w-[45%] flex-col gap-4 ">
             <div className="flex flex-col gap-2">
               <div className="text-xs font-medium leading-4 text-gray-900">Nom du centre</div>
-              <Field readOnly={!editInfo} label="Nom du centre" onChange={(e) => setData({ ...data, name: e.target.value })} value={data.name || ""} error={errors?.name} />
+              <InputText name="nameCenter" label="Nom du centre" className="flex-1 mb-3" value={data.name || ""} disabled />
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -243,13 +192,13 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                   <div className="text-sm leading-5 text-gray-700">{data.pmr === "true" ? "Oui" : "Non"}</div>
                 </div>
               </div>
-              <Toggle disabled={!editInfo} value={data.pmr === "true"} onChange={(e) => setData({ ...data, pmr: e.toString() })} />
+              <Toggle disabled={true} value={data.pmr === "true"} />
             </div>
             <div className="flex flex-col gap-3">
               <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
 
               <AddressForm
-                readOnly={!editInfo}
+                readOnly={true}
                 data={{
                   address: data.address,
                   zip: data.zip,
@@ -265,11 +214,12 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
 
               {data.address && (
                 <>
-                  <div className="flex items-center gap-3">
-                    <Field label="Département" value={data.department} disabled onChange={() => {}} />
-                    <Field label="Région" value={data.region} disabled onChange={() => {}} />
+                  <div className="flex items-center gap-3 mt-2">
+                    <InputText name="depCenter" label="Département" className="flex-1" value={data.department} disabled />
+
+                    <InputText name="regCenter" label="Région" className="flex-1" value={data.region} disabled />
                   </div>
-                  <Field label="Académie" value={"Académie de " + data.academy} disabled onChange={() => {}} />
+                  <InputText name="academyCenter" label="Académie" className="flex-1 mb-3" value={"Académie de " + data.academy} disabled />
                 </>
               )}
             </div>
@@ -282,68 +232,24 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium text-gray-900">Détails</div>
                 <div className="flex flex-col gap-2">
-                  <Select
-                    label="Typologie"
-                    readOnly={!editInfo}
-                    options={optionsTypology}
-                    selected={optionsTypology.find((e) => e.value === data.typology)}
-                    error={errors?.typology}
-                    setSelected={(e) => {
-                      setData({ ...data, typology: e.value });
-                    }}
-                  />
+                  <InputText name="typologie" label="Typologie" className="flex-1 mb-2" value={data.typology} disabled />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <Select
-                  label="Domaine"
-                  readOnly={!editInfo}
-                  options={optionsDomain}
-                  selected={optionsDomain.find((e) => e.value === data.domain)}
-                  setSelected={(e) => setData({ ...data, domain: e.value })}
-                  error={errors?.domain}
-                />
+                <InputText name="domaine" label="Domaine" className="flex-1 mb-2" value={data.domain} disabled />
               </div>
               <div className="flex flex-col gap-2">
-                <Field
-                  readOnly={!editInfo}
-                  label="Précisez le gestionnaire ou propriétaire"
-                  onChange={(e) => setData({ ...data, complement: e.target.value })}
-                  value={data.complement || ""}
-                  error={errors?.complement}
-                />
+                <InputText name="gestionnaire" label="Gestionnaire ou propriétaire" className="flex-1 mb-2" value={data.complement} disabled />
               </div>
               <div className="flex flex-col gap-2">
-                <Field
-                  readOnly={!editInfo}
-                  label="Capacité maximale d'accueil"
-                  onChange={(e) => setData({ ...data, placesTotal: parseInt(e.target.value) })}
-                  value={(data.placesTotal || "").toString()}
-                  error={errors?.placesTotal}
-                  tooltips={
-                    "C’est la capacité d’hébergement maximale du centre, qui dépend du bâti. Elle doit être supérieure ou égale au nombre de places ouvertes sur un séjour donné"
-                  }
-                />
+                <InputText name="capacity" label="Capacité maximale d'accueil" className="flex-1 mb-4" value={data.placesTotal?.toString() || ""} disabled />
               </div>
               <div className="flex flex-col gap-2">
-                <Field
-                  readOnly={!editInfo}
-                  label="Désignation du centre"
-                  onChange={(e) => setData({ ...data, centerDesignation: e.target.value })}
-                  value={data.centerDesignation || ""}
-                  error={errors?.centerDesignation}
-                  disabled={user.role !== "admin" && editInfo}
-                />
+                <InputText name="designation" label="Désignation du centre" className="flex-1 mb-2" value={data.centerDesignation || ""} disabled />
               </div>
               <div className="flex flex-col gap-2">
-                <Field
-                  readOnly={!editInfo}
-                  label="Code du centre"
-                  onChange={(e) => setData({ ...data, code2022: e.target.value })}
-                  value={data.code2022 || ""}
-                  error={errors?.code2022}
-                />
+                <InputText name="matricule" label="Matricule" className="flex-1 mb-2" value={data.matricule || ""} disabled />
               </div>
             </div>
           </div>

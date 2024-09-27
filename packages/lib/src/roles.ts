@@ -993,21 +993,18 @@ function canAllowSNU(actor) {
 }
 
 function canEditEstimatedSeats(actor) {
-  if (actor.role === ROLES.ADMIN) return true;
+  if (isAdmin(actor)) return true;
   const now = new Date();
   const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
   return actor.role === ROLES.ADMINISTRATEUR_CLE && now <= limitDateEstimatedSeats;
 }
 
 function canEditTotalSeats(actor) {
-  if (actor.role === ROLES.ADMIN) {
+  if (isAdmin(actor)) return true;
+  if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     const now = new Date();
     const limitDateTotalSeat = new Date(LIMIT_DATE_TOTAL_SEATS);
-    if (now <= limitDateTotalSeat) {
-      return false;
-    } else {
-      return true;
-    }
+    return now <= limitDateTotalSeat;
   }
   const limitDatesEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS).toISOString();
   const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();

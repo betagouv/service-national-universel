@@ -272,7 +272,7 @@ export default function View() {
         />
       )}
 
-      {(rights.showCenter || rights.showPDR) && (
+      {(rights.showCenter || rights.showPDR) && classe?.status !== STATUS_CLASSE.WITHDRAWN && (
         <SejourInfos
           classe={classe}
           setClasse={setClasse}
