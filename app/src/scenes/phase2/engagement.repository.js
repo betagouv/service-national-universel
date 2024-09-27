@@ -5,14 +5,14 @@ import * as FileSaver from "file-saver";
 export async function fetchPrograms() {
   const res = await fetch(`${apiURL}/program/public/engagements`);
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.name, { cause: error.message });
+  if (!ok) throw error;
   return data;
 }
 
 export async function fetchProgram(id) {
   const res = await fetch(`${apiURL}/program/public/engagement/${id}`);
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.name, { cause: error.message });
+  if (!ok) throw error;
   return data;
 }
 
@@ -21,7 +21,7 @@ export async function fetchApplications(youngId) {
     credentials: "include",
   });
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.name, { cause: error.message });
+  if (!ok) throw error;
   return data.map((e) => ({ ...e, engagementType: "mig" }));
 }
 
@@ -30,7 +30,7 @@ export async function fetchEquivalences(youngId) {
     credentials: "include",
   });
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.name, { cause: error.message });
+  if (!ok) throw error;
   return data.map((e) => ({ ...e, engagementType: "equivalence" }));
 }
 
@@ -39,7 +39,7 @@ export async function fetchEquivalence(youngId, id) {
     credentials: "include",
   });
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.name, { cause: error.message });
+  if (!ok) throw error;
   return data;
 }
 
@@ -68,6 +68,6 @@ export async function fetchMissionsFromApiEngagement(filters, page, size, sort) 
     body: JSON.stringify({ filters, page, size, sort }),
   });
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.name, { cause: error.message });
+  if (!ok) throw error;
   return data;
 }
