@@ -1,7 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
-import { Types } from "mongoose";
-const { ObjectId } = Types;
 
 import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS } from "snu-lib";
 

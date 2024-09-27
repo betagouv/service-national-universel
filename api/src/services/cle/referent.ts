@@ -58,6 +58,22 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
   }
 };
 
+export const addReferentClasseAsCoordinator = async (
+  referent: Pick<ReferentType, "firstName" | "lastName" | "email">,
+  { from }: { from: UserDto | null },
+  etablissement: EtablissementType,
+) => {
+  // Send invite
+  const fromName = `${from?.firstName || null} ${from?.lastName || null}`;
+  const toName = `${referent.firstName} ${referent.lastName}`;
+  const name_school = `${etablissement.name}`;
+
+  return await sendTemplate(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, {
+    emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+    params: { fromName, toName, name_school },
+  });
+};
+
 export const inviteReferent = async (
   referent: Pick<ReferentType, "firstName" | "lastName" | "email" | "invitationToken">,
   { role, from }: { role: UserDto["role"]; from: UserDto | null },

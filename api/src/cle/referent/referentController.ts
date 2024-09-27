@@ -11,11 +11,10 @@ import { uploadFile } from "../../utils";
 import { UserRequest } from "../../controllers/request";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
-import { EtablissementModel, ReferentModel } from "../../models";
-import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
+import { EtablissementModel } from "../../models";
+import { findOrCreateReferent, inviteReferent, addReferentClasseAsCoordinator } from "../../services/cle/referent";
 import { generateCSVStream } from "../../services/fileService";
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
-import { set } from "mongoose";
 
 const router = express.Router();
 
@@ -70,7 +69,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
     if (referent.role === ROLES.REFERENT_CLASSE) {
       referent.set({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle });
       await referent.save({ fromUser: req.user });
-      //send email waiting Thomas
+      await addReferentClasseAsCoordinator(referent, { from: req.user }, etablissement);
     } else {
       await inviteReferent(referent, { role: SUB_ROLES.coordinateur_cle, from: req.user }, etablissement);
     }
