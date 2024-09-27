@@ -21,7 +21,7 @@ const exportDateKeys = [EXPORT_COHESION_CENTERS, EXPORT_YOUNGS_BEFORE_SESSION, E
 
 const xlsxMimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-router.put("/:id/dsnj-export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.put("/:id/export-dsnj/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: exportDateKeyError, value: exportDateKey } = Joi.string()
       .valid(...exportDateKeys)
@@ -95,7 +95,7 @@ router.put("/:id/dsnj-export/:exportDateKey", passport.authenticate(ROLES.ADMIN,
   }
 });
 
-router.put("/:id/injep-export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.put("/:id/export-injep/:exportDateKey", passport.authenticate(ROLES.ADMIN, { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: exportDateKeyError, value: exportDateKey } = Joi.string()
       .valid(...exportDateKeys)
@@ -379,11 +379,11 @@ router.get("/:id/export-injep/:exportKey", passport.authenticate([ROLES.ADMIN, R
 
     if (exportKey === EXPORT_YOUNGS_BEFORE_SESSION) {
       file = await getFile(`injep/${cohort.snuId}/${EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`);
-      fileName = `INJEP - Fichier volontaire-${cohort.snuId}-${formattedDate}.xlsx`;
+      fileName = `${formattedDate}-INJEP-${cohort.snuId}-avant-sejour.xlsx`;
     }
     if (exportKey === EXPORT_YOUNGS_AFTER_SESSION) {
       file = await getFile(`injep/${cohort.snuId}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
-      fileName = `INJEP - Fichier volontaire avec validation-${cohort.snuId}-${formattedDate}.xlsx`;
+      fileName = `${formattedDate}-INJEP-${cohort.snuId}-apres-sejour.xlsx`;
     }
 
     const decryptedBuffer = decrypt(file.Body) as any;

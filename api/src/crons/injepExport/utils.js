@@ -43,7 +43,7 @@ const generateYoungsExport = async (cohortName, afterSession = false, action = "
   let result = [];
   const q = { cohort: cohortName, status: "VALIDATED" };
   if (afterSession) {
-    q.statusPhase1 = "DONE";
+    q.statusPhase1 = { $in: ["DONE", "NOT_DONE"] };
   }
 
   const youngs = await YoungModel.find(q).lean();
