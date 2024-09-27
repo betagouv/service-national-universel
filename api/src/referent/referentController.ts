@@ -1467,25 +1467,28 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const referents = await ReferentModel.find({ structureId: referent.structureId });
-    const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
-    if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
-    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
-
-    const classes = await ClasseModel.find({ referentClasseIds: { $in: [referent._id] } });
-    if (classes.length > 0) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSES });
-
-    if (referent.subRole === SUB_ROLES.referent_etablissement && referent.role === ROLES.ADMINISTRATEUR_CLE) {
-      const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [referent._id] } });
-      if (etablissement) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+    if (referent.role === ROLES.RESPONSIBLE || referent.role === ROLES.SUPERVISOR) {
+      const referents = await ReferentModel.find({ structureId: referent.structureId });
+      const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
+      if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
+      if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
     }
+    if (referent.role === ROLES.ADMINISTRATEUR_CLE || referent.role === ROLES.REFERENT_CLASSE) {
+      const classes = await ClasseModel.find({ referentClasseIds: { $in: [referent._id] }, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
+      if (classes.length > 0) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSES });
 
-    if (referent.subRole === SUB_ROLES.coordinateur_cle && referent.role === ROLES.ADMINISTRATEUR_CLE) {
-      const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: [referent._id] } });
-      if (etablissement) {
-        const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
-        etablissement.set({ coordinateurIds: coordinateur });
-        await etablissement.save({ fromUser: req.user });
+      if (referent.subRole === SUB_ROLES.referent_etablissement) {
+        const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [referent._id] } });
+        if (etablissement) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+      }
+
+      if (referent.subRole === SUB_ROLES.coordinateur_cle) {
+        const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: [referent._id] } });
+        if (etablissement) {
+          const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
+          etablissement.set({ coordinateurIds: coordinateur });
+          await etablissement.save({ fromUser: req.user });
+        }
       }
     }
 

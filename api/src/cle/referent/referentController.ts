@@ -11,10 +11,11 @@ import { uploadFile } from "../../utils";
 import { UserRequest } from "../../controllers/request";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
-import { EtablissementModel } from "../../models";
+import { EtablissementModel, ReferentModel } from "../../models";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 import { generateCSVStream } from "../../services/fileService";
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
+import { set } from "mongoose";
 
 const router = express.Router();
 
@@ -66,8 +67,13 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
 
     await etablissement.save({ fromUser: req.user });
 
-    // We send the email invitation once we are sure both the referent and the classe are created
-    await inviteReferent(referent, { role: SUB_ROLES.coordinateur_cle, from: req.user }, etablissement);
+    if (referent.role === ROLES.REFERENT_CLASSE) {
+      referent.set({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle });
+      await referent.save({ fromUser: req.user });
+      //send email waiting Thomas
+    } else {
+      await inviteReferent(referent, { role: SUB_ROLES.coordinateur_cle, from: req.user }, etablissement);
+    }
 
     return res.status(200).send({ ok: true });
   } catch (error) {

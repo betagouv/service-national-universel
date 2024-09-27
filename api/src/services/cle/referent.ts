@@ -34,6 +34,9 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
     // Return if already exists
     if (referent._id) return referent;
 
+    const referentClasse = await ReferentModel.findOne({ email: referent.email, role: ROLES.REFERENT_CLASSE });
+    if (referentClasse) return referentClasse;
+
     // Create referent
     if (!referent.email || !referent.firstName || !referent.lastName) throw new Error("Missing referent email or firstName or lastName");
     const invitationToken = crypto.randomBytes(20).toString("hex");
