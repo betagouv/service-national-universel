@@ -45,10 +45,9 @@ export default function Signin() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const invitationToken = urlParams.get("token");
-      const { data: young, token } = await api.post(`/young/signup_invite`, { email, password, invitationToken: invitationToken });
-      if (young && token) {
+      const { data: young } = await api.post(`/young/signup_invite`, { email, password, invitationToken: invitationToken });
+      if (young) {
         plausibleEvent("INVITATION/ Connexion réussie");
-        api.setToken(token);
         dispatch(setYoung(young));
         await cohortsInit();
         const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);

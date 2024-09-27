@@ -48,15 +48,13 @@ function App() {
 
   async function fetchData() {
     try {
-      const { ok, user, token } = await api.checkToken();
+      const { ok, user } = await api.checkToken();
 
-      if (!ok || !user || !token) {
-        api.setToken(null);
+      if (!ok || !user) {
         dispatch(setYoung(null));
         return;
       }
 
-      api.setToken(token);
       dispatch(setYoung(user));
       await cohortsInit();
 
