@@ -34,7 +34,9 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
     // Return if already exists
     if (referent._id) return referent;
 
-    const referentClasse = await ReferentModel.findOne({ email: referent.email, role: ROLES.REFERENT_CLASSE });
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
+    const refClasseIds = classes.map((c) => c.referentClasseIds).flat();
+    const referentClasse = await ReferentModel.findOne({ email: referent.email, role: ROLES.REFERENT_CLASSE, _id: { $in: refClasseIds } });
     if (referentClasse) return referentClasse;
 
     // Create referent
@@ -68,7 +70,7 @@ export const addReferentClasseAsCoordinator = async (
   const toName = `${referent.firstName} ${referent.lastName}`;
   const name_school = `${etablissement.name}`;
 
-  return await sendTemplate(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, {
+  return await sendTemplate(SENDINBLUE_TEMPLATES.CLE.REFERENT_CLASSE_ADDED_AS_COORDINATOR, {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
     params: { fromName, toName, name_school },
   });
