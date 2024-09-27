@@ -178,6 +178,13 @@ export const SessionPhase1Schema = {
     },
   },
 
+  sejourSnuId: {
+    type: String,
+    documentation: {
+      description: "Code du centre pour la session - séjour SI-SNU",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 };
