@@ -7,6 +7,8 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import ReactTooltip from "react-tooltip";
+import { HiInformationCircle } from "react-icons/hi";
 
 import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
@@ -30,6 +32,7 @@ export default function Create() {
   const [selectedRepresentant, setSelectedRepresentant] = useState(1);
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState([]);
+  const [classe, setClasse] = useState([]);
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
   const user = useSelector((state) => state.Auth.user);
@@ -136,11 +139,12 @@ export default function Create() {
       "parent1Status",
       "parent1LastName",
       "parent1FirstName",
-      // "situation",
+      "situation",
       "address",
       "city",
       "zip",
       "frenchNationality",
+      "grade",
     ];
 
     if (classeId) values.classeId = classeId;
@@ -329,6 +333,7 @@ export default function Create() {
   const getClasseCohort = async (classeId) => {
     const { data, ok, code } = await api.get(`/cle/classe/${classeId}`);
     if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+    setClasse(data);
     setValues((prevValues) => ({ ...prevValues, cohort: data.cohort }));
   };
 
@@ -421,7 +426,15 @@ export default function Create() {
         <div className="ml-8 mb-6 text-lg font-normal">Détails</div>
         <div className={"flex pb-14"}>
           <div className="flex-[1_0_50%] pl-8 pr-14">
-            <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} classeId={classeId} />
+            <Situation
+              values={values}
+              handleChange={handleChange}
+              required={{ situation: true }}
+              errors={errors}
+              setFieldValue={setFieldValue}
+              classeId={classeId}
+              classe={classe}
+            />
           </div>
           <div className="my-16 flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-14 pr-8">
@@ -626,7 +639,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
   );
 }
 
-function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
+function Situation({ values, handleChange, errors, setFieldValue, classeId, classe }) {
   const onChange = (e) => {
     for (const key in e) {
       if (e[key] !== values[key]) {
@@ -637,6 +650,10 @@ function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
   const onChangeSituation = (key, value) => {
     setFieldValue("employed", youngEmployedSituationOptions.includes(value) ? "true" : "false");
     setFieldValue("situation", value);
+  };
+
+  const onChangePSC1 = (key, value) => {
+    setFieldValue("psc1Info", value);
   };
 
   const onChangeGrade = (key, value) => {
@@ -657,45 +674,68 @@ function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
     });
   };
 
-  const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
-
+  const classeGrades = classe.grades.reduce((acc, grade) => {
+    acc[grade] = grade;
+    return acc;
+  }, {});
+  const classeType = classeId ? classeGrades : GRADES;
+  const gradeOptions = Object.keys(classeType).map((g) => ({ value: g, label: translateGrade(g) }));
+  const psc1Options = [
+    { value: "true", label: "Oui" },
+    { value: "false", label: "Non" },
+    { value: null, label: "Non renseigné" },
+  ];
   return (
     <>
-      {!classeId && (
-        <>
-          <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Situation</div>
-
-          <Field
-            name="grade"
-            label="Classe"
-            type="select"
-            error={errors?.grade}
-            value={values.grade}
-            transformer={translate}
-            className="flex-[1_1_50%]"
-            options={gradeOptions}
-            onChange={(value, key) => onChangeGrade(key, value)}
-          />
-          {values.schooled !== "" && (
-            <Field
-              name="situation"
-              label="Statut"
-              type="select"
-              error={errors?.situation}
-              value={values.situation}
-              transformer={translate}
-              className="mt-4 flex-[1_1_50%]"
-              options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
-              onChange={(value, key) => onChangeSituation(key, value)}
-            />
-          )}
-
-          {values.situation !== "" && values.schooled === "true" && (
-            <div className="mt-4">
-              <SchoolEditor showBackgroundColor={false} young={values} onChange={onChange} />
-            </div>
-          )}
-        </>
+      <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Situation</div>
+      <Field
+        name="grade"
+        label="Classe"
+        type="select"
+        error={errors?.grade}
+        value={values.grade}
+        transformer={translate}
+        className="flex-[1_1_50%]"
+        options={gradeOptions}
+        onChange={(value, key) => onChangeGrade(key, value)}
+      />
+      {values.schooled !== "" && (
+        <Field
+          name="situation"
+          label="Statut"
+          type="select"
+          error={errors?.situation}
+          value={values.situation}
+          transformer={translate}
+          className="mt-4 flex-[1_1_50%]"
+          options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
+          onChange={(value, key) => onChangeSituation(key, value)}
+        />
+      )}
+      <div className="mt-[16px]">
+        <div className="flex flex">
+          <h1 className="mb-2 text-xs font-medium leading-snug text-[#242526]">Titulaire du PSC1</h1>
+          <HiInformationCircle data-tip data-for="psc1Info" className="mt-0.5 ml-1 text-gray-400" />
+        </div>
+        <ReactTooltip id="psc1Info" className="bg-white shadow-xl" arrowColor="white" place="right">
+          <div className="text-xs text-[#414458]">Information déclarée par le volontaire lors de son inscription </div>
+        </ReactTooltip>
+        <Field
+          name="psc1Info"
+          value={values?.psc1Info || "Non renseigné"}
+          transformer={translate}
+          type="select"
+          options={psc1Options}
+          // onChange={(value) => onLocalChange("psc1Info", value)}
+          onChange={(value, key) => onChangePSC1(key, value)}
+          young={values}
+          className="flex-[1_1_50%]"
+        />
+      </div>
+      {values.situation !== "" && values.schooled === "true" && !classeId && (
+        <div className="mt-4">
+          <SchoolEditor showBackgroundColor={false} young={values} onChange={onChange} />
+        </div>
       )}
       <div className="mt-8">
         <div className="mt-8 mb-2 text-xs font-medium leading-snug text-[#242526]">Situations particulières</div>

@@ -578,6 +578,7 @@ export function validateYoung(young: YoungDto, user?: UserDto) {
     militaryPreparationCorrectionMessage: Joi.string().allow(null, ""),
     missionsInMail: Joi.array().items(Joi.any().allow(null, "")),
     classeId: Joi.string().allow(null, ""),
+    psc1Info: Joi.string().allow(null, ""),
   };
 
   if (!isYoung(user)) {
