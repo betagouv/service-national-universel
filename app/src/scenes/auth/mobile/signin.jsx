@@ -45,7 +45,7 @@ export default function Signin() {
       }
 
       if (!young) {
-        console.log("no young or token", young);
+        console.log("no young", young);
         return;
       }
 
