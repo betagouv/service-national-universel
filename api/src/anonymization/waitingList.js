@@ -1,13 +1,15 @@
 const { generateRandomEmail, generateBirthdate } = require("../utils/anonymise");
-const { waitingListSchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
+const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
 
-function anonymize(item) {
+function anonymize(itemToAnonymize) {
+  const whitelist = ["_id.$oid", "zip", "mail", "birthdateAt", "createdAt.$date", "updatedAt.$date"];
+
+  const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);
+
   item.mail && (item.mail = generateRandomEmail());
   item.birthdateAt && (item.birthdateAt = generateBirthdate());
 
-  const knownFields = ["mail", "birthdateAt"];
-
-  return anonymizeNewFields(item, knownFields, waitingListSchemaFields);
+  return item;
 }
 
 module.exports = anonymize;

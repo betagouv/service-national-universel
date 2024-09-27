@@ -1,7 +1,45 @@
 const { starify } = require("../utils/anonymise");
-const { applicationSchemaFields, anonymizeNewFields } = require("../utils/anonymise-model-fields");
+const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
 
-function anonymize(item) {
+function anonymize(itemToAnonymize) {
+  const whitelist = [
+    "_id.$oid",
+    "apiEngagementId",
+    "youngId",
+    "youngFirstName",
+    "youngLastName",
+    "youngEmail",
+    "youngBirthdateAt",
+    "youngCity",
+    "youngDepartment",
+    "youngCohort",
+    "cohortId",
+    "missionId",
+    "isJvaMission",
+    "missionName",
+    "missionDepartment",
+    "missionRegion",
+    "missionDuration",
+    "structureId",
+    "tutorId",
+    "contractId",
+    "contractStatus",
+    "tutorName",
+    "priority",
+    "hidden",
+    "status",
+    "statusComment",
+    "contractAvenantFiles",
+    "justificatifsFiles",
+    "feedBackExperienceFiles",
+    "othersFiles",
+    "filesType",
+    "createdAt.$date",
+    "updatedAt.$date",
+  ];
+
+  const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);
+
   item.youngEmail && (item.youngEmail = "*****@*******.***");
   item.youngFirstName && (item.youngFirstName = starify(item.youngFirstName));
   item.youngLastName && (item.youngLastName = starify(item.youngLastName));
@@ -15,21 +53,7 @@ function anonymize(item) {
   item.feedBackExperienceFiles && (item.feedBackExperienceFiles = []);
   item.othersFiles && (item.othersFiles = []);
 
-  const knownFields = [
-    "youngEmail",
-    "youngFirstName",
-    "youngLastName",
-    "youngBirthdateAt",
-    "tutorName",
-    "missionName",
-    "contractStatus",
-    "contractAvenantFiles",
-    "justificatifsFiles",
-    "feedBackExperienceFiles",
-    "othersFiles",
-  ];
-
-  return anonymizeNewFields(item, knownFields, applicationSchemaFields);
+  return item;
 }
 
 module.exports = anonymize;
