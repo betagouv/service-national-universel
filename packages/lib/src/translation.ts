@@ -1091,7 +1091,7 @@ const translateCniExpired = (cniExpired) => {
   }
 };
 
-const translateEtbalissementSector = (sector) => {
+const translateEtablissementSector = (sector) => {
   switch (sector) {
     case "pro":
       return "Professionnel";
@@ -1245,7 +1245,7 @@ export {
   translateBusPatchesField,
   translateInscriptionStatus,
   translateCniExpired,
-  translateEtbalissementSector,
+  translateEtablissementSector,
   translateColoration,
   translateYoungSource,
   translateStatusClasse,
@@ -1280,7 +1280,7 @@ export default {
   translateBusPatchesField,
   translateInscriptionStatus,
   translateCniExpired,
-  translateEtbalissementSector,
+  translateEtablissementSector,
   translateColoration,
   translateYoungSource,
   translateStatusClasse,

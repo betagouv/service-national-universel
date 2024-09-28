@@ -20,6 +20,7 @@ import Section from "../../Section";
 import SectionIdentiteCni from "./SectionIdentiteCni";
 import SectionIdentiteContact from "./SectionIdentiteContact";
 import { MiniTitle } from "../../commons/MiniTitle";
+import { HiOutlineCheckCircle, HiOutlineExclamation } from "react-icons/hi";
 
 export default function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
@@ -282,7 +283,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
             </div>
           )}
           <div className="mt-[32px]">
-            <MiniTitle>Adresse</MiniTitle>
+            <MiniTitle>Adresse de résidence</MiniTitle>
             <Field
               name="address"
               label="Adresse"
@@ -324,6 +325,10 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
                 young={young}
               />
             </div>
+            <div className="mb-[16px] flex items-start justify-between">
+              <Field name="department" label="Département" value={data.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
+              <Field name="region" label="Région" value={data.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
+            </div>
             <Field
               name="country"
               label="Pays"
@@ -340,10 +345,23 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               onChange={(value) => onLocalAddressChange("country", value)}
               young={young}
             />
-            <div className="mb-[16px] flex items-start justify-between">
-              <Field name="department" label="Département" value={data.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
-              <Field name="region" label="Région" value={data.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
-            </div>
+            {data?.etablissementDepartment ? (
+              data?.etablissementDepartment !== data?.department ? (
+                <div className="w-full h-full p-2 bg-amber-50 rounded-md flex justify-center items-center gap-2">
+                  <HiOutlineExclamation className="text-amber-500 p-2" size={40} />
+                  <div className="flex-1 text-amber-600 text-xs font-medium leading-4 break-words">
+                    Le département de ce volontaire n’est pas le même que le département de son établissement
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-full p-2 bg-emerald-50 rounded-md flex justify-center items-center gap-2">
+                  <HiOutlineCheckCircle className="text-emerald-500 p-2" size={40} />
+                  <div className="flex-1 text-emerald-600 text-xs font-medium leading-4 break-words">
+                    Le département de résidence de ce volontaire est le même que le département de son établissement
+                  </div>
+                </div>
+              )
+            ) : null}
             {sectionMode === "edition" && data.country && data.country.toUpperCase() === "FRANCE" && (
               <VerifyAddress
                 address={data.address}

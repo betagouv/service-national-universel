@@ -17,7 +17,7 @@ import {
   GRADES,
   getAge,
   YOUNG_SOURCE,
-  translateEtbalissementSector,
+  translateEtablissementSector,
   translateColoration,
 } from "snu-lib";
 import { filterDataForYoungSection } from "../../utils";
@@ -255,7 +255,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
             <div>
               {young.source === YOUNG_SOURCE.VOLONTAIRE ? (
                 <>
-                  <MiniTitle>Situation</MiniTitle>
+                  <MiniTitle>Situation scolaire</MiniTitle>
                   <Field
                     name="grade"
                     label="Classe"
@@ -288,38 +288,19 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                     onChange={(value) => onLocalChange("situation", value)}
                     young={young}
                   />
+                  <MiniTitle>Établissement</MiniTitle>
                   {data.schooled === "true" && (
                     <>
                       {sectionMode === "edition" ? (
                         <SchoolEditor young={data} onChange={onSchoolChange} />
                       ) : (
                         <>
-                          <Field
-                            name="schoolCity"
-                            label="Ville de l'établissement"
-                            value={data.schoolCity}
-                            mode={sectionMode}
-                            className="mb-[16px]"
-                            onStartRequest={onStartRequest}
-                            currentRequest={currentRequest}
-                            correctionRequest={getCorrectionRequest(requests, "schoolCity")}
-                            onCorrectionRequestChange={onCorrectionRequestChange}
-                            onChange={(value) => onLocalChange("schoolCity", value)}
-                            young={young}
-                          />
-                          <Field
-                            name="schoolName"
-                            label="Nom de l'établissement"
-                            value={data.schoolName}
-                            mode={sectionMode}
-                            className="mb-[16px]"
-                            onStartRequest={onStartRequest}
-                            currentRequest={currentRequest}
-                            correctionRequest={getCorrectionRequest(requests, "schoolName")}
-                            onCorrectionRequestChange={onCorrectionRequestChange}
-                            onChange={(value) => onLocalChange("schoolName", value)}
-                            young={young}
-                          />
+                          <div className="flex items-center gap-4 mb-[16px]">
+                            <Field name="etablissementRegion" label="Région" value={data?.schoolRegion} mode="readonly" className="w-1/2" young={young} />
+                            <Field name="etablissementDepartment" label="Département" value={data?.schoolDepartment} mode="readonly" className="w-1/2" young={young} />
+                          </div>
+                          <Field name="etablissementCity" label="Ville" value={data?.schoolCity} mode="readonly" className="mb-[16px]" young={young} />
+                          <Field name="etablissementName" label="Nom" value={data?.schoolName} mode="readonly" className="mb-[24px]" young={young} />
                         </>
                       )}
                     </>
@@ -341,8 +322,8 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                       transformer={translateColoration}
                     />
                   </div>
-                  <Link to={`/classes/${young.classeId}`} className="w-full ">
-                    <Button type="tertiary" title="Voir la classe" className="w-full mb-[16px]" />
+                  <Link to={`/classes/${young.classeId}`}>
+                    <Button type="tertiary" title="Voir la classe" className="w-full mb-[24px] max-w-none" />
                   </Link>
                   <MiniTitle>Situation scolaire</MiniTitle>
                   <Field
@@ -352,10 +333,17 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                     mode="readonly"
                     className="mb-[16px]"
                     young={young}
-                    transformer={translateEtbalissementSector}
+                    transformer={translateEtablissementSector}
                   />
-                  <Field name="etablissementCity" label="Ville de l'établissement" value={data?.etablissement?.city} mode="readonly" className="mb-[16px]" young={young} />
-                  <Field name="classeGrade" label="Classe" value={young?.grade} mode="readonly" className="mb-[16px]" young={young} transformer={translateGrade} />
+                  <Field name="classeGrade" label="Classe" value={young?.grade} mode="readonly" className="mb-[24px]" young={young} transformer={translateGrade} />
+                  <MiniTitle>Établissement</MiniTitle>
+                  <Field name="etablissementAcademy" label="Académie" value={data?.etablissement?.academy} mode="readonly" className="mb-[16px]" young={young} />
+                  <div className="flex items-center gap-4 mb-[16px]">
+                    <Field name="etablissementRegion" label="Région" value={data?.etablissement?.region} mode="readonly" className="w-1/2" young={young} />
+                    <Field name="etablissementDepartment" label="Département" value={data?.etablissement?.department} mode="readonly" className="w-1/2" young={young} />
+                  </div>
+                  <Field name="etablissementCity" label="Ville" value={data?.etablissement?.city} mode="readonly" className="mb-[16px]" young={young} />
+                  <Field name="etablissementName" label="Nom" value={data?.etablissement?.name} mode="readonly" className="mb-[24px]" young={young} />
                   <div className="flex items-center">
                     <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} className="mr-2" />
                     <p className="text-xs font-base text-gray-900 mr-1">Situation de l’élève différente de celle de la Classe engagée</p>
@@ -392,7 +380,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 )}
               </div>
             )}
-            <div className="mt-[16px]">
+            <div className="mt-[24px]">
               <div className="flex flex">
                 <MiniTitle>Titulaire du PSC1</MiniTitle>
                 <HiInformationCircle data-tip data-for="psc1Info" className="mt-0.5 ml-1 text-gray-400" />

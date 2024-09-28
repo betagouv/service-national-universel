@@ -1,3 +1,4 @@
+import { YOUNG_SOURCE } from "snu-lib";
 import validator from "validator";
 
 export function filterDataForYoungSection(data, section) {
@@ -9,6 +10,7 @@ export function filterDataForYoungSection(data, section) {
       lastName: data.lastName,
       gender: data.gender,
       email: data.email,
+      etablissementDepartment: data.source === YOUNG_SOURCE.VOLONTAIRE ? data.schoolDepartment : data.etablissement?.department,
       phone: data.phone,
       phoneZone: data.phoneZone,
       latestCNIFileExpirationDate: data.latestCNIFileExpirationDate,
