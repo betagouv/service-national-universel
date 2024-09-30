@@ -11,3 +11,4 @@ export type RouteResponseBody<T> = { ok: boolean; data?: T; code?: string; messa
 
 export type { CohortsRoutes } from "./cohort";
 export type { ClassesRoutes } from "./cle/classe";
+export type { PreinscriptionRoutes } from "./preinscription";

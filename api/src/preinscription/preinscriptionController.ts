@@ -1,45 +1,30 @@
-import { calculateAge, ERRORS } from "snu-lib";
+import { calculateAge, ERRORS, PreinscriptionRoutes } from "snu-lib";
 import express from "express";
 import Joi from "joi";
+
 import { capture } from "../sentry";
 import { getFilteredSessions } from "../utils/cohort";
 import { createContact } from "../brevo";
+import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
+import { RouteRequest, RouteResponse } from "../controllers/request";
+import { PreinscriptionRoutesSchema } from "./preinscriptionValidator";
 
 const router = express.Router({ mergeParams: true });
 
-const schemaEligibilite = Joi.object({
-  schoolDepartment: Joi.string().allow("", null),
-  department: Joi.string(),
-  region: Joi.string(),
-  schoolRegion: Joi.string().allow("", null),
-  birthdateAt: Joi.date().required(),
-  grade: Joi.string(),
-  status: Joi.string(),
-  zip: Joi.string().allow("", null),
-  isReInscription: Joi.boolean().required(),
-});
+router.post(
+  "/eligibilite",
+  requestValidatorMiddleware(PreinscriptionRoutesSchema["PostEligibility"]),
+  async (req: RouteRequest<PreinscriptionRoutes["PostEligibility"]>, res: RouteResponse<PreinscriptionRoutes["PostEligibility"]>) => {
+    try {
+      const cohorts = await getFilteredSessions(req.validatedBody, Number(req.headers["x-user-timezone"]) || null);
 
-router.post("/eligibilite", async (req, res) => {
-  const { error, value } = schemaEligibilite.validate(req.body);
-
-  if (error) {
-    capture(error);
-    return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-  }
-
-  try {
-    const cohorts = await getFilteredSessions(value, Number(req.headers["x-user-timezone"]) || null);
-
-    if (cohorts.length === 0) {
-      return res.send({ ok: true, data: [], message: "no_session_found" });
+      return res.json({ ok: true, data: cohorts });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    return res.send({ ok: true, data: cohorts });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 const schemaLead = Joi.object({
   email: Joi.string().email().required(),
