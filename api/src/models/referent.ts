@@ -88,6 +88,7 @@ schema.plugin(patchHistory, {
   ],
 });
 
+/*
 schema.plugin(
   mongooseElastic(esClient, {
     selectiveIndexing: true,
@@ -110,6 +111,7 @@ schema.plugin(
   }),
   MODELNAME,
 );
+*/
 
 schema.set("toObject", { virtuals: true });
 schema.set("toJSON", { virtuals: true });

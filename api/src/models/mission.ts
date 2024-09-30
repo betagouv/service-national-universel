@@ -39,7 +39,7 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
+// schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
 
 export type MissionType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type MissionDocument<T = {}> = DocumentExtended<MissionType & T>;

@@ -114,6 +114,7 @@ schema.plugin(patchHistory, {
   ],
 });
 
+/*
 schema.plugin(
   mongooseElastic(esClient, {
     selectiveIndexing: true,
@@ -140,6 +141,7 @@ schema.plugin(
   }),
   MODELNAME,
 );
+*/
 
 schema.index({ ligneId: 1 });
 schema.index({ sessionPhase1Id: 1 });
