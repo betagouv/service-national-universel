@@ -1,15 +1,11 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const config = require("config");
-const { PointDeRassemblementModel } = require("../../models");
-const { SchemaDeRepartitionModel } = require("../../models");
-const { LigneBusModel } = require("../../models");
-const { YoungModel } = require("../../models");
-const { LigneToPointModel } = require("../../models");
-const { PlanTransportModel } = require("../../models");
-const { CohortModel } = require("../../models");
-const {
+import express from "express";
+import passport from "passport";
+import config from "config";
+import Joi from "joi";
+import nanoid from "nanoid";
+
+import { PointDeRassemblementModel, SchemaDeRepartitionModel, LigneBusModel, YoungModel, LigneToPointModel, PlanTransportModel, CohortModel } from "../../models";
+import {
   SENDINBLUE_TEMPLATES,
   canViewMeetingPoints,
   canUpdateMeetingPoint,
@@ -17,21 +13,22 @@ const {
   canDeleteMeetingPoint,
   canDeleteMeetingPointSession,
   isPdrEditionOpen,
-} = require("snu-lib");
-const { ERRORS, isYoung } = require("../../utils");
-const { capture } = require("../../sentry");
-const Joi = require("joi");
-const { validateId } = require("../../utils/validator");
-const nanoid = require("nanoid");
-const { getCohesionCenterFromSession } = require("./commons");
-const { getTransporter } = require("../../utils");
-const { sendTemplate } = require("../../brevo");
-const { getCohortIdsFromCohortName } = require("../../cohort/cohortService");
+} from "snu-lib";
+import { ERRORS, isYoung } from "../../utils";
+import { capture } from "../../sentry";
+import { validateId } from "../../utils/validator";
+import { getCohesionCenterFromSession } from "../../controllers/planDeTransport/commons";
+import { getTransporter } from "../../utils";
+import { sendTemplate } from "../../brevo";
+import { getCohortIdsFromCohortName } from "../../cohort/cohortService";
+import { UserRequest } from "../../controllers/request";
+
+const router = express.Router();
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
  */
-router.get("/available", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.get("/available", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // verify cohesion center
     let cohesionCenter = req.user.sessionPhase1Id ? await getCohesionCenterFromSession(req.user.sessionPhase1Id) : null;
@@ -120,7 +117,7 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
 /**
  * Récupère les points de rassemblements pour un centre de cohésion avec cohort
  */
-router.get("/center/:centerId/cohort/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/center/:centerId/cohort/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       centerId: Joi.string().required(),
@@ -131,14 +128,14 @@ router.get("/center/:centerId/cohort/:cohort", passport.authenticate("referent",
 
     const { centerId, cohort } = value;
 
-    if (!canViewMeetingPoints(req.user, { centerId, cohort })) {
+    if (!canViewMeetingPoints(req.user)) {
       return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     const ligneBus = await LigneBusModel.find({ cohort: cohort, centerId: centerId });
 
     let arrayMeetingPoints = [];
-    ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
+    ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds as any)));
 
     const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
 
@@ -149,7 +146,7 @@ router.get("/center/:centerId/cohort/:cohort", passport.authenticate("referent",
   }
 });
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -178,6 +175,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { cohort, name, address, complementAddress, city, zip, department, region, location } = value;
 
     const pointDeRassemblement = await PointDeRassemblementModel.create({
+      // @ts-expect-error nanoid type not sync with lib v2
       code: nanoid(),
       cohorts: [cohort],
       name,
@@ -200,7 +198,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -239,6 +237,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       const meetingPoint = p.pointDeRassemblements.find((meetingPoint) => {
         return meetingPoint.meetingPointId === id;
       });
+      if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       meetingPoint.set({ ...meetingPoint, name, address, city, zip, department, region, location });
       await p.save({ fromUser: req.user });
     }
@@ -250,6 +249,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     ]);
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      // @ts-ignore
       const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -278,7 +278,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.put("/cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -312,6 +312,7 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
     const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts }, ["name", "repartitionSchemaDownloadAvailability", "dateStart"]);
 
     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
+      // @ts-ignore
       const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
       const referentTransport = await getTransporter();
       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -339,7 +340,7 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
   }
 });
 
-router.put("/delete/cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/delete/cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -371,7 +372,7 @@ router.put("/delete/cohort/:id", passport.authenticate("referent", { session: fa
   }
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
 
@@ -390,7 +391,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 });
 
 // get 1 meetingPoint info with meetingPoint Id and Bus Id as params
-router.get("/fullInfo/:pdrId/:busId", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/fullInfo/:pdrId/:busId", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error: errorParams, value: valueParams } = Joi.object({ pdrId: Joi.string().required(), busId: Joi.string().required() }).validate(req.params, {
       stripUnknown: true,
@@ -422,7 +423,7 @@ router.get("/fullInfo/:pdrId/:busId", passport.authenticate(["referent", "young"
 });
 
 // get all available meetingPoints with cohort and centerId as params
-router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- parameters & vérification
     const { error: errorParams, value: valueParams } = Joi.object({ cohort: Joi.string().required(), centerId: Joi.string().required() }).validate(req.params, {
@@ -451,7 +452,7 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     });
 
     //build final Array since client wait for ligneToPoint + meetingPoint + ligneBus
-    const data = [];
+    const data: any[] = [];
     ligneToPoint.map((ligne) => {
       const meetingPointFiltered = meetingPoints.find((m) => m._id.toString() === ligne.meetingPointId);
       const ligneBusFiltered = ligneDeBus.find((l) => l._id.toString() === ligne.lineId);
@@ -468,7 +469,7 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
   }
 });
 
-router.get("/:id/bus/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/bus/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     const { error: errorCohort, value: checkedCohort } = Joi.string().required().validate(req.params.cohort);
@@ -491,7 +492,7 @@ router.get("/:id/bus/:cohort", passport.authenticate("referent", { session: fals
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) {
@@ -521,7 +522,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 });
 
 //check if meetingPoint is in a schema
-router.get("/:id/in-schema", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/in-schema", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- vérification
     const { error: errorParams, value: valueParams } = Joi.object({ id: Joi.string().required() }).validate(req.params, {
@@ -546,4 +547,4 @@ router.get("/:id/in-schema", passport.authenticate("referent", { session: false,
   }
 });
 
-module.exports = router;
+export default router;

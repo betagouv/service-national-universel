@@ -15,7 +15,7 @@ export interface CohesionCenterImportReport {
 
 export const importCohesionCenter = async (centerFilePath: string) => {
   const centerFile = await getFile(centerFilePath);
-  const centerToImport: CohesionCenterCSV[] = await readCSVBuffer<CohesionCenterCSV>(Buffer.from(centerFile.Body), true);
+  const centerToImport: CohesionCenterCSV[] = await readCSVBuffer<CohesionCenterCSV>(Buffer.from(centerFile.Body));
 
   const mappedCenters = mapCohesionCentersForSept2024(centerToImport);
   const filteredCenter = filterCenter(mappedCenters);
