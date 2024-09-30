@@ -530,7 +530,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     // Vérification des objectifs à la validation d'un jeune
     if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
-      const fillingRate = await getFillingRate(young.department, young.cohort);
+      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+      const fillingRate = await getFillingRate(young.schoolDepartment || young.department, young.cohort);
       if (fillingRate >= FILLING_RATE_LIMIT) {
         return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
       }
@@ -662,7 +663,11 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
+      res.status(400).send({ ok: false, code: error.message });
+    } else {
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
   }
 });
 

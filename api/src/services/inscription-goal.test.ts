@@ -1,5 +1,51 @@
-import { FILLING_RATE_LIMIT, getInscriptionGoalStats } from "./inscription-goal";
+import { FILLING_RATE_LIMIT, getFillingRate, getInscriptionGoalStats } from "./inscription-goal";
 import { YoungModel, InscriptionGoalModel } from "../models";
+import { FUNCTIONAL_ERRORS } from "snu-lib";
+
+describe("getFillingRate", () => {
+  it("should return the correct filling rate", async () => {
+    // Arrange
+    const department = "Department1";
+    const cohort = "Cohort2023";
+    const youngCount = 50;
+    const maxGoal = 100;
+
+    YoungModel.find = jest.fn().mockReturnValue({
+      countDocuments: jest.fn().mockResolvedValue(youngCount),
+    });
+
+    InscriptionGoalModel.findOne = jest.fn().mockReturnValue({
+      department,
+      cohort,
+      max: maxGoal,
+    });
+
+    // Act
+    const result = await getFillingRate(department, cohort);
+
+    // Assert
+    expect(result).toBe(0.5);
+    expect(YoungModel.find).toHaveBeenCalledWith({ department, status: { $in: ["VALIDATED"] }, cohort });
+    expect(InscriptionGoalModel.findOne).toHaveBeenCalledWith({ department, cohort });
+  });
+
+  it("should throw an error when inscription goal is not defined", async () => {
+    // Arrange
+    const department = "Department1";
+    const cohort = "Cohort2023";
+
+    YoungModel.find = jest.fn().mockReturnValue({
+      countDocuments: jest.fn().mockResolvedValue(0),
+    });
+
+    InscriptionGoalModel.findOne = jest.fn().mockReturnValue(null);
+
+    // Act & Assert
+    await expect(getFillingRate(department, cohort)).rejects.toThrow(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
+    expect(YoungModel.find).toHaveBeenCalledWith({ department, status: { $in: ["VALIDATED"] }, cohort });
+    expect(InscriptionGoalModel.findOne).toHaveBeenCalledWith({ department, cohort });
+  });
+});
 
 describe("getInscriptionGoalStats", () => {
   it("should return the correct inscription goal", async () => {

@@ -1,7 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungDto, YoungType } from "snu-lib";
 
 import { CohortModel, YoungModel } from "../models";
 import { getInscriptionGoalStats } from "../services/inscription-goal";
@@ -79,7 +79,11 @@ describe("Referent", () => {
   });
 
   describe("PUT /referent/young/:id", () => {
-    async function createYoungThenUpdate(updateYoungFields, newYoungFields?, { keepYoung, queryParam }: { keepYoung?: boolean; queryParam?: string } = {}) {
+    async function createYoungThenUpdate(
+      updateYoungFields: Partial<YoungType>,
+      newYoungFields?: Partial<YoungType>,
+      { keepYoung, queryParam }: { keepYoung?: boolean; queryParam?: string } = {},
+    ) {
       const youngFixture = getNewYoungFixture();
       const originalYoung = await createYoungHelper({ ...youngFixture, ...newYoungFields });
       const modifiedYoung = { ...youngFixture, ...newYoungFields, ...updateYoungFields };
@@ -92,6 +96,27 @@ describe("Referent", () => {
       }
       return { young, modifiedYoung, response, id: originalYoung._id };
     }
+    it("should not update young if goal not defined", async () => {
+      const testName = "Juillet 2023";
+      // ajout d'un objectif non définie
+      const res = await request(getAppHelper())
+        .post(`/inscription-goal/${testName}`)
+        .send([{ department: testName, region: testName, max: null }]);
+      expect(res.statusCode).toEqual(200);
+      // ajout d'un jeune au departement
+      const passport = require("passport");
+      passport.user.role = ROLES.ADMIN;
+      const { response, id: youngId } = await createYoungThenUpdate(
+        {
+          status: YOUNG_STATUS.VALIDATED,
+        },
+        { region: testName, department: testName, cohort: testName },
+        { keepYoung: true },
+      );
+      expect(response.statusCode).not.toEqual(200);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
+      await deleteYoungByIdHelper(youngId);
+    });
     it("should not update young if goal reached", async () => {
       const testName = "Juillet 2023";
       const now = new Date();
@@ -111,7 +136,7 @@ describe("Referent", () => {
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: testName, department: testName, cohort: cohort.name, cohortId: cohort._id },
+        { region: testName, department: testName, schoolDepartment: testName, cohort: testName, cohortId: cohort._id },
         { keepYoung: true },
       );
       expect(responseSuccessed.statusCode).toEqual(200);
@@ -121,7 +146,7 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName },
+          { region: testName, department: testName, schoolDepartment: testName },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
@@ -133,11 +158,22 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName },
+          { region: testName, department: testName, schoolDepartment: testName },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
       expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
+      // ajout d'un jeune HZR sur un autre departement sans dépassement
+      response = (
+        await createYoungThenUpdate(
+          {
+            status: YOUNG_STATUS.VALIDATED,
+          },
+          { region: testName, department: testName },
+        )
+      ).response;
+      expect(response.statusCode).not.toEqual(200);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
       // admin: force l'ajout d'un jeune au departement meme si depassement
       response = (
         await createYoungThenUpdate(
@@ -156,6 +192,7 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should update young name", async () => {
+      // @ts-ignore: FIXME: young.name does not exist
       const { young, modifiedYoung, response } = await createYoungThenUpdate({ name: faker.company.name() });
       expect(response.statusCode).toEqual(200);
       expectYoungToEqual(young, modifiedYoung);
