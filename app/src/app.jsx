@@ -12,7 +12,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { setYoung } from "./redux/auth/actions";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import { maintenance } from "./config";
-import api, { initApi } from "./services/api";
+import api from "./services/api.service";
 import { queryClient } from "./services/react-query";
 import { shouldForceRedirectToEmailValidation } from "./utils/navigation";
 import { cohortsInit } from "./utils/cohorts";
@@ -38,25 +38,23 @@ const RepresentantsLegaux = lazy(() => import("./scenes/representants-legaux"));
 const Thanks = lazy(() => import("./scenes/contact/Thanks"));
 const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 
-initApi();
 startReactDsfr({ defaultColorScheme: "light", Link });
 
 function App() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
+  const { pathname, hash } = useLocation();
 
   async function fetchData() {
     try {
-      const { ok, user, token } = await api.checkToken();
+      const { ok, user } = await api.getUser();
 
-      if (!ok || !user || !token) {
-        api.setToken(null);
+      if (!ok || !user) {
         dispatch(setYoung(null));
         return;
       }
 
-      api.setToken(token);
       dispatch(setYoung(user));
       await cohortsInit();
 
@@ -74,6 +72,10 @@ function App() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    handleScroll(pathname, hash);
+  }, [pathname, hash]);
+
   if (loading) return <PageLoader />;
 
   if (maintenance) return <Maintenance />;
@@ -82,7 +84,6 @@ function App() {
     <Sentry.ErrorBoundary fallback={FallbackComponent}>
       <QueryClientProvider client={queryClient}>
         <Router history={history}>
-          <AutoScroll />
           <Suspense fallback={<PageLoader />}>
             <Switch>
               <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
@@ -126,19 +127,13 @@ function SecureRoute({ path, component }) {
   return <SentryRoute path={path} component={component} />;
 }
 
-function AutoScroll() {
-  const { pathname, hash } = useLocation();
-
-  useEffect(() => {
-    if (hash) {
-      const element = document.getElementById(hash.replace("#", ""));
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-        return;
-      }
+function handleScroll(pathname, hash) {
+  if (hash) {
+    const element = document.getElementById(hash.replace("#", ""));
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+      return;
     }
-    window.scrollTo(0, 0);
-  }, [pathname, hash]);
-
-  return null;
+  }
+  window.scrollTo(0, 0);
 }

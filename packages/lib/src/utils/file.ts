@@ -19,7 +19,7 @@ function download(file, fileName) {
  * @param [File]
  * @returns FormData
  **/
-function createFormDataForFileUpload(arr: any[], properties) {
+function createFormDataForFileUpload(arr: any[], properties = {}) {
   let files: any[] = [];
   if (Array.isArray(arr)) files = arr.filter((e) => typeof e === "object");
   else files = [arr];
