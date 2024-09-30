@@ -1,6 +1,12 @@
 import React from "react";
 
-export default function NumberInput({ days, label, onChange }) {
+interface NumberInputProps {
+  days: number;
+  label?: string;
+  onChange: (value: number) => void;
+}
+
+export default function NumberInput({ days, label, onChange }: NumberInputProps) {
   const handleInputChange = (event) => {
     onChange(event.target.value);
   };

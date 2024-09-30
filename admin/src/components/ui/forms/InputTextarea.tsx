@@ -1,6 +1,16 @@
 import React from "react";
 
-export default function InputTextarea({ onChange, value, disabled = false, error, readOnly = false, placeholder, rows = 2 }) {
+interface InputTextareaProps {
+  value: string;
+  disabled?: boolean;
+  error?: string;
+  readOnly?: boolean;
+  placeholder?: string;
+  rows?: number;
+  onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+}
+
+export default function InputTextarea({ onChange, value, disabled = false, error, readOnly = false, placeholder, rows = 2 }: InputTextareaProps) {
   return (
     <div
       className={`flex min-h-[54px] w-full flex-col justify-center rounded-lg border-[1px] bg-white py-2 px-2.5 ${disabled ? "border-gray-200" : "border-gray-300"} ${

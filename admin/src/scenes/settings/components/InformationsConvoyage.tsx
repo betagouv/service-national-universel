@@ -31,19 +31,19 @@ export const InformationsConvoyage = ({ disabled, informationsConvoyageData, han
       <SimpleToggle
         label="Référents régionaux"
         disabled={disabled}
-        value={informationsConvoyageData?.editionOpenForReferentRegion}
+        value={!!informationsConvoyageData?.editionOpenForReferentRegion}
         onChange={(value: boolean) => handleDataChange({ editionOpenForReferentRegion: value })}
       />
       <SimpleToggle
         label="Référents départementaux"
         disabled={disabled}
-        value={informationsConvoyageData?.editionOpenForReferentDepartment}
+        value={!!informationsConvoyageData?.editionOpenForReferentDepartment}
         onChange={(value: boolean) => handleDataChange({ editionOpenForReferentDepartment: value })}
       />
       <SimpleToggle
         label="Chef de centre"
         disabled={disabled}
-        value={informationsConvoyageData?.editionOpenForHeadOfCenter}
+        value={!!informationsConvoyageData?.editionOpenForHeadOfCenter}
         onChange={(value: boolean) => handleDataChange({ editionOpenForHeadOfCenter: value })}
       />
     </div>
