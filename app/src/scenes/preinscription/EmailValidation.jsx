@@ -37,11 +37,10 @@ export default function StepEmailValidation() {
       if (!emailValidationToken) {
         return setError("Merci d'entrer le code d'activation ");
       }
-      const { code, ok, token, user } = await api.post("/young/email-validation", { token_email_validation: emailValidationToken });
+      const { code, ok, user } = await api.post("/young/email-validation", { token_email_validation: emailValidationToken });
       if (!ok) {
         setError(`Une erreur s'est produite : ${translate(code)}`);
       }
-      if (token) api.setToken(token);
       if (user) dispatch(setYoung(user));
       const eventName = isCLE ? "CLE/CTA preinscription - validation email" : "Phase0/CTA preinscription - validation email";
       plausibleEvent(eventName);
