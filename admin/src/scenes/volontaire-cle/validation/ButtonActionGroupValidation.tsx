@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { HiOutlineClipboardCheck } from "react-icons/hi";
+import { IoWarningOutline } from "react-icons/io5";
 import { toastr } from "react-redux-toastr";
 import { useMutation } from "@tanstack/react-query";
 
-import { translate, YOUNG_STATUS, ClasseType } from "snu-lib";
-import { YoungDto } from "snu-lib/src/dto";
+import { translate, YOUNG_STATUS, ClasseType, YoungDto } from "snu-lib";
 import { DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
 import API from "@/services/api";
+import { set } from "mongoose";
 
 interface Props {
   selectedYoungs: YoungDto[];
@@ -21,11 +22,38 @@ interface Props {
 export default function ButtonActionGroupValidation({ selectedYoungs, setSelectedYoungs, setSelectAll, onYoungsChange, classes }: Props) {
   const [showModale, setShowModale] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+  const [modalError, setModalError] = useState(false);
+  const [fullClasses, setFullClasses] = useState<{ [key: string]: number }>({});
 
   const handleValidate = () => {
-    const classeIds = selectedYoungs.map((young) => young.classeId);
+    const youngsByClass: { [key: string]: number } = {};
 
-    validateYoung();
+    // Count youngs for each classe
+    selectedYoungs.forEach((young) => {
+      if (!young.classeId) return;
+      if (young.classeId in youngsByClass) {
+        youngsByClass[young.classeId]++;
+      } else {
+        youngsByClass[young.classeId] = 1;
+      }
+    });
+
+    // Check if number of youngs exceeds available seats for each class
+    classes.forEach((classe) => {
+      if (!classe.name) return;
+      const youngsInClass = youngsByClass[classe._id] || 0;
+      const availableSeats = classe.totalSeats - classe.seatsTaken;
+
+      if (youngsInClass > availableSeats) {
+        setFullClasses((prev) => ({ ...prev, [classe.name]: availableSeats }));
+      }
+    });
+
+    if (fullClasses.length > 0) {
+      return setModalError(true);
+    } else {
+      validateYoung();
+    }
   };
 
   const { isPending, mutate: validateYoung } = useMutation({
@@ -116,9 +144,32 @@ export default function ButtonActionGroupValidation({ selectedYoungs, setSelecte
           {
             title: "Confirmer",
             disabled: isPending,
-            onClick: () => validateYoung(),
+            onClick: () => handleValidate(),
           },
         ]}
+      />
+      <ModalConfirmation
+        isOpen={modalError}
+        onClose={() => {
+          setModalError(false);
+        }}
+        className="md:max-w-[700px]"
+        icon={<IoWarningOutline className="text-red-600" size={40} />}
+        title="Vous ne pouvez pas effectuer cette action."
+        text={
+          <p className="text-base leading-6 font-normal text-gray-900">
+            Vous ne pouvez pas valider les inscriptions de <span className="font-bold">élèves</span> pour les classes suivantes car le nombre de places disponibles est insuffisant
+            :
+            <ul>
+              {Object.entries(fullClasses).map(([name, seats]) => (
+                <li key={name}>
+                  <span className="font-bold">{name}</span> : {seats} place{seats > 1 ? "s" : ""}
+                </li>
+              ))}
+            </ul>
+          </p>
+        }
+        actions={[{ title: "Annuler", isCancel: true }]}
       />
     </>
   );
