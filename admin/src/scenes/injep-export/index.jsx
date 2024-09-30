@@ -18,7 +18,7 @@ import DatePicker from "./components/DatePicker";
 
 const exportDateKeys = ["cohesionCenters", "youngsBeforeSession", "youngsAfterSession"];
 
-const DSNJExport = () => {
+const INJEPExport = () => {
   const dispatch = useDispatch();
   const cohortList = useSelector((state) => state.Cohorts);
 
@@ -30,7 +30,7 @@ const DSNJExport = () => {
   const [currentKey, setCurrentKey] = useState(exportDateKeys[0]);
   const [newExportDate, setNewExportDate] = useState();
 
-  useDocumentTitle("Export DSNJ");
+  useDocumentTitle("Export INJEP");
   const todayPlusOneDay = dayjs().add(1, "day").toDate();
   const threeMonthsAfterCohortDateEnd = dayjs(currentCohort.dateEnd).add(3, "month").toDate();
 
@@ -41,8 +41,6 @@ const DSNJExport = () => {
 
   const translateKey = (key) => {
     switch (key) {
-      case "cohesionCenters":
-        return "centres";
       case "youngsBeforeSession":
         return "volontaires affectés et sur liste complémentaire";
       case "youngsAfterSession":
@@ -53,7 +51,7 @@ const DSNJExport = () => {
   };
 
   const generateText = (key, date) => {
-    const isNewExport = currentCohort?.dsnjExportDates?.[key] === undefined;
+    const isNewExport = currentCohort?.injepExportDates?.[key] === undefined;
     const translatedKey = translateKey(isNewExport ? key : currentKey);
     const formattedDate = dayjs(isNewExport ? date : newExportDate).format("DD/MM/YYYY");
 
@@ -61,12 +59,12 @@ const DSNJExport = () => {
       <p className={!isNewExport && "text-red-600 text-left mt-4"}>
         {isNewExport ? (
           <>
-            Vous vous apprêtez à rendre disponible à la DSNJ l'export des <span className="font-bold">{translatedKey}</span> le <span className="font-bold">{formattedDate}</span>.
+            Vous vous apprêtez à rendre disponible à l'INJEP l'export des <span className="font-bold">{translatedKey}</span> le <span className="font-bold">{formattedDate}</span>.
           </>
         ) : (
           <>
             <span className="font-bold">Attention : </span>un nouvel export des <span className="font-bold">{translatedKey}</span> sera généré le{" "}
-            <span className="font-bold">{formattedDate}</span> avec les informations mises à jour. L’ancien export ne sera plus téléchargeable par la DSNJ :{" "}
+            <span className="font-bold">{formattedDate}</span> avec les informations mises à jour. L’ancien export ne sera plus téléchargeable par l'INJEP :{" "}
             <span className="underline">pensez à les prévenir qu’ils doivent à nouveau télécharger cet export !</span>
           </>
         )}
@@ -76,17 +74,17 @@ const DSNJExport = () => {
 
   const handleUpdateDate = async (key, date) => {
     setIsModalConfirmOpenByKey({ ...isModalConfirmOpenByKey, [key]: false });
-    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${currentCohort._id}/export-dsnj/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
+    const { ok, code, data: updatedCohort } = await api.put(`/cohort/${currentCohort._id}/export-injep/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
     if (!ok) return toastr.error("Une erreur est survenue lors de l'enregistrement de la date d'export", translate(code));
     dispatch({ type: COHORTS_ACTIONS.UPDATE_COHORT, payload: updatedCohort });
     setCurrentCohort(updatedCohort);
   };
 
   const handleDownload = async (key) => {
-    plausibleEvent(`Export/DSNJ - Exporter ${key}`);
+    plausibleEvent(`Export/INJEP - Exporter ${key}`);
     try {
       setDownloadingByKey({ ...isLDownloadingByKey, [key]: true });
-      const file = await api.get(`/cohort/${currentCohort._id}/export-dsnj/${key}`);
+      const file = await api.get(`/cohort/${currentCohort._id}/export-injep/${key}`);
       FileSaver.saveAs(new Blob([new Uint8Array(file.data.data)], { type: file.mimeType }), file.fileName);
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", "");
@@ -108,8 +106,8 @@ const DSNJExport = () => {
     <>
       <Page>
         <Header
-          title="Données centres & volontaires (DSNJ)"
-          breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Séjours" }, { title: "Export DSNJ" }]}
+          title="Données centres & volontaires (INJEP)"
+          breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Séjours" }, { title: "Export INJEP" }]}
           actions={
             <SelectCohort
               cohort={currentCohort.name}
@@ -121,25 +119,17 @@ const DSNJExport = () => {
         />
         <div className="flex gap-4">
           <ExportBox
-            title="Liste des centres"
-            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[0]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[0]])}
-            onClick={() => handleClick(exportDateKeys[0])}
-            onDownload={() => handleDownload(exportDateKeys[0])}
-            isDownloading={!!isLDownloadingByKey[exportDateKeys[0]]}
-          />
-          <ExportBox
             title="Liste des volontaires affectés et sur liste complémentaire"
-            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[1]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[1]])}
+            availableFrom={currentCohort?.injepExportDates?.[exportDateKeys[1]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.injepExportDates?.[exportDateKeys[1]])}
             onClick={() => handleClick(exportDateKeys[1])}
             onDownload={() => handleDownload(exportDateKeys[1])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[1]]}
           />
           <ExportBox
             title="Liste des volontaires après le séjour"
-            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[2]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[2]])}
+            availableFrom={currentCohort?.injepExportDates?.[exportDateKeys[2]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.injepExportDates?.[exportDateKeys[2]])}
             onClick={() => handleClick(exportDateKeys[2])}
             onDownload={() => handleDownload(exportDateKeys[2])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[2]]}
@@ -164,7 +154,7 @@ const DSNJExport = () => {
               <HiOutlineCalendar size={24} />
             </div>
           }
-          title="Modification de la date de mise à disponibilité de l’export DSNJ"
+          title="Modification de la date de mise à disponibilité de l’export INJEP"
           text={generateText(currentKey, newExportDate)}
           actions={[
             { title: "Annuler", isCancel: true },
@@ -176,4 +166,4 @@ const DSNJExport = () => {
   );
 };
 
-export default DSNJExport;
+export default INJEPExport;

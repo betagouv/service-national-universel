@@ -22,6 +22,7 @@ const Content = lazy(() => import("./scenes/content"));
 const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
 const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
 const DSNJExport = lazy(() => import("./scenes/dsnj-export"));
+const INJEPExport = lazy(() => import("./scenes/injep-export"));
 const EditTransport = lazy(() => import("./scenes/edit-transport"));
 const Goal = lazy(() => import("./scenes/goal"));
 const Inscription = lazy(() => import("./scenes/inscription"));
@@ -240,6 +241,7 @@ const Home = () => {
                   <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
                   <RestrictedRoute path="/equipe" component={Team} />
                   <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
+                  <RestrictedRoute path="/injep-export" component={INJEPExport} />
                   {/* Plan de transport */}
                   {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
                   {/* Table de répartition */}
@@ -292,6 +294,7 @@ const Home = () => {
 
 const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
+  [ROLES.INJEP]: { authorised: ["/injep-export", "/profil"], default: "/injep-export" },
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {

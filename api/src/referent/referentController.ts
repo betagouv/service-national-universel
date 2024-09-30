@@ -142,6 +142,7 @@ function cleanReferentData(referent) {
   const fieldsToKeep = {
     admin: [],
     dsnj: [],
+    injep: [],
     head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "cohortIds", "sessionPhase1Id"],
     referent_department: ["department", "region"],
     referent_region: ["department", "region"],
