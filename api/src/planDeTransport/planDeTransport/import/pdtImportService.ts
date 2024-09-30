@@ -1,11 +1,11 @@
 import XLSX from "xlsx";
 import mongoose from "mongoose";
-import { logger } from "../../logger";
+import { logger } from "../../../logger";
 
 import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 
-import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../models";
-import { ERRORS } from "../../utils";
+import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../../models";
+import { ERRORS } from "../../../utils";
 
 import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
 
@@ -97,8 +97,6 @@ export const validatePdtFile = async (
   if (Object.values(errors).some((error) => error.length > 0)) {
     return { ok: false, code: ERRORS.INVALID_BODY, errors };
   }
-
-
 
   // Format errors.
   // Check format, add errors for each line

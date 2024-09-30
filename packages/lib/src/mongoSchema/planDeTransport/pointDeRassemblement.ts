@@ -11,6 +11,14 @@ export const PointDeRassemblementSchema = {
     },
   },
 
+  matricule: {
+    type: String,
+    unique: true,
+    documentation: {
+      description: "Matricule du point de rassemblement",
+    },
+  },
+
   cohorts: {
     type: [String],
     required: true,
