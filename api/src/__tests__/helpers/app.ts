@@ -7,7 +7,7 @@ import passport from "passport";
 import { injectRoutes } from "../../routes";
 import { UserRequest } from "../../controllers/request";
 
-function getAppHelper(user?: Partial<UserRequest["user"] & { subRole?: any }>) {
+function getAppHelper(user?: Partial<UserRequest["user"] & { subRole?: any }> | null, authStrategy?: "young" | "referent") {
   const app = express();
   app.use(bodyParser.json());
   app.use(bodyParser.text({ type: "application/x-ndjson" }));
@@ -17,10 +17,17 @@ function getAppHelper(user?: Partial<UserRequest["user"] & { subRole?: any }>) {
   injectRoutes(app);
 
   if (user) {
+    // @ts-ignore
     if (!passport.user) {
+      // @ts-ignore
       passport.user = { _id: "123" };
     }
+    // @ts-ignore
     passport.user = { ...passport.user, ...user };
+  }
+  if (authStrategy) {
+    // @ts-ignore
+    passport.authStrategy = authStrategy;
   }
   return app;
 }

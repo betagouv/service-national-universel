@@ -1,6 +1,6 @@
 import request from "supertest";
 import { fakerFR as faker } from "@faker-js/faker";
-import { addDays, addMonths, addYears, endOfDay, startOfDay } from "date-fns";
+import { addDays, addMonths, addYears, startOfDay } from "date-fns";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
@@ -27,33 +27,24 @@ describe("Cohort Session Controller", () => {
   });
 
   describe("POST /cohort-session/eligibility/:year", () => {
-    it("should return 404 if young ID is not found", async () => {
-      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${new ObjectId().toString()}`);
-      expect(response.status).toBe(404);
-      expect(response.body.code).toBe(ERRORS.NOT_FOUND);
-    });
-
+    // TODO: move auth young tests to preinscription
     it("should return 400 if young data is invalid", async () => {
-      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
-        .post("/cohort-session/eligibility/2023")
-        .send({ invalidData: true });
+      const response = await request(getAppHelper(null, "young")).post("/cohort-session/eligibility/2023").send({ invalidData: true });
       expect(response.status).toBe(400);
       expect(response.body.code).toBe(ERRORS.INVALID_BODY);
     });
 
     it("should return 200 if young data is valid", async () => {
-      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
-        .post("/cohort-session/eligibility/2023")
-        .send({
-          schoolDepartment: "",
-          department: "Department Name",
-          region: "Region Name",
-          schoolRegion: "",
-          birthdateAt: "2000-01-01",
-          grade: "Grade Name",
-          status: "Status Name",
-          zip: "",
-        });
+      const response = await request(getAppHelper(null, "young")).post("/cohort-session/eligibility/2023").send({
+        schoolDepartment: "",
+        department: "Department Name",
+        region: "Region Name",
+        schoolRegion: "",
+        birthdateAt: "2000-01-01",
+        grade: "Grade Name",
+        status: "Status Name",
+        zip: "",
+      });
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
     });
@@ -79,9 +70,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
-        .post("/cohort-session/eligibility/2023/")
-        .send(young);
+      const response = await request(getAppHelper(null, "young")).post("/cohort-session/eligibility/2023/").send(young);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -113,10 +102,7 @@ describe("Cohort Session Controller", () => {
       );
       const timeZoneOffset = -24 * 3600; // 6 hours in seconds
       // avec un header x-user-timezone
-      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
-        .post(`/cohort-session/eligibility/2023`)
-        .set("x-user-timezone", String(timeZoneOffset))
-        .send(young);
+      const response = await request(getAppHelper(null, "young")).post(`/cohort-session/eligibility/2023`).set("x-user-timezone", String(timeZoneOffset)).send(young);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -144,13 +130,17 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
-        .post("/cohort-session/eligibility/2023/")
-        .send(young);
+      const response = await request(getAppHelper(null, "young")).post("/cohort-session/eligibility/2023/").send(young);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBe(0);
+    });
+
+    it("should return 404 if young ID is not found", async () => {
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${new ObjectId().toString()}`);
+      expect(response.status).toBe(404);
+      expect(response.body.code).toBe(ERRORS.NOT_FOUND);
     });
 
     it("admin cle, should return filtered sessions if young is valid", async () => {
@@ -275,7 +265,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -306,7 +296,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      let response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      let response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -321,7 +311,7 @@ describe("Cohort Session Controller", () => {
           status: YOUNG_STATUS.WAITING_VALIDATION,
         }),
       );
-      response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -350,7 +340,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -378,7 +368,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -407,7 +397,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -436,7 +426,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -465,7 +455,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -493,7 +483,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -513,7 +503,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -544,7 +534,7 @@ describe("Cohort Session Controller", () => {
           birthdateAt: addDays(addYears(new Date(), -15), 1),
         }),
       );
-      let response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      let response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.data.length).toBe(0);
 
@@ -558,7 +548,7 @@ describe("Cohort Session Controller", () => {
       //     birthdateAt: addDays(addYears(new Date(), -18), 3),
       //   }),
       // );
-      // response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      // response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       // expect(response.status).toBe(200);
       // expect(response.body.data.length).toBe(0);
 
@@ -572,7 +562,7 @@ describe("Cohort Session Controller", () => {
       //     birthdateAt: addDays(addYears(new Date(), -18), 0),
       //   }),
       // );
-      // response = await request(getAppHelper({ role: ROLES.ADMIN })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      // response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       // expect(response.status).toBe(200);
       // expect(response.body.data.length).toBe(0);
     });
