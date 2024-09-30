@@ -39,6 +39,9 @@ export const importCohesionCenter = async (sessionCenterFilePath: string) => {
     }
 
     processedSessionReport = await createSession(sessionCenter, foundCenter, foundCohort);
+    if (processedSessionReport.action === "created") {
+      await addCohortToCohesionCenter(foundCenter, foundCohort);
+    }
 
     report.push(processedSessionReport);
   }
@@ -112,4 +115,9 @@ const createSession = async (
     action: "created",
     comment: "session created",
   };
+};
+const addCohortToCohesionCenter = (foundCenter: CohesionCenterDocument, foundCohort: CohortDocument) => {
+  foundCenter.cohorts.push(foundCohort.name);
+  foundCenter.cohortIds.push(foundCohort._id.toString());
+  return foundCenter.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
 };
