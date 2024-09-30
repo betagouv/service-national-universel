@@ -36,6 +36,7 @@ function anonymize(itemToAnonymize) {
     "filesType",
     "createdAt.$date",
     "updatedAt.$date",
+    "__v",
   ];
 
   const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);

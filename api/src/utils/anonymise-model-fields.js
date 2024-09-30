@@ -47,7 +47,6 @@ function anonymizeNonDeclaredFields(item, whitelist) {
     }
   }
 
-  console.log("Anonymized Item:", item);
   return item;
 }
 
