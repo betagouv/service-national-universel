@@ -90,7 +90,7 @@ export default function List() {
       });
       const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
         filters: {},
-        exportFields: ["name", "uniqueKeyAndId"],
+        exportFields: ["name", "uniqueKeyAndId", "totalSeats", "seatsTaken"],
       });
 
       const res = await api.post(`/elasticsearch/cle/young/search`, {
@@ -223,6 +223,7 @@ export default function List() {
                       setSelectedYoungs={setSelectedYoungs}
                       setSelectAll={setSelectAll}
                       onYoungsChange={() => initFilters()}
+                      classes={classes}
                     />
                   )}
                   {currentTab === "image" && !!studentsCount?.studentsWaitingImageRights && (

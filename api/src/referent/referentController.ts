@@ -673,6 +673,11 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+    if (youngs.length > remainingPlaces) {
+      return res.status(400).send({ ok: false, code: ERRORS.TOTAL_SEATS_REACHED });
+    }
+
     for (const young of youngs) {
       young.set({ status: payload.status });
       await young.save({ fromUser: req.user });

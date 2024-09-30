@@ -3,7 +3,7 @@ import { HiOutlineClipboardCheck } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 import { useMutation } from "@tanstack/react-query";
 
-import { translate, YOUNG_STATUS } from "snu-lib";
+import { translate, YOUNG_STATUS, ClasseType } from "snu-lib";
 import { YoungDto } from "snu-lib/src/dto";
 import { DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
@@ -15,11 +15,18 @@ interface Props {
   setSelectedYoungs: React.Dispatch<React.SetStateAction<any[]>>;
   setSelectAll: React.Dispatch<React.SetStateAction<boolean>>;
   onYoungsChange: () => void;
+  classes: Pick<ClasseType, "_id" | "name" | "uniqueKeyAndId" | "totalSeats" | "seatsTaken">[];
 }
 
-export default function ButtonActionGroupValidation({ selectedYoungs, setSelectedYoungs, setSelectAll, onYoungsChange }: Props) {
+export default function ButtonActionGroupValidation({ selectedYoungs, setSelectedYoungs, setSelectAll, onYoungsChange, classes }: Props) {
   const [showModale, setShowModale] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+
+  const handleValidate = () => {
+    const classeIds = selectedYoungs.map((young) => young.classeId);
+
+    validateYoung();
+  };
 
   const { isPending, mutate: validateYoung } = useMutation({
     mutationFn: async () => {
