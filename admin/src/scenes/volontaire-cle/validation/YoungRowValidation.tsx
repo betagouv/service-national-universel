@@ -3,8 +3,9 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { HiOutlineX, HiOutlineCheck, HiOutlineClipboardCheck } from "react-icons/hi";
 import { useMutation } from "@tanstack/react-query";
+import { IoWarningOutline } from "react-icons/io5";
 
-import { YOUNG_STATUS, getAge } from "snu-lib";
+import { YOUNG_STATUS, getAge, STATUS_CLASSE } from "snu-lib";
 import { YoungDto, ClasseDto } from "snu-lib/src/dto";
 import { Badge, ModalConfirmation } from "@snu/ds/admin";
 import { translate } from "@/utils";
@@ -13,9 +14,8 @@ import API from "@/services/api";
 import { capture } from "@/sentry";
 
 interface YoungDtoWithClasse extends YoungDto {
-  classe?: ClasseDto;
+  classe: ClasseDto;
 }
-
 interface Props {
   young: YoungDtoWithClasse;
   selectedYoungs: YoungDtoWithClasse[];
@@ -27,6 +27,20 @@ export default function YoungRowValidation({ young, selectedYoungs, onYoungSelec
   const history = useHistory();
   const [showModale, setShowModale] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+  const [modalError, setModalError] = useState(false);
+  const classe = young.classe;
+
+  const handleValidate = () => {
+    if (!classe) return;
+    if (authorized) {
+      const availableSeats = classe.totalSeats - classe.seatsTaken;
+
+      if (classe.status === STATUS_CLASSE.CLOSED || availableSeats === 0) {
+        return setModalError(true);
+      }
+      validateYoung();
+    }
+  };
 
   const { isPending, mutate: validateYoung } = useMutation({
     mutationFn: async () => {
@@ -128,9 +142,31 @@ export default function YoungRowValidation({ young, selectedYoungs, onYoungSelec
           {
             title: "Confirmer",
             disabled: isPending,
-            onClick: () => validateYoung(),
+            onClick: () => handleValidate(),
           },
         ]}
+      />
+      <ModalConfirmation
+        isOpen={modalError}
+        onClose={() => {
+          setModalError(false);
+          setShowModale(false);
+        }}
+        className="md:max-w-[700px]"
+        icon={<IoWarningOutline className="text-red-600" size={40} />}
+        title="Vous ne pouvez pas effectuer cette action."
+        text={
+          classe.status === STATUS_CLASSE.CLOSED ? (
+            <p className="text-base leading-6 font-normal text-gray-900">
+              Vous ne pouvez pas valider l'inscriptions de {young.firstName} {young.lastName} pour la classe {classe.name} car les inscriptions sont fermées pour cette classe.
+            </p>
+          ) : (
+            <p className="text-base leading-6 font-normal text-gray-900">
+              Vous ne pouvez pas valider l'inscriptions de {young.firstName} {young.lastName} pour la classe {classe.name} car le nombre de places disponibles est insuffisant.
+            </p>
+          )
+        }
+        actions={[{ title: "Annuler", isCancel: true }]}
       />
     </>
   );

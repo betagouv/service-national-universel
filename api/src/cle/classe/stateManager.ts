@@ -33,7 +33,7 @@ const ClasseStateManager = {
     }
 
     // Closed
-    if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats === seatsValidated || seatsValidated > classe.totalSeats) {
+    if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats <= seatsValidated) {
       classe.set({ status: STATUS_CLASSE.CLOSED });
       classe = await classe.save({ fromUser });
       return classe;

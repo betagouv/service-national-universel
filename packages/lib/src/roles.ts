@@ -1027,8 +1027,8 @@ function canCreateEtablissement(user: UserDto) {
 }
 
 //CLE
-function canValidateMultipleYoungsInClass(actor: UserDto, classe: ClasseType) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+function canValidateMultipleYoungsInClass(actor: UserDto) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
 function canValidateYoungInClass(actor: UserDto, classe: ClasseType) {
   if (isAdmin(actor)) return true;

@@ -101,6 +101,7 @@ import {
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
   YoungType,
+  STATUS_CLASSE,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -660,22 +661,28 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    if (!canValidateMultipleYoungsInClass(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const youngs = await YoungModel.find({ _id: { $in: payload.youngIds }, source: "CLE" });
     if (!youngs) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (youngs.length !== payload.youngIds.length) return res.status(404).send({ ok: false, code: ERRORS.BAD_REQUEST });
 
-    const classeId = youngs[0].classeId;
+    const classeIds = youngs.map((y) => y.classeId);
 
-    const classe = await ClasseModel.findById(classeId);
-    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const classes = await ClasseModel.find({ _id: { $in: classeIds } });
+    if (!classes.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canValidateMultipleYoungsInClass(req.user, classe)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (payload.status === YOUNG_STATUS.VALIDATED) {
+      classes.forEach((classe) => {
+        if (classe.status === STATUS_CLASSE.CLOSED) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `Classe ${classe._id} is closed` });
 
-    const remainingPlaces = classe.totalSeats - classe.seatsTaken;
-    if (youngs.length > remainingPlaces) {
-      return res.status(400).send({ ok: false, code: ERRORS.TOTAL_SEATS_REACHED });
+        const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+        if (youngs.length > remainingPlaces) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `No seats left for classe ${classe._id}` });
+        }
+      });
     }
 
     for (const young of youngs) {
