@@ -39,6 +39,8 @@ export default function YoungRowValidation({ young, selectedYoungs, onYoungSelec
         return setModalError(true);
       }
       validateYoung();
+    } else {
+      validateYoung();
     }
   };
 
