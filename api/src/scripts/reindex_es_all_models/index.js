@@ -9,7 +9,6 @@ const esClient = require("../../es");
 
 const {
   ApplicationModel,
-  CohortModel,
   CohesionCenterModel,
   ContractModel,
   DepartmentServiceModel,
@@ -78,7 +77,6 @@ async function reindexESAllModels() {
       LigneToPointModel,
       PlanTransportModel,
       EmailModel,
-      CohortModel,
       ClasseModel,
       EtablissementModel,
     ];
@@ -101,7 +99,6 @@ async function reindexESAllModels() {
       LigneBusModel,
       PlanTransportModel,
       EmailModel,
-      CohortModel,
       ClasseModel,
       EtablissementModel,
     ];
@@ -110,7 +107,6 @@ async function reindexESAllModels() {
       [ClasseModel.modelName]: ["etablissement"],
     };
 
-    // const models_indexed = [CohortModel]; // useful_models;
     let models_indexed = useful_models;
 
     if (groupName === "all") {
