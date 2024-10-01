@@ -76,6 +76,11 @@ async function reindexESAllModels() {
       ModificationBusModel,
       LigneBusModel,
       LigneToPointModel,
+      PlanTransportModel,
+      EmailModel,
+      CohortModel,
+      ClasseModel,
+      EtablissementModel,
     ];
 
     const useful_models = [
@@ -178,7 +183,7 @@ async function reindexESAllModels() {
         try {
           console.log(`Indexing ${index} ${i + 1}/${total}`);
           bulk.push(doc);
-          if (bulk.length >= 1000) await flush();
+          if (bulk.length >= 10000) await flush();
         } catch (e) {
           console.log("Error", e);
         }
