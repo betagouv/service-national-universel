@@ -29,11 +29,11 @@ exports.handler = async () => {
     }
 
     await slack.info({
-      title: "✅ DSNJ export generation",
+      title: "✅ INJEP export generation",
       text: printSlackInfo(exportsGenerated),
     });
   } catch (e) {
-    slack.error({ title: "DSNJ export generation", text: e });
+    slack.error({ title: "INJEP export generation", text: e });
     capture(e);
     throw e;
   }
