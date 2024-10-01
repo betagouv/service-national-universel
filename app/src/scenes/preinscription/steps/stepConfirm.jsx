@@ -12,7 +12,6 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import ProgressBar from "../components/ProgressBar";
 import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
@@ -107,17 +106,17 @@ export default function StepConfirm() {
 
     try {
       setLoading(true);
-      const { code, ok, token, user } = await api.post(`/young/signup`, values);
+      const { code, ok, user } = await api.post(`/young/signup`, values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
       } else {
         if (user) {
           plausibleEvent("Phase0/CTA preinscription - inscription");
-          if (token) api.setToken(token);
           await cohortsInit();
           dispatch(setYoung(user));
           removePersistedData();
+
           history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
         }
       }

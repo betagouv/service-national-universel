@@ -1,7 +1,18 @@
 import React from "react";
 import WithTooltip from "../../../components/WithTooltip";
+import { FEATURES_NAME, isFeatureEnabled, MissionType } from "snu-lib";
+import ApiEngagementTracker from "./ApiEngagementTracker";
+import { environment } from "@/config";
 
-const ApplyButton = ({ mission, onClick }) => {
+type propTypes = {
+  mission: MissionType & {
+    message: string;
+    canApply: boolean;
+  };
+  onClick: () => void;
+};
+
+const ApplyButton = ({ mission, onClick }: propTypes) => {
   return (
     <div className="flex flex-col gap-2 items-center">
       <WithTooltip tooltipText={mission.message}>
@@ -10,6 +21,7 @@ const ApplyButton = ({ mission, onClick }) => {
         </button>
       </WithTooltip>
       <p className="text-xs font-normal leading-none text-gray-500">{mission.placesLeft} places restantes</p>
+      {isFeatureEnabled(FEATURES_NAME.API_ENG_TRACKING, undefined, environment) && <ApiEngagementTracker missionId={mission.apiEngagementId} />}
     </div>
   );
 };

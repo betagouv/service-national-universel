@@ -17,7 +17,7 @@ const { generatePdfIntoStream } = require("../../utils/pdf-renderer");
 const { getMimeFromFile } = require("../../utils/file");
 const { sendDocumentEmailTask } = require("../../queues/sendMailQueue");
 
-router.post("/:type/:template", async (req, res) => {
+router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
