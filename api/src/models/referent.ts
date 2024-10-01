@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import bcrypt from "bcryptjs";
@@ -88,30 +89,30 @@ schema.plugin(patchHistory, {
   ],
 });
 
-/*
-schema.plugin(
-  mongooseElastic(esClient, {
-    selectiveIndexing: true,
-    ignore: [
-      "password",
-      "lastLogoutAt",
-      "passwordChangedAt",
-      "nextLoginAttemptIn",
-      "forgotPasswordResetToken",
-      "forgotPasswordResetExpires",
-      "invitationToken",
-      "invitationExpires",
-      "loginAttempts",
-      "attempts2FA",
-      "updatedAt",
-      "lastActivityAt",
-      "token2FA",
-      "token2FAExpires",
-    ],
-  }),
-  MODELNAME,
-);
-*/
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(
+    mongooseElastic(esClient, {
+      selectiveIndexing: true,
+      ignore: [
+        "password",
+        "lastLogoutAt",
+        "passwordChangedAt",
+        "nextLoginAttemptIn",
+        "forgotPasswordResetToken",
+        "forgotPasswordResetExpires",
+        "invitationToken",
+        "invitationExpires",
+        "loginAttempts",
+        "attempts2FA",
+        "updatedAt",
+        "lastActivityAt",
+        "token2FA",
+        "token2FAExpires",
+      ],
+    }),
+    MODELNAME,
+  );
+}
 
 schema.set("toObject", { virtuals: true });
 schema.set("toJSON", { virtuals: true });

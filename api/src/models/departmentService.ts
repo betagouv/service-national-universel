@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
@@ -190,7 +191,9 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-// schema.plugin(mongooseElastic(esClient), MODELNAME);
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient), MODELNAME);
+}
 
 export type DepartmentServiceType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type DepartmentServiceDocument<T = {}> = DocumentExtended<DepartmentServiceType & T>;

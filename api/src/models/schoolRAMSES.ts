@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import mongooseElastic from "@selego/mongoose-elastic";
@@ -49,8 +50,9 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-
-// schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["raw_data"] }), MODELNAME);
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["raw_data"] }), MODELNAME);
+}
 
 export type SchoolRAMSESType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type SchoolRAMSESDocument<T = {}> = DocumentExtended<SchoolRAMSESType & T>;

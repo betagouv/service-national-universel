@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
@@ -51,7 +52,9 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-// schema.plugin(mongooseElastic(esClient), MODELNAME);
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient), MODELNAME);
+}
 
 export type EtablissementDocument<T = {}> = DocumentExtended<EtablissementType & T>;
 type SchemaExtended = EtablissementDocument & UserExtension;

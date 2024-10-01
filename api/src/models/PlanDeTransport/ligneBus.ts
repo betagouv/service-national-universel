@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
@@ -270,7 +271,9 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-// schema.plugin(mongooseElastic(esClient), MODELNAME);
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient), MODELNAME);
+}
 
 schema.index({ cohort: 1 });
 schema.index({ cohort: 1, busId: 1 }, { unique: true });

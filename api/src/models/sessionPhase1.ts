@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { Schema } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
@@ -58,7 +59,9 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-// schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["team"] }), MODELNAME);
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["team"] }), MODELNAME);
+}
 
 schema.index({ cohesionCenterId: 1 });
 
