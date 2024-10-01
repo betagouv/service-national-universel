@@ -675,21 +675,26 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
     if (!classes.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (payload.status === YOUNG_STATUS.VALIDATED) {
-      classes.forEach((classe) => {
-        if (classe.status === STATUS_CLASSE.CLOSED) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `Classe ${classe._id} is closed` });
-
+      for (const classe of classes) {
+        if (classe.status === STATUS_CLASSE.CLOSED) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `Classe ${classe._id} is closed` });
+        }
         const remainingPlaces = classe.totalSeats - classe.seatsTaken;
         if (youngs.length > remainingPlaces) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `No seats left for classe ${classe._id}` });
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `No seats left in classe ${classe._id}` });
         }
-      });
+      }
     }
 
-    for (const young of youngs) {
-      young.set({ status: payload.status });
-      await young.save({ fromUser: req.user });
-      await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
-    }
+    await Promise.all(
+      youngs.map(async (young) => {
+        young.set({ status: payload.status });
+        await young.save({ fromUser: req.user });
+        if (payload.status === YOUNG_STATUS.VALIDATED) {
+          await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
+        }
+      }),
+    );
 
     return res.status(200).send({ ok: true, data: payload.youngIds });
   } catch (error) {

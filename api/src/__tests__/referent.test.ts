@@ -277,6 +277,7 @@ describe("Referent", () => {
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
+      expect(res.body.message).toEqual(`Classe ${classe._id} is closed`);
     });
 
     it("should return 403 if payload is VALIDATED if classe is full", async () => {
@@ -301,6 +302,7 @@ describe("Referent", () => {
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
+      expect(res.body.message).toEqual(`No seats left in classe ${classe._id}`);
     });
 
     it("should return 200 if payload is VALIDATED and if youngs updated", async () => {
