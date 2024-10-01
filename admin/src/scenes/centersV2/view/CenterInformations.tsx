@@ -39,7 +39,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
   const [errors, setErrors] = React.useState<Error>({});
-  const [data, setData] = useState<Center>({ ...center, academy: departmentToAcademy[center.department], pmr: center?.pmr ? center.pmr : "false" });
+  const [data, setData] = useState<Center>({ ...center, pmr: center?.pmr ? center.pmr : "false" });
   useDocumentTitle(`Fiche du centre - ${center?.name}`);
 
   const onSubmit = async () => {
@@ -66,7 +66,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
       }
       if (!data?.typology) error.typology = "La typologie est obligatoire";
       if (!data?.domain) error.domain = "Le domaine est obligatoire";
-      data.academy = departmentToAcademy[data.department];
+      if (!data?.academy) error.academy = "L'académie est obligatoire";
 
       // check session
       const canUpdateSession = sessions.filter((s) => s.placesTotal > (data?.placesTotal || 0)).length === 0;
@@ -206,7 +206,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                   department: data.department,
                   region: data.region,
                 }}
-                updateData={(newData) => setData({ ...data, ...newData, academy: departmentToAcademy[newData.department!] })}
+                updateData={(newData) => setData({ ...data, ...newData })}
                 query={query}
                 setQuery={setQuery}
                 options={results}

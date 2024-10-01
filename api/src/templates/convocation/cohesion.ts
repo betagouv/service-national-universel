@@ -120,7 +120,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
   }
   stuff.push("la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire");
   if (ligneBus?.lunchBreak) {
-    stuff.push("une collation ou un déjeuner froid selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour");
+    stuff.push("un repas froid selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour");
   }
   doc.list(stuff, doc.x + LIST_INDENT, undefined, { bulletRadius: 1.5, textIndent: LIST_INDENT, baseline: -7 });
 

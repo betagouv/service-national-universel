@@ -150,11 +150,6 @@ export const switchYoungByIdToLC = async (youngId: string): Promise<YoungType> =
   return await young.save();
 };
 
-export const updateStatusToInProgress = async (young: YoungDocument, user: UserDto): Promise<YoungDocument> => {
-  young.set({ status: YOUNG_STATUS.IN_PROGRESS });
-  return await young.save({ fromUser: user });
-};
-
 //@FIXME: Remove me when every young manually created are in status IN_PROGRESS or above
 export const mightAddInProgressStatus = async (young: YoungDocument, user: UserDto) => {
   if (young.status === YOUNG_STATUS.IN_PROGRESS) {
