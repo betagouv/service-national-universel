@@ -130,7 +130,7 @@ export default function Index() {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  if (!inscriptionCreationOpenForYoungs(cohort) && [YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
+  if (!inscriptionCreationOpenForYoungs(cohort) && !isCLE && [YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
     return <InscriptionClosed young={young} isCLE={isCLE} />;
   }
 

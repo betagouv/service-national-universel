@@ -93,6 +93,7 @@ const createSession = async (
   const sessionPhase1: Partial<SessionPhase1Type> = {
     cohesionCenterId: foundCenter._id,
     cohortId: foundCohort._id,
+    cohort: foundCohort.name,
     placesTotal: sessionCenter.sessionPlaces,
     department: foundCenter.department,
     region: foundCenter.region,
