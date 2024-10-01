@@ -32,7 +32,7 @@ const INJEPExport = () => {
 
   useDocumentTitle("Export INJEP");
   const todayPlusOneDay = dayjs().add(1, "day").toDate();
-  const threeMonthsAfterCohortDateEnd = dayjs(currentCohort.dateEnd).add(3, "month").toDate();
+  const oneMonthAfterCohortDateEnd = dayjs(currentCohort.dateEnd).add(1, "month").toDate();
 
   const getExportAvailableUntilDate = (date) => {
     if (!date) return null;
@@ -141,7 +141,7 @@ const INJEPExport = () => {
           isOpen={isDatePickerOpenByKey[currentKey]}
           onClose={() => setIsDatePickerOpenByKey({ ...isDatePickerOpenByKey, [currentKey]: false })}
           minDate={todayPlusOneDay}
-          maxDate={threeMonthsAfterCohortDateEnd}
+          maxDate={oneMonthAfterCohortDateEnd}
         />
         <ModalConfirmation
           isOpen={!!isModalConfirmOpenByKey[currentKey]}
