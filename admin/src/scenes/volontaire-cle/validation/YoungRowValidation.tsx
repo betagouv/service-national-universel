@@ -35,7 +35,7 @@ export default function YoungRowValidation({ young, selectedYoungs, onYoungSelec
     if (authorized) {
       const availableSeats = classe.totalSeats - classe.seatsTaken;
 
-      if (classe.status === STATUS_CLASSE.CLOSED || availableSeats === 0) {
+      if (classe.status === STATUS_CLASSE.CLOSED || availableSeats <= 0) {
         return setModalError(true);
       }
       validateYoung();
