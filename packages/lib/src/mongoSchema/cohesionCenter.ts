@@ -1,5 +1,6 @@
 import { Schema, InferSchemaType } from "mongoose";
 import { InterfaceExtended } from "..";
+import { CohesionCenterDomainEnum, CohesionCenterTypologyEnum } from "../constants/cohesionCenter";
 
 export const CohesionCenterSchema = {
   name: {
@@ -85,7 +86,7 @@ export const CohesionCenterSchema = {
 
   typology: {
     type: String,
-    enum: ["PUBLIC_ETAT", "PUBLIC_COLLECTIVITE", "PRIVE_ASSOCIATION", "PRIVE_AUTRE"],
+    enum: Object.values(CohesionCenterTypologyEnum),
     documentation: {
       description: "Typologie du centre",
     },
@@ -93,7 +94,7 @@ export const CohesionCenterSchema = {
 
   domain: {
     type: String,
-    enum: ["ETABLISSEMENT", "VACANCES", "FORMATION", "AUTRE"],
+    enum: Object.values(CohesionCenterDomainEnum),
     documentation: {
       description: "Domaine du centre",
     },
@@ -170,6 +171,13 @@ export const CohesionCenterSchema = {
     enum: ["VALIDATED", "DRAFT", "WAITING_VALIDATION"],
     documentation: {
       description: "Status de la globalité des cohortes d'un centre",
+    },
+  },
+
+  matricule: {
+    type: String,
+    documentation: {
+      description: "Matricule du centre sur le SI-SNU",
     },
   },
 

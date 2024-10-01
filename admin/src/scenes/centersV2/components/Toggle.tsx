@@ -5,11 +5,17 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Toggle({ onChange, value, disabled = false }) {
+interface Props {
+  onChange?: (e: any) => void;
+  value: boolean;
+  disabled?: boolean;
+}
+
+export default function Toggle({ onChange, value, disabled = false }: Props) {
   return (
     <Switch
       checked={value}
-      onChange={(e) => !disabled && onChange(e)}
+      onChange={(e) => !disabled && onChange && onChange(e)}
       className={` group relative inline-flex h-5 w-10 flex-shrink-0 cursor-wait items-center justify-center rounded-full `}>
       <span
         aria-hidden="true"
