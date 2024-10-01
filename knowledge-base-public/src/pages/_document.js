@@ -13,24 +13,6 @@ class MyDocument extends Document {
         <Head>
           <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
           <script defer data-domain="support.snu.gouv.fr" src="https://plausible.io/js/script.manual.outbound-links.js"></script>
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.plausible = window.plausible || function () {
-                  (window.plausible.q = window.plausible.q || []).push(arguments);
-                };
-              `,
-            }}
-          />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                var url = window.location.href;
-                var redactedUrl = url.replace(/[0-9a-fA-F]{24}/g, ":id");
-                plausible("pageview", { u: redactedUrl });
-              `,
-            }}
-          />
         </Head>
         <body>
           <Main />
