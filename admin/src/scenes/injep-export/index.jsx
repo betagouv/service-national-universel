@@ -16,7 +16,7 @@ import SelectCohort from "@/components/cohorts/SelectCohort";
 import ExportBox from "./components/ExportBox";
 import DatePicker from "./components/DatePicker";
 
-const exportDateKeys = ["cohesionCenters", "youngsBeforeSession", "youngsAfterSession"];
+const exportDateKeys = ["youngsBeforeSession", "youngsAfterSession"];
 
 const INJEPExport = () => {
   const dispatch = useDispatch();
@@ -120,19 +120,19 @@ const INJEPExport = () => {
         <div className="flex gap-4">
           <ExportBox
             title="Liste des volontaires affectés et sur liste complémentaire"
+            availableFrom={currentCohort?.injepExportDates?.[exportDateKeys[0]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.injepExportDates?.[exportDateKeys[0]])}
+            onClick={() => handleClick(exportDateKeys[0])}
+            onDownload={() => handleDownload(exportDateKeys[0])}
+            isDownloading={!!isLDownloadingByKey[exportDateKeys[0]]}
+          />
+          <ExportBox
+            title="Liste des volontaires après le séjour"
             availableFrom={currentCohort?.injepExportDates?.[exportDateKeys[1]]}
             availableUntil={getExportAvailableUntilDate(currentCohort?.injepExportDates?.[exportDateKeys[1]])}
             onClick={() => handleClick(exportDateKeys[1])}
             onDownload={() => handleDownload(exportDateKeys[1])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[1]]}
-          />
-          <ExportBox
-            title="Liste des volontaires après le séjour"
-            availableFrom={currentCohort?.injepExportDates?.[exportDateKeys[2]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.injepExportDates?.[exportDateKeys[2]])}
-            onClick={() => handleClick(exportDateKeys[2])}
-            onDownload={() => handleDownload(exportDateKeys[2])}
-            isDownloading={!!isLDownloadingByKey[exportDateKeys[2]]}
           />
         </div>
         <DatePicker
