@@ -1,15 +1,19 @@
-const express = require("express");
+import express from "express";
+import passport from "passport";
+import Joi from "joi";
+
+import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS } from "snu-lib";
+
+import { capture } from "../sentry";
+import { YoungModel, InscriptionGoalModel } from "../models";
+import { ERRORS } from "../utils";
+import { getFillingRate, FILLING_RATE_LIMIT } from "../services/inscription-goal";
+import { UserRequest } from "./request";
+
 const router = express.Router();
-const passport = require("passport");
-const Joi = require("joi");
-const { canUpdateInscriptionGoals, canViewInscriptionGoals } = require("snu-lib");
-const { capture } = require("../sentry");
-const { YoungModel, InscriptionGoalModel } = require("../models");
-const { ERRORS } = require("../utils");
-const { getFillingRate, FILLING_RATE_LIMIT } = require("../services/inscription-goal");
 
 // Update all inscription goals for a cohort
-router.post("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // Validate cohort...
     const { error: errorCohort, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
@@ -46,7 +50,7 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
   }
 });
 
-router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
     if (error) {
@@ -65,7 +69,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
   }
 });
 
-router.get("/:department/current", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:department/current", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
     if (error) {
@@ -86,27 +90,31 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
   }
 });
 
-router.get("/:cohort/department/:department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:cohort/department/:department", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    const { error, value: params } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { department, cohort } = value;
+    const { department, cohort } = params;
     const fillingRate = await getFillingRate(department, cohort);
 
-    return res.status(200).send({ ok: true, data: fillingRate });
+    return res.status(200).json({ ok: true, data: fillingRate });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: error });
+    if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
+      res.status(400).send({ ok: false, code: error.message });
+    } else {
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
   }
 });
 
-router.get("/:cohort/department/:department/reached", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:cohort/department/:department/reached", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
     if (error) {
@@ -120,8 +128,12 @@ router.get("/:cohort/department/:department/reached", passport.authenticate("you
     return res.status(200).send({ ok: true, data: fillingRate >= FILLING_RATE_LIMIT });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
+      res.status(400).send({ ok: false, code: error.message });
+    } else {
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
   }
 });
 
-module.exports = router;
+export default router;

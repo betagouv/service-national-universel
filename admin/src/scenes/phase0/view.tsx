@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import cx from "classnames";
 
-import { translate, YOUNG_STATUS, ROLES, SENDINBLUE_TEMPLATES, YOUNG_SOURCE, isCle, CohortDto, YoungDto } from "snu-lib";
+import { translate, YOUNG_STATUS, ROLES, SENDINBLUE_TEMPLATES, YOUNG_SOURCE, isCle, CohortDto, YoungDto, getDepartmentForEligibility } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -433,7 +433,8 @@ function FooterNoRequest({
       } else {
         // on vérifie la completion des objectifs pour le département
         // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
-        const { ok, code, data: fillingRate } = await api.get(`/inscription-goal/${young.cohort}/department/${young.schoolDepartment || young.department}`);
+        const departement = getDepartmentForEligibility(young);
+        const { ok, code, data: fillingRate } = await api.get(`/inscription-goal/${young.cohort}/department/${departement}`);
         if (!ok) throw new Error(code);
         const isGoalReached = fillingRate >= 1;
         // on vérifie qu'il n'y pas de jeunes en LC

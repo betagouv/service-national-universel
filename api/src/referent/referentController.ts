@@ -100,7 +100,7 @@ import {
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
   YoungType,
-  STATUS_CLASSE,
+  getDepartmentForEligibility,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -531,7 +531,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     // Vérification des objectifs à la validation d'un jeune
     if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
       // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
-      const fillingRate = await getFillingRate(young.schoolDepartment || young.department, young.cohort);
+      const departement = getDepartmentForEligibility(young);
+      const fillingRate = await getFillingRate(departement, young.cohort);
       if (fillingRate >= FILLING_RATE_LIMIT) {
         return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
       }
