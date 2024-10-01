@@ -29,12 +29,10 @@ function anonymizeNonDeclaredFields(item, whitelist) {
     if (!whitelist.includes(path)) {
       const value = getNestedValue(item, path);
 
-      // Si le champ est un tableau d'objets, on le laisse intact
       if (Array.isArray(value) && value.length > 0 && typeof value[0] === "object") {
         continue;
       }
 
-      // Anonymisation des champs non listés dans la whitelist
       if (value !== undefined) {
         if (Array.isArray(value)) {
           setNestedValue(item, path, []);
