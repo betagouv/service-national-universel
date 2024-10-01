@@ -56,9 +56,20 @@ export default function StepProfil() {
   const trimmedEmailConfirm = data?.emailConfirm?.trim();
 
   const handleNameChange = (field) => (value) => {
+    // Regular expression to remove invalid characters
     const regex = /[^a-zA-ZÀ-ÿ\s'-]/g;
-    const newValue = value.replace(regex, "");
-    setData({ ...data, [field]: newValue });
+    let fixedValue = "";
+
+    for (const c of value) {
+      const code = c.charCodeAt(0);
+      // Filter out emojis and other invalid characters
+      if (code >= 0x20 && code < 0x7f && !regex.test(c)) {
+        fixedValue += c;
+      }
+    }
+
+    // Update the state with the cleaned value
+    setData({ ...data, [field]: fixedValue });
   };
 
   const validate = () => {
@@ -256,8 +267,8 @@ export default function StepProfil() {
             value={data.lastName}
             onChange={handleNameChange("lastName")}
             onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })}
-            state={error.firstName ? "error" : "default"}
-            stateRelatedMessage={error.firstName}
+            state={error.lastName ? "error" : "default"}
+            stateRelatedMessage={error.lastName}
           />
 
           {isCLE && (
