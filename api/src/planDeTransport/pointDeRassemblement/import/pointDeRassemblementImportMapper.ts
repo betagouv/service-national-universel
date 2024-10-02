@@ -5,7 +5,6 @@ import { PointDeRassemblementCSV, PointDeRassemblementImportMapped } from "./poi
 export const mapPointDeRassemblements = (rawPdrs: PointDeRassemblementCSV[]): PointDeRassemblementImportMapped[] => {
   return rawPdrs.map((rawPdr) => {
     const rawPdrWithoutId: PointDeRassemblementImportMapped = {
-      code: rawPdr["Matricule du point de rassemblement"],
       // attention de garder le caractere spécial à la place de l'espace dans le nom de colonne
       name: rawPdr["Point de Rassemblement : Désignation du Point de Rassemblement"],
       address: rawPdr.Adresse,
@@ -15,6 +14,7 @@ export const mapPointDeRassemblements = (rawPdrs: PointDeRassemblementCSV[]): Po
       department: mapDepartment(rawPdr["Département"]),
       region: mapRegion(rawPdr["Région académique"]),
       matricule: rawPdr["Matricule du point de rassemblement"],
+      // code: rawPdr["Matricule du point de rassemblement"],
     };
     if (!rawPdrWithoutId.name) {
       throw new Error("NO NAME " + rawPdrWithoutId.matricule);
