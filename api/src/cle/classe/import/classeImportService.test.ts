@@ -1,9 +1,9 @@
 import { addCohortToClasse, addCohortToClasseByCohortSnuId, importClasseCohort } from "./classeImportService";
 import * as classeImportService from "./classeImportService";
-import { CohortModel, ClasseModel, ClasseDocument } from "../../../models";
+import { CohortModel, ClasseModel, ClasseDocument, YoungModel } from "../../../models";
 import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE } from "snu-lib";
 import mongoose from "mongoose";
-import { ClasseCohortImportKey, ClasseCohortMapped } from "./classeCohortImport";
+import { ClasseCohortImportKey, ClasseCohortMapped, ClasseImportType } from "./classeCohortImport";
 import { getFile } from "../../../utils";
 import { readCSVBuffer } from "../../../services/fileService";
 import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
@@ -12,6 +12,7 @@ import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
 jest.mock("../../../models", () => ({
   CohortModel: { findById: jest.fn() },
   ClasseModel: { findById: jest.fn(), save: jest.fn() },
+  YoungModel: { find: jest.fn(), save: jest.fn() },
 }));
 
 jest.mock("../../../utils", () => ({
@@ -38,6 +39,8 @@ describe("importClasseCohort", () => {
           _id: "1",
           cohort: "Cohort 101",
           cohortId: "101",
+          status: "OPEN",
+          totalSeats: 1,
         } as ClasseDocument);
       });
     });
@@ -59,22 +62,31 @@ describe("importClasseCohort", () => {
       { classeId: "2", cohortCode: "IDF_102" },
     ];
     const mockImportResult = [
-      { result: "success", classeId: "1", cohortCode: "IDF_101", cohortId: "101", cohortName: "Cohort 101" },
-      { result: "error", classeId: "2", cohortCode: "IDF_102", error: ERRORS.COHORT_NOT_FOUND },
+      {
+        result: "success",
+        classeId: "1",
+        cohortCode: "IDF_101",
+        cohortId: "101",
+        cohortName: "Cohort 101",
+        classeStatus: "OPEN",
+        classeTotalSeats: 1,
+        importType: ClasseImportType.NEXT_CLASSE_COHORT,
+      },
+      { result: "error", classeId: "2", cohortCode: "IDF_102", error: ERRORS.COHORT_NOT_FOUND, classeTotalSeats: undefined, importType: ClasseImportType.NEXT_CLASSE_COHORT },
     ];
 
     (getFile as jest.Mock).mockResolvedValue({ Body: Buffer.from("some mock data").toString() });
     (readCSVBuffer as jest.Mock).mockResolvedValue(mockCSV);
     (mapClassesCohortsForSept2024 as jest.Mock).mockReturnValue(mappedClassesCohorts);
 
-    const result = await importClasseCohort(filePath, importKey);
+    const result = await importClasseCohort(filePath, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
 
     expect(getFile).toHaveBeenCalledWith(filePath);
     expect(readCSVBuffer).toHaveBeenCalledWith(Buffer.from("some mock data"), true);
     expect(mapClassesCohortsForSept2024).toHaveBeenCalledWith(mockCSV);
     expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledTimes(2);
-    expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledWith({ classeId: "1", cohortCode: "IDF_101" }, importKey);
-    expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledWith({ classeId: "2", cohortCode: "IDF_102" }, importKey);
+    expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledWith({ classeId: "1", cohortCode: "IDF_101" }, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
+    expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledWith({ classeId: "2", cohortCode: "IDF_102" }, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
     expect(result).toEqual(mockImportResult);
   });
 });
@@ -86,7 +98,7 @@ describe("addCohortToClasse", () => {
   const classeCohortMapped: ClasseCohortMapped = {
     cohortCode: cohortId,
     classeId: classeId,
-    classeEstimatedSeats: 1,
+    classeTotalSeats: 1,
   };
 
   beforeEach(() => {
@@ -104,26 +116,27 @@ describe("addCohortToClasse", () => {
       set: setMock,
       save: saveMock,
     });
+    (YoungModel.find as jest.Mock).mockResolvedValue([{ set: setMock, save: saveMock }]);
 
-    await addCohortToClasse(classeCohortMapped, cohortId, importKey);
+    await addCohortToClasse(classeCohortMapped, cohortId, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
 
     expect(CohortModel.findById).toHaveBeenCalledWith(cohortId);
     expect(ClasseModel.findById).toHaveBeenCalledWith(classeId);
-    expect(setMock).toHaveBeenCalledWith({ cohortId: cohortId, cohort: cohortName, estimatedSeats: 1, status: STATUS_CLASSE.ASSIGNED });
+    expect(setMock).toHaveBeenCalledWith({ cohortId: cohortId, cohort: cohortName, totalSeats: 1 });
     expect(saveMock).toHaveBeenCalledWith({ fromUser: { firstName: `IMPORT_CLASSE_COHORT_${importKey}` } });
   });
 
   it("should throw an error if the cohort is not found", async () => {
     (CohortModel.findById as jest.Mock).mockResolvedValue(null);
 
-    await expect(addCohortToClasse(classeCohortMapped, cohortId, importKey)).rejects.toThrow(ERRORS.COHORT_NOT_FOUND);
+    await expect(addCohortToClasse(classeCohortMapped, cohortId, importKey, ClasseImportType.NEXT_CLASSE_COHORT)).rejects.toThrow(ERRORS.COHORT_NOT_FOUND);
   });
 
   it("should throw an error if the classe is not found", async () => {
     (CohortModel.findById as jest.Mock).mockResolvedValue({ _id: cohortId, name: "Cohort 2024" });
     (ClasseModel.findById as jest.Mock)(null);
 
-    await expect(addCohortToClasse(classeCohortMapped, cohortId, importKey)).rejects.toThrow(ERRORS.CLASSE_NOT_FOUND);
+    await expect(addCohortToClasse(classeCohortMapped, cohortId, importKey, ClasseImportType.NEXT_CLASSE_COHORT)).rejects.toThrow(ERRORS.CLASSE_NOT_FOUND);
   });
 });
 
@@ -134,7 +147,7 @@ describe("addCohortToClasseByCohortSnuId", () => {
   const classeCohortMapped: ClasseCohortMapped = {
     cohortCode: cohortSnuId,
     classeId: classeId,
-    classeEstimatedSeats: 42,
+    classeTotalSeats: 42,
   };
 
   beforeEach(() => {
@@ -151,18 +164,18 @@ describe("addCohortToClasseByCohortSnuId", () => {
       cohortId: cohortId,
     } as ClasseDocument);
 
-    await addCohortToClasseByCohortSnuId(classeCohortMapped, importKey);
+    await addCohortToClasseByCohortSnuId(classeCohortMapped, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
 
     expect(findCohortBySnuIdOrThrow).toHaveBeenCalledWith(cohortSnuId);
-    expect(classeImportService.addCohortToClasse).toHaveBeenCalledWith(classeCohortMapped, cohortId, importKey);
+    expect(classeImportService.addCohortToClasse).toHaveBeenCalledWith(classeCohortMapped, cohortId, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
   });
 
   it("should throw an error if the cohortSnuId is undefined", async () => {
     const classeCohortMapped: ClasseCohortMapped = {
       cohortCode: undefined,
       classeId: classeId,
-      classeEstimatedSeats: 1,
+      classeTotalSeats: 1,
     };
-    await expect(addCohortToClasseByCohortSnuId(classeCohortMapped, importKey)).rejects.toThrow(FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED);
+    await expect(addCohortToClasseByCohortSnuId(classeCohortMapped, importKey, ClasseImportType.NEXT_CLASSE_COHORT)).rejects.toThrow(FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED);
   });
 });
