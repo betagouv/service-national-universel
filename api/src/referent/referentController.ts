@@ -525,14 +525,14 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     if (!canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
-    const cohort = await CohortModel.findById(young.cohortId);
-    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : null;
 
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
     // Vérification des objectifs à la validation d'un jeune
     if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
       const departement = getDepartmentForEligibility(young);
       const fillingRate = await getFillingRate(departement, cohort.name);
@@ -618,6 +618,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     // verification des dates de fin d'instruction si jeune est VALIDATED
     if (newYoung.status === YOUNG_STATUS.VALIDATED) {
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       if (young.source === YOUNG_SOURCE.CLE) {
         const classe = await ClasseModel.findById(young.classeId);
         if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
