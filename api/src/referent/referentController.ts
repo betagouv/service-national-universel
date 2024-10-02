@@ -110,6 +110,7 @@ import { UserRequest } from "../controllers/request";
 import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
+import { ca } from "date-fns/locale";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -686,17 +687,24 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
       }
     }
 
+    const youngsSet: string[] = [];
     await Promise.all(
       youngs.map(async (young) => {
-        young.set({ status: payload.status });
-        await young.save({ fromUser: req.user });
-        if (payload.status === YOUNG_STATUS.VALIDATED) {
-          await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
+        try {
+          young.set({ status: payload.status });
+          await young.save({ fromUser: req.user });
+          if (payload.status === YOUNG_STATUS.VALIDATED) {
+            await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
+          }
+          youngsSet.push(young._id);
+        } catch (e) {
+          capture(e);
+          logger.error(`[BATCH] Error while validating young ${young._id}`);
         }
       }),
     );
 
-    return res.status(200).send({ ok: true, data: payload.youngIds });
+    return res.status(200).send({ ok: true, data: youngsSet });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
