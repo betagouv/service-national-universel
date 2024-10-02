@@ -96,7 +96,6 @@ import {
   YOUNG_SITUATIONS,
   CLE_FILIERE,
   canValidateMultipleYoungsInClass,
-  canValidateYoungInClass,
   ClasseSchoolYear,
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
@@ -609,11 +608,26 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.reinscriptionStep2023 = "DONE";
     }
 
-    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.source === YOUNG_SOURCE.CLE) {
-      const classe = await ClasseModel.findById(young.classeId);
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (!canValidateYoungInClass(req.user, classe)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // verification des dates de fin d'instruction si jeune est VALIDATED
+    if (newYoung.status === YOUNG_STATUS.VALIDATED) {
+      if (young.source === YOUNG_SOURCE.CLE) {
+        const classe = await ClasseModel.findById(young.classeId);
+        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const cohort = await CohortModel.findById(classe.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInsctructionOpen = now < cohort.instructionEndDate;
+        if (!isInsctructionOpen) {
+          return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      } else {
+        const cohort = await CohortModel.findById(young.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInsctructionOpen = now < cohort.instructionEndDate;
+        if (!isInsctructionOpen) {
+          return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
       }
     }
 
