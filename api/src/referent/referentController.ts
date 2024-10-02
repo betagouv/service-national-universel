@@ -618,7 +618,11 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
         const now = new Date();
         const isInsctructionOpen = now < cohort.instructionEndDate;
         if (!isInsctructionOpen) {
-          return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+        const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+        if (remainingPlaces <= 0) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       } else {
         const cohort = await CohortModel.findById(young.cohortId);
