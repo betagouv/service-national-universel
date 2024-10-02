@@ -1,5 +1,6 @@
 import qs from "qs";
 import { capture } from "../../sentry";
+import { logger } from "../../logger";
 
 /**
  * API Adresse (BAN)
@@ -23,7 +24,7 @@ export const apiAdress = async (
       filters.autocomplete = 1;
     }
     const filtersString = !filters || Object.keys(filters).length > 0 ? "" : `&${qs.stringify(filters)}`;
-    const res = await fetch(`https://api-adresse.data.gouv.fr/search/&q=${encodeURIComponent(queryString)}${filtersString}`, {
+    const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(queryString)}${filtersString}`, {
       // @ts-ignore
       retries: 3,
       retryDelay: 1000,
@@ -34,6 +35,7 @@ export const apiAdress = async (
     });
     return await res.json();
   } catch (e) {
+    logger.error(e);
     capture(e, { extra: { queryString } });
   }
 };
