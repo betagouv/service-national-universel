@@ -34,7 +34,7 @@ export const mapRegion = (regionCsv: string) => {
   }
   const foundRegion = regionList.find((region) => normalizeString(region) === normalizeString(convertedRegion));
   if (!foundRegion) {
-    logger.warn(`No region found for : ${regionCsv} was converted to ${convertedRegion}`);
+    logger.warn(`No region found for "${regionCsv}" was converted to "${convertedRegion}"`);
   }
   return foundRegion || "NO_REGION";
 };
