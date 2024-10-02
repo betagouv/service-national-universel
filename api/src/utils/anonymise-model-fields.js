@@ -29,7 +29,14 @@ function anonymizeNonDeclaredFields(item, whitelist) {
     if (!whitelist.includes(path)) {
       const value = getNestedValue(item, path);
 
-      if (Array.isArray(value) && value.length > 0 && typeof value[0] === "object") {
+      if (Array.isArray(value) && value.length > 0) {
+        if (typeof value[0] === "object") {
+          value.forEach((element, index) => {
+            value[index] = anonymizeNonDeclaredFields(element, whitelist);
+          });
+        } else {
+          setNestedValue(item, path, []);
+        }
         continue;
       }
 
