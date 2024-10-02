@@ -1,4 +1,5 @@
 const { CohortModel } = require("../src/models");
+const dayjs = require("dayjs");
 
 module.exports = {
   async up(db, client) {
@@ -6,8 +7,8 @@ module.exports = {
 
     for (const cohort of cohorts) {
       if (!cohort.dateStart || !cohort.dateEnd) continue;
-      const youngsBeforeSession = new Date(cohort.dateStart) + 2 * 24 * 60 * 60 * 1000;
-      const youngsAfterSession = new Date(cohort.dateEnd) + 6 * 24 * 60 * 60 * 1000;
+      const youngsBeforeSession = dayjs(cohort.dateStart).add(2, "day").toDate();
+      const youngsAfterSession = dayjs(cohort.dateEnd).add(6, "day").toDate();
       cohort.injepExportDates = {
         youngsBeforeSession,
         youngsAfterSession,
