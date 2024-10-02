@@ -1,3 +1,4 @@
+import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
 import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
 import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
@@ -19,7 +20,10 @@ jest.mock("../brevo", () => ({
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-describe("Meeting point", () => {
+describe("Point de rassemblement", () => {
+  beforeEach(async () => {
+    await PointDeRassemblementModel.deleteMany({});
+  });
   describe("GET /point-de-rassemblement/available", () => {
     it("should return 400 when young has no sessionPhase1Id", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture() });
@@ -233,6 +237,7 @@ describe("Meeting point", () => {
         .send({
           cohort: "Février 2023 - C",
           name: "Meeting Point",
+          matricule: faker.lorem.words(),
           address: "123 Main St",
           city: "Paris",
           zip: "75001",
@@ -266,6 +271,7 @@ describe("Meeting point", () => {
             lat: 48.8566,
             lon: 2.3522,
           },
+          matricule: faker.lorem.words(),
         });
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -353,6 +359,7 @@ describe("Meeting point", () => {
           lat: 48.8566,
           lon: 2.3522,
         },
+        matricule: faker.lorem.words(),
       };
       const { pdr, bus } = await createPointDeRassemblementWithBus(PointDeRassemblement, "centerId", "sessionId");
       const cohort = bus.cohort;
