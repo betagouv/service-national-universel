@@ -21,10 +21,11 @@ export const importPointDeRassemblement = async (pdrFilePath: string) => {
 
   // import des nouveaux PDR (création / modification)
   const mappedPdrs = mapPointDeRassemblements(pdrToImport);
+  const filteredPdrs = filterPdrs(mappedPdrs);
 
   const report: PointDeRassemblementImportReport[] = [];
 
-  for (const pdr of mappedPdrs) {
+  for (const pdr of filteredPdrs) {
     let processedPdr: PointDeRassemblementImportReport;
 
     try {
@@ -71,6 +72,16 @@ export const importPointDeRassemblement = async (pdrFilePath: string) => {
   await PointDeRassemblementModel.updateMany({ matricule: { $exists: false } }, { $set: { deletedAt: new Date() } });
 
   return report;
+};
+
+const filterPdrs = (mappedPdrs: PointDeRassemblementImportMapped[]) => {
+  // on supprime les lignes avec 2 fois le même _id
+  const duplicatedPdrs = mappedPdrs.filter((pdr) => pdr._id && mappedPdrs.find(({ _id, matricule }) => _id === pdr._id && matricule !== pdr.matricule));
+  duplicatedPdrs.forEach((pdr) => {
+    logger.info(`importCohesionCenter() - remove _id from PDR ${pdr.matricule} (duplicated _id: ${pdr._id})`);
+    pdr._id = undefined;
+  });
+  return mappedPdrs;
 };
 
 export const processPdrWithId = async (pdr: PointDeRassemblementImportMapped): Promise<PointDeRassemblementImportReport> => {
