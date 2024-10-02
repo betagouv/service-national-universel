@@ -7,8 +7,10 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import ReactTooltip from "react-tooltip";
+import { HiInformationCircle } from "react-icons/hi";
 
-import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib";
+import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -136,11 +138,12 @@ export default function Create() {
       "parent1Status",
       "parent1LastName",
       "parent1FirstName",
-      // "situation",
+      "situation",
       "address",
       "city",
       "zip",
       "frenchNationality",
+      "grade",
     ];
 
     if (classeId) values.classeId = classeId;
@@ -639,6 +642,10 @@ function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
     setFieldValue("situation", value);
   };
 
+  const onChangePSC1 = (key, value) => {
+    setFieldValue("psc1Info", value);
+  };
+
   const onChangeGrade = (key, value) => {
     const isSchooled = value !== "NOT_SCOLARISE";
     setFieldValue("schooled", isSchooled ? "true" : "false");
@@ -658,44 +665,62 @@ function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
   };
 
   const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
-
+  const psc1Options = [
+    { value: "true", label: "Oui" },
+    { value: "false", label: "Non" },
+    { value: null, label: "Non renseigné" },
+  ];
   return (
     <>
-      {!classeId && (
-        <>
-          <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Situation</div>
-
-          <Field
-            name="grade"
-            label="Classe"
-            type="select"
-            error={errors?.grade}
-            value={values.grade}
-            transformer={translate}
-            className="flex-[1_1_50%]"
-            options={gradeOptions}
-            onChange={(value, key) => onChangeGrade(key, value)}
-          />
-          {values.schooled !== "" && (
-            <Field
-              name="situation"
-              label="Statut"
-              type="select"
-              error={errors?.situation}
-              value={values.situation}
-              transformer={translate}
-              className="mt-4 flex-[1_1_50%]"
-              options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
-              onChange={(value, key) => onChangeSituation(key, value)}
-            />
-          )}
-
-          {values.situation !== "" && values.schooled === "true" && (
-            <div className="mt-4">
-              <SchoolEditor showBackgroundColor={false} young={values} onChange={onChange} />
-            </div>
-          )}
-        </>
+      <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Situation</div>
+      <Field
+        name="grade"
+        label="Classe"
+        type="select"
+        error={errors?.grade}
+        value={values.grade}
+        transformer={translate}
+        className="flex-[1_1_50%]"
+        options={gradeOptions}
+        onChange={(value, key) => onChangeGrade(key, value)}
+      />
+      {values.schooled !== "" && (
+        <Field
+          name="situation"
+          label="Statut"
+          type="select"
+          error={errors?.situation}
+          value={values.situation}
+          transformer={translate}
+          className="mt-4 flex-[1_1_50%]"
+          options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
+          onChange={(value, key) => onChangeSituation(key, value)}
+        />
+      )}
+      <div className="mt-[16px]">
+        <div className="flex flex">
+          <h1 className="mb-2 text-xs font-medium leading-snug text-[#242526]">Titulaire du PSC1</h1>
+          <HiInformationCircle data-tip data-for="psc1Info" className="mt-0.5 ml-1 text-gray-400" />
+        </div>
+        <ReactTooltip id="psc1Info" className="bg-white shadow-xl" arrowColor="white" place="right">
+          <div className="text-xs text-[#414458]">Information déclarée par le volontaire lors de son inscription </div>
+        </ReactTooltip>
+        <Field
+          name="psc1Info"
+          value={values?.psc1Info || "Non renseigné"}
+          transformer={translate}
+          type="select"
+          options={psc1Options}
+          // onChange={(value) => onLocalChange("psc1Info", value)}
+          onChange={(value, key) => onChangePSC1(key, value)}
+          young={values}
+          className="flex-[1_1_50%]"
+        />
+      </div>
+      {values.situation !== "" && values.schooled === "true" && !classeId && (
+        <div className="mt-4">
+          <SchoolEditor showBackgroundColor={false} young={values} onChange={onChange} />
+        </div>
       )}
       <div className="mt-8">
         <div className="mt-8 mb-2 text-xs font-medium leading-snug text-[#242526]">Situations particulières</div>
@@ -1105,6 +1130,8 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
     }
   }, [parent1Consentement]);
 
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? getSchoolYear(young.etablissement) : getCohortYear(young.cohort);
+
   const authorizationOptions = [
     { value: "true", label: "Autorise" },
     { value: "false", label: "N'autorise pas" },
@@ -1147,8 +1174,8 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
         </div>
         <div>
           <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment1")} errors={errors} value={volontaireConsentement.consentment1}>
-            Se porte volontaire pour participer à la session <b>{getCohortYear(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis
-            la réalisation d&apos;une mission d&apos;intérêt général.
+            Se porte volontaire pour participer à la session <b>{cohortYear}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis la
+            réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
           <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU1")} errors={errors} value={volontaireConsentement.acceptCGU1}>
             S&apos;inscrit pour le séjour de cohésion <strong>{getCohortPeriod(cohort)}</strong> sous réserve de places disponibles et s&apos;engage à en respecter le règlement
@@ -1183,7 +1210,7 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohort)}</b> du SNU.
+          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{cohortYear}</b> du SNU.
         </div>
         <div>
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow1")} errors={errors} value={parent1Consentement.allow1}>
@@ -1213,9 +1240,9 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow2")} errors={errors} value={parent1Consentement.allow2}>
             Accepte la collecte et le traitement des données personnelles de{" "}
             <b>
-              {young.firstName} {young.lastName}
+              {young.firstName} {young.lastName}{" "}
             </b>
-            .
+            dans le cadre d’une mission d’intérêt public.
           </CheckRead>
         </div>
         <div className="itemx-center mt-[16px] flex justify-between">

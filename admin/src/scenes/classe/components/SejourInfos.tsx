@@ -2,16 +2,16 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { HiOutlinePencil } from "react-icons/hi";
 
+import { ROLES, ClassesRoutes } from "snu-lib";
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { User } from "@/types";
 import { searchSessions, searchPointDeRassemblements } from "../utils";
-import { ROLES, ClasseDto } from "snu-lib";
 
 import { Rights, InfoBus } from "./types";
 
 interface Props {
-  classe: ClasseDto;
-  setClasse: (classe: ClasseDto) => void;
+  classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
+  setClasse: (classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>) => void;
   editStay: boolean;
   setEditStay: (edit: boolean) => void;
   errors: { [key: string]: string };
@@ -53,12 +53,16 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
             <Label
               title="Centre"
               name="centre"
-              tooltip="vous devez indiquez la cohorte avant d'indiquer le centre, si la cohorte séléctionner est CLE 23 24, vous ne pourrez associer aucun centre"
+              tooltip={
+                ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)
+                  ? "vous devez indiquez la cohorte avant d'indiquer le centre, si la cohorte séléctionner est CLE 23 24, vous ne pourrez associer aucun centre"
+                  : null
+              }
             />
             <Select
               isAsync
               className="mb-3"
-              placeholder={"Choisissez un centre existant"}
+              placeholder={![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? "Choisissez un centre existant" : "Non renseigné"}
               loadOptions={(q) => searchSessions({ q, cohort: classe.cohort })}
               defaultOptions={() => searchSessions({ q: "", cohort: classe.cohort })}
               noOptionsMessage={"Aucun centre ne correspond à cette recherche"}
@@ -81,14 +85,14 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
             />
             {classe.cohesionCenter && (
               <>
-                <InputText name="centerAddress" className="mb-3" label="Numéro et nom de la voie" value={classe.cohesionCenter.address} disabled />
+                <InputText name="centerAddress" className="mb-3" label="Numéro et nom de la voie" value={classe.cohesionCenter.address || ""} disabled />
                 <div className="flex items-center justify-between gap-3 mb-3">
-                  <InputText name="centerZip" className="flex-1" label="Code Postal" value={classe.cohesionCenter.zip} disabled />
-                  <InputText name="centerCity" className="flex-1" label="Ville" value={classe.cohesionCenter.city} disabled />
+                  <InputText name="centerZip" className="flex-1" label="Code Postal" value={classe.cohesionCenter.zip || ""} disabled />
+                  <InputText name="centerCity" className="flex-1" label="Ville" value={classe.cohesionCenter.city || ""} disabled />
                 </div>
                 <div className="flex items-center justify-between gap-3 mb-3">
-                  <InputText name="centerDepartment" className="flex-1" label="Département" value={classe.cohesionCenter.department} disabled />
-                  <InputText name="centerRegion" className="flex-1" label="Région" value={classe.cohesionCenter.region} disabled />
+                  <InputText name="centerDepartment" className="flex-1" label="Département" value={classe.cohesionCenter.department || ""} disabled />
+                  <InputText name="centerRegion" className="flex-1" label="Région" value={classe.cohesionCenter.region || ""} disabled />
                 </div>
                 {![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
                   <Link to={`/centre/` + classe.cohesionCenter._id} className="w-full">
@@ -105,12 +109,16 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
             <Label
               title="Point de rassemblement"
               name="pdr"
-              tooltip="Le point de rassemblement est automatiquement pré rempli avec l'adresse de l'établissement, vous pouvez le modifier si besoin"
+              tooltip={
+                ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)
+                  ? "Le point de rassemblement est automatiquement pré rempli avec l'adresse de l'établissement, vous pouvez le modifier si besoin"
+                  : null
+              }
             />
             <Select
               isAsync
               className="mb-3"
-              placeholder={"Choisissez un point de rassemblement existant"}
+              placeholder={![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? "Choisissez un point de rassemblement existant" : "Non renseigné"}
               loadOptions={(q) => searchPointDeRassemblements({ q, cohort: classe.cohort })}
               defaultOptions={() =>
                 searchPointDeRassemblements({
@@ -123,7 +131,7 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
               closeMenuOnSelect={true}
               value={
                 classe.pointDeRassemblement?.name && classe.pointDeRassemblement?.department
-                  ? { value: classe.pointDeRassemblement.id, label: `${classe.pointDeRassemblement.name}, ${classe.pointDeRassemblement.department}` }
+                  ? { value: classe.pointDeRassemblement._id, label: `${classe.pointDeRassemblement.name}, ${classe.pointDeRassemblement.department}` }
                   : null
               }
               onChange={(option) =>

@@ -2,7 +2,7 @@ import request from "supertest";
 import passport from "passport";
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { InvitationType, ROLES, STATUS_CLASSE, SUB_ROLES, UserDto } from "snu-lib";
+import { ClasseSchoolYear, InvitationType, ROLES, STATUS_CLASSE, SUB_ROLES, UserDto } from "snu-lib";
 
 import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import {
@@ -199,11 +199,41 @@ describe("Cle Referent", () => {
       ]);
 
       await ClasseModel.create([
-        createFixtureClasse({ name: "Classe 1", referentClasseIds: [referentsWithInvitation[0]._id], etablissementId: etablissements[0]._id, status: STATUS_CLASSE.VERIFIED }),
-        createFixtureClasse({ name: "Classe 2", referentClasseIds: [referentsWithInvitation[1]._id], etablissementId: etablissements[1]._id, status: STATUS_CLASSE.VERIFIED }),
-        createFixtureClasse({ name: "Classe 3", referentClasseIds: [referentsWithoutInvitation[0]._id], etablissementId: etablissements[1]._id, status: STATUS_CLASSE.VERIFIED }),
-        createFixtureClasse({ name: "Classe 4", referentClasseIds: [referentsWithoutInvitation[1]._id], etablissementId: etablissements[1]._id, status: STATUS_CLASSE.VERIFIED }),
-        createFixtureClasse({ name: "Classe 5", referentClasseIds: [referentsWithoutInvitation[2]._id], etablissementId: etablissements[1]._id, status: STATUS_CLASSE.CREATED }),
+        createFixtureClasse({
+          name: "Classe 1",
+          referentClasseIds: [referentsWithInvitation[0]._id],
+          etablissementId: etablissements[0]._id,
+          status: STATUS_CLASSE.VERIFIED,
+          schoolYear: ClasseSchoolYear.YEAR_2024_2025,
+        }),
+        createFixtureClasse({
+          name: "Classe 2",
+          referentClasseIds: [referentsWithInvitation[1]._id],
+          etablissementId: etablissements[1]._id,
+          status: STATUS_CLASSE.VERIFIED,
+          schoolYear: ClasseSchoolYear.YEAR_2024_2025,
+        }),
+        createFixtureClasse({
+          name: "Classe 3",
+          referentClasseIds: [referentsWithoutInvitation[0]._id],
+          etablissementId: etablissements[1]._id,
+          status: STATUS_CLASSE.VERIFIED,
+          schoolYear: ClasseSchoolYear.YEAR_2024_2025,
+        }),
+        createFixtureClasse({
+          name: "Classe 4",
+          referentClasseIds: [referentsWithoutInvitation[1]._id],
+          etablissementId: etablissements[1]._id,
+          status: STATUS_CLASSE.VERIFIED,
+          schoolYear: ClasseSchoolYear.YEAR_2024_2025,
+        }),
+        createFixtureClasse({
+          name: "Classe 5",
+          referentClasseIds: [referentsWithoutInvitation[2]._id],
+          etablissementId: etablissements[1]._id,
+          status: STATUS_CLASSE.CREATED,
+          schoolYear: ClasseSchoolYear.YEAR_2024_2025,
+        }),
         createFixtureClasse({
           name: "Classe 6 with same referent",
           referentClasseIds: [referentsWithInvitation[0]._id],

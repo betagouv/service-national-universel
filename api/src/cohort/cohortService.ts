@@ -1,7 +1,5 @@
-import { COHORT_TYPE, ERRORS } from "snu-lib";
-import { CohortDocument } from "../models";
-
-const { CohortModel } = require("../models");
+import { COHORT_TYPE, ERRORS, CohortType } from "snu-lib";
+import { CohortDocument, CohortModel } from "../models";
 
 const isInscriptionOpenOnSomeCohorts = async (): Promise<Boolean> => {
   const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
@@ -42,4 +40,20 @@ export const findCohortBySnuIdOrThrow = async (cohortName: string) => {
 export const getCohortIdsFromCohortName = async (cohortNames: string[]): Promise<string[]> => {
   const cohorts: Pick<CohortDocument, "_id" | "name">[] = await CohortModel.find({ name: { $in: cohortNames } }, { _id: 1, name: 1 }).lean();
   return cohorts.map((cohort) => cohort._id);
+};
+
+export const isCohortInscriptionOpen = (cohort: CohortType): boolean => {
+  const now = new Date();
+  const inscriptionStartDate = new Date(cohort.inscriptionStartDate);
+  const inscriptionEndDate = new Date(cohort.inscriptionEndDate);
+  const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
+  return isInscriptionOpen;
+};
+
+export const isCohortInscriptionClosed = (cohort: CohortType): boolean => {
+  const now = new Date();
+  const inscriptionStartDate = new Date(cohort.inscriptionStartDate);
+  const inscriptionEndDate = new Date(cohort.inscriptionEndDate);
+  const isInscriptionClosed = now >= inscriptionEndDate || now <= inscriptionStartDate;
+  return isInscriptionClosed;
 };

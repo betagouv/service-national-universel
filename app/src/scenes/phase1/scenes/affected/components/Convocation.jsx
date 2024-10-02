@@ -127,7 +127,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
               </>
             )}
             <li>- la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire,</li>
-            {meetingPoint?.bus?.lunchBreak && <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>}
+            {meetingPoint?.bus?.lunchBreak && <li>- un repas froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>}
           </ul>
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
@@ -151,7 +151,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
         <ConvocText>
           Afin que votre séjour se déroule dans les meilleures conditions, nous vous rappelons que chaque volontaire, lors de son inscription, s&apos;est engagé à respecter le{" "}
           <b>
-            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf" target="_blank" rel="noreferrer">
+            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur.pdf" target="_blank" rel="noreferrer">
               règlement intérieur
             </a>
           </b>{" "}

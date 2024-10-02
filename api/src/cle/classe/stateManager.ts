@@ -1,5 +1,6 @@
 import { STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
 import { ClasseModel, CohortModel } from "../../models";
+import { isCohortInscriptionClosed, isCohortInscriptionOpen } from "../../cohort/cohortService";
 
 const ClasseStateManager = {
   compute: async (_id, fromUser, options) => {
@@ -21,11 +22,8 @@ const ClasseStateManager = {
     classe.set({ seatsTaken: seatsValidated });
 
     // Get inscription date
-    const now = new Date();
-    const inscriptionStartDate = new Date(classeCohort.inscriptionStartDate);
-    const inscriptionEndDate = new Date(classeCohort.inscriptionEndDate);
-    const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
-    const isInscriptionClosed = now >= inscriptionEndDate;
+    const isInscriptionOpen = isCohortInscriptionOpen(classeCohort);
+    const isInscriptionClosed = isCohortInscriptionClosed(classeCohort);
 
     // Open
     if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status as any) && isInscriptionOpen) {
@@ -35,7 +33,7 @@ const ClasseStateManager = {
     }
 
     // Closed
-    if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats === seatsValidated) {
+    if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats <= seatsValidated) {
       classe.set({ status: STATUS_CLASSE.CLOSED });
       classe = await classe.save({ fromUser });
       return classe;

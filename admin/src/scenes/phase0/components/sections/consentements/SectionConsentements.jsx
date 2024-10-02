@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, YOUNG_STATUS, ROLES, getCohortPeriod, getCohortYear, YOUNG_SOURCE } from "snu-lib";
+import { translate, YOUNG_STATUS, ROLES, getCohortPeriod, getCohortYear, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
 
 import dayjs from "@/utils/dayjs.utils";
 
@@ -36,6 +36,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
 
   const user = useSelector((state) => state.Auth.user);
   const consent = young.parentAllowSNU === "true" ? "Autorise " : "N'autorise pas ";
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? getSchoolYear(young.etablissement) : getCohortYear(young.cohort);
 
   async function handleConfirmConsent(participationConsent, imageRights) {
     try {
@@ -168,8 +169,8 @@ export default function SectionConsentements({ young, onChange, readonly = false
         </div>
         <div>
           <CheckRead value={young.consentment === "true"}>
-            Se porte volontaire pour participer à la session <b>{getCohortYear(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis
-            la réalisation d&apos;une phase d'engagement.
+            Se porte volontaire pour participer à la session <b>{cohortYear}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis la
+            réalisation d&apos;une phase d'engagement.
           </CheckRead>
           <CheckRead value={young.acceptCGU === "true"}>
             {young.source === YOUNG_SOURCE.CLE ? (
@@ -208,7 +209,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohort)}</b> du SNU.
+          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{cohortYear}</b> du SNU.
         </div>
         <div className="border-b border-[#E5E7EB] pb-6">
           <CheckRead value={young.parent1AllowSNU === "true"}>
@@ -236,8 +237,9 @@ export default function SectionConsentements({ young, onChange, readonly = false
           <CheckRead value={young.parent1AllowSNU === "true"}>
             Accepte la collecte et le traitement des données personnelles de{" "}
             <b>
-              {young.firstName} {young.lastName}
+              {young.firstName} {young.lastName}{" "}
             </b>
+            dans le cadre d’une mission d’intérêt public.
           </CheckRead>
         </div>
         <div className="mb-[16px] mt-4 flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">

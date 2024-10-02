@@ -20,7 +20,6 @@ export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
   const keyList = ["type", "desc", "structureName", "address", "zip", "city", "startDate", "endDate", "contactFullName", "contactEmail", "files", "missionDuration"];
   const [data, setData] = useState();
-  console.log("🚀 ~ EditEquivalence ~ data:", data);
   const [openType, setOpenType] = useState(false);
   const [openSousType, setOpenSousType] = React.useState(false);
   const [error, setError] = useState(false);
@@ -30,7 +29,6 @@ export default function EditEquivalence() {
   const [errorMail, setErrorMail] = useState(false);
   const [duration, setDuration] = useState(null);
   const [errorDuration, setErrorDuration] = useState(false);
-  console.log("🚀 ~ EditEquivalence ~ errorDuration:", errorDuration);
   const [unit, setUnit] = useState("heures");
   const refType = useRef(null);
   const refSousType = React.useRef(null);
@@ -128,6 +126,16 @@ export default function EditEquivalence() {
       if (key === "missionDuration") {
         if (data[key] === undefined || data[key] === "" || data[key] == 0) {
           setErrorDuration(true);
+          error = true;
+        }
+      }
+      if (key === "structureName") {
+        if (data[key] === undefined || data[key] === "" || data[key] == 0) {
+          error = true;
+        }
+      }
+      if (key === "contactFullName") {
+        if (data[key] === undefined || data[key] === "" || data[key] == 0) {
           error = true;
         }
       }

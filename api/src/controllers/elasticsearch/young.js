@@ -64,6 +64,7 @@ function getYoungsFilters(user) {
     "classeId.keyword",
     "etablissementId.keyword",
     "psc1Info.keyword",
+    "frenchNationality.keyword",
   ].filter(Boolean);
 }
 

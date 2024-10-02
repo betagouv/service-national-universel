@@ -28,8 +28,8 @@ export default function Filters({
   setParamData,
   defaultUrlParam = undefined,
   size,
-  intermediateFilters = undefined,
-  disabled,
+  intermediateFilters = [],
+  disabled = false,
 }) {
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState({});
@@ -243,7 +243,7 @@ export default function Filters({
                                 ?.map((item) => {
                                   let customItem = item;
                                   const intermediateFilter = intermediateFilters?.find((intermediateFilter) => intermediateFilter.key === item.name);
-                                  if (intermediateFilters && intermediateFilter && item.name === intermediateFilter?.key) {
+                                  if (intermediateFilters.length > 0 && intermediateFilter && item.name === intermediateFilter?.key) {
                                     customItem = {
                                       ...item,
                                       allowEmpty: false,

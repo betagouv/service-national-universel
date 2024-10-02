@@ -2,11 +2,11 @@ export function injectRoutes(app) {
   app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
   app.use("/application", require("./controllers/application"));
   app.use("/bus", require("./controllers/bus"));
-  app.use("/cohesion-center", require("./controllers/cohesion-center"));
+  app.use("/cohesion-center", require("./cohesionCenter").default);
   app.use("/cohort", require("./cohort/cohortController"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
   app.use("/contract", require("./controllers/contract"));
-  app.use("/correction-request", require("./controllers/correction-request"));
+  app.use("/correction-request", require("./controllers/correction-request").default);
   app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
   app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
   app.use("/department-service", require("./controllers/department-service"));
@@ -38,6 +38,7 @@ export function injectRoutes(app) {
   app.use("/young-edition", require("./young/edition/youngEditionController").default);
   app.use("/SNUpport", require("./controllers/SNUpport"));
   app.use("/cle", require("./cle").default);
+  app.use("/preinscription", require("./preinscription/preinscriptionController"));
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));

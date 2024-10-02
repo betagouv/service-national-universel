@@ -3,6 +3,24 @@ import react from "@vitejs/plugin-react-swc";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import path from "path";
 
+export const VitePluginWatchPackages = async (config) => {
+  const externalFiles = [path.resolve(__dirname, "../packages/lib/dist", "index.mjs")];
+  return {
+    name: "vite-plugin-watch-workspace",
+    // on build start, add the external files to Vite's watch list
+    async buildStart() {
+      externalFiles.map((file) => {
+        this.addWatchFile(file);
+      });
+    },
+    async handleHotUpdate({ file, server }) {
+      if (externalFiles.includes(file)) {
+        server.ws.send({ type: "full-reload" });
+      }
+    },
+  };
+};
+
 // eslint-disable-next-line no-unused-vars
 export default defineConfig(({ command, mode }) => {
   // Load env file based on `mode` in the current working directory.
@@ -33,6 +51,9 @@ export default defineConfig(({ command, mode }) => {
         debug: true,
       }),
     );
+  } else {
+    // autp-reload when changes detected in snu-lib
+    plugins.push(VitePluginWatchPackages());
   }
 
   return {

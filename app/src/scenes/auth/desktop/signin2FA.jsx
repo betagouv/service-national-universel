@@ -1,8 +1,7 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "@/services/plausible";
-import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/dsfr/forms/input";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
@@ -11,66 +10,56 @@ import queryString from "query-string";
 import { useHistory } from "react-router-dom";
 import { BsShieldLock } from "react-icons/bs";
 import { isValidRedirectUrl, DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
-import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
+import { cohortsInit } from "@/utils/cohorts";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN = DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS / 60 / 1000;
 
 export default function Signin() {
-  const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
   const history = useHistory();
   const [token2FA, setToken2FA] = React.useState("");
   const [rememberMe, setRememberMe] = React.useState(false);
+  const disabled = !token2FA || loading;
 
   const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young);
 
   const params = queryString.parse(location.search);
-  const { redirect, disconnected, email } = params;
-
-  React.useEffect(() => {
-    if (!young && disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
-    if (young) history.push("/" + (redirect || ""));
-  }, [young]);
+  const { redirect, email } = params;
 
   const onSubmit = async ({ email, token, rememberMe }) => {
-    if (loading || disabled) return;
     setLoading(true);
     try {
-      setLoading(true);
       const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
-      setLoading(false);
-      if (response.token) api.setToken(response.token);
-      if (response.user) {
-        plausibleEvent("2FA/ Connexion réussie");
-        dispatch(setYoung(response.user));
-        const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
-        if (!redirectionApproved) {
-          captureMessage("Invalid redirect url", { extra: { redirect } });
-          toastr.error("Url de redirection invalide : " + redirect);
-          return history.push("/");
-        }
-        return (window.location.href = redirect);
+
+      if (!response.user) return;
+
+      plausibleEvent("2FA/ Connexion réussie");
+      dispatch(setYoung(response.user));
+      await cohortsInit();
+
+      const redirectionApproved = isValidRedirectUrl(redirect);
+
+      if (!redirectionApproved) {
+        captureMessage("Invalid redirect url", { extra: { redirect } });
+        toastr.error("Url de redirection invalide : " + redirect);
+        return history.push("/");
       }
+
+      return history.push(redirect || "/");
     } catch (e) {
+      setError({
+        text: "(Double authentification) Code non reconnu.",
+        subText: `Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de ${DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN} minutes, veuillez retenter de vous connecter.`,
+      });
       setLoading(false);
-      toastr.error(
-        "(Double authentification) Code non reconnu.",
-        `Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de ${DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN} minutes, veuillez retenter de vous connecter.`,
-      );
     }
   };
 
-  React.useEffect(() => {
-    if (token2FA) setDisabled(false);
-    else setDisabled(true);
-  }, [token2FA]);
-
   return (
     <div className="flex bg-[#F9F6F2] py-6">
-      <div className="mx-auto my-0 basis-[50%] bg-white px-[102px] py-[60px]">
+      <div className="mx-auto my-0 bg-white px-[102px] py-[60px]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="mb-1 text-[32px] font-bold text-[#161616]">Me connecter</div>
         <div className="mb-2 flex items-center gap-4">
@@ -107,7 +96,7 @@ export default function Signin() {
         </div>
         <div className="flex w-full justify-end">
           <button
-            disabled={disabled || loading}
+            disabled={disabled}
             className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 mt-4 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0"
             onClick={() => onSubmit({ email, token: token2FA, rememberMe })}>
             Connexion

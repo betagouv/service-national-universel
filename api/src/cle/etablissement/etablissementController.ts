@@ -8,11 +8,14 @@ import {
   ROLES,
   canUpdateEtablissement,
   canViewEtablissement,
+  canCreateEtablissement,
   isAdmin,
   departmentToAcademy,
   isChefEtablissement,
   isReferentOrAdmin,
   SENDINBLUE_TEMPLATES,
+  ClasseSchoolYear,
+  EtablissementType,
 } from "snu-lib";
 import { ReferentDto } from "snu-lib";
 import { capture } from "../../sentry";
@@ -23,6 +26,9 @@ import { UserRequest } from "../../controllers/request";
 import { idSchema } from "../../utils/validator";
 import { sendTemplate } from "../../brevo";
 import { buildUniqueClasseKey } from "../classe/classeService";
+import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
+import { apiEducation } from "../../services/gouv.fr/api-education";
+import { mapEtablissementFromAnnuaireToEtablissement } from "./etablissementMapper";
 
 const router = express.Router();
 
@@ -34,9 +40,10 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
     const query = {};
     let valueField: any = { $in: [req.user._id] };
     if (req.user.role === ROLES.REFERENT_CLASSE) {
-      const classe = await ClasseModel.findOne({ referentClasseIds: { $in: req.user._id } });
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      valueField = classe.etablissementId;
+      const classes = await ClasseModel.find({ referentClasseIds: { $in: req.user._id } });
+      if (!classes || classes.length === 0) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const lastClasse = classes.find((classe) => classe.schoolYear === ClasseSchoolYear.YEAR_2024_2025) || classes[0];
+      valueField = lastClasse.etablissementId;
     }
     query[searchField] = valueField;
     const etablissement = await EtablissementModel.findOne(query)?.lean();
@@ -190,18 +197,20 @@ router.delete("/:id/referents", passport.authenticate("referent", { session: fal
     for (const referent of referents) {
       // si il est aussi référent de classe
       const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
+      const email = referent.email;
       if (classe) {
         referent.set({
           role: ROLES.REFERENT_CLASSE,
           subRole: SUB_ROLES.none,
         });
       } else {
-        referent.set({ deletedAt: new Date() });
+        const newEmail = `deleted-${referent.id}-${referent.email}`;
+        referent.set({ deletedAt: new Date(), email: newEmail });
       }
       await referent.save({ fromUser: req.user });
       const toName = `${referent.firstName}  ${referent.lastName}`;
       await sendTemplate(SENDINBLUE_TEMPLATES.CLE.COORIDNIATEUR_REMOVED_ETABLISSEMENT, {
-        emailTo: [{ email: referent.email, name: toName }],
+        emailTo: [{ email, name: toName }],
         params: {
           toName,
         },
@@ -216,6 +225,59 @@ router.delete("/:id/referents", passport.authenticate("referent", { session: fal
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value: payload } = Joi.object<{ uai: string; email: string; refLastName: string; refFirstName: string }>({
+      uai: Joi.string().required(),
+      email: Joi.string().email().required(),
+      refLastName: Joi.string().required(),
+      refFirstName: Joi.string().required(),
+    }).validate(req.body, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canCreateEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (!(await isUAIValid(payload.uai))) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
+    const etablissementFromAnnuaire = await apiEducation({
+      filters: [{ key: "uai", value: payload.uai }],
+      page: 0,
+      size: -1,
+    }).then((etablissements) => etablissements[0]);
+
+    if (!etablissementFromAnnuaire) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const formatedEtablissement = mapEtablissementFromAnnuaireToEtablissement(etablissementFromAnnuaire, []) as EtablissementType;
+
+    const preReferent = {
+      firstName: payload.refFirstName,
+      lastName: payload.refLastName,
+      email: payload.email,
+    };
+
+    const referent = await findOrCreateReferent(preReferent, { etablissement: formatedEtablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Referent not created." });
+    if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+    await inviteReferent(referent, { role: ROLES.ADMINISTRATEUR_CLE, from: null }, formatedEtablissement);
+
+    const etablissement = await EtablissementModel.create({ ...formatedEtablissement, referentEtablissementIds: [referent._id], coordinateurIds: [] });
+
+    if (!etablissement) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Etablissement not created." });
+
+    await etablissement.save({ fromUser: { firstName: "CREATED_BY_ADMIN" } });
+
+    return res.status(200).send({ ok: true, data: etablissement });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -253,6 +315,11 @@ async function populateEtablissementWithClasse(etablissement, user) {
   }
   etablissement.classes = classes;
   return etablissement;
+}
+
+async function isUAIValid(uai: string): Promise<boolean> {
+  const etablissement = await EtablissementModel.findOne({ uai });
+  return !etablissement;
 }
 
 export default router;

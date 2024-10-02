@@ -12,16 +12,16 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import ProgressBar from "../components/ProgressBar";
 import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
 import { SignupButtons } from "@snu/ds/dsfr";
+import { cohortsInit } from "@/utils/cohorts";
 
 export default function StepConfirm() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
   const [context, bdcURI] = isLoggedIn
-    ? [ReinscriptionContext, "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    ? [ReinscriptionContext, "jetais-inscrit-en-2023-2024-comment-me-reinscrire-en-2024-2025"]
     : [PreInscriptionContext, "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const [error, setError] = useState({});
   const [isLoading, setLoading] = useState(false);
@@ -70,7 +70,7 @@ export default function StepConfirm() {
       } else {
         plausibleEvent("Phase0/CTA reinscription - inscription");
         dispatch(setYoung(data));
-        history.push("/inscription2023");
+        history.push("/inscription");
       }
     } catch (e) {
       setLoading(false);
@@ -106,16 +106,17 @@ export default function StepConfirm() {
 
     try {
       setLoading(true);
-      const { code, ok, token, user } = await api.post(`/young/signup`, values);
+      const { code, ok, user } = await api.post(`/young/signup`, values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
       } else {
         if (user) {
           plausibleEvent("Phase0/CTA preinscription - inscription");
-          if (token) api.setToken(token);
+          await cohortsInit();
           dispatch(setYoung(user));
           removePersistedData();
+
           history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
         }
       }
@@ -134,7 +135,6 @@ export default function StepConfirm() {
 
   return (
     <>
-      <ProgressBar isReinscription={isLoggedIn} />
       <DSFRContainer title="Ces informations sont-elles correctes ?" supportEvent="Phase0/aide preinscription - recap" supportLink={`${supportURL}/base-de-connaissance/${bdcURI}`}>
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="my-6 flex items-center justify-between">

@@ -82,9 +82,10 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const ref: React.MutableRefObject<any> = React.useRef(null);
   React.useEffect(() => {
     if (!data) return;
-    const temp = data;
+    let temp = data;
+
     if (filter?.filter) {
-      temp.filter(filter.filter);
+      temp = temp.filter(filter.filter);
     }
     if (filter?.sort) {
       filter.sort(temp);
@@ -102,9 +103,8 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
         data[emptyIndex].key = "N/A";
       }
     }
-
     setOptionsVisible(temp);
-  }, [data, filter]);
+  }, [data, filter, selectedFilters]);
 
   React.useEffect(() => {
     // normalize search

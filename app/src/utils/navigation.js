@@ -1,4 +1,6 @@
-import { YOUNG_SOURCE } from "snu-lib";
+import { FEATURES_NAME, isFeatureEnabled, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { getCohort } from "./cohorts";
+import { environment } from "@/config";
 
 export const INSCRIPTION_STEPS = {
   COORDONNEES: "COORDONNEES",
@@ -85,7 +87,7 @@ export const getStepUrl = (name, STEP_LIST) => {
 const WAITING_CORRECTION_LINK = [
   {
     field: ["firstName", "lastName", "phone", "email"],
-    redirect: "/inscription2023/correction/profil",
+    redirect: "/inscription/correction/profil",
     step: "profil",
   },
   {
@@ -104,7 +106,7 @@ const WAITING_CORRECTION_LINK = [
       "schoolId",
       "zip",
     ],
-    redirect: "/inscription2023/correction/eligibilite",
+    redirect: "/inscription/correction/eligibilite",
     step: "eligibilite",
   },
   {
@@ -121,7 +123,7 @@ const WAITING_CORRECTION_LINK = [
       "parent2Email",
       "parent2Phone",
     ],
-    redirect: "/inscription2023/correction/representants",
+    redirect: "/inscription/correction/representants",
     step: "representants",
   },
   {
@@ -158,13 +160,14 @@ const WAITING_CORRECTION_LINK = [
       "specificAmenagmentType",
       "reducedMobilityAccess",
       "handicapInSameDepartment",
+      "psc1Info",
     ],
-    redirect: "/inscription2023/correction/coordonnee",
+    redirect: "/inscription/correction/coordonnee",
     step: "coordonnee",
   },
   {
     field: ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"],
-    redirect: "/inscription2023/correction/documents",
+    redirect: "/inscription/correction/documents",
     step: "documents",
   },
 ];
@@ -172,7 +175,7 @@ const WAITING_CORRECTION_LINK = [
 const WAITING_CORRECTION_LINK_CLE = [
   {
     field: ["firstName", "lastName", "frenchNationality", "phone", "email", "birthdateAt", "grade"],
-    redirect: "/inscription2023/correction/profil",
+    redirect: "/inscription/correction/profil",
     step: "profil",
   },
   {
@@ -189,7 +192,7 @@ const WAITING_CORRECTION_LINK_CLE = [
       "parent2Email",
       "parent2Phone",
     ],
-    redirect: "/inscription2023/correction/representants",
+    redirect: "/inscription/correction/representants",
     step: "representants",
   },
   {
@@ -225,8 +228,9 @@ const WAITING_CORRECTION_LINK_CLE = [
       "specificAmenagmentType",
       "reducedMobilityAccess",
       "handicapInSameDepartment",
+      "psc1Info",
     ],
-    redirect: "/inscription2023/correction/coordonnee",
+    redirect: "/inscription/correction/coordonnee",
     step: "coordonnee",
   },
 ];
@@ -258,3 +262,11 @@ export const redirectToCorrection = (young, field) => {
   const correction = correctionLink.find((correction) => correction.field.includes(field));
   return correction ? correction.redirect : "/";
 };
+
+export function shouldForceRedirectToEmailValidation(user) {
+  const cohort = getCohort(user.cohort);
+  const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
+  const shouldUserValidateEmail = user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
+  const pathname = window.location.pathname;
+  return isEmailValidationEnabled && shouldUserValidateEmail && pathname !== "/preinscription/email-validation";
+}

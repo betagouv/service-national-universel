@@ -1,21 +1,19 @@
 import React, { useContext } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { getCohortPeriod } from "snu-lib";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
-import LinkTo from "../../../assets/icons/LinkTo";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import { isReturningParent } from "../commons";
-import { BorderButton } from "../components/Buttons";
 import Navbar from "../components/Navbar";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import plausibleEvent from "@/services/plausible";
 import { SignupButtons } from "@snu/ds/dsfr";
+import { shouldDisplayDateByCohortName } from "snu-lib";
 
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
-  const { young, token } = useContext(RepresentantsLegauxContext);
+  const { young, token, cohort } = useContext(RepresentantsLegauxContext);
 
   if (!young) return <Loader />;
 
@@ -30,8 +28,6 @@ export default function Presentation({ step, parentId }) {
     if (status === "REFUSED") return "est refusé";
   };
 
-  const isCLE = young?.cohort.name.includes("CLE");
-  const sejourDate = young?.cohort.name === "CLE 23-24" ? "À venir" : getCohortPeriod(young.cohort);
   const title = parentId === 2 ? `${young.firstName} s'est inscrit(e) au SNU !` : `${young.firstName} souhaite s'inscrire au SNU !`;
 
   function onSubmit() {
@@ -50,16 +46,17 @@ export default function Presentation({ step, parentId }) {
       <Navbar step={step} />
       <>
         <DSFRContainer title={title}>
-          <p className="mb-8 text-sm text-[#161616]">
-            {parentId === 2 ? (
-              <>Nous avons besoin de votre consentement au droit à l’image.</>
-            ) : (
-              <>Nous avons besoin de votre accord pour que {young.firstName} vive l’aventure du SNU.</>
-            )}
+          <p>
+            {parentId === 2
+              ? "Nous avons besoin de votre consentement au droit à l’image."
+              : `Nous avons besoin de votre accord pour que ${young.firstName} vive l’aventure du SNU.`}
           </p>
-          <BorderButton href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
-            Découvrir le SNU <LinkTo className="ml-2" />
-          </BorderButton>
+
+          <p>
+            <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer">
+              Découvrir le SNU
+            </a>
+          </p>
 
           <div className="flex flex-col bg-[#fbfbfb] p-4">
             <ul>
@@ -87,23 +84,25 @@ export default function Presentation({ step, parentId }) {
           </div>
           <div className="flex flex-col bg-[#fbfbfb] p-4">
             <h2 className="mb-1.5 mt-0 text-[19px] font-bold">Première étape</h2>
-            <p className="text-sm font-bold">Le séjour de cohésion : 2 semaines dans un autre département</p>
+            <p className="text-sm font-bold">Le séjour de cohésion :</p>
             <div className="flex flex-col items-center justify-center py-9">
               <div className="relative ">
                 <CalendarBig />
                 <CheckCircleStroke stroke="#E1000F" className="absolute bottom-[-5px] right-[-5px] h-[21px] w-[21px]" />
               </div>
-              {isCLE ? (
-                <p className="font-400 mt-3 text-center text-[15px] leading-[19px]">
-                  {young.firstName} effectuera le séjour <br />
-                  <strong>à venir</strong>.
-                </p>
-              ) : (
-                <p className="font-400 mt-3 text-center text-[15px] leading-[19px]">
-                  {young.firstName} a choisi le séjour <br />
-                  <strong>{sejourDate}</strong>.
-                </p>
-              )}
+              <p className="font-400 mt-3 text-center text-[15px] leading-[19px]">
+                {young.firstName} a choisi le séjour <br />
+                <strong>
+                  {shouldDisplayDateByCohortName(cohort.name) ? (
+                    <>
+                      du {new Date(cohort.dateStart).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} au{" "}
+                      {new Date(cohort.dateEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+                    </>
+                  ) : (
+                    "à venir"
+                  )}
+                </strong>
+              </p>
             </div>
           </div>
           <SignupButtons onClickNext={onSubmit} labelNext="Continuer vers la vérification" text="Votre consentement ne sera recueilli qu’à la troisième étape de ce formulaire" />

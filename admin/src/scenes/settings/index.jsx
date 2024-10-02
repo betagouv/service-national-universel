@@ -354,10 +354,10 @@ export default function Settings() {
                         tooltipRadius="6">
                         <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
                           <li>
-                            Fermeture de la possibilité de modifier ou corriger son dossier d’inscription (pour les dossiers “en attente de validation” et “en attente de
-                            correction”).
+                            Fermeture de la possibilité de modifier ou corriger son dossier d’inscription (pour les dossiers {data.type === COHORT_TYPE.CLE && "“en cours”"}, “en
+                            attente de validation” et “en attente de correction”).
                           </li>
-                          <li>Le bouton d’accès au dossier est masqué sur le compte volontaire et l’URL d’accès au formulaire bloquée.</li>
+                          {data.type !== COHORT_TYPE.CLE && <li>Le bouton d’accès au dossier est masqué sur le compte volontaire et l’URL d’accès au formulaire bloquée.</li>}
                         </ul>
                       </ReactTooltip>
                     </div>

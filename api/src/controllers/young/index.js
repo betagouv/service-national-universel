@@ -15,7 +15,7 @@ const { getRedisClient } = require("../../redis");
 const config = require("config");
 const { logger } = require("../../logger");
 const { capture, captureMessage } = require("../../sentry");
-const { ReferentModel, YoungModel, ApplicationModel, MissionModel, SessionPhase1Model, LigneBusModel, ClasseModel } = require("../../models");
+const { ReferentModel, YoungModel, ApplicationModel, MissionModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel } = require("../../models");
 const AuthObject = require("../../auth");
 const YoungAuth = new AuthObject(YoungModel);
 const {
@@ -242,6 +242,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 
     obj.parent1ContactPreference = "email";
     obj.parent2ContactPreference = "email";
+    obj.status = YOUNG_STATUS.IN_PROGRESS;
 
     obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
     if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
@@ -252,7 +253,11 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       obj.etablissementId = classe.etablissementId;
     }
+    //creating IN_PROGRESS for data
     const young = await YoungModel.create({ ...obj, fromUser: req.user });
+
+    young.set({ status: YOUNG_STATUS.WAITING_VALIDATION });
+    await young.save({ fromUser: req.user });
 
     const toName = `${young.firstName} ${young.lastName}`;
     const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}&utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
@@ -262,7 +267,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       params: { toName, cta, fromName },
     });
 
-    return res.status(200).send({ young, ok: true });
+    return res.status(200).send({ young: young, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
@@ -485,6 +490,9 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
     const previousYoung = { ...young.toObject() };
 
+    const cohortObj = await CohortModel.findOne({ name: cohort });
+    if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
     const oldCohort = young.cohort;
@@ -517,7 +525,14 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const session = sessions.find(({ name }) => name === cohort);
     if (!session && cohort !== "à venir") return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    young.set({ cohort, cohortChangeReason, cohortDetailedChangeReason, cohesionStayPresence: undefined, cohesionStayMedicalFileReceived: undefined });
+    young.set({
+      cohort,
+      cohortId: cohortObj._id,
+      cohortChangeReason,
+      cohortDetailedChangeReason,
+      cohesionStayPresence: undefined,
+      cohesionStayMedicalFileReceived: undefined,
+    });
 
     if (cohort !== "à venir") {
       const fillingRate = await getFillingRate(young.department, cohort);
@@ -1117,7 +1132,7 @@ router.use("/:id/phase1", require("./phase1"));
 router.use("/:id/phase2", require("./phase2"));
 router.use("/reinscription", require("./reinscription"));
 router.use("/inscription2023", require("./inscription2023"));
-router.use("/note", require("./note"));
+router.use("/note", require("./note").default);
 router.use("/:id/point-de-rassemblement", require("./point-de-rassemblement"));
 router.use("/account", require("./account"));
 

@@ -15,6 +15,7 @@ type OwnProps = {
   active?: boolean;
   readOnly?: boolean;
   error?: string;
+  max?: number;
 };
 
 export default function InputText({
@@ -29,6 +30,7 @@ export default function InputText({
   active,
   readOnly,
   error,
+  max,
 }: OwnProps) {
   const {
     baseClass,
@@ -51,7 +53,7 @@ export default function InputText({
           focusActive,
           bgColorClass,
           borderColorClass,
-          "px-[13px] py-[9px] h-[54px]"
+          "px-[13px] py-[9px] h-[54px]",
         )}
       >
         <div className="flex flex-1 flex-col justify-center">
@@ -60,7 +62,7 @@ export default function InputText({
               htmlFor={name}
               className={classNames(
                 error ? "text-red-500" : "text-gray-500",
-                "m-0  text-xs font-normal leading-4"
+                "m-0  text-xs font-normal leading-4",
               )}
             >
               {label}
@@ -76,6 +78,7 @@ export default function InputText({
             value={value}
             readOnly={readOnly}
             onChange={(e) => onChange?.(e)}
+            maxLength={max}
           />
         </div>
         {isErrorActive && <ErrorIcon />}

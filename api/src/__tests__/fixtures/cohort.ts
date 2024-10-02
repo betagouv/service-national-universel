@@ -1,6 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { COHORT_TYPE } from "snu-lib";
-import { CohortType } from "../../models";
+import { COHORT_TYPE, CohortType } from "snu-lib";
 
 function getNewCohortFixture(object: Partial<CohortType> = {}): Partial<CohortType> {
   return {

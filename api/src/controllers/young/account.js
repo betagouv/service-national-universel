@@ -20,7 +20,7 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
       gender: Joi.string().valid("male", "female").required(),
       phone: Joi.string().required(),
       phoneZone: Joi.string().required(),
-      psc1Info: Joi.string().valid("true", "false"),
+      psc1Info: Joi.string().valid("true", "false").allow(null),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -70,7 +70,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       department: Joi.string().trim().required(),
       region: Joi.string().trim().required(),
       cityCode: Joi.string().trim().default("").allow("", null),
-      status: Joi.string().valid("VALIDATED", "WAITING_LIST", "NOT_ELIGIBLE").allow(null),
+      status: Joi.string().valid("VALIDATED", "WAITING_LIST", "NOT_ELIGIBLE", "WAITING_VALIDATION").allow(null),
       cohort: Joi.string().allow(null),
     }).validate(req.body, { stripUnknown: true });
 

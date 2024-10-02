@@ -91,7 +91,7 @@ export default function Index() {
     }
 
     if (!Object.keys(PROFESSIONNAL_PROJECT).includes(data.professionnalProject)) {
-      errors.professionnalProject = "Vous devez précisez votre projet professionnel";
+      errors.professionnalProject = "Vous devez préciser votre projet professionnel";
       validated = false;
     }
     if (data.professionnalProject !== PROFESSIONNAL_PROJECT.UNKNOWN) {
@@ -103,50 +103,50 @@ export default function Index() {
 
     if (data.desiredLocationToggle) {
       if (data.desiredLocation === null || data.desiredLocation === undefined || data.desiredLocation.trim().length === 0) {
-        errors.desiredLocation = "Vous devez précisez l'endroit désiré.";
+        errors.desiredLocation = "Vous devez préciser l'endroit désiré.";
         validated = false;
       }
     }
 
     if (data.engaged) {
       if (data.engagedDescription === null || data.engagedDescription === undefined || data.engagedDescription.trim().length === 0) {
-        errors.engagedDescription = "Vous devez précisez votre activité bénévole.";
+        errors.engagedDescription = "Vous devez préciser votre activité bénévole.";
         validated = false;
       }
     }
 
     if (!Object.keys(PREF_FORMATS).includes(data.missionFormat)) {
-      errors.missionFormat = "Vous devez précisez votre format préféré";
+      errors.missionFormat = "Vous devez préciser votre format préféré";
       validated = false;
     }
 
     if (!Object.keys(PERIOD).includes(data.period)) {
-      errors.period = "Vous devez précisez une période de réalisation de la mission";
+      errors.period = "Vous devez préciser une période de réalisation de la mission";
       validated = false;
     }
 
     if (data.mobilityTransport.includes(TRANSPORT.OTHER)) {
       if (data.mobilityTransportOther === null || data.mobilityTransportOther === undefined || data.mobilityTransportOther.trim().length === 0) {
-        errors.mobilityTransportOther = "Vous devez précisez votre autre moyen de transport privilégié.";
+        errors.mobilityTransportOther = "Vous devez préciser votre autre moyen de transport privilégié.";
         validated = false;
       }
     }
 
     if (data.mobilityNearRelative) {
       if (data.mobilityNearRelativeName === null || data.mobilityNearRelativeName === undefined || data.mobilityNearRelativeName.trim().length === 0) {
-        errors.mobilityNearRelativeName = "Vous devez précisez le nom de votre proche.";
+        errors.mobilityNearRelativeName = "Vous devez préciser le nom de votre proche.";
         validated = false;
       }
       if (data.mobilityNearRelativeAddress === null || data.mobilityNearRelativeAddress === undefined || data.mobilityNearRelativeAddress.trim().length === 0) {
-        errors.mobilityNearRelativeAddress = "Vous devez précisez l'adresse de votre proche.";
+        errors.mobilityNearRelativeAddress = "Vous devez préciser l'adresse de votre proche.";
         validated = false;
       }
       if (data.mobilityNearRelativeZip === null || data.mobilityNearRelativeZip === undefined || data.mobilityNearRelativeZip.trim().length === 0) {
-        errors.mobilityNearRelativeZip = "Vous devez précisez le code postal de votre proche.";
+        errors.mobilityNearRelativeZip = "Vous devez préciser le code postal de votre proche.";
         validated = false;
       }
       if (data.mobilityNearRelativeCity === null || data.mobilityNearRelativeCity === undefined || data.mobilityNearRelativeCity.trim().length === 0) {
-        errors.mobilityNearRelativeCity = "Vous devez précisez la ville de votre proche.";
+        errors.mobilityNearRelativeCity = "Vous devez préciser la ville de votre proche.";
         validated = false;
       }
     }

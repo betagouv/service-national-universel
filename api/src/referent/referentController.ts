@@ -1,5 +1,5 @@
 import express, { Response } from "express";
-const { logger } = require("../logger");
+import { logger } from "../logger";
 import passport from "passport";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
@@ -26,8 +26,9 @@ import {
   CohesionCenterModel,
   EtablissementDocument,
   ClasseDocument,
-  YoungType,
   CohortModel,
+  SessionPhase1Document,
+  CohesionCenterDocument,
 } from "../models";
 
 import emailsEmitter from "../emails";
@@ -94,13 +95,21 @@ import {
   EQUIVALENCE_STATUS,
   YOUNG_SITUATIONS,
   CLE_FILIERE,
+  canValidateMultipleYoungsInClass,
+  ClasseSchoolYear,
+  canUpdateInscriptionGoals,
+  FUNCTIONAL_ERRORS,
+  YoungType,
+  STATUS_CLASSE,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
-import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
+import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
+import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
+import { ca } from "date-fns/locale";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -192,7 +201,7 @@ router.post("/signup", async (req: UserRequest, res: Response) => {
 
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
 
     //Create structure
     const { name, description, legalStatus, types, zip, region, department, sousType } = value;
@@ -211,6 +220,10 @@ router.post("/signup", async (req: UserRequest, res: Response) => {
     user.set({ structureId: structure._id });
     await user.save({ fromUser: user });
 
+    await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent.STRUCTURE_WELCOME, {
+      emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+      params: { firstName: user.firstName, email: user.email },
+    });
     return res.status(200).send({ user, token, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
@@ -245,12 +258,12 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
-    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     else if (type === "young") {
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     }
 
-    return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
+    return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -278,8 +291,8 @@ router.post("/restore_signin", passport.authenticate("referent", { session: fals
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
-    return res.status(200).send({ ok: true, token, data: serializeReferent(user, user) });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+    return res.status(200).send({ ok: true, token, data: serializeReferent(user) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -359,7 +372,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
     });
 
-    return res.status(200).send({ data: serializeReferent(referent, req.user), ok: true });
+    return res.status(200).send({ data: serializeReferent(referent), ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
@@ -415,7 +428,7 @@ router.post("/signup_verify", async (req: UserRequest, res: Response) => {
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    return res.status(200).send({ ok: true, token, data: serializeReferent(referent, referent) });
+    return res.status(200).send({ ok: true, token, data: serializeReferent(referent) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -458,7 +471,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
@@ -479,7 +492,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
       });
     }
 
-    return res.status(200).send({ data: serializeReferent(referent, referent), token, ok: true });
+    return res.status(200).send({ data: serializeReferent(referent), token, ok: true });
   } catch (error) {
     capture(error);
     return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -513,6 +526,14 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
+
+    // Vérification des objectifs à la validation d'un jeune
+    if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
+      const fillingRate = await getFillingRate(young.department, young.cohort);
+      if (fillingRate >= FILLING_RATE_LIMIT) {
+        return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
+      }
+    }
 
     if (newYoung.status === "REINSCRIPTION") {
       newYoung.cohesionStayPresence = undefined;
@@ -583,6 +604,39 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
     }
 
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.hasStartedReinscription === false) {
+      newYoung.inscriptionStep2023 = "DONE";
+    } else if (newYoung.status === YOUNG_STATUS.VALIDATED && young.hasStartedReinscription === true) {
+      newYoung.reinscriptionStep2023 = "DONE";
+    }
+
+    // verification des dates de fin d'instruction si jeune est VALIDATED
+    if (newYoung.status === YOUNG_STATUS.VALIDATED) {
+      if (young.source === YOUNG_SOURCE.CLE) {
+        const classe = await ClasseModel.findById(young.classeId);
+        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const cohort = await CohortModel.findById(classe.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInsctructionOpen = now < cohort.instructionEndDate;
+        if (!isInsctructionOpen) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+        const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+        if (remainingPlaces <= 0) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      } else {
+        const cohort = await CohortModel.findById(young.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInsctructionOpen = now < cohort.instructionEndDate;
+        if (!isInsctructionOpen) {
+          return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+    }
+
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
@@ -600,6 +654,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (await shouldSwitchYoungByIdToLC(id, value.status)) {
       await switchYoungByIdToLC(id);
     }
+    await mightAddInProgressStatus(young, req.user);
 
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
@@ -625,20 +680,53 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(req.user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+    if (!canValidateMultipleYoungsInClass(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const youngs = await YoungModel.find({ _id: { $in: payload.youngIds }, source: "CLE" });
+    if (!youngs) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (youngs.length !== payload.youngIds.length) return res.status(404).send({ ok: false, code: ERRORS.BAD_REQUEST });
 
-    for (const young of youngs) {
-      young.set({ status: payload.status });
-      await young.save({ fromUser: req.user });
-      await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
+    const classeIds = youngs.map((y) => y.classeId);
+
+    const classes = await ClasseModel.find({ _id: { $in: classeIds } });
+    if (!classes.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (payload.status === YOUNG_STATUS.VALIDATED) {
+      for (const classe of classes) {
+        const cohort = await CohortModel.findById(classe.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInstructionOpen = now < new Date(cohort.instructionEndDate);
+        if (!isInstructionOpen) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `Classe ${classe._id} is closed` });
+        }
+        const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+        if (youngs.length > remainingPlaces) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `No seats left in classe ${classe._id}` });
+        }
+      }
     }
 
-    return res.status(200).send({ ok: true, data: payload.youngIds });
+    const youngsSet: string[] = [];
+
+    await Promise.all(
+      youngs.map(async (young) => {
+        try {
+          young.set({ status: payload.status });
+          await young.save({ fromUser: req.user });
+          if (payload.status === YOUNG_STATUS.VALIDATED) {
+            await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
+          }
+          youngsSet.push(young._id);
+        } catch (e) {
+          capture(e);
+        }
+      }),
+    );
+
+    return res.status(200).send({ ok: true, data: youngsSet });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -725,7 +813,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       youngStatus = getYoungStatus(young) as YoungType["status"];
     }
 
-    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
+    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] as string);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
@@ -1154,7 +1242,7 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        const scanResult = await scanFile(tempFilePath, name, req.user);
+        const scanResult = await scanFile(tempFilePath, name);
         if (scanResult.infected) {
           return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
@@ -1243,7 +1331,8 @@ async function populateReferent(ref) {
     if (!classes) throw new Error(ERRORS.NOT_FOUND);
     ref.classe = classes;
 
-    const etablissement = await EtablissementModel.findById(classes[0].etablissementId).lean();
+    const lastClasse = classes.find((classe) => classe.schoolYear === ClasseSchoolYear.YEAR_2024_2025) || classes[0];
+    const etablissement = await EtablissementModel.findById(lastClasse.etablissementId).lean();
     if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
     ref.etablissement = etablissement;
   }
@@ -1260,7 +1349,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     let referent = await ReferentModel.findById(checkedId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    referent = serializeReferent(referent, req.user);
+    referent = serializeReferent(referent);
 
     await populateReferent(referent);
 
@@ -1471,12 +1560,11 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    let sessions = await SessionPhase1Model.find({ headCenterId: checkedId });
+    let sessions: SessionPhase1Document<{ cohesionCenter?: CohesionCenterDocument }>[] = await SessionPhase1Model.find({ headCenterId: checkedId });
     const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId?.toString()) } });
     if (JoiQueryWithCohesionCenter.value === "true") {
       sessions = sessions.map((s) => {
-        // @ts-expect-error FIXME: populate cohesionCenter does not exist in SessionPhase1Type
-        s._doc.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId?.toString());
+        s._doc!.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId?.toString());
         return s;
       });
     }

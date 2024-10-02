@@ -26,6 +26,10 @@ import YoungListHeader from "./components/YoungListHeader";
 
 const pageId = "youngCle-list";
 
+interface YoungDtoWithClasse extends YoungDto {
+  classe: ClasseDto;
+}
+
 export default function List() {
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
@@ -33,14 +37,13 @@ export default function List() {
   const [youngList, setYoungList] = useState([]);
   const [students, setStudents] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<any>({});
-  const [selectedYoungs, setSelectedYoungs] = useState<YoungDto[]>([]);
+  const [selectedYoungs, setSelectedYoungs] = useState<YoungDtoWithClasse[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [paramData, setParamData] = useState({
     page: 0,
   });
   const [size, setSize] = useState(10);
-  const [lastUpdateKey, setLastUpdateKey] = useState("");
 
   const { tabId } = useParams<{ tabId?: "general" | "consent" | "validation" | "image" }>();
   const currentTab = tabId || "general";
@@ -77,7 +80,7 @@ export default function List() {
       studentsWaitingValidation: 0,
       studentsWaitingImageRights: 0,
     };
-  }, [selectedFilters]);
+  }, [selectedFilters, youngList]);
 
   const getDataForExport = async () => {
     try {
@@ -91,7 +94,7 @@ export default function List() {
       });
       const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
         filters: {},
-        exportFields: ["name", "uniqueKeyAndId"],
+        exportFields: ["name", "uniqueKeyAndId", "totalSeats", "seatsTaken", "status"],
       });
 
       const res = await api.post(`/elasticsearch/cle/young/search`, {
@@ -113,6 +116,10 @@ export default function List() {
 
   const initFilters = () => {
     setYoungList([]);
+    setSelectedYoungs([]);
+    setSelectAll(false);
+    setSize(10);
+    setParamData({ page: 0 });
     if (currentTab === "general") {
       setSelectedFilters((prevFilters) => {
         const { inscriptionStep2023, status, imageRight, ...rest } = prevFilters;
@@ -143,10 +150,6 @@ export default function List() {
         };
       });
     }
-    setSelectedYoungs([]);
-    setSelectAll(false);
-    setSize(10);
-    setParamData({ page: 0 });
   };
 
   useEffect(() => {
@@ -156,7 +159,7 @@ export default function List() {
   if (!sessionsPhase1 || !bus || !classes) return <Loader />;
 
   return (
-    <Page key={lastUpdateKey}>
+    <Page>
       <Header
         title="Liste de mes élèves"
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes élèves" }]}
@@ -165,7 +168,7 @@ export default function List() {
       {!students && (
         <Container className="!p-8">
           <div className="py-6 bg-gray-50">
-            <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore d'élèves inscrit</div>
+            <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore d'élèves inscrits</div>
             <div className="flex items-start justify-center h-[136px]">
               <Link to="/classes">
                 <Button type="wired" title="Voir mes classes" />
@@ -215,7 +218,7 @@ export default function List() {
                       selectedYoungs={selectedYoungs}
                       setSelectedYoungs={setSelectedYoungs}
                       setSelectAll={setSelectAll}
-                      onYoungsChange={() => setLastUpdateKey(new Date().toISOString())}
+                      onYoungsChange={() => initFilters()}
                     />
                   )}
                   {currentTab === "validation" && !!studentsCount?.studentsWaitingValidation && (
@@ -223,7 +226,7 @@ export default function List() {
                       selectedYoungs={selectedYoungs}
                       setSelectedYoungs={setSelectedYoungs}
                       setSelectAll={setSelectAll}
-                      onYoungsChange={() => setLastUpdateKey(new Date().toISOString())}
+                      onYoungsChange={() => initFilters()}
                     />
                   )}
                   {currentTab === "image" && !!studentsCount?.studentsWaitingImageRights && (
@@ -231,7 +234,7 @@ export default function List() {
                       selectedYoungs={selectedYoungs}
                       setSelectedYoungs={setSelectedYoungs}
                       setSelectAll={setSelectAll}
-                      onYoungsChange={() => setLastUpdateKey(new Date().toISOString())}
+                      onYoungsChange={() => initFilters()}
                     />
                   )}
 
@@ -298,28 +301,13 @@ export default function List() {
                             <Fragment key={young._id}>
                               {currentTab === "general" && <YoungRowGeneral young={young} />}
                               {currentTab === "consent" && (
-                                <YoungRowConsent
-                                  young={young}
-                                  selectedYoungs={selectedYoungs}
-                                  onYoungSelected={setSelectedYoungs}
-                                  onChange={() => setLastUpdateKey(new Date().toISOString())}
-                                />
+                                <YoungRowConsent young={young} selectedYoungs={selectedYoungs} onYoungSelected={setSelectedYoungs} onChange={() => initFilters()} />
                               )}
                               {currentTab === "validation" && (
-                                <YoungRowValidation
-                                  young={young}
-                                  selectedYoungs={selectedYoungs}
-                                  onYoungSelected={setSelectedYoungs}
-                                  onChange={() => setLastUpdateKey(new Date().toISOString())}
-                                />
+                                <YoungRowValidation young={young} selectedYoungs={selectedYoungs} onYoungSelected={setSelectedYoungs} onChange={() => initFilters()} />
                               )}
                               {currentTab === "image" && (
-                                <YoungRowImageRight
-                                  young={young}
-                                  selectedYoungs={selectedYoungs}
-                                  onYoungSelected={setSelectedYoungs}
-                                  onChange={() => setLastUpdateKey(new Date().toISOString())}
-                                />
+                                <YoungRowImageRight young={young} selectedYoungs={selectedYoungs} onYoungSelected={setSelectedYoungs} onChange={() => initFilters()} />
                               )}
                             </Fragment>
                           ))}

@@ -135,6 +135,46 @@ router.get("/:cohort", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
+router.get("/:cohortId/public", async (req: UserRequest, res: Response) => {
+  try {
+    const { error, value } = Joi.object({
+      cohortId: Joi.string().required(),
+    })
+      .unknown()
+      .validate(req.params, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const cohort = await CohortModel.findById(value.cohortId);
+
+    if (!cohort) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    const data = {
+      _id: cohort._id,
+      name: cohort.name,
+      type: cohort.type,
+      dateStart: cohort.dateStart,
+      dateEnd: cohort.dateEnd,
+      isAssignmentAnnouncementsOpenForYoung: cohort.isAssignmentAnnouncementsOpenForYoung,
+      inscriptionStartDate: cohort.inscriptionStartDate,
+      inscriptionEndDate: cohort.inscriptionEndDate,
+      instructionEndDate: cohort.instructionEndDate,
+      inscriptionModificationEndDate: cohort.inscriptionModificationEndDate,
+      reInscriptionStartDate: cohort.reInscriptionStartDate,
+      reInscriptionEndDate: cohort.reInscriptionEndDate,
+      pdrChoiceLimitDate: cohort.pdrChoiceLimitDate,
+    };
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/bysession/:sessionId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({

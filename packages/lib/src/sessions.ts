@@ -2,6 +2,10 @@ import { regionsListDROMS } from "./region-and-departments";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { isCle } from "./young";
 import { getZonedDate } from "./utils/date";
+import { EtablissementDto } from "./dto";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { shouldDisplayDateByCohortName } from "./utils/cohortUtils";
 
 const COHORTS_WITH_JDM_COUNT = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
 
@@ -13,29 +17,53 @@ const getCohortEndDate = (cohort) => {
   return new Date(cohort.dateEnd);
 };
 
+const getSchoolYear = (etablissement: EtablissementDto) => {
+  const schoolYears = etablissement?.schoolYears || [];
+  return schoolYears[schoolYears.length - 1];
+};
+
 const getCohortYear = (cohort) => cohort?.dateStart?.slice(0, 4);
 
 const getCohortPeriod = (cohort, withBold = false) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
-  if (cohort.name === "à venir") return "à venir";
-  const startDate = getZonedDate(cohort.dateStart);
-  const endDate = getZonedDate(cohort.dateEnd);
 
-  const endDateformatOptions = { year: "numeric", month: "long", day: "numeric" };
-  const startDateformatOptions: Partial<typeof endDateformatOptions> = { day: "numeric" };
-  if (startDate.getMonth() !== endDate.getMonth()) {
-    startDateformatOptions.month = "long";
+  if(!shouldDisplayDateByCohortName(cohort.name)) {
+    return "à venir";
   }
-  if (startDate.getFullYear() !== endDate.getFullYear()) {
-    startDateformatOptions.year = "numeric";
+
+  // Fonction pour formater les dates avec la localisation française
+  const formatDate = (dateString, dateFormat) => {
+    return format(new Date(dateString), dateFormat, { locale: fr });
+  };
+
+  // Formater les mois et années pour comparaison
+  const startMonthYear = formatDate(cohort.dateStart, "MMMM yyyy");
+  const endMonthYear = formatDate(cohort.dateEnd, "MMMM yyyy");
+  const startYear = formatDate(cohort.dateStart, "yyyy");
+  const endYear = formatDate(cohort.dateEnd, "yyyy");
+
+  let formattedPeriod;
+
+  // Si même mois et même année
+  if (startMonthYear === endMonthYear) {
+    formattedPeriod = `du ${formatDate(cohort.dateStart, "d")} au ${formatDate(cohort.dateEnd, "d MMMM yyyy")}`;
   }
-  const formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions as any).format(startDate);
-  const formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions as any).format(endDate);
+  // Si même année mais mois différents
+  else if (startYear === endYear) {
+    formattedPeriod = `du ${formatDate(cohort.dateStart, "d MMMM")} au ${formatDate(cohort.dateEnd, "d MMMM yyyy")}`;
+  }
+  // Si mois et années différents
+  else {
+    formattedPeriod = `du ${formatDate(cohort.dateStart, "d MMMM yyyy")} au ${formatDate(cohort.dateEnd, "d MMMM yyyy")}`;
+  }
 
-  if (withBold) return `du <b>${formattedStart} au ${formattedEnd}</b>`;
+  // Si `withBold` est activé, on retourne le texte avec des balises <b>
+  if (withBold) return `<b>${formattedPeriod}</b>`;
 
-  return `du ${formattedStart} au ${formattedEnd}`;
+  return formattedPeriod;
 };
+
+
 
 const formatShortCohortPeriod = (cohort) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
@@ -168,6 +196,7 @@ function canApplyToPhase2(young, cohort) {
 }
 
 export {
+  getSchoolYear,
   getCohortYear,
   getCohortPeriod,
   formatCohortPeriod,

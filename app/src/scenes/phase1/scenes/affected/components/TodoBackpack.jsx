@@ -82,7 +82,7 @@ export default function TodoBackpack({ lunchBreak, data }) {
           <div className="flex items-baseline gap-4">
             <input type="checkbox" name="collation" id="collation" checked={todo.collation} onChange={handleCheck} />
             <label htmlFor="collation">
-              Une <strong>collation ou un déjeuner froid</strong> pour le repas.
+              Un <strong>repas froid</strong> selon la durée de votre trajet.
             </label>
           </div>
         )}

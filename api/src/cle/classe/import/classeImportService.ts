@@ -1,6 +1,6 @@
 import { getFile } from "../../../utils";
 import { readCSVBuffer } from "../../../services/fileService";
-import { ClasseCohortCSV, ClasseCohortImportKey, ClasseCohortImportResult } from "./classeCohortImport";
+import { ClasseCohortCSV, ClasseCohortImportKey, ClasseCohortImportResult, ClasseCohortMapped } from "./classeCohortImport";
 import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
 import { ClasseDocument, ClasseModel, CohortModel } from "../../../models";
 import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE } from "snu-lib";
@@ -18,36 +18,38 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
   }
 
   const classesCohortsImportResult: ClasseCohortImportResult[] = [];
-  for (const classeCohortToImport of classesCohortsToImportMapped) {
-    const classeCohortImportResult: ClasseCohortImportResult = { ...classeCohortToImport };
+  for (const classeCohortToImportMapped of classesCohortsToImportMapped) {
+    const classeCohortImportResult: ClasseCohortImportResult = { ...classeCohortToImportMapped };
     try {
-      const updatedClasse: ClasseDocument = await addCohortToClasseByCohortSnuId(classeCohortToImport.classeId, classeCohortToImport.cohortCode, classeCohortImportKey);
+      const updatedClasse: ClasseDocument = await addCohortToClasseByCohortSnuId(classeCohortToImportMapped, classeCohortImportKey);
       classeCohortImportResult.cohortId = updatedClasse.cohortId;
       classeCohortImportResult.cohortName = updatedClasse.cohort;
       classeCohortImportResult.classeStatus = updatedClasse.status;
+      classeCohortImportResult.classeEstimatedSeats = updatedClasse.estimatedSeats;
       classeCohortImportResult.result = "success";
     } catch (error) {
-      logger.error(error.stack);
+      logger.warn(error.stack);
+      classeCohortImportResult.classeEstimatedSeats = undefined;
       classeCohortImportResult.result = "error";
       classeCohortImportResult.error = error.message;
     } finally {
-      classeCohortImportResult.cohortCode = classeCohortToImport.cohortCode;
+      classeCohortImportResult.cohortCode = classeCohortToImportMapped.cohortCode;
       classesCohortsImportResult.push(classeCohortImportResult);
     }
   }
   return classesCohortsImportResult;
 };
 
-export const addCohortToClasseByCohortSnuId = async (classeId: string, cohortSnuId: string | undefined, classeCohortImportKey: ClasseCohortImportKey) => {
-  if (!cohortSnuId) {
+export const addCohortToClasseByCohortSnuId = async (classeCohortToImportMapped: ClasseCohortMapped, classeCohortImportKey: ClasseCohortImportKey) => {
+  if (!classeCohortToImportMapped.cohortCode) {
     throw new Error(FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED);
   }
-  const cohort = await findCohortBySnuIdOrThrow(cohortSnuId);
-  return addCohortToClasse(classeId, cohort._id, classeCohortImportKey);
+  const cohort = await findCohortBySnuIdOrThrow(classeCohortToImportMapped.cohortCode);
+  return addCohortToClasse(classeCohortToImportMapped, cohort._id, classeCohortImportKey);
 };
 
-export const addCohortToClasse = async (classeId: string, cohortId: string, classeCohortImportKey: ClasseCohortImportKey) => {
-  if (!classeId) {
+export const addCohortToClasse = async (classeCohortToImportMapped: ClasseCohortMapped, cohortId: string, classeCohortImportKey: ClasseCohortImportKey) => {
+  if (!classeCohortToImportMapped.classeId) {
     throw new Error(FUNCTIONAL_ERRORS.NO_CLASSE_ID_PROVIDED);
   }
   if (!cohortId) {
@@ -57,11 +59,11 @@ export const addCohortToClasse = async (classeId: string, cohortId: string, clas
   if (!cohort) {
     throw new Error(ERRORS.COHORT_NOT_FOUND);
   }
-  const classe = await ClasseModel.findById(classeId);
+  const classe = await ClasseModel.findById(classeCohortToImportMapped.classeId);
   if (!classe) {
     throw new Error(ERRORS.CLASSE_NOT_FOUND);
   }
-  classe.set({ cohortId: cohortId, cohort: cohort.name, status: STATUS_CLASSE.ASSIGNED });
-  logger.info(`classeImportService - addCohortToClasse() - Classe ${classeId} updated with cohort ${cohortId} - ${cohort.name}`);
+  classe.set({ cohortId: cohortId, cohort: cohort.name, status: STATUS_CLASSE.ASSIGNED, estimatedSeats: classeCohortToImportMapped.classeEstimatedSeats });
+  logger.info(`classeImportService - addCohortToClasse() - Classe ${classeCohortToImportMapped.classeId} updated with cohort ${cohortId} - ${cohort.name}`);
   return classe.save({ fromUser: { firstName: `IMPORT_CLASSE_COHORT_${classeCohortImportKey}` } });
 };

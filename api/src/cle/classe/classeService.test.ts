@@ -1,29 +1,132 @@
 import { Types } from "mongoose";
 const ObjectId = Types.ObjectId;
 
-import { ROLES, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE, isNowBetweenDates, canEditEstimatedSeats, canEditTotalSeats, CLE_COLORATION } from "snu-lib";
+import {
+  ROLES,
+  LIMIT_DATE_ESTIMATED_SEATS,
+  LIMIT_DATE_TOTAL_SEATS,
+  STATUS_CLASSE,
+  isNowBetweenDates,
+  canEditEstimatedSeats,
+  canEditTotalSeats,
+  CLE_COLORATION,
+  ClasseCertificateKeys,
+  ERRORS,
+  FUNCTIONAL_ERRORS,
+  EtablissementType,
+} from "snu-lib";
 
-import { ClasseModel, CohortModel, YoungModel, EtablissementDocument, EtablissementType } from "../../models";
+import { ClasseModel, CohortModel, YoungModel, EtablissementDocument } from "../../models";
 
-import { buildUniqueClasseId, buildUniqueClasseKey, deleteClasse, getEstimatedSeatsByEtablissement } from "./classeService";
+import {
+  buildUniqueClasseId,
+  buildUniqueClasseKey,
+  canUpdateReferentClasseBasedOnStatus,
+  deleteClasse,
+  getEstimatedSeatsByEtablissement,
+  isClasseStatusCreated,
+  generateCertificateByKey,
+} from "./classeService";
+
 import * as youngService from "../../young/youngService";
 import ClasseStateManager from "./stateManager";
 import * as classService from "./classeService";
 
-const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
-const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
+const generateConvocationsByClasseIdSpy = jest.spyOn(classService, "generateConvocationsByClasseId");
+const generateConsentementByClasseIdSpy = jest.spyOn(classService, "generateConsentementByClasseId");
+const generateImageRightByClasseIdSpy = jest.spyOn(classService, "generateImageRightByClasseId");
 
-describe("ClasseService", () => {
-  it("should return a pdf", async () => {
-    const youngBuffer = Buffer.from("pdf");
+describe("ClasseService generateCertificateByKey", () => {
+  const youngBuffer = Buffer.from("pdf");
 
-    findYoungsByClasseIdSpy.mockReturnValue(Promise.resolve(new Array(50).fill({})));
-    generateConvocationsForMultipleYoungsSpy.mockReturnValue(Promise.resolve(youngBuffer));
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should call generateImageRightByClasseId when key is IMAGE", async () => {
+    generateImageRightByClasseIdSpy.mockResolvedValue(youngBuffer);
+
+    const resultPdf = await generateCertificateByKey(ClasseCertificateKeys.IMAGE, "classeId");
+
+    expect(generateImageRightByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateImageRightByClasseIdSpy).toHaveBeenCalledWith("classeId");
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("should call generateConsentementByClasseId when key is CONSENT", async () => {
+    generateConsentementByClasseIdSpy.mockResolvedValue(youngBuffer);
+
+    const resultPdf = await generateCertificateByKey(ClasseCertificateKeys.CONSENT, "classeId");
+
+    expect(generateConsentementByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateConsentementByClasseIdSpy).toHaveBeenCalledWith("classeId");
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("should call generateConvocationsByClasseId when key is CONVOCATION", async () => {
+    generateConvocationsByClasseIdSpy.mockResolvedValue(youngBuffer);
+
+    const resultPdf = await generateCertificateByKey(ClasseCertificateKeys.CONVOCATION, "classeId");
+
+    expect(generateConvocationsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(generateConvocationsByClasseIdSpy).toHaveBeenCalledWith("classeId");
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("should return undefined when key is invalid", async () => {
+    const resultPdf = await generateCertificateByKey("INVALID_KEY", "classeId");
+
+    expect(resultPdf).toBeUndefined();
+  });
+});
+
+describe("ClasseService generate certificate", () => {
+  const youngBuffer = Buffer.from("pdf");
+  const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    generateConvocationsByClasseIdSpy.mockRestore();
+    generateConsentementByClasseIdSpy.mockRestore();
+    generateImageRightByClasseIdSpy.mockRestore();
+  });
+
+  it("generateConvocationsByClasseId", async () => {
+    const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
+    findYoungsByClasseIdSpy.mockResolvedValue(new Array(50).fill({}));
+    generateConvocationsForMultipleYoungsSpy.mockResolvedValue(youngBuffer);
 
     const resultPdf = await classService.generateConvocationsByClasseId("classeId");
 
     expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledWith("classeId");
     expect(generateConvocationsForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("generateConsentementByClasseId", async () => {
+    const generateConsentementForMultipleYoungsSpy = jest.spyOn(youngService, "generateConsentementForMultipleYoungs");
+    findYoungsByClasseIdSpy.mockResolvedValue(new Array(50).fill({}));
+    generateConsentementForMultipleYoungsSpy.mockResolvedValue(youngBuffer);
+
+    const resultPdf = await classService.generateConsentementByClasseId("classeId");
+
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledWith("classeId");
+    expect(generateConsentementForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
+    expect(resultPdf).toEqual(youngBuffer);
+  });
+
+  it("generateImageRightByClasseId", async () => {
+    const generateImageRightForMultipleYoungsSpy = jest.spyOn(youngService, "generateImageRightForMultipleYoungs");
+    findYoungsByClasseIdSpy.mockResolvedValue(new Array(50).fill({}));
+    generateImageRightForMultipleYoungsSpy.mockResolvedValue(youngBuffer);
+
+    const resultPdf = await classService.generateImageRightByClasseId("classeId");
+
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledTimes(1);
+    expect(findYoungsByClasseIdSpy).toHaveBeenCalledWith("classeId");
+    expect(generateImageRightForMultipleYoungsSpy).toHaveBeenCalledTimes(1);
     expect(resultPdf).toEqual(youngBuffer);
   });
 });
@@ -311,15 +414,8 @@ describe("canEditTotalSeats", () => {
     jest.useRealTimers();
   });
 
-  it("should return false if user is ADMIN and date is before LIMIT_DATES_ESTIMATED_SEATS", () => {
+  it("should return true if user is ADMIN", () => {
     const user = { role: ROLES.ADMIN };
-    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000));
-    expect(canEditTotalSeats(user)).toBe(false);
-  });
-
-  it("should return true if user is ADMIN and date is after LIMIT_DATES_ESTIMATED_SEATS", () => {
-    const user = { role: ROLES.ADMIN };
-    jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() + 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user)).toBe(true);
   });
 
@@ -333,6 +429,22 @@ describe("canEditTotalSeats", () => {
     const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();
 
     expect(isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats)).toBe(true);
+    expect(canEditTotalSeats(user1)).toBe(true);
+    expect(canEditTotalSeats(user2)).toBe(true);
+  });
+
+  it("should return false if user is REFERENT_REGION or REFERENT_DEPARTMENT and date is after LIMIT_DATE_TOTAL_SEATS", () => {
+    const user1 = { role: ROLES.REFERENT_REGION };
+    const user2 = { role: ROLES.REFERENT_DEPARTMENT };
+    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() + 24 * 60 * 60 * 1000));
+    expect(canEditTotalSeats(user1)).toBe(false);
+    expect(canEditTotalSeats(user2)).toBe(false);
+  });
+
+  it("should return true if user is REFERENT_REGION or REFERENT_DEPARTMENT and date is before LIMIT_DATE_TOTAL_SEATS", () => {
+    const user1 = { role: ROLES.REFERENT_REGION };
+    const user2 = { role: ROLES.REFERENT_DEPARTMENT };
+    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user1)).toBe(true);
     expect(canEditTotalSeats(user2)).toBe(true);
   });
@@ -351,11 +463,6 @@ describe("canEditTotalSeats", () => {
     jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user1)).toBe(false);
     expect(canEditTotalSeats(user2)).toBe(false);
-  });
-
-  it("should return false if user is not ADMIN, ADMINISTRATEUR_CLE, or REFERENT_CLASSE", () => {
-    const user = { role: ROLES.RESPONSIBLE };
-    expect(canEditTotalSeats(user)).toBe(false);
   });
 });
 
@@ -539,5 +646,89 @@ describe("getEffectifPrevisionnelByEtablissement", () => {
 
     expect(result).toEqual(expectedResult);
     expect(ClasseModel.find).toHaveBeenCalledWith({ etablissementId: mockEtablissement._id });
+  });
+});
+
+describe("isClasseStatusCreated", () => {
+  it("should return true if classe status is CREATED", async () => {
+    const classeId = "123";
+    const mockClasse = { status: STATUS_CLASSE.CREATED };
+    const findByIdSpy = jest.spyOn(ClasseModel, "findById");
+    findByIdSpy.mockResolvedValue(mockClasse);
+
+    const result = await isClasseStatusCreated(classeId);
+
+    expect(result).toBe(true);
+    expect(findByIdSpy).toHaveBeenCalledWith(classeId);
+    findByIdSpy.mockRestore();
+  });
+
+  it("should return false if classe status is not CREATED", async () => {
+    const classeId = "123";
+    const mockClasse = { status: STATUS_CLASSE.VERIFIED };
+    const findByIdSpy = jest.spyOn(ClasseModel, "findById");
+    findByIdSpy.mockResolvedValue(mockClasse);
+
+    const result = await isClasseStatusCreated(classeId);
+
+    expect(result).toBe(false);
+    expect(findByIdSpy).toHaveBeenCalledWith(classeId);
+    findByIdSpy.mockRestore();
+  });
+
+  it("should throw an error if classe is not found", async () => {
+    const classeId = "123";
+    const findByIdSpy = jest.spyOn(ClasseModel, "findById");
+    findByIdSpy.mockResolvedValue(null);
+
+    await expect(isClasseStatusCreated(classeId)).rejects.toThrow(ERRORS.CLASSE_NOT_FOUND);
+    expect(findByIdSpy).toHaveBeenCalledWith(classeId);
+    findByIdSpy.mockRestore();
+  });
+});
+
+describe("canUpdateReferentClasseBasedOnStatus", () => {
+  it("should return true for super admin", async () => {
+    const user = { role: ROLES.ADMIN, subRole: "god" };
+    const classeId = new ObjectId().toString();
+    const isClasseStatusCreatedSpy = jest.spyOn(classService, "isClasseStatusCreated");
+
+    const result = await canUpdateReferentClasseBasedOnStatus(user, classeId);
+    console.log("result", result);
+
+    expect(result).toBe(true);
+    expect(isClasseStatusCreatedSpy).not.toHaveBeenCalled();
+  });
+
+  it("should return true if classe status is created", async () => {
+    const user = { role: ROLES.REFERENT_CLASSE };
+    const classeId = new ObjectId().toString();
+    const isClasseStatusCreatedSpy = jest.spyOn(classService, "isClasseStatusCreated");
+    isClasseStatusCreatedSpy.mockResolvedValue(true);
+
+    const result = await canUpdateReferentClasseBasedOnStatus(user, classeId);
+
+    expect(result).toBe(true);
+    expect(isClasseStatusCreated).toHaveBeenCalledWith(classeId);
+  });
+
+  it("should throw an error if classe status is not created", async () => {
+    const user = { role: ROLES.REFERENT_CLASSE };
+    const classeId = "testId";
+    const isClasseStatusCreatedSpy = jest.spyOn(classService, "isClasseStatusCreated");
+    isClasseStatusCreatedSpy.mockResolvedValue(false);
+
+    await expect(canUpdateReferentClasseBasedOnStatus(user, classeId)).rejects.toThrow(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    expect(isClasseStatusCreated).toHaveBeenCalledWith(classeId);
+  });
+
+  it("should throw an error if user is not super admin and classe status is not created", async () => {
+    const user = { role: ROLES.REFERENT_CLASSE };
+    const classeId = new ObjectId().toString();
+    const isClasseStatusCreatedSpy = jest.spyOn(classService, "isClasseStatusCreated");
+    isClasseStatusCreatedSpy.mockResolvedValue(false);
+
+    await expect(canUpdateReferentClasseBasedOnStatus(user, classeId)).rejects.toThrow(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    expect(isClasseStatusCreatedSpy).toHaveBeenCalledWith(classeId);
   });
 });

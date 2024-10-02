@@ -10,9 +10,12 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { translate } from "../../../utils";
+import { translate, validateId } from "../../../utils";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
+import { useQuery } from "@tanstack/react-query";
+import { fetchClass } from "@/services/classe.service";
+import Loader from "@/components/Loader";
 
 export default function StepConsentements() {
   const { young, isCLE } = useAuth();
@@ -24,6 +27,12 @@ export default function StepConsentements() {
   const [data, setData] = React.useState({
     consentment1: young?.consentment === "true",
     consentment2: young?.acceptCGU === "true",
+  });
+
+  const { data: classe, isLoading } = useQuery({
+    queryKey: ["class", young?.classeId],
+    queryFn: () => fetchClass(young?.classeId),
+    enabled: isCLE && validateId(young?.classeId),
   });
 
   const onSubmit = async () => {
@@ -38,7 +47,7 @@ export default function StepConsentements() {
       dispatch(setYoung(responseData));
       const eventName = isCLE ? "CLE/CTA inscription - consentement" : "Phase0/CTA inscription - consentement";
       plausibleEvent(eventName);
-      history.push("/inscription2023/representants");
+      history.push("/inscription/representants");
     } catch (e) {
       capture(e);
       setError({
@@ -54,6 +63,10 @@ export default function StepConsentements() {
     if (data.consentment1 && data.consentment2) setDisabled(false);
     else setDisabled(true);
   }, [data]);
+
+  if (isLoading) return <Loader />;
+
+  const cohortYear = isCLE ? classe?.schoolYear : getCohortYear(getCohort(young.cohort));
 
   return (
     <>
@@ -77,10 +90,10 @@ export default function StepConsentements() {
               {
                 label: (
                   <span>
-                    Me porte volontaire pour participer à la session <strong>{getCohortYear(getCohort(young.cohort))}</strong> du Service National Universel
+                    Me porte volontaire pour participer à la session <strong>{cohortYear}</strong> du Service National Universel qui comprend la participation à un séjour de
+                    cohésion puis la réalisation d'une phase d'engagement.
                   </span>
                 ),
-                hintText: <span className="text-base text-black">qui comprend la participation à un séjour de cohésion puis la réalisation d'une phase d'engagement.</span>,
                 nativeInputProps: {
                   checked: data.consentment1,
                   onChange: (e) => setData({ ...data, consentment1: e.target.checked }),
@@ -97,7 +110,7 @@ export default function StepConsentements() {
                       </>
                     )}
                     et m&apos;engage à en respecter le{" "}
-                    <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf" target="_blank" rel="noreferrer">
+                    <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur.pdf" target="_blank" rel="noreferrer">
                       règlement intérieur
                     </a>
                     .
@@ -111,7 +124,7 @@ export default function StepConsentements() {
             ]}
           />
         </div>
-        <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/coordonnee")} disabled={disabled || loading} />
+        <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription/coordonnee")} disabled={disabled || loading} />
       </DSFRContainer>
     </>
   );

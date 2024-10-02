@@ -212,7 +212,7 @@ export type SendMailParameters = {
   bcc?: Email[];
   attachment?: Array<{ content: string; name: string }>;
   params?: {
-    [key: string]: string | string[] | number | undefined;
+    [key: string]: string | string[] | number | null | undefined;
   };
 };
 

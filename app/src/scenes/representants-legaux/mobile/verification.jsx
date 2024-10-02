@@ -2,8 +2,7 @@ import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
-import { getDepartmentByZip, translate, translateGrade, getCohortPeriod, YOUNG_SOURCE } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
+import { getDepartmentByZip, translate, translateGrade, YOUNG_SOURCE, shouldDisplayDateByCohortName } from "snu-lib";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 import { concatPhoneNumberWithZone } from "snu-lib";
@@ -17,7 +16,7 @@ import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
-  const { young, token } = useContext(RepresentantsLegauxContext);
+  const { young, token, cohort } = useContext(RepresentantsLegauxContext);
   const [certified, setCertified] = React.useState(young?.parent1DataVerified);
   const [error, setError] = React.useState(null);
   const [saving, setSaving] = React.useState(false);
@@ -102,7 +101,7 @@ export default function Verification({ step, parentId }) {
           )}
         </div>
 
-        <ProfileDetails young={young} isCLE={isCLE} hasHandicap={hasHandicap} />
+        <ProfileDetails young={young} isCLE={isCLE} hasHandicap={hasHandicap} cohort={cohort} />
 
         {parentId === 1 && (
           <>
@@ -126,7 +125,7 @@ export default function Verification({ step, parentId }) {
   );
 }
 
-const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
+const ProfileDetails = ({ young, isCLE, hasHandicap, cohort }) => {
   return (
     <>
       <hr className="mt-4" />
@@ -134,15 +133,25 @@ const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
         <div className="flex items-center justify-between">
           <h1 className="mt-2 text-lg font-bold text-[#161616]">Ses informations personnelles</h1>
         </div>
-        <Details title="Prénom" value={young.lastName} />
-        <Details title="Nom" value={young.firstName} />
+        <Details title="Prénom" value={young.firstName} />
+        <Details title="Nom" value={young.lastName} />
+        <Details title="Date de naissance" value={new Date(young.birthdateAt).toLocaleDateString("fr-FR", { day: "numeric", month: "numeric", year: "numeric" })} />
         <Details title="Email" value={young.email} />
         <Details title="Son niveau scolaire" value={young.grade} />
         <Details title="Téléphone" value={concatPhoneNumberWithZone(young.phone, young.phoneZone)} />
         <hr className="mt-4" />
         <div className="flex flex-col gap-1">
           <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
-          <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div>
+          <div className="font-normal text-[#161616]">
+            {shouldDisplayDateByCohortName(cohort.name) ? (
+              <>
+                Du {new Date(cohort.dateStart).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} au{" "}
+                {new Date(cohort.dateEnd).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+              </>
+            ) : (
+              "à venir"
+            )}
+          </div>
         </div>
         <hr className="mt-4" />
         <div className="flex items-center justify-between">
@@ -180,6 +189,8 @@ const ProfileDetails = ({ young, isCLE, hasHandicap }) => {
         ) : (
           <Details title="Situation particulière" value="Non" />
         )}
+        <Details title="PSC1" value={translate(young.psc1Info)} />
+
         <hr className="mt-4" />
         <p className="text-[16px] leading-[20px] text-[#666666] text-left">
           {young.firstName} {young.lastName} a déclaré le(s) détenteur(s) de l'autorité parentale suivant(s) :{" "}
@@ -221,7 +232,3 @@ const Details = ({ title, value }) => {
     </div>
   );
 };
-
-function capitalizeFirstLetter(string) {
-  if (string) return string.charAt(0).toUpperCase() + string.slice(1);
-}

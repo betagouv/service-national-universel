@@ -1,15 +1,57 @@
 import crypto from "crypto";
-import { FUNCTIONAL_ERRORS, InvitationType, ReferentCreatedBy, ROLES, SUB_ROLES, YOUNG_STATUS } from "snu-lib";
+import {
+  ERRORS,
+  FUNCTIONAL_ERRORS,
+  InvitationType,
+  isSuperAdmin,
+  ReferentCreatedBy,
+  ROLES,
+  STATUS_CLASSE,
+  YOUNG_STATUS,
+  ClasseCertificateKeys,
+  ClasseType,
+  EtablissementType,
+  ReferentType,
+} from "snu-lib";
 
-import { ClasseDocument, ClasseModel, ClasseType, EtablissementDocument, EtablissementType, ReferentModel, ReferentType, YoungModel } from "../../models";
-import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../../young/youngService";
+import { ClasseDocument, ClasseModel, EtablissementDocument, ReferentModel, YoungModel } from "../../models";
+
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs, generateImageRightForMultipleYoungs, generateConsentementForMultipleYoungs } from "../../young/youngService";
 
 import { mapRegionToTrigramme } from "../../services/regionService";
+
+export type UpdateReferentClasse = Pick<ReferentType, "firstName" | "lastName" | "email">;
+
+export const generateCertificateByKey = async (key: string, id: string) => {
+  let certificates;
+  if (key === ClasseCertificateKeys.IMAGE) {
+    certificates = await generateImageRightByClasseId(id);
+  }
+  if (key === ClasseCertificateKeys.CONSENT) {
+    certificates = await generateConsentementByClasseId(id);
+  }
+  if (key === ClasseCertificateKeys.CONVOCATION) {
+    certificates = await generateConvocationsByClasseId(id);
+  }
+  return certificates;
+};
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
 
   return await generateConvocationsForMultipleYoungs(youngsInClasse);
+};
+
+export const generateImageRightByClasseId = async (classeId: string) => {
+  const youngsInClasse = await findYoungsByClasseId(classeId);
+
+  return await generateImageRightForMultipleYoungs(youngsInClasse);
+};
+
+export const generateConsentementByClasseId = async (classeId: string) => {
+  const youngsInClasse = await findYoungsByClasseId(classeId);
+
+  return await generateConsentementForMultipleYoungs(youngsInClasse);
 };
 
 export const deleteClasse = async (_id: string, fromUser: object) => {
@@ -87,11 +129,11 @@ export const getClasseById = async (classeId, withPopulate = true) => {
   if (withPopulate) {
     query = query
       .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
-      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })
-      .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
+      .populate({ path: "referents", options: { select: { _id: 1, firstName: 1, lastName: 1, role: 1, email: 1 } } })
+      .populate({ path: "cohesionCenter", options: { select: { _id: 1, name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
       .populate({ path: "session", options: { select: { _id: 1 } } })
-      .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
-      .populate({ path: "cohortDetails", options: { select: { dateStart: 1 } } });
+      .populate({ path: "pointDeRassemblement", options: { select: { _id: 1, name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
+      .populate({ path: "cohortDetails", options: { select: { _id: 1, dateStart: 1, dateEnd: 1 } } });
   }
 
   const classe = await query.exec();
@@ -109,8 +151,8 @@ export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
   if (withPopulate) {
     query = query
       .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1 } } })
-      .populate({ path: "cohortDetails", options: { select: { dateStart: 1 } } })
-      .populate({ path: "etablissement", options: { select: { name: 1 } } });
+      .populate({ path: "cohortDetails", options: { select: { dateStart: 1, dateEnd: 1 } } })
+      .populate({ path: "etablissement", options: { select: { name: 1, schoolYear: 1 } } });
   }
 
   const classe = await query.exec();
@@ -122,7 +164,7 @@ export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
   return classe;
 };
 
-export const updateReferent = async (classeId: string, newReferent: Pick<ReferentType, "firstName" | "lastName" | "email">, fromUser: object) => {
+export const updateReferentByClasseId = async (classeId: string, newReferent: UpdateReferentClasse, fromUser: object) => {
   const classe = await ClasseModel.findById(classeId);
   const referent = await ReferentModel.findOne({ email: newReferent.email });
 
@@ -146,4 +188,22 @@ export const updateReferent = async (classeId: string, newReferent: Pick<Referen
   const newReferentClasseCreated = await ReferentModel.create(newReferentClasse);
   classe?.set({ referentClasseIds: [newReferentClasseCreated._id] });
   return classe?.save({ fromUser });
+};
+
+export const canUpdateReferentClasseBasedOnStatus = async (user, classeId: string) => {
+  if (!isSuperAdmin(user)) {
+    const isClasseCreated = await isClasseStatusCreated(classeId);
+    if (!isClasseCreated) {
+      throw new Error(FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE);
+    }
+  }
+  return true;
+};
+
+export const isClasseStatusCreated = async (classeId: string) => {
+  const classe = await ClasseModel.findById(classeId);
+  if (!classe) {
+    throw new Error(ERRORS.CLASSE_NOT_FOUND);
+  }
+  return classe.status === STATUS_CLASSE.CREATED;
 };

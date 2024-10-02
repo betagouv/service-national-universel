@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { ID } from "../utils";
-import { getCohort } from "@/utils/cohorts";
 import dayjs from "dayjs";
-import { formatDateFR, translateCorrectionReason } from "snu-lib";
-import DatePicker from "../../../components/dsfr/forms/DatePicker";
+import { translateCorrectionReason } from "snu-lib";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
@@ -13,7 +11,7 @@ import FileImport from "@/components/dsfr/forms/FileImport";
 import Verify from "./VerifyDocument";
 import plausibleEvent from "@/services/plausible";
 import { SignupButtons } from "@snu/ds/dsfr";
-import { set } from "date-fns";
+import Input from "@/components/dsfr/forms/input";
 
 export default function StepUploadDesktop({
   recto,
@@ -21,7 +19,6 @@ export default function StepUploadDesktop({
   verso,
   setVerso,
   date,
-  setDate,
   error,
   setError,
   loading,
@@ -32,26 +29,47 @@ export default function StepUploadDesktop({
   setChecked,
   onSubmit,
   onCorrect,
+  day,
+  setDay,
+  month,
+  setMonth,
+  year,
+  setYear,
 }) {
   const young = useSelector((state) => state.Auth.young);
   const [hasChanged, setHasChanged] = useState(false);
   const [step, setStep] = useState(0);
   const history = useHistory();
   const imageFileTypes = ["image/jpeg", "image/png", "image/jpg"];
-  const isEnabled = validate();
+  const fullDate = day && month && year ? new Date(year, month - 1, day) : null;
 
   function validate() {
-    if (!dayjs(date).isValid()) {
-      return false;
+    let error = {};
+
+    if (!day || day < 1 || day > 31) {
+      error.day = "Veuillez entrer un jour valide, compris entre 1 et 31";
     }
-    if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) {
-      return false;
+    if (!month || month < 1 || month > 12) {
+      error.month = "Veuillez entrer un mois valide, compris entre 1 et 12";
+    }
+    if (!year || year < 1990 || year > 2070) {
+      error.year = "Veuillez entrer un mois valide, comprise entre 1990 et 2070.";
+    }
+    if (!dayjs(fullDate).isValid()) {
+      error.text = "Date invalide. Veuillez entrer une date valide.";
     }
     if (corrections?.length) {
-      return hasChanged && !loading && !error.text;
+      if (!hasChanged && !loading) {
+        error.text = "Veuillez Modifier vos informations personnelles";
+      } else {
+        return error;
+      }
     } else {
-      return (young?.files?.cniFiles?.length || (recto && (verso || category === "passport"))) && date && !loading && !error.text;
+      if (!recto || (category !== "passport" && !verso)) {
+        error.text = "Veuillez télécharger le recto et le verso de votre pièce d'identité.";
+      }
     }
+    return error;
   }
 
   function resetState() {
@@ -63,6 +81,11 @@ export default function StepUploadDesktop({
   }
 
   const handleOnClickNext = async () => {
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setError(errors);
+      return;
+    }
     //si correction on passe directement à la vérification
     if (corrections?.length) return onCorrect(resetState);
     //si pas de nouveaux fichiers on passe directement à la vérification
@@ -72,7 +95,7 @@ export default function StepUploadDesktop({
     if (areAllFilesImages) return setStep(1);
     else return onSubmit(resetState);
   };
-
+  console.log(error);
   if (step === 1)
     return (
       <>
@@ -126,7 +149,7 @@ export default function StepUploadDesktop({
 
       <hr className="my-8" />
 
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+      {Object.keys(error).length > 0 && error?.text && <Error {...error} onClose={() => setError({})} />}
 
       <p className="my-4">
         Ajouter <strong>le recto</strong>
@@ -156,26 +179,42 @@ export default function StepUploadDesktop({
         .
       </div>
 
-      {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
+      {(recto || verso || date) && (
+        <ExpirationDate
+          day={day}
+          setDay={setDay}
+          month={month}
+          setMonth={setMonth}
+          year={year}
+          setYear={setYear}
+          onChange={() => setHasChanged(true)}
+          error={error}
+          setError={setError}
+          corrections={corrections}
+          category={category}
+        />
+      )}
 
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      <SignupButtons onClickNext={handleOnClickNext} disabled={!isEnabled} onClickPrevious={() => history.push("/inscription2023/documents")} />
+      {Object.keys(error).length > 0 && error?.text && <Error {...error} onClose={() => setError({})} />}
+      <SignupButtons
+        onClickNext={handleOnClickNext}
+        disabled={loading}
+        onClickPrevious={() => {
+          if (corrections?.length) {
+            history.push("/inscription/correction/documents");
+          } else {
+            history.push("/inscription/documents");
+          }
+        }}
+      />
     </>
   );
 }
 
-function ExpirationDate({ date, setDate, onChange, corrections, category }) {
+function ExpirationDate({ day, setDay, month, setMonth, year, setYear, onChange, error, corrections, category }) {
   const young = useSelector((state) => state.Auth.young);
-  const [error, setError] = useState(false);
 
-  const handleChange = (date) => {
-    setDate(date);
-    onChange && onChange();
-
-    if (!date) return setError("Veuillez renseigner une date d'expiration.");
-    if (dayjs(date).year() < 1990 || dayjs(date).year() > 2070) return setError("Veuillez renseigner une date d'expiration valide. Elle doit être comprise entre 1990 et 2070.");
-    setError(false);
-  };
+  const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
 
   return (
     <>
@@ -185,8 +224,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
           <div className="text-xl font-medium">Renseignez la date d’expiration</div>
           {young.cohort !== "à venir" && (
             <div className="mt-2 mb-8 leading-loose text-gray-600">
-              Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(formatDateFR(getCohort(young.cohort).dateStart))}
-              ).
+              Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {dayjs(young.cohort.dateStart).format("DD/MM/YYYY")}).
             </div>
           )}
           {corrections
@@ -205,14 +243,59 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
       <div>
         <label className="flex-start mt-2 flex w-full flex-col text-base">
           Date d&apos;expiration
-          <DatePicker
-            state={error ? "error" : "default"}
-            errorText={error}
-            initialValue={date}
-            onChange={(date) => {
-              handleChange(date);
-            }}
-          />
+          <div className="grid grid-cols-3 gap-4">
+            <Input
+              id="day"
+              type="number"
+              min="1"
+              max="31"
+              value={day}
+              onKeyDown={blockInvalidChar}
+              onChange={(e) => {
+                setDay(e);
+                onChange();
+              }}
+              placeholder="Jour"
+              hintText="Exemple : 14"
+              maxLength="2"
+              state={error.day ? "error" : "default"}
+              stateRelatedMessage={error.day}
+            />
+            <Input
+              id="month"
+              type="number"
+              min="1"
+              max="12"
+              value={month}
+              onKeyDown={blockInvalidChar}
+              onChange={(e) => {
+                setMonth(e);
+                onChange();
+              }}
+              placeholder="Mois"
+              hintText="Exemple : 12"
+              maxLength="2"
+              state={error.month ? "error" : "default"}
+              stateRelatedMessage={error.month}
+            />
+            <Input
+              id="year"
+              type="number"
+              min="1990"
+              max="2070"
+              value={year}
+              onKeyDown={blockInvalidChar}
+              onChange={(e) => {
+                setYear(e);
+                onChange();
+              }}
+              placeholder="Année"
+              hintText="Exemple : 2024"
+              maxLength="4"
+              state={error.year ? "error" : "default"}
+              stateRelatedMessage={error.year}
+            />
+          </div>
         </label>
       </div>
     </>
