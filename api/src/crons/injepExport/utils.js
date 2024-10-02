@@ -30,18 +30,12 @@ const printSlackInfo = (rapport) => {
   }, "");
 };
 
-const generateYoungsExport = async (cohortName, afterSession = false, action = "upload") => {
+const generateYoungsExport = async (cohort, afterSession = false, action = "upload") => {
   console.log("Début de l'export");
   console.time("export_injep");
 
-  const cohort = await CohortModel.findOne({ name: cohortName });
-  if (!cohort) {
-    console.error(`Cohorte ${cohortName} non trouvée`);
-    return;
-  }
-
   let result = [];
-  const q = { cohort: cohortName, status: "VALIDATED" };
+  const q = { cohort: cohort.name, status: "VALIDATED" };
   if (afterSession) {
     q.statusPhase1 = { $in: ["DONE", "NOT_DONE"] };
   }
@@ -61,7 +55,6 @@ const generateYoungsExport = async (cohortName, afterSession = false, action = "
   const classesMap = new Map(classes.map((classe) => [`${classe._id}`, classe]));
 
   for (let young of youngs) {
-    console.log(young.sessionPhase1Id);
     const session = sessionsPhase1Map.get(young.sessionPhase1Id);
     if (!session) {
       console.log("Session not found", young._id);
@@ -73,7 +66,7 @@ const generateYoungsExport = async (cohortName, afterSession = false, action = "
       "Adresse mail": young.email,
       "Numéro de téléphone": young.phone,
       "Présence à l'arrivée": young.cohesionStayPresence ? (young.cohesionStayPresence === "true" ? "Présent" : "Absent") : "Non renseigné",
-      "Départ renseigné": young.departInform || "",
+      "Départ renseigné": translate(young.departInform) || "",
       "Motif du départ": young.departSejourMotif || "",
       "Statut de la phase 1": translate(young.statusPhase1),
       Sexe: translate(young.gender),

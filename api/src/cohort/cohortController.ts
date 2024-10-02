@@ -340,7 +340,7 @@ router.get("/:id/export-dsnj/:exportKey", passport.authenticate([ROLES.ADMIN, RO
   }
 });
 
-router.get("/:id/export-injep/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req: UserRequest, res: Response) => {
+router.get("/:id/export-injep/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.INJEP], { session: false }), async (req: UserRequest, res: Response) => {
   try {
     const { error: exportDateKeyError, value: exportKey } = Joi.string()
       .valid(...exportDateKeys)
