@@ -2,7 +2,6 @@ import { STATUS_CLASSE } from "snu-lib";
 
 export enum ClasseCohortImportKey {
   SEPT_2024 = "SEPT_2024",
-  PDR_AND_CENTER = "PDR_AND_CENTER",
 }
 
 export enum ClasseImportType {
@@ -26,7 +25,7 @@ export interface ClasseCohortCSV {
 export interface ClasseCohortMapped {
   cohortCode?: string;
   classeId: string;
-  classeEstimatedSeats?: number;
+  classeTotalSeats?: number;
 }
 
 export interface ClasseCohortImportResult extends ClasseCohortMapped {
