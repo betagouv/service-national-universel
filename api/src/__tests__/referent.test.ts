@@ -266,7 +266,10 @@ describe("Referent", () => {
     it("should return 403 if payload is VALIDATED if classe is closed", async () => {
       const userId = "123";
       const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const now = new Date();
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: yesterday }));
       const classe: any = await createClasse(
         createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id, status: STATUS_CLASSE.CLOSED }),
       );
@@ -336,8 +339,11 @@ describe("Referent", () => {
 
     it("should return 200 if payload is REFUSED and if youngs updated event if classe is full or closed", async () => {
       const userId = "123";
+      const now = new Date();
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
       const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: yesterday }));
       const classe: any = await createClasse(
         createFixtureClasse({
           etablissementId: etablissement._id,

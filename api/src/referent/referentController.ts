@@ -688,9 +688,11 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
         if (youngs.length > remainingPlaces) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `No seats left in classe ${classe._id}` });
         }
+      }
     }
 
     const youngsSet: string[] = [];
+
     await Promise.all(
       youngs.map(async (young) => {
         try {
