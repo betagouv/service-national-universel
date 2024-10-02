@@ -677,14 +677,17 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
 
     if (payload.status === YOUNG_STATUS.VALIDATED) {
       for (const classe of classes) {
-        if (classe.status === STATUS_CLASSE.CLOSED) {
+        const cohort = await CohortModel.findById(classe.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInstructionOpen = now < new Date(cohort.instructionEndDate);
+        if (!isInstructionOpen) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `Classe ${classe._id} is closed` });
         }
         const remainingPlaces = classe.totalSeats - classe.seatsTaken;
         if (youngs.length > remainingPlaces) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `No seats left in classe ${classe._id}` });
         }
-      }
     }
 
     const youngsSet: string[] = [];
