@@ -16,6 +16,7 @@ function getNewPointDeRassemblementFixture(object: Partial<PointDeRassemblementT
       lat: Number(faker.location.latitude()),
       lon: Number(faker.location.longitude()),
     },
+    matricule: faker.lorem.words(),
     ...object,
   };
 }
