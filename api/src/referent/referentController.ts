@@ -525,6 +525,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     if (!canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
+    const cohort = await CohortModel.findById(young.cohortId);
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
@@ -532,7 +535,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
       // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
       const departement = getDepartmentForEligibility(young);
-      const fillingRate = await getFillingRate(departement, young.cohort);
+      const fillingRate = await getFillingRate(departement, cohort.name);
       if (fillingRate >= FILLING_RATE_LIMIT) {
         return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
       }
@@ -618,8 +621,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (young.source === YOUNG_SOURCE.CLE) {
         const classe = await ClasseModel.findById(young.classeId);
         if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const cohort = await CohortModel.findById(classe.cohortId);
-        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const now = new Date();
         const isInsctructionOpen = now < cohort.instructionEndDate;
         if (!isInsctructionOpen) {
@@ -630,8 +631,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       } else {
-        const cohort = await CohortModel.findById(young.cohortId);
-        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const now = new Date();
         const isInsctructionOpen = now < cohort.instructionEndDate;
         if (!isInsctructionOpen) {
