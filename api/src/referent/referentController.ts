@@ -100,6 +100,7 @@ import {
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
   YoungType,
+  STATUS_CLASSE,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -108,6 +109,7 @@ import { UserRequest } from "../controllers/request";
 import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
+import { ca } from "date-fns/locale";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -678,26 +680,53 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    if (!canValidateMultipleYoungsInClass(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const youngs = await YoungModel.find({ _id: { $in: payload.youngIds }, source: "CLE" });
     if (!youngs) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (youngs.length !== payload.youngIds.length) return res.status(404).send({ ok: false, code: ERRORS.BAD_REQUEST });
 
-    const classeId = youngs[0].classeId;
+    const classeIds = youngs.map((y) => y.classeId);
 
-    const classe = await ClasseModel.findById(classeId);
-    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const classes = await ClasseModel.find({ _id: { $in: classeIds } });
+    if (!classes.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canValidateMultipleYoungsInClass(req.user, classe)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (payload.status === YOUNG_STATUS.VALIDATED) {
+      for (const classe of classes) {
+        const cohort = await CohortModel.findById(classe.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInstructionOpen = now < new Date(cohort.instructionEndDate);
+        if (!isInstructionOpen) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `Classe ${classe._id} is closed` });
+        }
+        const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+        if (youngs.length > remainingPlaces) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `No seats left in classe ${classe._id}` });
+        }
+      }
     }
 
-    for (const young of youngs) {
-      young.set({ status: payload.status });
-      await young.save({ fromUser: req.user });
-      await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
-    }
+    const youngsSet: string[] = [];
 
-    return res.status(200).send({ ok: true, data: payload.youngIds });
+    await Promise.all(
+      youngs.map(async (young) => {
+        try {
+          young.set({ status: payload.status });
+          await young.save({ fromUser: req.user });
+          if (payload.status === YOUNG_STATUS.VALIDATED) {
+            await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
+          }
+          youngsSet.push(young._id);
+        } catch (e) {
+          capture(e);
+        }
+      }),
+    );
+
+    return res.status(200).send({ ok: true, data: youngsSet });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
