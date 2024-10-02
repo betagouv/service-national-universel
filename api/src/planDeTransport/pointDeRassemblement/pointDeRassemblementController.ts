@@ -151,6 +151,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
       name: Joi.string().required(),
+      matricule: Joi.string().required(),
       address: Joi.string().required(),
       complementAddress: Joi.string().allow(null, ""),
       city: Joi.string().required(),
