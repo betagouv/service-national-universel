@@ -770,11 +770,14 @@ describe("Young", () => {
   });
   describe("YoungModel post save hook", () => {
     it("should call StateManager.Classe.compute if source is CLE", async () => {
-      const cohortFixture = getNewCohortFixture({ type: "CLE" });
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      const cohortFixture = getNewCohortFixture({ type: "CLE", instructionEndDate: tomorrow });
       const cohort = await createCohortHelper(cohortFixture);
       const classe = createFixtureClasse({ seatsTaken: 0, status: "OPEN", cohort: cohort.name, cohortId: cohort._id });
       const classeId = (await createClasse(classe))._id;
-      const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId });
+      const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId, cohort: cohort.name, cohortId: cohort._id });
       const young = await createYoungHelper(youngFixture);
       const updatedYoung = { ...young.toObject(), status: "VALIDATED" };
       await young.set(updatedYoung).save();

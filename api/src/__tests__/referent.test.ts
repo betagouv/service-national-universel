@@ -94,6 +94,10 @@ describe("Referent", () => {
     }
     it("should not update young if goal reached", async () => {
       const testName = "Juillet 2023";
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: testName, instructionEndDate: tomorrow }));
       const { count } = await getInscriptionGoalStats(testName, testName);
       // ajout d'un objectif à 1
       const res = await request(getAppHelper())
@@ -107,7 +111,7 @@ describe("Referent", () => {
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: testName, department: testName, cohort: testName },
+        { region: testName, department: testName, cohort: cohort.name, cohortId: cohort._id },
         { keepYoung: true },
       );
       expect(responseSuccessed.statusCode).toEqual(200);
@@ -140,7 +144,7 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName },
+          { region: testName, department: testName, cohort: cohort.name, cohortId: cohort._id },
           { queryParam: "?forceGoal=1" },
         )
       ).response;
@@ -204,6 +208,10 @@ describe("Referent", () => {
     });
     it("should remove places when sending to cohesion center", async () => {
       const sessionPhase1: any = await createSessionPhase1(getNewSessionPhase1Fixture());
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: tomorrow }));
       const placesLeft = sessionPhase1.placesLeft;
       const { young, response } = await createYoungThenUpdate(
         {},
@@ -211,6 +219,7 @@ describe("Referent", () => {
           sessionPhase1Id: sessionPhase1._id,
           status: "VALIDATED",
           statusPhase1: "AFFECTED",
+          cohortId: cohort._id,
         },
       );
       expect(response.statusCode).toEqual(200);
