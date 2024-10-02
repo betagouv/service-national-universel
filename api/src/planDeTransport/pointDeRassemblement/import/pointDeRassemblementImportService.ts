@@ -1,7 +1,8 @@
+import { PointDeRassemblementType } from "snu-lib";
 import { logger } from "../../../logger";
 import { CohortModel, PointDeRassemblementDocument, PointDeRassemblementModel } from "../../../models";
 import { readCSVBuffer } from "../../../services/fileService";
-import { getUniqueAdressLocation } from "../../../services/gouv.fr/api-adresse";
+import { getNearestLocation, getSpecificAdressLocation } from "../../../services/gouv.fr/api-adresse";
 import { getFile } from "../../../utils";
 import { PointDeRassemblementCSV, PointDeRassemblementImportMapped } from "./pointDeRassemblementImport";
 import { mapPointDeRassemblements } from "./pointDeRassemblementImportMapper";
@@ -10,7 +11,7 @@ export interface PointDeRassemblementImportReport {
   _id?: string;
   matricule: string | undefined;
   name: string | undefined;
-  action: "nothing" | "updated" | "created" | "error";
+  action: "nothing" | "updated" | "updated_with_warning" | "created" | "created_with_warning" | "error";
   comment: string;
 }
 
@@ -27,22 +28,36 @@ export const importPointDeRassemblement = async (pdrFilePath: string) => {
     let processedPdr: PointDeRassemblementImportReport;
 
     try {
-      if (pdr._id) {
-        processedPdr = await processPdrWithId(pdr);
-      } else if (pdr.matricule) {
-        processedPdr = await processPdrWithoutId(pdr);
-      } else {
-        logger.warn(`importPointDeRassemblement() - Pdr ${pdr.name} has no matricule and no id, skipping`);
+      if (!pdr.matricule) {
+        logger.warn(`importPointDeRassemblement() - Pdr ${pdr.name} has no matricule, skipping`);
         report.push({
           name: pdr.name,
           action: "nothing",
-          comment: "No Id provided and No matricule in CSV",
+          comment: "No matricule in CSV",
           matricule: pdr.matricule,
         });
         continue;
+      } else if (!pdr.name) {
+        logger.warn(`importPointDeRassemblement() - Pdr ${pdr.matricule} has no name, skipping`);
+        report.push({
+          name: pdr.name,
+          action: "nothing",
+          comment: "No name in CSV",
+          matricule: pdr.matricule,
+        });
+        continue;
+      } else if (pdr._id) {
+        processedPdr = await processPdrWithId(pdr);
+        if (processedPdr.action === "error") {
+          processedPdr = await processPdrWithoutId(pdr);
+        }
+      } else if (pdr.matricule) {
+        processedPdr = await processPdrWithoutId(pdr);
       }
+      // @ts-expect-error - processedPdr is defined
       report.push(processedPdr);
     } catch (e) {
+      logger.error(e);
       report.push({
         name: pdr.name,
         action: "error",
@@ -60,9 +75,13 @@ export const importPointDeRassemblement = async (pdrFilePath: string) => {
 
 export const processPdrWithId = async (pdr: PointDeRassemblementImportMapped): Promise<PointDeRassemblementImportReport> => {
   const { _id, ...pdrToUpdate } = pdr;
-  const existingPdr = await PointDeRassemblementModel.findById(_id);
-  if (existingPdr) {
-    return await updatePdr(pdrToUpdate, existingPdr, "Id provided - Pdr found by Id");
+  try {
+    const existingPdr = await PointDeRassemblementModel.findById(_id);
+    if (existingPdr && !existingPdr.deletedAt) {
+      return await updatePdr(pdrToUpdate, existingPdr, "Id provided - Pdr found by Id");
+    }
+  } catch (e) {
+    logger.warn(e);
   }
   return {
     _id: _id,
@@ -74,27 +93,28 @@ export const processPdrWithId = async (pdr: PointDeRassemblementImportMapped): P
 };
 
 export const processPdrWithoutId = async (pdr: PointDeRassemblementImportMapped): Promise<PointDeRassemblementImportReport> => {
-  const foundPdrs = await PointDeRassemblementModel.find({ matricule: pdr.matricule });
+  const foundPdrs = await PointDeRassemblementModel.find({ matricule: pdr.matricule, deletedAt: { $exists: false } });
   if (foundPdrs.length === 1) {
     logger.info(`processPdrWithoutId() - Pdr with matricule ${pdr.matricule} already exists`);
     return await updatePdr(pdr, foundPdrs[0], "No Id - Pdr found by matricule");
   } else if (foundPdrs.length > 1) {
-    return await processPdrsByMatriculeFound(pdr, foundPdrs);
+    // return await processPdrsByMatriculeFound(pdr, foundPdrs);
+    throw new Error("Multiple PDR found with same matricule");
   } else {
     return await createPdr(pdr);
   }
 };
 
 export const updatePdr = async (pdr: PointDeRassemblementImportMapped, foundPdr: PointDeRassemblementDocument, comment: string): Promise<PointDeRassemblementImportReport> => {
-  const extraInfos = await getPdrExtraInfos(pdr, foundPdr);
+  const { extraInfos, report } = await getPdrExtraInfos(pdr, foundPdr);
   foundPdr.set({ ...pdr, ...extraInfos });
   await foundPdr.save({ fromUser: { firstName: "IMPORT_POINT_DE_RASSEMBLEMENT" } });
   return {
     _id: foundPdr._id,
     matricule: foundPdr.matricule,
     name: foundPdr.name,
-    action: "updated",
-    comment: comment,
+    action: report ? "updated_with_warning" : "updated",
+    comment: `${comment} ${report?.comment || ""}`,
   };
 };
 
@@ -110,15 +130,16 @@ export const processPdrsByMatriculeFound = async (pdr: PointDeRassemblementImpor
 };
 
 export const createPdr = async (pdr: PointDeRassemblementImportMapped): Promise<PointDeRassemblementImportReport> => {
-  const extraInfos = await getPdrExtraInfos(pdr);
+  const { extraInfos, report } = await getPdrExtraInfos(pdr);
+  pdr._id = undefined;
   const createdPdr = await PointDeRassemblementModel.create({ ...pdr, ...extraInfos });
   await createdPdr.save({ fromUser: { firstName: "IMPORT_POINT_DE_RASSEMBLEMENT" } });
   return {
     _id: createdPdr._id,
     matricule: createdPdr.matricule,
     name: createdPdr.name,
-    action: "created",
-    comment: "Pdr created",
+    action: report ? "created_with_warning" : "created",
+    comment: `Pdr created ${report?.comment || ""}`,
   };
 };
 
@@ -147,17 +168,32 @@ const getPdrExtraInfos = async (pdr: PointDeRassemblementImportMapped, foundPdr?
     ];
   }
 
-  if (!pdr.name) {
-    throw new Error("pdr without name" + pdr.matricule);
-  }
+  const code = foundPdr?.code || pdr.matricule;
 
   // handle geocoding
-  const location = await getUniqueAdressLocation({ label: pdr.name, address: pdr.address, city: pdr.city, zip: pdr.zip });
+  let report: Partial<PointDeRassemblementImportReport> | null = null;
+  let location: PointDeRassemblementType["location"] | null = null;
+  try {
+    location = await getSpecificAdressLocation({ label: pdr.name, address: pdr.address, city: pdr.city, zip: pdr.zip });
+  } catch (e) {
+    logger.warn(`importPointDeRassemblement() - geocoding pdr ${pdr.matricule}: ${e.message}`);
+    location = await getNearestLocation(pdr.city, pdr.zip);
+    report = {
+      comment: `(using nearest location ${location?.lat} ${location?.lon}, details: ${e.message})`,
+    };
+  }
+  if (!location?.lat || !location.lon) {
+    throw Error(`importPointDeRassemblement() - No suitable location found`);
+  }
 
   return {
-    cohors: cohortNames,
-    cohortIds,
-    complementAddress,
-    location,
+    report,
+    extraInfos: {
+      code,
+      cohors: cohortNames,
+      cohortIds,
+      complementAddress,
+      location,
+    },
   };
 };
