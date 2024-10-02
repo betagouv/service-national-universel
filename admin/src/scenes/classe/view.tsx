@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { HiHome } from "react-icons/hi";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -8,7 +8,7 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Badge } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes } from "snu-lib";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes, ROLES } from "snu-lib";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
 import { AuthState } from "@/redux/auth/reducer";
@@ -225,6 +225,23 @@ export default function View() {
     setErrors({});
   };
 
+  const canPerformManualInscriptionActions = useMemo(() => {
+    if (!cohort) return false;
+
+    switch (user.role) {
+      case ROLES.REFERENT_DEPARTMENT:
+        return cohort.inscriptionOpenForReferentDepartment === true;
+      case ROLES.REFERENT_REGION:
+        return cohort.inscriptionOpenForReferentRegion === true;
+      case ROLES.REFERENT_CLASSE:
+        return cohort.inscriptionOpenForReferentClasse === true;
+      case ROLES.ADMINISTRATEUR_CLE:
+        return cohort.inscriptionOpenForAdministrateurCle === true;
+      default:
+        return false;
+    }
+  }, [user.role, cohort]);
+
   if (!classe) return <Loader />;
 
   return (
@@ -240,7 +257,7 @@ export default function View() {
           },
           { title: "Fiche de la classe" },
         ]}
-        actions={getHeaderActionList({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus })}
+        actions={getHeaderActionList({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus, canPerformManualInscriptionActions })}
       />
       <GeneralInfos
         classe={classe}

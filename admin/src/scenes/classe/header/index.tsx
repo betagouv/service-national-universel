@@ -1,5 +1,6 @@
 import React from "react";
 import { HiOutlineClipboardList } from "react-icons/hi";
+import cx from "classnames";
 
 import { ROLES, STATUS_CLASSE, YOUNG_STATUS, ClasseFileKeys, ClasseCertificateKeys, ClassesRoutes } from "snu-lib";
 import { User } from "@/types";
@@ -23,9 +24,10 @@ interface Props {
   url: string;
   id: string;
   studentStatus: any;
+  canPerformManualInscriptionActions: boolean;
 }
 
-export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus }: Props) => {
+export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus, canPerformManualInscriptionActions }: Props) => {
   const isClasseDeletable = () => {
     if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) return false;
     if (classe?.cohesionCenterId) return false;
@@ -146,9 +148,22 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
   if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
     actionsList.push(<VerifClassButton key="verify" classe={classe} setClasse={setClasse} isLoading={isLoading} setLoading={setIsLoading} />);
   }
-  if (classe?.status && STATUS_CLASSE.OPEN === classe.status) {
-    actionsList.push(<DropdownButton key="inscription" title="Inscrire les élèves" type="wired" optionsGroup={optionsInscription} position="right" buttonClassName="mr-2" />);
-  }
+
+  const isManualInscriptionActionDisabled = !(classe?.status === STATUS_CLASSE.OPEN || canPerformManualInscriptionActions);
+
+  actionsList.push(
+    <DropdownButton
+      key="inscription"
+      title="Inscrire les élèves"
+      type="wired"
+      optionsGroup={optionsInscription}
+      position="right"
+      buttonClassName={cx("mr-2", isManualInscriptionActionDisabled && "cursor-not-allowed")}
+      disabled={isManualInscriptionActionDisabled}
+      {...(isManualInscriptionActionDisabled && { tooltip: "Les inscriptions sont fermées. Vous n’avez pas les droits pour inscrire un élève." })}
+    />,
+  );
+
   if (classe?.status && (classe.status === STATUS_CLASSE.OPEN || classe.status === STATUS_CLASSE.CLOSED) && [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)) {
     actionsList.push(
       <DropdownButton
