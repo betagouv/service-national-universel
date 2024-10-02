@@ -704,7 +704,6 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
           youngsSet.push(young._id);
         } catch (e) {
           capture(e);
-          logger.error(`[BATCH] Error while validating young ${young._id}`);
         }
       }),
     );
