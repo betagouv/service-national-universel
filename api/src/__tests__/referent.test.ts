@@ -1,7 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungDto, YoungType } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType } from "snu-lib";
 
 import { CohortModel, YoungModel } from "../models";
 import { getInscriptionGoalStats } from "../services/inscription-goal";
@@ -98,6 +98,7 @@ describe("Referent", () => {
     }
     it("should not update young if goal not defined", async () => {
       const testName = "Juillet 2023";
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: testName }));
       // ajout d'un objectif non définie
       const res = await request(getAppHelper())
         .post(`/inscription-goal/${testName}`)
@@ -110,7 +111,7 @@ describe("Referent", () => {
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: testName, department: testName, cohort: testName },
+        { region: testName, department: testName, cohort: cohort.name, cohortId: cohort.id },
         { keepYoung: true },
       );
       expect(response.statusCode).not.toEqual(200);
@@ -146,7 +147,7 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, schoolDepartment: testName },
+          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
@@ -158,7 +159,7 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, schoolDepartment: testName },
+          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
@@ -169,7 +170,7 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName },
+          { region: testName, department: testName, cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
@@ -192,12 +193,14 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should update young name", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
       // @ts-ignore: FIXME: young.name does not exist
-      const { young, modifiedYoung, response } = await createYoungThenUpdate({ name: faker.company.name() });
+      const { young, modifiedYoung, response } = await createYoungThenUpdate({ name: faker.company.name() }, { cohortId: cohort._id });
       expect(response.statusCode).toEqual(200);
       expectYoungToEqual(young, modifiedYoung);
     });
     it("should cascade young statuses when sending status WITHDRAWN", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
       const { young, response } = await createYoungThenUpdate(
         {
           status: "WITHDRAWN",
@@ -206,6 +209,7 @@ describe("Referent", () => {
           statusPhase1: "AFFECTED",
           statusPhase2: "WAITING_REALISATION",
           statusPhase3: "WAITING_REALISATION",
+          cohortId: cohort._id,
         },
       );
       expect(response.statusCode).toEqual(200);
@@ -215,6 +219,7 @@ describe("Referent", () => {
       expect(young?.statusPhase3).toEqual("WAITING_REALISATION");
     });
     it("should not cascade status to WITHDRAWN if validated", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
       const { young, response } = await createYoungThenUpdate(
         {
           status: "WITHDRAWN",
@@ -223,6 +228,7 @@ describe("Referent", () => {
           statusPhase1: "DONE",
           statusPhase2: "WAITING_REALISATION",
           statusPhase3: "VALIDATED",
+          cohortId: cohort._id,
         },
       );
       expect(response.statusCode).toEqual(200);
@@ -232,13 +238,15 @@ describe("Referent", () => {
       expect(young?.statusPhase3).toEqual("VALIDATED");
     });
     it("should update young statuses when sending cohection stay presence true", async () => {
-      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, { cohesionStayPresence: undefined });
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, { cohesionStayPresence: undefined, cohortId: cohort._id });
       expect(response.statusCode).toEqual(200);
       expect(young?.statusPhase1).toEqual("DONE");
       expect(young?.cohesionStayPresence).toEqual("true");
     });
     it("should update young statuses when sending cohection stay presence false", async () => {
-      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "false" });
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "false" }, { cohortId: cohort._id });
       expect(response.statusCode).toEqual(200);
       expect(young?.statusPhase1).toEqual("NOT_DONE");
       expect(young?.cohesionStayPresence).toEqual("false");
