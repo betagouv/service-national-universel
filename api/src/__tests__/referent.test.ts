@@ -285,8 +285,11 @@ describe("Referent", () => {
 
     it("should return 403 if payload is VALIDATED if classe is full", async () => {
       const userId = "123";
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
       const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: tomorrow }));
       const classe: any = await createClasse(
         createFixtureClasse({
           etablissementId: etablissement._id,
@@ -310,8 +313,11 @@ describe("Referent", () => {
 
     it("should return 200 if payload is VALIDATED and if youngs updated", async () => {
       const userId = "123";
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
       const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: tomorrow }));
       const classe: any = await createClasse(
         createFixtureClasse({
           etablissementId: etablissement._id,
