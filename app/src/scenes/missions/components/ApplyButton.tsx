@@ -13,6 +13,8 @@ type propTypes = {
 };
 
 const ApplyButton = ({ mission, onClick }: propTypes) => {
+  const shouldDisplayApiTracker = !!mission.apiEngagementId && isFeatureEnabled(FEATURES_NAME.API_ENG_TRACKING, undefined, environment);
+
   return (
     <div className="flex flex-col gap-2 items-center">
       <WithTooltip tooltipText={mission.message}>
@@ -21,7 +23,7 @@ const ApplyButton = ({ mission, onClick }: propTypes) => {
         </button>
       </WithTooltip>
       <p className="text-xs font-normal leading-none text-gray-500">{mission.placesLeft} places restantes</p>
-      {isFeatureEnabled(FEATURES_NAME.API_ENG_TRACKING, undefined, environment) && <ApiEngagementTracker missionId={mission.apiEngagementId} />}
+      {shouldDisplayApiTracker && <ApiEngagementTracker missionId={mission.apiEngagementId} />}
     </div>
   );
 };

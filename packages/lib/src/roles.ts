@@ -1,8 +1,8 @@
 import { ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
-import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE } from "./constants/constants";
-import { ClasseType, SessionPhase1Type } from "./mongoSchema";
+import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "./constants/constants";
+import { SessionPhase1Type } from "./mongoSchema";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -16,6 +16,7 @@ const ROLES = {
   HEAD_CENTER: "head_center",
   VISITOR: "visitor",
   DSNJ: "dsnj",
+  INJEP: "injep",
   TRANSPORTER: "transporter",
   ADMINISTRATEUR_CLE: "administrateur_cle",
   REFERENT_CLASSE: "referent_classe",
@@ -1027,12 +1028,8 @@ function canCreateEtablissement(user: UserDto) {
 }
 
 //CLE
-function canValidateMultipleYoungsInClass(actor: UserDto, classe: ClasseType) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
-}
-function canValidateYoungInClass(actor: UserDto, classe: ClasseType) {
-  if (isAdmin(actor)) return true;
-  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+function canValidateMultipleYoungsInClass(actor: UserDto) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
 
 export {
@@ -1189,5 +1186,4 @@ export {
   canUpdateReferentClasse,
   canCreateEtablissement,
   canValidateMultipleYoungsInClass,
-  canValidateYoungInClass,
 };

@@ -26,6 +26,10 @@ import YoungListHeader from "./components/YoungListHeader";
 
 const pageId = "youngCle-list";
 
+interface YoungDtoWithClasse extends YoungDto {
+  classe: ClasseDto;
+}
+
 export default function List() {
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
@@ -33,7 +37,7 @@ export default function List() {
   const [youngList, setYoungList] = useState([]);
   const [students, setStudents] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<any>({});
-  const [selectedYoungs, setSelectedYoungs] = useState<YoungDto[]>([]);
+  const [selectedYoungs, setSelectedYoungs] = useState<YoungDtoWithClasse[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [paramData, setParamData] = useState({
@@ -90,7 +94,7 @@ export default function List() {
       });
       const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
         filters: {},
-        exportFields: ["name", "uniqueKeyAndId"],
+        exportFields: ["name", "uniqueKeyAndId", "totalSeats", "seatsTaken", "status"],
       });
 
       const res = await api.post(`/elasticsearch/cle/young/search`, {
