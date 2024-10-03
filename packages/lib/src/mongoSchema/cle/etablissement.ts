@@ -2,7 +2,7 @@ import { Schema, InferSchemaType } from "mongoose";
 
 import { CLE_SECTOR_LIST, CLE_TYPE_LIST } from "../../constants/constants";
 
-import { InterfaceExtended } from "..";
+import { InterfaceExtended, ReferentType } from "..";
 
 export const EtablissementSchema = {
   schoolId: {
@@ -142,4 +142,6 @@ export const EtablissementSchema = {
 };
 
 const schema = new Schema(EtablissementSchema);
-export type EtablissementType = InterfaceExtended<InferSchemaType<typeof schema>>;
+export type EtablissementType = InterfaceExtended<InferSchemaType<typeof schema>> & {
+  coordinateurs?: Pick<ReferentType, "_id" | "email" | "firstName" | "lastName" | "phone" | "role" | "subRole">;
+};

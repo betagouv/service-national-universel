@@ -5,13 +5,13 @@ import { useHistory } from "react-router-dom";
 import { ProfilePic } from "@snu/ds";
 import { ModalConfirmation } from "@snu/ds/admin";
 import { User } from "@/types";
-import { isChefEtablissement, EtablissementDto } from "snu-lib";
+import { isChefEtablissement, EtablissementType } from "snu-lib";
 
 import { REFERENT_SIGNUP_FIRSTTIME_LOCAL_STORAGE_KEY } from "@/services/cle";
 
 interface Props {
   user: User;
-  etablissement: EtablissementDto;
+  etablissement: EtablissementType;
 }
 
 /* First login ADMINISTRATEUR_CLE referent_etablissement */

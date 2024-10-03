@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { HiPlus } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
-import { Button, ModalConfirmation, InputText } from "@snu/ds/admin";
+import { Button, ModalConfirmation, InputText, Label, Select } from "@snu/ds/admin";
 import { ProfilePic } from "@snu/ds";
 import validator from "validator";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { ERRORS, translate, EtablissementDto } from "snu-lib";
+import { ERRORS, translate, ReferentType, EtablissementType } from "snu-lib";
 
 interface Props {
-  etablissement: EtablissementDto;
+  etablissement: EtablissementType;
   onChange: () => void;
 }
 interface Errors {
@@ -20,6 +20,7 @@ interface Errors {
   coordinator?: string;
 }
 interface NewCoordinator {
+  _id?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -29,6 +30,43 @@ export default function ButtonAddCoordinator({ etablissement, onChange }: Props)
   const [modalAddCoordinator, setModalAddCoordinator] = useState(false);
   const [newCoordinator, setNewCoordinator] = useState<NewCoordinator>({ firstName: "", lastName: "", email: "" });
   const [errors, setErrors] = useState<Errors>({});
+  const [referentList, setReferentList] = useState<ReferentType[]>([]);
+
+  useEffect(() => {
+    loadReferents({ etablissementId: etablissement._id, coordinateurs: etablissement.coordinateurs });
+  }, []);
+
+  const loadReferents = async ({ etablissementId, coordinateurs }) => {
+    try {
+      const { ok, code, data: classes } = await api.get(`/cle/classe/from-etablissement/${etablissementId}`);
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération des referents", translate(code));
+      }
+
+      const refList = classes.flatMap((classe) =>
+        classe.referent
+          .filter((r) => Boolean(r))
+          .map((referent) => ({
+            ...referent,
+            value: referent._id,
+            label: `${referent.firstName} ${referent.lastName}`,
+          })),
+      );
+      const uniqueIds = new Set();
+
+      const uniqueArray = [...(coordinateurs ?? []), ...refList].filter((item) => {
+        if (!uniqueIds.has(item._id)) {
+          uniqueIds.add(item._id);
+          return true;
+        }
+        return false;
+      });
+      setReferentList(uniqueArray);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des contacts", "");
+    }
+  };
 
   const sendInvitation = async () => {
     try {
@@ -91,6 +129,7 @@ export default function ButtonAddCoordinator({ etablissement, onChange }: Props)
         text={
           <div className="mt-6 w-[636px] text-left text-ds-gray-900">
             {errors.coordinator && <div className="text-red-500 mb-2">{errors.coordinator}</div>}
+            <Label name="" title="Renseignez les informations du nouveau coordinateur ..." />
             <InputText
               className="mb-3"
               label="Nom"
@@ -119,6 +158,24 @@ export default function ButtonAddCoordinator({ etablissement, onChange }: Props)
               value={newCoordinator.email}
               onChange={(e) => setNewCoordinator({ ...newCoordinator, email: e.target.value })}
             />
+            <div className="flex-1">
+              <Label name="" title="... ou ajoutez référent de classe existant" />
+              <Select
+                className="mb-3"
+                isActive={true}
+                placeholder={"Choisir un référent existant"}
+                noOptionsMessage={"Aucun référent trouvé"}
+                // @ts-ignore
+                options={referentList}
+                closeMenuOnSelect={true}
+                isClearable={true}
+                value={newCoordinator?._id ? { label: `${newCoordinator?.firstName} ${newCoordinator?.lastName}`, value: newCoordinator._id } : null}
+                onChange={(options) => {
+                  // @ts-ignore
+                  options ? setNewCoordinator(referentList.find((referent) => referent._id === options.value)) : setNewCoordinator({});
+                }}
+              />
+            </div>
           </div>
         }
         actions={[
