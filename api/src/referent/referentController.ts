@@ -808,6 +808,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     const { cohort, cohortChangeReason } = value;
 
+    // TODO: Check objectif département
     let youngStatus = young.status;
     if (cohort === "à venir ") {
       youngStatus = getYoungStatus(young) as YoungType["status"];

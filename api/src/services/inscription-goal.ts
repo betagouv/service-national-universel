@@ -1,4 +1,4 @@
-import { InscriptionGoalModel, YoungModel } from "../models";
+import { InscriptionGoalModel, InscriptionGoalType, YoungModel } from "../models";
 
 export const getFillingRate = async (department, cohort) => {
   const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments();
@@ -18,6 +18,16 @@ export const getInscriptionGoalStats = async (department, cohort) => {
     count,
     max,
     fillingRate: count / max,
+    rateLimit: FILLING_RATE_LIMIT,
+  };
+};
+
+export const computeInscriptionGoalStats = (inscriptionGoal: InscriptionGoalType, youngCounts: number = 0) => {
+  const max = inscriptionGoal?.max || 1;
+  return {
+    count: youngCounts,
+    max,
+    fillingRate: youngCounts / max,
     rateLimit: FILLING_RATE_LIMIT,
   };
 };

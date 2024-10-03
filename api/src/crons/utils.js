@@ -1,5 +1,4 @@
 const { YoungModel, InscriptionGoalModel } = require("../models");
-const { regionList, departmentList } = require("snu-lib");
 
 const getMinusDate = (v) => {
   const d = new Date();
@@ -45,6 +44,4 @@ const getDataInscriptions = async ({ department, region }) => {
 module.exports = {
   getMinusDate,
   getDataInscriptions,
-  departmentList,
-  regionList,
 };
