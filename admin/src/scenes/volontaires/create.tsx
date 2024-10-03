@@ -10,7 +10,19 @@ import { useSelector } from "react-redux";
 import ReactTooltip from "react-tooltip";
 import { HiInformationCircle } from "react-icons/hi";
 
-import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
+import {
+  translateGrade,
+  GRADES,
+  YOUNG_STATUS,
+  getCohortPeriod,
+  getCohortYear,
+  isPhoneNumberWellFormated,
+  PHONE_ZONES,
+  YOUNG_SOURCE,
+  getSchoolYear,
+  getDepartmentForEligibility,
+  CohortType,
+} from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -26,19 +38,124 @@ import Check from "@/assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 
+type FormErrors = {
+  temporaryDate?: string;
+  email?: string;
+  phone?: string;
+  parent1Email?: string;
+  parent1Phone?: string;
+  parent2Email?: string;
+  parent2Phone?: string;
+  parent2FirstName?: string;
+  parent2LastName?: string;
+  parent2Status?: string;
+  specificAmenagmentType?: string;
+  address?: string;
+  city?: string;
+  zip?: string;
+  schooled?: string;
+  parent1AllowSNU?: string;
+  acceptCGU?: string;
+  consentment?: string;
+  parentAllowSNU?: string;
+  rulesParent1?: string;
+};
+
+type FormValues = {
+  firstName: string;
+  lastName: string;
+  birthdateAt: Date | null;
+  temporaryDate: Date | null;
+  birthCityZip: string;
+  birthCity: string;
+  gender: string;
+  grade: string;
+  birthCountry: string;
+  email: string;
+  expirationDate: Date | null;
+  phone: string;
+  phoneZone: string;
+  cohort: string;
+  parentStatementOfHonorInvalidId: string;
+  addressVerified: string;
+  country: string;
+  zip: string;
+  city: string;
+  department: string;
+  region: string;
+  address: string;
+  foreignCountry: string;
+  foreignZip: string;
+  foreignCity: string;
+  foreignAddress: string;
+  situation: string;
+  schoolId: string;
+  schoolName: string;
+  schoolType: string;
+  schoolAddress: string;
+  schoolZip: string;
+  schoolDepartment: string;
+  schoolRegion: string;
+  schoolCity: string;
+  schoolCountry: string;
+  schooled: string;
+  employed: string;
+  specificAmenagment: string;
+  specificAmenagmentType: string;
+  specificSituations: string;
+  reducedMobilityAccess: string;
+  handicapInSameDepartment: string;
+  ppsBeneficiary: string;
+  paiBeneficiary: string;
+  allergies: string;
+  consentment: string;
+  parentAllowSNU: string;
+  parent1Status: string;
+  rulesParent1: string;
+  parent1AllowImageRights: string;
+  parent1AllowSNU: string;
+  parent1FirstName: string;
+  hostLastName: string;
+  hostFirstName: string;
+  hostRelationship: string;
+  parent1LastName: string;
+  parent1Email: string;
+  parent1Phone: string;
+  parent1PhoneZone: string;
+  parent1OwnAddress: string;
+  parent1Address: string;
+  parent1City: string;
+  parent1Zip: string;
+  parent1Country: string;
+  classeId?: string;
+  parent2FirstName?: string;
+  parent2LastName?: string;
+  parent2Status?: string;
+  parent2Phone?: string;
+  parent2Email?: string;
+  parent2PhoneZone?: string;
+  parent2AllowImageRights: string;
+  parent2OwnAddress: string;
+  parent2Address: string;
+  parent2Zip: string;
+  parent2City: string;
+  parent2Country: string;
+  frenchNationality: string;
+  acceptCGU?: string;
+};
+
 export default function Create() {
   const history = useHistory();
   const location = useLocation();
   const [selectedRepresentant, setSelectedRepresentant] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [cohorts, setCohorts] = useState([]);
+  const [cohorts, setCohorts] = useState<CohortType[]>([]);
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
-  const user = useSelector((state) => state.Auth.user);
   const classeId = new URLSearchParams(location.search).get("classeId");
 
-  const [errors, setErrors] = useState({});
-  const [values, setValues] = useState({
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [values, setValues] = useState<FormValues>({
     firstName: "",
     lastName: "",
     birthdateAt: null,
@@ -54,7 +171,7 @@ export default function Create() {
     phoneZone: "FRANCE",
     cohort: "",
     parentStatementOfHonorInvalidId: "false",
-    addressVerified: false,
+    addressVerified: "false",
     country: "FRANCE",
     zip: "",
     city: "",
@@ -120,7 +237,7 @@ export default function Create() {
   });
 
   const validate = () => {
-    const errors = {};
+    const errors: FormErrors = {};
     const errorEmpty = "Ne peut être vide";
     const errorEmail = "Adresse email invalide";
     const errorPhone = "Numéro de téléphone invalide";
@@ -177,14 +294,14 @@ export default function Create() {
       errors.parent1Phone = PHONE_ZONES[values.parent1PhoneZone || "AUTRE"].errorMessage;
     }
     //check parent2 if exist
-    const parent2FirstNameEmpty = validator.isEmpty(values.parent2FirstName);
-    const parent2LastNameEmpty = validator.isEmpty(values.parent2LastName);
-    const parent2StatusEmpty = validator.isEmpty(values.parent2Status);
-    const parent2Phone = validator.isEmpty(values.parent2Phone);
+    const parent2FirstNameEmpty = validator.isEmpty(values.parent2FirstName!);
+    const parent2LastNameEmpty = validator.isEmpty(values.parent2LastName!);
+    const parent2StatusEmpty = validator.isEmpty(values.parent2Status!);
+    const parent2Phone = validator.isEmpty(values.parent2Phone!);
     // if 1 of 3 is not empty --> ask for the 3
     if (values.parent2Email !== "" || !parent2FirstNameEmpty || !parent2LastNameEmpty || !parent2StatusEmpty || !parent2Phone) {
       let foundError = false;
-      if (!validator.isEmail(values.parent2Email)) {
+      if (!validator.isEmail(values.parent2Email!)) {
         errors.parent2Email = errorEmail;
         foundError = true;
       }
@@ -218,7 +335,7 @@ export default function Create() {
     // permet de vérifier si l'adresse a été entièrement remplie mais pas vérifiée
     if (!(errors.address || errors.city || errors.zip)) {
       if (values.department === "" || values.region === "") {
-        toastr.error("Vous devez vérifier l'adresse");
+        toastr.error("Vous devez vérifier l'adresse", "");
       }
     }
     if (values.parent1OwnAddress === "true") {
@@ -244,12 +361,12 @@ export default function Create() {
         if (values.schoolCountry === "FRANCE") {
           if (validator.isEmpty(values.schoolCity) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
             errors.schooled = "missing";
-            toastr.error("Des informations sont manquantes au niveau de l'établissement");
+            toastr.error("Des informations sont manquantes au niveau de l'établissement", "");
           }
         } else {
           if (validator.isEmpty(values.schoolCountry) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
             errors.schooled = "missing";
-            toastr.error("Des informations sont manquantes au niveau de l'établissement");
+            toastr.error("Des informations sont manquantes au niveau de l'établissement", "");
           }
         }
       }
@@ -273,7 +390,7 @@ export default function Create() {
 
     if (Object.keys(errors).length > 0) {
       console.log(errors);
-      toastr.error("Le formulaire n'est pas complet");
+      toastr.error("Le formulaire n'est pas complet", "");
     }
     return errors;
   };
@@ -299,7 +416,10 @@ export default function Create() {
     if (classeId) {
       sendData();
     } else {
-      const res = await api.get(`/inscription-goal/${values.cohort}/department/${values.department}`);
+      // on vérifie la completion des objectifs pour le département
+      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+      const departement = getDepartmentForEligibility(values);
+      const res = await api.get(`/inscription-goal/${values.cohort}/department/${departement}`);
       if (!res.ok) throw new Error(res);
       const fillingRate = res.data;
       if (fillingRate >= 1) {
@@ -310,7 +430,7 @@ export default function Create() {
     }
   };
 
-  const sendData = async (status = YOUNG_STATUS.WAITING_VALIDATION) => {
+  const sendData = async (status: keyof typeof YOUNG_STATUS = YOUNG_STATUS.WAITING_VALIDATION) => {
     try {
       setLoading(true);
       values.addressVerified = values.addressVerified.toString();
@@ -319,7 +439,7 @@ export default function Create() {
       if (!ok) {
         toastr.error("Une erreur s'est produite :", translate(code));
       } else {
-        toastr.success("Le volontaire a bien été créé");
+        toastr.success("Le volontaire a bien été créé", "");
         history.push(`/volontaire/${young._id}`);
       }
     } catch (e) {
@@ -424,7 +544,7 @@ export default function Create() {
         <div className="ml-8 mb-6 text-lg font-normal">Détails</div>
         <div className={"flex pb-14"}>
           <div className="flex-[1_0_50%] pl-8 pr-14">
-            <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} classeId={classeId} />
+            <Situation values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} classeId={classeId} />
           </div>
           <div className="my-16 flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-14 pr-8">
@@ -731,7 +851,6 @@ function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
             label="Nature de l'aménagement spécifique"
             error={errors?.specificAmenagmentType}
             value={values.specificAmenagmentType}
-            mode="edition"
             onChange={(value, name) => handleChange({ target: { name, value } })}
           />
         )}
@@ -1004,11 +1123,6 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
     { value: "true", label: translate("true") },
     { value: "false", label: translate("false") },
   ];
-  const user = useSelector((state) => state.Auth.user);
-  const handleChangeBool = (e, value) => {
-    e.target.value = value;
-    handleChange(e);
-  };
 
   const handlePhoneChange = (name) => (value) => {
     handleChange({

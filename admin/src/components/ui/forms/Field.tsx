@@ -1,10 +1,30 @@
-import React, { useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import SimpleSelect from "@/components/ui/forms/SimpleSelect";
 import { copyToClipboard } from "@/utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
 import { htmlCleaner } from "snu-lib";
+
+interface FieldProps {
+  type?: string;
+  name?: string;
+  label: string;
+  placeholder?: string;
+  value: string | null;
+  onChange?: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, name: string) => void;
+  className?: string;
+  readOnly?: boolean;
+  error?: string;
+  copy?: boolean;
+  bgColor?: string;
+  row?: number;
+  maxLength?: number;
+  dateMode?: string;
+  transformer?: (item: any) => any;
+  options?: Array<any>;
+  filterOnType?: boolean;
+}
 
 export default function Field({
   // Common
@@ -28,7 +48,7 @@ export default function Field({
   transformer,
   options,
   filterOnType,
-}) {
+}: FieldProps) {
   const [copied, setCopied] = useState(false);
 
   if (type === "date")
@@ -59,7 +79,7 @@ export default function Field({
 
         {["text", "tel"].includes(type) && (
           <input
-            readOnly={readOnly && "readonly"}
+            readOnly={!!readOnly}
             type={type}
             name={name}
             placeholder={placeholder}
@@ -76,7 +96,6 @@ export default function Field({
             <textarea
               rows={row}
               readOnly={readOnly}
-              type="text"
               name={name}
               placeholder={placeholder}
               value={value}
@@ -89,7 +108,6 @@ export default function Field({
         {type === "select" && (
           <SimpleSelect
             value={value}
-            name={name}
             showBackgroundColor={false}
             transformer={transformer}
             options={options}

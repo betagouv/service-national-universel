@@ -9,8 +9,21 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, isTime, placeholder, readOnly = false, className }) {
-  const [time, setTime] = useState(value ? `${String(dayjs(value).utc().hour()).padStart(2, 0)}:${String(dayjs(value).utc().minute()).padStart(2, 0)}` : "00:00");
+interface DatePickerWrapperProps {
+  label: string;
+  value: string | null;
+  onChange: (date: Date | null) => void;
+  disabled?: boolean;
+  error?: string;
+  mode?: "single" | "range";
+  isTime?: boolean;
+  placeholder?: string;
+  readOnly?: boolean;
+  className?: string;
+}
+
+export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, isTime, placeholder, readOnly = false, className }: DatePickerWrapperProps) {
+  const [time, setTime] = useState(value ? `${String(dayjs(value).utc().hour()).padStart(2, "0")}:${String(dayjs(value).utc().minute()).padStart(2, "0")}` : "00:00");
 
   useEffect(() => {
     handleChange(value);
@@ -21,11 +34,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
     if (!isTime || mode !== "single") return onChange(date);
 
     // eslint-disable-next-line
-    let [hours, minutes] = time
-      ? time.split(":")
-      : value
-        ? [dayjs(value).hour(), dayjs(value).minute()]
-        : ["00", "00"];
+    let [hours, minutes] = time ? time.split(":") : value ? [dayjs(value).hour(), dayjs(value).minute()] : ["00", "00"];
 
     hours = Number(hours);
     minutes = Number(minutes);
@@ -42,8 +51,8 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
   };
 
   const setHoursOrMinutes = (type, n) => {
-    if (type === "hours") setTime(`${String(n).padStart(2, 0)}:${String(getHoursOrMinutes("minutes")).padStart(2, 0)}`);
-    else setTime(`${String(getHoursOrMinutes("hours")).padStart(2, 0)}:${String(n).padStart(2, 0)}`);
+    if (type === "hours") setTime(`${String(n).padStart(2, "0")}:${String(getHoursOrMinutes("minutes")).padStart(2, "0")}`);
+    else setTime(`${String(getHoursOrMinutes("hours")).padStart(2, "0")}:${String(n).padStart(2, "0")}`);
   };
 
   return (
@@ -70,7 +79,9 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                     disabled={true}
                     value={
                       value
-                        ? dayjs(value).toUtcLocally().format("DD/MM/YYYY") +
+                        ? // @ts-ignore
+                          dayjs(value).toUtcLocally().format("DD/MM/YYYY") +
+                          // @ts-ignore
                           (isTime ? " " + dayjs().hour(dayjs(value).utc().hour()).minute(dayjs(value).utc().minute()).shiftTimeToUtc().format("HH:mm") : "")
                         : ""
                     }
@@ -104,19 +115,15 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                             <div
                               className="flex items-center justify-center w-[40px] h-[40px] rounded-full cursor-pointer hover:bg-[#eff6ff]"
                               onClick={() => {
-                                let hOrM = getHoursOrMinutes(c);
+                                const hOrM = getHoursOrMinutes(c);
                                 // eslint-disable-next-line
-                                setHoursOrMinutes(
-                                  c,
-                                  c === "hours"
-                                    ? hOrM === 0 ? 23 : hOrM - 1
-                                    : hOrM === 0 ? 59 : hOrM - 1,
-                                  );
+                                setHoursOrMinutes(c, c === "hours" ? (hOrM === 0 ? 23 : hOrM - 1) : hOrM === 0 ? 59 : hOrM - 1);
                               }}>
                               <BsChevronUp size={24} color="#797b86" />
                             </div>
                             {/* 42 * 5 =  */}
                             <div className="max-h-[210px] overflow-hidden">
+                              {/* @ts-ignore */}
                               <div className={`-translate-y-[0px]`} style={{ "--tw-translate-y": `-${42 * (getHoursOrMinutes(c) ?? 0)}px` }}>
                                 {[
                                   "",
@@ -141,14 +148,9 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                             <div
                               className="flex items-center justify-center w-[40px] h-[40px] rounded-full cursor-pointer hover:bg-[#eff6ff]"
                               onClick={() => {
-                                let hOrM = getHoursOrMinutes(c);
+                                const hOrM = getHoursOrMinutes(c);
                                 // eslint-disable-next-line
-                                setHoursOrMinutes(
-                                  c,
-                                  c === "hours"
-                                    ? hOrM === 23 ? 0 : hOrM + 1
-                                    : hOrM === 59 ? 0 : hOrM + 1,
-                                );
+                                setHoursOrMinutes(c, c === "hours" ? (hOrM === 23 ? 0 : hOrM + 1) : hOrM === 59 ? 0 : hOrM + 1);
                               }}>
                               <BsChevronDown size={24} color="#797b86" />
                             </div>
