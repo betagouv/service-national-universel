@@ -7,7 +7,7 @@ describe("getFillingRate", () => {
     // Arrange
     const department = "Department1";
     const cohort = "Cohort2023";
-    const youngCount = 50;
+    const youngCount = 10;
     const maxGoal = 100;
 
     YoungModel.find = jest.fn().mockReturnValue({
@@ -24,8 +24,10 @@ describe("getFillingRate", () => {
     const result = await getFillingRate(department, cohort);
 
     // Assert
-    expect(result).toBe(0.5);
-    expect(YoungModel.find).toHaveBeenCalledWith({ department, status: { $in: ["VALIDATED"] }, cohort });
+    expect(result).toBe(0.3);
+    expect(YoungModel.find).toHaveBeenCalledWith({ department, schoolDepartment: department, status: { $in: ["VALIDATED"] }, cohort });
+    expect(YoungModel.find).toHaveBeenCalledWith({ department, schoolDepartment: { $exists: false }, status: { $in: ["VALIDATED"] }, cohort });
+    expect(YoungModel.find).toHaveBeenCalledWith({ departement: { $ne: department }, schoolDepartment: department, status: { $in: ["VALIDATED"] }, cohort });
     expect(InscriptionGoalModel.findOne).toHaveBeenCalledWith({ department, cohort });
   });
 
@@ -42,7 +44,6 @@ describe("getFillingRate", () => {
 
     // Act & Assert
     await expect(getFillingRate(department, cohort)).rejects.toThrow(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
-    expect(YoungModel.find).toHaveBeenCalledWith({ department, status: { $in: ["VALIDATED"] }, cohort });
     expect(InscriptionGoalModel.findOne).toHaveBeenCalledWith({ department, cohort });
   });
 });
@@ -51,7 +52,7 @@ describe("getInscriptionGoalStats", () => {
   it("should return the correct inscription goal", async () => {
     const department = "Test Department";
     const cohort = "Test Cohort";
-    const count = 50;
+    const count = 10;
     const max = 100;
 
     YoungModel.find = jest.fn().mockReturnValue({
@@ -62,9 +63,9 @@ describe("getInscriptionGoalStats", () => {
 
     const stats = await getInscriptionGoalStats(department, cohort);
 
-    expect(stats.count).toBe(count);
+    expect(stats.count).toBe(count * 3);
     expect(stats.max).toBe(max);
-    expect(stats.fillingRate).toBe(0.5);
+    expect(stats.fillingRate).toBe(0.3);
     expect(stats.rateLimit).toBe(FILLING_RATE_LIMIT);
   });
 
