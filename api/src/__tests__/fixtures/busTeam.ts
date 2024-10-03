@@ -1,6 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
-import { LigneBusType } from "../../models";
+import { LigneBusType } from "snu-lib";
 const { ObjectId } = Types;
 
 const getBusTeamFixture = (object): Partial<LigneBusType["team"]> => ({

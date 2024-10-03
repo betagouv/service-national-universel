@@ -1,7 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
-import { BusType } from "../../models/bus";
+import { BusType } from "snu-lib";
 
 function getNewBusFixture(): Partial<BusType> {
   return {

@@ -1,34 +1,13 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "../types";
+import { ImportPlanTransportSchema, InterfaceExtended } from "snu-lib";
+
+import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
 const MODELNAME = "importplandetransport";
 
-const schema = new Schema({
-  cohort: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Cohorte",
-    },
-  },
-  cohortId: {
-    type: String,
-    documentation: {
-      description: "Id de la cohorte",
-    },
-  },
-  lines: {
-    type: [Object],
-    documentation: {
-      description: "Détails des lignes de bus (on ne définit pas l'intérieur pour plus de malléabilité sur l'import",
-    },
-  },
-
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
+const schema = new Schema(ImportPlanTransportSchema);
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
   if (user) {
@@ -54,7 +33,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-export type ImportPlanTransportType = InterfaceExtended<InferSchemaType<typeof schema>>;
+type ImportPlanTransportType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type ImportPlanTransportDocument<T = {}> = DocumentExtended<ImportPlanTransportType & T>;
 type SchemaExtended = ImportPlanTransportDocument & UserExtension;
 
