@@ -123,13 +123,7 @@ export default function Edit(props) {
                     </FormGroup>
                     <FormGroup>
                       <label>URL du site pour la phase Engagement (nécessaire au tracking JVA)</label>
-                      <Field
-                        // validate={(v) => !v && requiredMessage}
-                        value={values.urlPhaseEngagement}
-                        onChange={handleChange}
-                        name="urlPhaseEngagement"
-                        placeholder="www.site.com"
-                      />
+                      <Field value={values.urlPhaseEngagement} onChange={handleChange} name="urlPhaseEngagement" placeholder="www.site.com" />
                       <ErrorMessage errors={errors} touched={touched} name="urlPhaseEngagement" />
                     </FormGroup>
                     <FormGroup>
