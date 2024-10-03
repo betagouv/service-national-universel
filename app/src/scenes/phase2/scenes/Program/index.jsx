@@ -18,7 +18,7 @@ export default function Program() {
   if (error) return <div>Erreur lors du chargement du programme.</div>;
 
   const imgSrc = `https://snu-bucket-prod.cellar-c2.services.clever-cloud.com/programmes-engagement/${data.imageString}`;
-
+  const url = data.urlPhaseEngagement || data.url;
   return (
     <div className="bg-white pb-12">
       <Header
@@ -35,7 +35,7 @@ export default function Program() {
       <div className="max-w-4xl mx-auto px-[1rem] md:px-[2.5rem]">
         {data.publisherName ? null : (
           <a
-            href={data.url}
+            href={url}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md py-2.5 text-center block mb-4">

@@ -43,6 +43,12 @@ const schema = new Schema({
       description: "lien vers son site web",
     },
   },
+  urlPhaseEngagement: {
+    type: String,
+    documentation: {
+      description: "lien vers le site web avec un tracking spécifique pour JVA",
+    },
+  },
   imageFile: {
     type: String,
     documentation: {

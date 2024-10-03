@@ -120,6 +120,9 @@ export function validateProgram(program) {
       url: Joi.string()
         .uri({ scheme: ["http", "https"] })
         .allow(null, ""),
+      urlPhaseEngagement: Joi.string()
+        .uri({ scheme: ["http", "https"] })
+        .allow(null, ""),
       imageFile: Joi.string().allow(null, ""),
       imageString: Joi.string().allow(null, ""),
       type: Joi.string().allow(null, ""),

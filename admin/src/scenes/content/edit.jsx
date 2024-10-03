@@ -40,6 +40,7 @@ export default function Edit(props) {
           name: "",
           description: "",
           url: "",
+          urlPhaseEngagement: "",
           imageFile: "",
           type: "",
           department: "",
@@ -119,6 +120,17 @@ export default function Edit(props) {
                       </label>
                       <Field validate={(v) => !v && requiredMessage} value={values.url} onChange={handleChange} name="url" placeholder="www.site.com" />
                       <ErrorMessage errors={errors} touched={touched} name="url" />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>URL du site pour la phase Engagement (nécessaire au tracking JVA)</label>
+                      <Field
+                        // validate={(v) => !v && requiredMessage}
+                        value={values.urlPhaseEngagement}
+                        onChange={handleChange}
+                        name="urlPhaseEngagement"
+                        placeholder="www.site.com"
+                      />
+                      <ErrorMessage errors={errors} touched={touched} name="urlPhaseEngagement" />
                     </FormGroup>
                     <FormGroup>
                       <label>URL de l&apos;image</label>
