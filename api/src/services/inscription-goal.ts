@@ -1,6 +1,7 @@
 import { FUNCTIONAL_ERRORS } from "snu-lib";
 import { InscriptionGoalModel, YoungModel } from "../models";
 
+// cf: api/src/crons/computeGoalsInscription.js getCount
 const getJeunesValidesCount = async (department, cohort) => {
   const jeunesScolariseCount = await YoungModel.find({ department, schoolDepartment: department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments();
   const jeunesNonscolariseCount = await YoungModel.find({ department, schoolDepartment: { $exists: false }, status: { $in: ["VALIDATED"] }, cohort }).countDocuments();
