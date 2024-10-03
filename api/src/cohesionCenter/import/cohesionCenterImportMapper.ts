@@ -9,11 +9,11 @@ export const mapCohesionCentersForSept2024 = (cohesionCenters: CohesionCenterCSV
       address: cohesionCenter.Adresse,
       city: cohesionCenter.Commune,
       zip: cohesionCenter["Code postal"],
-      department: mapDepartment(cohesionCenter["Département"]),
+      department: mapDepartment(cohesionCenter["Département"], "name"),
       region: mapRegion(cohesionCenter["Région académique"]),
       placesTotal: parseInt(cohesionCenter["Capacité d'accueil Maximale"]),
       pmr: cohesionCenter["Acceuil PMR"] === "TRUE" ? "true" : "false",
-      academy: cohesionCenter.Académie,
+      academy: mapAcademy(cohesionCenter.Académie),
       typology: mapTypology(cohesionCenter["Typologie du centre"]),
       domain: mapDomain(cohesionCenter["Domaine d'activité"]),
       complement: cohesionCenter["Complément adresse"],
@@ -22,7 +22,7 @@ export const mapCohesionCentersForSept2024 = (cohesionCenters: CohesionCenterCSV
       COR: cohesionCenter["Organisme de rattachement"],
       code: cohesionCenter["Matricule du Centre"],
       code2022: cohesionCenter["Matricule du Centre"],
-      departmentCode: mapDepartmentCode(cohesionCenter["Département"]),
+      departmentCode: mapDepartment(cohesionCenter["Département"], "code"),
       matricule: cohesionCenter["Matricule du Centre"],
     };
     if (cohesionCenter["ID temporaire"]) {
@@ -70,26 +70,6 @@ export const mapRegion = (regionCsv: string) => {
   return foundRegion || "NO_REGION";
 };
 
-export const mapDepartment = (departmentCsv: string) => {
-  let convertedDepartment = departmentCsv;
-
-  if (departmentCsv === "COTE D'OR") {
-    convertedDepartment = "COTE-D'OR";
-  }
-  if (departmentCsv === "COTES D'ARMOR") {
-    convertedDepartment = "COTES-D'ARMOR";
-  }
-  if (departmentCsv === "NOUVELLE CALEDONIE") {
-    convertedDepartment = "NOUVELLE-CALEDONIE";
-  }
-
-  const foundDepartment = departmentList.find((dep) => normalizeString(dep) === normalizeString(convertedDepartment));
-  if (!foundDepartment) {
-    logger.warn(`No department found for : ${departmentCsv} was converted to ${convertedDepartment}`);
-  }
-  return foundDepartment || "NO_DEPARTMENT";
-};
-
 export const mapAcademy = (academyCsv: string) => {
   let convertedAcademy = academyCsv;
 
@@ -104,7 +84,7 @@ export const mapAcademy = (academyCsv: string) => {
   return foundAcademy || "NO_ACADEMY";
 };
 
-export const mapDepartmentCode = (departmentCsv: string) => {
+export const mapDepartment = (departmentCsv: string, type: string) => {
   let department = departmentCsv;
   if (departmentCsv === "COTE D'OR") {
     department = "COTE-D'OR";
@@ -115,11 +95,20 @@ export const mapDepartmentCode = (departmentCsv: string) => {
   if (departmentCsv === "NOUVELLE CALEDONIE") {
     department = "NOUVELLE-CALEDONIE";
   }
-  let departmentCode = Object.keys(departmentLookUp).find((key) => normalizeString(departmentLookUp[key]) === normalizeString(department));
-  if (!departmentCode) {
-    logger.warn(`mapDepartmentCode() - No department code for : ${departmentCsv} was converted to ${department}`);
+  if (type === "code") {
+    let departmentCode = Object.keys(departmentLookUp).find((key) => normalizeString(departmentLookUp[key]) === normalizeString(department));
+    if (!departmentCode) {
+      logger.warn(`mapDepartmentCode() - No department code for : ${departmentCsv} was converted to ${department}`);
+    }
+    return departmentCode || "NO_DEPARTMENT";
+  } else if (type === "name") {
+    let departmentName = Object.values(departmentLookUp).find((value) => normalizeString(value) === normalizeString(department));
+
+    if (!departmentName) {
+      logger.warn(`No department found for : ${departmentCsv} was converted to ${department}`);
+    }
+    return departmentName || "NO_DEPARTMENT";
   }
-  return departmentCode || "NO_DEPARTMENT";
 };
 
 export const mapDomain = (domainCsv: string): CohesionCenterDomainEnum => {
