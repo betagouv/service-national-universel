@@ -1,4 +1,4 @@
-import { CohesionCenterDomainEnum, CohesionCenterTypologyEnum, departmentLookUp, regionList } from "snu-lib";
+import { CohesionCenterDomainEnum, CohesionCenterTypologyEnum, departmentLookUp, regionList, departmentList, academyList } from "snu-lib";
 import { logger } from "../../logger";
 import { CohesionCenterCSV, CohesionCenterImportMapped } from "./cohesionCenterImport";
 
@@ -9,7 +9,7 @@ export const mapCohesionCentersForSept2024 = (cohesionCenters: CohesionCenterCSV
       address: cohesionCenter.Adresse,
       city: cohesionCenter.Commune,
       zip: cohesionCenter["Code postal"],
-      department: cohesionCenter["Département"],
+      department: mapDepartment(cohesionCenter["Département"]),
       region: mapRegion(cohesionCenter["Région académique"]),
       placesTotal: parseInt(cohesionCenter["Capacité d'accueil Maximale"]),
       pmr: cohesionCenter["Acceuil PMR"] === "TRUE" ? "true" : "false",
@@ -68,6 +68,40 @@ export const mapRegion = (regionCsv: string) => {
     logger.warn(`No region found for : ${regionCsv} was converted to ${convertedRegion}`);
   }
   return foundRegion || "NO_REGION";
+};
+
+export const mapDepartment = (departmentCsv: string) => {
+  let convertedDepartment = departmentCsv;
+
+  if (departmentCsv === "COTE D'OR") {
+    convertedDepartment = "COTE-D'OR";
+  }
+  if (departmentCsv === "COTES D'ARMOR") {
+    convertedDepartment = "COTES-D'ARMOR";
+  }
+  if (departmentCsv === "NOUVELLE CALEDONIE") {
+    convertedDepartment = "NOUVELLE-CALEDONIE";
+  }
+
+  const foundDepartment = departmentList.find((dep) => normalizeString(dep) === normalizeString(convertedDepartment));
+  if (!foundDepartment) {
+    logger.warn(`No department found for : ${departmentCsv} was converted to ${convertedDepartment}`);
+  }
+  return foundDepartment || "NO_DEPARTMENT";
+};
+
+export const mapAcademy = (academyCsv: string) => {
+  let convertedAcademy = academyCsv;
+
+  if (academyCsv === "NOUVELLE CALEDONIE") {
+    convertedAcademy = "NOUVELLE-CALEDONIE";
+  }
+
+  const foundAcademy = academyList.find((academy) => normalizeString(academy) === normalizeString(convertedAcademy));
+  if (!foundAcademy) {
+    logger.warn(`No academy found for : ${academyCsv} was converted to ${convertedAcademy}`);
+  }
+  return foundAcademy || "NO_ACADEMY";
 };
 
 export const mapDepartmentCode = (departmentCsv: string) => {
