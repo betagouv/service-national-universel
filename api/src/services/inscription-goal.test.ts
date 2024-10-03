@@ -4,7 +4,6 @@ import { FUNCTIONAL_ERRORS } from "snu-lib";
 
 describe("getFillingRate", () => {
   it("should return the correct filling rate", async () => {
-    // Arrange
     const department = "Department1";
     const cohort = "Cohort2023";
     const youngCount = 10;
@@ -20,10 +19,8 @@ describe("getFillingRate", () => {
       max: maxGoal,
     });
 
-    // Act
     const result = await getFillingRate(department, cohort);
 
-    // Assert
     expect(result).toBe(0.3);
     expect(YoungModel.find).toHaveBeenCalledWith({ department, schoolDepartment: department, status: { $in: ["VALIDATED"] }, cohort });
     expect(YoungModel.find).toHaveBeenCalledWith({ department, schoolDepartment: { $exists: false }, status: { $in: ["VALIDATED"] }, cohort });
@@ -32,7 +29,6 @@ describe("getFillingRate", () => {
   });
 
   it("should throw an error when inscription goal is not defined", async () => {
-    // Arrange
     const department = "Department1";
     const cohort = "Cohort2023";
 
@@ -42,7 +38,6 @@ describe("getFillingRate", () => {
 
     InscriptionGoalModel.findOne = jest.fn().mockReturnValue(null);
 
-    // Act & Assert
     await expect(getFillingRate(department, cohort)).rejects.toThrow(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
     expect(InscriptionGoalModel.findOne).toHaveBeenCalledWith({ department, cohort });
   });

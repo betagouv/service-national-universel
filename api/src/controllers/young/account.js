@@ -9,7 +9,7 @@ const { YoungModel, CohortModel } = require("../../models");
 const { serializeYoung } = require("../../utils/serializer");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { capture } = require("../../sentry");
-const { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES, getDepartmentForEligibility } = require("snu-lib");
 const validator = require("validator");
 const { validateParents } = require("../../utils/validator");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
@@ -108,7 +108,10 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
       // Check if cohort goal is reached
       if (isEligible) {
-        const fillingRate = await getFillingRate(value.department, cohort);
+        // on vérifie la completion des objectifs pour le département
+        // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+        const departement = getDepartmentForEligibility(value);
+        const fillingRate = await getFillingRate(departement, cohort);
         isGoalReached = fillingRate >= FILLING_RATE_LIMIT;
       }
 

@@ -43,7 +43,6 @@ const {
   canGetYoungByEmail,
   canInviteYoung,
   canEditYoung,
-  canSendTemplateToYoung,
   canViewYoungApplications,
   canEditPresenceYoung,
   canDeletePatchesHistory,
@@ -57,6 +56,8 @@ const {
   youngCanWithdraw,
   translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
+  getDepartmentForEligibility,
+  FUNCTIONAL_ERRORS,
 } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
@@ -535,7 +536,10 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     });
 
     if (cohort !== "à venir") {
-      const fillingRate = await getFillingRate(young.department, cohort);
+      // on vérifie la completion des objectifs pour le département
+      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+      const departement = getDepartmentForEligibility(young);
+      const fillingRate = await getFillingRate(departement, cohort);
 
       if (fillingRate >= FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.VALIDATED) {
         young.set({ status: YOUNG_STATUS.WAITING_LIST });
@@ -599,7 +603,11 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
+      res.status(400).send({ ok: false, code: error.message });
+    } else {
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
   }
 });
 
