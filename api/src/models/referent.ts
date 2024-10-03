@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import bcrypt from "bcryptjs";
@@ -39,10 +40,14 @@ schema.methods.anonymise = function () {
 
 //Sync with Sendinblue
 schema.post("save", function (doc) {
-  brevo.sync(doc, MODELNAME);
+  if (config.ENVIRONMENT !== "test" && brevo.isFieldsNeedSync(this.getChanges()?.["$set"])) {
+    brevo.sync(doc, MODELNAME);
+  }
 });
 schema.post("findOneAndUpdate", function (doc) {
-  brevo.sync(doc, MODELNAME);
+  if (config.ENVIRONMENT !== "test" && brevo.isFieldsNeedSync(this.getUpdate()?.["$set"])) {
+    brevo.sync(doc, MODELNAME);
+  }
 });
 schema.post("remove", function (doc) {
   brevo.unsync(doc);

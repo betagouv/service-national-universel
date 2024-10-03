@@ -412,3 +412,10 @@ export async function unsync(obj, options = { force: false }) {
     capture(error, { contexts: { emails } });
   }
 }
+
+const BREVO_SYNC_FILEDS = ["firstName", "lastName", "email", "parent1Email", "parent2Email"];
+export function isFieldsNeedSync(updates?: { [key: string]: string }) {
+  if (!updates) return false;
+  const fields = Object.keys(updates);
+  return fields.some((field) => BREVO_SYNC_FILEDS.includes(field));
+}

@@ -65,11 +65,14 @@ schema.post<SchemaExtended>("save", async function (doc) {
     await ClasseStateManager.compute(doc.classeId, doc._user, { YoungModel });
   }
 
-  if (config.ENVIRONMENT === "test") return;
-  brevo.sync(doc, MODELNAME);
+  if (config.ENVIRONMENT !== "test" && brevo.isFieldsNeedSync(this.getChanges()?.["$set"])) {
+    brevo.sync(doc, MODELNAME);
+  }
 });
 schema.post("findOneAndUpdate", function (doc) {
-  brevo.sync(doc, MODELNAME);
+  if (config.ENVIRONMENT !== "test" && brevo.isFieldsNeedSync(this.getUpdate()?.["$set"])) {
+    brevo.sync(doc, MODELNAME);
+  }
 });
 schema.post("remove", function (doc) {
   brevo.unsync(doc);
