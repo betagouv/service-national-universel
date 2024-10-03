@@ -8,6 +8,10 @@ if ! [[ -x "$(command -v mongodump)" ]]; then
   echo 'ERROR: mongodump, bsondump & mongoimport are not installed : https://www.mongodb.com/docs/database-tools/' >&2
   exit 1
 fi
+if ! [[ -x "$(command -v jq)" ]]; then
+  echo 'ERROR: jq not installed install : brew install jq' >&2
+  exit 1
+fi
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 PROJECT_DIR=$(cd $SCRIPT_DIR/../../../ && pwd)
@@ -32,6 +36,7 @@ MONGO_LOCAL_URL="mongodb://localhost:27017/$MONGO_LOCAL_NAME";
 echo "= DUMP DIR   : $DUMP_DIRECTORY\n"
 echo "> DUMP FROM  : $MONGO_STAGING_URL"
 echo "> RESTORE TO : $MONGO_LOCAL_URL"
+echo "> REINDEXING according to local-development.js configuration"
 
 if [ -z "$MONGO_STAGING_URL" ];then
   echo "MONGO_STAGING_URL is empty"
