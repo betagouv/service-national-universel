@@ -16,6 +16,7 @@ import PhoneField from "@/components/dsfr/forms/PhoneField";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
 import useAuth from "@/services/useAuth";
 import { SignupButtons } from "@snu/ds/dsfr";
+import emojiRegex from "emoji-regex";
 
 export default function StepProfil() {
   const { young, isCLE } = useAuth();
@@ -46,22 +47,19 @@ export default function StepProfil() {
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm"];
 
   const handleNameChange = (field) => (value) => {
-    // Regular expression to remove invalid characters
-    const regex = /[^a-zA-ZÀ-ÿ\s'-]/g;
-    let fixedValue = "";
+    // Expression régulière pour supprimer les caractères invalides
+    const invalidCharRegex = /[^a-zA-ZÀ-ÿ\s'\-^¨éèëâçù]/g;
+    // Expression régulière pour correspondre aux emojis
+    const emojiReg = emojiRegex();
 
-    for (const c of value) {
-      const code = c.charCodeAt(0);
-      // Filter out emojis and other invalid characters
-      if (code >= 0x20 && code < 0x7f && !regex.test(c)) {
-        fixedValue += c;
-      }
-    }
+    // Supprimer les caractères invalides
+    let fixedValue = value.replace(invalidCharRegex, "");
+    // Supprimer les emojis
+    fixedValue = fixedValue.replace(emojiReg, "");
 
-    // Update the state with the cleaned value
+    // Mettre à jour l'état avec la valeur nettoyée
     setData({ ...data, [field]: fixedValue });
   };
-
   const validate = () => {
     let errors = {};
 

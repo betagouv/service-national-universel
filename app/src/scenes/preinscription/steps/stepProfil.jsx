@@ -25,6 +25,7 @@ import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
 import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
 import { cohortsInit } from "@/utils/cohorts";
+import emojiRegex from "emoji-regex";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -56,19 +57,17 @@ export default function StepProfil() {
   const trimmedEmailConfirm = data?.emailConfirm?.trim();
 
   const handleNameChange = (field) => (value) => {
-    // Regular expression to remove invalid characters
-    const regex = /[^a-zA-ZÀ-ÿ\s'-]/g;
-    let fixedValue = "";
+    // Expression régulière pour supprimer les caractères invalides
+    const invalidCharRegex = /[^a-zA-ZÀ-ÿ\s'\-^¨éèëâçù]/g;
+    // Expression régulière pour correspondre aux emojis
+    const emojiReg = emojiRegex();
 
-    for (const c of value) {
-      const code = c.charCodeAt(0);
-      // Filter out emojis and other invalid characters
-      if (code >= 0x20 && code < 0x7f && !regex.test(c)) {
-        fixedValue += c;
-      }
-    }
+    // Supprimer les caractères invalides
+    let fixedValue = value.replace(invalidCharRegex, "");
+    // Supprimer les emojis
+    fixedValue = fixedValue.replace(emojiReg, "");
 
-    // Update the state with the cleaned value
+    // Mettre à jour l'état avec la valeur nettoyée
     setData({ ...data, [field]: fixedValue });
   };
 
