@@ -143,5 +143,5 @@ export const EtablissementSchema = {
 
 const schema = new Schema(EtablissementSchema);
 export type EtablissementType = InterfaceExtended<InferSchemaType<typeof schema>> & {
-  coordinateurs?: Pick<ReferentType, "_id" | "email" | "firstName" | "lastName" | "phone" | "role" | "subRole">;
+  coordinateurs?: Pick<ReferentType, "_id" | "email" | "firstName" | "lastName" | "phone" | "role" | "subRole">[];
 };
