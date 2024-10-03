@@ -106,7 +106,7 @@ async function reindexESAllModels() {
     };
 
     // const models_indexed = [CohortModel]; // useful_models;
-    let models_indexed = useful_models;
+    let models_indexed = [CohesionCenterModel];
 
     if (groupName === "all") {
       models_indexed = all_models;
