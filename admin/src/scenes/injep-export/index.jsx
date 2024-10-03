@@ -119,7 +119,7 @@ const INJEPExport = () => {
         />
         <div className="flex gap-4">
           <ExportBox
-            title="Liste des volontaires affectés et sur liste complémentaire"
+            title="Liste des volontaires au début du séjour (J+2)"
             availableFrom={currentCohort?.injepExportDates?.[exportDateKeys[0]]}
             availableUntil={getExportAvailableUntilDate(currentCohort?.injepExportDates?.[exportDateKeys[0]])}
             onClick={() => handleClick(exportDateKeys[0])}
@@ -127,7 +127,7 @@ const INJEPExport = () => {
             isDownloading={!!isLDownloadingByKey[exportDateKeys[0]]}
           />
           <ExportBox
-            title="Liste des volontaires après le séjour"
+            title="Liste des volontaires après le séjour (J+6)"
             availableFrom={currentCohort?.injepExportDates?.[exportDateKeys[1]]}
             availableUntil={getExportAvailableUntilDate(currentCohort?.injepExportDates?.[exportDateKeys[1]])}
             onClick={() => handleClick(exportDateKeys[1])}

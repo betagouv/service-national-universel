@@ -166,6 +166,34 @@ export const subjectsAdmin = {
   },
 };
 
+export const typesExport = {
+  TECHNICAL: {
+    id: "TECHNICAL",
+    label: "J'ai un problème technique",
+    tags: ["TAG_problème_technique", "AGENT_Startup_Support", "AGENT_Startup_Technique"],
+  },
+  OTHER: {
+    id: "OTHER",
+    label: "Autre",
+    tags: ["TAG_Autre Demande", "AGENT_Startup_Support"],
+  },
+};
+
+export const subjectsExport = {
+  DOWNLOAD: {
+    parentId: "TECHNICAL",
+    id: "DOWNLOAD",
+    label: "Je n'arrive pas à télécharger un document depuis la plateforme",
+    tags: ["TAG_téléchargment"],
+  },
+  OTHER: {
+    parentId: "TECHNICAL",
+    id: "OTHER",
+    label: "J'ai un autre problème",
+    tags: ["TAG_autre"],
+  },
+};
+
 export const typesStructure = {
   TECHNICAL: {
     id: "TECHNICAL",

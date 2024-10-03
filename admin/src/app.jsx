@@ -293,8 +293,8 @@ const Home = () => {
 };
 
 const limitedAccess = {
-  [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
-  [ROLES.INJEP]: { authorised: ["/injep-export", "/profil"], default: "/injep-export" },
+  [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil", "/besoin-d-aide"], default: "/dsnj-export" },
+  [ROLES.INJEP]: { authorised: ["/injep-export", "/profil", "/besoin-d-aide"], default: "/injep-export" },
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {
