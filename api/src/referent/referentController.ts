@@ -524,9 +524,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
-
-    const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : null;
-
+    const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
