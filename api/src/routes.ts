@@ -17,7 +17,7 @@ export function injectRoutes(app) {
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters"));
   app.use("/gouv.fr", require("./controllers/gouv.fr"));
-  app.use("/inscription-goal", require("./controllers/inscription-goal"));
+  app.use("/inscription-goal", require("./controllers/inscription-goal").default);
   app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
   app.use("/mission", require("./controllers/mission"));

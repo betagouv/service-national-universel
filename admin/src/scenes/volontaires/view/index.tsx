@@ -35,7 +35,10 @@ export default function Index({ ...props }) {
   useDocumentTitle(young ? (young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : `${young.firstName} ${young.lastName}`) : "Volontaires");
 
   const getDetail = () => {
-    let mode = ([YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young?.status || "") ? "correction" : "readonly";
+    if (!young) return;
+    let mode: "correction" | "readonly" = ([YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young?.status || "")
+      ? "correction"
+      : "readonly";
     const cohort = cohorts.find(({ _id, name }) => _id === young?.cohortId || name === young?.cohort);
     if (new Date() > new Date(cohort?.instructionEndDate || "")) {
       mode = "readonly";
