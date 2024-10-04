@@ -368,7 +368,6 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     if (user.role === ROLES.HEAD_CENTER) {
       const sessionsPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
       if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
-      console.log(addMonths(new Date(), -3));
       const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
       if (visibleCohorts.length > 0) {
         contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
