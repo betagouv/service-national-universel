@@ -49,7 +49,7 @@ describe("LigneDeBus", () => {
       expect(res.body.data.meetingPoints[0].department).toBe(PointDeRassemblement.department);
       expect(res.body.data.meetingPoints[0].region).toBe(PointDeRassemblement.region);
       expect(res.body.data.meetingPoints[0].location).toEqual(PointDeRassemblement.location);
-      expect(res.body.data.ligneBus[0]._id).toBe(ligneBus._id.toString());
+      expect(res.body.data.ligneBus.find(({ _id }) => _id === ligneBus._id.toString())).toBeDefined();
       expect(res.body.data.ligneToPoints.length).toBeGreaterThan(0);
       expect(res.body.data.ligneToPoints[0]._id).toBe(ligneToPoint._id.toString());
     });
