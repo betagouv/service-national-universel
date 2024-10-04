@@ -21,7 +21,7 @@ const schema = new Schema({
   },
   pointDeRassemblements: {
     ...PlanTransportSchema["pointDeRassemblements"],
-    type: [new Schema(EnrichedPointDeRassemblementSchema)],
+    type: [EnrichedPointDeRassemblementSchema],
   },
 });
 
