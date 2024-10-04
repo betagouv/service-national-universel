@@ -101,7 +101,6 @@ import {
   FUNCTIONAL_ERRORS,
   YoungType,
   getDepartmentForEligibility,
-  canGetYoungByEmail,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -525,9 +524,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
-    console.log(young.cohort);
     const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
-    console.log(cohort);
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
