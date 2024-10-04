@@ -1,5 +1,6 @@
 const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
 const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
+const crypto = require("crypto");
 
 function anonymize(itemToAnonymize) {
   const whitelist = [
@@ -391,8 +392,8 @@ function anonymize(itemToAnonymize) {
   item.forgotPasswordResetToken = "";
   item.invitationToken = "";
   item.phase3Token = "";
-  item.parent1Inscription2023Token = "";
-  item.parent2Inscription2023Token = "";
+  item.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
+  item.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
 
   return item;
 }
