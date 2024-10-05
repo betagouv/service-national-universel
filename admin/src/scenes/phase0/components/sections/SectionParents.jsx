@@ -298,22 +298,87 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                       ) : (
                         <>
                           <div className="flex items-center gap-4 mb-[16px]">
-                            <Field name="etablissementZone" label="Zone" value={region2zone[data?.schoolRegion]} mode="readonly" className="w-1/2" young={young} />
                             <Field
-                              name="etablissementAcademy"
+                              name="schoolZone"
+                              label="Zone"
+                              value={region2zone[data?.schoolRegion]}
+                              mode={sectionMode}
+                              className="w-1/2"
+                              onStartRequest={onStartRequest}
+                              currentRequest={currentRequest}
+                              correctionRequest={getCorrectionRequest(requests, "schoolZone")}
+                              onCorrectionRequestChange={onCorrectionRequestChange}
+                              onChange={(value) => onLocalChange("schoolZone", value)}
+                              young={young}
+                            />
+                            <Field
+                              name="schoolAcademy"
                               label="Académie"
                               value={departmentToAcademy[data?.schoolDepartment]}
-                              mode="readonly"
+                              mode={sectionMode}
                               className="w-1/2"
+                              onStartRequest={onStartRequest}
+                              currentRequest={currentRequest}
+                              correctionRequest={getCorrectionRequest(requests, "schoolAcademy")}
+                              onCorrectionRequestChange={onCorrectionRequestChange}
+                              onChange={(value) => onLocalChange("schoolAcademy", value)}
                               young={young}
                             />
                           </div>
                           <div className="flex items-center gap-4 mb-[16px]">
-                            <Field name="etablissementRegion" label="Région" value={data?.schoolRegion} mode="readonly" className="w-1/2" young={young} />
-                            <Field name="etablissementDepartment" label="Département" value={data?.schoolDepartment} mode="readonly" className="w-1/2" young={young} />
+                            <Field
+                              name="schoolRegion"
+                              label="Région"
+                              value={data.schoolRegion}
+                              mode={sectionMode}
+                              className="w-1/2"
+                              onStartRequest={onStartRequest}
+                              currentRequest={currentRequest}
+                              correctionRequest={getCorrectionRequest(requests, "schoolRegion")}
+                              onCorrectionRequestChange={onCorrectionRequestChange}
+                              onChange={(value) => onLocalChange("schoolRegion", value)}
+                              young={young}
+                            />
+                            <Field
+                              name="schoolDepartment"
+                              label="Département"
+                              value={data.schoolDepartment}
+                              mode={sectionMode}
+                              className="w-1/2"
+                              onStartRequest={onStartRequest}
+                              currentRequest={currentRequest}
+                              correctionRequest={getCorrectionRequest(requests, "schoolDepartment")}
+                              onCorrectionRequestChange={onCorrectionRequestChange}
+                              onChange={(value) => onLocalChange("schoolDepartment", value)}
+                              young={young}
+                            />
                           </div>
-                          <Field name="etablissementCity" label="Ville" value={data?.schoolCity} mode="readonly" className="mb-[16px]" young={young} />
-                          <Field name="etablissementName" label="Nom" value={data?.schoolName} mode="readonly" className="mb-[24px]" young={young} />
+                          <Field
+                            name="schoolCity"
+                            label="Ville de l'établissement"
+                            value={data.schoolCity}
+                            mode={sectionMode}
+                            className="mb-[16px]"
+                            onStartRequest={onStartRequest}
+                            currentRequest={currentRequest}
+                            correctionRequest={getCorrectionRequest(requests, "schoolCity")}
+                            onCorrectionRequestChange={onCorrectionRequestChange}
+                            onChange={(value) => onLocalChange("schoolCity", value)}
+                            young={young}
+                          />
+                          <Field
+                            name="schoolName"
+                            label="Nom de l'établissement"
+                            value={data.schoolName}
+                            mode={sectionMode}
+                            className="mb-[24px]"
+                            onStartRequest={onStartRequest}
+                            currentRequest={currentRequest}
+                            correctionRequest={getCorrectionRequest(requests, "schoolName")}
+                            onCorrectionRequestChange={onCorrectionRequestChange}
+                            onChange={(value) => onLocalChange("schoolName", value)}
+                            young={young}
+                          />
                         </>
                       )}
                     </>
