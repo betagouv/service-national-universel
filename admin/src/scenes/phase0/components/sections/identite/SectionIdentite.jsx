@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE } from "snu-lib";
+import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE, GRADES } from "snu-lib";
 
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
@@ -345,7 +345,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               onChange={(value) => onLocalAddressChange("country", value)}
               young={young}
             />
-            {data?.etablissementDepartment ? (
+            {data?.etablissementDepartment && data.grade !== GRADES.NOT_SCOLARISE ? (
               data?.etablissementDepartment !== data?.department ? (
                 <div className="w-full h-full p-2 bg-amber-50 rounded-md flex justify-center items-center gap-2">
                   <HiOutlineExclamation className="text-amber-500 p-2" size={40} />
