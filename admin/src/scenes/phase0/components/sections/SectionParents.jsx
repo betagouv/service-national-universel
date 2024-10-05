@@ -19,6 +19,8 @@ import {
   YOUNG_SOURCE,
   translateEtablissementSector,
   translateColoration,
+  departmentToAcademy,
+  region2zone,
 } from "snu-lib";
 import { filterDataForYoungSection } from "../../utils";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "../../commons";
@@ -296,6 +298,17 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                       ) : (
                         <>
                           <div className="flex items-center gap-4 mb-[16px]">
+                            <Field name="etablissementZone" label="Zone" value={region2zone[data?.schoolRegion]} mode="readonly" className="w-1/4" young={young} />
+                            <Field
+                              name="etablissementAcademy"
+                              label="Académie"
+                              value={departmentToAcademy[data?.schoolDepartment]}
+                              mode="readonly"
+                              className="w-3/4"
+                              young={young}
+                            />
+                          </div>
+                          <div className="flex items-center gap-4 mb-[16px]">
                             <Field name="etablissementRegion" label="Région" value={data?.schoolRegion} mode="readonly" className="w-1/2" young={young} />
                             <Field name="etablissementDepartment" label="Département" value={data?.schoolDepartment} mode="readonly" className="w-1/2" young={young} />
                           </div>
@@ -337,7 +350,10 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   />
                   <Field name="classeGrade" label="Classe" value={young?.grade} mode="readonly" className="mb-[24px]" young={young} transformer={translateGrade} />
                   <MiniTitle>Établissement</MiniTitle>
-                  <Field name="etablissementAcademy" label="Académie" value={data?.etablissement?.academy} mode="readonly" className="mb-[16px]" young={young} />
+                  <div className="flex items-center gap-4 mb-[16px]">
+                    <Field name="etablissementZone" label="Zone" value={region2zone[data?.etablissement?.region]} mode="readonly" className="w-1/4" young={young} />
+                    <Field name="etablissementAcademy" label="Académie" value={data?.etablissement?.academy} mode="readonly" className="w-3/4" young={young} />
+                  </div>
                   <div className="flex items-center gap-4 mb-[16px]">
                     <Field name="etablissementRegion" label="Région" value={data?.etablissement?.region} mode="readonly" className="w-1/2" young={young} />
                     <Field name="etablissementDepartment" label="Département" value={data?.etablissement?.department} mode="readonly" className="w-1/2" young={young} />
