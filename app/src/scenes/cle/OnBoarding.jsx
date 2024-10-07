@@ -68,8 +68,8 @@ const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
 };
 
 const OnBoarding = () => {
-  const { isLoggedIn, logout } = useAuth();
-  if (isLoggedIn) logout({ redirect: false });
+  const { isLoggedIn, logout, isCLE } = useAuth();
+  if (isLoggedIn && !isCLE) logout({ redirect: false });
   const { id } = queryString.parse(window.location.search);
   const {
     isError,
