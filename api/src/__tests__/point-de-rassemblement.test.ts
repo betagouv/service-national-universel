@@ -438,6 +438,7 @@ describe("Point de rassemblement", () => {
         city: "Test City",
         address: "Test Address",
         code: code,
+        matricule: code,
       });
 
       const res = await request(getAppHelper()).get(`/point-de-rassemblement/${pointDeRassemblement._id}`).send();

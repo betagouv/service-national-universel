@@ -263,6 +263,7 @@ describe("LigneDeBus", () => {
         city: "Paris",
         address: "123 Main St",
         code: "PDR1",
+        matricule: "PDR1",
         location: {
           lat: 48.8566,
           lon: 2.3522,
@@ -278,6 +279,7 @@ describe("LigneDeBus", () => {
         city: "Paris",
         address: "456 Main St",
         code: "PDR2",
+        matricule: "PDR2",
         location: {
           lat: 48.8566,
           lon: 2.3522,
