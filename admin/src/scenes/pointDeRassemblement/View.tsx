@@ -351,21 +351,15 @@ export default function View(props) {
             <div className="flex w-[45%] flex-col gap-4 ">
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium leading-4 text-gray-900">Désignation du point de rassemblement</div>
-                <Field
-                  label="Désignation du point de rassemblement"
-                  onChange={(e) => setPdr({ ...pdr, name: e.target.value })}
-                  value={pdr.name}
-                  error={errors?.name}
-                  readOnly={!editInfo}
-                />
+                <Field label="Désignation du point de rassemblement" onChange={(e) => setPdr({ ...pdr, name: e.target.value })} value={pdr.name} error={errors?.name} readOnly />
               </div>
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium leading-4 text-gray-900">Matricule</div>
-                <Field value={pdr.matricule || ""} readOnly />
+                <Field label="Matricule" value={pdr.matricule || ""} readOnly />
               </div>
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium leading-4 text-gray-900">Académie</div>
-                <Field value={departmentToAcademy[pdr.department]} readOnly />
+                <Field label="Académie" value={departmentToAcademy[pdr.department]} readOnly />
               </div>
             </div>
             <div className="flex w-[10%] items-center justify-center">
@@ -385,8 +379,11 @@ export default function View(props) {
                   options={results}
                 />
                 <div className="flex items-center gap-3">
-                  <Field label="Département" onChange={(e) => setPdr({ ...pdr, department: e.target.value })} value={pdr.department} readOnly={true} disabled={editInfo} />
-                  <Field label="Région" onChange={(e) => setPdr({ ...pdr, region: e.target.value })} value={pdr.region} readOnly={true} disabled={editInfo} />
+                  <Field label="Département" onChange={(e) => setPdr({ ...pdr, department: e.target.value })} value={pdr.department} readOnly disabled={editInfo} />
+                  <Field label="Région" onChange={(e) => setPdr({ ...pdr, region: e.target.value })} value={pdr.region} readOnly disabled={editInfo} />
+                </div>
+                <div>
+                  <Field label="Particularités d'accès" value={pdr.particularitesAcces || ""} readOnly disabled={editInfo} />
                 </div>
               </div>
             </div>

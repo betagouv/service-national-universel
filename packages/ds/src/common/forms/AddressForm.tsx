@@ -57,7 +57,7 @@ export default function AddressForm({
           label="Adresse"
           value={data.address}
           onChange={(value: string) => updateData({ ...data, address: value })}
-          disabled={
+          readOnly={
             readOnly || data?.coordinatesAccuracyLevel === "housenumber"
           }
           className="col-span-2"
@@ -65,13 +65,13 @@ export default function AddressForm({
         <Input
           label="Ville"
           value={data.city}
-          disabled
+          readOnly={readOnly}
           className="col-span-2 md:col-span-1"
         />
         <Input
           label="Code postal"
           value={data.zip}
-          disabled
+          readOnly={readOnly}
           className="col-span-2 md:col-span-1"
         />
         {!readOnly && (

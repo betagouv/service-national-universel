@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { ROLES, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
+import { PointDeRassemblementType, ROLES, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
 import Calendar from "../../assets/icons/Calendar";
 import ExternalLink from "../../assets/icons/ExternalLink";
@@ -19,20 +19,22 @@ import { getCohortGroups } from "@/services/cohort.service";
 import { getDefaultCohort } from "@/utils/session";
 import { Link } from "react-router-dom";
 import { Button } from "@snu/ds/admin";
+import { AuthState } from "@/redux/auth/reducer";
+import { CohortState } from "@/redux/cohorts/reducer";
 
 export default function List() {
-  const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const [modal, setModal] = React.useState({ isOpen: false });
   const defaultCohortName = getDefaultCohort(cohorts)?.name;
   const history = useHistory();
-  const { currentTab } = useParams();
+  const { currentTab } = useParams<{ currentTab?: string }>();
   const { search } = useLocation();
   const query = new URLSearchParams(search);
 
   React.useEffect(() => {
     const listTab = ["liste-points", "session"];
-    if (!listTab.includes(currentTab)) return history.push(`/point-de-rassemblement/liste/liste-points`);
+    if (!listTab.includes(currentTab || "")) return history.push(`/point-de-rassemblement/liste/liste-points`);
   }, [currentTab]);
 
   React.useEffect(() => {
@@ -96,7 +98,7 @@ export default function List() {
 }
 
 const ListPoints = ({ user }) => {
-  const [data, setData] = React.useState([]);
+  const [data, setData] = React.useState<PointDeRassemblementType[]>([]);
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrList";
   const [paramData, setParamData] = React.useState({ page: 0 });
@@ -132,13 +134,15 @@ const ListPoints = ({ user }) => {
           />
           <ExportComponent
             title="Exporter"
+            // @ts-ignore
             filters={filterArray}
             exportTitle="point_de_rassemblement"
             route="/elasticsearch/pointderassemblement/export"
             transform={async (data) => {
-              let res = [];
+              const res: PointDeRassemblementType[] = [];
               for (const item of data) {
                 res.push({
+                  // @ts-ignore
                   Identifiant: item._id.toString(),
                   Code: item.code,
                   Cohortes: item?.cohorts.map((e) => e).join(", "),
@@ -181,7 +185,7 @@ const ListPoints = ({ user }) => {
               <div className="w-[60%]">Cohortes</div>
             </div>
             {data?.map((hit) => {
-              return <Hit key={hit._id} hit={hit} user={user} />;
+              return <Hit key={hit._id} hit={hit} />;
             })}
             <hr />
           </div>
@@ -193,7 +197,7 @@ const ListPoints = ({ user }) => {
 
 const Hit = ({ hit }) => {
   const history = useHistory();
-  const cohorts = useSelector((state) => state.Cohorts);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   return (
     <>
       <hr />
@@ -209,8 +213,9 @@ const Hit = ({ hit }) => {
         </div>
         <div className="flex w-[60%] flex-wrap items-center gap-2">
           {hit.cohorts?.map((cohortName) => {
-            const cohort = cohorts.find((e) => e.name === cohortName);
-            const disabled = new Date(cohort.startDate) < new Date();
+            const cohort = cohorts?.find((e) => e.name === cohortName);
+            // @ts-ignore
+            const disabled = new Date(cohort?.dateStart) < new Date();
             return (
               <div
                 key={cohortName}
@@ -229,7 +234,7 @@ const Hit = ({ hit }) => {
 };
 
 const ListSessions = ({ user, defaultCohortName }) => {
-  const [data, setData] = React.useState([]);
+  const [data, setData] = React.useState<PointDeRassemblementType[]>([]);
   const [selectedFilters, setSelectedFilters] = React.useState({ cohorts: { filter: [defaultCohortName] } });
   const pageId = "pdrListSession";
   const [paramData, setParamData] = React.useState({ page: 0 });
@@ -240,7 +245,7 @@ const ListSessions = ({ user, defaultCohortName }) => {
       title: "Région",
       name: "region",
       missingLabel: "Non renseignée",
-      defaultValue: user.role === ROLES.REGION ? [user.region] : [],
+      defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     },
     {
       title: "Département",
@@ -251,9 +256,9 @@ const ListSessions = ({ user, defaultCohortName }) => {
     },
   ];
 
-  const [pdrIds, setPdrIds] = React.useState([]);
-  const [nbYoungByPdr, setNbYoungByPdr] = React.useState([]);
-  const [nbLinesByPdr, setNbLinesByPdr] = React.useState([]);
+  const [pdrIds, setPdrIds] = React.useState<string[]>([]);
+  const [nbYoungByPdr, setNbYoungByPdr] = React.useState<{ key: string; doc_count: number }[]>([]);
+  const [nbLinesByPdr, setNbLinesByPdr] = React.useState<{ key: string; doc_count: number }[]>([]);
   const [loading, setLoading] = React.useState(false);
 
   const selectedCohort = selectedFilters?.cohorts?.filter ? selectedFilters.cohorts.filter[0] : defaultCohortName;
@@ -297,7 +302,7 @@ const ListSessions = ({ user, defaultCohortName }) => {
             route="/elasticsearch/pointderassemblement/search"
             setData={(value) => setData(value)}
             filters={filterArray}
-            searchPalceholder="Rechercher un point de rassemblement"
+            searchPlaceholder="Rechercher un point de rassemblement"
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
@@ -307,6 +312,7 @@ const ListSessions = ({ user, defaultCohortName }) => {
           />
           <ExportComponent
             title="Exporter"
+            // @ts-ignore
             filters={filterArray}
             exportTitle="point_de_rassemblement"
             route="/elasticsearch/pointderassemblement/export"
@@ -321,9 +327,10 @@ const ListSessions = ({ user, defaultCohortName }) => {
               const youngsByMettingPoints = await getYoungsByPdr(data.map((d) => d._id));
               const linesByMettingPoints = await getLinesByPdr(data.map((d) => d._id));
 
-              let res = [];
+              const res: PointDeRassemblementType[] = [];
               for (const item of data) {
                 res.push({
+                  // @ts-ignore
                   Identifiant: item._id.toString(),
                   Code: item.code,
                   Cohort: selectedCohort,
@@ -367,7 +374,6 @@ const ListSessions = ({ user, defaultCohortName }) => {
                 <HitSession
                   key={hit._id}
                   hit={hit}
-                  user={user}
                   session={selectedCohort}
                   nbYoung={nbYoungByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
                   nbLines={nbLinesByPdr.find((e) => e.key === hit._id)?.doc_count || 0}
@@ -383,7 +389,15 @@ const ListSessions = ({ user, defaultCohortName }) => {
   );
 };
 
-const HitSession = ({ hit, session, nbYoung, nbLines, loading }) => {
+interface HitSessionProps {
+  hit: any;
+  session: any;
+  nbYoung: number;
+  nbLines: number;
+  loading: boolean;
+}
+
+const HitSession = ({ hit, session, nbYoung, nbLines, loading }: HitSessionProps) => {
   const history = useHistory();
   return (
     <>
