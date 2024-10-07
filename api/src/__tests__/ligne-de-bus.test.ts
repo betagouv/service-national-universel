@@ -21,7 +21,7 @@ const mockModelMethodWithError = (model, method) => {
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-describe("Meeting point", () => {
+describe("Ligne de bus", () => {
   describe("GET /all", () => {
     beforeEach(async () => {
       await LigneBusModel.deleteMany();
@@ -352,6 +352,7 @@ describe("Meeting point", () => {
         city: "Paris",
         address: "123 Main St",
         code: "PDR1",
+        matricule: "PDR1",
         location: {
           lat: 48.8566,
           lon: 2.3522,
@@ -367,6 +368,7 @@ describe("Meeting point", () => {
         city: "Paris",
         address: "456 Main St",
         code: "PDR2",
+        matricule: "PDR2",
         location: {
           lat: 48.8566,
           lon: 2.3522,
