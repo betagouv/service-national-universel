@@ -26,7 +26,7 @@ const mockModelMethodWithError = (model, method) => {
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-describe("LigneDeBus", () => {
+describe("Ligne de bus", () => {
   describe("GET /all", () => {
     afterEach(async () => {
       await Promise.all([LigneBusModel.deleteMany(), PointDeRassemblementModel.deleteMany(), LigneToPointModel.deleteMany()]);
