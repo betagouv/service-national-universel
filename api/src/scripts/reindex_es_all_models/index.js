@@ -30,9 +30,10 @@ const {
   PlanTransportModel,
   LigneBusModel,
   LigneToPointModel,
-  EmailModel,
   ClasseModel,
   EtablissementModel,
+  SchoolRAMSESModel,
+  EmailModel,
 } = require("../../models");
 
 const StatsYoungCenterModel = require("../../models/legacy/stats-young-center");
@@ -79,6 +80,7 @@ async function reindexESAllModels() {
       EmailModel,
       ClasseModel,
       EtablissementModel,
+      SchoolRAMSESModel,
     ];
 
     const useful_models = [

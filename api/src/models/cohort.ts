@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { isAfter, isWithinInterval } from "date-fns";
 import patchHistory from "mongoose-patch-history";
 
-import { CohortSchema, CohortType, getDateTimeByTimeZoneOffset, YoungDSNJExportDatesSchema, YoungEligibilitySchema } from "snu-lib";
+import { CohortSchema, CohortType, getDateTimeByTimeZoneOffset, YoungDSNJExportDatesSchema, YoungINJEPExportDatesSchema, YoungEligibilitySchema } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
@@ -13,6 +13,10 @@ const schema = new Schema({
   dsnjExportDates: {
     ...CohortSchema.dsnjExportDates,
     type: new Schema(YoungDSNJExportDatesSchema),
+  },
+  injepExportDates: {
+    ...CohortSchema.injepExportDates,
+    type: new Schema(YoungINJEPExportDatesSchema),
   },
   eligibility: {
     ...CohortSchema.eligibility,

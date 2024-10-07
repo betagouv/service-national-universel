@@ -96,11 +96,12 @@ import {
   YOUNG_SITUATIONS,
   CLE_FILIERE,
   canValidateMultipleYoungsInClass,
-  canValidateYoungInClass,
   ClasseSchoolYear,
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
   YoungType,
+  getDepartmentForEligibility,
+  isAdmin,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -109,6 +110,7 @@ import { UserRequest } from "../controllers/request";
 import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
+import { ca } from "date-fns/locale";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -142,6 +144,7 @@ function cleanReferentData(referent) {
   const fieldsToKeep = {
     admin: [],
     dsnj: [],
+    injep: [],
     head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "cohortIds", "sessionPhase1Id"],
     referent_department: ["department", "region"],
     referent_region: ["department", "region"],
@@ -522,13 +525,16 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
-
+    const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
     // Vérification des objectifs à la validation d'un jeune
     if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
-      const fillingRate = await getFillingRate(young.department, young.cohort);
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+      const departement = getDepartmentForEligibility(young);
+      const fillingRate = await getFillingRate(departement, cohort.name);
       if (fillingRate >= FILLING_RATE_LIMIT) {
         return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
       }
@@ -609,11 +615,27 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.reinscriptionStep2023 = "DONE";
     }
 
-    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.source === YOUNG_SOURCE.CLE) {
-      const classe = await ClasseModel.findById(young.classeId);
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (!canValidateYoungInClass(req.user, classe)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // verification des dates de fin d'instruction si jeune est VALIDATED
+    if (newYoung.status === YOUNG_STATUS.VALIDATED) {
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (young.source === YOUNG_SOURCE.CLE) {
+        const classe = await ClasseModel.findById(young.classeId);
+        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInsctructionOpen = now < cohort.instructionEndDate;
+        const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+        if (remainingPlaces <= 0) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+        if (!isInsctructionOpen && !isAdmin(req.user)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      } else {
+        const now = new Date();
+        const isInsctructionOpen = now < cohort.instructionEndDate;
+        if (!isInsctructionOpen && !isAdmin(req.user)) {
+          return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
       }
     }
 
@@ -641,7 +663,11 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
+      res.status(400).send({ ok: false, code: error.message });
+    } else {
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
   }
 });
 
@@ -660,26 +686,53 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    if (!canValidateMultipleYoungsInClass(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const youngs = await YoungModel.find({ _id: { $in: payload.youngIds }, source: "CLE" });
     if (!youngs) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (youngs.length !== payload.youngIds.length) return res.status(404).send({ ok: false, code: ERRORS.BAD_REQUEST });
 
-    const classeId = youngs[0].classeId;
+    const classeIds = youngs.map((y) => y.classeId);
 
-    const classe = await ClasseModel.findById(classeId);
-    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const classes = await ClasseModel.find({ _id: { $in: classeIds } });
+    if (!classes.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canValidateMultipleYoungsInClass(req.user, classe)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (payload.status === YOUNG_STATUS.VALIDATED) {
+      for (const classe of classes) {
+        const cohort = await CohortModel.findById(classe.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInstructionOpen = now < new Date(cohort.instructionEndDate);
+        if (!isInstructionOpen) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `Classe ${classe._id} is closed` });
+        }
+        const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+        if (youngs.length > remainingPlaces) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `No seats left in classe ${classe._id}` });
+        }
+      }
     }
 
-    for (const young of youngs) {
-      young.set({ status: payload.status });
-      await young.save({ fromUser: req.user });
-      await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
-    }
+    const youngsSet: string[] = [];
 
-    return res.status(200).send({ ok: true, data: payload.youngIds });
+    await Promise.all(
+      youngs.map(async (young) => {
+        try {
+          young.set({ status: payload.status });
+          await young.save({ fromUser: req.user });
+          if (payload.status === YOUNG_STATUS.VALIDATED) {
+            await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
+          }
+          youngsSet.push(young._id);
+        } catch (e) {
+          capture(e);
+        }
+      }),
+    );
+
+    return res.status(200).send({ ok: true, data: youngsSet });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -743,6 +796,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(value.etablissementId), await ClasseModel.findById(value.classeId)]);
       if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
       if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
+      if (classe.seatsTaken >= classe.totalSeats) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       classe = dbClasse;
       etablissement = dbEtablissement;
     }

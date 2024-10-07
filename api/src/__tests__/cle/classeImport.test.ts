@@ -1,6 +1,6 @@
 import request from "supertest";
 import getAppHelper from "../helpers/app";
-import { ClasseCohortImportKey } from "../../cle/classe/import/classeCohortImport";
+import { ClasseCohortImportKey, ClasseImportType } from "../../cle/classe/import/classeCohortImport";
 import { getFile } from "../../utils";
 import { ClasseModel, CohortModel } from "../../models";
 import { createFixtureClasse } from "../fixtures/classe";
@@ -36,10 +36,11 @@ describe("POST /cle/classe-import", () => {
   const requestBody = {
     filePath: filePath,
     classeCohortImportKey: classeCohortImportKey,
+    importType: ClasseImportType.FIRST_CLASSE_COHORT,
   };
 
   it("should return 200 and the import results when the request is successful", async () => {
-    const classe1 = await ClasseModel.create(createFixtureClasse({ estimatedSeats: 1 }));
+    const classe1 = await ClasseModel.create(createFixtureClasse());
     const classe2 = await ClasseModel.create(createFixtureClasse());
     const classe3 = await ClasseModel.create(createFixtureClasse());
     const cohort = await CohortModel.create(getNewCohortFixture({ name: "à venir", snuId: "A_VENIR" }));
@@ -63,35 +64,40 @@ ${classe3?._id},""
       {
         classeId: classe1._id.toString(),
         classeStatus: STATUS_CLASSE.ASSIGNED,
-        classeEstimatedSeats: 42,
+        classeTotalSeats: 42,
         cohortId: cohort._id.toString(),
         result: "success",
         cohortCode: cohort.snuId,
         cohortName: cohort.name,
+        importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
       {
         classeId: notExistingClasseId,
         cohortCode: cohort.snuId,
         result: "error",
         error: ERRORS.CLASSE_NOT_FOUND,
+        importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
       {
         classeId: classe2._id.toString(),
         cohortCode: notExistingCohortCode,
         result: "error",
         error: ERRORS.COHORT_NOT_FOUND,
+        importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
       {
         classeId: classe3._id.toString(),
         cohortCode: "",
         result: "error",
         error: FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED,
+        importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
       {
         classeId: "",
         cohortCode: cohort.snuId,
         result: "error",
         error: FUNCTIONAL_ERRORS.NO_CLASSE_ID_PROVIDED,
+        importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
     ];
     expect(response.body.ok).toBe(true);

@@ -338,6 +338,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                 placeholder="Classe"
                 options={classes as any} // FIXME: use _id as value
                 closeMenuOnSelect
+                noOptionsMessage={"Toutes les classes de cet établissement sont pleines"}
                 isClearable={true}
                 value={classe ? { label: classe.label, value: "" } : null}
                 onChange={({ classe }) => setClasse(classe)}
