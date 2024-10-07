@@ -796,9 +796,9 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(value.etablissementId), await ClasseModel.findById(value.classeId)]);
       if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
       if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
-      if (classe.seatsTaken >= classe.totalSeats) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       classe = dbClasse;
       etablissement = dbEtablissement;
+      if (classe.seatsTaken >= classe.totalSeats) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let previousEtablissement: any = undefined;
@@ -818,6 +818,9 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     let youngStatus = young.status;
     if (cohort === "à venir ") {
       youngStatus = getYoungStatus(young) as YoungType["status"];
+    }
+    if (value.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
+      youngStatus = YOUNG_STATUS.VALIDATED;
     }
 
     const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] as string);
