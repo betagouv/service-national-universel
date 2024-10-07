@@ -37,7 +37,7 @@ export const PointDeRassemblementSchema = {
     type: String,
     required: true,
     documentation: {
-      description: "Nom du point de rassemblement",
+      description: "Désignation du point de rassemblement",
     },
   },
 
