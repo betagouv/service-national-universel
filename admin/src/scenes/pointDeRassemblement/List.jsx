@@ -18,6 +18,7 @@ import ModalCreation from "./components/ModalCreation";
 import { getCohortGroups } from "@/services/cohort.service";
 import { getDefaultCohort } from "@/utils/session";
 import { Link } from "react-router-dom";
+import { Button } from "@snu/ds/admin";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -47,11 +48,12 @@ export default function List() {
         <div className="flex items-center justify-between py-8">
           <Title>Points de rassemblement</Title>
           {canCreateMeetingPoint(user) ? (
-            <button
-              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
-              onClick={() => setModal({ isOpen: true })}>
-              Rattacher un point à un séjour
-            </button>
+            <Button
+              title="Rattacher un point à un séjour"
+              disabled
+              tooltip="La gestion des points de rassemblement se fait uniquement dans le SI-SNU"
+              onClick={() => setModal({ isOpen: true })}
+            />
           ) : null}
         </div>
         <div>

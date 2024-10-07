@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import ReactTooltip from "react-tooltip";
 
 import {
   useAddress,
@@ -12,13 +11,20 @@ import {
   canUpdateMeetingPoint,
   canViewMeetingPointId,
   isPdrEditionOpen,
-  ROLES,
+  PointDeRassemblementType,
+  departmentToAcademy,
 } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
+// @ts-ignore
 import { useDebounce } from "@uidotdev/usehooks";
+
+import { Badge, Button } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
 import api from "@/services/api";
+
+import { AuthState } from "@/redux/auth/reducer";
+import { getDefaultCohort } from "@/utils/session";
 
 import Pencil from "@/assets/icons/Pencil";
 import Trash from "@/assets/icons/Trash";
@@ -31,28 +37,47 @@ import { Title } from "./components/common";
 import Field from "./components/Field";
 import ModalConfirmDelete from "./components/ModalConfirmDelete";
 import ModalCreation from "./components/ModalCreation";
-import { getDefaultCohort } from "@/utils/session";
+
+interface FormError {
+  name?: string;
+  address?: string;
+  city?: string;
+  zip?: string;
+}
+
+type PointDeRassemblementsForm = PointDeRassemblementType & {
+  addressVerified?: boolean;
+  complementAddress: Array<PointDeRassemblementType["complementAddress"][0] & { edit?: boolean }>;
+};
 
 export default function View(props) {
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Auth.user?.cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  // @ts-ignore TODO: remove
+  const cohorts = useSelector((state: AuthState) => state.Auth.user?.cohorts);
 
   const urlParams = new URLSearchParams(window.location.search);
 
   const mount = React.useRef(false);
 
-  const [pdr, setPdr] = React.useState(null);
+  const [pdr, setPdr] = React.useState<PointDeRassemblementsForm | null>(null);
   const [modalCreation, setModalCreation] = React.useState({ isOpen: false });
-  const [modalDelete, setModalDelete] = React.useState({ isOpen: false });
+  const [modalDelete, setModalDelete] = React.useState<{
+    isOpen: boolean;
+    type?: "pdr" | "session";
+    id?: string;
+    title?: string;
+    message?: string;
+    onDelete?: () => void;
+  }>({ isOpen: false });
   const [isLoading, setIsLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState({});
+  const [errors, setErrors] = React.useState<FormError>({});
   const [editInfo, setEditInfo] = React.useState(false);
   const [editSession, setEditSession] = React.useState(false);
-  const [currentCohort, setCurrentCohort] = React.useState("");
+  const [currentCohort, setCurrentCohort] = React.useState<string>("");
   const [currentCohortDetails, setCurrentCohortDetails] = React.useState({});
-  const [nbYoung, setNbYoung] = React.useState([]);
-  const [lines, setLines] = React.useState([]);
+  const [nbYoung, setNbYoung] = React.useState<{ cohort: string; count: number }[]>([]);
+  const [lines, setLines] = React.useState<{ cohort: string; count: number }[]>([]);
   const [pdrInSchema, setPdrInSchema] = React.useState(false);
   const [query, setQuery] = useState("");
 
@@ -104,7 +129,7 @@ export default function View(props) {
       return reponsePDR;
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement");
+      toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement", "");
     }
   };
 
@@ -126,25 +151,26 @@ export default function View(props) {
   }, [editInfo, editSession]);
 
   const handleChangeComplement = (e) => {
-    let complementAddressToUpdate = pdr.complementAddress;
-    complementAddressToUpdate = complementAddressToUpdate.filter((c) => c.cohort !== currentCohort);
+    let complementAddressToUpdate = pdr?.complementAddress;
+    complementAddressToUpdate = complementAddressToUpdate?.filter((c) => c.cohort !== currentCohort) || [];
     complementAddressToUpdate.push({ cohort: currentCohort, complement: e, edit: true });
+    // @ts-ignore
     setPdr({ ...pdr, complementAddress: complementAddressToUpdate });
   };
 
   const handleDelete = async () => {
     try {
       setIsLoading(true);
-      const { ok, code } = await api.remove(`/point-de-rassemblement/${pdr._id}`);
+      const { ok, code } = await api.remove(`/point-de-rassemblement/${pdr?._id}`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression du point de rassemblement", code);
         return setIsLoading(false);
       }
-      toastr.success("Le point de rassemblement a bien été supprimé");
+      toastr.success("Le point de rassemblement a bien été supprimé", "");
       history.push("/point-de-rassemblement");
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression du point de rassemblement");
+      toastr.error("Oups, une erreur est survenue lors de la suppression du point de rassemblement", "");
       setIsLoading(false);
     }
   };
@@ -152,18 +178,18 @@ export default function View(props) {
   const handleDeleteSession = async () => {
     try {
       setIsLoading(true);
-      const { ok, code, data: PDR } = await api.put(`/point-de-rassemblement/delete/cohort/${pdr._id}`, { cohort: currentCohort });
+      const { ok, code, data: PDR } = await api.put(`/point-de-rassemblement/delete/cohort/${pdr?._id}`, { cohort: currentCohort });
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression du séjour", code);
         return setIsLoading(false);
       }
-      toastr.success("Le séjour a bien été supprimé");
-      setCurrentCohort(getDefaultCohort(cohorts.filter((c) => PDR.cohorts.includes(c.name))));
+      toastr.success("Le séjour a bien été supprimé", "");
+      setCurrentCohort(getDefaultCohort(cohorts.filter((c) => PDR.cohorts.includes(c.name)))?.name);
       setPdr(PDR);
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression du séjour");
+      toastr.error("Oups, une erreur est survenue lors de la suppression du séjour", "");
       setIsLoading(false);
     }
   };
@@ -171,7 +197,7 @@ export default function View(props) {
   const handleSubmitInfo = async () => {
     try {
       setIsLoading(true);
-      const error = {};
+      const error: FormError = {};
       if (!pdr?.name) {
         error.name = "Le nom est obligatoire";
       }
@@ -191,14 +217,14 @@ export default function View(props) {
         ok,
         code,
         data: PDR,
-      } = await api.put(`/point-de-rassemblement/${pdr._id}`, {
-        name: pdr.name,
-        address: pdr.address,
-        city: pdr.city,
-        zip: pdr.zip,
-        department: pdr.department,
-        region: pdr.region,
-        location: pdr.location,
+      } = await api.put(`/point-de-rassemblement/${pdr?._id}`, {
+        name: pdr?.name,
+        address: pdr?.address,
+        city: pdr?.city,
+        zip: pdr?.zip,
+        department: pdr?.department,
+        region: pdr?.region,
+        location: pdr?.location,
       });
 
       if (!ok) {
@@ -210,7 +236,7 @@ export default function View(props) {
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la création du point de rassemblement");
+      toastr.error("Oups, une erreur est survenue lors de la création du point de rassemblement", "");
       setIsLoading(false);
     }
   };
@@ -218,14 +244,14 @@ export default function View(props) {
   const handleSubmitSession = async () => {
     try {
       setIsLoading(true);
-      const complementAddressToUpdate = pdr.complementAddress;
+      const complementAddressToUpdate = pdr?.complementAddress || [];
       for await (const infoToUpdate of complementAddressToUpdate) {
         if (infoToUpdate?.edit) {
           const {
             ok,
             code,
             data: PDR,
-          } = await api.put(`/point-de-rassemblement/cohort/${pdr._id}`, {
+          } = await api.put(`/point-de-rassemblement/cohort/${pdr?._id}`, {
             cohort: infoToUpdate.cohort,
             complementAddress: infoToUpdate.complement,
           });
@@ -242,7 +268,7 @@ export default function View(props) {
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modifications des compléments d'adresse");
+      toastr.error("Oups, une erreur est survenue lors de la modifications des compléments d'adresse", "");
       setIsLoading(false);
     }
   };
@@ -256,10 +282,12 @@ export default function View(props) {
         {/* HEADER */}
         <div className="flex items-center justify-between">
           <Title>{pdr.name}</Title>
+          {pdr.deletedAt && <Badge title="Archivé" status="WAITING_CORRECTION" />}
           <div className="flex items-center gap-2">
             {canDeleteMeetingPoint(user) ? (
-              <button
-                className="rounded-lg border-[1px] border-red-600 bg-red-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              <Button
+                title="Supprimer"
+                type="danger"
                 onClick={() =>
                   setModalDelete({
                     isOpen: true,
@@ -268,17 +296,17 @@ export default function View(props) {
                     onDelete: handleDelete,
                   })
                 }
-                disabled={isLoading}>
-                Supprimer
-              </button>
+                disabled
+                tooltip="Les informations doivent être mises à jour dans le SI SNU"
+              />
             ) : null}
             {canCreateMeetingPoint(user) ? (
-              <button
-                className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              <Button
+                title="Rattacher le point à un séjour"
                 onClick={() => setModalCreation({ isOpen: true })}
-                disabled={isLoading}>
-                Rattacher le point à un séjour
-              </button>
+                disabled
+                tooltip="Les informations doivent être mises à jour dans le SI SNU"
+              />
             ) : null}
           </div>
         </div>
@@ -290,21 +318,14 @@ export default function View(props) {
               <>
                 {!editInfo ? (
                   <div data-tip="" data-for="tooltip-edit-disabled">
-                    {pdrInSchema && user.role !== ROLES.ADMIN && (
-                      <ReactTooltip id="tooltip-edit-disabled" className="rounded-xl bg-white shadow-xl drop-shadow-sm" arrowColor="white" disable={false}>
-                        <div className="text-center text-gray-700">
-                          Action impossible : point de rassemblement utilisé dans un schéma de répartition. <br />
-                          Rapprochez-vous de la Sous-Direction
-                        </div>
-                      </ReactTooltip>
-                    )}
-                    <button
-                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    <Button
+                      title="Modifier"
+                      type="modify"
+                      leftIcon={<Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />}
                       onClick={() => setEditInfo(true)}
-                      disabled={isLoading || (pdrInSchema && user.role !== ROLES.ADMIN)}>
-                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                      Modifier
-                    </button>
+                      disabled
+                      tooltip="Les informations doivent être mises à jour dans le SI SNU"
+                    />
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -329,14 +350,22 @@ export default function View(props) {
           <div className="flex">
             <div className="flex w-[45%] flex-col gap-4 ">
               <div className="flex flex-col gap-2">
-                <div className="text-xs font-medium leading-4 text-gray-900">Nom du point de rassemblement</div>
+                <div className="text-xs font-medium leading-4 text-gray-900">Désignation du point de rassemblement</div>
                 <Field
-                  label={"Nom du point de rassemblement"}
+                  label="Désignation du point de rassemblement"
                   onChange={(e) => setPdr({ ...pdr, name: e.target.value })}
                   value={pdr.name}
                   error={errors?.name}
                   readOnly={!editInfo}
                 />
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="text-xs font-medium leading-4 text-gray-900">Matricule</div>
+                <Field value={pdr.matricule || ""} readOnly />
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="text-xs font-medium leading-4 text-gray-900">Académie</div>
+                <Field value={departmentToAcademy[pdr.department]} readOnly />
               </div>
             </div>
             <div className="flex w-[10%] items-center justify-center">
@@ -349,6 +378,7 @@ export default function View(props) {
                 <AddressForm
                   readOnly={!editInfo}
                   data={{ address: pdr.address, zip: pdr.zip, city: pdr.city }}
+                  // @ts-ignore
                   updateData={(address) => setPdr({ ...pdr, ...address, addressVerified: true })}
                   query={query}
                   setQuery={setQuery}
@@ -369,7 +399,7 @@ export default function View(props) {
               <Title>Par séjour</Title>
               <SelectCohort
                 cohort={currentCohort}
-                filterFn={(c) => pdr.cohorts.find((name) => c.name === name)}
+                filterFn={(c) => !!pdr.cohorts.find((name) => c.name === name)}
                 withBadge
                 onChange={(cohortName) => {
                   setCurrentCohort(cohortName);
@@ -383,13 +413,14 @@ export default function View(props) {
                 {canUpdateMeetingPoint(user, pdr) && isPdrEditionOpen(user, currentCohortDetails) && (
                   <>
                     {!editSession ? (
-                      <button
-                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      <Button
+                        title="Modifier"
+                        type="modify"
+                        leftIcon={<Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />}
                         onClick={() => setEditSession(true)}
-                        disabled={isLoading}>
-                        <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                        Modifier
-                      </button>
+                        disabled
+                        tooltip="Les informations doivent être mises à jour dans le SI SNU"
+                      />
                     ) : (
                       <div className="flex items-center gap-2">
                         <button
@@ -414,8 +445,10 @@ export default function View(props) {
                 <div className="relative flex w-1/3 items-center justify-center  border-r-[1px] border-gray-200 p-4">
                   {canViewMeetingPointId(user) && <Field label="ID" value={pdr.code} copy={true} />}
                   {canDeleteMeetingPointSession(user) ? (
-                    <button
-                      className="absolute bottom-5 right-5 flex cursor-pointer items-center gap-2 px-2 py-1 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+                    <Button
+                      title="Supprimer le séjour"
+                      type="cancel"
+                      className="absolute bottom-5 right-5"
                       onClick={() =>
                         setModalDelete({
                           isOpen: true,
@@ -424,10 +457,10 @@ export default function View(props) {
                           message: "Êtes-vous sûr de vouloir supprimer cette session ?",
                         })
                       }
-                      disabled={isLoading}>
-                      <Trash className="h-4 w-4 text-red-400" />
-                      <div className="text-xs font-medium leading-4 text-gray-800">Supprimer le séjour</div>
-                    </button>
+                      leftIcon={<Trash className="h-4 w-4 text-red-400" />}
+                      disabled
+                      tooltip="Les informations doivent être mises à jour dans le SI SNU"
+                    />
                   ) : null}
                 </div>
                 <div className="flex w-1/3 flex-col items-center justify-center  border-r-[1px] border-gray-200">
@@ -462,6 +495,7 @@ export default function View(props) {
           await loadPDR();
           setCurrentCohort(cohort);
         }}
+        // @ts-ignore
         defaultPDR={pdr}
         editable={false}
       />
@@ -472,7 +506,7 @@ export default function View(props) {
         onCancel={() => setModalDelete({ isOpen: false })}
         onDelete={() => {
           setModalDelete({ isOpen: false });
-          modalDelete.onDelete();
+          modalDelete.onDelete?.();
         }}
       />
     </>

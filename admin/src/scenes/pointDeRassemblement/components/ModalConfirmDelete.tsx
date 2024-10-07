@@ -1,7 +1,15 @@
 import React from "react";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 
-export default function ModalConfirmDelete({ isOpen, onCancel, onDelete, title, message }) {
+interface ModalConfirmDeleteProps {
+  isOpen: boolean;
+  onCancel: () => void;
+  onDelete: () => void;
+  title?: string;
+  message?: string;
+}
+
+export default function ModalConfirmDelete({ isOpen, onCancel, onDelete, title, message }: ModalConfirmDeleteProps) {
   return (
     <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[512px] rounded-lg bg-white shadow-xl">
       <div className="flex w-full flex-col items-center gap-4 p-8">

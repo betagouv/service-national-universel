@@ -35,7 +35,7 @@ describe("Point de rassemblement", () => {
       passport.user = previous;
     });
   });
-  describe("PUT /point-de-rassemblement/:id", () => {
+  describe.skip("PUT /point-de-rassemblement/:id", () => {
     it("should return 404 when point-de-rassemblement does not exist", async () => {
       const notExistingPdrId = "5f9f1b9b9b9b9b9b9b9b9b9b";
       const res = await request(getAppHelper())
@@ -115,7 +115,7 @@ describe("Point de rassemblement", () => {
       expect(res.status).toBe(200);
     });
   });
-  describe("DELETE /point-de-rassemblement/:id", () => {
+  describe.skip("DELETE /point-de-rassemblement/:id", () => {
     it("should return 404 when point-de-rassemblement does not exist", async () => {
       const notExistingPdrId = "5f9f1b9b9b9b9b9b9b9b9b9b";
       const res = await request(getAppHelper())
@@ -203,7 +203,7 @@ describe("Point de rassemblement", () => {
       expect(res.body.code).toBe("SERVER_ERROR");
     });
   });
-  describe("POST /", () => {
+  describe.skip("POST /", () => {
     it("should return 400 when request body is invalid", async () => {
       const res = await request(getAppHelper())
         .post("/point-de-rassemblement/")
