@@ -10,11 +10,10 @@ import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { translate, validateId } from "../../../utils";
+import { translate } from "../../../utils";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
-import { useQuery } from "@tanstack/react-query";
-import { fetchClass } from "@/services/classe.service";
+import useClass from "@/scenes/cle/useClass";
 import Loader from "@/components/Loader";
 
 export default function StepConsentements() {
@@ -29,11 +28,7 @@ export default function StepConsentements() {
     consentment2: young?.acceptCGU === "true",
   });
 
-  const { data: classe, isLoading } = useQuery({
-    queryKey: ["class", young?.classeId],
-    queryFn: () => fetchClass(young?.classeId),
-    enabled: isCLE && validateId(young?.classeId),
-  });
+  const { data: classe, isLoading } = useClass(young?.classeId);
 
   const onSubmit = async () => {
     setLoading(true);
