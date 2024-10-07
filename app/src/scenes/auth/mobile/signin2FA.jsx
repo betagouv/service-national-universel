@@ -39,9 +39,8 @@ export default function Signin() {
     try {
       const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
 
-      if (!response.token || !response.user) return;
+      if (!response.user) return;
 
-      api.setToken(response.token);
       await cohortsInit();
       plausibleEvent("2FA/ Connexion réussie");
       dispatch(setYoung(response.user));

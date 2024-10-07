@@ -26,7 +26,6 @@ import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import BoxWithPercentage from "../../../components/sejour/BoxWithPercentage";
 import CardCenterCapacity from "./components/CardCenterCapacity";
-import MoreInfo from "./components/MoreInfo";
 import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "../../../components/sejour/Presences";
 import StatusPhase1 from "../../../components/sejour/StatusPhase1";
@@ -205,7 +204,6 @@ export default function Index() {
             />
           </div>
           <div className="flex gap-4">
-            <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} filter={selectedFilters} />
             <TabSession sessionByCenter={sessionByCenter} filters={selectedFilters} />
           </div>
         </div>

@@ -1,10 +1,12 @@
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
-
-import anonymize from "../anonymization/cohesionCenter";
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
+import mongooseElastic from "@selego/mongoose-elastic";
 
 import { CohesionCenterSchema, CohesionCenterType } from "snu-lib";
+
+import esClient from "../es";
+import anonymize from "../anonymization/cohesionCenter";
+import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
 const MODELNAME = "cohesioncenter";
 
@@ -37,6 +39,8 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
+
+schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 export type CohesionCenterDocument<T = {}> = DocumentExtended<CohesionCenterType & T>;
 type SchemaExtended = CohesionCenterDocument & UserExtension;

@@ -11,6 +11,7 @@ import { createFixtureClasse } from "./fixtures/classe";
 import { createFixtureEtablissement } from "./fixtures/etablissement";
 
 import { YoungModel, ClasseModel } from "../models";
+import exp from "constants";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
@@ -74,8 +75,12 @@ describe("PUT /young-edition/:id/ref-allow-snu", () => {
       .send({ consent: true, imageRights: true });
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body.data.inscriptionStep2023).toEqual("DONE");
     expect(res.body.data.status).toEqual("WAITING_VALIDATION");
+    expect(res.body.data.inscriptionStep2023).toEqual("DONE");
+    expect(res.body.data.parentAllowSNU).toEqual("true");
+    expect(res.body.data.parent1AllowSNU).toEqual("true");
+    expect(res.body.data.parent1ValidationDate).toBeDefined();
+    expect(res.body.data.imageRight).toEqual("true");
     expect(res.body.data.parent1AllowImageRights).toEqual("true");
   });
 });
@@ -147,8 +152,11 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     for (const updatedYoungId of res.body.data) {
       expect(youngIds.includes(updatedYoungId)).toBe(true);
       const updatedYoung = await YoungModel.findById(updatedYoungId);
-      expect(updatedYoung?.inscriptionStep2023).toEqual("DONE");
       expect(updatedYoung?.status).toEqual("WAITING_VALIDATION");
+      expect(updatedYoung?.inscriptionStep2023).toEqual("DONE");
+      expect(updatedYoung?.parentAllowSNU).toEqual("true");
+      expect(updatedYoung?.parent1AllowSNU).toEqual("true");
+      expect(updatedYoung?.parent1ValidationDate).toBeDefined();
     }
   });
 
@@ -166,8 +174,11 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     for (const updatedYoungId of res.body.data) {
       expect(youngIds.includes(updatedYoungId)).toBe(true);
       const updatedYoung = await YoungModel.findById(updatedYoungId);
+      expect(updatedYoung?.status).toEqual(YOUNG_STATUS.NOT_AUTORISED);
       expect(updatedYoung?.inscriptionStep2023).toEqual("WAITING_CONSENT");
-      expect(updatedYoung?.status).toEqual(YOUNG_STATUS.IN_PROGRESS);
+      expect(updatedYoung?.parentAllowSNU).toEqual("false");
+      expect(updatedYoung?.parent1AllowSNU).toEqual("false");
+      expect(updatedYoung?.parent1ValidationDate).toBeDefined();
     }
   });
 
@@ -185,6 +196,7 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     for (const updatedYoungId of res.body.data) {
       expect(youngIds.includes(updatedYoungId)).toBe(true);
       const updatedYoung = await YoungModel.findById(updatedYoungId);
+      expect(updatedYoung?.imageRight).toEqual("true");
       expect(updatedYoung?.parent1AllowImageRights).toEqual("true");
       expect(updatedYoung?.status).toEqual(YOUNG_STATUS.IN_PROGRESS);
     }
@@ -204,7 +216,8 @@ describe("PUT /young-edition/ref-allow-snu", () => {
     for (const updatedYoungId of res.body.data) {
       expect(youngIds.includes(updatedYoungId)).toBe(true);
       const updatedYoung = await YoungModel.findById(updatedYoungId);
-      expect(updatedYoung?.parent1AllowImageRights).toBeUndefined();
+      expect(updatedYoung?.imageRight).toEqual("false");
+      expect(updatedYoung?.parent1AllowImageRights).toBe("false");
       expect(updatedYoung?.status).toEqual(YOUNG_STATUS.IN_PROGRESS);
     }
   });

@@ -32,8 +32,7 @@ const {
   isYoung,
   isReferent,
   getCcOfYoung,
-  updateYoungPhase2Hours,
-  updateStatusPhase2,
+  updateYoungPhase2StatusAndHours,
   getFile,
   updateYoungStatusPhase2Contract,
   getReferentManagerPhase2,
@@ -217,8 +216,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     value.contractStatus = "DRAFT";
     const data = await ApplicationModel.create(value);
-    await updateYoungPhase2Hours(young, req.user);
-    await updateStatusPhase2(young, req.user);
+    await updateYoungPhase2StatusAndHours(young, req.user);
     await updateMission(data, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
 
@@ -309,8 +307,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
         await apiEngagement.update(application);
       }
 
-      await updateYoungPhase2Hours(young, req.user);
-      await updateStatusPhase2(young, req.user);
+      await updateYoungPhase2StatusAndHours(young, req.user);
       await updateYoungStatusPhase2Contract(young, req.user);
       await updateMission(application, req.user);
     });
@@ -378,8 +375,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
     await application.save({ fromUser: req.user });
 
-    await updateYoungPhase2Hours(young, req.user);
-    await updateStatusPhase2(young, req.user);
+    await updateYoungPhase2StatusAndHours(young, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
     await updateMission(application, req.user);
 

@@ -138,14 +138,13 @@ export default function StepProfil() {
 
     try {
       setLoading(true);
-      const { code, ok, token, user } = await API.post(`/young/signup`, values);
+      const { code, ok, user } = await API.post(`/young/signup`, values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
       }
       if (user) {
         plausibleEvent("CLE/CTA preinscription - infos persos");
-        if (token) API.setToken(token);
         await cohortsInit();
         dispatch(setYoung(user));
         history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");

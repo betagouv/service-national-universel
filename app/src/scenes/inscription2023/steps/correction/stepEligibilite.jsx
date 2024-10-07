@@ -106,7 +106,7 @@ export default function StepEligibilite() {
         // Zip du jeune
         // ! Vérifie que ça a la bouille d'un zipcode mais ds les faits, on peut mettre nimp en 5 chiffres
         if (!data?.isAbroad && !(data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
-          errors.zip = "Vous devez sélectionner un code postal";
+          errors.zip = "Vous devez saisir un code postal";
         }
       } else {
         // School

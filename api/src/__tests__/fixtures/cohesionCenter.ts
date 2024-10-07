@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { CohesionCenterType } from "snu-lib";
+import { CohesionCenterDomainEnum, CohesionCenterType, CohesionCenterTypologyEnum } from "snu-lib";
 
 function getNewCohesionCenterFixture(object: Partial<CohesionCenterType> = {}): Partial<CohesionCenterType> {
   const placesLeft = 15;
@@ -37,8 +37,8 @@ function getNewCohesionCenterFixtureV2(object = {}): Partial<CohesionCenterType>
     placesTotal: 20,
     pmr: "false",
     academy: faker.location.city(),
-    typology: "PUBLIC_ETAT",
-    domain: "ETABLISSEMENT",
+    typology: CohesionCenterTypologyEnum.PUBLIC_ETAT,
+    domain: CohesionCenterDomainEnum.ETABLISSEMENT,
     complement: faker.lorem.word(),
     centerDesignation: faker.lorem.word(),
     cohorts: ["Février 2023 - C"],

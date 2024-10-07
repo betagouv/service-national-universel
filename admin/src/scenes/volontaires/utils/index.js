@@ -1,5 +1,4 @@
 import {
-  ES_NO_LIMIT,
   ROLES,
   departmentLookUp,
   formatDateFR,
@@ -22,7 +21,6 @@ import {
   translateStatusMilitaryPreparationFiles,
 } from "snu-lib";
 import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
-import api from "../../../services/api";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
 export const getFilterArray = (user, bus, session, classes, etablissements) => {
@@ -64,6 +62,13 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
     {
       title: "Sexe",
       name: "gender",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Nationalité française",
+      name: "frenchNationality",
       parentGroup: "Dossier",
       missingLabel: "Non renseigné",
       translate: translate,
@@ -346,6 +351,14 @@ export async function transformVolontaires(data, values) {
       ligneToPoint = data?.ligneToPoint || {};
       meetingPoint = data?.meetingPoint || {};
     }
+    let classe = {};
+    let etablissement = {};
+    if (data.classeId) {
+      classe = data?.classe || {};
+    }
+    if (data.etablissementId) {
+      etablissement = data?.etablissement || {};
+    }
 
     if (!data.domains) data.domains = [];
     if (!data.periodRanking) data.periodRanking = [];
@@ -419,6 +432,12 @@ export async function transformVolontaires(data, values) {
         "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
         "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
         "Ville de la structure médico-sociale": data.medicosocialStructureCity,
+      },
+      cle: {
+        "Nationalité française": translate(data.frenchNationality),
+        "Etablissement UAI": etablissement?.uai,
+        "Classe Engagée ID": data.classeId,
+        Coloration: translate(classe?.coloration),
       },
       representative1: {
         "Statut représentant légal 1": translate(data.parent1Status),

@@ -23,7 +23,7 @@ function getNewApplicationFixture(): Partial<ApplicationType> {
     tutorName: faker.person.firstName(),
     priority: "1",
     status: "WAITING_VALIDATION",
-    cohortId: "1",
+    cohortId: new ObjectId().toString(),
   };
 }
 

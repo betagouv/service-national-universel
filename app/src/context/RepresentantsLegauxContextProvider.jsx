@@ -10,7 +10,7 @@ import { fetchCohort } from "@/utils/cohorts";
 export const RepresentantsLegauxContext = createContext();
 
 const RepresentantsLegauxContextProvider = ({ children, parentId }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const params = queryString.parse(location.search);
   const { token } = params;
@@ -20,8 +20,12 @@ const RepresentantsLegauxContextProvider = ({ children, parentId }) => {
 
   useEffect(() => {
     async function getYoungFromToken() {
+      if (!token || !parentId) {
+        setError(true);
+        return;
+      }
+      setLoading(true);
       try {
-        if (!token || !parentId) setError(true);
         const { ok, data } = await api.get(`/representants-legaux/young?token=${token}&parent=${parentId}`);
         if (!ok) return setError(true);
         setYoung(data);

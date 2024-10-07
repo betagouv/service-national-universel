@@ -73,6 +73,8 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
         ...user,
         role: ROLES.HEAD_CENTER,
         cohorts: [focusedSession?.cohort],
+        cohesionCenterId: focusedSession?.cohesionCenterId,
+        cohesionCenterName: focusedSession?.nameCentre,
       });
       if (!responseInvitation?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
       const responseSession = await api.put(`/session-phase1/${focusedSession._id}/team`, { headCenterId: responseInvitation?.data?._id });

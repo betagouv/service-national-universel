@@ -17,11 +17,11 @@ import { Input, InputPassword, Button } from "@snu/ds/dsfr";
 
 export default function Signin() {
   const params = queryString.parse(location.search);
-  const { redirect, disconnected } = params;
+  const { redirect } = params;
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(disconnected === "1" ? { text: "Votre session a expiré", subText: "Merci de vous reconnecter." } : {});
+  const [error, setError] = React.useState({});
   const [isInscriptionOpen, setInscriptionOpen] = React.useState(false);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -30,20 +30,19 @@ export default function Signin() {
   const onSubmit = async () => {
     setLoading(true);
     try {
-      const { user: young, token, code } = await api.post(`/young/signin`, { email, password });
+      const { user: young, code } = await api.post(`/young/signin`, { email, password });
 
       if (code === "2FA_REQUIRED") {
         plausibleEvent("2FA demandée");
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
 
-      if (!young || !token) {
-        console.log("no young or token", young, token);
+      if (!young) {
+        console.log("no young", young);
         return;
       }
 
       plausibleEvent("Connexion réussie");
-      api.setToken(token);
       dispatch(setYoung(young));
       await cohortsInit();
 

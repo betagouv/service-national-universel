@@ -3,6 +3,13 @@ import { history, initSentry, SentryRoute } from "./sentry";
 import * as Sentry from "@sentry/react";
 initSentry();
 
+// Configure dayjs globally
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
+import "dayjs/locale/fr";
+dayjs.locale("fr");
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import React, { lazy, Suspense, useEffect, useState } from "react";
@@ -48,15 +55,13 @@ function App() {
 
   async function fetchData() {
     try {
-      const { ok, user, token } = await api.checkToken();
+      const { ok, user } = await api.checkToken();
 
-      if (!ok || !user || !token) {
-        api.setToken(null);
+      if (!ok || !user) {
         dispatch(setYoung(null));
         return;
       }
 
-      api.setToken(token);
       dispatch(setYoung(user));
       await cohortsInit();
 

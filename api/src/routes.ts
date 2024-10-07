@@ -2,7 +2,7 @@ export function injectRoutes(app) {
   app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
   app.use("/application", require("./controllers/application"));
   app.use("/bus", require("./controllers/bus"));
-  app.use("/cohesion-center", require("./controllers/cohesion-center"));
+  app.use("/cohesion-center", require("./cohesionCenter").default);
   app.use("/cohort", require("./cohort/cohortController"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
   app.use("/contract", require("./controllers/contract"));
@@ -17,7 +17,7 @@ export function injectRoutes(app) {
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters"));
   app.use("/gouv.fr", require("./controllers/gouv.fr"));
-  app.use("/inscription-goal", require("./controllers/inscription-goal"));
+  app.use("/inscription-goal", require("./controllers/inscription-goal").default);
   app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
   app.use("/mission", require("./controllers/mission"));

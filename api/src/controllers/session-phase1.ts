@@ -96,6 +96,7 @@ router.get("/:id/schema-repartition", passport.authenticate("referent", { sessio
 });
 
 router.use("/", require("../sessionPhase1/sessionPhase1Controller"));
+router.use("/import", require("../sessionPhase1/import/sessionPhase1ImportController").default);
 
 router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
