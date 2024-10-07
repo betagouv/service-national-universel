@@ -49,6 +49,7 @@ export const PointDeRassemblementSchema = {
     },
   },
 
+  // LEGACY
   complementAddress: {
     type: [
       {
@@ -74,6 +75,14 @@ export const PointDeRassemblementSchema = {
     ],
     documentation: {
       description: "Complément d'adresse du point de rassemblement",
+    },
+  },
+
+  // SI-SNU (anciennement complementAddress)
+  particularitesAcces: {
+    type: String,
+    documentation: {
+      description: "Particularités d'accès du point de rassemblement",
     },
   },
 
