@@ -9,6 +9,7 @@ export const mapPointDeRassemblements = (rawPdrs: PointDeRassemblementCSV[]): Po
       name: rawPdr["Point de Rassemblement : Désignation du Point de Rassemblement"],
       address: rawPdr.Adresse,
       complementAddress: rawPdr["Particularités pour accès"],
+      particularitesAcces: rawPdr["Particularités pour accès"],
       city: rawPdr.Commune,
       zip: rawPdr["Code postal"],
       department: mapDepartment(rawPdr["Département"]),

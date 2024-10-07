@@ -25,7 +25,10 @@ export interface PointDeRassemblementCSV {
   "ID temporaire PDR": string;
 }
 
-export type PointDeRassemblementImportMapped = Pick<PointDeRassemblementType, "name" | "address" | "city" | "zip" | "department" | "region" | "matricule"> & {
+export type PointDeRassemblementImportMapped = Pick<
+  PointDeRassemblementType,
+  "name" | "address" | "city" | "zip" | "department" | "region" | "particularitesAcces" | "matricule"
+> & {
   _id?: string;
   complementAddress: string;
 };
