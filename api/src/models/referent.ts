@@ -44,7 +44,7 @@ schema.post("save", function (doc) {
 schema.post("findOneAndUpdate", function (doc) {
   brevo.sync(doc, MODELNAME);
 });
-schema.post("remove", function (doc) {
+schema.post("deleteOne", function (doc) {
   brevo.unsync(doc);
 });
 

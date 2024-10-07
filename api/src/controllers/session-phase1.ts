@@ -323,7 +323,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     cohesionCenter.set({ cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
     cohesionCenter.save({ fromUser: req.user });
 
-    await sessionPhase1.remove();
+    await sessionPhase1.deleteOne();
     await updateHeadCenter(sessionPhase1.headCenterId, req.user);
     res.status(200).send({ ok: true });
   } catch (error) {
