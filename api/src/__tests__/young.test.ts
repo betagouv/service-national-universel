@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 
 import request from "supertest";
 import jwt from "jsonwebtoken";
-import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS } from "snu-lib";
 import { sendTemplate } from "../brevo";
 import * as fileUtils from "../utils/file";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
@@ -474,6 +474,40 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(200);
     });
   });
+
+  // Dans __tests__/young.test.ts
+
+  describe("POST /young/invite", () => {
+    it("should return 403 when user is not authorized to invite young", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: false }));
+      const youngFixture = getNewYoungFixture({ cohort: cohort.name });
+
+      const passport = require("passport");
+      passport.user = referent;
+
+      const res = await request(getAppHelper()).post("/young/invite").send(youngFixture);
+
+      expect(res.status).toBe(403);
+      expect(res.body.code).toBe(ERRORS.OPERATION_NOT_ALLOWED);
+    });
+
+    it("should return 200 when user is authorized to invite young", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: true }));
+      const youngFixture = getNewYoungFixture({ cohort: cohort.name });
+
+      const passport = require("passport");
+      passport.user = referent;
+
+      const res = await request(getAppHelper()).post("/young/invite").send(youngFixture);
+
+      expect(res.status).toBe(200);
+      expect(res.body.young).toBeDefined();
+      expect(res.body.ok).toBe(true);
+    });
+  });
+
 
   describe("POST /young/signup_verify", () => {
     it("should return 400 when missing invitationToken", async () => {

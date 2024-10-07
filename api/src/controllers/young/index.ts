@@ -231,7 +231,9 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canInviteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const cohortObj = await CohortModel.findOne({ name: value.cohort });
+
+    if (!canInviteYoung(req.user, cohortObj)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const obj = { ...value };
 
