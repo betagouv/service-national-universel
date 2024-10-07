@@ -4,10 +4,10 @@ module.exports = {
       {},
       {
         $set: {
-          inscriptionOpenForReferentClasse: false,
-          inscriptionOpenForReferentRegion: false,
-          inscriptionOpenForReferentDepartment: false,
-          inscriptionOpenForAdministrateurCle: false,
+          inscriptionOpenForReferentClasse: true,
+          inscriptionOpenForReferentRegion: true,
+          inscriptionOpenForReferentDepartment: true,
+          inscriptionOpenForAdministrateurCle: true,
         },
       },
     );
