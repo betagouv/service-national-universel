@@ -258,7 +258,7 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
     const memberToDelete = ligne.team.id(value.idTeam);
     if (!memberToDelete) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await memberToDelete.remove();
+    await memberToDelete.deleteOne();
     await ligne.save({ fromUser: req.user });
 
     const infoBus = await getInfoBus(ligne);

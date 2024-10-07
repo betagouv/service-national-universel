@@ -275,7 +275,7 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
 
     const recordToDelete = young.files[key].id(fileId);
     if (!recordToDelete) return res.status(404).send({ ok: false, code: ERRORS.FILE_NOT_FOUND });
-    recordToDelete.remove();
+    recordToDelete.deleteOne();
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ data: young.files[key], ok: true });
