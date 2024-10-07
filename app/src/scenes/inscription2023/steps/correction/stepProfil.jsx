@@ -16,6 +16,7 @@ import PhoneField from "@/components/dsfr/forms/PhoneField";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
 import useAuth from "@/services/useAuth";
 import { SignupButtons } from "@snu/ds/dsfr";
+import emojiRegex from "emoji-regex";
 
 export default function StepProfil() {
   const { young, isCLE } = useAuth();
@@ -45,6 +46,20 @@ export default function StepProfil() {
 
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm"];
 
+  const handleNameChange = (field) => (value) => {
+    // Expression régulière pour supprimer les caractères invalides
+    const invalidCharRegex = /[^a-zA-ZÀ-ÿ\s'\-^¨éèëâçù]/g;
+    // Expression régulière pour correspondre aux emojis
+    const emojiReg = emojiRegex();
+
+    // Supprimer les caractères invalides
+    let fixedValue = value.replace(invalidCharRegex, "");
+    // Supprimer les emojis
+    fixedValue = fixedValue.replace(emojiReg, "");
+
+    // Mettre à jour l'état avec la valeur nettoyée
+    setData({ ...data, [field]: fixedValue });
+  };
   const validate = () => {
     let errors = {};
 
@@ -146,16 +161,10 @@ export default function StepProfil() {
               </div>
             </>
           )}
-          <Input
-            value={data.firstName}
-            onChange={(e) => setData({ ...data, firstName: e })}
-            label="Prénom du volontaire"
-            error={error.firstName}
-            correction={corrections.firstName}
-          />
+          <Input value={data.firstName} onChange={handleNameChange("firstName")} label="Prénom du volontaire" error={error.firstName} correction={corrections.firstName} />
           <Input
             value={data.lastName}
-            onChange={(e) => setData({ ...data, lastName: e })}
+            onChange={handleNameChange("lastName")}
             label="Nom de famille du volontaire"
             error={error.lastName}
             correction={corrections.lastName}

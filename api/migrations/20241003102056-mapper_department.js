@@ -1,5 +1,5 @@
 const { CohesionCenterModel } = require("../src/models");
-import { mapAcademy, mapDepartment } from "../src/cohesionCenter/import/cohesionCenterImportMapper";
+const { mapAcademy, mapDepartment } = require("../src/cohesionCenter/import/cohesionCenterImportMapper");
 
 module.exports = {
   async up() {
