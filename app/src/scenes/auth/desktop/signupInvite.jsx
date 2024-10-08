@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { formatToActualTime, isValidRedirectUrl } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
@@ -8,11 +8,10 @@ import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/dsfr/forms/input";
-import { setYoung } from "../../../redux/auth/actions";
+import useAuth from "@/services/useAuth";
 import api from "../../../services/api";
 import Error from "../../../components/error";
-import { getPasswordErrorMessage } from "../../../utils";
-import { cohortsInit } from "../../../utils/cohorts";
+import { getPasswordErrorMessage } from "@/utils";
 import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
 import { toastr } from "react-redux-toastr";
@@ -28,8 +27,7 @@ export default function Signin() {
   const [error, setError] = React.useState({});
   const history = useHistory();
 
-  const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young);
+  const { young, login } = useAuth();
 
   const params = queryString.parse(location.search);
   const { redirect } = params;
@@ -48,8 +46,7 @@ export default function Signin() {
       const { data: young } = await api.post(`/young/signup_invite`, { email, password, invitationToken: invitationToken });
       if (young) {
         plausibleEvent("INVITATION/ Connexion réussie");
-        dispatch(setYoung(young));
-        await cohortsInit();
+        await login(young);
         const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
         if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
