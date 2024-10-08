@@ -380,7 +380,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const data = await PointDeRassemblementModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
+    const data = await PointDeRassemblementModel.findOne({ _id: checkedId });
 
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
