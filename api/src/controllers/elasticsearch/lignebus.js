@@ -23,16 +23,6 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
             { terms: { "meetingPointsIds.keyword": queryFilters.meetingPointIds } },
             queryFilters.cohort.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             { bool: { must_not: { exists: { field: "deletedAt" } } } },
-            {
-              nested: {
-                path: "pointDeRassemblements",
-                query: {
-                  bool: {
-                    must: [{ exists: { field: "pointDeRassemblements.matricule" } }, { bool: { must_not: { exists: { field: "pointDeRassemblements.deletedAt" } } } }],
-                  },
-                },
-              },
-            },
           ].filter(Boolean),
         },
       },
