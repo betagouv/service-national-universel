@@ -54,15 +54,15 @@ export default function ButtonAddCoordinator({ etablissement, onChange }: Props)
       );
       const uniqueIds = new Set();
 
-      const uniqueArray = [...(coordinateurs ?? []), ...refList].filter((item) => {
+      const uniqueArray = [...refList].filter((item) => {
         if (!uniqueIds.has(item._id)) {
           uniqueIds.add(item._id);
           return true;
         }
         return false;
       });
-
-      setReferentList(uniqueArray);
+      const uniqueArrayFiltered = uniqueArray.filter((referent) => !coordinateurs.find((c) => c._id === referent._id));
+      setReferentList(uniqueArrayFiltered);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des référents", "");
