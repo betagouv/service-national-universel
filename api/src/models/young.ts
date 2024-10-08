@@ -3,7 +3,6 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
-import config from "config";
 
 import { YOUNG_SOURCE, YOUNG_STATUS, YoungSchema, YoungSchemaCorrectionRequest, YoungSchemaFile, YoungSchemaNote, YoungType } from "snu-lib";
 
