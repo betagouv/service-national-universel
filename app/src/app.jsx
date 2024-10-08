@@ -26,6 +26,7 @@ import { cohortsInit } from "./utils/cohorts";
 
 import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
+import { displaySignupToast } from "./utils";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
 const AllEngagements = lazy(() => import("./scenes/all-engagements/index"));
@@ -64,6 +65,7 @@ function App() {
 
       dispatch(setYoung(user));
       await cohortsInit();
+      displaySignupToast(user);
 
       if (shouldForceRedirectToEmailValidation(user)) {
         history.push("/preinscription/email-validation");

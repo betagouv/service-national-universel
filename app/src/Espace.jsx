@@ -82,19 +82,11 @@ const Espace = () => {
     return <Redirect to="/preinscription/email-validation" />;
   }
 
-  if (shouldForceRedirectToReinscription(young)) {
-    if (young.reInscriptionStep2023 !== REINSCRIPTION_STEPS.ELIGIBILITE) {
-      toastr.info("Connexion réussie", "Vous pouvez reprendre votre inscription là où vous l'avez laissée.");
-    }
-    return <Redirect to="/reinscription" />;
-  }
+  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
   const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
 
-  if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) {
-    toastr.info("Connexion réussie", "Vous pouvez reprendre votre inscription là où vous l'avez laissée.");
-    return <Redirect to="/inscription" />;
-  }
+  if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription" />;
 
   return (
     <ClassicLayout>
