@@ -16,7 +16,7 @@ import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
-import { shouldForceRedirectToEmailValidation } from "./utils/navigation";
+import { REINSCRIPTION_STEPS, shouldForceRedirectToEmailValidation } from "./utils/navigation";
 
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
@@ -82,7 +82,12 @@ const Espace = () => {
     return <Redirect to="/preinscription/email-validation" />;
   }
 
-  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
+  if (shouldForceRedirectToReinscription(young)) {
+    if (young.reInscriptionStep2023 !== REINSCRIPTION_STEPS.ELIGIBILITE) {
+      toastr.info("Connexion réussie", "Vous pouvez reprendre votre inscription là où vous l'avez laissée.");
+    }
+    return <Redirect to="/reinscription" />;
+  }
 
   const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
 
