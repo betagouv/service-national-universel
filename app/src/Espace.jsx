@@ -86,7 +86,10 @@ const Espace = () => {
 
   const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
 
-  if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription" />;
+  if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) {
+    toastr.info("Connexion réussie", "Vous pouvez reprendre votre inscription là où vous l'avez laissée.");
+    return <Redirect to="/inscription" />;
+  }
 
   return (
     <ClassicLayout>
