@@ -13,7 +13,8 @@ export const roleOptions = [
 export const departmentOptions = departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label));
 
 export const alertMessage = {
-  [YOUNG_SOURCE.CLE]: "Si vous avez une question sur votre parcours SNU, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
+  [YOUNG_SOURCE.CLE]:
+    "Si vous avez des questions sur votre inscription ou votre séjour dans le cadre de votre classe engagée, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
   [YOUNG_SOURCE.VOLONTAIRE]: "Aucun sujet disponible.",
 };
 
@@ -88,15 +89,17 @@ export const questions = [
     label: "Code de la route - Comment obtenir mes codes d'accès ?",
     articles: ["permis-et-code-de-la-route"],
     roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
+    displayForm: true,
   },
   {
-    value: "PHASE_0_ELIGIBILITY",
     category: "QUESTION",
     label: "Séjour -  Eligibilité aux séjours",
+    value: "PHASE_0_ELIGIBILITY",
     articles: ["je-souhaite-minscrire-au-snu"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     value: "PHASE_1_LUGGAGE",
@@ -105,6 +108,7 @@ export const questions = [
     articles: ["dans-ma-valise-materiel-trousseau"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "QUESTION",
@@ -113,6 +117,7 @@ export const questions = [
     articles: ["dans-ma-valise-materiel-trousseau"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "QUESTION",
@@ -121,6 +126,7 @@ export const questions = [
     articles: ["mon-lieu-daffectation"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "QUESTION",
@@ -129,6 +135,7 @@ export const questions = [
     articles: ["le-point-de-rassemblement"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "QUESTION",
@@ -137,6 +144,7 @@ export const questions = [
     articles: ["je-souhaite-changer-les-dates-de-mon-sejour", "je-me-desiste-du-snu"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "QUESTION",
@@ -144,7 +152,8 @@ export const questions = [
     label: "Phase Engagement - Comment trouver une Mission d'intérêt général ?",
     articles: ["comment-trouver-une-mig"],
     roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
+    displayForm: true,
   },
   {
     category: "QUESTION",
@@ -152,7 +161,8 @@ export const questions = [
     label: "Phase Engagement - J'ai trouvé une Mission d'intérêt général mais elle n'est pas sur la plateforme, comment faire ?",
     articles: ["je-ne-trouve-pas-de-mission-qui-minteresse"],
     roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
+    displayForm: true,
   },
   {
     category: "QUESTION",
@@ -160,6 +170,7 @@ export const questions = [
     label: "Phase Engagement - Je n'ai pas de nouvelle de ma candidature",
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "QUESTION",
@@ -167,7 +178,8 @@ export const questions = [
     label: "Phase Engagement - Ma JDC / Mon CIP",
     articles: ["journee-defense-et-citoyennete"],
     roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
+    displayForm: true,
   },
   {
     category: "TECHNICAL",
@@ -175,6 +187,7 @@ export const questions = [
     label: "Inscription classe engagée : j’ai déjà un compte volontaire",
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "TECHNICAL",
@@ -182,6 +195,7 @@ export const questions = [
     label: "Pour me connecter",
     roles: ["public"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "TECHNICAL",
@@ -190,6 +204,7 @@ export const questions = [
     articles: ["je-minscris-et-remplis-mon-profil"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "TECHNICAL",
@@ -198,6 +213,7 @@ export const questions = [
     articles: ["je-souhaite-inscrire-des-freressoeurs"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "TECHNICAL",
@@ -205,6 +221,7 @@ export const questions = [
     label: "Je n'arrive pas à téléverser (déposer) un document",
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "TECHNICAL",
@@ -212,6 +229,7 @@ export const questions = [
     label: "Je n'ai pas reçu le lien de validation du contrat d'engagement",
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
   {
     category: "TECHNICAL",
@@ -219,21 +237,21 @@ export const questions = [
     label: "J'ai un autre problème",
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    displayForm: true,
   },
 ];
 
 /**
- * @param {("QUESTION"|"TECHNICAL")} category
- * @param {("public"|"young")} role: public: not logged in, young: young logged in
- * @param {"CLE"|"VOLONTAIRE"} parcours
+ * @param {("QUESTION"|"TECHNICAL")} [category]
+ * @param {("public"|"young")} [role]: public: not logged in, young: young logged in
+ * @param {"CLE"|"VOLONTAIRE"} [parcours]
  * @returns list of available questions
  */
 export function getQuestions(category, role, parcours) {
-  let res = questions;
-  if (category) res = res.filter((e) => e.category === category);
-  if (role) res = res.filter((e) => e.roles.includes(role));
-  if (parcours) res = res.filter((e) => e.parcours.includes(parcours));
-  return res;
+  return questions
+    .filter((e) => (category ? e.category === category : true))
+    .filter((e) => (role ? e.roles.includes(role) : true))
+    .filter((e) => (parcours ? e.parcours.includes(parcours) : true));
 }
 
 export function getArticles(question) {
