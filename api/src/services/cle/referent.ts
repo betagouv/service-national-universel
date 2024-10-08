@@ -60,7 +60,7 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
   }
 };
 
-export const addReferentClasseAsCoordinator = async (
+export const inviteReferentClasseAsCoordinator = async (
   referent: Pick<ReferentType, "firstName" | "lastName" | "email">,
   { from }: { from: UserDto | null },
   etablissement: EtablissementType,
