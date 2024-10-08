@@ -24,7 +24,7 @@ export default function Header({ home, withSeeAs }) {
         </Link>
 
         <Link href="/" className={`font-bold text-white md:ml-6 ${withSeeAs ? "" : "md:block hidden"}`}>
-          Base de connaissance
+          Retour à la page d’accueil
         </Link>
       </div>
 

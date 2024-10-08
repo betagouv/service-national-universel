@@ -1,7 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
-import { InscriptionGoalType } from "../../models";
+import { InscriptionGoalType } from "snu-lib";
 
 export default function getNewInscriptionGoalFixture(object: Partial<InscriptionGoalType> = {}): Partial<InscriptionGoalType> {
   return {

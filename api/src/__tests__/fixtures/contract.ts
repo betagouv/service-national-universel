@@ -1,6 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
-import { ContractType } from "../../models";
+import { ContractType } from "snu-lib";
 const { ObjectId } = Types;
 
 function getNewContractFixture(): Partial<ContractType> {
