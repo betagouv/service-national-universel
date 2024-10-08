@@ -1,0 +1,63 @@
+name: API - Run Tests
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      branch_name:
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            src:
+              - 'api/**'
+              - 'packages/lib/**'
+      - name: Git checkout
+        if: steps.changes.outputs.src == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Node 18.x
+        if: steps.changes.outputs.src == 'true'
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      - name: Start MongoDB 4.0
+        if: steps.changes.outputs.src == 'true'
+        uses: supercharge/mongodb-github-action@v1.10.0
+        with:
+          mongodb-version: "4.0"
+
+      - name: Install packages
+        if: steps.changes.outputs.src == 'true'
+        run: npm ci
+
+      - name: Build lib
+        if: steps.changes.outputs.src == 'true'
+        continue-on-error: false
+        run: npm run build -w packages/lib
+
+      - name: Lint code
+        if: steps.changes.outputs.src == 'true'
+        working-directory: api
+        run: npm run lint
+
+      - name: Test and Send coverage
+        if: steps.changes.outputs.src == 'true'
+        uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          CI: true
+          MONGO_URL: mongodb://localhost:27017/SampleDB
+        with:
+          workingDirectory: api
+          coverageCommand: npm run coverage

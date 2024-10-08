@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { ProgramType } from "../../models";
+import { ProgramType } from "snu-lib";
 
 function getNewProgramFixture(): Partial<ProgramType> {
   return {

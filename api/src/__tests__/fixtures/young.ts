@@ -1,4 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
+import { Types } from "mongoose";
+const { ObjectId } = Types;
 import { departmentList, regionList, YoungType } from "snu-lib";
 
 function randomDepartment() {
@@ -204,8 +206,8 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     sportInterest: faker.lorem.sentences(),
     environmentInterest: faker.lorem.sentences(),
     citizenshipInterest: faker.lorem.sentences(),
-    cohortId: "1",
-    originalCohortId: "1",
+    cohortId: new ObjectId().toString(),
+    originalCohortId: new ObjectId().toString(),
     ...fields,
   };
 }

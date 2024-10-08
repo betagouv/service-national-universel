@@ -165,11 +165,7 @@ export default function ChangeSejour() {
                           })}
                         </DropdownMenu>
                       </UncontrolledDropdown>
-                      <a
-                        href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"
-                        style={{ color: "#5145cc" }}
-                        target="_blank"
-                        rel="noreferrer">
+                      <a href={supportURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"} style={{ color: "#5145cc" }} target="_blank" rel="noreferrer">
                         Pourquoi je ne vois pas tous les séjours ?
                       </a>
                     </SectionHelp>
