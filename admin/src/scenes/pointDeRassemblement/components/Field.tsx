@@ -36,7 +36,7 @@ export default function Field({ onChange, value, label, disabled = false, error,
             {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
           </div>
         )}
-        <input className={`w-full ${disabled ? "bg-gray-100" : ""}`} value={value} onChange={onChange} disabled={disabled} readOnly={readOnly} />
+        <input className={`w-full disabled:bg-gray-100 disabled:text-gray-400`} value={value} onChange={onChange} disabled={disabled} readOnly={readOnly} />
       </div>
       {error && <div className="text-[#EF4444]">{error}</div>}
     </div>

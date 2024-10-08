@@ -30,9 +30,13 @@ const Input = ({
 
   return (
     <div className={className}>
-      <Label title={label} hasError={Boolean(error)}>
+      <Label
+        title={label}
+        hasError={Boolean(error)}
+        className={disabled ? "!bg-gray-100" : ""}
+      >
         <input
-          className="w-full bg-white text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:text-gray-400"
+          className="w-full text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:text-gray-400"
           name={name}
           type={type}
           value={value}
