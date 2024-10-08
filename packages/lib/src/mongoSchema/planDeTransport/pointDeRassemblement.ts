@@ -1,5 +1,5 @@
 import { Schema, InferSchemaType } from "mongoose";
-import { InterfaceExtended } from "..";
+import { InterfaceExtended } from "../..";
 
 export const PointDeRassemblementSchema = {
   code: {

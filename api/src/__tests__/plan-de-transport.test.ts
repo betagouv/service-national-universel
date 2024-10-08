@@ -117,5 +117,11 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.ok).toBe(true);
+
+    const importedPdts = await PlanTransportModel.find({ cohort: importPlanTransport.cohort });
+    const pdt = importedPdts[0];
+    expect(pdt.pointDeRassemblements[0].__t).toBe("Enriched");
+    expect(pdt.pointDeRassemblements[0].returnHour).toBeDefined();
+    expect(pdt.pointDeRassemblements[0].cohorts).toBeDefined();
   });
 });
