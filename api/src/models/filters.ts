@@ -1,35 +1,13 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "./types";
+import { FiltersSchema, InterfaceExtended } from "snu-lib";
+
+import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
 const MODELNAME = "filter";
 
-const schema = new Schema({
-  userId: {
-    type: String,
-  },
-  url: {
-    type: String,
-    documentation: {
-      description: "Url contenant tous les filtres preselectionnés",
-    },
-  },
-  page: {
-    type: String,
-    documentation: {
-      description: "Page sur laquelle se trouve le filtre",
-    },
-  },
-  name: {
-    type: String,
-    documentation: {
-      description: "Nom de la sauvegarde des filtres",
-    },
-  },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
+const schema = new Schema(FiltersSchema);
 
 schema.virtual("fromUser").set<SchemaExtended>(function (fromUser: UserSaved) {
   if (fromUser) {
@@ -55,7 +33,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-export type FiltersType = InterfaceExtended<InferSchemaType<typeof schema>>;
+type FiltersType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type FiltersDocument<T = {}> = DocumentExtended<FiltersType & T>;
 type SchemaExtended = FiltersDocument & UserExtension;
 

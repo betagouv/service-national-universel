@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { MissionType } from "../../models";
+import { MissionType } from "snu-lib";
 
 function getNewMissionFixture(): Partial<MissionType> {
   return {

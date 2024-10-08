@@ -2,12 +2,13 @@ import config from "config";
 import mongoose, { InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
-import { MissionSchema } from "snu-lib";
+
+import { InterfaceExtended, MissionSchema } from "snu-lib";
 
 import esClient from "../es";
 import anonymize from "../anonymization/mission";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "./types";
+import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
 const MODELNAME = "mission";
 
@@ -45,7 +46,7 @@ if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
   schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
 }
 
-export type MissionType = InterfaceExtended<InferSchemaType<typeof schema>>;
+type MissionType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type MissionDocument<T = {}> = DocumentExtended<MissionType & T>;
 type SchemaExtended = MissionDocument & UserExtension;
 

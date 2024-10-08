@@ -3,15 +3,17 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
+import config from "config";
+
 import { YOUNG_SOURCE, YOUNG_STATUS, YoungSchema, YoungSchemaCorrectionRequest, YoungSchemaFile, YoungSchemaNote, YoungType } from "snu-lib";
+
 import esClient from "../es";
 import * as brevo from "../brevo";
 import anonymize from "../anonymization/young";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
+import ClasseStateManager from "../cle/classe/stateManager";
 
 const MODELNAME = "young";
-
-const ClasseStateManager = require("../cle/classe/stateManager").default;
 
 const schema = new Schema({
   ...YoungSchema,

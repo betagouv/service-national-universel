@@ -1,12 +1,12 @@
 import config from "config";
-import mongoose, { Schema } from "mongoose";
+import mongoose, { InferSchemaType, Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import mongooseElastic from "@selego/mongoose-elastic";
 
 import esClient from "../../es";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
-import { PointDeRassemblementSchema, PointDeRassemblementType } from "snu-lib";
+import { InterfaceExtended, PointDeRassemblementSchema } from "snu-lib";
 
 const MODELNAME = "pointderassemblement";
 
@@ -40,6 +40,7 @@ if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
   schema.plugin(mongooseElastic(esClient), MODELNAME);
 }
 
+type PointDeRassemblementType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type PointDeRassemblementDocument<T = {}> = DocumentExtended<PointDeRassemblementType & T>;
 type SchemaExtended = PointDeRassemblementDocument & UserExtension;
 
