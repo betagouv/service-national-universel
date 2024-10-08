@@ -96,12 +96,12 @@ export default function View(props) {
 
   const setYoungsFromES = async (id) => {
     const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: [id], cohort: [] } });
-    setNbYoung(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+    setNbYoung(responses[0].aggregations?.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 
   const setLinesFromES = async (id) => {
     const { responses } = await api.post("/elasticsearch/lignebus/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: [id], cohort: [] } });
-    setLines(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
+    setLines(responses[0].aggregations?.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 
   const loadPDR = async () => {
@@ -128,6 +128,7 @@ export default function View(props) {
 
       return reponsePDR;
     } catch (e) {
+      console.log(e);
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement", "");
     }

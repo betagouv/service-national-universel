@@ -66,14 +66,14 @@ export default function List() {
               }}
               active={currentTab === "liste-points"}
             />
-            <TabItem
+            {/* <TabItem
               icon={<Calendar />}
               title="Sessions"
               onClick={() => {
                 history.replace(`/point-de-rassemblement/liste/session`);
               }}
               active={currentTab === "session"}
-            />
+            /> */}
           </div>
           <div className={`relative mb-8 items-start rounded-b-lg rounded-tr-lg bg-white`}>
             <div className="flex w-full flex-col pt-4">
