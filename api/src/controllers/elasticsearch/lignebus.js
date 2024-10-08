@@ -22,6 +22,17 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
           filter: [
             { terms: { "meetingPointsIds.keyword": queryFilters.meetingPointIds } },
             queryFilters.cohort.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+            { bool: { must_not: { exists: { field: "deletedAt" } } } },
+            {
+              nested: {
+                path: "pointDeRassemblements",
+                query: {
+                  bool: {
+                    must: [{ exists: { field: "pointDeRassemblements.matricule" } }, { bool: { must_not: { exists: { field: "pointDeRassemblements.deletedAt" } } } }],
+                  },
+                },
+              },
+            },
           ].filter(Boolean),
         },
       },
@@ -49,7 +60,7 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
   try {
     // Configuration
     const { user, body } = req;
-    const searchFields = ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"];
+    const searchFields = ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "pointDeRassemblements.matricule", "centerCode", "centerCity", "centerRegion"];
     const filterFields = [
       "busId.keyword",
       "cohort.keyword",
@@ -60,6 +71,7 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
       "pointDeRassemblements.department.keyword",
       "pointDeRassemblements.city.keyword",
       "pointDeRassemblements.code.keyword",
+      "pointDeRassemblements.matricule.keyword",
       "centerName.keyword",
       "centerRegion.keyword",
       "centerDepartment.keyword",

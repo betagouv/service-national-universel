@@ -235,6 +235,16 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
             { terms: { "meetingPointId.keyword": queryFilters.meetingPointIds } },
             { terms: { "status.keyword": ["VALIDATED"] } },
             queryFilters.cohort.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+            {
+              nested: {
+                path: "meetingPoint",
+                query: {
+                  bool: {
+                    must: [{ exists: { field: "meetingPoint.matricule" } }, { bool: { must_not: { exists: { field: "meetingPoint.deletedAt" } } } }],
+                  },
+                },
+              },
+            },
           ].filter(Boolean),
         },
       },

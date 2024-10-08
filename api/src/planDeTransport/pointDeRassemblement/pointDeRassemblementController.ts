@@ -41,7 +41,7 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
     // - are in a bus line that is affected to the young's session
     // - are in a bus line that still has available seats
 
-    const meetingPointsInSameDepartment = await PointDeRassemblementModel.find({ department: req.user.department });
+    const meetingPointsInSameDepartment = await PointDeRassemblementModel.find({ department: req.user.department, deletedAt: { $exists: false } });
 
     // get all buses to cohesion center using previous meeting points, find used meeting points with hours and get a new meeting point list
     let meetingPointIds = meetingPointsInSameDepartment.map((m) => m._id.toString());

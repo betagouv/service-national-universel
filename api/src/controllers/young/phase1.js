@@ -83,7 +83,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
 
     let bus = null;
     if (meetingPointId) {
-      const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
+      const meetingPoint = await PointDeRassemblementModel.findOne({ _id: meetingPointId, deletedAt: { $exists: false } });
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       bus = await LigneBusModel.findById(ligneId);
