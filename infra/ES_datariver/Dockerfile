@@ -5,7 +5,7 @@ ENV MONSTACHE_ES_URLS=""
 ENV MONSTACHE_MONGO_URL=""
 
 ARG MONGO_DB_NAME=""
-ENV MONGO_DB_NAME=${MONGO_DB_NAME}
+ARG TAIL_OPLOG="false"
 
 COPY collections.csv .
 COPY generate_config.sh .

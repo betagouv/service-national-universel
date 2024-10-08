@@ -13,11 +13,23 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch_data:/data/elastic
-  mailcatcher:
-    image: schickling/mailcatcher
-    ports:
-      - "1025:1025"
-      - "1080:1080"
+  es_datariver:
+    depends_on:
+      - mongo
+      - elasticsearch
+    build:
+      context: ../infra/ES_datariver
+      args:
+        MONGO_DB_NAME: test
+        TAIL_OPLOG: "true"
+    environment:
+      MONSTACHE_ES_URLS: http://elasticsearch:9200
+      MONSTACHE_MONGO_URL: mongodb://mongo:27017/test
+  # mailcatcher:
+  #   image: schickling/mailcatcher
+  #   ports:
+  #     - "1025:1025"
+  #     - "1080:1080"
 
 volumes:
   mongodb_data:

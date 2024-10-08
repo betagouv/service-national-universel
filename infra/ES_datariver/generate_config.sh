@@ -34,10 +34,6 @@ verbose = false
 prune-invalid-json = true
 cluster-name = 'sync_mongo_es'
 
-change-stream-namespaces = [
-$collections
-]
-
 direct-read-stateful = true
 direct-read-concur = 1
 
@@ -46,6 +42,27 @@ $collections
 ]
 
 EOF
+
+
+if [[ $TAIL_OPLOG == "true" ]]
+then
+collections=$(tail -n +2 $col_file | cut -d "," -f 1 )
+collections=$(echo $collections | tr " " "|")
+
+cat <<EOF
+enable-oplog = true
+namespace-regex = '^$db_name\.($collections)$'
+
+EOF
+else
+cat <<EOF
+change-stream-namespaces = [
+$collections
+]
+
+EOF
+fi
+
 
 tail -n +2 $col_file \
 | while read row
