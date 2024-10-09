@@ -9,7 +9,6 @@ const esClient = require("../../es");
 
 const {
   ApplicationModel,
-  CohortModel,
   CohesionCenterModel,
   ContractModel,
   DepartmentServiceModel,
@@ -31,10 +30,10 @@ const {
   PlanTransportModel,
   LigneBusModel,
   LigneToPointModel,
-  EmailModel,
   ClasseModel,
   EtablissementModel,
   SchoolRAMSESModel,
+  EmailModel,
 } = require("../../models");
 
 const StatsYoungCenterModel = require("../../models/legacy/stats-young-center");
@@ -48,6 +47,12 @@ if (args.length > 0) {
 }
 
 async function reindexESAllModels() {
+  if (!config.get(ENABLE_MONGOOSE_ELASTIC)) {
+    console.log("MongooseElastic is disabled (see ENABLE_MONGOOSE_ELASTIC). Synchronization is performed by listening to Mongo changestream (see ESDatariver)");
+    console.log("Aborting");
+    return;
+  }
+
   try {
     const all_models = [
       ApplicationModel,
@@ -77,6 +82,10 @@ async function reindexESAllModels() {
       ModificationBusModel,
       LigneBusModel,
       LigneToPointModel,
+      PlanTransportModel,
+      EmailModel,
+      ClasseModel,
+      EtablissementModel,
       SchoolRAMSESModel,
     ];
 
@@ -98,7 +107,6 @@ async function reindexESAllModels() {
       LigneBusModel,
       PlanTransportModel,
       EmailModel,
-      CohortModel,
       ClasseModel,
       EtablissementModel,
     ];
@@ -107,7 +115,6 @@ async function reindexESAllModels() {
       [ClasseModel.modelName]: ["etablissement"],
     };
 
-    // const models_indexed = [CohortModel]; // useful_models;
     let models_indexed = useful_models;
 
     if (groupName === "all") {
@@ -180,7 +187,7 @@ async function reindexESAllModels() {
         try {
           console.log(`Indexing ${index} ${i + 1}/${total}`);
           bulk.push(doc);
-          if (bulk.length >= 1000) await flush();
+          if (bulk.length >= 10000) await flush();
         } catch (e) {
           console.log("Error", e);
         }

@@ -20,5 +20,6 @@ module.exports = {
   TASK_QUEUE_PREFIX: "production",
   MAIL_TRANSPORT: "BREVO",
   ENABLE_2FA: true,
+  ENABLE_MONGOOSE_ELASTIC: true,
   ...secrets,
 };

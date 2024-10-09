@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import esClient from "../../es";
@@ -34,7 +35,9 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient), MODELNAME);
+}
 
 type TableDeRepartitionType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type TableDeRepartitionDocument<T = {}> = DocumentExtended<TableDeRepartitionType & T>;

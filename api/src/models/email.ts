@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import esClient from "../es";
@@ -11,7 +12,9 @@ const MODELNAME = "email";
 
 const schema = new Schema(EmailSchema);
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient), MODELNAME);
+}
 
 type EmailType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type EmailDocument<T = {}> = DocumentExtended<EmailType & T>;

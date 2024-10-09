@@ -1,0 +1,11 @@
+{
+  "description": "sessionphase1 ignore fields",
+  "processors": [
+    {
+      "remove": {
+        "field": "team",
+        "ignore_missing": true
+      }
+    }
+  ]
+}
