@@ -82,7 +82,7 @@ describe("importClasseCohort", () => {
     const result = await importClasseCohort(filePath, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
 
     expect(getFile).toHaveBeenCalledWith(filePath);
-    expect(readCSVBuffer).toHaveBeenCalledWith(Buffer.from("some mock data"), true);
+    expect(readCSVBuffer).toHaveBeenCalledWith(Buffer.from("some mock data"));
     expect(mapClassesCohortsForSept2024).toHaveBeenCalledWith(mockCSV);
     expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledTimes(2);
     expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledWith({ classeId: "1", cohortCode: "IDF_101" }, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
