@@ -11,7 +11,7 @@ import { dbClose, dbConnect } from "../helpers/db";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
 import mongoose from "mongoose";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 jest.mock("../../utils", () => ({
