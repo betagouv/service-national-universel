@@ -83,6 +83,10 @@ export const itemsSejourAdmin = [
     title: "Export DSNJ",
     link: "/dsnj-export",
   },
+  {
+    title: "Export INJEP",
+    link: "/injep-export",
+  },
 ];
 
 export const itemsSejourRef = [
