@@ -297,6 +297,7 @@ describe("Point de rassemblement", () => {
         zip: "75001",
         department: "Paris",
         region: "Île-de-France",
+        academie: "Academie",
         location: {
           lat: 48.8566,
           lon: 2.3522,
@@ -355,6 +356,7 @@ describe("Point de rassemblement", () => {
         zip: "75001",
         department: "Paris",
         region: "Île-de-France",
+        academie: "Academie",
         location: {
           lat: 48.8566,
           lon: 2.3522,
@@ -434,6 +436,7 @@ describe("Point de rassemblement", () => {
         complementAddress: [],
         region: "Test Region",
         department: "Test Department",
+        academie: "Academie",
         zip: "12345",
         city: "Test City",
         address: "Test Address",

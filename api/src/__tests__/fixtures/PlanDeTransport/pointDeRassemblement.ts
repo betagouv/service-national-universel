@@ -11,6 +11,7 @@ function getNewPointDeRassemblementFixture(object: Partial<PointDeRassemblementT
     city: faker.location.city(),
     department: faker.location.state(),
     region: faker.location.state(),
+    academie: faker.location.state(),
     // country: faker.location.country(),
     location: {
       lat: Number(faker.location.latitude()),
