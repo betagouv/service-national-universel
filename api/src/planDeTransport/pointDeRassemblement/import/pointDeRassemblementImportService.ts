@@ -201,7 +201,7 @@ const getPdrExtraInfos = async (pdr: PointDeRassemblementImportMapped, foundPdr?
     report,
     extraInfos: {
       code,
-      cohors: cohortNames,
+      cohorts: cohortNames,
       cohortIds,
       complementAddress,
       location,
