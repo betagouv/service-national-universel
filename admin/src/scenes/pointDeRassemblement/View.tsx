@@ -360,7 +360,7 @@ export default function View(props) {
               </div>
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium leading-4 text-gray-900">Académie</div>
-                <Field label="Académie" value={departmentToAcademy[pdr.department]} disabled />
+                <Field label="Académie" value={pdr.academie} disabled />
               </div>
             </div>
             <div className="flex w-[10%] items-center justify-center">

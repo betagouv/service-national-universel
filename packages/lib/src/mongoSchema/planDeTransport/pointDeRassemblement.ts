@@ -118,6 +118,14 @@ export const PointDeRassemblementSchema = {
     },
   },
 
+  academie: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Académie du point de rassemblement",
+    },
+  },
+
   location: {
     lat: { type: Number },
     lon: { type: Number },

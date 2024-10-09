@@ -27,7 +27,7 @@ export interface PointDeRassemblementCSV {
 
 export type PointDeRassemblementImportMapped = Pick<
   PointDeRassemblementType,
-  "name" | "address" | "city" | "zip" | "department" | "region" | "particularitesAcces" | "matricule"
+  "name" | "address" | "city" | "zip" | "department" | "region" | "academie" | "particularitesAcces" | "matricule"
 > & {
   _id?: string;
   complementAddress: string;

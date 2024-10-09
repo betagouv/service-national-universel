@@ -1,4 +1,4 @@
-import { departmentList, regionList } from "snu-lib";
+import { academyList, departmentList, regionList } from "snu-lib";
 import { logger } from "../../../logger";
 import { PointDeRassemblementCSV, PointDeRassemblementImportMapped } from "./pointDeRassemblementImport";
 
@@ -14,6 +14,7 @@ export const mapPointDeRassemblements = (rawPdrs: PointDeRassemblementCSV[]): Po
       zip: rawPdr["Code postal"],
       department: mapDepartment(rawPdr["Département"]),
       region: mapRegion(rawPdr["Région académique"]),
+      academie: mapAcademy(rawPdr["Académie"]),
       matricule: rawPdr["Matricule du point de rassemblement"],
       // code: rawPdr["Matricule du point de rassemblement"],
     };
@@ -56,6 +57,20 @@ const mapDepartment = (departmentCsv: string) => {
     logger.warn(`mapDepartment() - No department code for : ${department} (${departmentCsv})`);
   }
   return departmentName || "NO_DEPARTMENT";
+};
+
+export const mapAcademy = (academyCsv: string) => {
+  let convertedAcademy = academyCsv;
+
+  if (academyCsv === "NOUVELLE CALEDONIE") {
+    convertedAcademy = "NOUVELLE-CALEDONIE";
+  }
+
+  const foundAcademy = academyList.find((academy) => normalizeString(academy) === normalizeString(convertedAcademy));
+  if (!foundAcademy) {
+    logger.warn(`No academy found for : ${academyCsv} was converted to ${convertedAcademy}`);
+  }
+  return foundAcademy || "NO_ACADEMY";
 };
 
 function normalizeString(s: string | undefined) {
