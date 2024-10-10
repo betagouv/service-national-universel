@@ -106,6 +106,15 @@ export const updateYoungsCohorts = async (classeId: string, cohort: CohortDocume
 };
 
 export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped: ClasseCohortMapped, classe: ClasseDocument) => {
+  if (!classeCohortToImportMapped.centerCode) {
+    throw new Error(FUNCTIONAL_ERRORS.NO_CENTER_CODE_PROVIDED);
+  }
+  if (!classeCohortToImportMapped.pdrCode) {
+    throw new Error(FUNCTIONAL_ERRORS.NO_PDR_CODE_PROVIDED);
+  }
+  if (!classeCohortToImportMapped.sessionCode) {
+    throw new Error(FUNCTIONAL_ERRORS.NO_SESSION_CODE_PROVIDED);
+  }
   const cohesionCenter = await CohesionCenterModel.findOne({ matricule: classeCohortToImportMapped.centerCode });
   if (!cohesionCenter) {
     throw new Error(ERRORS.COHESION_CENTER_NOT_FOUND);
