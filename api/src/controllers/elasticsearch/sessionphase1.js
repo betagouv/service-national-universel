@@ -17,6 +17,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "department.keyword",
       "region.keyword",
       "cohort.keyword",
+      "sanitaryContactEmailExist.keyword",
       "code.keyword",
       "placesLeft",
       "hasTimeSchedule.keyword",
@@ -58,6 +59,18 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         headCenterExistAggs: () => {
           return {
             terms: { field: "headCenterId.keyword", size: ES_NO_LIMIT, missing: "N/A" },
+          };
+        },
+        sanitaryContactEmailExist: (query, value) => {
+          const conditions = [];
+          if (value.includes("true")) conditions.push({ bool: { must: [{ exists: { field: "sanitaryContactEmail.keyword" } }] } });
+          if (value.includes("false")) conditions.push({ bool: { must_not: [{ exists: { field: "sanitaryContactEmail.keyword" } }] } });
+          if (conditions.length) query.bool.must.push({ bool: { should: conditions } });
+          return query;
+        },
+        sanitaryContactEmailExistAggs: () => {
+          return {
+            terms: { field: "sanitaryContactEmail.keyword", size: ES_NO_LIMIT, missing: "" },
           };
         },
       },
