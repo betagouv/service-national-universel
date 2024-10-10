@@ -163,6 +163,7 @@ export default function StepCoordonnees() {
   } = data;
 
   const debouncedBirthCity = useDebounce(birthCity, 200);
+  console.log("🚀 ~ StepCoordonnees ~ debouncedBirthCity:", debouncedBirthCity);
 
   const wasBornInFranceBool = data.birthCountry ? wasBornInFrance === "true" : undefined;
   const isFrenchResident = livesInFrance === "true";
@@ -287,7 +288,7 @@ export default function StepCoordonnees() {
   const { results: birthCityZipSuggestions } = useAddress({
     query: debouncedBirthCity,
     options: { type: "municipality" },
-    enabled: wasBornInFranceBool && debouncedBirthCity.length > 2,
+    enabled: wasBornInFranceBool === true && debouncedBirthCity.length > 2,
   });
 
   const updateBirthCity = async (value) => {
