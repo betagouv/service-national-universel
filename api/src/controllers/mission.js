@@ -381,7 +381,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     const applications = await ApplicationModel.find({ missionId: mission._id });
     if (applications && applications.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
-    await mission.remove();
+    await mission.deleteOne();
 
     logger.debug(`Mission ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
