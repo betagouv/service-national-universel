@@ -9,7 +9,7 @@ import { logger } from "../../../logger";
 
 export const importClasseCohort = async (filePath: string, classeCohortImportKey: ClasseCohortImportKey, importType: ClasseImportType) => {
   const classeCohortFile = await getFile(filePath);
-  const classesCohortsToImport: ClasseCohortCSV[] = await readCSVBuffer<ClasseCohortCSV>(Buffer.from(classeCohortFile.Body), true);
+  const classesCohortsToImport: ClasseCohortCSV[] = await readCSVBuffer<ClasseCohortCSV>(Buffer.from(classeCohortFile.Body));
 
   const classesCohortsToImportMapped = mapClassesCohortsForSept2024(classesCohortsToImport, importType);
   if (classeCohortImportKey !== ClasseCohortImportKey.SEPT_2024) {
