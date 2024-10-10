@@ -42,7 +42,7 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualStructure, event, value) {
-  const structInfos = await actualStructure.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const structInfos = await actualStructure.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let structure = rebuildStruct(structInfos);
 
   const anonymisedStructure = new StructureModel(structure).anonymise();

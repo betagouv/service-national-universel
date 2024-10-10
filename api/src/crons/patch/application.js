@@ -44,7 +44,7 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualApplication, event, value) {
-  const applicationInfos = await actualApplication.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const applicationInfos = await actualApplication.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let application = rebuildApplication(applicationInfos);
 
   const anonymizedApplication = new ApplicationModel(application).anonymise();
