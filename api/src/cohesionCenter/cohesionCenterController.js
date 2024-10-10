@@ -352,7 +352,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: center._id });
     if (sessionsPhase1.length !== 0) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    await center.remove();
+    await center.deleteOne();
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

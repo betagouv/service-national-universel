@@ -10,7 +10,7 @@ async function getDepartmentServiceByIdHelper(id) {
 
 async function deleteDepartmentServiceByIdHelper(id) {
   const departmentService = await getDepartmentServiceByIdHelper(id);
-  await departmentService?.remove();
+  await departmentService?.deleteOne();
 }
 
 async function deleteAllDepartmentServicesHelper() {

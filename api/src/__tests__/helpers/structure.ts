@@ -10,7 +10,7 @@ async function getStructureByIdHelper(structureId) {
 
 async function deleteStructureByIdHelper(structureId) {
   const structure = await getStructureByIdHelper(structureId);
-  if (structure) await structure.remove();
+  if (structure) await structure.deleteOne();
 }
 
 async function createStructureHelper(mission) {
