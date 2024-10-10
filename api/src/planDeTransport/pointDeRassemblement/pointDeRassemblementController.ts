@@ -441,7 +441,6 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     const meetingPoints = await PointDeRassemblementModel.find({
       _id: { $in: meetingPointIds },
       $or: [{ name: { $regex: regex } }, { city: { $regex: regex } }, { department: { $regex: regex } }, { region: { $regex: regex } }],
-      deletedAt: { $exists: false },
     });
 
     //build final Array since client wait for ligneToPoint + meetingPoint + ligneBus
