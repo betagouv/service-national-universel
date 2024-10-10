@@ -45,19 +45,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
-    let contextFilters = [
-      { bool: { must_not: { exists: { field: "deletedAt" } } } },
-      {
-        nested: {
-          path: "pointDeRassemblements",
-          query: {
-            bool: {
-              must: [{ exists: { field: "pointDeRassemblements.matricule" } }, { bool: { must_not: { exists: { field: "pointDeRassemblements.deletedAt" } } } }],
-            },
-          },
-        },
-      },
-    ];
+    let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
 
     // A head center can only see bus line rattached to his center.
     if (user.role === ROLES.HEAD_CENTER) {
