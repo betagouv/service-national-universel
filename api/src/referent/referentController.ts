@@ -849,7 +849,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       });
     }
     const cohortModel = await CohortModel.findOne({ name: cohort });
-    if (cohortModel?.type === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.IN_PROGRESS) {
+    if (cohortModel?.type === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.IN_PROGRESS && (inscriptionStep === "DOCUMENTS" || reinscriptionStep === "DOCUMENTS")) {
       young.hasStartedReinscription ? (reinscriptionStep = "REPRESENTANTS") : (inscriptionStep = "REPRESENTANTS");
     }
 
