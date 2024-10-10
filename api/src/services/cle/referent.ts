@@ -34,6 +34,11 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
     // Return if already exists
     if (referent._id) return referent;
 
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
+    const refClasseIds = classes.map((c) => c.referentClasseIds).flat();
+    const referentClasse = await ReferentModel.findOne({ email: referent.email, role: ROLES.REFERENT_CLASSE, _id: { $in: refClasseIds } });
+    if (referentClasse) return referentClasse;
+
     // Create referent
     if (!referent.email || !referent.firstName || !referent.lastName) throw new Error("Missing referent email or firstName or lastName");
     const invitationToken = crypto.randomBytes(20).toString("hex");
@@ -53,6 +58,22 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
     capture(error);
     return null;
   }
+};
+
+export const inviteReferentClasseAsCoordinator = async (
+  referent: Pick<ReferentType, "firstName" | "lastName" | "email">,
+  { from }: { from: UserDto | null },
+  etablissement: EtablissementType,
+) => {
+  // Send invite
+  const fromName = `${from?.firstName || null} ${from?.lastName || null}`;
+  const toName = `${referent.firstName} ${referent.lastName}`;
+  const name_school = `${etablissement.name}`;
+
+  return await sendTemplate(SENDINBLUE_TEMPLATES.CLE.REFERENT_CLASSE_ADDED_AS_COORDINATOR, {
+    emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+    params: { fromName, toName, name_school },
+  });
 };
 
 export const inviteReferent = async (

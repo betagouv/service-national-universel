@@ -1,0 +1,11 @@
+{
+  "description": "structure ignore fields",
+  "processors": [
+    {
+      "remove": {
+        "field": "jvaRawData",
+        "ignore_missing": true
+      }
+    }
+  ]
+}

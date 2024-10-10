@@ -1,6 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
-import { MeetingPointType } from "../../models";
+import { MeetingPointType } from "snu-lib";
 const { ObjectId } = Types;
 
 function getNewMeetingPointFixture(): Partial<MeetingPointType> {
