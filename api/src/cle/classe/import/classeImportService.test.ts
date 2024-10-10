@@ -1,7 +1,7 @@
 import { addCohortToClasse, addCohortToClasseByCohortSnuId, importClasseCohort, updateYoungsCohorts, processSessionPhasePdrAndCenter } from "./classeImportService";
 import * as classeImportService from "./classeImportService";
 import { CohortModel, CohortDocument, ClasseModel, ClasseDocument, YoungModel, CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model } from "../../../models";
-import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 import mongoose from "mongoose";
 import { ClasseCohortImportKey, ClasseCohortMapped, ClasseImportType } from "./classeCohortImport";
 import { getFile } from "../../../utils";
@@ -258,7 +258,7 @@ describe("processSessionPhasePdrAndCenter", () => {
     jest.restoreAllMocks();
   });
 
-  it("should update classe with cohesionCenterId, pointDeRassemblementId, and sessionId", async () => {
+  it("should update classe with cohesionCenterId, pointDeRassemblementId, sessionId and statusPhase1", async () => {
     const cohesionCenterMock = { _id: centerId, name: "Center 001" };
     const pdrMock = { _id: pdrId, name: "PDR 001" };
     const sessionMock = { _id: sessionId, codeCentre: "Session 001" };
@@ -277,6 +277,7 @@ describe("processSessionPhasePdrAndCenter", () => {
 
     expect(SessionPhase1Model.findOne).toHaveBeenCalledWith({ sejourSnuId: classeCohortMapped.sessionCode });
     expect(classeMock.set).toHaveBeenCalledWith({ sessionId: sessionId });
+    expect(classeMock.set).toHaveBeenCalledWith({ statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
   });
 
   it("should throw an error if center code is not provided", async () => {

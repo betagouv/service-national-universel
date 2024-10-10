@@ -3,9 +3,10 @@ import { readCSVBuffer } from "../../../services/fileService";
 import { ClasseCohortCSV, ClasseCohortImportKey, ClasseCohortImportResult, ClasseCohortMapped, ClasseImportType } from "./classeCohortImport";
 import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
 import { ClasseDocument, ClasseModel, CohortDocument, CohortModel, YoungModel, PointDeRassemblementModel, SessionPhase1Model, CohesionCenterModel } from "../../../models";
-import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
 import { logger } from "../../../logger";
+import StatusPhase1 from "../../../../../admin/build/src/scenes/dashboardV2/components/sejour/StatusPhase1";
 
 export const importClasseCohort = async (filePath: string, classeCohortImportKey: ClasseCohortImportKey, importType: ClasseImportType) => {
   const classeCohortFile = await getFile(filePath);
@@ -135,6 +136,8 @@ export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped
   }
 
   classe.set({ sessionId: session._id });
+
+  classe.set({ statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
 
   logger.info(
     `processSessionPhasePdrAndCenter - Classe ${classeCohortToImportMapped.classeId} updated with Cohort ${classeCohortToImportMapped.cohortCode}, Center ${cohesionCenter.name}, PDR ${pdr.name}, and Session ${session.codeCentre}`,
