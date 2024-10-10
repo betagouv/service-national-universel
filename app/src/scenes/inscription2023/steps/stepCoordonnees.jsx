@@ -163,7 +163,6 @@ export default function StepCoordonnees() {
   } = data;
 
   const debouncedBirthCity = useDebounce(birthCity, 200);
-  console.log("🚀 ~ StepCoordonnees ~ debouncedBirthCity:", debouncedBirthCity);
 
   const wasBornInFranceBool = data.birthCountry ? wasBornInFrance === "true" : undefined;
   const isFrenchResident = livesInFrance === "true";
