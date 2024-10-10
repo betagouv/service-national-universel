@@ -381,7 +381,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
 
     // * Update slave PlanTransport
     const planDeTransport = await PlanTransportModel.findById(id);
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(ObjectId(newMeetingPointId));
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(new ObjectId(newMeetingPointId));
     const meetingPoint = planDeTransport.pointDeRassemblements.find((meetingPoint) => {
       return meetingPoint.meetingPointId === meetingPointId;
     });
@@ -448,7 +448,7 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
 
     // * Update slave PlanTransport
     const planDeTransport = await PlanTransportModel.findById(id);
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(ObjectId(meetingPoint._id));
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(new ObjectId(meetingPoint._id));
     planDeTransport.pointDeRassemblements.push({
       meetingPointId: meetingPoint._id,
       ...pointDeRassemblement._doc,
