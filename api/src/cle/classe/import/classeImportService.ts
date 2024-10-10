@@ -6,7 +6,6 @@ import { ClasseDocument, ClasseModel, CohortDocument, CohortModel, YoungModel, P
 import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
 import { logger } from "../../../logger";
-import StatusPhase1 from "../../../../../admin/build/src/scenes/dashboardV2/components/sejour/StatusPhase1";
 
 export const importClasseCohort = async (filePath: string, classeCohortImportKey: ClasseCohortImportKey, importType: ClasseImportType) => {
   const classeCohortFile = await getFile(filePath);

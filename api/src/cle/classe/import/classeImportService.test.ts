@@ -1,7 +1,7 @@
 import { addCohortToClasse, addCohortToClasseByCohortSnuId, importClasseCohort, updateYoungsCohorts, processSessionPhasePdrAndCenter } from "./classeImportService";
 import * as classeImportService from "./classeImportService";
 import { CohortModel, CohortDocument, ClasseModel, ClasseDocument, YoungModel, CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model } from "../../../models";
-import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, STATUS_PHASE1_CLASSE } from "snu-lib";
 import mongoose from "mongoose";
 import { ClasseCohortImportKey, ClasseCohortMapped, ClasseImportType } from "./classeCohortImport";
 import { getFile } from "../../../utils";
