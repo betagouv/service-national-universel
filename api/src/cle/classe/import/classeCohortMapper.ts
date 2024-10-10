@@ -18,7 +18,7 @@ export const mapClassesCohortsForSept2024 = (classesChortes: ClasseCohortCSV[], 
         cohortCode: classeCohorte["Session formule"],
         centerCode: classeCohorte["Désignation du centre"],
         pdrCode: classeCohorte["Code point de rassemblement initial"],
-        sessionCode: classeCohorte["Session : Code de la session"],
+        sessionCode: `${classeCohorte["Session : Code de la session"]}_${classeCohorte["Désignation du centre"]}`,
       };
       return classeCohorteMapped;
     });

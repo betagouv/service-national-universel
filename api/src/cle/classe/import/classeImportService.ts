@@ -81,7 +81,7 @@ export const addCohortToClasse = async (
       await updateYoungsCohorts(classe._id, cohort, classeCohortImportKey);
     }
   } else if (importType === ClasseImportType.PDR_AND_CENTER) {
-    processSessionPhasePdrAndCenter(classeCohortToImportMapped, classe, classeCohortImportKey);
+    await processSessionPhasePdrAndCenter(classeCohortToImportMapped, classe);
   }
 
   logger.info(`classeImportService - addCohortToClasse() - Classe ${classeCohortToImportMapped.classeId} updated with cohort ${cohortId} - ${cohort.name}`);
@@ -105,7 +105,7 @@ export const updateYoungsCohorts = async (classeId: string, cohort: CohortDocume
   }
 };
 
-export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped: ClasseCohortMapped, classe: ClasseDocument, classeCohortImportKey: ClasseCohortImportKey) => {
+export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped: ClasseCohortMapped, classe: ClasseDocument) => {
   const cohesionCenter = await CohesionCenterModel.findOne({ matricule: classeCohortToImportMapped.centerCode });
   if (!cohesionCenter) {
     throw new Error(ERRORS.COHESION_CENTER_NOT_FOUND);
@@ -126,8 +126,6 @@ export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped
   }
 
   classe.set({ sessionId: session._id });
-
-  await classe.save({ fromUser: { firstName: `AFFECTATION_CLASSE_COHORT_${classeCohortImportKey}` } });
 
   logger.info(
     `processSessionPhasePdrAndCenter - Classe ${classeCohortToImportMapped.classeId} updated with Cohort ${classeCohortToImportMapped.cohortCode}, Center ${cohesionCenter.name}, PDR ${pdr.name}, and Session ${session.codeCentre}`,
