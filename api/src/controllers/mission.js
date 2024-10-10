@@ -16,7 +16,7 @@ const { serializeMission, serializeApplication } = require("../utils/serializer"
 const patches = require("./patches");
 const { sendTemplate } = require("../brevo");
 const config = require("config");
-const { putLocation } = require("../services/gouv.fr/api-adresse");
+const { getNearestLocation } = require("../services/gouv.fr/api-adresse");
 
 //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
 const fixDate = (dateString) => {
@@ -58,7 +58,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        checkedMission.location = await getNearestLocation(checkedMission.city, checkedMission.zip);
         if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
           return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
         }
@@ -120,7 +120,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        checkedMission.location = await getNearestLocation(checkedMission.city, checkedMission.zip);
         if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
           return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
         }

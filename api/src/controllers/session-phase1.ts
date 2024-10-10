@@ -420,7 +420,7 @@ router.post("/check-token/:token", async (req: UserRequest, res: Response) => {
       let arrayMeetingPoints: string[] = [];
       ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
 
-      const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
+      const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints }, deletedAt: { $exists: false } });
 
       for (const young of youngs) {
         const tempYoung = {

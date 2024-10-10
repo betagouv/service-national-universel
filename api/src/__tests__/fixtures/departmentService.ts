@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { DepartmentServiceType } from "../../models";
+import { DepartmentServiceType } from "snu-lib";
 
 function getNewDepartmentServiceFixture(): Partial<DepartmentServiceType> {
   return {

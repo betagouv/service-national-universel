@@ -7,6 +7,11 @@ import { dbConnect, dbClose } from "./helpers/db";
 import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
 import { createPointDeRassemblementWithBus } from "./helpers/PlanDeTransport/pointDeRassemblement";
+import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
+import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
+import getBusTeamFixture from "./fixtures/busTeam";
+
+const ObjectId = Types.ObjectId;
 
 mockEsClient({
   lignebus: [{ _id: "ligneId" }],
@@ -21,45 +26,15 @@ const mockModelMethodWithError = (model, method) => {
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-describe("Meeting point", () => {
+describe("LigneDeBus", () => {
   describe("GET /all", () => {
-    beforeEach(async () => {
-      await LigneBusModel.deleteMany();
-    });
     afterEach(async () => {
       await Promise.all([LigneBusModel.deleteMany(), PointDeRassemblementModel.deleteMany(), LigneToPointModel.deleteMany()]);
     });
     it("should return all ligneBus, meetingPoints, and ligneToPoints", async () => {
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: "center_id",
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
       const code = Math.random().toString(36).substring(2, 8);
-      const PointDeRassemblement = {
-        code: code,
-        cohorts: ["Février 2023 - C"],
-        name: "Meeting Point",
-        address: "123 Main St",
-        city: "Paris",
-        zip: "75001",
-        department: "Paris",
-        region: "Île-de-France",
-        location: {
-          lat: 48.8566,
-          lon: 2.3522,
-        },
-      };
+      const PointDeRassemblement = getNewPointDeRassemblementFixture({ code });
       const { ligneToPoint } = await createPointDeRassemblementWithBus(PointDeRassemblement, ligneBus.centerId, ligneBus.sessionId);
 
       const res = await request(getAppHelper()).get("/ligne-de-bus/all");
@@ -74,7 +49,7 @@ describe("Meeting point", () => {
       expect(res.body.data.meetingPoints[0].department).toBe(PointDeRassemblement.department);
       expect(res.body.data.meetingPoints[0].region).toBe(PointDeRassemblement.region);
       expect(res.body.data.meetingPoints[0].location).toEqual(PointDeRassemblement.location);
-      expect(res.body.data.ligneBus[0]._id).toBe(ligneBus._id.toString());
+      expect(res.body.data.ligneBus.find(({ _id }) => _id === ligneBus._id.toString())).toBeDefined();
       expect(res.body.data.ligneToPoints.length).toBeGreaterThan(0);
       expect(res.body.data.ligneToPoints[0]._id).toBe(ligneToPoint._id.toString());
     });
@@ -85,7 +60,7 @@ describe("Meeting point", () => {
       try {
         res = await request(getAppHelper()).get("/ligne-de-bus/all").send();
       } catch (error) {
-        // tslint:disable-next-line:no-empty
+        console.error(error);
       }
 
       expect(res.status).toBe(500);
@@ -115,43 +90,15 @@ describe("Meeting point", () => {
           lon: 2.3522,
         },
       });
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: center._id,
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id_1",
-        cohort,
-      });
-      await LigneBusModel.create({
-        name: "Ligne 2",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: center._id,
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id_2",
-        cohort,
-      });
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ centerId: center._id, cohort, busId: "bus_id_1" }));
+      await LigneBusModel.create(getNewLigneBusFixture({ centerId: center._id, cohort, busId: "bus_id_2" }));
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/cohort/${cohort}`);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.data.ligneBus.length).toBe(2);
-      expect(res.body.data.ligneBus[0]._id).toBe(ligneBus._id.toString());
+      expect(res.body.data.ligneBus.map(({ _id }) => _id).includes(ligneBus._id.toString())).toBe(true);
     });
 
     it("should return 403 when user is not authorized", async () => {
@@ -194,21 +141,13 @@ describe("Meeting point", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = user;
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: new Types.ObjectId(),
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          cohort: "Février 2023 - C",
+        }),
+      );
+      ligneBus.team.push(getBusTeamFixture());
+      await ligneBus.save();
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/${ligneBus._id}`);
 
@@ -227,6 +166,7 @@ describe("Meeting point", () => {
       expect(res.body.data.departuredDate).toBe(ligneBus.departuredDate.toISOString());
       expect(res.body.data.busId).toBe(ligneBus.busId);
       expect(res.body.data.cohort).toBe(ligneBus.cohort);
+      expect(res.body.data.team[0]._id).toBeDefined();
       passport.user = previous;
     });
 
@@ -248,21 +188,11 @@ describe("Meeting point", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = user;
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: "center_id",
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          cohort: "Février 2023 - C",
+        }),
+      );
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/${ligneBus._id}`);
 
@@ -277,21 +207,11 @@ describe("Meeting point", () => {
         throw new Error("test error");
       });
 
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: "center_id",
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          cohort: "Février 2023 - C",
+        }),
+      );
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/${ligneBus._id}`);
 
@@ -328,30 +248,23 @@ describe("Meeting point", () => {
           lon: 2.3522,
         },
       });
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: center._id,
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          centerId: center._id,
+          cohort: "Février 2023 - C",
+        }),
+      );
       const pdr1 = await PointDeRassemblementModel.create({
-        _id: new Types.ObjectId(),
+        _id: new ObjectId(),
         name: "PDR 1",
         region: "Île-de-France",
         department: "Paris",
+        academie: "Académie de Paris",
         zip: "75001",
         city: "Paris",
         address: "123 Main St",
         code: "PDR1",
+        matricule: "PDR1",
         location: {
           lat: 48.8566,
           lon: 2.3522,
@@ -359,14 +272,16 @@ describe("Meeting point", () => {
       });
 
       const pdr2 = await PointDeRassemblementModel.create({
-        _id: new Types.ObjectId(),
+        _id: new ObjectId(),
         name: "PDR 2",
         region: "Île-de-France",
         department: "Paris",
+        academie: "Académie de Paris",
         zip: "75002",
         city: "Paris",
         address: "456 Main St",
         code: "PDR2",
+        matricule: "PDR2",
         location: {
           lat: 48.8566,
           lon: 2.3522,
@@ -406,7 +321,7 @@ describe("Meeting point", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = user;
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new Types.ObjectId()}/availablePDR`);
+      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new ObjectId()}/availablePDR`);
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -430,21 +345,11 @@ describe("Meeting point", () => {
           lon: 2.3522,
         },
       });
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: center._id,
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          cohort: "Février 2023 - C",
+        }),
+      );
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/${ligneBus._id}/availablePDR`);
 
@@ -460,7 +365,7 @@ describe("Meeting point", () => {
         throw new Error("test error");
       });
 
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new Types.ObjectId()}/availablePDR`);
+      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new ObjectId()}/availablePDR`);
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -495,21 +400,12 @@ describe("Meeting point", () => {
           lon: 2.3522,
         },
       });
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: center._id,
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          centerId: center._id,
+          cohort: "Février 2023 - C",
+        }),
+      );
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/${ligneBus._id}/ligne-to-points`);
 
@@ -526,7 +422,7 @@ describe("Meeting point", () => {
         throw new Error("test error");
       });
 
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new Types.ObjectId()}/ligne-to-points`);
+      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new ObjectId()}/ligne-to-points`);
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -546,21 +442,11 @@ describe("Meeting point", () => {
       const previous = passport.user;
       passport.user = user;
 
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: new Types.ObjectId(),
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          cohort: "Février 2023 - C",
+        }),
+      );
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/${ligneBus._id}/data-for-check`);
 
@@ -579,21 +465,11 @@ describe("Meeting point", () => {
       const previous = passport.user;
       passport.user = user;
 
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: new Types.ObjectId(),
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          cohort: "Février 2023 - C",
+        }),
+      );
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/${ligneBus._id}/data-for-check`);
 
@@ -609,7 +485,7 @@ describe("Meeting point", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = user;
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new Types.ObjectId()}/data-for-check`);
+      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new ObjectId()}/data-for-check`);
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -620,9 +496,9 @@ describe("Meeting point", () => {
       mockModelMethodWithError(LigneBusModel, "find");
       let res;
       try {
-        res = await request(getAppHelper()).get(`/ligne-de-bus/${new Types.ObjectId()}/data-for-check`).send();
+        res = await request(getAppHelper()).get(`/ligne-de-bus/${new ObjectId()}/data-for-check`).send();
       } catch (error) {
-        // tslint:disable-next-line:no-empty
+        console.error(error);
       }
 
       expect(res.status).toBe(500);
@@ -643,21 +519,11 @@ describe("Meeting point", () => {
       const previous = passport.user;
       passport.user = user;
 
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: new Types.ObjectId(),
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          cohort: "Février 2023 - C",
+        }),
+      );
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/cohort/${ligneBus.cohort}/hasValue`);
 
@@ -728,21 +594,11 @@ describe("Meeting point", () => {
       const previous = passport.user;
       passport.user = user;
 
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: new Types.ObjectId(),
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          cohort: "Février 2023 - C",
+        }),
+      );
 
       await ligneBus.save();
 
@@ -800,21 +656,11 @@ describe("Meeting point", () => {
       const previous = passport.user;
       passport.user = user;
 
-      const ligneBus = await LigneBusModel.create({
-        name: "Ligne 1",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: new Types.ObjectId(),
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort: "Février 2023 - C",
-      });
+      const ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({
+          cohort: "Février 2023 - C",
+        }),
+      );
 
       await ligneBus.save();
 

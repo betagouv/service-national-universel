@@ -1,5 +1,5 @@
 import { Schema, InferSchemaType } from "mongoose";
-import { InterfaceExtended } from "..";
+import { InterfaceExtended } from "../..";
 
 export const PointDeRassemblementSchema = {
   code: {
@@ -8,6 +8,14 @@ export const PointDeRassemblementSchema = {
     unique: true,
     documentation: {
       description: "Code du point de rassemblement",
+    },
+  },
+
+  matricule: {
+    type: String,
+    unique: true,
+    documentation: {
+      description: "Matricule du point de rassemblement",
     },
   },
 
@@ -29,7 +37,7 @@ export const PointDeRassemblementSchema = {
     type: String,
     required: true,
     documentation: {
-      description: "Nom du point de rassemblement",
+      description: "Désignation du point de rassemblement",
     },
   },
 
@@ -41,6 +49,7 @@ export const PointDeRassemblementSchema = {
     },
   },
 
+  // LEGACY
   complementAddress: {
     type: [
       {
@@ -66,6 +75,14 @@ export const PointDeRassemblementSchema = {
     ],
     documentation: {
       description: "Complément d'adresse du point de rassemblement",
+    },
+  },
+
+  // SI-SNU (anciennement complementAddress)
+  particularitesAcces: {
+    type: String,
+    documentation: {
+      description: "Particularités d'accès du point de rassemblement",
     },
   },
 
@@ -98,6 +115,14 @@ export const PointDeRassemblementSchema = {
     required: true,
     documentation: {
       description: "Région du point de rassemblement",
+    },
+  },
+
+  academie: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Académie du point de rassemblement",
     },
   },
 

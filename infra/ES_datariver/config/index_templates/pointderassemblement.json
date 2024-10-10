@@ -1,0 +1,130 @@
+{
+  "index_patterns": ["pointderassemblement"],
+  "template": {
+    "settings": {
+      "index": {
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "zip": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "address": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "code": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "city": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "createdAt": {
+          "type": "date"
+        },
+        "deletedAt": {
+          "type": "date"
+        },
+        "complementAddress": {
+          "type": "object",
+          "properties": {
+            "cohort": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              }
+            },
+            "complement": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "name": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lon": {
+              "type": "float"
+            },
+            "lat": {
+              "type": "float"
+            }
+          }
+        },
+        "department": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "region": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "cohorts": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "updatedAt": {
+          "type": "date"
+        }
+      }
+    }
+  },
+  "composed_of": []
+}

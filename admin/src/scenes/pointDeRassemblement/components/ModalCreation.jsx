@@ -190,15 +190,6 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
                       <div className="text-xs leading-4 text-gray-900">Aucun point de rassemblement trouvé</div>
                     </div>
                   )}
-                  <hr className="my-2" />
-                  <div className="flex flex-col items-center justify-center gap-2 pb-3">
-                    <div className="text-sm leading-5 text-gray-900">Le point de rassemblement n’est pas dans la liste ?</div>
-                    <div
-                      className="cursor-pointer rounded-lg py-1 px-2 text-xs leading-4 text-blue-600 hover:bg-blue-50"
-                      onClick={() => history.push(`/point-de-rassemblement/nouveau?cohort=${selectedCohort}`)}>
-                      Créer un point de rassemblement
-                    </div>
-                  </div>
                 </div>
               </div>
               {selectedPDR && (

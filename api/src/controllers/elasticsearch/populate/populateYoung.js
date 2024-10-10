@@ -26,7 +26,9 @@ async function populateYoungExport(data, exportFields) {
     const lignesToPoint = await allRecords("lignetopoint", { bool: { must: { terms: { "meetingPointId.keyword": meetingPointsIds } } } });
     data = data.map((item) => ({ ...item, ligneToPoint: lignesToPoint?.find((e) => e.meetingPointId === item.meetingPointId && e.lineId === item.ligneId) }));
     //get meetingPoint
-    const meetingPoints = await allRecords("pointderassemblement", { bool: { must: { ids: { values: meetingPointsIds } } } });
+    const meetingPoints = await allRecords("pointderassemblement", {
+      bool: { must: [{ ids: { values: meetingPointsIds } }, { exists: { field: "matricule" } }], must_not: { exists: { field: "deleted" } } },
+    });
     data = data.map((item) => ({ ...item, meetingPoint: meetingPoints?.find((e) => e._id.toString() === item.meetingPointId) }));
   }
 

@@ -48,7 +48,7 @@ router.put(
         UpdateReferentClasse & {
           idClasse: string;
         }
-      >(file.data, true);
+      >(file.data);
       console.log(referentsClassesToUpdate);
 
       const { error, value: referentsClassesToUpdateValidated } = updateReferentsClassesSchema.validate(referentsClassesToUpdate);
