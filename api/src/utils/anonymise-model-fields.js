@@ -16,6 +16,10 @@ function getAllPaths(obj, parentPath = "") {
   let paths = [];
   for (let key in obj) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
+    if (obj[key] instanceof Date) {
+      paths.push(currentPath);
+      continue;
+    }
     if (typeof obj[key] === "object" && obj[key] !== null && !Array.isArray(obj[key])) {
       paths = paths.concat(getAllPaths(obj[key], currentPath));
     } else {
@@ -25,12 +29,18 @@ function getAllPaths(obj, parentPath = "") {
   return paths;
 }
 
+function isWhitelisted(path, whitelist) {
+  return whitelist.some((whitelistedPath) => {
+    return path === whitelistedPath || path.startsWith(whitelistedPath + ".");
+  });
+}
+
 // Anonymise tous les champs d'un objet qui ne sont pas dans la whitelist
 function anonymizeNonDeclaredFields(item, whitelist) {
   const allPaths = getAllPaths(item);
 
   for (const path of allPaths) {
-    if (!whitelist.includes(path)) {
+    if (!isWhitelisted(path, whitelist)) {
       const value = getNestedValue(item, path);
 
       if (Array.isArray(value) && value.length > 0) {
@@ -48,7 +58,7 @@ function anonymizeNonDeclaredFields(item, whitelist) {
       if (value !== undefined) {
         if (Array.isArray(value)) {
           setNestedValue(item, path, []);
-        } else if (path.includes("$date")) {
+        } else if (value instanceof Date) {
           setNestedValue(item, path, new Date());
         } else if (typeof value === "string") {
           setNestedValue(item, path, "");

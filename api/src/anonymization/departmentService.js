@@ -4,6 +4,7 @@ const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields"
 function anonymize(itemToAnonymize) {
   const whitelist = [
     "_id.$oid",
+    "contacts",
     "contacts.cohort",
     "contacts.cohortId",
     "contacts.contactName",
@@ -22,13 +23,14 @@ function anonymize(itemToAnonymize) {
     "contactName",
     "contactPhone",
     "contactMail",
+    "representantEtat",
     "representantEtat.firstName",
     "representantEtat.lastName",
     "representantEtat.mobile",
     "representantEtat.email",
     "representantEtat.role",
-    "createdAt.$date",
-    "updatedAt.$date",
+    "createdAt",
+    "updatedAt",
     "__v",
   ];
   const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);

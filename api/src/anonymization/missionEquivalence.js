@@ -13,8 +13,9 @@ function anonymize(itemToAnonymize) {
     "address",
     "zip",
     "city",
-    "startDate.$date",
-    "endDate.$date",
+    "startDate",
+    "endDate",
+    "frequency",
     "frequency.nombre",
     "frequency.duree",
     "frequency.frequence",
@@ -23,8 +24,8 @@ function anonymize(itemToAnonymize) {
     "contactEmail",
     "files",
     "message",
-    "createdAt.$date",
-    "updatedAt.$date",
+    "createdAt",
+    "updatedAt",
     "__v",
   ];
   const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);

@@ -34,8 +34,8 @@ function anonymize(itemToAnonymize) {
     "feedBackExperienceFiles",
     "othersFiles",
     "filesType",
-    "createdAt.$date",
-    "updatedAt.$date",
+    "createdAt",
+    "updatedAt",
     "__v",
   ];
 

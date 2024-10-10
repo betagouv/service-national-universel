@@ -29,8 +29,8 @@ function anonymize(itemToAnonymize) {
     "country",
     "departmentCode",
     "sessionStatus",
-    "createdAt.$date",
-    "updatedAt.$date",
+    "createdAt",
+    "updatedAt",
     "__v",
   ];
 
