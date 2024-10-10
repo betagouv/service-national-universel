@@ -23,6 +23,7 @@ const reminderInscription = require("./reminderInscription");
 const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
 const reminderWaitingCorrection = require("./reminderWaitingCorrection");
 const dsnjExport = require("./dsnjExport");
+const injepExport = require("./injepExport");
 const clotureMissionReminder = require("./clotureInscriptionReminder");
 const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
 const mongoMonitoring = require("./mongoMonitoring");
@@ -54,6 +55,7 @@ const everyHours = (x) => `0 */${x} * * *`;
 // youngPatches.handler() : tous les jours à 3h00
 // classePatches.handler() : tous les jours à 3h20
 // dsnjExport.handler() : tous les jours à 3h30
+// injepExport.handler() : tous les jours à 3h40
 // refreshMaterializedViews.handler() : tous les jours à 5h00
 
 // Crons qui peuvent être de  jour :
@@ -84,6 +86,7 @@ const CRONS = [
   cron("missionEquivalencePatches", "45 1 * * *", missionEquivalencePatches.handler),
   cron("classePatches", "20 3 * * *", classePatches.handler),
   cron("dsnjExport", "15 04 * * *", dsnjExport.handler),
+  cron("injepExport", "40 04 * * *", injepExport.handler),
   cron("parentConsentementReminder", "27 8 * * *", parentConsentementReminder.handler),
   cron("parentRevalidateRI", "30 7 * * 1", parentRevalidateRI.handler),
   cron("reminderInscription", "0 11 * * *", reminderInscription.handler),
