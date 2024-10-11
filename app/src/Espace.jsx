@@ -16,7 +16,7 @@ import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
-import { REINSCRIPTION_STEPS, shouldForceRedirectToEmailValidation } from "./utils/navigation";
+import { shouldForceRedirectToEmailValidation } from "./utils/navigation";
 
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
