@@ -46,7 +46,7 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualClasse, event, value) {
-  const classeInfos = await actualClasse.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const classeInfos = await actualClasse.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let classe = rebuildClasse(classeInfos);
 
   const age = getAge(classe?.birthdateAt || actualClasse?.birthdateAt);

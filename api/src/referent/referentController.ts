@@ -1549,7 +1549,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       }
     }
 
-    await referent.remove();
+    await referent.deleteOne();
     logger.debug(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {

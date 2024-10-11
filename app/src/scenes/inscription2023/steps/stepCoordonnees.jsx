@@ -287,7 +287,7 @@ export default function StepCoordonnees() {
   const { results: birthCityZipSuggestions } = useAddress({
     query: debouncedBirthCity,
     options: { type: "municipality" },
-    enabled: wasBornInFranceBool && debouncedBirthCity.length > 2,
+    enabled: wasBornInFranceBool === true && debouncedBirthCity.length > 2,
   });
 
   const updateBirthCity = async (value) => {

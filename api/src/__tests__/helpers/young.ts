@@ -10,12 +10,12 @@ async function getYoungByIdHelper(youngId) {
 
 async function deleteYoungByIdHelper(youngId) {
   const young = await getYoungByIdHelper(youngId);
-  if (young) await young.remove();
+  if (young) await young.deleteOne();
 }
 
 async function deleteYoungByEmailHelper(email) {
   const young = await YoungModel.findOne({ email });
-  if (young) await young.remove();
+  if (young) await young.deleteOne();
 }
 
 async function createYoungHelper(young) {
