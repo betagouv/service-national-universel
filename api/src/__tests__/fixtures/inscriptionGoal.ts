@@ -9,6 +9,7 @@ export default function getNewInscriptionGoalFixture(object: Partial<Inscription
     department: faker.number.int({ min: 11, max: 123 }).toString(),
     max: faker.number.int({ min: 11, max: 123 }),
     cohortId: new ObjectId().toString(),
+    cohort: faker.lorem.words(),
     ...object,
   };
 }

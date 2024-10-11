@@ -33,7 +33,7 @@ import { createCohortHelper } from "../helpers/cohort";
 import { getNewReferentFixture, getNewSignupReferentFixture } from "../fixtures/referent";
 import { createReferentHelper } from "../helpers/referent";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 mockEsClient({
