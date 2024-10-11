@@ -3,9 +3,25 @@ import { useHistory } from "react-router-dom";
 import { setYoung } from "../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { logoutYoung } from "./young.service";
-import { YOUNG_SOURCE } from "snu-lib";
+import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 import { cohortsInit } from "@/utils/cohorts";
-import { displaySignupToast } from "@/utils";
+import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS, shouldForceRedirectToEmailValidation } from "@/utils/navigation";
+
+const loginMessage = {
+  PARENT: null,
+  INSCRIPTION: {
+    title: "Connexion réussie",
+    message: "Vous pouvez reprendre votre inscription à l'étape où vous vous étiez arrêté.",
+  },
+  REINSCRIPTION: {
+    title: "Connexion réussie",
+    message: "Vous pouvez reprendre votre réinscription à l'étape où vous vous étiez arrêté.",
+  },
+  DEFAULT: {
+    title: "Connexion réussie",
+    message: "",
+  },
+};
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -25,7 +41,11 @@ export const useAuth = () => {
   const login = async (user) => {
     dispatch(setYoung(user));
     await cohortsInit();
-    displaySignupToast(user);
+    displayLoginToast(user);
+    if (shouldForceRedirectToEmailValidation(user)) {
+      history.push("/preinscription/email-validation");
+    }
+    return true;
   };
 
   const isLoggedIn = !!young;
@@ -45,5 +65,24 @@ export const useAuth = () => {
     isCLE,
   };
 };
+
+function displayLoginToast(user) {
+  const message = getLoginMessage(user);
+  if (!message) return;
+  toastr.success(message.title, message.message, { timeOut: 3 });
+}
+
+function getLoginMessage(user) {
+  if (window.location.pathname.includes("/representants-legaux")) {
+    return loginMessage.PARENT;
+  }
+  if (user.status === YOUNG_STATUS.IN_PROGRESS && user.inscriptionStep2023 !== INSCRIPTION_STEPS.EMAIL_WAITING_VALIDATION) {
+    return loginMessage.INSCRIPTION;
+  }
+  if (user.status === YOUNG_STATUS.REINSCRIPTION && user.reInscriptionStep2023 !== REINSCRIPTION_STEPS.ELIGIBILITE) {
+    return loginMessage.REINSCRIPTION;
+  }
+  return loginMessage.DEFAULT;
+}
 
 export default useAuth;

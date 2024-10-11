@@ -21,7 +21,6 @@ import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import { maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
-import { shouldForceRedirectToEmailValidation } from "./utils/navigation";
 import useAuth from "./services/useAuth";
 
 import PageLoader from "./components/PageLoader";
@@ -56,17 +55,11 @@ function App() {
 
   async function fetchData() {
     try {
-      const { ok, user } = await api.checkToken();
-
-      if (!ok || !user) {
+      const { user } = await api.getUser();
+      if (!user) {
         dispatch(setYoung(null));
-        return;
-      }
-
-      await login(user);
-
-      if (shouldForceRedirectToEmailValidation(user)) {
-        history.push("/preinscription/email-validation");
+      } else {
+        await login(user);
       }
     } catch (e) {
       console.log(e);

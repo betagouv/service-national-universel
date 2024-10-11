@@ -10,7 +10,7 @@ class api {
     this.headers = { "x-user-timezone": new Date().getTimezoneOffset() };
   }
 
-  checkToken() {
+  getUser() {
     return new Promise(async (resolve, reject) => {
       try {
         const controller = new AbortController();
