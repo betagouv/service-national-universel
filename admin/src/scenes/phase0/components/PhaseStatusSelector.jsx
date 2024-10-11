@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import ChevronRight from "../../../assets/icons/ChevronRight";
-import { ROLES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, translate, translatePhase1 } from "snu-lib";
+import { YOUNG_STATUS_PHASE3, getPhaseStatusOptions, translate, translatePhase1 } from "snu-lib";
 import Check from "../../../assets/icons/Check";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
@@ -9,22 +9,12 @@ import Warning from "../../../assets/icons/Warning";
 import ConfirmationModal from "./ConfirmationModal";
 import { useSelector } from "react-redux";
 
-const statusOptionsByRole = {
-  0: { DEFAULT: [] },
-  1: {
-    [ROLES.ADMIN]: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
-    DEFAULT: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
-  },
-  2: { DEFAULT: [YOUNG_STATUS_PHASE2.WAITING_REALISATION, YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.VALIDATED] },
-  3: { DEFAULT: [YOUNG_STATUS_PHASE3.WAITING_REALISATION, YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED] },
-};
-
 export default function PhaseStatusSelector({ young, onChange }) {
   const [phaseChoiceOpened, setPhaseChoiceOpened] = useState(false);
   const [statusOpened, setStatusOpened] = useState(0);
   const [confirmChangeModal, setConfirmChangeModal] = useState(null);
   const { user } = useSelector((state) => state.Auth);
-  const statusOptions = getStatusOptions(user.role, statusOpened);
+  const statusOptions = getPhaseStatusOptions(user, statusOpened);
 
   const containerRef = useRef();
 
@@ -142,21 +132,17 @@ export default function PhaseStatusSelector({ young, onChange }) {
   );
 }
 
-function getStatusOptions(role, phase) {
-  return statusOptionsByRole[phase][role] || statusOptionsByRole[phase].DEFAULT || [];
-}
-
-function statusButton(young, option, phase, onSelect) {
-  const isChecked = young[`statusPhase${phase}`] === option;
+function statusButton(young, option, phaseNumber, onSelect) {
+  const isChecked = young[`statusPhase${phaseNumber}`] === option;
   return (
     <button
       key={option}
       className={`w-full flex items-center whitespace-nowrap rounded-b-[6px] bg-[#FFFFFF] px-[16px] py-[8px] text-[14px] text-[#374151] hover:bg-[#F3F4F6] ${
         isChecked ? "font-medium" : ""
       }`}
-      onClick={() => onSelect(phase, option)}>
+      onClick={() => onSelect(phaseNumber, option)}>
       {isChecked && <Check />}
-      <div className="ml-[6px]">{phase === 1 ? translatePhase1(option) : translate(option)}</div>
+      <div className="ml-[6px]">{phaseNumber === 1 ? translatePhase1(option) : translate(option)}</div>
     </button>
   );
 }

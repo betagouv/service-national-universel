@@ -35,8 +35,7 @@ import {
   canEditYoung,
   canAllowSNU,
   YoungType,
-  ROLES,
-  YOUNG_STATUS_PHASE1,
+  getPhaseStatusOptions,
 } from "snu-lib";
 import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
@@ -294,8 +293,12 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    if (value.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED && req.user.role !== ROLES.ADMIN) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    for (const [key, val] of Object.entries(value)) {
+      const phaseNumber = parseInt(key.replace("statusPhase", ""));
+      const authorizedStatuses = getPhaseStatusOptions(req.user, phaseNumber);
+      if (!authorizedStatuses.includes(val)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
     }
 
     // --- get young
