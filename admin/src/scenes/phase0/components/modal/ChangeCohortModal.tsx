@@ -3,7 +3,7 @@ import { IoRepeat } from "react-icons/io5";
 import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
-import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
 import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
 
@@ -64,6 +64,10 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
   }>();
   const [classes, setClasses] = useState<ClasseOption[]>([]);
   const [classe, setClasse] = useState<Classe & { cohort?: string; label: string }>();
+  let youngStatus = young.status;
+  if (young.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
+    youngStatus = YOUNG_STATUS.VALIDATED;
+  }
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -338,6 +342,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                 placeholder="Classe"
                 options={classes as any} // FIXME: use _id as value
                 closeMenuOnSelect
+                noOptionsMessage={"Toutes les classes de cet établissement sont pleines"}
                 isClearable={true}
                 value={classe ? { label: classe.label, value: "" } : null}
                 onChange={({ classe }) => setClasse(classe)}
@@ -434,7 +439,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Statut de l'élève :</div>
-                  <Badge title={translateInscriptionStatus(young.status)} status={young.status} />
+                  <Badge title={translateInscriptionStatus(youngStatus)} status={youngStatus} />
                 </div>
               </div>
             </div>

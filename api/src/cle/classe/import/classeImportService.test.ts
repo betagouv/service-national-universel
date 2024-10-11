@@ -1,7 +1,7 @@
-import { addCohortToClasse, addCohortToClasseByCohortSnuId, importClasseCohort } from "./classeImportService";
+import { addCohortToClasse, addCohortToClasseByCohortSnuId, importClasseCohort, updateYoungsCohorts, processSessionPhasePdrAndCenter } from "./classeImportService";
 import * as classeImportService from "./classeImportService";
-import { CohortModel, ClasseModel, ClasseDocument, YoungModel } from "../../../models";
-import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE } from "snu-lib";
+import { CohortModel, CohortDocument, ClasseModel, ClasseDocument, YoungModel, CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model } from "../../../models";
+import { ERRORS, FUNCTIONAL_ERRORS, STATUS_PHASE1_CLASSE } from "snu-lib";
 import mongoose from "mongoose";
 import { ClasseCohortImportKey, ClasseCohortMapped, ClasseImportType } from "./classeCohortImport";
 import { getFile } from "../../../utils";
@@ -13,6 +13,9 @@ jest.mock("../../../models", () => ({
   CohortModel: { findById: jest.fn() },
   ClasseModel: { findById: jest.fn(), save: jest.fn() },
   YoungModel: { find: jest.fn(), save: jest.fn() },
+  CohesionCenterModel: { findOne: jest.fn() },
+  PointDeRassemblementModel: { findOne: jest.fn() },
+  SessionPhase1Model: { findOne: jest.fn() },
 }));
 
 jest.mock("../../../utils", () => ({
@@ -82,8 +85,8 @@ describe("importClasseCohort", () => {
     const result = await importClasseCohort(filePath, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
 
     expect(getFile).toHaveBeenCalledWith(filePath);
-    expect(readCSVBuffer).toHaveBeenCalledWith(Buffer.from("some mock data"), true);
-    expect(mapClassesCohortsForSept2024).toHaveBeenCalledWith(mockCSV);
+    expect(readCSVBuffer).toHaveBeenCalledWith(Buffer.from("some mock data"));
+    expect(mapClassesCohortsForSept2024).toHaveBeenCalledWith(mockCSV, ClasseImportType.NEXT_CLASSE_COHORT);
     expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledTimes(2);
     expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledWith({ classeId: "1", cohortCode: "IDF_101" }, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
     expect(addCohortToClasseByCohortSnuId).toHaveBeenCalledWith({ classeId: "2", cohortCode: "IDF_102" }, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
@@ -177,5 +180,142 @@ describe("addCohortToClasseByCohortSnuId", () => {
       classeTotalSeats: 1,
     };
     await expect(addCohortToClasseByCohortSnuId(classeCohortMapped, importKey, ClasseImportType.NEXT_CLASSE_COHORT)).rejects.toThrow(FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED);
+  });
+});
+
+describe("updateYoungsCohorts", () => {
+  const classeId = new mongoose.Types.ObjectId().toString();
+  const cohortId = new mongoose.Types.ObjectId().toString();
+  const cohortName = "Cohort 2024";
+  const importKey = ClasseCohortImportKey.SEPT_2024;
+  const cohortMock: CohortDocument = {
+    _id: cohortId,
+    name: cohortName,
+  } as CohortDocument;
+  const youngId = new mongoose.Types.ObjectId().toString();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  it("should update youngs with new cohort information", async () => {
+    const youngMock = {
+      _id: youngId,
+      cohortId: "originalCohortId",
+      cohort: "Original Cohort Name",
+      set: jest.fn().mockReturnThis(),
+      save: jest.fn(),
+    };
+
+    (YoungModel.find as jest.Mock).mockResolvedValue([youngMock]);
+
+    await updateYoungsCohorts(classeId, cohortMock, importKey);
+
+    expect(YoungModel.find).toHaveBeenCalledWith({ classeId });
+    expect(youngMock.set).toHaveBeenCalledWith({
+      cohort: cohortName,
+      cohortId: cohortId,
+      originalCohort: "Original Cohort Name",
+      originalCohortId: "originalCohortId",
+      cohortChangeReason: "Import SI-SNU",
+    });
+    expect(youngMock.save).toHaveBeenCalledWith({
+      fromUser: { firstName: `IMPORT_CLASSE_COHORT_${importKey}` },
+    });
+  });
+
+  it("should not throw an error if no youngs are found", async () => {
+    (YoungModel.find as jest.Mock).mockResolvedValue([]);
+
+    await expect(updateYoungsCohorts(classeId, cohortMock, importKey)).resolves.not.toThrow();
+
+    expect(YoungModel.find).toHaveBeenCalledWith({ classeId });
+  });
+});
+
+describe("processSessionPhasePdrAndCenter", () => {
+  const classeId = new mongoose.Types.ObjectId().toString();
+  const centerId = new mongoose.Types.ObjectId().toString();
+  const pdrId = new mongoose.Types.ObjectId().toString();
+  const sessionId = new mongoose.Types.ObjectId().toString();
+
+  const classeCohortMapped: ClasseCohortMapped = {
+    classeId: classeId,
+    cohortCode: "COHORT_2024",
+    centerCode: "CENTER_001",
+    pdrCode: "PDR_001",
+    sessionCode: "SESSION_001",
+    classeTotalSeats: 30,
+  };
+
+  const classeMock = {
+    set: jest.fn().mockReturnThis(),
+  };
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  it("should update classe with cohesionCenterId, pointDeRassemblementId, sessionId and statusPhase1", async () => {
+    const cohesionCenterMock = { _id: centerId, name: "Center 001" };
+    const pdrMock = { _id: pdrId, name: "PDR 001" };
+    const sessionMock = { _id: sessionId, codeCentre: "Session 001" };
+
+    (CohesionCenterModel.findOne as jest.Mock).mockResolvedValue(cohesionCenterMock);
+    (PointDeRassemblementModel.findOne as jest.Mock).mockResolvedValue(pdrMock);
+    (SessionPhase1Model.findOne as jest.Mock).mockResolvedValue(sessionMock);
+
+    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any);
+
+    expect(CohesionCenterModel.findOne).toHaveBeenCalledWith({ matricule: classeCohortMapped.centerCode });
+    expect(classeMock.set).toHaveBeenCalledWith({ cohesionCenterId: centerId });
+
+    expect(PointDeRassemblementModel.findOne).toHaveBeenCalledWith({ matricule: classeCohortMapped.pdrCode });
+    expect(classeMock.set).toHaveBeenCalledWith({ pointDeRassemblementId: pdrId });
+
+    expect(SessionPhase1Model.findOne).toHaveBeenCalledWith({ sejourSnuId: classeCohortMapped.sessionCode });
+    expect(classeMock.set).toHaveBeenCalledWith({ sessionId: sessionId });
+    expect(classeMock.set).toHaveBeenCalledWith({ statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
+  });
+
+  it("should throw an error if center code is not provided", async () => {
+    const classeCohortMappedWithoutCenterCode = { ...classeCohortMapped, centerCode: undefined };
+
+    await expect(processSessionPhasePdrAndCenter(classeCohortMappedWithoutCenterCode, classeMock as any)).rejects.toThrow(FUNCTIONAL_ERRORS.NO_CENTER_CODE_PROVIDED);
+  });
+
+  it("should throw an error if cohesion center is not found", async () => {
+    (CohesionCenterModel.findOne as jest.Mock).mockResolvedValue(null);
+
+    await expect(processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any)).rejects.toThrow(ERRORS.COHESION_CENTER_NOT_FOUND);
+  });
+
+  it("should throw an error if PDR code is not provided", async () => {
+    const classeCohortMappedWithoutPdrCode = { ...classeCohortMapped, pdrCode: undefined };
+
+    await expect(processSessionPhasePdrAndCenter(classeCohortMappedWithoutPdrCode, classeMock as any)).rejects.toThrow(FUNCTIONAL_ERRORS.NO_PDR_CODE_PROVIDED);
+  });
+
+  it("should throw an error if PDR is not found", async () => {
+    (CohesionCenterModel.findOne as jest.Mock).mockResolvedValue({ _id: centerId });
+    (PointDeRassemblementModel.findOne as jest.Mock).mockResolvedValue(null);
+
+    await expect(processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any)).rejects.toThrow(ERRORS.PDR_NOT_FOUND);
+  });
+
+  it("should throw an error if session code is not provided", async () => {
+    const classeCohortMappedWithoutSessionCode = { ...classeCohortMapped, sessionCode: undefined };
+
+    await expect(processSessionPhasePdrAndCenter(classeCohortMappedWithoutSessionCode, classeMock as any)).rejects.toThrow(FUNCTIONAL_ERRORS.NO_SESSION_CODE_PROVIDED);
+  });
+
+  it("should throw an error if session is not found", async () => {
+    (CohesionCenterModel.findOne as jest.Mock).mockResolvedValue({ _id: centerId });
+    (PointDeRassemblementModel.findOne as jest.Mock).mockResolvedValue({ _id: pdrId });
+    (SessionPhase1Model.findOne as jest.Mock).mockResolvedValue(null);
+
+    await expect(processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any)).rejects.toThrow(ERRORS.SESSION_NOT_FOUND);
   });
 });

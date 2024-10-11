@@ -1,0 +1,11 @@
+{
+  "description": "schoolramses ignore fields",
+  "processors": [
+    {
+      "remove": {
+        "field": "raw_data",
+        "ignore_missing": true
+      }
+    }
+  ]
+}

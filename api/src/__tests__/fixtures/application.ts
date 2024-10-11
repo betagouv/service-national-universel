@@ -1,6 +1,8 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
-import { ApplicationType } from "../../models";
+
+import { ApplicationType } from "snu-lib";
+
 const { ObjectId } = Types;
 
 function getNewApplicationFixture(): Partial<ApplicationType> {

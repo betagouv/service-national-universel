@@ -27,7 +27,7 @@ function getNewCohesionCenterFixture(object: Partial<CohesionCenterType> = {}): 
 function getNewCohesionCenterFixtureV2(object = {}): Partial<CohesionCenterType> {
   return {
     name: faker.lorem.word(),
-    code2022: faker.lorem.word(),
+    code2022: faker.string.uuid(),
     address: faker.lorem.word(),
     city: faker.location.city(),
     zip: faker.location.zipCode(),

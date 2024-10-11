@@ -101,6 +101,7 @@ import {
   FUNCTIONAL_ERRORS,
   YoungType,
   getDepartmentForEligibility,
+  isAdmin,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -622,17 +623,17 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
         if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const now = new Date();
         const isInsctructionOpen = now < cohort.instructionEndDate;
-        if (!isInsctructionOpen) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-        }
         const remainingPlaces = classe.totalSeats - classe.seatsTaken;
         if (remainingPlaces <= 0) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+        if (!isInsctructionOpen && !isAdmin(req.user)) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       } else {
         const now = new Date();
         const isInsctructionOpen = now < cohort.instructionEndDate;
-        if (!isInsctructionOpen) {
+        if (!isInsctructionOpen && !isAdmin(req.user)) {
           return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
@@ -797,6 +798,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
       classe = dbClasse;
       etablissement = dbEtablissement;
+      if (classe.seatsTaken >= classe.totalSeats) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let previousEtablissement: any = undefined;
@@ -816,6 +818,9 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     let youngStatus = young.status;
     if (cohort === "à venir ") {
       youngStatus = getYoungStatus(young) as YoungType["status"];
+    }
+    if (value.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
+      youngStatus = YOUNG_STATUS.VALIDATED;
     }
 
     const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] as string);
@@ -1519,29 +1524,32 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const referents = await ReferentModel.find({ structureId: referent.structureId });
-    const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
-    if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
-    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
-
-    const classes = await ClasseModel.find({ referentClasseIds: { $in: [referent._id] } });
-    if (classes.length > 0) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSES });
-
-    if (referent.subRole === SUB_ROLES.referent_etablissement && referent.role === ROLES.ADMINISTRATEUR_CLE) {
-      const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [referent._id] } });
-      if (etablissement) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+    if (referent.role === ROLES.RESPONSIBLE || referent.role === ROLES.SUPERVISOR) {
+      const referents = await ReferentModel.find({ structureId: referent.structureId });
+      const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
+      if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
+      if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
     }
+    if (referent.role === ROLES.ADMINISTRATEUR_CLE || referent.role === ROLES.REFERENT_CLASSE) {
+      const classes = await ClasseModel.find({ referentClasseIds: { $in: [referent._id] }, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
+      if (classes.length > 0) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSES });
 
-    if (referent.subRole === SUB_ROLES.coordinateur_cle && referent.role === ROLES.ADMINISTRATEUR_CLE) {
-      const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: [referent._id] } });
-      if (etablissement) {
-        const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
-        etablissement.set({ coordinateurIds: coordinateur });
-        await etablissement.save({ fromUser: req.user });
+      if (referent.subRole === SUB_ROLES.referent_etablissement) {
+        const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [referent._id] } });
+        if (etablissement) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+      }
+
+      if (referent.subRole === SUB_ROLES.coordinateur_cle) {
+        const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: [referent._id] } });
+        if (etablissement) {
+          const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
+          etablissement.set({ coordinateurIds: coordinateur });
+          await etablissement.save({ fromUser: req.user });
+        }
       }
     }
 
-    await referent.remove();
+    await referent.deleteOne();
     logger.debug(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
