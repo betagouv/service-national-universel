@@ -119,9 +119,8 @@ export const PointDeRassemblementSchema = {
   },
 
   academie: {
-    //TODO: remettre required apres la Toussaint
     type: String,
-    //required: true,
+    required: true,
     documentation: {
       description: "Académie du point de rassemblement",
     },
