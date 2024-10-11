@@ -41,8 +41,8 @@
     "tailwindcss": "3.3.3"
   },
   "engines": {
-    "node": "^18.20",
-    "npm": "^10.5",
+    "node": "^20.17",
+    "npm": "^10.8",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   }
 }
