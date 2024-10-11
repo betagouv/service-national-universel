@@ -10,7 +10,7 @@ async function getContractByIdHelper(contractId) {
 
 async function deleteContractByIdHelper(contractId) {
   const contract = await getContractByIdHelper(contractId);
-  await contract?.remove();
+  await contract?.deleteOne();
 }
 
 async function createContractHelper(contract) {

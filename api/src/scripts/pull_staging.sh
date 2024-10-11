@@ -48,7 +48,7 @@ then
     exit 1
 fi
 
-echo -n '\nIs this all good (y/n)? '
+printf '\nIs this all good (y/n)? '
 read answer
 if [ "$answer" = "${answer#[Yy]}" ] ;then 
     echo "Aborting..."

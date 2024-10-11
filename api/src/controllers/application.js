@@ -253,7 +253,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
     }
 
     // Transform ids to ObjectId
-    value.ids = value.ids.map((id) => ObjectId(id));
+    value.ids = value.ids.map((id) => new ObjectId(id));
 
     const pipeline = [
       { $match: { _id: { $in: value.ids } } },

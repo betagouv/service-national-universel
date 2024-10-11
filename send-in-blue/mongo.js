@@ -5,11 +5,6 @@ const { MONGO_URL } = require("./config");
 
 if (MONGO_URL) {
   mongoose.connect(MONGO_URL, {
-    useCreateIndex: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false, // * https://stackoverflow.com/a/52572958
-    poolSize: 500,
     maxPoolSize: 500,
     minPoolSize: 50,
     waitQueueTimeoutMS: 30_000,

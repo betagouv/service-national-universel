@@ -2,7 +2,7 @@ import { ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS } from "./constants/constants";
-import { SessionPhase1Type } from "./mongoSchema";
+import { PointDeRassemblementType, SessionPhase1Type } from "./mongoSchema";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -557,7 +557,7 @@ function canViewMeetingPoints(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER].includes(actor.role);
 }
 
-function canUpdateMeetingPoint(actor, meetingPoint = null) {
+function canUpdateMeetingPoint(actor, meetingPoint: PointDeRassemblementType | null = null) {
   if (isAdmin(actor)) return true;
   if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     if (!meetingPoint) return true;

@@ -78,6 +78,8 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE] = async (user
             queryFromFilter(user.role, user.region, user.department, [
               { terms: { "cohort.keyword": [cohort] } },
               { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
+              { exists: { field: "matricule" } },
+              { bool: { must_not: { exists: { field: "deleted" } } } },
             ]),
             "department.keyword",
           ),
