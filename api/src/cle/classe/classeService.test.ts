@@ -31,8 +31,6 @@ import {
 import * as youngService from "../../young/youngService";
 import ClasseStateManager from "./stateManager";
 import * as classService from "./classeService";
-import exp from "constants";
-import { status } from "../../../../admin/build/src/utils/index";
 
 const generateConvocationsByClasseIdSpy = jest.spyOn(classService, "generateConvocationsByClasseId");
 const generateConsentementByClasseIdSpy = jest.spyOn(classService, "generateConsentementByClasseId");
