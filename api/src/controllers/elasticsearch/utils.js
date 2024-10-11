@@ -109,20 +109,14 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
     if (keyWithoutKeyword === "seatsTaken") {
       const seatsTakenFilter = queryFilters.seatsTaken;
       if (seatsTakenFilter.includes(0)) {
-        // Group 1: Find all classes where seatsTaken = 0 (empty classes)
         hitsRequestBody.query.bool.must.push({ term: { seatsTaken: 0 } });
         countAggsQuery.bool.must.push({ term: { seatsTaken: 0 } });
       } else if (seatsTakenFilter.includes(1)) {
-        // Group 2: Find all classes where seatsTaken < totalSeats (not full classes)
-        hitsRequestBody.query.bool.must.push({ range: { seatsTaken: { lt: "totalSeats" } } });
-        countAggsQuery.bool.must.push({ range: { seatsTaken: { lt: "totalSeats" } } });
-      } else if (seatsTakenFilter.includes(2)) {
-        // Group 3: Find all classes where seatsTaken >= totalSeats (full or overbooked classes)
-        hitsRequestBody.query.bool.must.push({ range: { seatsTaken: { gte: "totalSeats" } } });
-        countAggsQuery.bool.must.push({ range: { seatsTaken: { gte: "totalSeats" } } });
+        hitsRequestBody.query.bool.must.push({ range: { seatsTaken: { gt: 0 } } });
+        countAggsQuery.bool.must.push({ range: { seatsTaken: { gt: 0 } } });
       }
     } else {
-      // Default query behavior for other fields
+      // Comportement par default pour les autres champs
       hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
       countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
     }

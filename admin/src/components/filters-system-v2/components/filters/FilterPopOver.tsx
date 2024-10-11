@@ -6,13 +6,8 @@ import { normalizeString } from "./utils";
 import { RowFilter, IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
 import cx from "classnames";
-import { set } from "mongoose";
 
 // file used to show the popover for the all the possible values of a filter
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
 
 type FilterPopOverProps = {
   filter: RowFilter;
