@@ -5,7 +5,7 @@ import { createReferentHelper, deleteReferentByIdHelper } from "./helpers/refere
 import { getNewReferentFixture } from "./fixtures/referent";
 import { TableDeRepartitionModel } from "../models";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 describe("Table de répartition", () => {
   let referent;

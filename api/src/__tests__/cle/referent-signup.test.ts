@@ -16,7 +16,7 @@ import { createFixtureEtablissement } from "../fixtures/etablissement";
 import { createFixtureClasse } from "../fixtures/classe";
 import { createClasse } from "../helpers/classe";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 const sendTemplateSpy = jest.spyOn(brevo, "sendTemplate");

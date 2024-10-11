@@ -18,21 +18,36 @@ jobs:
           ref: ${{ inputs.branch_name }}
 
       - name: Node 18.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 18.x
 
-      - name: Start MongoDB 4.0
+      - name: Start MongoDB 6.0
         uses: supercharge/mongodb-github-action@v1.10.0
         with:
-          mongodb-version: "4.0"
+          mongodb-version: "6.0"
+
+      - uses: actions/cache@v4
+        id: cache-npm
+        with:
+          path: |
+            node_modules
+            api/node_modules
+            app/node_modules
+            admin/node_modules
+            packages/ds/node_modules
+            packages/lib/node_modules
+          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nodemodules-
 
       - name: Install packages
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Build lib
-        continue-on-error: false
-        run: npm run build -w packages/lib
+        working-directory: packages/lib
+        run: npm run build
 
       - name: Lint code
         working-directory: api

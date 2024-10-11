@@ -3,7 +3,7 @@ import { CohesionCenterModel, SessionPhase1Model } from "../../models";
 async function createCohesionCenter(cohesionCenter) {
   const center = await CohesionCenterModel.create(cohesionCenter);
   // Wait 100 ms to be sure that the center is created in the database
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  // await new Promise((resolve) => setTimeout(resolve, 100));
   return center;
 }
 
