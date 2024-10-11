@@ -185,9 +185,11 @@ export const validateId = (id) => {
 export const desktopBreakpoint = 768;
 
 export function displaySignupToast(user) {
+  const url = window.location.pathname;
   const shouldDisplaySignupToast =
-    (user.status === YOUNG_STATUS.IN_PROGRESS && user.inscriptionStep2023 !== INSCRIPTION_STEPS.COORDONNEES) ||
-    (user.status === YOUNG_STATUS.REINSCRIPTION && user.reInscriptionStep2023 !== REINSCRIPTION_STEPS.ELIGIBILITE);
+    !url.includes("/representants-legaux") &&
+    ((user.status === YOUNG_STATUS.IN_PROGRESS && user.inscriptionStep2023 !== INSCRIPTION_STEPS.EMAIL_WAITING_VALIDATION) ||
+      (user.status === YOUNG_STATUS.REINSCRIPTION && user.reInscriptionStep2023 !== REINSCRIPTION_STEPS.ELIGIBILITE));
 
   if (shouldDisplaySignupToast) {
     toastr.success("Connexion réussie", "Vous pouvez reprendre votre inscription là où vous l'avez laissée.", { timeOut: 3 });
