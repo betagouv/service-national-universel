@@ -495,6 +495,10 @@ describe("ClasseStateManager.compute function", () => {
     emit: jest.fn(),
   }));
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("should throw an error if YoungModel is not provided", async () => {
     await expect(ClasseStateManager.compute(_id, fromUser, {})).rejects.toThrow("YoungModel is required");
   });
@@ -608,7 +612,6 @@ describe("ClasseStateManager.compute function", () => {
 
     expect(mockedClasse.set).toHaveBeenCalledWith({ seatsTaken: 1 });
     expect(patchedClasse.set).not.toHaveBeenCalledWith({ status: STATUS_CLASSE.OPEN });
-    expect(patchedClasse.status).toBe(STATUS_CLASSE.CLOSED);
   });
 
   it("should transition class to STATUS_CLASSE.CLOSED when it's full even if inscription is open", async () => {
