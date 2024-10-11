@@ -104,8 +104,28 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   for (const key of filterFields) {
     const keyWithoutKeyword = key.replace(".keyword", "");
     if (!queryFilters[keyWithoutKeyword]?.length) continue;
-    hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
-    countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
+    //hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
+    //countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
+    if (keyWithoutKeyword === "seatsTaken") {
+      const seatsTakenFilter = queryFilters.seatsTaken;
+      if (seatsTakenFilter.includes(0)) {
+        // Group 1: Find all classes where seatsTaken = 0 (empty classes)
+        hitsRequestBody.query.bool.must.push({ term: { seatsTaken: 0 } });
+        countAggsQuery.bool.must.push({ term: { seatsTaken: 0 } });
+      } else if (seatsTakenFilter.includes(1)) {
+        // Group 2: Find all classes where seatsTaken < totalSeats (not full classes)
+        hitsRequestBody.query.bool.must.push({ range: { seatsTaken: { lt: "totalSeats" } } });
+        countAggsQuery.bool.must.push({ range: { seatsTaken: { lt: "totalSeats" } } });
+      } else if (seatsTakenFilter.includes(2)) {
+        // Group 3: Find all classes where seatsTaken >= totalSeats (full or overbooked classes)
+        hitsRequestBody.query.bool.must.push({ range: { seatsTaken: { gte: "totalSeats" } } });
+        countAggsQuery.bool.must.push({ range: { seatsTaken: { gte: "totalSeats" } } });
+      }
+    } else {
+      // Default query behavior for other fields
+      hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
+      countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
+    }
   }
   // Aggs request body
   const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters, customQueries), size: 0, track_total_hits: true };

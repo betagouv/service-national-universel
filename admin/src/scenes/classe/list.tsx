@@ -104,11 +104,28 @@ export default function List() {
     { title: "Académie", name: "academy", missingLabel: "Non renseigné" },
     { title: "Année scolaire", name: "schoolYear", missingLabel: "Non renseigné", defaultValue: ["2024-2025"] },
     {
-      title: "Classe vide",
+      title: "Effectif",
       name: "seatsTaken",
       missingLabel: "Non renseigné",
-      translate: (item) => (item === 0 ? "Oui" : "Non"),
-      filter: (item) => Number(item.key) === 0,
+      translate: (item) => (item === 0 ? "Vide" : item === 1 ? "En cours" : "Remplis"),
+      //filter: (item) => Number(item.key) === 0,
+      reduce: (data) => {
+        const grouped = data.reduce(
+          (acc, item) => {
+            if (item.key === 0) {
+              acc[0] = { key: 0, doc_count: item.doc_count }; // Ensure key: 0 is the first item
+            } else {
+              acc[1].doc_count += item.doc_count; // Sum doc_count for other keys
+            }
+            return acc;
+          },
+          [
+            { key: 0, doc_count: 0 },
+            { key: 1, doc_count: 0 },
+          ],
+        );
+        return grouped;
+      },
     },
   ].filter(Boolean);
 

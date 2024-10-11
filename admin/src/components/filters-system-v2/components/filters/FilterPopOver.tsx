@@ -6,6 +6,7 @@ import { normalizeString } from "./utils";
 import { RowFilter, IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
 import cx from "classnames";
+import { set } from "mongoose";
 
 // file used to show the popover for the all the possible values of a filter
 
@@ -25,6 +26,17 @@ type FilterPopOverProps = {
 };
 
 export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, intermediateFilter }: FilterPopOverProps) {
+  const [optionFilter, setOptionFilter] = React.useState(data);
+
+  React.useEffect(() => {
+    if (!data) return;
+    let temp = data;
+    if (filter?.reduce) {
+      temp = filter.reduce(temp);
+    }
+    setOptionFilter(temp);
+  }, [data, filter, selectedFilters]);
+
   return (
     <Popover>
       <Popover.Button
@@ -50,7 +62,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
         filter={filter}
         selectedFilters={selectedFilters}
         setSelectedFilters={setSelectedFilters}
-        data={data}
+        data={optionFilter}
         setParamData={setParamData}
         intermediateFilter={intermediateFilter}
       />
@@ -89,6 +101,9 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     }
     if (filter?.sort) {
       filter.sort(temp);
+    }
+    if (filter?.reduce) {
+      temp = filter.reduce(temp);
     }
 
     const naIndex = data.findIndex((item) => item?.key === "N/A");
