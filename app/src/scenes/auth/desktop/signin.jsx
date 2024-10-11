@@ -1,17 +1,15 @@
 import plausibleEvent from "@/services/plausible";
 import queryString from "query-string";
 import React from "react";
-import { useDispatch } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib";
 import { isValidRedirectUrl } from "snu-lib";
 import RightArrow from "../../../assets/icons/RightArrow";
 import Error from "../../../components/error";
-import { setYoung } from "../../../redux/auth/actions";
 import { capture, captureMessage } from "../../../sentry";
 import api from "../../../services/api";
-import { cohortsInit } from "../../../utils/cohorts";
 
 import { Input, InputPassword, Button } from "@snu/ds/dsfr";
 
@@ -24,7 +22,7 @@ export default function Signin() {
   const [error, setError] = React.useState({});
   const [isInscriptionOpen, setInscriptionOpen] = React.useState(false);
   const history = useHistory();
-  const dispatch = useDispatch();
+  const { login } = useAuth();
   const disabled = !email || !password || loading;
 
   const onSubmit = async () => {
@@ -43,8 +41,7 @@ export default function Signin() {
       }
 
       plausibleEvent("Connexion réussie");
-      dispatch(setYoung(young));
-      await cohortsInit();
+      await login(young);
 
       if (!redirect) {
         history.push("/");
