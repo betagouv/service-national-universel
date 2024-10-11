@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -10,14 +10,12 @@ import { ModalContainer } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
-import { fetchClass } from "@/services/classe.service";
-import { validateId } from "@/utils";
-import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
 import { RiArrowLeftLine } from "react-icons/ri";
 import { STATUS_CLASSE } from "snu-lib";
 import { Button } from "@snu/ds/dsfr";
+import useClass from "./useClass";
 
 const Title = () => (
   <div>
@@ -68,18 +66,11 @@ const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
 };
 
 const OnBoarding = () => {
-  const { isLoggedIn, logout } = useAuth();
-  if (isLoggedIn) logout({ redirect: false });
+  const { isLoggedIn, logout, isCLE } = useAuth();
   const { id } = queryString.parse(window.location.search);
-  const {
-    isError,
-    isPending,
-    data: classe,
-  } = useQuery({
-    queryKey: ["class", id],
-    queryFn: () => fetchClass(id),
-    enabled: validateId(id),
-  });
+  const { isError, isPending, data: classe } = useClass(id);
+  if (isLoggedIn && !isCLE) logout({ redirect: false });
+  if (isLoggedIn && isCLE) return <Redirect to="/inscription" />;
   if (isPending) return <Loader />;
   if (isError)
     return <OnboardingError message="Impossible de joindre le service. Essayez de vérifier le lien d'inscription qui vous a été transmis. Sinon, veuillez réessayer plus tard." />;
