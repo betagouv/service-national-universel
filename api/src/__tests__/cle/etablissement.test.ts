@@ -16,9 +16,8 @@ import { dbConnect, dbClose } from "../helpers/db";
 
 import * as apiEducationModule from "../../services/gouv.fr/api-education";
 import { getEtablissementsFromAnnuaire } from "../fixtures/providers/annuaireEtablissement";
-import { Etablissement } from "../../../../admin/src/scenes/etablissement/Create/type";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 describe("PUT /cle/etablissement/:id", () => {

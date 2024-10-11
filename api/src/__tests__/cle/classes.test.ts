@@ -13,7 +13,7 @@ import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import { createReferentHelper } from "../helpers/referent";
 import getNewReferentFixture from "../fixtures/referent";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 jest.spyOn(emailsEmitter, "emit").mockImplementation(() => {});

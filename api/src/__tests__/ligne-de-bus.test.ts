@@ -23,7 +23,7 @@ const mockModelMethodWithError = (model, method) => {
   });
 };
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 describe("LigneDeBus", () => {

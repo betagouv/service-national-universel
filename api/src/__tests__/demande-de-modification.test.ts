@@ -9,7 +9,7 @@ import getPlanDeTransportFixture from "./fixtures/PlanDeTransport/planDeTranspor
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 describe("demande-de-modification", () => {

@@ -8,7 +8,7 @@ import { dbConnect, dbClose } from "./helpers/db";
 import { AlerteMessageModel } from "../models";
 import getNewAlerteMessageFixture from "./fixtures/alerteMessage";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 describe("AlerteMessage Routes", () => {
