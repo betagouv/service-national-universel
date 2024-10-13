@@ -1,6 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import mongoose from "mongoose";
-import { LigneBusType } from "../../../models";
+import { LigneBusType } from "snu-lib";
 
 function getNewLigneBusFixture(object: Partial<LigneBusType> = {}): Partial<LigneBusType> {
   return {

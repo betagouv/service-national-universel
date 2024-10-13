@@ -71,7 +71,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
               </div>
             </div>
           </div>
-          {young.cohort !== "Juillet 2024" && (
+          {!pdrChoiceExpired(young.cohort) && (
             <div>
               <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
                 Modifier
@@ -102,7 +102,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
               </div>
             </div>
           </div>
-          {young.cohort !== "Juillet 2024" && (
+          {!pdrChoiceExpired(young.cohort) && (
             <div>
               <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
                 Modifier

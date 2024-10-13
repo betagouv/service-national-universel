@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { StructureType } from "../../models";
+import { StructureType } from "snu-lib";
 
 function getNewStructureFixture(): Partial<StructureType> {
   return {

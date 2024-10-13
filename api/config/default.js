@@ -68,4 +68,5 @@ module.exports = {
   ENABLE_2FA: false,
   LOG_LEVEL: "info", // error, warn, info, http, debug
   DO_MIGRATION: true,
+  ENABLE_MONGOOSE_ELASTIC: false,
 };

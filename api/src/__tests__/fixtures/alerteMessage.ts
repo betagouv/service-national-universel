@@ -1,6 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { ROLES_LIST } from "snu-lib";
-import { AlerteMessageType } from "../../models";
+import { ROLES_LIST, AlerteMessageType } from "snu-lib";
 
 function getNewAlerteMessageFixture(object: Partial<AlerteMessageType> = {}): Partial<AlerteMessageType> {
   return {

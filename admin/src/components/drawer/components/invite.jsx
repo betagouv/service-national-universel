@@ -365,6 +365,7 @@ const ChooseRole = ({ value, onChange, validate }) => {
       {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_REGION ? <option value={ROLES.REFERENT_REGION}>{translate(ROLES.REFERENT_REGION)}</option> : null}
       {user.role === ROLES.ADMIN ? <option value={ROLES.ADMIN}>{translate(ROLES.ADMIN)}</option> : null}
       {user.role === ROLES.ADMIN ? <option value={ROLES.DSNJ}>{translate(ROLES.DSNJ)}</option> : null}
+      {user.role === ROLES.ADMIN ? <option value={ROLES.INJEP}>{translate(ROLES.INJEP)}</option> : null}
       {user.role === ROLES.ADMIN ? <option value={ROLES.TRANSPORTER}>{translate(ROLES.TRANSPORTER)}</option> : null}
       {user.role === ROLES.ADMIN ? <option value={ROLES.ADMINISTRATEUR_CLE}>{translate(ROLES.ADMINISTRATEUR_CLE)}</option> : null}
     </Field>
@@ -398,7 +399,9 @@ const Invitation = styled.div`
     background-clip: padding-box;
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+      border-color 0.15s ease-in-out,
+      box-shadow 0.15s ease-in-out;
   }
   h3 {
     border: 1px solid ${colors.red};

@@ -16,7 +16,7 @@ import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
 import { SignupButtons } from "@snu/ds/dsfr";
-import { cohortsInit } from "@/utils/cohorts";
+import useAuth from "@/services/useAuth";
 
 export default function StepConfirm() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -28,6 +28,7 @@ export default function StepConfirm() {
   const [data, removePersistedData] = React.useContext(context);
   const selectedCohort = data?.sessions.find((s) => s?.name === data?.cohort);
   const dispatch = useDispatch();
+  const { login } = useAuth();
 
   const history = useHistory();
 
@@ -113,8 +114,7 @@ export default function StepConfirm() {
       } else {
         if (user) {
           plausibleEvent("Phase0/CTA preinscription - inscription");
-          await cohortsInit();
-          dispatch(setYoung(user));
+          await login(user);
           removePersistedData();
 
           history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");

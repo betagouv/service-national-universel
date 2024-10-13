@@ -17,12 +17,12 @@ export function injectRoutes(app) {
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters"));
   app.use("/gouv.fr", require("./controllers/gouv.fr"));
-  app.use("/inscription-goal", require("./controllers/inscription-goal"));
+  app.use("/inscription-goal", require("./controllers/inscription-goal").default);
   app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
   app.use("/mission", require("./controllers/mission"));
   app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
-  app.use("/point-de-rassemblement", require("./controllers/planDeTransport/point-de-rassemblement"));
+  app.use("/point-de-rassemblement", require("./planDeTransport/pointDeRassemblement").default);
   app.use("/program", require("./controllers/program"));
   app.use("/referent", require("./referent/referentController").default);
   app.use("/representants-legaux", require("./controllers/representants-legaux"));
