@@ -355,13 +355,11 @@ function FooterPending({
 function FooterSent({
   young,
   requests,
-  reminding,
   onRemindRequests,
   footerClass,
 }: {
   young: YoungDto;
   requests: NonNullable<YoungDto["correctionRequests"]>;
-  reminding: boolean;
   onRemindRequests: (type?: ConfirmModalContentData["type"], message?: { reason: string; message: string } | null) => void;
   footerClass: string;
 }) {
