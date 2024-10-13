@@ -495,6 +495,10 @@ describe("ClasseStateManager.compute function", () => {
     emit: jest.fn(),
   }));
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("should throw an error if YoungModel is not provided", async () => {
     await expect(ClasseStateManager.compute(_id, fromUser, {})).rejects.toThrow("YoungModel is required");
   });
@@ -541,7 +545,7 @@ describe("ClasseStateManager.compute function", () => {
     expect(mockedClasse.save).toHaveBeenCalledWith({ fromUser });
   });
 
-  it("should transition class to STATUS_CLASSE.OPEN when inscription open", async () => {
+  it("should transition class to STATUS_CLASSE.OPEN when inscription open AND it not full", async () => {
     const patchedClasse = {
       ...mockedClasse,
       status: STATUS_CLASSE.ASSIGNED,
@@ -568,6 +572,86 @@ describe("ClasseStateManager.compute function", () => {
     expect(patchedClasse.set).toHaveBeenCalledWith({ seatsTaken: 0 });
     expect(patchedClasse.set).toHaveBeenCalledWith({ status: STATUS_CLASSE.OPEN });
     expect(patchedClasse.save).toHaveBeenCalledWith({ fromUser });
+  });
+
+  it("should NOT transition class to STATUS_CLASSE.OPEN when it's full even if inscription is open", async () => {
+    const patchedClasse = {
+      ...mockedClasse,
+      status: STATUS_CLASSE.CLOSED,
+      totalSeats: 1,
+    };
+
+    const now = new Date();
+    const oneDayBefore = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const oneDayAfter = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    const mockedCohort = {
+      name: "Example Cohort",
+      inscriptionStartDate: oneDayBefore,
+      inscriptionEndDate: oneDayAfter,
+    };
+
+    const patchedYoungs = [
+      {
+        _id: "student1",
+        status: "VALIDATED",
+        save: saveStudentMock,
+        set: jest.fn(function (data) {
+          Object.assign(this, data);
+        }),
+      },
+    ];
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(patchedClasse);
+    jest.spyOn(YoungModel, "find").mockReturnValueOnce({
+      lean: jest.fn().mockResolvedValue(patchedYoungs),
+    } as any);
+    jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
+
+    const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
+
+    expect(mockedClasse.set).toHaveBeenCalledWith({ seatsTaken: 1 });
+    expect(patchedClasse.set).not.toHaveBeenCalledWith({ status: STATUS_CLASSE.OPEN });
+  });
+
+  it("should transition class to STATUS_CLASSE.CLOSED when it's full even if inscription is open", async () => {
+    const patchedClasse = {
+      ...mockedClasse,
+      status: STATUS_CLASSE.OPEN,
+      totalSeats: 1,
+    };
+
+    const now = new Date();
+    const oneDayBefore = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const oneDayAfter = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    const mockedCohort = {
+      name: "Example Cohort",
+      inscriptionStartDate: oneDayBefore,
+      inscriptionEndDate: oneDayAfter,
+    };
+
+    const patchedYoungs = [
+      {
+        _id: "student1",
+        status: "VALIDATED",
+        save: saveStudentMock,
+        set: jest.fn(function (data) {
+          Object.assign(this, data);
+        }),
+      },
+    ];
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(patchedClasse);
+    jest.spyOn(YoungModel, "find").mockReturnValueOnce({
+      lean: jest.fn().mockResolvedValue(patchedYoungs),
+    } as any);
+    jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
+
+    const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
+
+    expect(mockedClasse.set).toHaveBeenCalledWith({ seatsTaken: 1 });
+    expect(mockedClasse.set).toHaveBeenCalledWith({ status: STATUS_CLASSE.CLOSED });
   });
 
   it("should transition class to STATUS_CLASSE.CLOSED when inscription close", async () => {

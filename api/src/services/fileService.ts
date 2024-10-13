@@ -1,8 +1,10 @@
 import { format } from "@fast-csv/format";
-import { parse } from "@fast-csv/parse";
-import { capture } from "../sentry";
+import { parse, ParserOptionsArgs } from "@fast-csv/parse";
+
 import { ERRORS } from "snu-lib";
-const { logger } = require("../logger");
+
+import { capture } from "../sentry";
+import { logger } from "../logger";
 
 export function generateCSVStream(data: any[], headers: null | boolean | string[] = true) {
   const csvStream = format({ headers });
@@ -11,11 +13,11 @@ export function generateCSVStream(data: any[], headers: null | boolean | string[
   return csvStream;
 }
 
-export function readCSVBuffer<T>(buffer: Buffer, hasHeaders: boolean): Promise<T[]> {
+export function readCSVBuffer<T>(buffer: Buffer, options: ParserOptionsArgs = { headers: true }): Promise<T[]> {
   return new Promise((resolve, reject) => {
     const content: T[] = [];
 
-    const stream = parse({ headers: hasHeaders })
+    const stream = parse(options)
       .on("error", (error) => {
         capture(error);
         reject(new Error(ERRORS.CANNOT_PARSE_CSV));

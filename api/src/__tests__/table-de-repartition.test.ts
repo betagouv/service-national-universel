@@ -5,7 +5,7 @@ import { createReferentHelper, deleteReferentByIdHelper } from "./helpers/refere
 import { getNewReferentFixture } from "./fixtures/referent";
 import { TableDeRepartitionModel } from "../models";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 describe("Table de répartition", () => {
   let referent;
@@ -113,7 +113,7 @@ describe("Table de répartition", () => {
 
       // Clean up by deleting the created referent and tableDeRepartition
       await deleteReferentByIdHelper(referent._id);
-      await tableDeRepartition.delete();
+      await tableDeRepartition.deleteOne();
     });
     it("should return 400 when request body is invalid", async () => {
       const res = await request(getAppHelper()).post("/table-de-repartition/department").send({
@@ -372,7 +372,7 @@ describe("Table de répartition", () => {
 
       // Clean up by deleting the created referent and tableDeRepartition
       await deleteReferentByIdHelper(referent._id);
-      await tableDeRepartition.delete();
+      await tableDeRepartition.deleteOne();
     });
 
     it("should return 400 when request body is invalid", async () => {

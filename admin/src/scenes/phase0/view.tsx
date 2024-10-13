@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import cx from "classnames";
 
-import { translate, YOUNG_STATUS, ROLES, SENDINBLUE_TEMPLATES, YOUNG_SOURCE, isCle, YoungDto, CohortDto } from "snu-lib";
+import { translate, YOUNG_STATUS, ROLES, SENDINBLUE_TEMPLATES, YOUNG_SOURCE, isCle, CohortDto, YoungDto, getDepartmentForEligibility } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -41,15 +41,16 @@ interface VolontairePhase0ViewProps {
   globalMode: "correction" | "readonly";
 }
 
-export default function VolontairePhase0View({ young, onChange, globalMode }: VolontairePhase0ViewProps) {
+export default function VolontairePhase0View({ young, globalMode, onChange }: VolontairePhase0ViewProps) {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
+
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
   const [requests, setRequests] = useState<NonNullable<YoungDto["correctionRequests"]>>([]);
   const [processing, setProcessing] = useState(false);
   const [cohort, setCohort] = useState<CohortDto>();
   const [oldCohort, setOldCohort] = useState(true);
-  const [footerMode, setFooterMode] = useState("NO_REQUEST");
+  const [footerMode, setFooterMode] = useState<"PENDING" | "WAITING" | "NO_REQUEST">("NO_REQUEST");
   const [footerClass, setFooterClass] = useState("");
 
   useEffect(() => {
@@ -96,7 +97,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }: Vo
     setCurrentCorrectionRequestField(fieldName);
   }
 
-  async function onCorrectionRequestChange(fieldName, message, reason) {
+  async function onCorrectionRequestChange(fieldName: string, message?: string, reason?: string) {
     if (message === null && reason == null) {
       const requestIndex = requests.findIndex((req) => req.field === fieldName);
       if (requestIndex >= 0) {
@@ -298,7 +299,21 @@ export default function VolontairePhase0View({ young, onChange, globalMode }: Vo
   );
 }
 
-function FooterPending({ young, requests, sending, onDeletePending, onSendPending, footerClass }) {
+function FooterPending({
+  young,
+  requests,
+  sending,
+  onDeletePending,
+  onSendPending,
+  footerClass,
+}: {
+  young: YoungDto;
+  requests: NonNullable<YoungDto["correctionRequests"]>;
+  sending: boolean;
+  onDeletePending: () => void;
+  onSendPending: () => void;
+  footerClass: string;
+}) {
   const sentRequestsCount = requests.filter((r) => r.status === "SENT" || r.status === "REMINDED")?.length || 0;
   const pendingRequestsCount = requests.filter((r) => r.status === "PENDING")?.length || 0;
 
@@ -337,7 +352,19 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
   );
 }
 
-function FooterSent({ young, requests, onRemindRequests, footerClass }) {
+function FooterSent({
+  young,
+  requests,
+  reminding,
+  onRemindRequests,
+  footerClass,
+}: {
+  young: YoungDto;
+  requests: NonNullable<YoungDto["correctionRequests"]>;
+  reminding: boolean;
+  onRemindRequests: (type?: ConfirmModalContentData["type"], message?: { reason: string; message: string } | null) => void;
+  footerClass: string;
+}) {
   const [sentRequestsCount, setSentRequestsCount] = useState(0);
 
   useEffect(() => {
@@ -348,12 +375,12 @@ function FooterSent({ young, requests, onRemindRequests, footerClass }) {
   let remindedDate: Date | null = null;
   for (const req of requests) {
     if (req.status === "SENT") {
-      if (sentDate === null || req.sentAt.valueOf() > sentDate.valueOf()) {
-        sentDate = req.sentAt;
+      if (sentDate === null || (req.sentAt && req.sentAt.valueOf() > sentDate.valueOf())) {
+        sentDate = req.sentAt || null;
       }
     } else if (req.status === "REMINDED") {
-      if (remindedDate === null || req.remindedAt.valueOf() > remindedDate.valueOf()) {
-        remindedDate = req.remindedAt;
+      if (remindedDate === null || (req.remindedAt && req.remindedAt.valueOf() > remindedDate.valueOf())) {
+        remindedDate = req.remindedAt || null;
       }
     }
   }
@@ -380,7 +407,17 @@ function FooterSent({ young, requests, onRemindRequests, footerClass }) {
   );
 }
 
-function FooterNoRequest({ processing, onProcess, young, footerClass }) {
+function FooterNoRequest({
+  processing,
+  onProcess,
+  young,
+  footerClass,
+}: {
+  processing: boolean;
+  onProcess: (type?: ConfirmModalContentData["type"], message?: { reason: string; message: string } | null) => void;
+  young: YoungDto;
+  footerClass: string;
+}) {
   const history = useHistory();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalContentData | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -394,7 +431,9 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
         return setConfirmModal(ConfirmModalContent({ source: young.source, isDatePassed, young }));
       } else {
         // on vérifie la completion des objectifs pour le département
-        const { ok, code, data: fillingRate } = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
+        // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+        const departement = getDepartmentForEligibility(young);
+        const { ok, code, data: fillingRate } = await api.get(`/inscription-goal/${young.cohort}/department/${departement}`);
         if (!ok) throw new Error(code);
         const isGoalReached = fillingRate >= 1;
         // on vérifie qu'il n'y pas de jeunes en LC

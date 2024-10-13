@@ -12,12 +12,6 @@ export interface EtablissementExport extends EtablissementType {
     phone: string;
     email: string;
   }[];
-  coordinateurs: {
-    firstName: string;
-    lastName: string;
-    phone: string;
-    email: string;
-  }[];
 }
 
 export function exportExcelSheet(etablissements: EtablissementExport[]) {
@@ -40,12 +34,12 @@ export function exportExcelSheet(etablissements: EtablissementExport[]) {
     phone: e.referentEtablissement.length ? e.referentEtablissement[0].phone : "",
     email: e.referentEtablissement.length ? e.referentEtablissement[0].email : "",
     // coordinateurs
-    coordinateur1FullName: e.coordinateurs.length ? `${e.coordinateurs[0]?.firstName} ${e.coordinateurs[0]?.lastName}` : "",
-    coordinateur1Phone: e.coordinateurs.length ? e.coordinateurs[0]?.phone : "",
-    coordinateur1Email: e.coordinateurs.length ? e.coordinateurs[0]?.email : "",
-    coordinateur2FullName: e.coordinateurs.length > 1 ? `${e.coordinateurs[1]?.firstName} ${e.coordinateurs[1]?.lastName}` : "",
-    coordinateur2Phone: e.coordinateurs.length ? e.coordinateurs[1]?.phone : "",
-    coordinateur2Email: e.coordinateurs.length ? e.coordinateurs[1]?.email : "",
+    coordinateur1FullName: e.coordinateurs ? `${e.coordinateurs[0]?.firstName} ${e.coordinateurs[0]?.lastName}` : "",
+    coordinateur1Phone: e.coordinateurs ? e.coordinateurs[0]?.phone : "",
+    coordinateur1Email: e.coordinateurs ? e.coordinateurs[0]?.email : "",
+    coordinateur2FullName: e.coordinateurs && e.coordinateurs.length > 1 ? `${e.coordinateurs[1]?.firstName} ${e.coordinateurs[1]?.lastName}` : "",
+    coordinateur2Phone: e.coordinateurs && e.coordinateurs.length > 1 ? e.coordinateurs[1]?.phone : "",
+    coordinateur2Email: e.coordinateurs && e.coordinateurs.length > 1 ? e.coordinateurs[1]?.email : "",
     updatedAt: dayjs(e.updatedAt).format("DD/MM/YYYY HH:mm"),
     createdAt: dayjs(e.createdAt).format("DD/MM/YYYY HH:mm"),
   }));

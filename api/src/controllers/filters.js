@@ -72,7 +72,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     if (filter.userId.toString() !== req.user._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    await filter.remove();
+    await filter.deleteOne();
 
     return res.status(200).send({ ok: true });
   } catch (error) {

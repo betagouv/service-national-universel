@@ -1,30 +1,16 @@
+import config from "config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import mongooseElastic from "@selego/mongoose-elastic";
 import esClient from "../es";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "./types";
+import { InterfaceExtended, SchoolRAMSESchema } from "snu-lib";
+
+import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
 const MODELNAME = "schoolramses";
 
-const schema = new Schema(
-  {
-    uai: { type: String },
-    fullName: { type: String },
-    postcode: { type: String },
-    type: { type: String },
-    departmentName: { type: String },
-    region: { type: String },
-    city: { type: String },
-    country: { type: String },
-    adresse: { type: String },
-    department: { type: String },
-    codeCity: { type: String },
-    codePays: { type: String },
-    raw_data: mongoose.Schema.Types.Mixed,
-  },
-  { timestamps: true },
-);
+const schema = new Schema(SchoolRAMSESchema, { timestamps: true });
 
 schema.virtual("fromUser").set<SchemaExtended>(function (fromUser: UserSaved) {
   if (fromUser) {
@@ -49,10 +35,11 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["raw_data"] }), MODELNAME);
+}
 
-schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["raw_data"] }), MODELNAME);
-
-export type SchoolRAMSESType = InterfaceExtended<InferSchemaType<typeof schema>>;
+type SchoolRAMSESType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type SchoolRAMSESDocument<T = {}> = DocumentExtended<SchoolRAMSESType & T>;
 type SchemaExtended = SchoolRAMSESDocument & UserExtension;
 

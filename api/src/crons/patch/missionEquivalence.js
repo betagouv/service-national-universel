@@ -44,7 +44,7 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualMissionEquivalence, event, value) {
-  const missionEquivalenceInfos = await actualMissionEquivalence.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const missionEquivalenceInfos = await actualMissionEquivalence.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let missionEquivalence = rebuildMissionEquivalence(missionEquivalenceInfos);
   const structure = await StructureModel.findOne({ name: actualMissionEquivalence.structureName });
 

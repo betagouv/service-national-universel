@@ -3,8 +3,8 @@ import { Switch } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 
-import { YoungDto } from "snu-lib";
-
+import { YoungDto, ROLES } from "snu-lib";
+import { AuthState } from "@/redux/auth/reducer";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import { SentryRoute } from "@/sentry";
 import api from "@/services/api";
@@ -26,6 +26,7 @@ import CustomMission from "./customMission";
 
 export default function Index({ ...props }) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
 
   const { data: young, refetch } = useQuery<YoungDto>({
     queryKey: ["young", props.match.params.id],
@@ -41,9 +42,10 @@ export default function Index({ ...props }) {
       ? "correction"
       : "readonly";
     const cohort = cohorts.find(({ _id, name }) => _id === young?.cohortId || name === young?.cohort);
-    if (new Date() > new Date(cohort?.instructionEndDate || "")) {
+    if (user.role !== ROLES.ADMIN && new Date() > new Date(cohort?.instructionEndDate || "")) {
       mode = "readonly";
     }
+
     return <VolontairePhase0View young={young} onChange={refetch} globalMode={mode} />;
   };
 

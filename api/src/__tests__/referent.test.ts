@@ -1,7 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType } from "snu-lib";
 
 import { CohortModel, YoungModel } from "../models";
 import { getInscriptionGoalStats } from "../services/inscription-goal";
@@ -26,6 +26,7 @@ import { createFixtureClasse } from "./fixtures/classe";
 import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
+import { ObjectId } from "bson";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -39,7 +40,7 @@ jest.mock("../cryptoUtils", () => ({
   encrypt: () => Buffer.from("test"),
 }));
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 describe("Referent", () => {
@@ -78,7 +79,11 @@ describe("Referent", () => {
   });
 
   describe("PUT /referent/young/:id", () => {
-    async function createYoungThenUpdate(updateYoungFields, newYoungFields?, { keepYoung, queryParam }: { keepYoung?: boolean; queryParam?: string } = {}) {
+    async function createYoungThenUpdate(
+      updateYoungFields: Partial<YoungType>,
+      newYoungFields?: Partial<YoungType>,
+      { keepYoung, queryParam }: { keepYoung?: boolean; queryParam?: string } = {},
+    ) {
       const youngFixture = getNewYoungFixture();
       const originalYoung = await createYoungHelper({ ...youngFixture, ...newYoungFields });
       const modifiedYoung = { ...youngFixture, ...newYoungFields, ...updateYoungFields };
@@ -91,8 +96,34 @@ describe("Referent", () => {
       }
       return { young, modifiedYoung, response, id: originalYoung._id };
     }
+    it("should not update young if goal not defined", async () => {
+      const testName = "Juillet 2023";
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: testName }));
+      // ajout d'un objectif non définie
+      const res = await request(getAppHelper())
+        .post(`/inscription-goal/${testName}`)
+        .send([{ department: testName, region: testName, max: null }]);
+      expect(res.statusCode).toEqual(200);
+      // ajout d'un jeune au departement
+      const passport = require("passport");
+      passport.user.role = ROLES.ADMIN;
+      const { response, id: youngId } = await createYoungThenUpdate(
+        {
+          status: YOUNG_STATUS.VALIDATED,
+        },
+        { region: testName, department: testName, cohort: cohort.name, cohortId: cohort.id },
+        { keepYoung: true },
+      );
+      expect(response.statusCode).not.toEqual(200);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
+      await deleteYoungByIdHelper(youngId);
+    });
     it("should not update young if goal reached", async () => {
       const testName = "Juillet 2023";
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: testName, instructionEndDate: tomorrow }));
       const { count } = await getInscriptionGoalStats(testName, testName);
       // ajout d'un objectif à 1
       const res = await request(getAppHelper())
@@ -106,7 +137,7 @@ describe("Referent", () => {
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: testName, department: testName, cohort: testName },
+        { region: testName, department: testName, schoolDepartment: testName, cohort: testName, cohortId: cohort._id },
         { keepYoung: true },
       );
       expect(responseSuccessed.statusCode).toEqual(200);
@@ -116,7 +147,7 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName },
+          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
@@ -128,18 +159,29 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName },
+          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
       expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
+      // ajout d'un jeune HZR sur un autre departement sans dépassement
+      response = (
+        await createYoungThenUpdate(
+          {
+            status: YOUNG_STATUS.VALIDATED,
+          },
+          { region: testName, department: testName, cohortId: cohort._id },
+        )
+      ).response;
+      expect(response.statusCode).not.toEqual(200);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
       // admin: force l'ajout d'un jeune au departement meme si depassement
       response = (
         await createYoungThenUpdate(
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName },
+          { region: testName, department: testName, cohort: cohort.name, cohortId: cohort._id },
           { queryParam: "?forceGoal=1" },
         )
       ).response;
@@ -151,11 +193,14 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should update young name", async () => {
-      const { young, modifiedYoung, response } = await createYoungThenUpdate({ name: faker.company.name() });
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      // @ts-ignore: FIXME: young.name does not exist
+      const { young, modifiedYoung, response } = await createYoungThenUpdate({ name: faker.company.name() }, { cohortId: cohort._id });
       expect(response.statusCode).toEqual(200);
       expectYoungToEqual(young, modifiedYoung);
     });
     it("should cascade young statuses when sending status WITHDRAWN", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
       const { young, response } = await createYoungThenUpdate(
         {
           status: "WITHDRAWN",
@@ -164,6 +209,7 @@ describe("Referent", () => {
           statusPhase1: "AFFECTED",
           statusPhase2: "WAITING_REALISATION",
           statusPhase3: "WAITING_REALISATION",
+          cohortId: cohort._id,
         },
       );
       expect(response.statusCode).toEqual(200);
@@ -173,6 +219,7 @@ describe("Referent", () => {
       expect(young?.statusPhase3).toEqual("WAITING_REALISATION");
     });
     it("should not cascade status to WITHDRAWN if validated", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
       const { young, response } = await createYoungThenUpdate(
         {
           status: "WITHDRAWN",
@@ -181,6 +228,7 @@ describe("Referent", () => {
           statusPhase1: "DONE",
           statusPhase2: "WAITING_REALISATION",
           statusPhase3: "VALIDATED",
+          cohortId: cohort._id,
         },
       );
       expect(response.statusCode).toEqual(200);
@@ -190,19 +238,25 @@ describe("Referent", () => {
       expect(young?.statusPhase3).toEqual("VALIDATED");
     });
     it("should update young statuses when sending cohection stay presence true", async () => {
-      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, { cohesionStayPresence: undefined });
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, { cohesionStayPresence: undefined, cohortId: cohort._id });
       expect(response.statusCode).toEqual(200);
       expect(young?.statusPhase1).toEqual("DONE");
       expect(young?.cohesionStayPresence).toEqual("true");
     });
     it("should update young statuses when sending cohection stay presence false", async () => {
-      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "false" });
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "false" }, { cohortId: cohort._id });
       expect(response.statusCode).toEqual(200);
       expect(young?.statusPhase1).toEqual("NOT_DONE");
       expect(young?.cohesionStayPresence).toEqual("false");
     });
     it("should remove places when sending to cohesion center", async () => {
       const sessionPhase1: any = await createSessionPhase1(getNewSessionPhase1Fixture());
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: tomorrow }));
       const placesLeft = sessionPhase1.placesLeft;
       const { young, response } = await createYoungThenUpdate(
         {},
@@ -210,6 +264,7 @@ describe("Referent", () => {
           sessionPhase1Id: sessionPhase1._id,
           status: "VALIDATED",
           statusPhase1: "AFFECTED",
+          cohortId: cohort._id,
         },
       );
       expect(response.statusCode).toEqual(200);
@@ -238,6 +293,7 @@ describe("Referent", () => {
         .send({ youngIds: [], status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(400);
     });
+
     it("should return 404 if young not found", async () => {
       const youngIds = [notExistingYoungId];
       const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
@@ -245,25 +301,29 @@ describe("Referent", () => {
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 403 if user cannot validate youngs", async () => {
-      const userId = "123";
-      const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
-      const classe: any = await createClasse(
-        createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id, status: STATUS_CLASSE.OPEN }),
-      );
-      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
-      const youngIds = [young._id.toString()];
+    it("should return 403 if user cannot validate youngs", async () => {
+      const youngIds = [new ObjectId().toString()];
       const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
     });
-    it("should return 403 if classe is not open", async () => {
+    it("should return 403 if payload is VALIDATED and if classe is not found", async () => {
+      const youngIds = [new ObjectId().toString()];
+      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
+      expect(res.statusCode).toEqual(404);
+    });
+
+    it("should return 403 if payload is VALIDATED if classe is closed", async () => {
       const userId = "123";
       const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const now = new Date();
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: yesterday }));
       const classe: any = await createClasse(
         createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id, status: STATUS_CLASSE.CLOSED }),
       );
@@ -274,13 +334,54 @@ describe("Referent", () => {
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
+      expect(res.body.message).toEqual(`Classe ${classe._id} is closed`);
     });
-    it("should return 200 if youngs updated", async () => {
+
+    it("should return 403 if payload is VALIDATED if classe is full", async () => {
       const userId = "123";
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
       const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: tomorrow }));
       const classe: any = await createClasse(
-        createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id, status: STATUS_CLASSE.OPEN }),
+        createFixtureClasse({
+          etablissementId: etablissement._id,
+          referentClasseIds: [userId],
+          cohort: cohort.name,
+          cohortId: cohort._id,
+          status: STATUS_CLASSE.OPEN,
+          totalSeats: 1,
+          seatsTaken: 1,
+        }),
+      );
+      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
+
+      const youngIds = [young._id.toString()];
+      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
+      expect(res.statusCode).toEqual(403);
+      expect(res.body.message).toEqual(`No seats left in classe ${classe._id}`);
+    });
+
+    it("should return 200 if payload is VALIDATED and if youngs updated", async () => {
+      const userId = "123";
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      const etablissement = await createEtablissement(createFixtureEtablissement());
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: tomorrow }));
+      const classe: any = await createClasse(
+        createFixtureClasse({
+          etablissementId: etablissement._id,
+          referentClasseIds: [userId],
+          cohort: cohort.name,
+          cohortId: cohort._id,
+          status: STATUS_CLASSE.OPEN,
+          seatsTaken: 0,
+          totalSeats: 1,
+        }),
       );
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
@@ -293,6 +394,38 @@ describe("Referent", () => {
         expect(youngIds.includes(updatedYoungId)).toBe(true);
         const updatedYoung = await YoungModel.findById(updatedYoungId);
         expect(updatedYoung?.status).toEqual(YOUNG_STATUS.VALIDATED);
+      }
+    });
+
+    it("should return 200 if payload is REFUSED and if youngs updated event if classe is full or closed", async () => {
+      const userId = "123";
+      const now = new Date();
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      const etablissement = await createEtablissement(createFixtureEtablissement());
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: yesterday }));
+      const classe: any = await createClasse(
+        createFixtureClasse({
+          etablissementId: etablissement._id,
+          referentClasseIds: [userId],
+          cohort: cohort.name,
+          cohortId: cohort._id,
+          status: STATUS_CLASSE.CLOSED,
+          seatsTaken: 1,
+          totalSeats: 1,
+        }),
+      );
+      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
+
+      const youngIds = [young._id.toString()];
+      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+        .put(`/referent/youngs`)
+        .send({ youngIds, status: YOUNG_STATUS.REFUSED });
+      expect(res.statusCode).toEqual(200);
+      for (const updatedYoungId of res.body.data) {
+        expect(youngIds.includes(updatedYoungId)).toBe(true);
+        const updatedYoung = await YoungModel.findById(updatedYoungId);
+        expect(updatedYoung?.status).toEqual(YOUNG_STATUS.REFUSED);
       }
     });
   });
