@@ -8,7 +8,27 @@ import Field from "../../Field";
 import PhoneField from "../../PhoneField";
 import { MiniTitle } from "../../commons/MiniTitle";
 
-export default function SectionIdentiteContact({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
+interface SectionIdentiteContactProps {
+  young: any;
+  globalMode: string;
+  currentRequest: any;
+  onStartRequest: any;
+  requests: any;
+  onCorrectionRequestChange: any;
+  className?: string;
+  onChange: any;
+}
+
+export default function SectionIdentiteContact({
+  young,
+  globalMode,
+  currentRequest,
+  onStartRequest,
+  requests,
+  onCorrectionRequestChange,
+  className,
+  onChange,
+}: SectionIdentiteContactProps) {
   const genderOptions = [
     { value: "female", label: translate("female") },
     { value: "male", label: translate("male") },

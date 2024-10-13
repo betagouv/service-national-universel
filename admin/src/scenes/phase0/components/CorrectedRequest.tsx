@@ -3,7 +3,15 @@ import dayjs from "@/utils/dayjs.utils";
 import Field from "./Field";
 import { YOUNG_STATUS } from "snu-lib";
 
-export default function CorrectedRequest({ young, correctionRequest, className, reasons }) {
+// interface CorrectedRequestProps
+interface CorrectedRequestProps {
+  young: any;
+  correctionRequest: any;
+  className?: string;
+  reasons?: any[];
+}
+
+export default function CorrectedRequest({ young, correctionRequest, className, reasons }: CorrectedRequestProps) {
   const [correctionView, setCorrectionView] = useState(false);
 
   function toggleCorrectionView() {
@@ -45,8 +53,10 @@ export default function CorrectedRequest({ young, correctionRequest, className, 
             <div className="mb-[16px] text-center text-[11px] font-medium uppercase leading-[16px] text-[#6B7280]">
               envoyée le {dayjs(correctionRequest.sentAt).format("DD/MM/YYYY")}
             </div>
-            {correctionRequest.reason && <Field label="Motif" value={translateReason(correctionRequest.reason)} mode="readonly" className="mb-[16px]" />}
-            {correctionRequest.message && <Field value={paragraphize(correctionRequest.message)} mode="readonly" className="mb-[16px]" />}
+            {correctionRequest.reason && (
+              <Field name="CorrectedRequestReason" label="Motif" value={translateReason(correctionRequest.reason)} mode="readonly" className="mb-[16px]" />
+            )}
+            {correctionRequest.message && <Field name="CorrectedRequestMessage" value={paragraphize(correctionRequest.message)} mode="readonly" className="mb-[16px]" />}
           </div>
         )}
       </div>

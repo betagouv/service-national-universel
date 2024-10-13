@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, MutableRefObject } from "react";
 
-const useMouseOver = () => {
+const useMouseOver = (): [MutableRefObject<HTMLDivElement | null>, boolean] => {
   const [value, setValue] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement | null>(null);
   const handleMouseOver = () => setValue(true);
   const handleMouseOut = () => setValue(false);
   useEffect(() => {
@@ -15,7 +15,9 @@ const useMouseOver = () => {
         node.removeEventListener("mouseout", handleMouseOut);
       };
     }
-  }, [ref.current]);
+    // Always return a cleanup function
+    return () => {};
+  }, []);
   return [ref, value];
 };
 
