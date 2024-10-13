@@ -35,7 +35,13 @@ const REJECTION_REASONS = {
   OTHER: "Autre (préciser)",
 };
 
-export default function VolontairePhase0View({ young, onChange, globalMode }) {
+interface VolontairePhase0ViewProps {
+  young: YoungDto;
+  onChange: (options?: any) => Promise<any>;
+  globalMode: "correction" | "readonly";
+}
+
+export default function VolontairePhase0View({ young, onChange, globalMode }: VolontairePhase0ViewProps) {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
@@ -67,17 +73,14 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   }, []);
 
   useEffect(() => {
-    if (young) {
-      setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
-      const currentCohort = cohorts.find((c) => c.name === young.cohort);
-      setCohort(currentCohort);
-      setOldCohort(!currentCohort);
-    } else {
-      setRequests([]);
-      setCohort(undefined);
-      setOldCohort(true);
-    }
-  }, [young]);
+    if (!young) throw new Error("Young is missing");
+
+    setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
+    const currentCohort = cohorts.find((c) => c.name === young.cohort);
+    if (!currentCohort) throw new Error("Cohort is missing");
+    setCohort(currentCohort);
+    setOldCohort(!currentCohort);
+  }, [young, cohorts]);
 
   useEffect(() => {
     if (requests.some((r) => r.status === "PENDING")) {
@@ -232,6 +235,8 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
     }
   }
 
+  if (!cohort) return null;
+
   return (
     <>
       <YoungHeader young={young} tab="file" onChange={onChange} />
@@ -285,7 +290,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
               footerClass={footerClass}
             />
           )}
-          {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} footerClass={footerClass} />}
+          {footerMode === "WAITING" && <FooterSent young={young} requests={requests} onRemindRequests={remindRequests} footerClass={footerClass} />}
           {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} footerClass={footerClass} />}
         </>
       )}
@@ -332,7 +337,7 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
   );
 }
 
-function FooterSent({ young, requests, reminding, onRemindRequests, footerClass }) {
+function FooterSent({ young, requests, onRemindRequests, footerClass }) {
   const [sentRequestsCount, setSentRequestsCount] = useState(0);
 
   useEffect(() => {

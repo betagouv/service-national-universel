@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE, GRADES } from "snu-lib";
+import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE, GRADES, YoungDto, CohortDto, CorrectionRequest } from "snu-lib";
 
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
@@ -22,20 +22,49 @@ import SectionIdentiteContact from "./SectionIdentiteContact";
 import { MiniTitle } from "../../commons/MiniTitle";
 import { HiOutlineCheckCircle, HiOutlineExclamation } from "react-icons/hi";
 
-export default function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
-  const [sectionMode, setSectionMode] = useState(globalMode);
+// Interface for SectionIdentiteProps
+interface SectionIdentiteProps {
+  young: YoungDto;
+  cohort: CohortDto;
+  onStartRequest: (fieldName: any) => void;
+  currentRequest: string;
+  onCorrectionRequestChange: (fieldName: any, message: any, reason: any) => Promise<void>;
+  requests: CorrectionRequest[];
+  globalMode: "correction" | "readonly";
+  onChange: (options?: any) => Promise<any>;
+  readonly?: boolean;
+}
+
+interface ErrorInterface {
+  email?: string;
+  phone?: string;
+  [key: string]: any;
+}
+
+export default function SectionIdentite({
+  young,
+  cohort,
+  onStartRequest,
+  currentRequest,
+  onCorrectionRequestChange,
+  requests,
+  globalMode,
+  onChange,
+  readonly = false,
+}: SectionIdentiteProps) {
+  const [sectionMode, setSectionMode] = useState<"edition" | "readonly" | "correction">(globalMode);
   const [youngFiltered, setYoungFiltered] = useState(filterDataForYoungSection(young, "identite"));
   const [saving, setSaving] = useState(false);
   const birthDate = getBirthDate();
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<ErrorInterface>({});
 
-  function getBirthDate() {
-    if (youngFiltered && youngFiltered.birthdateAt) {
-      const date = dayjs(youngFiltered.birthdateAt);
-      return { day: date.date(), month: date.format("MMMM"), year: date.year() };
-    } else {
-      return { day: "", month: "", year: "" };
-    }
+  function getBirthDate(): { day: string; month: string; year: string } {
+    const date = youngFiltered?.birthdateAt ? dayjs(youngFiltered.birthdateAt) : null;
+    return {
+      day: date ? date.date().toString() : "",
+      month: date ? date.format("MMMM") : "",
+      year: date ? date.year().toString() : "",
+    };
   }
 
   function onSectionChangeMode(mode) {
@@ -60,11 +89,10 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
     setSaving(true);
     if (validate()) {
       try {
-        // eslint-disable-next-line no-unused-vars
-        const { applications, ...dataToSend } = youngFiltered;
+        const { ...dataToSend } = youngFiltered;
         const result = await api.put(`/young-edition/${young._id}/identite`, dataToSend);
         if (result.ok) {
-          toastr.success("Les données ont bien été enregistrées.");
+          toastr.success("Succès !", "Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
           onChange();
         } else {
@@ -85,7 +113,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
 
   function validate() {
     let result = true;
-    let errors = {};
+    const errors: ErrorInterface = {};
 
     if (!youngFiltered.email || !validator.isEmail(youngFiltered.email)) {
       errors.email = "L'email ne semble pas valide";
@@ -112,20 +140,22 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
     return result;
   }
 
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setYoungFiltered({
-      ...youngFiltered,
-      addressVerified: true,
-      cityCode: suggestion.cityCode,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? suggestion.address : youngFiltered.address,
-      zip: isConfirmed ? suggestion.zip : youngFiltered.zip,
-      city: isConfirmed ? suggestion.city : youngFiltered.city,
-    });
-  };
+  const onVerifyAddress =
+    (isConfirmed = false) =>
+    (suggestion) => {
+      setYoungFiltered({
+        ...youngFiltered,
+        addressVerified: "true",
+        cityCode: suggestion.cityCode,
+        region: suggestion.region,
+        department: suggestion.department,
+        location: suggestion.location,
+        // if the suggestion is not confirmed we keep the address typed by the user
+        address: isConfirmed ? suggestion.address : youngFiltered.address,
+        zip: isConfirmed ? suggestion.zip : youngFiltered.zip,
+        city: isConfirmed ? suggestion.city : youngFiltered.city,
+      });
+    };
 
   const nationalityOptions = [
     { value: "true", label: translate("true") },
@@ -135,7 +165,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
   return (
     <SectionContext.Provider value={{ errors }}>
       <Section
-        step={globalMode === "correction" ? "Première étape" : null}
+        step={globalMode === "correction" ? "Première étape" : undefined}
         title={globalMode === "correction" ? "Vérifier l'identité" : "Informations générales"}
         editable={young.status !== YOUNG_STATUS.DELETED && !readonly}
         mode={sectionMode}
@@ -369,7 +399,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
                 city={youngFiltered.city}
                 onSuccess={onVerifyAddress(true)}
                 onFail={onVerifyAddress()}
-                isVerified={youngFiltered.addressVerified === true}
+                isVerified={youngFiltered.addressVerified === "true"}
                 buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
               />
             )}

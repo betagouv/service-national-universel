@@ -146,7 +146,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
 
         const result = await api.put(`/young-edition/${young._id}/situationparents`, youngFiltered);
         if (result.ok) {
-          toastr.success("Les données ont bien été enregistrées.");
+          toastr.success("Succès !", "Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
           onChange && onChange();
         } else {
