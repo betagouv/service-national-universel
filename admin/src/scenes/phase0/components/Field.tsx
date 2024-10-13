@@ -8,7 +8,6 @@ import { copyToClipboard } from "../../../utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
 
-// Interface for Field
 interface FieldProps {
   group?: any;
   name: string;

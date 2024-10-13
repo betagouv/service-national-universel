@@ -22,7 +22,6 @@ import SectionIdentiteContact from "./SectionIdentiteContact";
 import { MiniTitle } from "../../commons/MiniTitle";
 import { HiOutlineCheckCircle, HiOutlineExclamation } from "react-icons/hi";
 
-// Interface for SectionIdentiteProps
 interface SectionIdentiteProps {
   young: YoungDto;
   cohort: CohortDto;

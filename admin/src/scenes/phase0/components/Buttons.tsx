@@ -103,7 +103,6 @@ export function Button({ children, className = "", onClick = () => {}, spinner =
   }
 }
 
-// interface RoundButtonProps
 interface RoundButtonProps {
   children: ReactNode;
   className?: string;

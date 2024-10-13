@@ -3,7 +3,6 @@ import dayjs from "@/utils/dayjs.utils";
 import Field from "./Field";
 import { YOUNG_STATUS } from "snu-lib";
 
-// interface CorrectedRequestProps
 interface CorrectedRequestProps {
   young: any;
   correctionRequest: any;
