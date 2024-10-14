@@ -17,6 +17,8 @@ export function resetAppAuth() {
   passport.user = getNewReferentFixture();
   // @ts-ignore
   passport.user._id = new ObjectId();
+  passport.authStrategy = undefined;
+  // passport.lastTypeCalledOnAuthenticate = undefined;
 }
 
 function getAppHelper(user?: Partial<UserRequest["user"] & { subRole?: any }> | YoungDocument | ReferentDocument | null, authStrategy?: "young" | "referent") {

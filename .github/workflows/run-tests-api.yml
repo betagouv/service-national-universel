@@ -58,7 +58,6 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           CI: true
-          MONGO_URL: mongodb://localhost:27017/SampleDB
         with:
           workingDirectory: api
           coverageCommand: npm run coverage
