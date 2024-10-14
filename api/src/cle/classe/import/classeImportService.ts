@@ -115,7 +115,7 @@ export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped
   if (!classeCohortToImportMapped.sessionCode) {
     throw new Error(FUNCTIONAL_ERRORS.NO_SESSION_CODE_PROVIDED);
   }
-  const cohesionCenter = await CohesionCenterModel.findOne({ matricule: classeCohortToImportMapped.centerCode, deletedAt: { $exists: false } });
+  const cohesionCenter = await CohesionCenterModel.findOne({ matricule: classeCohortToImportMapped.centerCode });
   if (!cohesionCenter) {
     throw new Error(ERRORS.COHESION_CENTER_NOT_FOUND);
   }
