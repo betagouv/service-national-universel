@@ -104,8 +104,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   for (const key of filterFields) {
     const keyWithoutKeyword = key.replace(".keyword", "");
     if (!queryFilters[keyWithoutKeyword]?.length) continue;
-    //hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
-    //countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
+    // Special case for seatsTaken
     if (keyWithoutKeyword === "seatsTaken") {
       const seatsTakenFilter = queryFilters.seatsTaken;
       if (seatsTakenFilter.includes(0)) {

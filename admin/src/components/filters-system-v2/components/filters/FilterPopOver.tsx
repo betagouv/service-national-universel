@@ -29,6 +29,12 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
     if (filter?.reduce) {
       temp = filter.reduce(temp);
     }
+    if (filter?.filter) {
+      temp = temp.filter(filter.filter);
+    }
+    if (filter?.sort) {
+      filter.sort(temp);
+    }
     setOptionFilter(temp);
   }, [data, filter, selectedFilters]);
 
