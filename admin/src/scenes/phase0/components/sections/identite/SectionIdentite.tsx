@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE } from "snu-lib";
+import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE, GRADES, YoungDto, CohortDto, CorrectionRequest } from "snu-lib";
 
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
@@ -20,21 +20,50 @@ import Section from "../../Section";
 import SectionIdentiteCni from "./SectionIdentiteCni";
 import SectionIdentiteContact from "./SectionIdentiteContact";
 import { MiniTitle } from "../../commons/MiniTitle";
+import { HiOutlineCheckCircle, HiOutlineExclamation } from "react-icons/hi";
 
-export default function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
-  const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState(filterDataForYoungSection(young, "identite"));
+interface SectionIdentiteProps {
+  young: YoungDto;
+  cohort: CohortDto;
+  onStartRequest: (fieldName: any) => void;
+  currentRequest: string;
+  onCorrectionRequestChange: (fieldName: any, message: any, reason: any) => Promise<void>;
+  requests: CorrectionRequest[];
+  globalMode: "correction" | "readonly";
+  onChange: (options?: any) => Promise<any>;
+  readonly?: boolean;
+}
+
+interface ErrorInterface {
+  email?: string;
+  phone?: string;
+  [key: string]: any;
+}
+
+export default function SectionIdentite({
+  young,
+  cohort,
+  onStartRequest,
+  currentRequest,
+  onCorrectionRequestChange,
+  requests,
+  globalMode,
+  onChange,
+  readonly = false,
+}: SectionIdentiteProps) {
+  const [sectionMode, setSectionMode] = useState<"edition" | "readonly" | "correction">(globalMode);
+  const [youngFiltered, setYoungFiltered] = useState(filterDataForYoungSection(young, "identite"));
   const [saving, setSaving] = useState(false);
   const birthDate = getBirthDate();
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<ErrorInterface>({});
 
-  function getBirthDate() {
-    if (data && data.birthdateAt) {
-      const date = dayjs(data.birthdateAt);
-      return { day: date.date(), month: date.format("MMMM"), year: date.year() };
-    } else {
-      return { day: "", month: "", year: "" };
-    }
+  function getBirthDate(): { day: string; month: string; year: string } {
+    const date = youngFiltered?.birthdateAt ? dayjs(youngFiltered.birthdateAt) : null;
+    return {
+      day: date ? date.date().toString() : "",
+      month: date ? date.format("MMMM") : "",
+      year: date ? date.year().toString() : "",
+    };
   }
 
   function onSectionChangeMode(mode) {
@@ -42,16 +71,16 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
   }
 
   function onLocalChange(field, value) {
-    setData({ ...data, [field]: value });
+    setYoungFiltered({ ...youngFiltered, [field]: value });
   }
 
   function onLocalAddressChange(field, value) {
     onLocalChange(field, value);
-    setData((prev) => ({ ...prev, addressVerified: "false" }));
+    setYoungFiltered((prev) => ({ ...prev, addressVerified: "false" }));
   }
 
   function onCancel() {
-    setData({ ...young });
+    setYoungFiltered({ ...young });
     setErrors({});
   }
 
@@ -59,11 +88,10 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
     setSaving(true);
     if (validate()) {
       try {
-        // eslint-disable-next-line no-unused-vars
-        const { applications, ...dataToSend } = data;
+        const { ...dataToSend } = youngFiltered;
         const result = await api.put(`/young-edition/${young._id}/identite`, dataToSend);
         if (result.ok) {
-          toastr.success("Les données ont bien été enregistrées.");
+          toastr.success("Succès !", "Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
           onChange();
         } else {
@@ -84,47 +112,49 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
 
   function validate() {
     let result = true;
-    let errors = {};
+    const errors: ErrorInterface = {};
 
-    if (!data.email || !validator.isEmail(data.email)) {
+    if (!youngFiltered.email || !validator.isEmail(youngFiltered.email)) {
       errors.email = "L'email ne semble pas valide";
       result = false;
     }
 
-    if (!data.phone || !isPhoneNumberWellFormated(data.phone, data.phoneZone || "AUTRE")) {
-      errors.phone = PHONE_ZONES[data.phoneZone || "AUTRE"].errorMessage;
+    if (!youngFiltered.phone || !isPhoneNumberWellFormated(youngFiltered.phone, youngFiltered.phoneZone || "AUTRE")) {
+      errors.phone = PHONE_ZONES[youngFiltered.phoneZone || "AUTRE"].errorMessage;
       result = false;
     }
 
-    result = validateEmpty(data, "lastName", errors) && result;
-    result = validateEmpty(data, "firstName", errors) && result;
-    result = validateEmpty(data, "birthCity", errors) && result;
-    result = validateEmpty(data, "birthCityZip", errors) && result;
-    result = validateEmpty(data, "birthCountry", errors) && result;
+    result = validateEmpty(youngFiltered, "lastName", errors) && result;
+    result = validateEmpty(youngFiltered, "firstName", errors) && result;
+    result = validateEmpty(youngFiltered, "birthCity", errors) && result;
+    result = validateEmpty(youngFiltered, "birthCityZip", errors) && result;
+    result = validateEmpty(youngFiltered, "birthCountry", errors) && result;
 
-    result = validateEmpty(data, "address", errors) && result;
-    result = validateEmpty(data, "zip", errors) && result;
-    result = validateEmpty(data, "city", errors) && result;
-    result = validateEmpty(data, "country", errors) && result;
+    result = validateEmpty(youngFiltered, "address", errors) && result;
+    result = validateEmpty(youngFiltered, "zip", errors) && result;
+    result = validateEmpty(youngFiltered, "city", errors) && result;
+    result = validateEmpty(youngFiltered, "country", errors) && result;
 
     setErrors(errors);
     return result;
   }
 
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setData({
-      ...data,
-      addressVerified: true,
-      cityCode: suggestion.cityCode,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? suggestion.address : data.address,
-      zip: isConfirmed ? suggestion.zip : data.zip,
-      city: isConfirmed ? suggestion.city : data.city,
-    });
-  };
+  const onVerifyAddress =
+    (isConfirmed = false) =>
+    (suggestion) => {
+      setYoungFiltered({
+        ...youngFiltered,
+        addressVerified: "true",
+        cityCode: suggestion.cityCode,
+        region: suggestion.region,
+        department: suggestion.department,
+        location: suggestion.location,
+        // if the suggestion is not confirmed we keep the address typed by the user
+        address: isConfirmed ? suggestion.address : youngFiltered.address,
+        zip: isConfirmed ? suggestion.zip : youngFiltered.zip,
+        city: isConfirmed ? suggestion.city : youngFiltered.city,
+      });
+    };
 
   const nationalityOptions = [
     { value: "true", label: translate("true") },
@@ -134,7 +164,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
   return (
     <SectionContext.Provider value={{ errors }}>
       <Section
-        step={globalMode === "correction" ? "Première étape" : null}
+        step={globalMode === "correction" ? "Première étape" : undefined}
         title={globalMode === "correction" ? "Vérifier l'identité" : "Informations générales"}
         editable={young.status !== YOUNG_STATUS.DELETED && !readonly}
         mode={sectionMode}
@@ -147,7 +177,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
             <>
               {young.source === YOUNG_SOURCE.VOLONTAIRE && (
                 <SectionIdentiteCni
-                  young={data}
+                  young={youngFiltered}
                   cohort={cohort}
                   globalMode={sectionMode}
                   requests={requests}
@@ -159,7 +189,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
                 />
               )}
               <SectionIdentiteContact
-                young={data}
+                young={youngFiltered}
                 globalMode={sectionMode}
                 requests={requests}
                 onStartRequest={onStartRequest}
@@ -171,7 +201,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
           ) : (
             <>
               <SectionIdentiteContact
-                young={data}
+                young={youngFiltered}
                 globalMode={sectionMode}
                 requests={requests}
                 onStartRequest={onStartRequest}
@@ -183,7 +213,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
                 <SectionIdentiteCni
                   cohort={cohort}
                   className="mt-[32px]"
-                  young={data}
+                  young={youngFiltered}
                   globalMode={sectionMode}
                   requests={requests}
                   onStartRequest={onStartRequest}
@@ -209,7 +239,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               correctionRequest={getCorrectionRequest(requests, "birthdateAt")}
               onCorrectionRequestChange={onCorrectionRequestChange}
               type="date"
-              value={data.birthdateAt}
+              value={youngFiltered.birthdateAt}
               onChange={(value) => onLocalChange("birthdateAt", value)}
               young={young}>
               <Field name="birth_day" label="Jour" value={birthDate.day} className="mr-[14px] flex-[1_1_23%]" />
@@ -220,7 +250,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               <Field
                 name="birthCity"
                 label="Ville de naissance"
-                value={data.birthCity}
+                value={youngFiltered.birthCity}
                 mode={sectionMode}
                 className="mr-[8px] flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
@@ -233,7 +263,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               <Field
                 name="birthCityZip"
                 label="Code postal de naissance"
-                value={data.birthCityZip}
+                value={youngFiltered.birthCityZip}
                 mode={sectionMode}
                 className="ml-[8px] flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
@@ -247,7 +277,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
             <Field
               name="birthCountry"
               label="Pays de naissance"
-              value={data.birthCountry}
+              value={youngFiltered.birthCountry}
               mode={sectionMode}
               onStartRequest={onStartRequest}
               currentRequest={currentRequest}
@@ -266,7 +296,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               <Field
                 name="frenchNationality"
                 label="Nationalité Française"
-                value={data.frenchNationality}
+                value={youngFiltered.frenchNationality}
                 mode={sectionMode}
                 className="mb-[16px]"
                 onStartRequest={onStartRequest}
@@ -282,11 +312,11 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
             </div>
           )}
           <div className="mt-[32px]">
-            <MiniTitle>Adresse</MiniTitle>
+            <MiniTitle>Adresse de résidence</MiniTitle>
             <Field
               name="address"
               label="Adresse"
-              value={data.address}
+              value={youngFiltered.address}
               mode={sectionMode}
               className="mb-[16px]"
               onStartRequest={onStartRequest}
@@ -300,7 +330,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               <Field
                 name="zip"
                 label="Code postal"
-                value={data.zip}
+                value={youngFiltered.zip}
                 mode={sectionMode}
                 className="mr-[8px] flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
@@ -313,7 +343,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               <Field
                 name="city"
                 label="Ville"
-                value={data.city}
+                value={youngFiltered.city}
                 mode={sectionMode}
                 className="ml-[8px] flex-[1_1_50%]"
                 onStartRequest={onStartRequest}
@@ -324,10 +354,14 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
                 young={young}
               />
             </div>
+            <div className="mb-[16px] flex items-start justify-between">
+              <Field name="department" label="Département" value={youngFiltered.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
+              <Field name="region" label="Région" value={youngFiltered.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
+            </div>
             <Field
               name="country"
               label="Pays"
-              value={data.country}
+              value={youngFiltered.country}
               mode={sectionMode}
               className="mb-[16px]"
               onStartRequest={onStartRequest}
@@ -340,29 +374,42 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               onChange={(value) => onLocalAddressChange("country", value)}
               young={young}
             />
-            <div className="mb-[16px] flex items-start justify-between">
-              <Field name="department" label="Département" value={data.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
-              <Field name="region" label="Région" value={data.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
-            </div>
-            {sectionMode === "edition" && data.country && data.country.toUpperCase() === "FRANCE" && (
+            {youngFiltered?.etablissementDepartment && youngFiltered.grade !== GRADES.NOT_SCOLARISE ? (
+              youngFiltered?.etablissementDepartment !== youngFiltered?.department ? (
+                <div className="w-full h-full p-2 bg-amber-50 rounded-md flex justify-center items-center gap-2">
+                  <HiOutlineExclamation className="text-amber-500 p-2" size={40} />
+                  <div className="flex-1 text-amber-600 text-xs font-medium leading-4 break-words">
+                    Le département de ce volontaire n’est pas le même que le département de son établissement
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-full p-2 bg-emerald-50 rounded-md flex justify-center items-center gap-2">
+                  <HiOutlineCheckCircle className="text-emerald-500 p-2" size={40} />
+                  <div className="flex-1 text-emerald-600 text-xs font-medium leading-4 break-words">
+                    Le département de résidence de ce volontaire est le même que le département de son établissement
+                  </div>
+                </div>
+              )
+            ) : null}
+            {sectionMode === "edition" && youngFiltered.country && youngFiltered.country.toUpperCase() === "FRANCE" && (
               <VerifyAddress
-                address={data.address}
-                zip={data.zip}
-                city={data.city}
+                address={youngFiltered.address}
+                zip={youngFiltered.zip}
+                city={youngFiltered.city}
                 onSuccess={onVerifyAddress(true)}
                 onFail={onVerifyAddress()}
-                isVerified={data.addressVerified === true}
+                isVerified={youngFiltered.addressVerified === "true"}
                 buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
               />
             )}
           </div>
-          {data.foreignAddress && (
+          {youngFiltered.foreignAddress && (
             <div className="mt-[32px]">
               <MiniTitle>Adresse à l&apos;étranger</MiniTitle>
               <Field
                 name="address"
                 label="Adresse"
-                value={data.foreignAddress}
+                value={youngFiltered.foreignAddress}
                 mode={sectionMode}
                 className="mb-[16px]"
                 onStartRequest={onStartRequest}
@@ -376,7 +423,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
                 <Field
                   name="zip"
                   label="Code postal"
-                  value={data.foreignZip}
+                  value={youngFiltered.foreignZip}
                   mode={sectionMode}
                   className="mr-[8px] flex-[1_1_50%]"
                   onStartRequest={onStartRequest}
@@ -389,7 +436,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
                 <Field
                   name="city"
                   label="Ville"
-                  value={data.foreignCity}
+                  value={youngFiltered.foreignCity}
                   mode={sectionMode}
                   className="ml-[8px] flex-[1_1_50%]"
                   onStartRequest={onStartRequest}
@@ -403,7 +450,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
               <Field
                 name="country"
                 label="Pays"
-                value={data.foreignCountry}
+                value={youngFiltered.foreignCountry}
                 mode={sectionMode}
                 className="mb-[16px]"
                 onStartRequest={onStartRequest}

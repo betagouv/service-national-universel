@@ -7,6 +7,24 @@ import SectionContext from "../context/SectionContext";
 import CorrectedRequest from "./CorrectedRequest";
 import CorrectionRequest from "./CorrectionRequest";
 
+interface PhoneFieldProps {
+  name?: string;
+  label?: string;
+  mode?: string;
+  value?: string;
+  onChange?: any;
+  zoneValue?: string;
+  onChangeZone?: any;
+  placeholder?: string;
+  className?: string;
+  error?: string;
+  onStartRequest?: any;
+  currentRequest?: any;
+  correctionRequest?: any;
+  onCorrectionRequestChange?: any;
+  young?: any;
+}
+
 /**
  * mode  could be "correction|edition|readonly" (default readonly)
  */
@@ -26,7 +44,7 @@ const PhoneField = ({
   correctionRequest,
   onCorrectionRequestChange,
   young,
-}) => {
+}: PhoneFieldProps) => {
   const [fieldRef, isFieldHovered] = useMouseOver();
 
   const [opened, setOpened] = useState(false);
@@ -50,7 +68,7 @@ const PhoneField = ({
   }, [correctionRequest]);
 
   useEffect(() => {
-    setOpened(name && currentRequest === name);
+    setOpened(!!name && currentRequest === name);
   }, [currentRequest]);
 
   useEffect(() => {
@@ -71,7 +89,7 @@ const PhoneField = ({
       {label && <label className="text-[12px] font-normal leading-[16px] text-[#6B7280]">{label}</label>}
       {mode === "edition" && (
         <>
-          <InputPhone className="bg-gray-50" value={value} onChange={onChange} zoneValue={zoneValue} onChangeZone={onChangeZone} placeholder={placeholder} error={error} />
+          <InputPhone className="bg-gray-50" value={value} onChange={onChange} zoneValue={zoneValue} onChangeZone={onChangeZone} placeholder={placeholder} />
           {error && <div className="mt-[8px] text-[#EF4444]">{error}</div>}
         </>
       )}
@@ -87,7 +105,7 @@ const PhoneField = ({
       )}
 
       {correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
-      {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} young={young} />}
+      {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} />}
     </div>
   );
 };
