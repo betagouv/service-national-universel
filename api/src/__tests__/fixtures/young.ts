@@ -21,7 +21,7 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     birthCountry: faker.location.country(),
     birthCity: faker.location.city(),
     birthCityZip: faker.location.zipCode(),
-    email: faker.internet.email().toLowerCase(),
+    email: faker.internet.email({ firstName: faker.lorem.words[0], lastName: faker.lorem.words[1] }).toLowerCase(),
     phone: faker.phone.number(),
     phoneZone: "FRANCE",
     gender: faker.person.gender(),

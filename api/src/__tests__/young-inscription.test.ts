@@ -29,27 +29,28 @@ describe("Young Inscription", () => {
     });
 
     it("Should return 400 when eliligibility scheme is invalid", async () => {
+      const user = await createYoungHelper(getNewYoungFixture());
       const eligibilityObj = {
         birthdateAt: "",
         schooled: "",
         grade: "",
         schoolName: "",
       };
-      let res = await request(getAppHelper()).put("/young/inscription2023/eligibilite");
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/eligibilite");
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).put("/young/inscription2023/eligibilite").send({});
+      res = await request(getAppHelper(user)).put("/young/inscription2023/eligibilite").send({});
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).put("/young/inscription2023/eligibilite").send(eligibilityObj);
+      res = await request(getAppHelper(user)).put("/young/inscription2023/eligibilite").send(eligibilityObj);
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper())
+      res = await request(getAppHelper(user))
         .put("/young/inscription2023/eligibilite")
         .send({ ...eligibilityObj, grade: "grade-test" });
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper())
+      res = await request(getAppHelper(user))
         .put("/young/inscription2023/eligibilite")
         .send({
           ...eligibilityObj,
@@ -142,6 +143,7 @@ describe("Young Inscription", () => {
     });
 
     it("Should return 400 when body sent is invalid when type url param is 'next' or 'correction'", async () => {
+      const user = await createYoungHelper(getNewYoungFixture());
       let typeUrlParam = "next";
 
       const coordonneeObj = {
@@ -152,11 +154,11 @@ describe("Young Inscription", () => {
         phone: "0600010203",
       };
 
-      let res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
+      let res = await request(getAppHelper(user)).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
       expect(res.status).toBe(400);
 
       typeUrlParam = "correction";
-      res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
+      res = await request(getAppHelper(user)).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
       expect(res.status).toBe(400);
     });
 
@@ -479,11 +481,20 @@ describe("Young Inscription", () => {
     });
 
     it("Should return 400 when the body is invalid using 'next' route param", async () => {
+      const cniFile = {
+        name: "CNI_TEST.pdf",
+        uploadedAt: new Date().toISOString(),
+        size: 150244,
+        mimetype: "application/pdf",
+        category: "cniNew",
+        expirationDate: new Date().toISOString(),
+      };
+      const user = await createYoungHelper(getNewYoungFixture({ files: { cniFiles: [cniFile] } }));
       const documentObj = {
         date: "invalid value",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/next").send(documentObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/documents/next").send(documentObj);
       expect(res.status).toBe(400);
     });
 
@@ -633,18 +644,20 @@ describe("Young Inscription", () => {
 
   describe("PUT /young/inscription2023/profil", () => {
     it("Should return 400 if no body is provided", async () => {
-      let res = await request(getAppHelper()).put("/young/inscription2023/profil");
+      const user = await createYoungHelper(getNewYoungFixture());
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/profil");
       expect(res.status).toBe(400);
     });
 
     it("Should return 400 if the body provided is invalid", async () => {
+      const user = await createYoungHelper(getNewYoungFixture());
       const profilObj = {
         firstName: 0,
         lastName: ["invalid", "value"],
         email: "invalid email value",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/profil").send(profilObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/profil").send(profilObj);
       expect(res.status).toBe(400);
     });
 
