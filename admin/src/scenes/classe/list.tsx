@@ -15,6 +15,7 @@ import { ROLES, translateStatusClasse, translate, EtablissementType, ClasseType 
 import { getCohortGroups } from "@/services/cohort.service";
 import ClasseRow from "./list/ClasseRow";
 import { exportExcelSheet, ClasseExport } from "./utils";
+import { is } from "date-fns/locale";
 
 interface ClasseProps extends ClasseType {
   referentClasse: { firstName: string; lastName: string }[];
@@ -107,6 +108,7 @@ export default function List() {
       title: "Classe Vide",
       name: "seatsTaken",
       missingLabel: "Non renseigné",
+      isSingle: true,
       translate: (item) => (item === 0 ? "Oui" : "Non"),
       reduce: (data) => {
         const grouped = data.reduce(
@@ -185,8 +187,8 @@ export default function List() {
                 sortOptions={[
                   { label: "Nom (A > Z)", field: "name.keyword", order: "asc" },
                   { label: "Nom (Z > A)", field: "name.keyword", order: "desc" },
-                  { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
-                  { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
+                  { label: "Nombre d'élève décroissant", field: "seatsTaken", order: "desc" },
+                  { label: "Nombre d'élève croissant", field: "seatsTaken", order: "asc" },
                 ]}
                 selectedFilters={selectedFilters}
                 pagination={paramData}

@@ -115,7 +115,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
         countAggsQuery.bool.must.push({ range: { seatsTaken: { gt: 0 } } });
       }
     } else {
-      // Comportement par default pour les autres champs
+      // Comportement par default pour les autres filtres
       hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
       countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
     }

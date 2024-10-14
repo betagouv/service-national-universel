@@ -13,6 +13,7 @@ export type RowFilter = {
   filter: (data?: DataFilter) => DataFilter;
   filterRootFilter: (data?: DataFilter[]) => DataFilter[];
   reduce?: (data: DataFilter[]) => DataFilter[];
+  isSingle?: boolean;
 };
 
 export type DataFilter = {
