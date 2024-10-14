@@ -20,7 +20,7 @@ jest.mock("../brevo", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 describe("Application", () => {
