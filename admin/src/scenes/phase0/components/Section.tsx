@@ -5,7 +5,21 @@ import ChevronDown from "@/assets/icons/ChevronDown";
 
 import { RoundButton } from "./Buttons";
 
-export default function Section({ step, title, editable, collapsable, children, mode, onChangeMode, onSave, onCancel, saving = false, containerNoFlex = false }) {
+interface SectionProps {
+  step?: string;
+  title: string;
+  editable?: boolean;
+  collapsable?: boolean;
+  children: any;
+  mode?: string;
+  onChangeMode?: any;
+  onSave?: any;
+  onCancel?: any;
+  saving?: boolean;
+  containerNoFlex?: boolean;
+}
+
+export default function Section({ step, title, editable, collapsable, children, mode, onChangeMode, onSave, onCancel, saving = false, containerNoFlex = false }: SectionProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   function startEdit() {
