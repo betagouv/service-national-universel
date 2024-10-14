@@ -823,7 +823,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       youngStatus = YOUNG_STATUS.VALIDATED;
     }
 
-    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] as string);
+    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;

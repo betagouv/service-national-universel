@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Request, Response, NextFunction } from "express";
 import { logger } from "../logger";
-export const authMiddleware = (strategy: string) => (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = (strategy: string | string[]) => (req: Request, res: Response, next: NextFunction) => {
   if (isPublicRoute(req.path)) {
     //@ts-expect-error ipInfo does not exist
     logger.info(`Acessing public route: ${req.originalUrl} - ip: ${req.ipInfo}`);
