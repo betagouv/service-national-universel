@@ -31,6 +31,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
+    hitsRequestBody.query.bool.must_not = [{ exists: { field: "deletedAt" } }];
+
     let response;
     let cohesionCenters = [];
     if (req.params.action === "export") {
