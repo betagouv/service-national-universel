@@ -100,7 +100,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const timeZoneOffset = -24 * 3600; // 6 hours in seconds
+      const timeZoneOffset = -24 * 3600; // 24 hours in seconds
       // avec un header x-user-timezone
       const response = await request(getAppHelper(null, "young")).post(`/cohort-session/eligibility/2023`).set("x-user-timezone", String(timeZoneOffset)).send(young);
       expect(response.status).toBe(200);
