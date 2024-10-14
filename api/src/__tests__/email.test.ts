@@ -1,10 +1,11 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { ROLES } from "snu-lib";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Email", () => {
   let res;
@@ -22,27 +23,20 @@ describe("Email", () => {
       expect(res.status).toBe(200);
     });
     it("should reject if not ADMIN, REFERENT_DEPARTMENT, REFERENT_REGION, REFERENT_CLASSE, ADMINISTRATEUR_CLE", async () => {
-      const passport = require("passport");
       const { ADMIN, REFERENT_DEPARTMENT, REFERENT_REGION, REFERENT_CLASSE, ADMINISTRATEUR_CLE, ...unauthorizedRoles } = ROLES;
       for (const role of Object.values(unauthorizedRoles)) {
-        passport.user.role = role;
-        res = await request(getAppHelper()).get("/email?email=test@example.org");
+        res = await request(getAppHelper({ role })).get("/email?email=test@example.org");
         expect(res.statusCode).toEqual(403);
       }
-      passport.user.role = ADMIN;
-      res = await request(getAppHelper()).get("/email?email=test@example.org");
+      res = await request(getAppHelper({ role: ADMIN })).get("/email?email=test@example.org");
       expect(res.statusCode).toEqual(200);
-      passport.user.role = REFERENT_DEPARTMENT;
-      res = await request(getAppHelper()).get("/email?email=test@example.org");
+      res = await request(getAppHelper({ role: REFERENT_DEPARTMENT })).get("/email?email=test@example.org");
       expect(res.statusCode).toEqual(200);
-      passport.user.role = REFERENT_REGION;
-      res = await request(getAppHelper()).get("/email?email=test@example.org");
+      res = await request(getAppHelper({ role: REFERENT_REGION })).get("/email?email=test@example.org");
       expect(res.statusCode).toEqual(200);
-      passport.user.role = REFERENT_CLASSE;
-      res = await request(getAppHelper()).get("/email?email=test@example.org");
+      res = await request(getAppHelper({ role: REFERENT_CLASSE })).get("/email?email=test@example.org");
       expect(res.statusCode).toEqual(200);
-      passport.user.role = ADMINISTRATEUR_CLE;
-      res = await request(getAppHelper()).get("/email?email=test@example.org");
+      res = await request(getAppHelper({ role: ADMINISTRATEUR_CLE })).get("/email?email=test@example.org");
       expect(res.statusCode).toEqual(200);
     });
   });
