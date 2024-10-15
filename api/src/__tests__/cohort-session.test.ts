@@ -8,7 +8,7 @@ import { COHORT_TYPE, ERRORS, GRADES, ROLES, YOUNG_STATUS } from "snu-lib";
 
 import { CohortModel } from "../models";
 import { dbConnect, dbClose } from "./helpers/db";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 
 // young
 import getNewYoungFixture from "./fixtures/young";
@@ -25,6 +25,7 @@ describe("Cohort Session Controller", () => {
   beforeEach(async () => {
     await CohortModel.deleteMany({});
   });
+  afterEach(resetAppAuth);
 
   describe("POST /cohort-session/eligibility/:year", () => {
     // TODO: move auth young tests to preinscription
@@ -102,7 +103,7 @@ describe("Cohort Session Controller", () => {
       );
       const timeZoneOffset = -24 * 3600; // 24 hours in seconds
       // avec un header x-user-timezone
-      const response = await request(getAppHelper(null, "young")).post(`/cohort-session/eligibility/2023`).set("x-user-timezone", String(timeZoneOffset)).send(young);
+      const response = await request(getAppHelper()).post(`/cohort-session/eligibility/2023`).set("x-user-timezone", String(timeZoneOffset)).send(young);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
