@@ -31,11 +31,11 @@ jobs:
         with:
           node-version: 18.x
 
-      - name: Start MongoDB 6.0
+      - name: Start MongoDB 7.0
         if: steps.changes.outputs.src == 'true'
         uses: supercharge/mongodb-github-action@v1.10.0
         with:
-          mongodb-version: "6.0"
+          mongodb-version: "7.0"
 
       - uses: actions/cache@v4
         id: cache-npm

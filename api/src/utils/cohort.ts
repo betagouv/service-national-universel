@@ -1,32 +1,49 @@
-const { YOUNG_STATUS, getRegionForEligibility, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility } = require("snu-lib");
-const { YoungModel, CohortModel, InscriptionGoalModel } = require("../models");
+import { YOUNG_STATUS, getRegionForEligibility, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType } from "snu-lib";
+import { YoungModel, CohortModel, InscriptionGoalModel, CohortDocument } from "../models";
 
-async function getFilteredSessions(young, timeZoneOffset = "") {
+type CohortDocumentWithPlaces = CohortDocument<{
+  numberOfCandidates?: number;
+  numberOfValidated?: number;
+  goal?: number;
+  goalReached?: boolean;
+  isFull?: boolean;
+  isEligible?: boolean;
+}>;
+
+type YoungInfo = Pick<YoungType, "cohort" | "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip"> & {
+  _id?: YoungType["_id"];
+  isReInscription?: boolean;
+};
+
+// TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
+export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
   const cohorts = await CohortModel.find({});
   const region = getRegionForEligibility(young);
   const department = getDepartmentForEligibility(young);
 
-  const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart)?.getFullYear() : undefined;
-
-  const sessions = cohorts.filter(
-    (session) =>
-      // if the young has already a cohort, he can only apply for the cohorts of the same year
+  const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart || "")?.getFullYear() : undefined;
+  const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
+    // if the young has already a cohort, he can only apply for the cohorts of the same year
+    return (
       (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
       session.eligibility?.zones.includes(department) &&
-      session.eligibility?.schoolLevels.includes(young.grade) &&
+      session.eligibility?.schoolLevels.includes(young.grade!) &&
+      young.birthdateAt &&
       session.eligibility?.bornAfter <= young.birthdateAt &&
+      // @ts-expect-error comparaison d'une Date avec un number...
       session.eligibility?.bornBefore.setTime(session.eligibility?.bornBefore.getTime() + 11 * 60 * 60 * 1000) >= young.birthdateAt &&
-      (session.getIsInscriptionOpen(timeZoneOffset) ||
-        (session.getIsReInscriptionOpen(timeZoneOffset) && young.isReInscription) ||
-        (session.getIsInstructionOpen(timeZoneOffset) && [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status))),
-  );
+      (session.getIsInscriptionOpen(Number(timeZoneOffset)) ||
+        (session.getIsReInscriptionOpen(Number(timeZoneOffset)) && young.isReInscription) ||
+        (session.getIsInstructionOpen(Number(timeZoneOffset)) && ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION] as string[]).includes(young.status)))
+    );
+  });
   for (let session of sessions) {
     session.isEligible = true;
   }
   return getPlaces(sessions, region);
 }
 
-async function getAllSessions(young) {
+export async function getAllSessions(young: YoungInfo) {
   const cohorts = await CohortModel.find({});
   const region = getRegionForEligibility(young);
   const sessionsWithPlaces = await getPlaces(cohorts, region);
@@ -37,19 +54,21 @@ async function getAllSessions(young) {
   return sessionsWithPlaces;
 }
 
-async function getFilteredSessionsForCLE() {
+export async function getFilteredSessionsForCLE() {
   const sessionsCLE = await CohortModel.find({ type: COHORT_TYPE.CLE });
   let now = Date.now();
   const sessions = sessionsCLE.filter(
     (session) =>
       !!session.inscriptionStartDate &&
+      // @ts-expect-error comparaison d'une Date avec un number...
       session.inscriptionStartDate <= now &&
+      // @ts-expect-error comparaison d'une Date avec un number...
       ((session.inscriptionEndDate && session.inscriptionEndDate > now) || (session.instructionEndDate && session.instructionEndDate > now)),
   );
   return sessions;
 }
 
-async function getPlaces(sessions, region) {
+async function getPlaces(sessions: CohortDocumentWithPlaces[], region: string): Promise<CohortDocumentWithPlaces[]> {
   const cohorts = await CohortModel.find({});
   const sessionNames = sessions.map(({ name }) => name);
   const goals = await InscriptionGoalModel.aggregate([{ $match: { region, cohort: { $in: sessionNames } } }, { $group: { _id: "$cohort", total: { $sum: "$max" } } }]);
@@ -91,10 +110,11 @@ async function getPlaces(sessions, region) {
     }
   }
 
+  // @ts-ignore
   return sessionObj;
 }
 
-async function getCohortsEndAfter(date) {
+export async function getCohortsEndAfter(date) {
   try {
     return CohortModel.find({ dateEnd: { $gte: date } });
   } catch (err) {
@@ -102,12 +122,12 @@ async function getCohortsEndAfter(date) {
   }
 }
 
-async function getCohortNamesEndAfter(date) {
+export async function getCohortNamesEndAfter(date) {
   const cohorts = await getCohortsEndAfter(date);
   return cohorts.map((cohort) => cohort.name);
 }
 
-async function getCohortDateInfo(cohortName) {
+export async function getCohortDateInfo(cohortName) {
   try {
     return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1, daysToValidate: 1, daysToValidateForTerminalGrade: 1, dateStart: 1 });
   } catch (err) {
@@ -115,7 +135,7 @@ async function getCohortDateInfo(cohortName) {
   }
 }
 
-async function getCohortValidationDate(cohortName) {
+export async function getCohortValidationDate(cohortName) {
   try {
     return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1 });
   } catch (err) {
@@ -123,7 +143,7 @@ async function getCohortValidationDate(cohortName) {
   }
 }
 
-function getDepartureDateSession(session, young, cohort) {
+export function getDepartureDateSession(session, young, cohort) {
   if (session?.dateStart) {
     const sessionDateStart = new Date(session.dateStart);
     sessionDateStart.setHours(sessionDateStart.getHours() + 12);
@@ -137,7 +157,7 @@ function getDepartureDateSession(session, young, cohort) {
   return new Date(cohortDateStart);
 }
 
-function getReturnDateSession(session, young, cohort) {
+export function getReturnDateSession(session, young, cohort) {
   if (session?.dateEnd) {
     const sessionDateEnd = new Date(session.dateEnd);
     sessionDateEnd.setHours(sessionDateEnd.getHours() + 12);
@@ -150,15 +170,3 @@ function getReturnDateSession(session, young, cohort) {
   cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
   return new Date(cohortDateEnd);
 }
-
-module.exports = {
-  getFilteredSessions,
-  getAllSessions,
-  getCohortNamesEndAfter,
-  getCohortsEndAfter,
-  getCohortDateInfo,
-  getCohortValidationDate,
-  getDepartureDateSession,
-  getReturnDateSession,
-  getFilteredSessionsForCLE,
-};
