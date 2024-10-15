@@ -111,21 +111,13 @@ export default function List() {
       isSingle: true,
       translate: (item) => (item === 0 ? "Oui" : "Non"),
       reduce: (data) => {
-        const grouped = data.reduce(
-          (acc, item) => {
-            if (item.key === 0) {
-              acc[0] = { key: 0, doc_count: item.doc_count };
-            } else {
-              acc[1].doc_count += item.doc_count;
-            }
-            return acc;
-          },
-          [
-            { key: 0, doc_count: 0 },
-            { key: 1, doc_count: 0 },
-          ],
-        );
-        return grouped;
+        const zeroSeats = data.filter((item) => item.key === 0);
+        const oneOrMoreSeats = data.filter((item) => item.key > 0);
+
+        return [
+          { key: 0, doc_count: zeroSeats.reduce((acc, item) => acc + item.doc_count, 0) },
+          { key: 1, doc_count: oneOrMoreSeats.reduce((acc, item) => acc + item.doc_count, 0) },
+        ];
       },
     },
   ].filter(Boolean);
