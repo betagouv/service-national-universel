@@ -104,6 +104,7 @@ export const validatePdtFile = async (
     // Remove empty colums from the line
     for (const key in line) {
       if (line[key] === "0") line[key] = "";
+      line[key] = line[key]?.toString().trim();
     }
     // We need to have the "line number" as of the excel file, so we add 2 to the index.
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
@@ -252,7 +253,7 @@ export const validatePdtFile = async (
       for (const mergedLine of mergedLines) {
         let found = false;
         for (const [i, line] of lines.entries()) {
-          if (line["NUMERO DE LIGNE"] === mergedLine) {
+          if (line["NUMERO DE LIGNE"] === mergedLine.trim()) {
             found = true;
             break;
           }
