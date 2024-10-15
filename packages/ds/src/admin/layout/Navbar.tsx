@@ -43,7 +43,7 @@ export default function Navbar({ tab, button }: OwnProps) {
               <div
                 className={cx("truncate mr-3", {
                   "mb-1": !tabItem.label,
-                  "text-gray-500": !tabItem.isActive,
+                  "text-gray-400": !tabItem.isActive,
                 })}
               >
                 {tabItem.title}
