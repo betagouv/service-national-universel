@@ -5,13 +5,13 @@ module.exports = {
     const backupCollection = db.collection("backup_sessions_without_placeLeft");
 
     const sessionsWithoutPlaceLeft = await SessionPhase1Model.find({
-      placeLeft: { $exists: false },
+      placesLeft: { $exists: false },
     });
 
     for (const session of sessionsWithoutPlaceLeft) {
       await backupCollection.insertOne(session.toObject());
-      session.placeLeft = session.placesTotal;
-      await session.save();
+      session.placesLeft = session.placesTotal;
+      await session.save({ fromUser: { firstName: "ADD_PLACELEFT_SESSION" } });
     }
 
     const backupCount = await backupCollection.countDocuments({});
@@ -26,7 +26,7 @@ module.exports = {
 
     if (backupSessions.length > 0) {
       for (const backupSession of backupSessions) {
-        await SessionPhase1Model.updateOne({ _id: backupSession._id }, { $unset: { placeLeft: 1 } });
+        await SessionPhase1Model.updateOne({ _id: backupSession._id }, { $unset: { placesLeft: 1 } });
       }
     }
 
