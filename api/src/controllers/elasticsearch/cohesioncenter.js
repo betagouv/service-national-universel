@@ -24,14 +24,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
-    let contextFilters = [];
+    let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }, { exists: { field: "matricule" } }];
     if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
-
-    hitsRequestBody.query.bool.must_not = [{ exists: { field: "deletedAt" } }];
 
     let response;
     let cohesionCenters = [];
