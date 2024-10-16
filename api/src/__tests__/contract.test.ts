@@ -4,7 +4,7 @@ import request from "supertest";
 
 import { YoungType } from "snu-lib";
 
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewContractFixture from "./fixtures/contract";
 import { getNewApplicationFixture } from "./fixtures/application";
@@ -37,6 +37,7 @@ jest.mock("../brevo", () => ({
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Structure", () => {
   describe("POST /contract", () => {
@@ -173,19 +174,13 @@ describe("Structure", () => {
         structureManagerToken: "qux",
       });
 
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-
-      const res = await request(getAppHelper()).get(`/contract/${contract._id}`).send();
+      const res = await request(getAppHelper(young)).get(`/contract/${contract._id}`).send();
       expect(res.status).toBe(200);
       expect(res.body.data.projectManagerToken).toBeUndefined();
       expect(res.body.structureManagerToken).toBeUndefined();
       expect(res.body.data.parent1Token).toBeUndefined();
       expect(res.body.data.parent2Token).toBeUndefined();
       expect(res.body.data.youngContractToken).toBeUndefined();
-
-      passport.user = previous;
     });
     it("should return 403 when young tries to see a contract from someone else", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
@@ -193,15 +188,8 @@ describe("Structure", () => {
       const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
 
       const secondYoung = await createYoungHelper(getNewYoungFixture());
-
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = secondYoung;
-
-      const res = await request(getAppHelper()).get(`/contract/${contract._id}`).send();
+      const res = await request(getAppHelper(secondYoung)).get(`/contract/${contract._id}`).send();
       expect(res.status).toBe(403);
-
-      passport.user = previous;
     });
   });
 
@@ -295,13 +283,8 @@ describe("Structure", () => {
 
       const secondYoung = await createYoungHelper(getNewYoungFixture());
 
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = secondYoung;
-
-      const resDownload = await request(getAppHelper()).post(`/contract/${contract._id}/download`).send();
+      const resDownload = await request(getAppHelper(secondYoung)).post(`/contract/${contract._id}/download`).send();
       expect(resDownload.status).toBe(403);
-      passport.user = previous;
     });
 
     it("should return 200 when young tries to see their own contract", async () => {
@@ -309,13 +292,8 @@ describe("Structure", () => {
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
       const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
 
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-
-      const resDownload = await request(getAppHelper()).post(`/contract/${contract._id}/download`).send();
+      const resDownload = await request(getAppHelper(young)).post(`/contract/${contract._id}/download`).send();
       expect(resDownload.status).toBe(200);
-      passport.user = previous;
     });
   });
 });

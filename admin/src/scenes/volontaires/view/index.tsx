@@ -37,6 +37,7 @@ export default function Index({ ...props }) {
 
   const getDetail = () => {
     if (!young) return;
+
     let mode: "correction" | "readonly" = ([YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young?.status || "")
       ? "correction"
       : "readonly";

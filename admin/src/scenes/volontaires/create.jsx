@@ -1,21 +1,22 @@
 import React, { useState } from "react";
 import validator from "validator";
-
-import { translate } from "@/utils";
-import api from "@/services/api";
+import { Spinner } from "reactstrap";
 import { toastr } from "react-redux-toastr";
-import { capture } from "@/sentry";
 import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ReactTooltip from "react-tooltip";
 import { HiInformationCircle } from "react-icons/hi";
 
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import { translate } from "@/utils";
 import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
-import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
+import { CohortService } from "@/services/cohortService";
+
+import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import MiniSwitch from "../phase0/components/MiniSwitch";
 import RadioButton from "../phase0/components/RadioButton";
-import { Spinner } from "reactstrap";
 
 //Identite
 import Field from "@/components/ui/forms/Field";
@@ -368,15 +369,14 @@ export default function Create() {
               zip: values.zip,
             };
           }
-          const res = await api.post(`/cohort-session/eligibility/2023`, body);
-          if (res.data.msg) return setEgibilityError(res.data.msg);
-          if (res.data.length === 0) {
+          const cohortsAvailable = await CohortService.getEligibilityForYoung({ payload: body });
+          if (cohortsAvailable.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de séjour disponible.");
           } else {
             setEgibilityError("");
           }
 
-          setCohorts(res.data);
+          setCohorts(cohortsAvailable);
         } catch (e) {
           capture(e);
 

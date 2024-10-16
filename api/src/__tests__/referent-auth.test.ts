@@ -1,6 +1,6 @@
 import request from "supertest";
 import { ROLES, SUB_ROLES } from "snu-lib";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewStructureFixture from "./fixtures/structure";
 import { createReferentHelper, getReferentByIdHelper } from "./helpers/referent";
@@ -17,6 +17,7 @@ jest.mock("../brevo", () => ({
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Referent", () => {
   let res;
@@ -148,28 +149,22 @@ describe("Referent", () => {
   describe("POST /referent/logout", () => {
     it("should return 200", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = referent;
-      const res = await request(getAppHelper()).post("/referent/logout");
+
+      const res = await request(getAppHelper(referent)).post("/referent/logout");
       expect(res.status).toBe(200);
-      passport.user = previous;
     });
   });
 
   describe("GET /referent/signin_token", () => {
     it("should return 200", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = referent;
-      passport.user.set = jest.fn();
-      passport.user.save = jest.fn();
-      const res = await request(getAppHelper()).get("/referent/signin_token").set("Cookie", ["jwt_ref=blah"]);
+
+      referent.set = jest.fn();
+      referent.save = jest.fn();
+      const res = await request(getAppHelper(referent)).get("/referent/signin_token").set("Cookie", ["jwt_ref=blah"]);
       expect(res.status).toBe(200);
-      expect(passport.user.set).toHaveBeenCalled();
-      expect(passport.user.save).toHaveBeenCalled();
-      passport.user = previous;
+      expect(referent.set).toHaveBeenCalled();
+      expect(referent.save).toHaveBeenCalled();
     });
   });
 
@@ -195,44 +190,32 @@ describe("Referent", () => {
 
     it("should return 401 when new password is identical as last password", async () => {
       const young = await createReferentHelper({ ...getNewReferentFixture(), password: VALID_PASSWORD });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      res = await request(getAppHelper()).post("/referent/reset_password").send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+
+      res = await request(getAppHelper(young)).post("/referent/reset_password").send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(401);
-      passport.user = previous;
     });
 
     it("should return return 401 when original password does not match", async () => {
       const young = await createReferentHelper({ ...getNewReferentFixture(), password: "foo" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      res = await request(getAppHelper()).post("/referent/reset_password").send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+
+      res = await request(getAppHelper(young)).post("/referent/reset_password").send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(401);
-      passport.user = previous;
     });
 
     it("should return return 422 when verifyPassword !== newPassword", async () => {
       const young = await createReferentHelper({ ...getNewReferentFixture(), password: "foo" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      res = await request(getAppHelper())
+
+      res = await request(getAppHelper(young))
         .post("/referent/reset_password")
         .send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD + "HOP" });
       expect(res.status).toBe(422);
-      passport.user = previous;
     });
 
     it("should return return 200 when password is changed", async () => {
       const young = await createReferentHelper({ ...getNewReferentFixture(), password: "foo" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      res = await request(getAppHelper()).post("/referent/reset_password").send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+
+      res = await request(getAppHelper(young)).post("/referent/reset_password").send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(200);
-      passport.user = previous;
     });
   });
 

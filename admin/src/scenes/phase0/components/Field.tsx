@@ -8,6 +8,31 @@ import { copyToClipboard } from "../../../utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
 
+interface FieldProps {
+  group?: any;
+  name: string;
+  label?: string;
+  value: string | undefined;
+  mode?: string;
+  className?: string;
+  onStartRequest?: any;
+  currentRequest?: any;
+  correctionRequest?: any;
+  onCorrectionRequestChange?: any;
+  type?: string;
+  options?: any[];
+  filterOnType?: boolean;
+  onChange?: any;
+  showBackgroundColor?: boolean;
+  transformer?: any;
+  young?: any;
+  rows?: number;
+  maxLength?: number;
+  copy?: boolean;
+  error?: string;
+  allowCustomValue?: boolean;
+}
+
 /**
  * mode  could be "correction|edition|readonly" (default readonly)
  */
@@ -16,7 +41,7 @@ export default function Field({
   name,
   label,
   value,
-  mode,
+  mode = "readonly",
   className = "",
   onStartRequest,
   currentRequest,
@@ -25,7 +50,7 @@ export default function Field({
   type = "text",
   options = [],
   filterOnType = false,
-  onChange = () => {},
+  onChange = (value: any) => {},
   showBackgroundColor = true,
   transformer,
   young,
@@ -34,7 +59,7 @@ export default function Field({
   copy = false,
   error: errorProps,
   allowCustomValue = false,
-}) {
+}: FieldProps) {
   const [mouseIn, setMouseIn] = useState(false);
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
@@ -47,8 +72,8 @@ export default function Field({
   const error = errorProps || errors[name];
 
   useEffect(() => {
-    setOpened(name && currentRequest === name);
-  }, [currentRequest]);
+    setOpened(!!name && currentRequest === name);
+  }, [currentRequest, name]);
 
   useEffect(() => {
     setHasValidRequest(correctionRequest ? correctionRequest.status === "SENT" || correctionRequest.status === "REMINDED" : false);
@@ -95,9 +120,9 @@ export default function Field({
     onStartRequest && onStartRequest(name);
   }
 
-  function mouseOver(mousein) {
+  function mouseOver(mouseIn) {
     if (group === null || group === undefined) {
-      setMouseIn(mousein);
+      setMouseIn(mouseIn);
     }
   }
 
@@ -152,7 +177,7 @@ export default function Field({
         )}
       </div>
       {!group && correctionRequest && correctionRequest.status === "CORRECTED" && <CorrectedRequest correctionRequest={correctionRequest} young={young} />}
-      {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} young={young} />}
+      {opened && <CorrectionRequest name={name} label={label} correctionRequest={correctionRequest} onChangeRequest={onCorrectionRequestChange} />}
     </div>
   );
 }
