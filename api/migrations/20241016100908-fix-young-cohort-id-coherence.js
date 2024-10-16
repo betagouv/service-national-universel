@@ -1,5 +1,5 @@
-import { logger } from "../src/logger";
-import { YoungModel } from "../src/models";
+const { logger } = require("../src/logger");
+const { YoungModel } = require("../src/models");
 
 module.exports = {
   async up() {
