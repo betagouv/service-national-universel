@@ -1,5 +1,6 @@
 import { YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { regionsListDROMS } from "./region-and-departments";
+import { getZonedDate } from "./utils/date";
 
 const TRANSPORT_TIMES = {
   ALONE_ARRIVAL_HOUR: "16:00",
@@ -19,24 +20,25 @@ const TRANSPORT_TIMES = {
 function getDepartureDate(young, session, cohort, meetingPoint: any = null) {
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointDepartureDate(meetingPoint);
   if (young?.status && young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterArrivalDate(young, session, cohort);
-  return getGlobalDepartureDate(young, cohort);
+  return getZonedDate(getGlobalDepartureDate(young, cohort));
 }
 
 function getMeetingPointDepartureDate(meetingPoint) {
-  if (meetingPoint?.bus?.departuredDate) return new Date(meetingPoint?.bus?.departuredDate);
-  if (meetingPoint?.ligneBus?.departuredDate) return new Date(meetingPoint?.ligneBus?.departuredDate);
-  return new Date(meetingPoint?.departuredDate);
+  if (meetingPoint?.bus?.departuredDate) return getZonedDate(new Date(meetingPoint?.bus?.departuredDate));
+  if (meetingPoint?.ligneBus?.departuredDate) return getZonedDate(new Date(meetingPoint?.ligneBus?.departuredDate));
+  return getZonedDate(new Date(meetingPoint?.departuredDate));
 }
 
 function getCenterArrivalDate(young, session, cohort) {
-  if (session?.dateStart) return new Date(session?.dateStart);
-  return getGlobalDepartureDate(young, cohort);
+  if (session?.dateStart) return getZonedDate(new Date(session?.dateStart));
+  return getZonedDate(getGlobalDepartureDate(young, cohort));
 }
 
 function getGlobalDepartureDate(young, cohort) {
   if (young.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
     return new Date(2023, 6, 4);
   }
+
   if (cohort?.dateStart) return new Date(cohort.dateStart);
   return new Date();
 }
@@ -54,18 +56,18 @@ function getGlobalDepartureDate(young, cohort) {
 function getReturnDate(young, session, cohort, meetingPoint: any = null) {
   if (meetingPoint?.bus || meetingPoint?.ligneBus || meetingPoint?.departuredDate) return getMeetingPointReturnDate(meetingPoint);
   if (young?.status && young.status !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return getCenterReturnDate(young, session, cohort);
-  return getGlobalReturnDate(young, cohort);
+  return getZonedDate(getGlobalReturnDate(young, cohort));
 }
 
 function getMeetingPointReturnDate(meetingPoint) {
-  if (meetingPoint?.bus?.returnDate) return new Date(meetingPoint?.bus?.returnDate);
-  if (meetingPoint?.ligneBus?.returnDate) return new Date(meetingPoint?.ligneBus?.returnDate);
-  return new Date(meetingPoint?.returnDate);
+  if (meetingPoint?.bus?.returnDate) return getZonedDate(new Date(meetingPoint?.bus?.returnDate));
+  if (meetingPoint?.ligneBus?.returnDate) return getZonedDate(new Date(meetingPoint?.ligneBus?.returnDate));
+  return getZonedDate(new Date(meetingPoint?.returnDate));
 }
 
 function getCenterReturnDate(young, session, cohort) {
-  if (session?.dateEnd) return new Date(session?.dateEnd);
-  return getGlobalReturnDate(young, cohort);
+  if (session?.dateEnd) return getZonedDate(new Date(session?.dateEnd));
+  return getZonedDate(getGlobalReturnDate(young, cohort));
 }
 
 function getGlobalReturnDate(young, cohort) {

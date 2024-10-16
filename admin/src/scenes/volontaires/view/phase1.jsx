@@ -3,7 +3,7 @@ import { ImQuotesLeft } from "react-icons/im";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { YOUNG_SOURCE } from "snu-lib";
+import { YOUNG_SOURCE, getZonedDate } from "snu-lib";
 
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import dayjs from "@/utils/dayjs.utils";
@@ -191,11 +191,11 @@ export default function Phase1(props) {
                         />
                         <Field
                           title="Heure&nbsp;de&nbsp;départ"
-                          value={dayjs(meetingPoint?.bus.departuredDate).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
+                          value={dayjs(getZonedDate(meetingPoint?.bus.departuredDate)).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
                         />
                         <Field
                           title="Heure&nbsp;de&nbsp;retour"
-                          value={dayjs(meetingPoint?.bus.returnDate).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
+                          value={dayjs(getZonedDate(meetingPoint?.bus.returnDate)).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
                         />
                         <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} externalLink={`${adminURL}/ligne-de-bus/${meetingPoint?.bus._id}`} />
                       </div>
