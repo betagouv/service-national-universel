@@ -1,4 +1,5 @@
-import mongoose, { InferSchemaType, Schema } from "mongoose";
+import config from "config";
+import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import mongooseElastic from "@selego/mongoose-elastic";
 
@@ -49,7 +50,9 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-schema.plugin(mongooseElastic(esClient), MODELNAME);
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient), MODELNAME);
+}
 
 schema.index({ ligneDeBusId: 1 });
 

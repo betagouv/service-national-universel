@@ -22,7 +22,7 @@ import { maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
 import { shouldForceRedirectToEmailValidation } from "./utils/navigation";
-import { cohortsInit } from "./utils/cohorts";
+import useAuth from "./services/useAuth";
 
 import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
@@ -52,6 +52,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
+  const { login } = useAuth();
 
   async function fetchData() {
     try {
@@ -62,8 +63,7 @@ function App() {
         return;
       }
 
-      dispatch(setYoung(user));
-      await cohortsInit();
+      await login(user);
 
       if (shouldForceRedirectToEmailValidation(user)) {
         history.push("/preinscription/email-validation");

@@ -1,3 +1,4 @@
+import config from "config";
 import mongoose, { InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
@@ -40,7 +41,10 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
+
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
+}
 
 type MissionType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type MissionDocument<T = {}> = DocumentExtended<MissionType & T>;

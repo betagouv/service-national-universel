@@ -25,7 +25,7 @@ import { initPlanTransport, getXlsxBufferPlanTransport } from "./helpers/PlanDeT
 
 const { ObjectId } = Types;
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 // disable transaction for this test

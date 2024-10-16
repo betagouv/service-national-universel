@@ -10,7 +10,7 @@ async function getMissionByIdHelper(missionId) {
 
 async function deleteMissionByIdHelper(missionId) {
   const mission = await getMissionByIdHelper(missionId);
-  await mission?.remove();
+  await mission?.deleteOne();
 }
 
 async function createMissionHelper(mission) {

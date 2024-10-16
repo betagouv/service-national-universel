@@ -117,7 +117,7 @@ router.post("/delete/department", passport.authenticate("referent", { session: f
       }
     } else {
       //sinon on supprime l'entrée
-      toDelete.remove();
+      toDelete.deleteOne();
     }
 
     return res.status(200).send({ ok: true });

@@ -1,0 +1,330 @@
+{
+  "index_patterns": ["structure"],
+  "template": {
+    "settings": {
+      "index": {
+        "analysis": {
+          "analyzer": {
+            "folding": {
+              "filter": ["lowercase", "asciifolding"],
+              "tokenizer": "standard"
+            }
+          }
+        },
+        "number_of_replicas": "0",
+        "default_pipeline": "structure"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "sqlId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "country": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "lastName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "folded": {
+              "analyzer": "folding",
+              "type": "text"
+            }
+          }
+        },
+        "structurePriveeType": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "city": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "structurePubliqueEtatType": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "networkName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "structurePubliqueType": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "description": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "isMilitaryPreparation": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "sousType": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "instagram": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "siret": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "createdAt": {
+          "type": "date"
+        },
+        "isJvaStructure": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "twitter": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "__v": {
+          "type": "long"
+        },
+        "networkId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "sqlNetworkId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "state": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "department": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "updatedAt": {
+          "type": "date"
+        },
+        "zip": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "associationTypes": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "jvaStructureId": {
+          "type": "long"
+        },
+        "types": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "website": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "address": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "facebook": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "sqlUserId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "legalStatus": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "isNetwork": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "name": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lon": {
+              "type": "float"
+            },
+            "lat": {
+              "type": "float"
+            }
+          }
+        },
+        "region": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "status": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  },
+  "composed_of": []
+}

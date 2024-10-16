@@ -1,0 +1,26 @@
+{
+  "description": "referent ignore fields",
+  "processors": [
+    {
+      "remove": {
+        "field": [
+          "password",
+          "lastLogoutAt",
+          "passwordChangedAt",
+          "nextLoginAttemptIn",
+          "forgotPasswordResetToken",
+          "forgotPasswordResetExpires",
+          "invitationToken",
+          "invitationExpires",
+          "loginAttempts",
+          "attempts2FA",
+          "updatedAt",
+          "lastActivityAt",
+          "token2FA",
+          "token2FAExpires"
+        ],
+        "ignore_missing": true
+      }
+    }
+  ]
+}
