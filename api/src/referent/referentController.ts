@@ -109,8 +109,7 @@ import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
 import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
-import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
-import { ca } from "date-fns/locale";
+import { getCompletionObjectifStats } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
 
 const router = express.Router();
@@ -535,9 +534,11 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
       const departement = getDepartmentForEligibility(young);
-      const fillingRate = await getFillingRate(departement, cohort.name);
-      if (fillingRate >= FILLING_RATE_LIMIT) {
-        return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
+      const completionObjectif = await getCompletionObjectifStats(departement, cohort.name);
+      if (completionObjectif.isAtteint) {
+        return res
+          .status(400)
+          .send({ ok: false, code: completionObjectif.department.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED });
       }
     }
 

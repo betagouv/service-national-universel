@@ -4,7 +4,7 @@ import request from "supertest";
 import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto } from "snu-lib";
 
 import { CohortModel, YoungModel } from "../models";
-import { getInscriptionGoalStats } from "../services/inscription-goal";
+import { getCompletionObjectifStats } from "../services/inscription-goal";
 
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
@@ -128,11 +128,17 @@ describe("Referent", () => {
       const tomorrow = new Date(now);
       tomorrow.setDate(now.getDate() + 1);
       const cohort = await createCohortHelper(getNewCohortFixture({ name: testName, instructionEndDate: tomorrow }));
-      const { count } = await getInscriptionGoalStats(testName, testName);
+      let objectif = 0;
+      try {
+        const { department } = await getCompletionObjectifStats(testName, testName);
+        objectif = department.objectif;
+      } catch {
+        objectif = 0;
+      }
       // ajout d'un objectif à 1
       const res = await request(getAppHelper())
         .post(`/inscription-goal/${testName}`)
-        .send([{ department: testName, region: testName, max: count + 1 }]);
+        .send([{ department: testName, region: testName, max: objectif + 1 }]);
       expect(res.statusCode).toEqual(200);
       // ajout d'un jeune au departement sans depassement
 

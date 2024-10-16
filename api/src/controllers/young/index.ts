@@ -55,12 +55,11 @@ import {
   translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
   ReferentType,
-  YoungType,
 } from "snu-lib";
 import { getFilteredSessions } from "../../utils/cohort";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
-import { getFillingRate, FILLING_RATE_LIMIT } from "../../services/inscription-goal";
+import { getCompletionObjectifDepartement } from "../../services/inscription-goal";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
 import scanFile from "../../utils/virusScanner";
 import emailsEmitter from "../../emails";
@@ -549,13 +548,13 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     });
 
     if (cohort !== "à venir") {
-      const fillingRate = await getFillingRate(young.department, cohort);
+      const completionObjectif = await getCompletionObjectifDepartement(young.department!, cohort);
 
-      if (fillingRate >= FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.VALIDATED) {
+      if (completionObjectif.isAtteint && young.status === YOUNG_STATUS.VALIDATED) {
         young.set({ status: YOUNG_STATUS.WAITING_LIST });
       }
 
-      if (fillingRate < FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.WAITING_LIST) {
+      if (!completionObjectif.isAtteint && young.status === YOUNG_STATUS.WAITING_LIST) {
         young.set({ status: YOUNG_STATUS.VALIDATED });
       }
     }

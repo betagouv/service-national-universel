@@ -7,7 +7,7 @@ import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS }
 import { capture } from "../sentry";
 import { YoungModel, InscriptionGoalModel } from "../models";
 import { ERRORS } from "../utils";
-import { getFillingRate, FILLING_RATE_LIMIT } from "../services/inscription-goal";
+import { getCompletionObjectifDepartement } from "../services/inscription-goal";
 import { UserRequest } from "./request";
 
 const router = express.Router();
@@ -101,9 +101,9 @@ router.get("/:cohort/department/:department", passport.authenticate("referent", 
     if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { department, cohort } = params;
-    const fillingRate = await getFillingRate(department, cohort);
+    const completionObjectif = await getCompletionObjectifDepartement(department, cohort);
 
-    return res.status(200).json({ ok: true, data: fillingRate });
+    return res.status(200).json({ ok: true, data: completionObjectif.tauxRemplissage });
   } catch (error) {
     capture(error);
     if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
@@ -123,9 +123,9 @@ router.get("/:cohort/department/:department/reached", passport.authenticate("you
     }
 
     const { department, cohort } = value;
-    const fillingRate = await getFillingRate(department, cohort);
+    const completionObjectif = await getCompletionObjectifDepartement(department, cohort);
 
-    return res.status(200).send({ ok: true, data: fillingRate >= FILLING_RATE_LIMIT });
+    return res.status(200).send({ ok: true, data: completionObjectif.isAtteint });
   } catch (error) {
     capture(error);
     if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
