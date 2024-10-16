@@ -1128,7 +1128,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
 router.use("/:id/documents", require("./documents"));
 router.use("/:id/meeting-point", require("./meeting-point"));
 router.use("/:id/session", require("./session"));
-router.use("/:id/phase1", require("./phase1"));
+router.use("/:id/phase1", require("./phase1").default);
 router.use("/:id/phase2", require("./phase2"));
 router.use("/reinscription", require("./reinscription"));
 router.use("/inscription2023", require("./inscription2023"));
