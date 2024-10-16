@@ -49,7 +49,10 @@ export default function ModalChangePDRSameLine({ isOpen, onCancel, young, cohort
         meetingPointId: selectedPdr?._id,
         ligneId: bus?._id,
       });
-      if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
+      if (!response.ok)
+        return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code), {
+          timeOut: 10000,
+        });
       toastr.success(`L'affectation du jeune a bien été effectuée`);
       history.go(`/volontaire/${young._id}/phase1`);
     } catch (error) {

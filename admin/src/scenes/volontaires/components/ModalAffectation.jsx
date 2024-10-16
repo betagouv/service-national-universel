@@ -115,7 +115,10 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         meetingPointId: selectedPdr?.pdr._id,
         ligneId: selectedPdr?.data.ligneBus._id,
       });
-      if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
+      if (!response.ok)
+        return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code), {
+          timeOut: 10000,
+        });
       /*
       await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.PHASE_1_AFFECTATION}`);
       */
