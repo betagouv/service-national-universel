@@ -13,7 +13,7 @@ import { MultiLine } from "../../../components/list";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import api from "../../../services/api";
-import { debounce, formatDateFR, getZonedDate, translate } from "../../../utils";
+import { debounce, formatDateFR, FUNCTIONAL_ERRORS, getZonedDate, translate } from "../../../utils";
 import RightArrow from "./RightArrow";
 import MeetingInfo from "./phase1/MeetingInfo";
 
@@ -115,7 +115,11 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
         meetingPointId: selectedPdr?.pdr._id,
         ligneId: selectedPdr?.data.ligneBus._id,
       });
-      if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
+      if (!response.ok) {
+        return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code), {
+          timeOut: 10000,
+        });
+      }
       /*
       await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.PHASE_1_AFFECTATION}`);
       */
@@ -123,10 +127,15 @@ export default function ModalAffectations({ isOpen, onCancel, young, center = nu
       toastr.success(`L'affectation du jeune a bien été effectuée`);
       history.go(`/volontaire/${young._id}/phase1`);
     } catch (error) {
-      if (error.code === "OPERATION_NOT_ALLOWED")
+      if (error.code === "OPERATION_NOT_ALLOWED") {
         return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune. Il semblerait que ce centre soit déjà complet", translate(error?.code), {
           timeOut: 5000,
         });
+      } else if (error.code === FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED) {
+        return toastr.error("Vous ne pouvez pas affecter ce jeune", translate(error.code), {
+          timeOut: 10000,
+        });
+      }
       return toastr.error("Oups, une erreur est survenue lors du traitement de l'affectation du jeune", translate(error?.code));
     }
   };
