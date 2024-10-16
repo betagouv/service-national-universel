@@ -10,7 +10,7 @@ async function getReferentByIdHelper(referentId) {
 
 async function deleteReferentByIdHelper(referentId) {
   const referent = await getReferentByIdHelper(referentId);
-  await referent?.remove();
+  await referent?.deleteOne();
 }
 
 async function deleteAllReferentBySubrole(subRole) {

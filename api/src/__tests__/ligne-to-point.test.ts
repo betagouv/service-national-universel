@@ -9,7 +9,7 @@ import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
 import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 import { PointDeRassemblementModel, LigneToPointModel } from "../models";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 describe("Ligne To Point", () => {

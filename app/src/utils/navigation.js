@@ -3,6 +3,7 @@ import { getCohort } from "./cohorts";
 import { environment } from "@/config";
 
 export const INSCRIPTION_STEPS = {
+  EMAIL_WAITING_VALIDATION: "EMAIL_WAITING_VALIDATION",
   COORDONNEES: "COORDONNEES",
   CONSENTEMENTS: "CONSENTEMENTS",
   REPRESENTANTS: "REPRESENTANTS",

@@ -13,18 +13,16 @@ import { PHONE_ZONES, isPhoneNumberWellFormated, FEATURES_NAME, isFeatureEnabled
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import IconFrance from "@/assets/IconFrance";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
-import { useDispatch } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
 import dayjs from "dayjs";
 import API from "@/services/api";
-import { setYoung } from "@/redux/auth/actions";
 import { capture } from "@/sentry";
 import { RiInformationLine } from "react-icons/ri";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
 import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
-import { cohortsInit } from "@/utils/cohorts";
 import emojiRegex from "emoji-regex";
 
 export default function StepProfil() {
@@ -33,7 +31,7 @@ export default function StepProfil() {
   const [loading, setLoading] = React.useState(false);
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
-  const dispatch = useDispatch();
+  const { login } = useAuth();
   const parcours = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase();
   const isCLE = parcours === YOUNG_SOURCE.CLE;
   const classeId = new URLSearchParams(window.location.search).get("classeId");
@@ -161,8 +159,7 @@ export default function StepProfil() {
       }
       if (user) {
         plausibleEvent("CLE/CTA preinscription - infos persos");
-        await cohortsInit();
-        dispatch(setYoung(user));
+        await login(user);
         history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
       }
     } catch (e) {

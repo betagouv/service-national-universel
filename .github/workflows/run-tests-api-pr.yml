@@ -27,24 +27,38 @@ jobs:
 
       - name: Node 18.x
         if: steps.changes.outputs.src == 'true'
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 18.x
 
-      - name: Start MongoDB 4.0
+      - name: Start MongoDB 7.0
         if: steps.changes.outputs.src == 'true'
         uses: supercharge/mongodb-github-action@v1.10.0
         with:
-          mongodb-version: "4.0"
+          mongodb-version: "7.0"
+
+      - uses: actions/cache@v4
+        id: cache-npm
+        with:
+          path: |
+            node_modules
+            api/node_modules
+            app/node_modules
+            admin/node_modules
+            packages/ds/node_modules
+            packages/lib/node_modules
+          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nodemodules-
 
       - name: Install packages
-        if: steps.changes.outputs.src == 'true'
+        if: ${{ (steps.changes.outputs.src == 'true') && (steps.cache-npm.outputs.cache-hit != 'true') }}
         run: npm ci
 
       - name: Build lib
         if: steps.changes.outputs.src == 'true'
-        continue-on-error: false
-        run: npm run build -w packages/lib
+        working-directory: packages/lib
+        run: npm run build
 
       - name: Lint code
         if: steps.changes.outputs.src == 'true'
@@ -53,11 +67,10 @@ jobs:
 
       - name: Test and Send coverage
         if: steps.changes.outputs.src == 'true'
-        uses: paambaati/codeclimate-action@v2.7.5
+        uses: paambaati/codeclimate-action@v9.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           CI: true
-          MONGO_URL: mongodb://localhost:27017/SampleDB
         with:
           workingDirectory: api
           coverageCommand: npm run coverage

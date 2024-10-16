@@ -7,7 +7,7 @@ import { createPointDeRassemblementHelper, createPointDeRassemblementWithBus } f
 import { createCohesionCenter } from "./helpers/cohesionCenter";
 import { createSessionPhase1 } from "./helpers/sessionPhase1";
 import getNewYoungFixture from "./fixtures/young";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { createYoungHelper } from "./helpers/young";
 import { SchemaDeRepartitionModel, PointDeRassemblementModel, LigneToPointModel } from "../models";
@@ -17,8 +17,9 @@ jest.mock("../brevo", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Point de rassemblement", () => {
   beforeEach(async () => {
@@ -27,12 +28,9 @@ describe("Point de rassemblement", () => {
   describe("GET /point-de-rassemblement/available", () => {
     it("should return 400 when young has no sessionPhase1Id", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture() });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      const res = await request(getAppHelper()).get("/point-de-rassemblement/available").send();
+
+      const res = await request(getAppHelper(young)).get("/point-de-rassemblement/available").send();
       expect(res.status).toBe(400);
-      passport.user = previous;
     });
   });
   describe.skip("PUT /point-de-rassemblement/:id", () => {
@@ -145,15 +143,11 @@ describe("Point de rassemblement", () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: pointDeRassemblemenYoung._id });
 
       const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
 
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper(young))
         .get("/point-de-rassemblement/fullInfo/" + pointDeRassemblement._id + "/" + pointDeRassemblement._id)
         .send();
       expect(res.status).toBe(403);
-      passport.user = previous;
     });
     it("should return 403 when young try to fetch another bus than his", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
@@ -163,15 +157,11 @@ describe("Point de rassemblement", () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: resultYoung.pdr._id, ligneId: resultYoung.bus._id });
 
       const { pdr, bus } = await createPointDeRassemblementWithBus(getNewPointDeRassemblementFixture(), cohesionCenter._id, sessionPhase1._id);
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
 
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper(young))
         .get("/point-de-rassemblement/fullInfo/" + pdr._id + "/" + bus._id)
         .send();
       expect(res.status).toBe(403);
-      passport.user = previous;
     });
   });
   describe("GET /center/:centerId/cohort/:cohortId", () => {
@@ -228,11 +218,8 @@ describe("Point de rassemblement", () => {
 
     it("should return 403 when user is not authorized to create meeting point", async () => {
       const user = { _id: "123", role: "user" };
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = user;
 
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper(user))
         .post("/point-de-rassemblement/")
         .send({
           cohort: "Février 2023 - C",
@@ -249,15 +236,11 @@ describe("Point de rassemblement", () => {
           },
         });
       expect(res.status).toBe(403);
-      passport.user = previous;
     });
 
     it("should return 200 when meeting point is successfully created", async () => {
       const user = { _id: "123", role: "admin" };
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = user;
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper(user))
         .post("/point-de-rassemblement/")
         .send({
           cohort: "Février 2023 - C",
@@ -276,16 +259,12 @@ describe("Point de rassemblement", () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.data).toBeDefined();
-      passport.user = previous;
     });
   });
   describe("GET /point-de-rassemblement/:id/bus/:cohort", () => {
     it("should return 200 when meeting point and bus data are found", async () => {
       // Create a referent user with the necessary permissions
       const user = { _id: "123", role: "admin" };
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = user;
       const code = Math.random().toString(36).substring(2, 8);
       // Create a meeting point and bus data
       const PointDeRassemblement = {
@@ -306,7 +285,7 @@ describe("Point de rassemblement", () => {
       const { pdr, bus } = await createPointDeRassemblementWithBus(PointDeRassemblement, "centerId", "sessionId");
 
       // Send a request to get the meeting point and bus data
-      const res = await request(getAppHelper()).get(`/point-de-rassemblement/${pdr._id}/bus/${bus.cohort}`).send();
+      const res = await request(getAppHelper(user)).get(`/point-de-rassemblement/${pdr._id}/bus/${bus.cohort}`).send();
 
       // Expect the server to return a 200 status code and the expected data
       expect(res.status).toBe(200);
@@ -314,36 +293,24 @@ describe("Point de rassemblement", () => {
       expect(res.body.data.bus).toBeDefined();
       expect(res.body.data.meetingPoint).toBeDefined();
       expect(res.body.data.meetingPointsDetail).toBeDefined();
-
-      // Restore the previous user object to avoid affecting other tests
-      passport.user = previous;
     });
 
     it("should return 400 when invalid params are provided", async () => {
       // Create a referent user with the necessary permissions
       const user = { _id: "123", role: "referent" };
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = user;
 
       // Send a request with invalid params
-      const res = await request(getAppHelper()).get("/point-de-rassemblement/invalid-id/bus/invalid-cohort").send();
+      const res = await request(getAppHelper(user)).get("/point-de-rassemblement/invalid-id/bus/invalid-cohort").send();
 
       // Expect the server to return a 400 status code and an error message
       expect(res.status).toBe(400);
       expect(res.body.ok).toBe(false);
       expect(res.body.code).toBe("INVALID_PARAMS");
-
-      // Restore the previous user object to avoid affecting other tests
-      passport.user = previous;
     });
 
     it("should return 403 when user is not authorized to view meeting points", async () => {
       // Create a user without the necessary permissions
       const user = { _id: "123", role: "user" };
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = user;
       const code = Math.random().toString(36).substring(2, 8);
 
       // Create a meeting point and bus data with valid centerId and sessionId values
@@ -367,15 +334,12 @@ describe("Point de rassemblement", () => {
       const cohort = bus.cohort;
 
       // Send a request to get the meeting point and bus data
-      const res = await request(getAppHelper()).get(`/point-de-rassemblement/${pdr._id}/bus/${cohort}`).send();
+      const res = await request(getAppHelper(user)).get(`/point-de-rassemblement/${pdr._id}/bus/${cohort}`).send();
 
       // Expect the server to return a 403 status code and an error message
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
       expect(res.body.code).toBe("OPERATION_UNAUTHORIZED");
-
-      // Restore the previous user object to avoid affecting other tests
-      passport.user = previous;
     });
   });
   describe("GET /ligneToPoint/:cohort/:centerId", () => {

@@ -6,10 +6,19 @@ import dayjs from "@/utils/dayjs.utils";
 
 import { MiniTitle } from "./commons/MiniTitle";
 
-export default function CorrectionRequest({ name, label, correctionRequest, onChangeRequest, reasons, messagePlaceholder }) {
+interface CorrectionRequestProps {
+  name: string;
+  label?: string;
+  correctionRequest: any;
+  onChangeRequest: any;
+  reasons?: any[];
+  messagePlaceholder?: string;
+}
+
+export default function CorrectionRequest({ name, label, correctionRequest, onChangeRequest, reasons, messagePlaceholder }: CorrectionRequestProps) {
   const [requestText, setRequestText] = useState("");
   const [requestReason, setRequestReason] = useState("");
-  const [reasonOptions, setReasonOptions] = useState([]);
+  const [reasonOptions, setReasonOptions] = useState<JSX.Element[]>([]);
   const [lastDate, setLastDate] = useState("");
 
   useEffect(() => {
@@ -68,7 +77,8 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
   return (
     <div className="my-[16px] rounded-[7px] bg-[#F9FAFB] p-[24px]">
       <MiniTitle>
-        {!correctionRequest || correctionRequest.status === "PENDING" ? "Demander une correction" : `Correction demandée le ${lastDate}`} - {label}
+        {!correctionRequest || correctionRequest.status === "PENDING" ? "Demander une correction" : `Correction demandée le ${lastDate}`}
+        {label ? ` - ${label}` : null}
       </MiniTitle>
       {reasons && reasons.length > 0 && (
         <div className="mb-[16px] flex w-[100%] items-center rounded-[6px] border-[1px] border-[#D1D5DB] bg-white pr-[15px]">
@@ -82,7 +92,7 @@ export default function CorrectionRequest({ name, label, correctionRequest, onCh
         value={requestText}
         onChange={changeText}
         className="w-[100%] rounded-[6px] border-[1px] border-[#D1D5DB] bg-white p-[15px]"
-        rows="5"
+        rows={5}
         placeholder={messagePlaceholder}
       />
       <div className="mt-[16px] text-right">
