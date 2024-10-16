@@ -7,6 +7,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import ReactTooltip from "react-tooltip";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import { Badge, Button } from "@snu/ds/admin";
 
 import { useAddress, departmentToAcademy } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
@@ -139,6 +140,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
       />
       <div className="flex items-center justify-between">
         <Title>{data.name}</Title>
+        {data?.deletedAt && <Badge title="Archivé" status="WAITING_CORRECTION" />}
         <div className="flex items-center gap-2">
           {user.role === ROLES.ADMIN ? (
             <div data-tip="" data-for="tooltip-delete">
@@ -147,9 +149,15 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                   <div className="text-[black]">Des sessions sont encore associées au centre</div>
                 </ReactTooltip>
               )}
+              {data?.deletedAt && (
+                <ReactTooltip id="tooltip-delete" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" arrowColor="white">
+                  <div className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Les informations doivent être mises à jour dans le SI SNU</div>
+                </ReactTooltip>
+              )}
 
-              <button
-                className="rounded-lg border-[1px] border-red-600 bg-red-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              <Button
+                title="Supprimer"
+                type="danger"
                 onClick={() =>
                   setModalDelete({
                     isOpen: true,
@@ -158,17 +166,15 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                     onDelete: handleDelete,
                   })
                 }
-                disabled={isLoading || sessions.length !== 0}>
-                Supprimer
-              </button>
+                disabled={isLoading || sessions.length !== 0 || !!data?.deletedAt}></Button>
             </div>
           ) : null}
           {canCreateOrUpdateCohesionCenter(user) ? (
-            <button
-              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
-              onClick={() => setModalVisible(true)}>
-              Rattacher un centre à un séjour
-            </button>
+            <Button
+              title="Rattacher un centre à un séjou"
+              onClick={() => setModalVisible(true)}
+              disabled={!!data?.deletedAt}
+              tooltip="Les informations doivent être mises à jour dans le SI SNU"></Button>
           ) : null}
         </div>
       </div>
