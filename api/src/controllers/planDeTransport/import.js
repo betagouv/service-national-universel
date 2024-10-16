@@ -4,7 +4,7 @@ const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
-const { canSendPlanDeTransport, MIME_TYPES, COHORT_TYPE } = require("snu-lib");
+const { canSendPlanDeTransport, MIME_TYPES, COHORT_TYPE, FUNCTIONAL_ERRORS } = require("snu-lib");
 const fs = require("fs");
 const { parse: parseDate } = require("date-fns");
 const fileUpload = require("express-fileupload");
@@ -112,7 +112,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       }
 
       const lines = importData.lines;
-      const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
+      const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("MATRICULE PDR")).length;
 
       // Vérification des lignes existantes (ne sont modifié que les nouvelles)
       const newLines = [];
@@ -132,18 +132,32 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       for (const line of newLines) {
         const pdrIds = [];
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-          if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
-            pdrIds.push(line[`ID PDR ${pdrNumber}`]);
+          if (
+            line[`MATRICULE PDR ${pdrNumber}`] &&
+            !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`MATRICULE PDR ${pdrNumber}`]?.toLowerCase())
+          ) {
+            const pdr = await PointDeRassemblementModel.findOne({ matricule: line[`MATRICULE PDR ${pdrNumber}`] });
+            if (!pdr) {
+              throw new Error(ERRORS.NOT_FOUND, { cause: `Pdr not found for matricule : ${line[`MATRICULE PDR ${pdrNumber}`]}` });
+            }
+            pdrIds.push(pdr._id);
           }
         }
 
-        const session = await SessionPhase1Model.findOne({ cohort: importData.cohort, cohesionCenterId: line["ID CENTRE"] });
+        const cohesionCenter = await CohesionCenterModel.find({ matricule: line["MATRICULE CENTRE"] });
+        if (cohesionCenter.length > 1) {
+          throw new Error(FUNCTIONAL_ERRORS.MORE_THAN_ONE_CENTER_FOR_ONE_MATRICULE, { cause: `More than one cohesionCenter for matricule : ${line["MATRICULE CENTRE"]}` });
+        }
+        if (cohesionCenter.length === 0) {
+          throw new Error(ERRORS.NOT_FOUND, { cause: `No cohesionCenter for matricule : ${line["MATRICULE CENTRE"]}` });
+        }
+        const session = await SessionPhase1Model.findOne({ cohort: importData.cohort, cohesionCenterId: cohesionCenter[0]._id });
         const busLineData = {
           cohort: importData.cohort,
           busId: line["NUMERO DE LIGNE"],
           departuredDate: parseDate(line["DATE DE TRANSPORT ALLER"], "dd/MM/yyyy", new Date()),
           returnDate: parseDate(line["DATE DE TRANSPORT RETOUR"], "dd/MM/yyyy", new Date()),
-          centerId: line["ID CENTRE"],
+          centerId: cohesionCenter[0]._id,
           centerArrivalTime: formatTime(line["HEURE D'ARRIVEE AU CENTRE"]),
           centerDepartureTime: formatTime(line["HEURE DE DÉPART DU CENTRE"]),
           followerCapacity: line["TOTAL ACCOMPAGNATEURS"],
@@ -171,11 +185,11 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         }
 
         const lineToPointWithCorrespondance = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc, pdrNumber) => {
-          if (pdrNumber > 1 && !line[`ID PDR ${pdrNumber}`]) return acc;
-          if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`].toLowerCase())) {
+          if (pdrNumber > 1 && !line[`MATRICULE PDR ${pdrNumber}`]) return acc;
+          if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`MATRICULE PDR ${pdrNumber}`].toLowerCase())) {
             acc.push({
               lineId: busLine._id.toString(),
-              meetingPointId: line[`ID PDR ${pdrNumber}`],
+              meetingPointId: line[`MATRICULE PDR ${pdrNumber}`],
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
               busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`]),
               departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]),
@@ -184,7 +198,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               stepPoints: [],
             });
           } else {
-            if (line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance") {
+            if (line[`MATRICULE PDR ${pdrNumber}`].toLowerCase() === "correspondance") {
               // Special case: when correspondance is not aller or retour
               // We create 2 step points (aller and retour).
               acc[acc.length - 1].stepPoints.push({
@@ -203,10 +217,10 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               });
             } else {
               acc[acc.length - 1].stepPoints.push({
-                type: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "aller" : "retour",
+                type: line[`MATRICULE PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "aller" : "retour",
                 address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
-                departureHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]) : "",
-                returnHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "" : formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`]),
+                departureHour: line[`MATRICULE PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]) : "",
+                returnHour: line[`MATRICULE PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "" : formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`]),
                 transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
               });
             }
