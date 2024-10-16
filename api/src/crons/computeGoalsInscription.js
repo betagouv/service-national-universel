@@ -5,9 +5,22 @@ const { departmentList } = require("./utils");
 
 const arr = departmentList;
 
+// cf: api/src/services/inscription-goal.ts getJeunesValidesCount
+// TODO: factoriser le code de calcul des objectifs des départements
 const getCount = async ({ department }) => {
   const res = {};
-  const cursor = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort: /2024/ }).cursor();
+  // scolarisé
+  let cursor = await YoungModel.find({ department, schoolDepartment: department, status: { $in: ["VALIDATED"] }, cohort: /2024/ }).cursor();
+  await cursor.eachAsync(async function (young) {
+    res[young.cohort] = (res[young.cohort] || 0) + 1;
+  });
+  // non scolarisé
+  cursor = await YoungModel.find({ department, schoolDepartment: { $exists: false }, status: { $in: ["VALIDATED"] }, cohort: /2024/ }).cursor();
+  await cursor.eachAsync(async function (young) {
+    res[young.cohort] = (res[young.cohort] || 0) + 1;
+  });
+  // HZR
+  cursor = await YoungModel.find({ departement: { $ne: department }, schoolDepartment: department, status: { $in: ["VALIDATED"] }, cohort: /2024/ }).cursor();
   await cursor.eachAsync(async function (young) {
     res[young.cohort] = (res[young.cohort] || 0) + 1;
   });

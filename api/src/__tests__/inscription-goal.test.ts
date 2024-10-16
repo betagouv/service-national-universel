@@ -4,11 +4,15 @@ import { dbConnect, dbClose } from "./helpers/db";
 import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
 import { createInscriptionGoal } from "./helpers/inscriptionGoal";
 import { FUNCTIONAL_ERRORS } from "snu-lib";
+import { InscriptionGoalModel } from "../models";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Inscription Goal", () => {
+  beforeAll(async () => {
+    await InscriptionGoalModel.deleteMany({});
+  });
   describe("POST /inscription-goal/:cohort", () => {
     it("should post a new entry in inscription-goal", async () => {
       const res = await request(getAppHelper())
