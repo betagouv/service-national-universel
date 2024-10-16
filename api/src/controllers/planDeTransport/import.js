@@ -130,7 +130,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
       // import des nouvelles lignes
       for (const line of newLines) {
-        const pdrIds = [];
+        const pdrMatriculeIdMap = new Map();
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
           if (
             line[`MATRICULE PDR ${pdrNumber}`] &&
@@ -140,9 +140,10 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             if (!pdr) {
               throw new Error(ERRORS.NOT_FOUND, { cause: `Pdr not found for matricule : ${line[`MATRICULE PDR ${pdrNumber}`]}` });
             }
-            pdrIds.push(pdr._id);
+            pdrMatriculeIdMap.set(line[`MATRICULE PDR ${pdrNumber}`], pdr._id);
           }
         }
+        const meetingPointsIds = Array.from(pdrMatriculeIdMap.values());
 
         const cohesionCenter = await CohesionCenterModel.find({ matricule: line["MATRICULE CENTRE"] });
         if (cohesionCenter.length > 1) {
@@ -168,7 +169,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           lunchBreakReturn: line["PAUSE DÉJEUNER RETOUR" || ""].toLowerCase() === "oui",
           travelTime: formatTime(line["TEMPS DE ROUTE"]),
           sessionId: session?._id.toString(),
-          meetingPointsIds: pdrIds,
+          meetingPointsIds: meetingPointsIds,
           classeId: line["ID CLASSE"] ? line["ID CLASSE"] : undefined,
           mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"].split(",") : [],
         };
@@ -189,7 +190,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`MATRICULE PDR ${pdrNumber}`].toLowerCase())) {
             acc.push({
               lineId: busLine._id.toString(),
-              meetingPointId: line[`MATRICULE PDR ${pdrNumber}`],
+              meetingPointId: pdrMatriculeIdMap.get(line[`MATRICULE PDR ${pdrNumber}`]),
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
               busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`]),
               departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]),
@@ -295,7 +296,6 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     });
   } catch (error) {
     capture(error);
-
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   } finally {
     await endSession(transaction);
