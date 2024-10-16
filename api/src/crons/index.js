@@ -28,6 +28,7 @@ const clotureMissionReminder = require("./clotureInscriptionReminder");
 const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
 const mongoMonitoring = require("./mongoMonitoring");
 const classesStatusUpdate = require("./classesStatusUpdate");
+const checkCoherence = require("./checkCoherence");
 
 // doubt ? -> https://crontab.guru/
 
@@ -109,6 +110,7 @@ const CRONS = [
   cron("syncContactSupport", "15 1 * * *", syncContactSupport.handler),
   cron("mongoMonitoring", "*/5 * * * *", mongoMonitoring.handler),
   cron("classesStatusUpdate", "2 */1 * * *", classesStatusUpdate.handler),
+  cron("checkCoherence", "30 8,13,17 * * *", checkCoherence.handler),
 ];
 
 module.exports = CRONS;
