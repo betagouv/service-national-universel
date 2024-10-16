@@ -49,6 +49,7 @@ import {
   isYoung,
   inSevenDays,
   FILE_STATUS_PHASE1,
+  STEPS2023,
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
@@ -849,8 +850,12 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       });
     }
     const cohortModel = await CohortModel.findOne({ name: cohort });
-    if (cohortModel?.type === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.IN_PROGRESS && (inscriptionStep === "DOCUMENTS" || reinscriptionStep === "DOCUMENTS")) {
-      young.hasStartedReinscription ? (reinscriptionStep = "REPRESENTANTS") : (inscriptionStep = "REPRESENTANTS");
+    if (
+      cohortModel?.type === YOUNG_SOURCE.CLE &&
+      young.status === YOUNG_STATUS.IN_PROGRESS &&
+      (inscriptionStep === STEPS2023.DOCUMENTS || reinscriptionStep === STEPS2023.DOCUMENTS)
+    ) {
+      young.hasStartedReinscription ? (reinscriptionStep = STEPS2023.REPRESENTANTS) : (inscriptionStep = STEPS2023.REPRESENTANTS);
     }
 
     young.set({
