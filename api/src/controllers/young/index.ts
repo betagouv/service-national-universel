@@ -59,7 +59,7 @@ import {
 import { getFilteredSessions } from "../../utils/cohort";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
-import { getCompletionObjectifDepartement } from "../../services/inscription-goal";
+import { getCompletionObjectifStats } from "../../services/inscription-goal";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
 import scanFile from "../../utils/virusScanner";
 import emailsEmitter from "../../emails";
@@ -548,7 +548,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     });
 
     if (cohort !== "à venir") {
-      const completionObjectif = await getCompletionObjectifDepartement(young.department!, cohort);
+      const completionObjectif = await getCompletionObjectifStats(young.department!, cohort);
 
       if (completionObjectif.isAtteint && young.status === YOUNG_STATUS.VALIDATED) {
         young.set({ status: YOUNG_STATUS.WAITING_LIST });

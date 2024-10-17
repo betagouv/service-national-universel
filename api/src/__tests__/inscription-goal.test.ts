@@ -3,7 +3,7 @@ import getAppHelper from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
 import { createInscriptionGoal } from "./helpers/inscriptionGoal";
-import { FUNCTIONAL_ERRORS, YOUNG_STATUS } from "snu-lib";
+import { department2region, FUNCTIONAL_ERRORS, YOUNG_STATUS } from "snu-lib";
 import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
 
@@ -56,10 +56,21 @@ describe("Inscription Goal", () => {
       expect(res.body.data).toBeGreaterThan(0);
       expect(res.body.data).toBeLessThan(1);
     });
-    it("should return filling at 1 when goal reached", async () => {
+    it("should return filling at 1 when department goal is reached", async () => {
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ max: 1 }));
       await createYoungHelper(
         getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, department: inscriptionGoal.department, cohort: inscriptionGoal.cohort, cohortId: inscriptionGoal.cohortId }),
+      );
+      const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBe(1);
+    });
+    it("should return filling at 1 when region goal is reached (not department)", async () => {
+      const department = "Loire-Atlantique";
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ department, region: department2region[department], max: 1 }));
+      // jeune dans la region mais pas dans le departement
+      await createYoungHelper(
+        getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, cohort: inscriptionGoal.cohort, cohortId: inscriptionGoal.cohortId }),
       );
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(200);

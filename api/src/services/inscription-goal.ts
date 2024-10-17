@@ -55,6 +55,10 @@ export const getCompletionObjectifStats = async (department: string, cohort: str
     department: completionObjectifDepartement,
     region: completionObjectifRegion,
     isAtteint: completionObjectifDepartement.isAtteint || completionObjectifRegion.isAtteint,
+    tauxRemplissage:
+      completionObjectifRegion.tauxRemplissage > completionObjectifDepartement.tauxRemplissage
+        ? completionObjectifRegion.tauxRemplissage
+        : completionObjectifDepartement.tauxRemplissage,
     tauxLimiteRemplissage: FILLING_RATE_LIMIT,
   };
 };

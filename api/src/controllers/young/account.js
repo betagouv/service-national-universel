@@ -12,7 +12,7 @@ const { capture } = require("../../sentry");
 const { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const validator = require("validator");
 const { validateParents } = require("../../utils/validator");
-const { getCompletionObjectifDepartement } = require("../../services/inscription-goal");
+const { getCompletionObjectifStats } = require("../../services/inscription-goal");
 
 router.put("/profile", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -108,7 +108,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
       // Check if cohort goal is reached
       if (isEligible) {
-        const completionObjectif = await getCompletionObjectifDepartement(value.department, cohort);
+        const completionObjectif = await getCompletionObjectifStats(value.department, cohort);
         isGoalReached = completionObjectif.isAtteint;
       }
 
