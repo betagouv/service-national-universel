@@ -25,7 +25,7 @@ const getSchoolYear = (etablissement?: EtablissementDto) => {
 
 const getCohortYear = (cohort?: CohortType & { dateStart?: string }) => cohort?.dateStart?.slice(0, 4);
 
-const getCohortPeriod = (cohort?: CohortType, withBold = false) => {
+const getCohortPeriod = (cohort?: Pick<CohortType, "name" | "dateStart" | "dateEnd">, withBold = false) => {
   if (!cohort?.dateStart || !cohort?.dateEnd) return cohort?.name || cohort;
 
   if (!shouldDisplayDateByCohortName(cohort.name)) {
