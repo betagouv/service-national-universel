@@ -1,12 +1,13 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
-import { departmentList, InscriptionGoalType, regionList } from "snu-lib";
+import { department2region, departmentList, InscriptionGoalType } from "snu-lib";
 
 export default function getNewInscriptionGoalFixture(object: Partial<InscriptionGoalType> = {}): Partial<InscriptionGoalType> {
+  const department = faker.helpers.arrayElement(departmentList);
   return {
-    region: faker.helpers.arrayElement(regionList),
-    department: faker.helpers.arrayElement(departmentList),
+    department,
+    region: department2region[department],
     max: faker.number.int({ min: 11, max: 123 }),
     cohortId: new ObjectId().toString(),
     cohort: faker.lorem.words(),

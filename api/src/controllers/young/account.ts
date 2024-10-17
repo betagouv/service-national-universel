@@ -1,20 +1,22 @@
-const express = require("express");
-const Joi = require("joi");
-const passport = require("passport");
-const crypto = require("crypto");
-const { ERRORS, notifDepartmentChange, YOUNG_STATUS_PHASE1, YOUNG_STATUS } = require("../../utils");
-const { getQPV, getDensity } = require("../../geo");
-const router = express.Router({ mergeParams: true });
-const { YoungModel, CohortModel } = require("../../models");
-const { serializeYoung } = require("../../utils/serializer");
-const { getFilteredSessions } = require("../../utils/cohort");
-const { capture } = require("../../sentry");
-const { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES } = require("snu-lib");
-const validator = require("validator");
-const { validateParents } = require("../../utils/validator");
-const { getCompletionObjectifDepartement } = require("../../services/inscription-goal");
+import express from "express";
+import Joi from "joi";
+import passport from "passport";
+import crypto from "crypto";
+import { UserRequest } from "../request";
+import { ERRORS, notifDepartmentChange, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from "../../utils";
+import { getQPV, getDensity } from "../../geo";
+import { YoungModel, CohortModel } from "../../models";
+import { serializeYoung } from "../../utils/serializer";
+import { getFilteredSessions } from "../../utils/cohort";
+import { capture } from "../../sentry";
+import { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES } from "snu-lib";
+import validator from "validator";
+import { validateParents } from "../../utils/validator";
+import { getCompletionObjectifs } from "../../services/inscription-goal";
 
-router.put("/profile", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+const router = express.Router({ mergeParams: true });
+
+router.put("/profile", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { value, error } = Joi.object({
       gender: Joi.string().valid("male", "female").required(),
@@ -49,7 +51,7 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
 //    - mon statut d’inscription est “validée sur liste principale” OU “validée sur liste complémentaire” ET
 //    - mon statut phase 1 “en attente d’affectation”
 
-router.put("/address", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/address", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { value, error } = Joi.object({
       addressVerified: Joi.string().trim().valid("true").required(),
@@ -81,7 +83,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
     const currentCohort = await CohortModel.findById(young.cohortId);
 
     // If the young is affected and the cohort is not ended address can't be updated.
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && new Date(currentCohort.dateEnd).valueOf() > Date.now()) {
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && currentCohort && new Date(currentCohort.dateEnd).valueOf() > Date.now()) {
       return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
     }
 
@@ -93,7 +95,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
     ) {
       // @todo eligibility is based on address, should be based on school address.
-      const availableSessions = await getFilteredSessions({ grade: young.grade, birthdateAt: young.birthdateAt, ...value }, req.headers["x-user-timezone"] || null);
+      const availableSessions = await getFilteredSessions({ grade: young.grade, birthdateAt: young.birthdateAt, ...value }, Number(req.headers["x-user-timezone"]) || null);
 
       const cohort = value.cohort ? value.cohort : young.cohort;
       const status = value.status ? value.status : young.status;
@@ -108,7 +110,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
       // Check if cohort goal is reached
       if (isEligible) {
-        const completionObjectif = await getCompletionObjectifDepartement(value.department, cohort);
+        const completionObjectif = await getCompletionObjectifs(value.department, cohort);
         isGoalReached = completionObjectif.isAtteint;
       }
 
@@ -152,7 +154,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
   }
 });
 
-router.put("/parents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/parents", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { value, error } = validateParents(req.body, true);
 
@@ -185,6 +187,7 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
       young.parent2LastName = "";
       young.parent2FirstName = "";
       young.parent2Phone = "";
+      // @ts-expect-error nullable field
       young.parent2PhoneZone = null;
       young.parent2Email = "";
       young.parent2Inscription2023Token = "";
@@ -200,7 +203,7 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
   }
 });
 
-router.put("/mission-preferences", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/mission-preferences", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { value, error } = Joi.object({
       domains: Joi.array().items(Joi.string()).required(),
@@ -238,4 +241,4 @@ router.put("/mission-preferences", passport.authenticate("young", { session: fal
   }
 });
 
-module.exports = router;
+export default router;

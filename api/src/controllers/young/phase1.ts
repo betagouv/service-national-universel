@@ -28,7 +28,7 @@ import { YoungModel, SessionPhase1Model, CohesionCenterModel, PointDeRassembleme
 import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "../../utils";
 import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
 import { UserRequest } from "../request";
-import { getCompletionObjectifStats } from "../../services/inscription-goal";
+import { getCompletionObjectifs } from "../../services/inscription-goal";
 
 const router = express.Router({ mergeParams: true });
 
@@ -90,7 +90,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (young.status === "WAITING_LIST") {
       // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
       const departement = getDepartmentForEligibility(young);
-      const completionObjectif = await getCompletionObjectifStats(departement, cohort.name);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
       if (completionObjectif.isAtteint) {
         return res
           .status(400)

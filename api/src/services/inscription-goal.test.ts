@@ -1,4 +1,4 @@
-import { FILLING_RATE_LIMIT, getCompletionObjectifDepartement, getCompletionObjectifStats } from "./inscription-goal";
+import { FILLING_RATE_LIMIT, getCompletionObjectifDepartement, getCompletionObjectifs } from "./inscription-goal";
 import { YoungModel, InscriptionGoalModel } from "../models";
 import { FUNCTIONAL_ERRORS } from "snu-lib";
 
@@ -47,7 +47,7 @@ describe("getCompletionObjectifDepartement", () => {
   });
 });
 
-describe("getCompletionObjectifStats", () => {
+describe("getCompletionObjectifs", () => {
   it("should return the correct inscription goal", async () => {
     const department = "Test Department";
     const cohort = "Test Cohort";
@@ -61,7 +61,7 @@ describe("getCompletionObjectifStats", () => {
     InscriptionGoalModel.findOne = jest.fn().mockResolvedValue({ max });
     InscriptionGoalModel.aggregate = jest.fn().mockResolvedValue([{ total: max }]);
 
-    const stats = await getCompletionObjectifStats(department, cohort);
+    const stats = await getCompletionObjectifs(department, cohort);
 
     expect(stats.department.jeunesCount).toBe(count);
     expect(stats.department.objectif).toBe(max);
@@ -80,6 +80,6 @@ describe("getCompletionObjectifStats", () => {
     InscriptionGoalModel.findOne = jest.fn().mockResolvedValue(null);
     InscriptionGoalModel.aggregate = jest.fn().mockResolvedValue([]);
 
-    await expect(getCompletionObjectifStats(department, cohort)).rejects.toThrow(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
+    await expect(getCompletionObjectifs(department, cohort)).rejects.toThrow(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
   });
 });

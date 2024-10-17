@@ -109,7 +109,7 @@ import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
 import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
-import { getCompletionObjectifStats } from "../services/inscription-goal";
+import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
 
 const router = express.Router();
@@ -534,7 +534,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
       const departement = getDepartmentForEligibility(young);
-      const completionObjectif = await getCompletionObjectifStats(departement, cohort.name);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
       if (completionObjectif.isAtteint) {
         return res
           .status(400)

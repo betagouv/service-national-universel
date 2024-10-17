@@ -48,13 +48,17 @@ export const getCompletionObjectifDepartement = async (department: string, cohor
 };
 
 // Vérification des objectifs pour un département et la région associée
-export const getCompletionObjectifStats = async (department: string, cohort: string) => {
+export const getCompletionObjectifs = async (department: string, cohort: string) => {
   const completionObjectifDepartement = await getCompletionObjectifDepartement(department, cohort);
   const completionObjectifRegion = await getCompletionObjectifRegion(department2region[department], cohort);
   return {
     department: completionObjectifDepartement,
     region: completionObjectifRegion,
     isAtteint: completionObjectifDepartement.isAtteint || completionObjectifRegion.isAtteint,
+    tauxRemplissage:
+      completionObjectifRegion.tauxRemplissage > completionObjectifDepartement.tauxRemplissage
+        ? completionObjectifRegion.tauxRemplissage
+        : completionObjectifDepartement.tauxRemplissage,
     tauxLimiteRemplissage: FILLING_RATE_LIMIT,
   };
 };

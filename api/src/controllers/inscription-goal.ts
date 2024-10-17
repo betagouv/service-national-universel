@@ -7,7 +7,7 @@ import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS }
 import { capture } from "../sentry";
 import { YoungModel, InscriptionGoalModel } from "../models";
 import { ERRORS } from "../utils";
-import { getCompletionObjectifDepartement } from "../services/inscription-goal";
+import { getCompletionObjectifs } from "../services/inscription-goal";
 import { UserRequest } from "./request";
 
 const router = express.Router();
@@ -101,7 +101,7 @@ router.get("/:cohort/department/:department", passport.authenticate("referent", 
     if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { department, cohort } = params;
-    const completionObjectif = await getCompletionObjectifDepartement(department, cohort);
+    const completionObjectif = await getCompletionObjectifs(department, cohort);
 
     return res.status(200).json({ ok: true, data: completionObjectif.tauxRemplissage });
   } catch (error) {
@@ -123,7 +123,7 @@ router.get("/:cohort/department/:department/reached", passport.authenticate("you
     }
 
     const { department, cohort } = value;
-    const completionObjectif = await getCompletionObjectifDepartement(department, cohort);
+    const completionObjectif = await getCompletionObjectifs(department, cohort);
 
     return res.status(200).send({ ok: true, data: completionObjectif.isAtteint });
   } catch (error) {

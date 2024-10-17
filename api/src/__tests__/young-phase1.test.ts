@@ -20,7 +20,7 @@ import { createPointDeRassemblementHelper } from "./helpers/PlanDeTransport/poin
 import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
 import { createInscriptionGoal } from "./helpers/inscriptionGoal";
 import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
-import { getCompletionObjectifStats } from "../services/inscription-goal";
+import { getCompletionObjectifs } from "../services/inscription-goal";
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
@@ -67,7 +67,7 @@ describe("Young Phase1 Controller", () => {
       await createInscriptionGoal(getNewInscriptionGoalFixture({ department: young.department, region: department2region[young.department!], cohort: young.cohort, max: 1 }));
 
       await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, department: young.department, cohort: young.cohort, cohortId: young.cohortId }));
-      const { department, region, isAtteint } = await getCompletionObjectifStats(young.department!, young.cohort!);
+      const { department, region, isAtteint } = await getCompletionObjectifs(young.department!, young.cohort!);
       expect(department.objectif).toBe(1);
       expect(department.isAtteint).toBe(true);
       expect(region.objectif).toBe(1);
