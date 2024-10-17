@@ -91,7 +91,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
             />
           )}
 
-          {young.statusPhase1 === "NOT_DONE" && user.role !== ROLES.HEAD_CENTER && (
+          {young.statusPhase1 === "NOT_DONE" && user.role === ROLES.ADMIN && (
             <div onClick={() => setModalDispense({ isOpen: true })} className="ml-2 cursor-pointer rounded border-[1px] border-blue-700 px-2.5 py-1.5 font-medium text-blue-700">
               Dispenser le volontaire du séjour
             </div>
