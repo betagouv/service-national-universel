@@ -19,7 +19,7 @@ export default function YoungListHeader({ currentTab, selectAll, onSelectAllChan
   switch (currentTab) {
     case "general":
       return (
-        <tr className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 bg-gray-50">
+        <tr className="flex items-center py-2.5 px-4 text-xs uppercase text-gray-400 bg-gray-50">
           <th className="w-[30%]">Élèves</th>
           <th className="w-[20%]">Cohortes</th>
           <th className="w-[20%]">Classes</th>
