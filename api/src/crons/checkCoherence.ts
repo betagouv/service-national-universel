@@ -62,9 +62,9 @@ export const handler = async () => {
           cohortByNameId: 1,
         },
       },
-    ]).exec()) as { _id: string; cohortId: string; cohort: string; convertedId: string; cohortByNameId: string }[];
+    ])) as { _id: string; cohortId: string; cohort: string; convertedId: string; cohortByNameId: string }[];
     if (cohortIncoherence.length > 0) {
-      const youngsCountByCohort = youngs.reduce((acc, cur) => {
+      const youngsCountByCohort = cohortIncoherence.reduce((acc, cur) => {
         acc[cur.cohort!] = (acc[cur.cohort!] || 0) + 1;
         return acc;
       }, {});
