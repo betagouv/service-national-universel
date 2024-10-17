@@ -7,8 +7,9 @@ import { useDebounce } from "@uidotdev/usehooks";
 import ReactTooltip from "react-tooltip";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import { Badge, Button } from "@snu/ds/admin";
 
-import { useAddress, departmentToAcademy } from "snu-lib";
+import { useAddress, departmentToAcademy, CohesionCenterType } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 
 import { AuthState } from "@/redux/auth/reducer";
@@ -18,7 +19,6 @@ import useDocumentTitle from "@/hooks/useDocumentTitle";
 import api from "@/services/api";
 import { InputText } from "@snu/ds/admin";
 
-import { Center } from "@/types";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import { Title } from "../components/commons";
@@ -39,7 +39,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
   const [errors, setErrors] = React.useState<Error>({});
-  const [data, setData] = useState<Center>({ ...center, pmr: center?.pmr ? center.pmr : "false" });
+  const [data, setData] = useState<CohesionCenterType>({ ...center, pmr: center?.pmr ? center.pmr : "false" });
   useDocumentTitle(`Fiche du centre - ${center?.name}`);
 
   const onSubmit = async () => {
@@ -139,6 +139,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
       />
       <div className="flex items-center justify-between">
         <Title>{data.name}</Title>
+        {data?.deletedAt && <Badge title="Archivé" status="WAITING_CORRECTION" />}
         <div className="flex items-center gap-2">
           {user.role === ROLES.ADMIN ? (
             <div data-tip="" data-for="tooltip-delete">
@@ -147,9 +148,15 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                   <div className="text-[black]">Des sessions sont encore associées au centre</div>
                 </ReactTooltip>
               )}
+              {data?.deletedAt && (
+                <ReactTooltip id="tooltip-delete" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" arrowColor="white">
+                  <div className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Les informations doivent être mises à jour dans le SI SNU</div>
+                </ReactTooltip>
+              )}
 
-              <button
-                className="rounded-lg border-[1px] border-red-600 bg-red-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              <Button
+                title="Supprimer"
+                type="danger"
                 onClick={() =>
                   setModalDelete({
                     isOpen: true,
@@ -158,17 +165,15 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                     onDelete: handleDelete,
                   })
                 }
-                disabled={isLoading || sessions.length !== 0}>
-                Supprimer
-              </button>
+                disabled={isLoading || sessions.length !== 0 || !!data?.deletedAt}></Button>
             </div>
           ) : null}
           {canCreateOrUpdateCohesionCenter(user) ? (
-            <button
-              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
-              onClick={() => setModalVisible(true)}>
-              Rattacher un centre à un séjour
-            </button>
+            <Button
+              title="Rattacher un centre à un séjou"
+              onClick={() => setModalVisible(true)}
+              disabled={!!data?.deletedAt}
+              tooltip="Les informations doivent être mises à jour dans le SI SNU"></Button>
           ) : null}
         </div>
       </div>
@@ -215,9 +220,9 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
               {data.address && (
                 <>
                   <div className="flex items-center gap-3 mt-2">
-                    <InputText name="depCenter" label="Département" className="flex-1" value={data.department} disabled />
+                    <InputText name="depCenter" label="Département" className="flex-1" value={data.department || ""} disabled />
 
-                    <InputText name="regCenter" label="Région" className="flex-1" value={data.region} disabled />
+                    <InputText name="regCenter" label="Région" className="flex-1" value={data.region || ""} disabled />
                   </div>
                   <InputText name="academyCenter" label="Académie" className="flex-1 mb-3" value={"Académie de " + data.academy} disabled />
                 </>
@@ -232,15 +237,15 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium text-gray-900">Détails</div>
                 <div className="flex flex-col gap-2">
-                  <InputText name="typologie" label="Typologie" className="flex-1 mb-2" value={data.typology} disabled />
+                  <InputText name="typologie" label="Typologie" className="flex-1 mb-2" value={data.typology || ""} disabled />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <InputText name="domaine" label="Domaine" className="flex-1 mb-2" value={data.domain} disabled />
+                <InputText name="domaine" label="Domaine" className="flex-1 mb-2" value={data.domain || ""} disabled />
               </div>
               <div className="flex flex-col gap-2">
-                <InputText name="gestionnaire" label="Gestionnaire ou propriétaire" className="flex-1 mb-2" value={data.complement} disabled />
+                <InputText name="gestionnaire" label="Gestionnaire ou propriétaire" className="flex-1 mb-2" value={data.complement || ""} disabled />
               </div>
               <div className="flex flex-col gap-2">
                 <InputText name="capacity" label="Capacité maximale d'accueil" className="flex-1 mb-4" value={data.placesTotal?.toString() || ""} disabled />

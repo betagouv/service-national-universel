@@ -1,4 +1,5 @@
 import { STATUS_CLASSE } from "snu-lib";
+import { ClasseDocument } from "../../../models";
 
 export enum ClasseCohortImportKey {
   SEPT_2024 = "SEPT_2024",
@@ -41,4 +42,10 @@ export interface ClasseCohortImportResult extends ClasseCohortMapped {
   importType?: ClasseImportType;
   result?: "success" | "error";
   error?: "success" | string;
+  updated?: string;
 }
+
+export type AddCohortToClasseResult = {
+  updatedClasse: ClasseDocument;
+  updatedFields: string[];
+};
