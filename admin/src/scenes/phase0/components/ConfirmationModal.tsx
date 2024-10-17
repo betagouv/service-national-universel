@@ -5,7 +5,7 @@ import { BorderButton, PlainButton } from "./Buttons";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   icon?: ReactNode;
   title: string;
   message: string;
