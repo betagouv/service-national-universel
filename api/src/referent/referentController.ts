@@ -112,6 +112,7 @@ import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToL
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
 import { ca } from "date-fns/locale";
+import SNUpport from "../SNUpport";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -1564,6 +1565,21 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     await referent.deleteOne();
     logger.debug(`Referent ${req.params.id} has been deleted`);
+
+    if (referent.role === ROLES.REFERENT_DEPARTMENT || referent.role === ROLES.REFERENT_REGION) {
+      const response = await SNUpport.api(`/v0/referent`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email: referent.email }),
+      });
+
+      if (!response.ok) {
+        logger.error(`Failed to delete referent from SNUPPORT: ${response.statusText}`);
+      }
+    }
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
