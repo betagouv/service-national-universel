@@ -22,10 +22,11 @@ jest.mock("../brevo", () => ({
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Application", () => {
-  afterEach(resetAppAuth);
   describe("POST /application", () => {
+    beforeEach(resetAppAuth);
     it("should return 404 when young is not found", async () => {
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -55,7 +56,7 @@ describe("Application", () => {
       expect(res.status).toBe(200);
       expect(res.body.data.youngId).toBe(young._id.toString());
     });
-    it("should not allow young to apply for pohers", async () => {
+    it("should not allow young to apply for others", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const secondYoung = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));

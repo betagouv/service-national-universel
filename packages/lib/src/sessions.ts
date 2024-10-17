@@ -10,11 +10,11 @@ import { shouldDisplayDateByCohortName } from "./utils/cohortUtils";
 const COHORTS_WITH_JDM_COUNT = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
 
 const getCohortStartDate = (cohort) => {
-  return new Date(cohort.dateStart);
+  return getZonedDate(cohort.dateStart);
 };
 
 const getCohortEndDate = (cohort) => {
-  return new Date(cohort.dateEnd);
+  return getZonedDate(cohort.dateEnd);
 };
 
 const getSchoolYear = (etablissement: EtablissementDto) => {
@@ -33,7 +33,7 @@ const getCohortPeriod = (cohort, withBold = false) => {
 
   // Fonction pour formater les dates avec la localisation française
   const formatDate = (dateString, dateFormat) => {
-    return format(new Date(dateString), dateFormat, { locale: fr });
+    return format(getZonedDate(dateString), dateFormat, { locale: fr });
   };
 
   // Formater les mois et années pour comparaison

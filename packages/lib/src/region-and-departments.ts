@@ -342,26 +342,25 @@ const region2zone = {
   Etranger: "Etranger",
 };
 
-const getRegionForEligibility = (young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip">) => {
+const getRegionForEligibility = (young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "schoolCountry" | "zip">) => {
   let region = young.schooled === "true" ? young.schoolRegion : young.region;
   if (!region) {
-    let dep = young?.schoolDepartment || young?.department || getDepartmentByZip(young?.zip);
-    if (dep && (!isNaN(dep) || ["2A", "2B", "02A", "02B"].includes(dep))) {
-      if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
-      else dep = departmentLookUp[dep];
-    }
+    const dep = getDepartmentForEligibility(young);
     region = department2region[dep] || getRegionByZip(young?.zip);
   }
   if (!region) region = "Etranger";
   return region;
 };
 
-const getDepartmentForEligibility = (young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip"> & { _id?: YoungType["_id"] }) => {
+const getDepartmentForEligibility = (
+  young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "schoolCountry" | "zip"> & { _id?: YoungType["_id"] },
+) => {
   let dep;
-  if (young._id && young.schooled === "true") dep = young.schoolDepartment;
+  const schoolDepartment = !young?.schoolCountry || young.schoolCountry === "FRANCE" ? young?.schoolDepartment : null;
+  if (young._id && young.schooled === "true") dep = schoolDepartment;
   if (young._id && young.schooled === "false") dep = young.department;
 
-  if (!dep) dep = young?.schoolDepartment || young?.department || getDepartmentByZip(young?.zip);
+  if (!dep) dep = schoolDepartment || young?.department || getDepartmentByZip(young?.zip);
   if (dep && (!isNaN(dep) || ["2A", "2B", "02A", "02B"].includes(dep))) {
     if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
     else dep = departmentLookUp[dep];

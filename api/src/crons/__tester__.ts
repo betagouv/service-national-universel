@@ -1,11 +1,11 @@
 // To test run:
-// ts-node ./src/crons/__tester__.js patch/young
+// ts-node ./src/crons/__tester__.ts patch/young
 
 // uncomment when running in local
 // process.env["NODE_CONFIG_DIR"] = "<RELATIVE PATH>/service-national-universel/api/config/";
 
-require("config");
-const { initDB } = require("../mongo");
+import config from "config";
+import { initDB } from "../mongo";
 
 // You need to run in local apps and target the right database (Prod usually)
 
@@ -40,6 +40,11 @@ const { initDB } = require("../mongo");
     case "goal":
       await require("./computeGoalsInscription").handler();
       break;
+    case "check-coherence":
+      await require("./checkCoherence").handler();
+      break;
+    default:
+      console.log("No cron found for " + process.argv[2]);
   }
   process.exit(0);
 })();
