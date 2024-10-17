@@ -10,6 +10,7 @@ import { ERRORS, FUNCTIONAL_ERRORS, ROLES, STATUS_CLASSE } from "snu-lib";
 import { dbClose, dbConnect } from "../helpers/db";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
 import mongoose from "mongoose";
+import { up } from "../../../migrations/20240627123807-sync-appel-a-projet";
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
@@ -70,6 +71,7 @@ ${classe3?._id},""
         cohortCode: cohort.snuId,
         cohortName: cohort.name,
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
+        updated: "cohortId, cohort, status, totalSeats",
       },
       {
         classeId: notExistingClasseId,
