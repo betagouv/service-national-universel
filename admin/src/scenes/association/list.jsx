@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
-import { capture } from "../../sentry";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { ES_NO_LIMIT, ROLES, getDepartmentNumber, translate } from "../../utils";
 import Association from "./components/Association";
@@ -9,8 +7,6 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import { BsDownload } from "react-icons/bs";
 
 export default function List() {
-  const [associations, setAssociations] = useState([]);
-  const [missionsInfo, setMissionsInfo] = useState({});
   const user = useSelector((state) => state.Auth.user);
 
   const [data, setData] = React.useState([]);
@@ -32,68 +28,6 @@ export default function List() {
     },
     { title: "Domaine", name: "activites_lib_theme1", missingLabel: "Non renseignée", translate },
   ];
-
-  useEffect(() => {
-    (async () => {
-      if (associations.length === 0) return;
-      const rnas = associations.map((a) => a.id_rna);
-      const raw = JSON.stringify({
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      terms: { "associationRNA.keyword": rnas },
-                    },
-                    {
-                      terms: { "organizationRNA.keyword": rnas },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        size: ES_NO_LIMIT,
-      });
-
-      const result = {};
-
-      try {
-        const res = await fetch("https://api.api-engagement.beta.gouv.fr/v0/mission/search", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: raw,
-          redirect: "follow",
-        }).then((response) => response.json());
-
-        if (res.hits?.hits?.length > 0) {
-          for (const association of associations) {
-            const hits = res.hits.hits.filter((e) => e._source.associationRNA === association._source.id_rna || e._source.organizationRNA === association._source.id_rna);
-            result[association._id] = {
-              countMissions: hits.length,
-              countPlaces: hits.reduce((prev, curr) => (curr._source.places ? prev + curr._source.places : 0), 0),
-              missions: hits.map((el) => ({ id: el._id, ...el._source })),
-            };
-          }
-        }
-      } catch (err) {
-        capture(err);
-        console.log(err);
-        toastr.error("Erreur lors de la récupération des missions");
-        for (const association of associations) {
-          result[association._id] = {
-            countMissions: 0,
-            countPlaces: 0,
-            missions: [],
-          };
-        }
-      }
-      setMissionsInfo(result);
-    })();
-  }, [associations]);
 
   return (
     <div className="mb-8">
@@ -124,8 +58,6 @@ export default function List() {
                 "Statut juridique": association.statut_juridique || association.identite_lib_forme_juridique,
                 "Domaine d’action": association.activites_lib_theme1,
                 RNA: association.id_rna,
-                "Nombre de mission publiées sur la plateforme": missionsInfo[association._id]?.countMissions || 0,
-                "Nombre de places disponible sur la plateforme": missionsInfo[association._id]?.countPlaces || 0,
                 Mail: association.coordonnees_courriel,
                 Téléphone: association.coordonnees_telephone,
                 "Lien facebook": association.facebook,
@@ -143,7 +75,6 @@ export default function List() {
             route="/elasticsearch/association/search"
             setData={(value) => {
               setData(value);
-              setAssociations(value);
             }}
             filters={filterArray}
             searchPlaceholder="Rechercher par mots clés, nom, ville, description…"
@@ -178,17 +109,7 @@ export default function List() {
                 critères
               </p>
               {data.map((hit) => (
-                <Association
-                  hit={hit}
-                  missionsInfo={
-                    missionsInfo[hit._id] || {
-                      countMissions: 0,
-                      countPlaces: 0,
-                      missions: [],
-                    }
-                  }
-                  key={hit._id}
-                />
+                <Association hit={hit} key={hit._id} />
               ))}
             </div>
           }
