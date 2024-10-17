@@ -37,6 +37,7 @@ const ContractDone = lazy(() => import("./scenes/contract/done"));
 const Espace = lazy(() => import("./Espace"));
 const Inscription2023 = lazy(() => import("./scenes/inscription2023"));
 const Maintenance = lazy(() => import("./scenes/maintenance"));
+const NewSejour = lazy(() => import("./scenes/newSejour/NewSejour"));
 const NonEligible = lazy(() => import("./scenes/noneligible"));
 const OnBoarding = lazy(() => import("./scenes/cle/OnBoarding"));
 const PreInscription = lazy(() => import("./scenes/preinscription"));
@@ -106,6 +107,7 @@ function App() {
               <SentryRoute path="/public-engagements" component={AllEngagements} />
               <SentryRoute path="/merci" component={Thanks} />
               <SentryRoute path="/preinscription" component={PreInscription} />
+              <SentryRoute path="/choisir-un-nouveau-sejour" component={NewSejour} />
 
               <SecureRoute path="/inscription" component={Inscription2023} />
               <SecureRoute path="/reinscription" component={ReInscription} />
