@@ -1,9 +1,9 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, department2region } from "snu-lib";
 
-import { CohortModel, YoungModel } from "../models";
+import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
 import { getCompletionObjectifStats } from "../services/inscription-goal";
 
 import getAppHelper, { resetAppAuth } from "./helpers/app";
@@ -45,6 +45,7 @@ afterAll(dbClose);
 beforeEach(async () => {
   await YoungModel.deleteMany();
   await CohortModel.deleteMany();
+  await InscriptionGoalModel.deleteMany();
 });
 afterEach(resetAppAuth);
 
@@ -124,40 +125,40 @@ describe("Referent", () => {
     });
     it("should not update young if goal reached", async () => {
       const testName = "Juillet 2023";
+      const testDepartment = "Loire-Atlantique";
       const now = new Date();
       const tomorrow = new Date(now);
       tomorrow.setDate(now.getDate() + 1);
       const cohort = await createCohortHelper(getNewCohortFixture({ name: testName, instructionEndDate: tomorrow }));
-      let objectif = 0;
-      try {
-        const { department } = await getCompletionObjectifStats(testName, testName);
-        objectif = department.objectif;
-      } catch {
-        objectif = 0;
-      }
+
       // ajout d'un objectif à 1
       const res = await request(getAppHelper())
         .post(`/inscription-goal/${testName}`)
-        .send([{ department: testName, region: testName, max: objectif + 1 }]);
+        .send([{ department: testDepartment, region: department2region[testDepartment], max: 1 }]);
       expect(res.statusCode).toEqual(200);
-      // ajout d'un jeune au departement sans depassement
 
+      let completionObjectif = await getCompletionObjectifStats(testDepartment, testName);
+      expect(completionObjectif.department.objectif).toBe(1);
+      expect(completionObjectif.isAtteint).toBe(false);
+
+      // ajout d'un jeune au departement sans depassement
       const { response: responseSuccessed, id: youngId } = await createYoungThenUpdate(
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: testName, department: testName, schoolDepartment: testName, cohort: testName, cohortId: cohort._id },
+        { region: testName, department: testDepartment, schoolDepartment: testDepartment, cohort: testName, cohortId: cohort._id },
         { keepYoung: true },
         { role: ROLES.HEAD_CENTER },
       );
       expect(responseSuccessed.statusCode).toEqual(200);
+
       // ajout d'un jeune au departement avec depassement
       let response = (
         await createYoungThenUpdate(
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
+          { region: department2region[testDepartment], department: testDepartment, schoolDepartment: testDepartment, cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
@@ -168,7 +169,7 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
+          { region: department2region[testDepartment], department: testDepartment, schoolDepartment: testDepartment, cohortId: cohort._id },
           undefined,
           { role: ROLES.ADMIN },
         )
@@ -181,7 +182,7 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, cohortId: cohort._id },
+          { region: department2region[testDepartment], department: testDepartment, cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
@@ -192,7 +193,7 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, cohort: cohort.name, cohortId: cohort._id },
+          { region: department2region[testDepartment], department: testDepartment, cohort: cohort.name, cohortId: cohort._id },
           { queryParam: "?forceGoal=1" },
         )
       ).response;
