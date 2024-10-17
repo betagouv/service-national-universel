@@ -6,7 +6,7 @@ import { EtablissementDto } from "./dto";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { shouldDisplayDateByCohortName } from "./utils/cohortUtils";
-import { CohortType } from "src";
+import { CohortType } from "./mongoSchema/cohort";
 
 const COHORTS_WITH_JDM_COUNT = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
 

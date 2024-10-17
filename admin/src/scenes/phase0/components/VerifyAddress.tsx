@@ -20,9 +20,9 @@ interface AddressData {
 }
 
 interface VerifyAddressProps {
-  address: string;
-  zip: string;
-  city: string;
+  address?: string;
+  zip?: string;
+  city?: string;
   onSuccess: (address: AddressData) => void;
   onFail: (address: AddressData) => void;
   disabled?: boolean;
