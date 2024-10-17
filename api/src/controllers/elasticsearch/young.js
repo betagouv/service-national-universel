@@ -380,7 +380,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       }
     }
     if (user.role === ROLES.REFERENT_REGION) {
-      const centers = await CohesionCenterModel.find({ region: user.region });
+      const centers = await CohesionCenterModel.find({ region: user.region, deletedAt: { $exists: false } });
       const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -388,7 +388,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     }
 
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      const centers = await CohesionCenterModel.find({ department: user.department });
+      const centers = await CohesionCenterModel.find({ department: user.department, deletedAt: { $exists: false } });
       const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

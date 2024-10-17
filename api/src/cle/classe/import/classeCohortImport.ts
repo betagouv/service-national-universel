@@ -1,4 +1,5 @@
 import { STATUS_CLASSE } from "snu-lib";
+import { ClasseDocument } from "../../../models";
 
 export enum ClasseCohortImportKey {
   SEPT_2024 = "SEPT_2024",
@@ -20,12 +21,18 @@ export interface ClasseCohortCSV {
   "Session formule": string;
   "Identifiant de la classe engagée": string;
   "Effectif de jeunes concernés": number;
+  "Session : Code de la session"?: string;
+  "Désignation du centre"?: string;
+  "Code point de rassemblement initial"?: string;
 }
 
 export interface ClasseCohortMapped {
   cohortCode?: string;
   classeId: string;
   classeTotalSeats?: number;
+  centerCode?: string;
+  pdrCode?: string;
+  sessionCode?: string;
 }
 
 export interface ClasseCohortImportResult extends ClasseCohortMapped {
@@ -35,4 +42,10 @@ export interface ClasseCohortImportResult extends ClasseCohortMapped {
   importType?: ClasseImportType;
   result?: "success" | "error";
   error?: "success" | string;
+  updated?: string;
 }
+
+export type AddCohortToClasseResult = {
+  updatedClasse: ClasseDocument;
+  updatedFields: string[];
+};

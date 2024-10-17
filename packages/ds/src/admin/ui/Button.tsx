@@ -8,7 +8,8 @@ type Ttype =
   | "tertiary"
   | "wired"
   | "modify"
-  | "cancel";
+  | "cancel"
+  | "danger";
 
 type OwnProps = {
   title: React.ReactNode;
@@ -127,6 +128,13 @@ const getStyles = ({ type }: { type: Ttype }) => {
         base: "text-gray-600 bg-gray-100 hover:bg-gray-200",
         disabled: "text-gray-600/60 bg-gray-100/60",
         loaderColor: "#4b5563",
+      };
+    case "danger":
+      return {
+        native: "h-[38px] py-[9px] text-sm",
+        base: "text-white bg-red-600 hover:bg-red-700",
+        disabled: "text-white bg-red-600/60",
+        loaderColor: "#ffffff",
       };
     default:
       return {

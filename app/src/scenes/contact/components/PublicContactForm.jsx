@@ -14,9 +14,7 @@ import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import MyClass from "@/scenes/cle/MyClass";
-import { useQuery } from "@tanstack/react-query";
-import { fetchClass } from "@/services/classe.service";
-import { validateId } from "@/utils";
+import useClass from "@/scenes/cle/useClass";
 
 export default function PublicContactForm({ category, question, parcours }) {
   const history = useHistory();
@@ -36,15 +34,7 @@ export default function PublicContactForm({ category, question, parcours }) {
   const classeIdFromLink = getClasseIdFromLink(link);
   const classeId = classeIdFromURL || classeIdFromLink;
 
-  const {
-    isPending,
-    isError,
-    data: classe,
-  } = useQuery({
-    queryKey: ["class", classeId],
-    queryFn: () => fetchClass(classeId),
-    enabled: validateId(classeId),
-  });
+  const { isPending, isError, data: classe } = useClass(classeId);
 
   const questions = getQuestions(category, "public", parcours);
 

@@ -111,6 +111,7 @@ import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToL
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
 import { ca } from "date-fns/locale";
+import SNUpport from "../SNUpport";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -823,7 +824,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       youngStatus = YOUNG_STATUS.VALIDATED;
     }
 
-    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] as string);
+    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
@@ -1549,8 +1550,23 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       }
     }
 
-    await referent.remove();
+    await referent.deleteOne();
     logger.debug(`Referent ${req.params.id} has been deleted`);
+
+    if (referent.role === ROLES.REFERENT_DEPARTMENT || referent.role === ROLES.REFERENT_REGION) {
+      const response = await SNUpport.api(`/v0/referent`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email: referent.email }),
+      });
+
+      if (!response.ok) {
+        logger.error(`Failed to delete referent from SNUPPORT: ${response.statusText}`);
+      }
+    }
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

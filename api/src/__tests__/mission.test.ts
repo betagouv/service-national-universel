@@ -1,5 +1,5 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewMissionFixture from "./fixtures/mission";
 import getNewStructureFixture from "./fixtures/structure";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -17,6 +17,7 @@ import getNewCohortFixture from "./fixtures/cohort";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Mission", () => {
   describe("POST /mission", () => {
@@ -49,16 +50,11 @@ describe("Mission", () => {
     });
     it("should return 403 if user can not update mission", async () => {
       const mission = await createMissionHelper({ ...getNewMissionFixture() });
-      const passport = require("passport");
-      passport.user.role = ROLES.VISITOR;
-      let res = await request(getAppHelper()).put("/mission/" + mission._id);
+      let res = await request(getAppHelper({ role: ROLES.VISITOR })).put("/mission/" + mission._id);
       expect(res.statusCode).toEqual(403);
 
-      passport.user.role = ROLES.HEAD_CENTER;
-      res = await request(getAppHelper()).put("/mission/" + mission._id);
+      res = await request(getAppHelper({ role: ROLES.HEAD_CENTER })).put("/mission/" + mission._id);
       expect(res.statusCode).toEqual(403);
-
-      passport.user.role = ROLES.ADMIN;
     });
   });
   describe("GET /mission/:id", () => {
@@ -85,17 +81,12 @@ describe("Mission", () => {
     it("should return application if user is a young", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture());
       const young = await createYoungHelper({ ...getNewYoungFixture(), cohort: cohort.name, cohortId: cohort._id });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
 
       const mission = await createMissionHelper({ ...getNewMissionFixture() });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const res = await request(getAppHelper()).get(`/mission/${mission._id}`);
+      const res = await request(getAppHelper(young)).get(`/mission/${mission._id}`);
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.application.youngId).toEqual(application.youngId);
-
-      passport.user = previous;
     });
   });
 
@@ -191,11 +182,10 @@ describe("Mission", () => {
       const mission = await createMissionHelper(getNewMissionFixture());
       mission.name = "MY NEW NAME";
       await mission.save();
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
-      const res = await request(getAppHelper()).get(`/mission/${mission._id}/patches`).send();
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .get(`/mission/${mission._id}/patches`)
+        .send();
       expect(res.status).toBe(403);
-      passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if mission found with patches", async () => {
       const mission = await createMissionHelper(getNewMissionFixture());

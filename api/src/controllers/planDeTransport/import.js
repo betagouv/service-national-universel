@@ -21,8 +21,8 @@ const scanFile = require("../../utils/virusScanner");
 const { getMimeFromFile } = require("../../utils/file");
 const { validateId } = require("../../utils/validator");
 
-const { validatePdtFile, computeImportSummary } = require("../../pdt/import/pdtImportService");
-const { formatTime } = require("../../pdt/import/pdtImportUtils");
+const { validatePdtFile, computeImportSummary } = require("../../planDeTransport/planDeTransport/import/pdtImportService");
+const { formatTime } = require("../../planDeTransport/planDeTransport/import/pdtImportUtils");
 const { startSession, withTransaction, endSession } = require("../../mongo");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
