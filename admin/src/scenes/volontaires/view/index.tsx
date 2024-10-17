@@ -32,6 +32,7 @@ export default function Index({ ...props }) {
     queryKey: ["young", props.match.params.id],
     queryFn: async () => (await api.get(`/referent/young/${props.match.params.id}`))?.data,
     enabled: !!props.match?.params?.id,
+    refetchOnWindowFocus: false,
   });
   useDocumentTitle(young ? (young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : `${young.firstName} ${young.lastName}`) : "Volontaires");
 
