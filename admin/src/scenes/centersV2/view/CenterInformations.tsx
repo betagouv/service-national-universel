@@ -9,7 +9,7 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { Badge, Button } from "@snu/ds/admin";
 
-import { useAddress, departmentToAcademy } from "snu-lib";
+import { useAddress, departmentToAcademy, CohesionCenterType } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 
 import { AuthState } from "@/redux/auth/reducer";
@@ -19,7 +19,6 @@ import useDocumentTitle from "@/hooks/useDocumentTitle";
 import api from "@/services/api";
 import { InputText } from "@snu/ds/admin";
 
-import { Center } from "@/types";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import { Title } from "../components/commons";
@@ -40,7 +39,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
   const [errors, setErrors] = React.useState<Error>({});
-  const [data, setData] = useState<Center>({ ...center, pmr: center?.pmr ? center.pmr : "false" });
+  const [data, setData] = useState<CohesionCenterType>({ ...center, pmr: center?.pmr ? center.pmr : "false" });
   useDocumentTitle(`Fiche du centre - ${center?.name}`);
 
   const onSubmit = async () => {
