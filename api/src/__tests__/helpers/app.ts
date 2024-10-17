@@ -17,6 +17,7 @@ export function resetAppAuth() {
   passport.user = getNewReferentFixture();
   // @ts-ignore
   passport.user._id = new ObjectId();
+  // @ts-ignore
   passport.authStrategy = undefined;
   // passport.lastTypeCalledOnAuthenticate = undefined;
 }

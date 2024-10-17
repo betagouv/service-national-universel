@@ -95,6 +95,7 @@ const createSession = async (
     cohortId: foundCohort._id,
     cohort: foundCohort.name,
     placesTotal: sessionCenter.sessionPlaces,
+    placesLeft: sessionCenter.sessionPlaces,
     department: foundCenter.department,
     region: foundCenter.region,
     codeCentre: foundCenter.matricule,
