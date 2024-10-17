@@ -15,8 +15,6 @@ import { getFile } from "../../../utils";
 import { readCSVBuffer } from "../../../services/fileService";
 import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
 import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
-import { status } from "../../../../../admin/build/src/utils/index";
-import classe from "../../../emails/cle/classe";
 
 jest.mock("../../../models", () => ({
   CohortModel: { findById: jest.fn() },
