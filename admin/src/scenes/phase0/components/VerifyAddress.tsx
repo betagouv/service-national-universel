@@ -5,6 +5,34 @@ import InfoIcon from "../../../components/InfoIcon";
 import { apiAdress } from "../../../services/api-adresse";
 import { BorderButton } from "./Buttons";
 
+interface AddressData {
+  address: string;
+  zip: string;
+  city: string;
+  department: string;
+  departmentNumber: number;
+  location: {
+    lon: number;
+    lat: number;
+  };
+  region: string;
+  cityCode: string;
+}
+
+interface VerifyAddressProps {
+  address: string;
+  zip: string;
+  city: string;
+  onSuccess: (address: AddressData) => void;
+  onFail: (address: AddressData) => void;
+  disabled?: boolean;
+  isVerified?: boolean;
+  buttonClassName?: string;
+  buttonContainerClassName?: string;
+  verifyButtonText?: string;
+  verifyText?: string;
+}
+
 export default function VerifyAddress({
   address,
   zip,
@@ -17,9 +45,9 @@ export default function VerifyAddress({
   buttonContainerClassName = "",
   verifyButtonText = "Vérifier mon adresse",
   verifyText = "Pour vérifier votre adresse vous devez remplir les champs adresse de résidence, code postal et ville.",
-}) {
+}: VerifyAddressProps) {
   const [loading, setLoading] = useState(false);
-  const [suggestion, setSuggestion] = useState(null);
+  const [suggestion, setSuggestion] = useState<{ ok: boolean; status: string; properties?: { name: string; postcode: string; city: string } } | null>(null);
 
   useEffect(() => {
     setSuggestion(null);
@@ -79,8 +107,8 @@ export default function VerifyAddress({
     return (
       <div className="w-full">
         <b className="mb-8">Est-ce que c&apos;est la bonne adresse ?</b>
-        <p>{suggestion.properties.name}</p>
-        <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
+        <p>{suggestion.properties?.name}</p>
+        <p>{`${suggestion.properties?.postcode}, ${suggestion.properties?.city}`}</p>
         <div className="mt-2 space-y-4">
           <BorderButton
             className="w-full"
@@ -110,7 +138,6 @@ export default function VerifyAddress({
       <div className={buttonContainerClassName}>
         <BorderButton
           className={buttonClassName}
-          disabled={disabled}
           onClick={() => {
             if (disabled || !address || !zip || !city || loading) return;
             getSuggestions(address, city, zip);
