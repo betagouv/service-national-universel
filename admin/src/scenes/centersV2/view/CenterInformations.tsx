@@ -220,9 +220,9 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
               {data.address && (
                 <>
                   <div className="flex items-center gap-3 mt-2">
-                    <InputText name="depCenter" label="Département" className="flex-1" value={data.department} disabled />
+                    <InputText name="depCenter" label="Département" className="flex-1" value={data.department || ""} disabled />
 
-                    <InputText name="regCenter" label="Région" className="flex-1" value={data.region} disabled />
+                    <InputText name="regCenter" label="Région" className="flex-1" value={data.region || ""} disabled />
                   </div>
                   <InputText name="academyCenter" label="Académie" className="flex-1 mb-3" value={"Académie de " + data.academy} disabled />
                 </>
@@ -237,15 +237,15 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
               <div className="flex flex-col gap-2">
                 <div className="text-xs font-medium text-gray-900">Détails</div>
                 <div className="flex flex-col gap-2">
-                  <InputText name="typologie" label="Typologie" className="flex-1 mb-2" value={data.typology} disabled />
+                  <InputText name="typologie" label="Typologie" className="flex-1 mb-2" value={data.typology || ""} disabled />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <InputText name="domaine" label="Domaine" className="flex-1 mb-2" value={data.domain} disabled />
+                <InputText name="domaine" label="Domaine" className="flex-1 mb-2" value={data.domain || ""} disabled />
               </div>
               <div className="flex flex-col gap-2">
-                <InputText name="gestionnaire" label="Gestionnaire ou propriétaire" className="flex-1 mb-2" value={data.complement} disabled />
+                <InputText name="gestionnaire" label="Gestionnaire ou propriétaire" className="flex-1 mb-2" value={data.complement || ""} disabled />
               </div>
               <div className="flex flex-col gap-2">
                 <InputText name="capacity" label="Capacité maximale d'accueil" className="flex-1 mb-4" value={data.placesTotal?.toString() || ""} disabled />
