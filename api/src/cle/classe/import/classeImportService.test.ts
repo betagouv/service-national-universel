@@ -82,6 +82,7 @@ describe("importClasseCohort", () => {
         classeStatus: "OPEN",
         classeTotalSeats: 1,
         importType: ClasseImportType.NEXT_CLASSE_COHORT,
+        updated: "cohort, cohortId, status, totalSeats",
       },
       { result: "error", classeId: "2", cohortCode: "IDF_102", error: ERRORS.COHORT_NOT_FOUND, classeTotalSeats: undefined, importType: ClasseImportType.NEXT_CLASSE_COHORT },
     ];
