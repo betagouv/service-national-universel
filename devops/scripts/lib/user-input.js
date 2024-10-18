@@ -6,6 +6,7 @@ const INTEGER = "int";
 const BOOLEAN = "bool";
 
 const PAD = 40;
+const OPTION = "--";
 
 function parseBool(input) {
   if (input === "1" || input === "true") {
@@ -92,7 +93,7 @@ class UserInput {
     if (!name.match(KEBAB_CASE_PATTERN)) {
       throw new Error(`Invalid format for ${name} : kebab-case expected`);
     }
-    this.opts.push({ type, name: `--${name}`, description });
+    this.opts.push({ type, name, description });
     return this;
   }
 
@@ -133,10 +134,10 @@ class UserInput {
   _parseOptions(source, result) {
     for (const item of source) {
       const { name, value } = parseOption(item);
-      const option = this.opts.find((i) => i.name === name);
+      const option = this.opts.find((i) => OPTION + i.name === name);
       if (option) {
-        const key = camelize(option.name.substring(2));
-        result[key] = parseItem(option.type, option.name, value);
+        const key = camelize(option.name);
+        result[key] = parseItem(option.type, name, value);
       } else {
         throw new Error(`Invalid option: ${name}`);
       }
@@ -190,10 +191,10 @@ class UserInput {
 
     const args = process.argv.slice(2);
 
-    const options = args.filter((arg) => arg.startsWith("-"));
+    const options = args.filter((arg) => arg.startsWith(OPTION));
     this._parseOptions = this._parseOptions(options, result);
 
-    const positionals = args.filter((arg) => !arg.startsWith("-"));
+    const positionals = args.filter((arg) => !arg.startsWith(OPTION));
     this._parsePositionals = this._parsePositionals(positionals, result);
 
     return result;
