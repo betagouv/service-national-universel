@@ -112,14 +112,13 @@ if (require.main === module) {
   - Image Tags not updated since <lifetime> days
   - Containers using an image tag that does not exists anymore`
   )
-    .arg("registryName", "Name of the docker image registry")
-    .arg("containerNamespace", "Container's namespace")
+    .arg("registry-name", "Name of the docker image registry")
+    .arg("container-namespace", "Container's namespace")
     .optInt(
       "lifetime",
-      ["--lifetime"],
       `Number of days without update after which an image tag will be deleted (default: ${DEFAULT_LIFETIME} days)`
     )
-    .optBool("dryRun", ["--dry-run"], "Enable Dry Run mode")
+    .optBool("dry-run", "Enable Dry Run mode")
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .validate();

@@ -45,28 +45,37 @@ function parseOption(arg) {
   const index = arg.indexOf("=");
   if (index === -1) {
     return {
-      key: arg,
+      name: arg,
       value: "true",
     };
   } else {
     return {
-      key: arg.substring(0, index),
+      name: arg.substring(0, index),
       value: arg.substring(index + 1),
     };
   }
 }
+
+function camelize(value) {
+  return value.replace(/-./g, (x) => x[1].toUpperCase());
+}
+
+const KEBAB_CASE_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+const ENV_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 class UserInput {
   constructor(description) {
     this.description = description;
     this.args = [];
     this.opts = [];
-    this.optsIndex = {};
     this.envs = [];
-    this.optBool("help", ["-h", "--help"], "Print command-line options");
+    this.optBool("help", "Print command-line options");
   }
 
   _arg(type, name, description) {
+    if (!name.match(KEBAB_CASE_PATTERN)) {
+      throw new Error(`Invalid format for ${name} : kebab-case expected`);
+    }
     this.args.push({ type, name, description });
     return this;
   }
@@ -79,28 +88,30 @@ class UserInput {
     return this._arg(INTEGER, name, description);
   }
 
-  _opt(type, name, keys, description) {
-    const option = { type, name, keys, description };
-    for (const key of keys) {
-      this.optsIndex[key] = option;
+  _opt(type, name, description) {
+    if (!name.match(KEBAB_CASE_PATTERN)) {
+      throw new Error(`Invalid format for ${name} : kebab-case expected`);
     }
-    this.opts.push(option);
+    this.opts.push({ type, name: `--${name}`, description });
     return this;
   }
 
-  option(name, keys, description) {
-    return this._opt(STRING, name, keys, description);
+  option(name, description) {
+    return this._opt(STRING, name, description);
   }
 
-  optInt(name, keys, description) {
-    return this._opt(INTEGER, name, keys, description);
+  optInt(name, description) {
+    return this._opt(INTEGER, name, description);
   }
 
-  optBool(name, keys, description) {
-    return this._opt(BOOLEAN, name, keys, description);
+  optBool(name, description) {
+    return this._opt(BOOLEAN, name, description);
   }
 
   _env(type, name, description) {
+    if (!name.match(ENV_PATTERN)) {
+      throw new Error(`Invalid format for ${name} : identifier case expected`);
+    }
     this.envs.push({ type, name, description });
     return this;
   }
@@ -121,12 +132,13 @@ class UserInput {
 
   _parseOptions(source, result) {
     for (const item of source) {
-      const { key, value } = parseOption(item);
-      const option = this.optsIndex[key];
+      const { name, value } = parseOption(item);
+      const option = this.opts.find((i) => i.name === name);
       if (option) {
-        result[option.name] = parseItem(option.type, option.name, value);
+        const key = camelize(option.name.substring(2));
+        result[key] = parseItem(option.type, option.name, value);
       } else {
-        throw new Error(`Invalid option: ${key}`);
+        throw new Error(`Invalid option: ${name}`);
       }
     }
   }
@@ -141,7 +153,8 @@ class UserInput {
     let i = 0;
     for (const arg of this.args) {
       const item = source[i];
-      result[arg.name] = parseItem(arg.type, arg.name, item);
+      const key = camelize(arg.name);
+      result[key] = parseItem(arg.type, arg.name, item);
       i += 1;
     }
   }
@@ -160,9 +173,8 @@ class UserInput {
 
     console.log("\nOptions:");
     for (const option of this.opts) {
-      console.log(
-        `  ${option.keys.join(", ").padEnd(PAD)}${option.description}`
-      );
+      const name = option.type === BOOLEAN ? option.name : `${option.name}=...`;
+      console.log(`  ${name.padEnd(PAD)}${option.description}`);
     }
 
     console.log("\nEnvironment variables:");
