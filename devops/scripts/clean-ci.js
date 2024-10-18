@@ -117,12 +117,12 @@ if (require.main === module) {
     .optInt(
       "lifetime",
       ["--lifetime"],
-      `Number of days to keep an image tag (default: ${DEFAULT_LIFETIME} days)`
+      `Number of days without update after which an image tag will be deleted (default: ${DEFAULT_LIFETIME} days)`
     )
     .optBool("dryRun", ["--dry-run"], "Enable Dry Run mode")
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
-    .parse();
+    .validate();
 
   const client = new ScalewayClient(
     input.SCW_SECRET_KEY,

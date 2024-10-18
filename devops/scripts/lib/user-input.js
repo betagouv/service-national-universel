@@ -187,7 +187,7 @@ class UserInput {
     return result;
   }
 
-  parse() {
+  validate() {
     try {
       const result = this._parse();
       if ("help" in result) {
