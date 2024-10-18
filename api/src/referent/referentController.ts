@@ -49,6 +49,7 @@ import {
   isYoung,
   inSevenDays,
   FILE_STATUS_PHASE1,
+  STEPS2023,
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
@@ -824,6 +825,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const { cohort, cohortChangeReason } = value;
 
     let youngStatus = young.status;
+    let inscriptionStep = young.inscriptionStep2023;
+    let reinscriptionStep = young.reinscriptionStep2023;
     if (cohort === "à venir ") {
       youngStatus = getYoungStatus(young) as YoungType["status"];
     }
@@ -855,6 +858,14 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       });
     }
     const cohortModel = await CohortModel.findOne({ name: cohort });
+    if (
+      cohortModel?.type === YOUNG_SOURCE.CLE &&
+      young.status === YOUNG_STATUS.IN_PROGRESS &&
+      (inscriptionStep === STEPS2023.DOCUMENTS || reinscriptionStep === STEPS2023.DOCUMENTS)
+    ) {
+      young.hasStartedReinscription ? (reinscriptionStep = STEPS2023.REPRESENTANTS) : (inscriptionStep = STEPS2023.REPRESENTANTS);
+    }
+
     young.set({
       status: youngStatus,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
@@ -873,6 +884,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         classeId: value.classeId,
         cniFiles: [],
         "files.cniFiles": [],
+        inscriptionStep2023: inscriptionStep,
+        reinscriptionStep2023: reinscriptionStep,
         latestCNIFileExpirationDate: undefined,
         latestCNIFileCategory: undefined,
         cohesionCenterId: classe.cohesionCenterId,
