@@ -1,6 +1,3 @@
-const { getEnv } = require("./lib/env");
-const { ScalewayClient } = require("./lib/scaleway-client");
-
 function buildEndpointIndex(registryEndpoint, images) {
   const index = {};
   for (const image of images) {
@@ -104,9 +101,27 @@ class CleanCI {
 }
 
 if (require.main === module) {
+  const UserInput = require("./lib/user-input");
+  const ScalewayClient = require("./lib/scaleway-client");
+
+  const input = new UserInput()
+    .arg("registryName", "Name of the docker image registry")
+    .arg("containerNamespace", "Container's namespace")
+    .argInt("lifetime", "Lifetime")
+    .optBool("help", ["-h", "--help"], "Print command-line options")
+    .optBool("dryRun", ["--dry-run"], "Enable Dry Run mode")
+    .env("SCW_SECRET_KEY", "Scaleway secret key")
+    .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
+    .parse();
+  console.log(input);
+  return;
   const client = new ScalewayClient(
-    getEnv("SCW_SECRET_KEY"),
-    getEnv("SCW_ORGANIZATION_ID")
+    input.SCW_SECRET_KEY,
+    input.SCW_ORGANIZATION_ID
   );
   new CleanCI(client).run();
 }
+
+module.exports = {
+  CleanCI,
+};

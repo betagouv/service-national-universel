@@ -134,6 +134,4 @@ class ScalewayClient {
   }
 }
 
-module.exports = {
-  ScalewayClient,
-};
+module.exports = ScalewayClient;
