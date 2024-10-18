@@ -10,7 +10,6 @@ import { ERRORS, FUNCTIONAL_ERRORS, ROLES, STATUS_CLASSE } from "snu-lib";
 import { dbClose, dbConnect } from "../helpers/db";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
 import mongoose from "mongoose";
-import { up } from "../../../migrations/20240627123807-sync-appel-a-projet";
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
@@ -26,7 +25,9 @@ jest.mock("passport");
 beforeEach(async () => {
   await CohortModel.deleteMany();
   await ClasseModel.deleteMany();
+  //@ts-ignore
   passport.user.role = ROLES.ADMIN;
+  //@ts-ignore
   passport.user.subRole = "god";
   jest.spyOn(featureServiceModule, "isFeatureAvailable").mockImplementation(() => Promise.resolve(true));
 });
@@ -120,9 +121,9 @@ ${classe3?._id},""
   });
 
   it("should return 403 for non-superadmin role", async () => {
+    //@ts-ignore
     passport.user.role = ROLES.VISITOR;
     const response = await request(getAppHelper()).post("/cle/classe/import/classe-cohort").send(requestBody);
-
     expect(response.status).toEqual(403);
     expect(response.body).toEqual({
       ok: false,
