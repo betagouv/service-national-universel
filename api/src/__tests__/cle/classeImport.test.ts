@@ -72,6 +72,7 @@ ${classe3?._id},""
         cohortName: cohort.name,
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
         updated: "cohortId, cohort, status, totalSeats",
+        error: "",
       },
       {
         classeId: notExistingClasseId,

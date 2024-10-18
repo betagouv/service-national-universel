@@ -6,6 +6,9 @@ import { ClasseDocument, ClasseModel, CohortDocument, CohortModel, YoungModel, P
 import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 import { findCohortBySnuIdOrThrow } from "../../../cohort/cohortService";
 import { logger } from "../../../logger";
+import { errors } from "@elastic/elasticsearch";
+import { status } from "../../../../../admin/build/src/utils/index";
+import StatusPhase1 from "../../../../../admin/build/src/scenes/dashboardV2/components/sejour/StatusPhase1";
 
 export const importClasseCohort = async (filePath: string, classeCohortImportKey: ClasseCohortImportKey, importType: ClasseImportType) => {
   const classeCohortFile = await getFile(filePath);
@@ -20,16 +23,16 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
   for (const classeCohortToImportMapped of classesCohortsToImportMapped) {
     const classeCohortImportResult: ClasseCohortImportResult = { ...classeCohortToImportMapped };
     try {
-      const { updatedClasse, updatedFields }: AddCohortToClasseResult = await addCohortToClasseByCohortSnuId(classeCohortToImportMapped, classeCohortImportKey, importType);
+      const { updatedClasse, updatedFields, error }: AddCohortToClasseResult = await addCohortToClasseByCohortSnuId(classeCohortToImportMapped, classeCohortImportKey, importType);
       classeCohortImportResult.cohortId = updatedClasse.cohortId;
       classeCohortImportResult.cohortName = updatedClasse.cohort;
       classeCohortImportResult.classeStatus = updatedClasse.status;
       classeCohortImportResult.classeTotalSeats = updatedClasse.totalSeats;
       classeCohortImportResult.result = "success";
       classeCohortImportResult.updated = updatedFields.join(", ");
+      classeCohortImportResult.error = error.length ? error.join(", ") : undefined;
     } catch (error) {
       logger.warn(error.stack);
-      classeCohortImportResult.classeTotalSeats = undefined;
       classeCohortImportResult.result = "error";
       classeCohortImportResult.error = error.message;
     } finally {
@@ -50,9 +53,9 @@ export const addCohortToClasseByCohortSnuId = async (
     throw new Error(FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED);
   }
   const cohort = await findCohortBySnuIdOrThrow(classeCohortToImportMapped.cohortCode);
-  const { updatedClasse, updatedFields } = await addCohortToClasse(classeCohortToImportMapped, cohort._id, classeCohortImportKey, importType);
+  const { updatedClasse, updatedFields, error } = await addCohortToClasse(classeCohortToImportMapped, cohort._id, classeCohortImportKey, importType);
 
-  return { updatedClasse, updatedFields };
+  return { updatedClasse, updatedFields, error };
 };
 
 export const addCohortToClasse = async (
@@ -77,6 +80,7 @@ export const addCohortToClasse = async (
   }
 
   let updatedFields: string[] = [];
+  let error: string[] = [];
   if (importType === ClasseImportType.FIRST_CLASSE_COHORT) {
     classe.set({ cohortId: cohortId, cohort: cohort.name, status: STATUS_CLASSE.ASSIGNED, totalSeats: classeCohortToImportMapped.classeTotalSeats });
     updatedFields.push("cohortId", "cohort", "status", "totalSeats");
@@ -85,12 +89,12 @@ export const addCohortToClasse = async (
     await updateClasseForNextCohortOrPdrAndCenter(classe, cohort, classeCohortToImportMapped, classeCohortImportKey, updatedFields);
 
     if (importType === ClasseImportType.PDR_AND_CENTER) {
-      await processSessionPhasePdrAndCenter(classeCohortToImportMapped, classe, updatedFields);
+      await processSessionPhasePdrAndCenter(classeCohortToImportMapped, classe, updatedFields, error);
     }
   }
 
   await classe.save({ fromUser: { firstName: `IMPORT_CLASSE_COHORT_${classeCohortImportKey}` } });
-  return { updatedClasse: classe, updatedFields };
+  return { updatedClasse: classe, updatedFields, error };
 };
 
 export const updateYoungsCohorts = async (classeId: string, cohort: CohortDocument, classeCohortImportKey: ClasseCohortImportKey) => {
@@ -110,40 +114,50 @@ export const updateYoungsCohorts = async (classeId: string, cohort: CohortDocume
   }
 };
 
-export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped: ClasseCohortMapped, classe: ClasseDocument, updatedFields: string[]) => {
-  if (classeCohortToImportMapped.sessionCode) {
-    const session = await SessionPhase1Model.findOne({ sejourSnuId: classeCohortToImportMapped.sessionCode });
-    if (!session) {
-      throw new Error(ERRORS.SESSION_NOT_FOUND);
+export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped: ClasseCohortMapped, classe: ClasseDocument, updatedFields: string[], error: string[]) => {
+  try {
+    if (classeCohortToImportMapped.sessionCode) {
+      const session = await SessionPhase1Model.findOne({ sejourSnuId: classeCohortToImportMapped.sessionCode });
+      if (!session) {
+        error.push(ERRORS.SESSION_NOT_FOUND);
+      } else {
+        classe.set({ sessionId: session._id });
+        updatedFields.push("sessionId");
+
+        // Only search for the cohesion center if there is a sessionCode and session is found
+        if (classeCohortToImportMapped.centerCode) {
+          try {
+            const cohesionCenter = await CohesionCenterModel.findOne({ matricule: classeCohortToImportMapped.centerCode });
+            if (!cohesionCenter) {
+              error.push(ERRORS.COHESION_CENTER_NOT_FOUND);
+            } else {
+              classe.set({ cohesionCenterId: cohesionCenter._id });
+              updatedFields.push("cohesionCenterId");
+
+              // Only search for the PDR if a cohesion center was found
+              if (classeCohortToImportMapped.pdrCode) {
+                try {
+                  const pdr = await PointDeRassemblementModel.findOne({ matricule: classeCohortToImportMapped.pdrCode });
+                  console.log("LAAAA", pdr);
+                  if (!pdr) {
+                    error.push(ERRORS.PDR_NOT_FOUND);
+                  } else {
+                    classe.set({ pointDeRassemblementId: pdr._id, statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
+                    updatedFields.push("pointDeRassemblementId", "statusPhase1");
+                  }
+                } catch (pdrError) {
+                  error.push(`Error finding PDR: ${pdrError.message}`);
+                }
+              }
+            }
+          } catch (centerError) {
+            error.push(`Error finding cohesion center: ${centerError.message}`);
+          }
+        }
+      }
     }
-
-    classe.set({ sessionId: session._id });
-    updatedFields.push("sessionId");
-  }
-
-  if (classeCohortToImportMapped.centerCode) {
-    const cohesionCenter = await CohesionCenterModel.findOne({ matricule: classeCohortToImportMapped.centerCode });
-    if (!cohesionCenter) {
-      throw new Error(ERRORS.COHESION_CENTER_NOT_FOUND);
-    }
-
-    classe.set({ cohesionCenterId: cohesionCenter._id });
-    updatedFields.push("cohesionCenterId");
-  }
-
-  if (classeCohortToImportMapped.pdrCode) {
-    const pdr = await PointDeRassemblementModel.findOne({ matricule: classeCohortToImportMapped.pdrCode });
-    if (!pdr) {
-      throw new Error(ERRORS.PDR_NOT_FOUND);
-    }
-
-    classe.set({ pointDeRassemblementId: pdr._id });
-    updatedFields.push("pointDeRassemblementId");
-  }
-
-  if (classe.sessionId && classe.cohesionCenterId && classe.pointDeRassemblementId) {
-    classe.set({ statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
-    updatedFields.push("statusPhase1");
+  } catch (sessionError) {
+    error.push(`Error finding session: ${sessionError.message}`);
   }
 
   logger.info(
