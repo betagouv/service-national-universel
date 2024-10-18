@@ -1,8 +1,11 @@
-const { env, argv } = require("node:process");
+const process = require("node:process");
+const path = require("node:path");
 
 const STRING = "str";
 const INTEGER = "int";
 const BOOLEAN = "bool";
+
+const PAD = 40;
 
 function parseBool(input) {
   if (input === "1" || input === "true") {
@@ -13,14 +16,10 @@ function parseBool(input) {
   return null;
 }
 
-function parseItem(name, value, type, defaultValue) {
+function parseItem(name, value, type) {
   let _value = value;
   if (!_value) {
-    if (defaultValue === undefined) {
-      throw new Error(`${name} is not set`);
-    } else {
-      _value = defaultValue;
-    }
+    throw new Error(`${name} is not set`);
   }
   switch (type) {
     case STRING:
@@ -58,11 +57,13 @@ function parseOption(arg) {
 }
 
 class UserInput {
-  constructor() {
+  constructor(description) {
+    this.description = description;
     this.args = [];
     this.opts = [];
     this.optsIndex = {};
     this.envs = [];
+    this.optBool("help", ["-h", "--help"], "Print command-line options");
   }
 
   _arg(type, name, description) {
@@ -99,41 +100,106 @@ class UserInput {
     return this._opt(BOOLEAN, name, keys, description);
   }
 
-  _env(type, name, description, defaultValue) {
-    this.envs.push({ type, name, description, default: defaultValue });
+  _env(type, name, description) {
+    this.envs.push({ type, name, description });
     return this;
   }
 
-  env(name, description, defaultValue) {
-    return this._env(STRING, name, description, defaultValue);
+  env(name, description) {
+    return this._env(STRING, name, description);
   }
 
-  envBool(name, description, defaultValue) {
-    return this._env(BOOLEAN, name, description, defaultValue);
+  envBool(name, description) {
+    return this._env(BOOLEAN, name, description);
+  }
+
+  _parseEnvironment(source, result) {
+    for (const env of this.envs) {
+      result[env.name] = parseItem(env.name, source[env.name], env.type);
+    }
+  }
+
+  _parseOptions(source, result) {
+    for (const item of source) {
+      const { key, value } = parseOption(item);
+      const option = this.optsIndex[key];
+      if (option) {
+        result[option.name] = parseItem(option.name, value, option.type);
+      } else {
+        throw new Error(`Invalid option: ${key}`);
+      }
+    }
+  }
+
+  _parsePositionals(source, result) {
+    if (source.length < this.args.length) {
+      throw new Error("Required arguments are missing");
+    }
+    if (source.length > this.args.length) {
+      throw new Error("Too much arguments were provided");
+    }
+    let i = 0;
+    for (const arg of this.args) {
+      const item = source[i];
+      result[arg.name] = parseItem(arg.name, item, arg.type);
+      i += 1;
+    }
+  }
+
+  logUsage() {
+    const argNames = this.args.map((arg) => "<" + arg.name + ">").join(" ");
+    const fileName = path.basename(process.argv[1]);
+    console.log(`Usage: node ${fileName} ${argNames}`);
+
+    console.log(`\n${this.description}`);
+
+    console.log("\nPositional arguments:");
+    for (const arg of this.args) {
+      console.log(`  ${arg.name.padEnd(PAD)}${arg.description}`);
+    }
+
+    console.log("\nOptions:");
+    for (const option of this.opts) {
+      console.log(
+        `  ${option.keys.join(", ").padEnd(PAD)}${option.description}`
+      );
+    }
+
+    console.log("\nEnvironment variables:");
+    for (const env of this.envs) {
+      console.log(`  ${env.name.padEnd(PAD)}${env.description}`);
+    }
+  }
+
+  _parse() {
+    const result = {};
+
+    this._parseEnvironment(process.env, result);
+
+    const args = process.argv.slice(2);
+
+    const options = args.filter((arg) => arg.startsWith("-"));
+    this._parseOptions = this._parseOptions(options, result);
+
+    const positionals = args.filter((arg) => !arg.startsWith("-"));
+    this._parsePositionals = this._parsePositionals(positionals, result);
+
+    return result;
   }
 
   parse() {
-    const result = {};
-    for (const e of this.envs) {
-      result[e.name] = parseItem(e.name, env[e.name], e.type, e.default);
-    }
-    for (const arg of argv.slice(2)) {
-      if (arg.startsWith("-")) {
-        const { key, value } = parseOption(arg);
-        const option = this.optsIndex[key];
-        if (option) {
-          result[option.name] = parseItem(
-            option.name,
-            value,
-            option.type,
-            option.default
-          );
-        } else {
-          throw new Error(`Bad option: ${key}`);
-        }
+    try {
+      const result = this._parse();
+      if ("help" in result) {
+        this.logUsage();
+        process.exit(0);
       }
+      return result;
+    } catch (error) {
+      console.error(error.message);
+      this.logUsage();
+      process.exit(1);
     }
-    return result;
   }
 }
 

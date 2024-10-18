@@ -12,14 +12,17 @@ function parseRegistryEndpoint(endpoint) {
   return { imageEndpoint: parsed[0], tagName: parsed[1] };
 }
 
+const DEFAULT_LIFETIME = 21;
+
 class CleanCI {
   constructor(client, options = {}) {
     this.client = client;
-    this.registryName = options.registryName ?? "snu-ci";
-    this.containerNamespace = options.containerNamespace ?? "snu-custom";
+    this.registryName = options.registryName;
+    this.containerNamespace = options.containerNamespace;
     this.dryRun = options.dryRun ?? true;
 
-    const lifetimeMs = options.lifetimeMs ?? 3 * 7 * 24 * 3600000; // 3 weeks
+    const lifetimeDays = options.lifetime ?? DEFAULT_LIFETIME;
+    const lifetimeMs = lifetimeDays * 24 * 3600000;
     this.limit = new Date(Date.now() - lifetimeMs).toISOString();
   }
 
@@ -104,22 +107,28 @@ if (require.main === module) {
   const UserInput = require("./lib/user-input");
   const ScalewayClient = require("./lib/scaleway-client");
 
-  const input = new UserInput()
+  const input = new UserInput(
+    `Sequentially delete the following resources:
+  - Image Tags not updated since <lifetime> days
+  - Containers using an image tag that does not exists anymore`
+  )
     .arg("registryName", "Name of the docker image registry")
     .arg("containerNamespace", "Container's namespace")
-    .argInt("lifetime", "Lifetime")
-    .optBool("help", ["-h", "--help"], "Print command-line options")
+    .optInt(
+      "lifetime",
+      ["--lifetime"],
+      `Number of days to keep an image tag (default: ${DEFAULT_LIFETIME} days)`
+    )
     .optBool("dryRun", ["--dry-run"], "Enable Dry Run mode")
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .parse();
-  console.log(input);
-  return;
+
   const client = new ScalewayClient(
     input.SCW_SECRET_KEY,
     input.SCW_ORGANIZATION_ID
   );
-  new CleanCI(client).run();
+  new CleanCI(client, input).run();
 }
 
 module.exports = {
