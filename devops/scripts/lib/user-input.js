@@ -190,7 +190,7 @@ class UserInput {
   validate() {
     try {
       const result = this._parse();
-      if ("help" in result) {
+      if (result["help"]) {
         this.logUsage();
         process.exit(0);
       }
