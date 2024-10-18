@@ -847,7 +847,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!youngCanWithdraw(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+    const cohort = await CohortModel.findOne({ name: young.cohort });
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
     const inscriptionStatus = ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young.status!);
 
@@ -879,7 +879,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     // If they are CLE, we notify the class referent.
     try {
-      if (young.cohort === YOUNG_SOURCE.CLE) {
+      if (cohort?.type === YOUNG_SOURCE.CLE) {
         const referent = await ReferentModel.findOne({ role: ROLES.REFERENT_CLASSE, classeId: young.classeId });
         if (referent) {
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
@@ -888,6 +888,10 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
           });
         }
       }
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.WITHDRAWN, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { raisondesistement: withdrawnReason },
+      });
     } catch (e) {
       capture(e);
     }
