@@ -39,6 +39,7 @@
     "history": "^4.9.0",
     "i18n-iso-countries": "7.5.0",
     "libphonenumber-js": "^1.10.28",
+    "lodash.debounce": "^4.0.8",
     "password-validator": "5.3.0",
     "query-string": "6.14.1",
     "react": "18.2.0",

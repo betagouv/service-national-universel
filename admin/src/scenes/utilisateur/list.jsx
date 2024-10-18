@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { HiHome } from "react-icons/hi";
+import debounce from "lodash/debounce";
 
 import dayjs from "@/utils/dayjs.utils";
 import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
@@ -76,18 +77,28 @@ export default function List() {
       : null,
   ].filter(Boolean);
 
+  const fetchStructures = debounce(async () => {
+    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) return;
+    const { data, ok } = await api.get("/structure");
+    if (!ok) {
+      toastr.error("Erreur lors de la récupération des structures");
+      return;
+    }
+    setStructures(data);
+  }, 300);
+
+  const fetchDepartmentService = debounce(async () => {
+    const { data, ok } = await api.get(`/department-service`);
+    if (!ok) {
+      toastr.error("Erreur lors de la récupération des services départementaux");
+      return;
+    }
+    setServices(data);
+  }, 300);
+
   useEffect(() => {
-    (async () => {
-      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) return;
-      const { data, ok } = await api.get("/structure");
-      if (!ok) return;
-      setStructures(data);
-    })();
-    (async () => {
-      const { data, ok } = await api.get(`/department-service`);
-      if (!ok) return;
-      setServices(data);
-    })();
+    fetchStructures();
+    fetchDepartmentService();
   }, []);
 
   if (user.role === ROLES.HEAD_CENTER && !sessionPhase1) return <Loader />;
