@@ -16,7 +16,7 @@ function parseBool(input) {
   return null;
 }
 
-function parseItem(name, value, type) {
+function parseItem(type, name, value) {
   let _value = value;
   if (!_value) {
     throw new Error(`${name} is not set`);
@@ -115,7 +115,7 @@ class UserInput {
 
   _parseEnvironment(source, result) {
     for (const env of this.envs) {
-      result[env.name] = parseItem(env.name, source[env.name], env.type);
+      result[env.name] = parseItem(env.type, env.name, source[env.name]);
     }
   }
 
@@ -124,7 +124,7 @@ class UserInput {
       const { key, value } = parseOption(item);
       const option = this.optsIndex[key];
       if (option) {
-        result[option.name] = parseItem(option.name, value, option.type);
+        result[option.name] = parseItem(option.type, option.name, value);
       } else {
         throw new Error(`Invalid option: ${key}`);
       }
@@ -141,7 +141,7 @@ class UserInput {
     let i = 0;
     for (const arg of this.args) {
       const item = source[i];
-      result[arg.name] = parseItem(arg.name, item, arg.type);
+      result[arg.name] = parseItem(arg.type, arg.name, item);
       i += 1;
     }
   }
