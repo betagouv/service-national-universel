@@ -49,7 +49,13 @@ describe("Inscription Goal", () => {
     it("should return corresponding filling rate when young exists", async () => {
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture());
       await createYoungHelper(
-        getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, department: inscriptionGoal.department, cohort: inscriptionGoal.cohort, cohortId: inscriptionGoal.cohortId }),
+        getNewYoungFixture({
+          status: YOUNG_STATUS.VALIDATED,
+          department: inscriptionGoal.department,
+          region: inscriptionGoal.region,
+          cohort: inscriptionGoal.cohort,
+          cohortId: inscriptionGoal.cohortId,
+        }),
       );
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(200);
@@ -59,7 +65,13 @@ describe("Inscription Goal", () => {
     it("should return filling at 1 when department goal is reached", async () => {
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ max: 1 }));
       await createYoungHelper(
-        getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, department: inscriptionGoal.department, cohort: inscriptionGoal.cohort, cohortId: inscriptionGoal.cohortId }),
+        getNewYoungFixture({
+          status: YOUNG_STATUS.VALIDATED,
+          department: inscriptionGoal.department,
+          region: inscriptionGoal.region,
+          cohort: inscriptionGoal.cohort,
+          cohortId: inscriptionGoal.cohortId,
+        }),
       );
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(200);

@@ -54,11 +54,9 @@ export const getCompletionObjectifs = async (department: string, cohort: string)
   return {
     department: completionObjectifDepartement,
     region: completionObjectifRegion,
-    isAtteint: completionObjectifDepartement.isAtteint || completionObjectifRegion.isAtteint,
-    tauxRemplissage:
-      completionObjectifRegion.tauxRemplissage > completionObjectifDepartement.tauxRemplissage
-        ? completionObjectifRegion.tauxRemplissage
-        : completionObjectifDepartement.tauxRemplissage,
+    // uniquement la région est utilisé pour la completion des objectifs
+    isAtteint: completionObjectifRegion.isAtteint,
+    tauxRemplissage: completionObjectifRegion.tauxRemplissage,
     tauxLimiteRemplissage: FILLING_RATE_LIMIT,
   };
 };

@@ -92,9 +92,10 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       const departement = getDepartmentForEligibility(young);
       const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
       if (completionObjectif.isAtteint) {
-        return res
-          .status(400)
-          .send({ ok: false, code: completionObjectif.department.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED });
+        return res.status(400).send({
+          ok: false,
+          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
+        });
       }
       young.set({ status: "VALIDATED" });
     }

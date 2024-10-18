@@ -4,7 +4,7 @@ const { ObjectId } = Types;
 
 import { department2region, FUNCTIONAL_ERRORS, YOUNG_STATUS } from "snu-lib";
 
-import { InscriptionGoalModel, LigneBusModel } from "../models";
+import { InscriptionGoalModel, LigneBusModel, YoungModel } from "../models";
 
 import { dbConnect, dbClose } from "./helpers/db";
 import getAppHelper from "./helpers/app";
@@ -25,6 +25,7 @@ import { getCompletionObjectifs } from "../services/inscription-goal";
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 beforeEach(async () => {
+  await YoungModel.deleteMany({});
   await InscriptionGoalModel.deleteMany({});
 });
 
@@ -55,7 +56,14 @@ describe("Young Phase1 Controller", () => {
     it("should not update young in waiting list when goal is reached", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "youngCohort", manualAffectionOpenForAdmin: true }));
       const young = await createYoungHelper(
-        getNewYoungFixture({ status: YOUNG_STATUS.WAITING_LIST, cohort: cohort.name, cohortId: cohort._id, department: "Loire-Atlantique", schoolDepartment: "Loire-Atlantique" }),
+        getNewYoungFixture({
+          status: YOUNG_STATUS.WAITING_LIST,
+          cohort: cohort.name,
+          cohortId: cohort._id,
+          department: "Loire-Atlantique",
+          schoolDepartment: "Loire-Atlantique",
+          region: department2region["Loire-Atlantique"],
+        }),
       );
       const sessionPhase1 = await createSessionPhase1(
         getNewSessionPhase1Fixture({ cohort: cohort.name, cohortId: cohort._id, cohesionCenterId: new ObjectId().toString(), department: young.department }),
@@ -64,13 +72,17 @@ describe("Young Phase1 Controller", () => {
         getNewLigneBusFixture({ sessionId: sessionPhase1._id, centerId: sessionPhase1.cohesionCenterId, cohort: sessionPhase1.cohort, cohortId: sessionPhase1.cohortId }),
       );
       const pointDeRassemblement = await createPointDeRassemblementHelper(getNewPointDeRassemblementFixture());
-      await createInscriptionGoal(getNewInscriptionGoalFixture({ department: young.department, region: department2region[young.department!], cohort: young.cohort, max: 1 }));
+      await createInscriptionGoal(getNewInscriptionGoalFixture({ department: young.department, region: young.region, cohort: young.cohort, max: 1 }));
 
-      await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, department: young.department, cohort: young.cohort, cohortId: young.cohortId }));
+      await createYoungHelper(
+        getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, department: young.department, region: young.region, cohort: young.cohort, cohortId: young.cohortId }),
+      );
       const { department, region, isAtteint } = await getCompletionObjectifs(young.department!, young.cohort!);
       expect(department.objectif).toBe(1);
       expect(department.isAtteint).toBe(true);
       expect(region.objectif).toBe(1);
+      expect(region.jeunesCount).toBe(1);
+      expect(region.isAtteint).toBe(true);
       expect(isAtteint).toBe(true);
 
       const response = await request(getAppHelper()).post(`/young/${young._id.toString()}/phase1/affectation`).send({
