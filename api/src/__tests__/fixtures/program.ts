@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { ProgramType } from "snu-lib";
+import { departmentList, ProgramType, regionList } from "snu-lib";
 
 function getNewProgramFixture(): Partial<ProgramType> {
   return {
@@ -12,8 +12,8 @@ function getNewProgramFixture(): Partial<ProgramType> {
     imageFile: "",
     imageString: "",
     type: faker.lorem.sentences(),
-    department: faker.location.state(),
-    region: faker.location.state(),
+    department: faker.helpers.arrayElement(departmentList),
+    region: faker.helpers.arrayElement(regionList),
     visibility: "",
   };
 }

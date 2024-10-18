@@ -4,15 +4,6 @@ const { ObjectId } = Types;
 import { addYears } from "date-fns";
 import { departmentList, regionList, YoungType } from "snu-lib";
 
-function randomDepartment() {
-  const index = Math.floor(Math.random() * departmentList.length);
-  return departmentList[index];
-}
-function randomRegion() {
-  const index = Math.floor(Math.random() * regionList.length);
-  return regionList[index];
-}
-
 export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Partial<YoungType> {
   return {
     firstName: faker.person.firstName(),
@@ -73,8 +64,8 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     zip: faker.location.zipCode(),
     city: faker.location.city(),
     cityCode: faker.location.zipCode(),
-    department: randomDepartment(),
-    region: randomRegion(),
+    department: faker.helpers.arrayElement(departmentList),
+    region: faker.helpers.arrayElement(regionList),
     country: "France",
     location: {
       lat: Number(faker.location.latitude()),
@@ -99,8 +90,8 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     schoolComplementAdresse: "",
     schoolZip: faker.location.zipCode(),
     schoolCity: faker.location.city(),
-    schoolDepartment: randomDepartment(),
-    schoolRegion: randomRegion(),
+    schoolDepartment: faker.helpers.arrayElement(departmentList),
+    schoolRegion: faker.helpers.arrayElement(regionList),
     schoolLocation: {
       lat: Number(faker.location.latitude()),
       lon: Number(faker.location.longitude()),
@@ -117,8 +108,8 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     parent1ComplementAddress: "",
     parent1Zip: faker.location.zipCode(),
     parent1City: faker.location.city(),
-    parent1Department: randomDepartment(),
-    parent1Region: randomRegion(),
+    parent1Department: faker.helpers.arrayElement(departmentList),
+    parent1Region: faker.helpers.arrayElement(regionList),
     parent1Location: {
       lat: Number(faker.location.latitude()),
       lon: Number(faker.location.longitude()),
@@ -134,8 +125,8 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     parent2ComplementAddress: "",
     parent2Zip: faker.location.zipCode(),
     parent2City: faker.location.city(),
-    parent2Department: randomDepartment(),
-    parent2Region: randomRegion(),
+    parent2Department: faker.helpers.arrayElement(departmentList),
+    parent2Region: faker.helpers.arrayElement(regionList),
     parent2Location: {
       lat: Number(faker.location.latitude()),
       lon: Number(faker.location.longitude()),
@@ -150,8 +141,8 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     medicosocialStructureComplementAddress: "",
     medicosocialStructureZip: faker.location.zipCode(),
     medicosocialStructureCity: faker.location.city(),
-    medicosocialStructureDepartment: randomDepartment(),
-    medicosocialStructureRegion: randomRegion(),
+    medicosocialStructureDepartment: faker.helpers.arrayElement(departmentList),
+    medicosocialStructureRegion: faker.helpers.arrayElement(regionList),
     medicosocialStructureLocation: {
       lat: Number(faker.location.latitude()),
       lon: Number(faker.location.longitude()),

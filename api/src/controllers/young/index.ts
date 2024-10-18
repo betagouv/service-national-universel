@@ -55,12 +55,13 @@ import {
   translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
   ReferentType,
-  YoungType,
+  getDepartmentForEligibility,
+  FUNCTIONAL_ERRORS,
 } from "snu-lib";
 import { getFilteredSessions } from "../../utils/cohort";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
-import { getFillingRate, FILLING_RATE_LIMIT } from "../../services/inscription-goal";
+import { getCompletionObjectifs } from "../../services/inscription-goal";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
 import scanFile from "../../utils/virusScanner";
 import emailsEmitter from "../../emails";
@@ -266,6 +267,19 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       obj.etablissementId = classe.etablissementId;
     }
+
+    if (obj.source !== YOUNG_SOURCE.CLE && value.status === YOUNG_STATUS.VALIDATED) {
+      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+      const departement = getDepartmentForEligibility(obj);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      if (completionObjectif.isAtteint) {
+        return res.status(400).send({
+          ok: false,
+          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
+        });
+      }
+    }
+
     //creating IN_PROGRESS for data
     const young = await YoungModel.create({ ...obj, fromUser: req.user });
 
@@ -549,13 +563,13 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     });
 
     if (cohort !== "à venir") {
-      const fillingRate = await getFillingRate(young.department, cohort);
+      const completionObjectif = await getCompletionObjectifs(young.department!, cohort);
 
-      if (fillingRate >= FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.VALIDATED) {
+      if (completionObjectif.isAtteint && young.status === YOUNG_STATUS.VALIDATED) {
         young.set({ status: YOUNG_STATUS.WAITING_LIST });
       }
 
-      if (fillingRate < FILLING_RATE_LIMIT && young.status === YOUNG_STATUS.WAITING_LIST) {
+      if (!completionObjectif.isAtteint && young.status === YOUNG_STATUS.WAITING_LIST) {
         young.set({ status: YOUNG_STATUS.VALIDATED });
       }
     }
@@ -1154,6 +1168,6 @@ router.use("/reinscription", require("./reinscription"));
 router.use("/inscription2023", require("./inscription2023"));
 router.use("/note", require("./note").default);
 router.use("/:id/point-de-rassemblement", require("./point-de-rassemblement"));
-router.use("/account", require("./account"));
+router.use("/account", require("./account").default);
 
 export default router;
