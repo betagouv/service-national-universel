@@ -736,4 +736,23 @@ describe("Young", () => {
       expect(updatedClasse?.seatsTaken).toBe(1);
     });
   });
+
+  describe("POST /young/invite", () => {
+    it("should create a new young user and send an invitation email", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = getNewYoungFixture({ cohortId: cohort._id.toString() });
+
+      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post("/young/invite")
+        .send(young);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty("young");
+      expect(res.body.young).toHaveProperty("invitationToken");
+      expect(res.body.young).toHaveProperty("invitationExpires");
+      expect(res.body.young).toHaveProperty("status", "WAITING_VALIDATION");
+      expect(res.body.young).toHaveProperty("cohort", cohort.name);
+      expect(res.body.young).toHaveProperty("cohortId", cohort._id.toString());
+    });
+  });
 });
