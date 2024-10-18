@@ -174,7 +174,10 @@ class UserInput {
 
     console.log("\nOptions:");
     for (const option of this.opts) {
-      const name = option.type === BOOLEAN ? option.name : `${option.name}=...`;
+      let name = OPTION + option.name;
+      if (option.type !== BOOLEAN) {
+        name += "=...";
+      }
       console.log(`  ${name.padEnd(PAD)}${option.description}`);
     }
 
