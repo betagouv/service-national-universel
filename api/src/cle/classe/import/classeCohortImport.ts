@@ -41,11 +41,12 @@ export interface ClasseCohortImportResult extends ClasseCohortMapped {
   cohortName?: string;
   importType?: ClasseImportType;
   result?: "success" | "error";
-  error?: "success" | string;
+  error?: string;
   updated?: string;
 }
 
 export type AddCohortToClasseResult = {
   updatedClasse: ClasseDocument;
   updatedFields: string[];
+  error: string[];
 };

@@ -1,10 +1,12 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
+import { Types } from "mongoose";
+const { ObjectId } = Types;
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, department2region } from "snu-lib";
 
-import { CohortModel, YoungModel } from "../models";
-import { getInscriptionGoalStats } from "../services/inscription-goal";
+import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
+import { getCompletionObjectifs } from "../services/inscription-goal";
 
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
@@ -26,7 +28,8 @@ import { createFixtureClasse } from "./fixtures/classe";
 import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
-import { ObjectId } from "bson";
+import { createInscriptionGoal } from "./helpers/inscriptionGoal";
+import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -45,6 +48,7 @@ afterAll(dbClose);
 beforeEach(async () => {
   await YoungModel.deleteMany();
   await CohortModel.deleteMany();
+  await InscriptionGoalModel.deleteMany();
 });
 afterEach(resetAppAuth);
 
@@ -101,20 +105,18 @@ describe("Referent", () => {
       }
       return { young, modifiedYoung, response, id: originalYoung._id };
     }
-    it("should not update young if goal not defined", async () => {
+    it("should not update young if goal not defined (null)", async () => {
       const testName = "Juillet 2023";
       const cohort = await createCohortHelper(getNewCohortFixture({ name: testName }));
       // ajout d'un objectif non définie
-      const res = await request(getAppHelper())
-        .post(`/inscription-goal/${testName}`)
-        .send([{ department: testName, region: testName, max: null }]);
-      expect(res.statusCode).toEqual(200);
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, max: null as any }));
+
       // ajout d'un jeune au departement
       const { response, id: youngId } = await createYoungThenUpdate(
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: testName, department: testName, cohort: cohort.name, cohortId: cohort.id },
+        { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort.id },
         { keepYoung: true },
         { role: ROLES.ADMIN },
       );
@@ -122,60 +124,62 @@ describe("Referent", () => {
       expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
       await deleteYoungByIdHelper(youngId);
     });
-    it("should not update young if goal reached", async () => {
+    it("should not update young if department goal reached", async () => {
       const testName = "Juillet 2023";
       const now = new Date();
       const tomorrow = new Date(now);
       tomorrow.setDate(now.getDate() + 1);
       const cohort = await createCohortHelper(getNewCohortFixture({ name: testName, instructionEndDate: tomorrow }));
-      const { count } = await getInscriptionGoalStats(testName, testName);
-      // ajout d'un objectif à 1
-      const res = await request(getAppHelper())
-        .post(`/inscription-goal/${testName}`)
-        .send([{ department: testName, region: testName, max: count + 1 }]);
-      expect(res.statusCode).toEqual(200);
-      // ajout d'un jeune au departement sans depassement
 
+      // ajout d'un objectif à 1
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: testName, max: 1 }));
+
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, testName);
+      expect(completionObjectif.department.objectif).toBe(1);
+      expect(completionObjectif.isAtteint).toBe(false);
+
+      // ajout d'un jeune au departement sans depassement
       const { response: responseSuccessed, id: youngId } = await createYoungThenUpdate(
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: testName, department: testName, schoolDepartment: testName, cohort: testName, cohortId: cohort._id },
+        { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
         { keepYoung: true },
         { role: ROLES.HEAD_CENTER },
       );
       expect(responseSuccessed.statusCode).toEqual(200);
+
       // ajout d'un jeune au departement avec depassement
       let response = (
         await createYoungThenUpdate(
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
+          { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
       // admin: ajout d'un jeune au departement avec depassement
       response = (
         await createYoungThenUpdate(
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
+          { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohortId: cohort._id },
           undefined,
           { role: ROLES.ADMIN },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
       // ajout d'un jeune HZR sur un autre departement sans dépassement
       response = (
         await createYoungThenUpdate(
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, cohortId: cohort._id },
+          { cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
@@ -186,12 +190,34 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, cohort: cohort.name, cohortId: cohort._id },
+          { region: inscriptionGoal.region, department: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
           { queryParam: "?forceGoal=1" },
         )
       ).response;
       expect(response.statusCode).toEqual(200);
       await deleteYoungByIdHelper(youngId);
+    });
+    it("should not update young if region goal reached (not department)", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, cohortId: cohort._id, max: 1 }));
+      // jeune dans la region mais pas dans le departement
+      await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, cohort: cohort.name, cohortId: cohort._id }));
+
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort.name);
+      expect(completionObjectif.department.isAtteint).toBe(false);
+      expect(completionObjectif.region.isAtteint).toBe(true);
+      expect(completionObjectif.isAtteint).toBe(true);
+
+      const response = (
+        await createYoungThenUpdate(
+          {
+            status: YOUNG_STATUS.VALIDATED,
+          },
+          { department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, region: inscriptionGoal.region, cohort: cohort.name, cohortId: cohort._id },
+        )
+      ).response;
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
     });
     it("should return 404 if young not found", async () => {
       const res = await request(getAppHelper()).put(`/referent/young/${notExistingYoungId}`).send();

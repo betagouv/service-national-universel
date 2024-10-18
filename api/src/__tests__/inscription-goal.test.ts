@@ -3,7 +3,9 @@ import getAppHelper from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
 import { createInscriptionGoal } from "./helpers/inscriptionGoal";
-import { FUNCTIONAL_ERRORS } from "snu-lib";
+import { department2region, FUNCTIONAL_ERRORS, YOUNG_STATUS } from "snu-lib";
+import { createYoungHelper } from "./helpers/young";
+import getNewYoungFixture from "./fixtures/young";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -42,6 +44,49 @@ describe("Inscription Goal", () => {
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture());
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(200);
+      expect(res.body.data).toBe(0);
+    });
+    it("should return corresponding filling rate when young exists", async () => {
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture());
+      await createYoungHelper(
+        getNewYoungFixture({
+          status: YOUNG_STATUS.VALIDATED,
+          department: inscriptionGoal.department,
+          region: inscriptionGoal.region,
+          cohort: inscriptionGoal.cohort,
+          cohortId: inscriptionGoal.cohortId,
+        }),
+      );
+      const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeGreaterThan(0);
+      expect(res.body.data).toBeLessThan(1);
+    });
+    it("should return filling at 1 when department goal is reached", async () => {
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ max: 1 }));
+      await createYoungHelper(
+        getNewYoungFixture({
+          status: YOUNG_STATUS.VALIDATED,
+          department: inscriptionGoal.department,
+          region: inscriptionGoal.region,
+          cohort: inscriptionGoal.cohort,
+          cohortId: inscriptionGoal.cohortId,
+        }),
+      );
+      const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBe(1);
+    });
+    it("should return filling at 1 when region goal is reached (not department)", async () => {
+      const department = "Loire-Atlantique";
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ department, region: department2region[department], max: 1 }));
+      // jeune dans la region mais pas dans le departement
+      await createYoungHelper(
+        getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, cohort: inscriptionGoal.cohort, cohortId: inscriptionGoal.cohortId }),
+      );
+      const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBe(1);
     });
     it("should return 400 when goal does not exist", async () => {
       const res = await request(getAppHelper()).get(`/inscription-goal/Unknow/department/Unknow`);

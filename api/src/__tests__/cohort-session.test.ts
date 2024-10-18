@@ -85,7 +85,6 @@ describe("Cohort Session Controller", () => {
         schoolRegion: "",
         birthdateAt: faker.date.past({ years: 3, refDate: addYears(new Date(), -15) }),
         grade: GRADES["2ndeGT"],
-        status: YOUNG_STATUS.REFUSED,
         zip: faker.location.zipCode(),
       };
       // cohort open today, but with timezone not avalaiable
@@ -101,7 +100,7 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const timeZoneOffset = -24 * 3600; // 24 hours in seconds
+      const timeZoneOffset = -24 * 60; // 24 hours in minutes (cf getDateTimeByTimeZoneOffset)
       // avec un header x-user-timezone
       const response = await request(getAppHelper()).post(`/cohort-session/eligibility/2023`).set("x-user-timezone", String(timeZoneOffset)).send(young);
       expect(response.status).toBe(200);

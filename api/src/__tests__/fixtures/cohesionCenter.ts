@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { CohesionCenterDomainEnum, CohesionCenterType, CohesionCenterTypologyEnum } from "snu-lib";
+import { CohesionCenterDomainEnum, CohesionCenterType, CohesionCenterTypologyEnum, departmentList, regionList } from "snu-lib";
 
 function getNewCohesionCenterFixture(object: Partial<CohesionCenterType> = {}): Partial<CohesionCenterType> {
   const placesLeft = 15;
@@ -10,8 +10,8 @@ function getNewCohesionCenterFixture(object: Partial<CohesionCenterType> = {}): 
     address: faker.lorem.word(),
     zip: faker.location.zipCode(),
     city: faker.location.city(),
-    department: faker.location.state(),
-    region: faker.location.state(),
+    department: faker.helpers.arrayElement(departmentList),
+    region: faker.helpers.arrayElement(regionList),
     country: faker.location.country(),
     placesTotal: placesLeft,
     placesLeft: placesLeft,
@@ -31,8 +31,8 @@ function getNewCohesionCenterFixtureV2(object = {}): Partial<CohesionCenterType>
     address: faker.lorem.word(),
     city: faker.location.city(),
     zip: faker.location.zipCode(),
-    department: faker.location.state(),
-    region: faker.location.state(),
+    department: faker.helpers.arrayElement(departmentList),
+    region: faker.helpers.arrayElement(regionList),
     addressVerified: "true",
     placesTotal: 20,
     pmr: "false",
