@@ -210,6 +210,7 @@ class UserInput {
         this.logUsage();
         process.exit(0);
       }
+      delete result["help"];
       return result;
     } catch (error) {
       console.error(error.message);
