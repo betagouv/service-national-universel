@@ -1,19 +1,38 @@
 import React, { useEffect, useState } from "react";
 import Field from "./Field";
-import { ES_NO_LIMIT } from "snu-lib";
 import api from "../../../services/api";
+import { SchoolRAMSESType, YoungType } from "snu-lib";
 
-export default function SchoolEditor({ young, onChange, className, showBackgroundColor = true }) {
+interface SchoolChanges {
+  schoolName?: string;
+  schoolType?: string;
+  schoolAddress?: string;
+  schoolZip?: string;
+  schoolDepartment?: string;
+  schoolRegion?: string;
+  schoolCity?: string;
+  schoolCountry?: string;
+  schoolId?: string;
+}
+
+interface SchoolEditorProps {
+  young: YoungType;
+  className?: string;
+  showBackgroundColor?: boolean;
+  onChange?: (values: SchoolChanges) => void;
+}
+
+export default function SchoolEditor({ young, onChange, className, showBackgroundColor = true }: SchoolEditorProps) {
   const [schoolInFrance, setSchoolInFrance] = useState(true);
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
-  const [schools, setSchools] = useState([]);
+  const [schools, setSchools] = useState<Array<SchoolRAMSESType & { id: string }>>([]);
   const [loadingSchools, setLoadingSchools] = useState(false);
 
   useEffect(() => {
     if (young) {
       console.log("young.schoolCity: ", young.schoolCity);
-      setSchoolInFrance(young.schoolCountry && young.schoolCountry.toUpperCase() === "FRANCE");
+      setSchoolInFrance(!!young.schoolCountry && young.schoolCountry.toUpperCase() === "FRANCE");
     } else {
       setSchoolInFrance(true);
     }
@@ -32,7 +51,7 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
   }, [young.schoolCountry]);
 
   function changeSchoolInFrance(inFrance) {
-    let change = young.schoolCountry === "FRANCE" ? !inFrance : inFrance;
+    const change = young.schoolCountry === "FRANCE" ? !inFrance : inFrance;
     setSchoolInFrance(inFrance);
     if (onChange && change) {
       onChange({
@@ -51,7 +70,7 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
 
   function onLocalChange(field, value) {
     console.log("School Editor: Local Change = ", field, value);
-    let changes = { [field]: value };
+    const changes: SchoolChanges = { [field]: value };
 
     if (field === "schoolCity" && value !== young.schoolCity) {
       if (onChange) {
@@ -83,7 +102,7 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
           changes.schoolType = school.type;
           changes.schoolAddress = school.adresse;
           changes.schoolZip = school.postcode ? school.postcode : school.codeCity;
-          changes.schoolDepartment = school.departmentName ? school.departmentName : school.departement;
+          changes.schoolDepartment = school.departmentName ? school.departmentName : school.department;
           changes.schoolRegion = school.region;
           changes.schoolCity = school.city;
           changes.schoolCountry = school.country;

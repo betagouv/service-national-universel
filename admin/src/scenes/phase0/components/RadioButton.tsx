@@ -1,6 +1,18 @@
 import React from "react";
 
-const RadioButton = ({ options, label, onChange, value: currentValue, readonly = false }) => {
+const RadioButton = ({
+  options,
+  label,
+  onChange,
+  value: currentValue,
+  readonly = false,
+}: {
+  options: { value: string; label: string }[];
+  label?: string;
+  onChange: (value: string) => void;
+  value: string;
+  readonly?: boolean;
+}) => {
   function change(value) {
     if (!readonly && onChange) {
       onChange(value);

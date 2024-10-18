@@ -1,22 +1,33 @@
 import React, { useState } from "react";
 import validator from "validator";
-import { Spinner } from "reactstrap";
+
+import { translate } from "@/utils";
+import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
+import { capture } from "@/sentry";
 import { useHistory, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
 import ReactTooltip from "react-tooltip";
 import { HiInformationCircle } from "react-icons/hi";
 
-import { capture } from "@/sentry";
-import api from "@/services/api";
-import { translate } from "@/utils";
-import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
-import dayjs from "@/utils/dayjs.utils";
-import { CohortService } from "@/services/cohortService";
-
+import {
+  translateGrade,
+  GRADES,
+  YOUNG_STATUS,
+  getCohortPeriod,
+  getCohortYear,
+  isPhoneNumberWellFormated,
+  PHONE_ZONES,
+  YOUNG_SOURCE,
+  getSchoolYear,
+  getDepartmentForEligibility,
+  CohortType,
+  EtablissementDto,
+} from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
+import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
 import RadioButton from "../phase0/components/RadioButton";
+import { Spinner } from "reactstrap";
 
 //Identite
 import Field from "@/components/ui/forms/Field";
@@ -27,19 +38,129 @@ import Check from "@/assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 
+type FormErrors = {
+  temporaryDate?: string;
+  email?: string;
+  phone?: string;
+  parent1Email?: string;
+  parent1Phone?: string;
+  parent2Email?: string;
+  parent2Phone?: string;
+  parent2FirstName?: string;
+  parent2LastName?: string;
+  parent2Status?: string;
+  specificAmenagmentType?: string;
+  address?: string;
+  city?: string;
+  zip?: string;
+  schooled?: string;
+  parent1AllowSNU?: string;
+  acceptCGU?: string;
+  consentment?: string;
+  parentAllowSNU?: string;
+  rulesParent1?: string;
+};
+
+type FormValues = {
+  firstName: string;
+  lastName: string;
+  birthdateAt: Date | null;
+  temporaryDate: Date | null;
+  birthCityZip: string;
+  birthCity: string;
+  gender: string;
+  grade: string;
+  birthCountry: string;
+  email: string;
+  expirationDate: Date | null;
+  phone: string;
+  phoneZone: string;
+  cohort?: string;
+  cohortId?: string;
+  parentStatementOfHonorInvalidId: string;
+  addressVerified: string;
+  country: string;
+  zip: string;
+  city: string;
+  department: string;
+  region: string;
+  address: string;
+  foreignCountry: string;
+  foreignZip: string;
+  foreignCity: string;
+  foreignAddress: string;
+  situation: string;
+  schoolId: string;
+  schoolName: string;
+  schoolType: string;
+  schoolAddress: string;
+  schoolZip: string;
+  schoolDepartment: string;
+  schoolRegion: string;
+  schoolCity: string;
+  schoolCountry: string;
+  schooled: string;
+  employed: string;
+  specificAmenagment: string;
+  specificAmenagmentType: string;
+  specificSituations: string;
+  reducedMobilityAccess: string;
+  handicapInSameDepartment: string;
+  ppsBeneficiary: string;
+  paiBeneficiary: string;
+  allergies: string;
+  consentment: string;
+  parentAllowSNU: string;
+  parent1Status: string;
+  rulesParent1: string;
+  parent1AllowImageRights: string;
+  parent1AllowSNU: string;
+  parent1FirstName: string;
+  hostLastName: string;
+  hostFirstName: string;
+  hostRelationship: string;
+  parent1LastName: string;
+  parent1Email: string;
+  parent1Phone: string;
+  parent1PhoneZone: string;
+  parent1OwnAddress: string;
+  parent1Address: string;
+  parent1City: string;
+  parent1Zip: string;
+  parent1Country: string;
+  classeId?: string;
+  parent2FirstName?: string;
+  parent2LastName?: string;
+  parent2Status?: string;
+  parent2Phone?: string;
+  parent2Email?: string;
+  parent2PhoneZone?: string;
+  parent2AllowImageRights: string;
+  parent2OwnAddress: string;
+  parent2Address: string;
+  parent2Zip: string;
+  parent2City: string;
+  parent2Country: string;
+  frenchNationality: string;
+  acceptCGU?: string;
+  source?: "CLE" | "VOLONTAIRE";
+  etablissement?: EtablissementDto;
+  parent1ValidationDate?: string;
+  parent2ValidationDate?: string;
+};
+
 export default function Create() {
   const history = useHistory();
   const location = useLocation();
   const [selectedRepresentant, setSelectedRepresentant] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [cohorts, setCohorts] = useState([]);
+  const [cohorts, setCohorts] = useState<CohortType[]>([]);
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
-  const user = useSelector((state) => state.Auth.user);
   const classeId = new URLSearchParams(location.search).get("classeId");
 
-  const [errors, setErrors] = useState({});
-  const [values, setValues] = useState({
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [values, setValues] = useState<FormValues>({
     firstName: "",
     lastName: "",
     birthdateAt: null,
@@ -55,7 +176,7 @@ export default function Create() {
     phoneZone: "FRANCE",
     cohort: "",
     parentStatementOfHonorInvalidId: "false",
-    addressVerified: false,
+    addressVerified: "false",
     country: "FRANCE",
     zip: "",
     city: "",
@@ -121,7 +242,7 @@ export default function Create() {
   });
 
   const validate = () => {
-    const errors = {};
+    const errors: FormErrors = {};
     const errorEmpty = "Ne peut être vide";
     const errorEmail = "Adresse email invalide";
     const errorPhone = "Numéro de téléphone invalide";
@@ -178,14 +299,14 @@ export default function Create() {
       errors.parent1Phone = PHONE_ZONES[values.parent1PhoneZone || "AUTRE"].errorMessage;
     }
     //check parent2 if exist
-    const parent2FirstNameEmpty = validator.isEmpty(values.parent2FirstName);
-    const parent2LastNameEmpty = validator.isEmpty(values.parent2LastName);
-    const parent2StatusEmpty = validator.isEmpty(values.parent2Status);
-    const parent2Phone = validator.isEmpty(values.parent2Phone);
+    const parent2FirstNameEmpty = validator.isEmpty(values.parent2FirstName!);
+    const parent2LastNameEmpty = validator.isEmpty(values.parent2LastName!);
+    const parent2StatusEmpty = validator.isEmpty(values.parent2Status!);
+    const parent2Phone = validator.isEmpty(values.parent2Phone!);
     // if 1 of 3 is not empty --> ask for the 3
     if (values.parent2Email !== "" || !parent2FirstNameEmpty || !parent2LastNameEmpty || !parent2StatusEmpty || !parent2Phone) {
       let foundError = false;
-      if (!validator.isEmail(values.parent2Email)) {
+      if (!validator.isEmail(values.parent2Email!)) {
         errors.parent2Email = errorEmail;
         foundError = true;
       }
@@ -219,7 +340,7 @@ export default function Create() {
     // permet de vérifier si l'adresse a été entièrement remplie mais pas vérifiée
     if (!(errors.address || errors.city || errors.zip)) {
       if (values.department === "" || values.region === "") {
-        toastr.error("Vous devez vérifier l'adresse");
+        toastr.error("Vous devez vérifier l'adresse", "");
       }
     }
     if (values.parent1OwnAddress === "true") {
@@ -245,12 +366,12 @@ export default function Create() {
         if (values.schoolCountry === "FRANCE") {
           if (validator.isEmpty(values.schoolCity) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
             errors.schooled = "missing";
-            toastr.error("Des informations sont manquantes au niveau de l'établissement");
+            toastr.error("Des informations sont manquantes au niveau de l'établissement", "");
           }
         } else {
           if (validator.isEmpty(values.schoolCountry) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
             errors.schooled = "missing";
-            toastr.error("Des informations sont manquantes au niveau de l'établissement");
+            toastr.error("Des informations sont manquantes au niveau de l'établissement", "");
           }
         }
       }
@@ -274,7 +395,7 @@ export default function Create() {
 
     if (Object.keys(errors).length > 0) {
       console.log(errors);
-      toastr.error("Le formulaire n'est pas complet");
+      toastr.error("Le formulaire n'est pas complet", "");
     }
     return errors;
   };
@@ -300,8 +421,14 @@ export default function Create() {
     if (classeId) {
       sendData();
     } else {
-      const res = await api.get(`/inscription-goal/${values.cohort}/department/${values.department}`);
-      if (!res.ok) throw new Error(res);
+      // on vérifie la completion des objectifs pour le département
+      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+      const departement = getDepartmentForEligibility(values);
+      const res = await api.get(`/inscription-goal/${values.cohort}/department/${departement}`);
+      if (!res.ok) {
+        toastr.error("Séjour non disponible: ", translate(res.code));
+        return;
+      }
       const fillingRate = res.data;
       if (fillingRate >= 1) {
         setComplememtaryListModalOpen(true);
@@ -311,7 +438,7 @@ export default function Create() {
     }
   };
 
-  const sendData = async (status = YOUNG_STATUS.WAITING_VALIDATION) => {
+  const sendData = async (status: keyof typeof YOUNG_STATUS = YOUNG_STATUS.WAITING_VALIDATION) => {
     try {
       setLoading(true);
       values.addressVerified = values.addressVerified.toString();
@@ -320,7 +447,7 @@ export default function Create() {
       if (!ok) {
         toastr.error("Une erreur s'est produite :", translate(code));
       } else {
-        toastr.success("Le volontaire a bien été créé");
+        toastr.success("Le volontaire a bien été créé", "");
         history.push(`/volontaire/${young._id}`);
       }
     } catch (e) {
@@ -333,7 +460,7 @@ export default function Create() {
   const getClasseCohort = async (classeId) => {
     const { data, ok, code } = await api.get(`/cle/classe/${classeId}`);
     if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-    setValues((prevValues) => ({ ...prevValues, cohort: data.cohort }));
+    setValues((prevValues) => ({ ...prevValues, cohort: data.cohort, cohortId: data.cohortId }));
   };
 
   React.useEffect(() => {
@@ -369,14 +496,15 @@ export default function Create() {
               zip: values.zip,
             };
           }
-          const cohortsAvailable = await CohortService.getEligibilityForYoung({ payload: body });
-          if (cohortsAvailable.length === 0) {
+          const res = await api.post(`/cohort-session/eligibility/2023`, body);
+          if (res.data.msg) return setEgibilityError(res.data.msg);
+          if (res.data.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de séjour disponible.");
           } else {
             setEgibilityError("");
           }
 
-          setCohorts(cohortsAvailable);
+          setCohorts(res.data);
         } catch (e) {
           capture(e);
 
@@ -389,6 +517,8 @@ export default function Create() {
       setCohorts([]);
     }
   }, [values.schoolDepartment, values.department, values.schoolRegion, values.region, values.grade, values.birthdateAt]);
+
+  console.log(values.cohort, values.cohortId);
 
   return (
     <div className="py-4 px-8">
@@ -424,7 +554,7 @@ export default function Create() {
         <div className="ml-8 mb-6 text-lg font-normal">Détails</div>
         <div className={"flex pb-14"}>
           <div className="flex-[1_0_50%] pl-8 pr-14">
-            <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} classeId={classeId} />
+            <Situation values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} classeId={classeId} />
           </div>
           <div className="my-16 flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-14 pr-8">
@@ -456,16 +586,22 @@ export default function Create() {
                 .filter((session) => !session.name.match(/CLE/))
                 .map((session) => (
                   <div
-                    key={session.name}
-                    onClick={() => setFieldValue("cohort", session.name)}
+                    key={session._id}
+                    onClick={() => {
+                      setFieldValue("cohort", session.name);
+                      setFieldValue("cohortId", session._id);
+                    }}
                     className="m-3 flex h-14 w-60 cursor-pointer flex-row items-center justify-start rounded-md border border-[#3B82F6]">
                     <input
                       className="mx-3 rounded-full"
                       type="radio"
                       id="checkboxCohort"
                       name="cohort"
-                      checked={session.name === values.cohort}
-                      onChange={() => setFieldValue("cohort", session.name)}
+                      checked={session._id === values.cohortId}
+                      onChange={() => {
+                        setFieldValue("cohort", session.name);
+                        setFieldValue("cohortId", session._id);
+                      }}
                     />
                     <div>{session.name}</div>
                   </div>
@@ -487,7 +623,7 @@ export default function Create() {
           <div className="relative mb-4 rounded bg-white pt-4 shadow">
             <div className="ml-8 mb-6 text-lg font-normal">Consentements</div>
             <div className={"flex px-8 pb-14"}>
-              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} cohort={values.cohort} />
+              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} cohort={cohorts.find(({ name }) => name === values.cohort)} />
             </div>
           </div>
         )}
@@ -713,7 +849,6 @@ function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
           options={psc1Options}
           // onChange={(value) => onLocalChange("psc1Info", value)}
           onChange={(value, key) => onChangePSC1(key, value)}
-          young={values}
           className="flex-[1_1_50%]"
         />
       </div>
@@ -731,7 +866,6 @@ function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
             label="Nature de l'aménagement spécifique"
             error={errors?.specificAmenagmentType}
             value={values.specificAmenagmentType}
-            mode="edition"
             onChange={(value, name) => handleChange({ target: { name, value } })}
           />
         )}
@@ -754,7 +888,7 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
     { label: "Ami de la famille", value: "Ami de la famille" },
     { label: "Autre", value: "Autre" },
   ];
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
+  const onVerifyAddress = (isConfirmed?: boolean) => (suggestion) => {
     setFieldValue("addressVerified", isConfirmed);
     for (const key in suggestion) {
       if (suggestion[key] !== values[key]) {
@@ -903,7 +1037,6 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
           city={values.city}
           onSuccess={onVerifyAddress(true)}
           onFail={onVerifyAddress()}
-          fromInscription
           verifyButtonText="Vérifier l'adresse"
           verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postal et ville."
           isVerified={values.addressVerified}
@@ -983,7 +1116,6 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
             city={values.city}
             onSuccess={onVerifyAddress(true)}
             onFail={onVerifyAddress()}
-            fromInscription
             verifyButtonText="Vérifier l'adresse"
             verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse de résidence, code postal et ville."
             isVerified={values.addressVerified}
@@ -1004,11 +1136,6 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
     { value: "true", label: translate("true") },
     { value: "false", label: translate("false") },
   ];
-  const user = useSelector((state) => state.Auth.user);
-  const handleChangeBool = (e, value) => {
-    e.target.value = value;
-    handleChange(e);
-  };
 
   const handlePhoneChange = (name) => (value) => {
     handleChange({
@@ -1078,7 +1205,6 @@ function Identite({ values, handleChange, errors, setFieldValue }) {
           label="Nationalité Française"
           value={values.frenchNationality}
           error={errors?.frenchNationality}
-          mode="edition"
           className="mb-[16px]"
           type="select"
           options={nationalityOptions}
@@ -1095,7 +1221,15 @@ const PARENT_STATUS_NAME = {
   mother: "La mère",
   representant: "Le représentant légal",
 };
-function SectionConsentements({ young, setFieldValue, errors, cohort }) {
+
+interface SectionConsentementsProps {
+  young: FormValues;
+  cohort?: CohortType;
+  errors: FormErrors;
+  setFieldValue: (field: string, value: string) => void;
+}
+
+function SectionConsentements({ young, setFieldValue, errors, cohort }: SectionConsentementsProps) {
   const [volontaireConsentement, setVolontaireConsentement] = React.useState({
     acceptCGU1: false,
     consentment1: false,
@@ -1130,14 +1264,14 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
     }
   }, [parent1Consentement]);
 
-  const cohortYear = young.source === YOUNG_SOURCE.CLE ? getSchoolYear(young.etablissement) : getCohortYear(young.cohort);
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? getSchoolYear(young.etablissement) : getCohortYear(cohort as any);
 
   const authorizationOptions = [
     { value: "true", label: "Autorise" },
     { value: "false", label: "N'autorise pas" },
   ];
 
-  const handleVolontaireChange = (name, value) => {
+  const handleVolontaireChange = (name: string, value?: string) => {
     setVolontaireConsentement((prevState) => {
       return {
         ...prevState,
@@ -1146,7 +1280,7 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
     });
   };
 
-  const handleParent1Change = (name) => {
+  const handleParent1Change = (name: string) => {
     setParent1Consentement((prevState) => {
       return {
         ...prevState,
@@ -1155,7 +1289,7 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
     });
   };
 
-  const handleConsentementChange = (name) => {
+  const handleConsentementChange = (name: string) => {
     if (young[name] === "true") {
       setFieldValue(name, "false");
     } else {

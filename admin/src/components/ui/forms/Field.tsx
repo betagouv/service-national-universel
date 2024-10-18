@@ -6,6 +6,26 @@ import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
 import { htmlCleaner } from "snu-lib";
 
+interface FieldProps {
+  type?: string;
+  name?: string;
+  label?: string;
+  placeholder?: string;
+  value: string;
+  onChange?: (value: any, name?: string, e?: any) => void;
+  className?: string;
+  readOnly?: boolean;
+  error?: string;
+  copy?: boolean;
+  bgColor?: string;
+  row?: number;
+  maxLength?: number;
+  dateMode?: string;
+  transformer?: (item: any) => any;
+  options?: Array<any>;
+  filterOnType?: boolean;
+}
+
 export default function Field({
   // Common
   type = "text",
@@ -28,13 +48,21 @@ export default function Field({
   transformer,
   options,
   filterOnType,
-}) {
+}: FieldProps) {
   const [copied, setCopied] = useState(false);
 
   if (type === "date")
     return (
       <div className={className}>
-        <DatePickerInput label={label} placeholder={placeholder} value={value} onChange={(date) => onChange(date, name)} disabled={readOnly} error={error} mode={dateMode} />
+        <DatePickerInput
+          label={label}
+          placeholder={placeholder}
+          value={value}
+          onChange={(date) => onChange?.(date, name)}
+          disabled={readOnly}
+          error={error}
+          mode={dateMode as any}
+        />
       </div>
     );
 
@@ -59,12 +87,12 @@ export default function Field({
 
         {["text", "tel"].includes(type) && (
           <input
-            readOnly={readOnly && "readonly"}
+            readOnly={!!readOnly}
             type={type}
             name={name}
             placeholder={placeholder}
             value={value}
-            onChange={(e) => onChange(e.target.value, name, e)}
+            onChange={(e) => onChange?.(e.target.value, name, e)}
             className={`${!readOnly && !!bgColor && bgColor} w-full`}
           />
         )}
@@ -76,11 +104,10 @@ export default function Field({
             <textarea
               rows={row}
               readOnly={readOnly}
-              type="text"
               name={name}
               placeholder={placeholder}
               value={value}
-              onChange={(e) => onChange(e.target.value, name, e)}
+              onChange={(e) => onChange?.(e.target.value, name, e)}
               className={`w-full text-start ${bgColor} ` + className}
               maxLength={maxLength}
             />
@@ -89,11 +116,10 @@ export default function Field({
         {type === "select" && (
           <SimpleSelect
             value={value}
-            name={name}
             showBackgroundColor={false}
             transformer={transformer}
             options={options}
-            onChange={(value) => onChange(value, name)}
+            onChange={(value) => onChange?.(value, name)}
             filterOnType={filterOnType}
           />
         )}

@@ -110,7 +110,7 @@ const CRONS = [
   cron("syncContactSupport", "15 1 * * *", syncContactSupport.handler),
   cron("mongoMonitoring", "*/5 * * * *", mongoMonitoring.handler),
   cron("classesStatusUpdate", "2 */1 * * *", classesStatusUpdate.handler),
-  cron("checkCoherence", "30 8,13,17 * * *", checkCoherence.handler),
+  cron("checkCoherence", "30 6,11,15 * * *", checkCoherence.handler),
 ];
 
 module.exports = CRONS;

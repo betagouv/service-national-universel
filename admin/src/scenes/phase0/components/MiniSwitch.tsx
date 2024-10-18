@@ -1,6 +1,11 @@
 import React from "react";
 
-export default function MiniSwitch({ value, className }) {
+interface MiniSwitchProps {
+  value: boolean;
+  className?: string;
+}
+
+export default function MiniSwitch({ value, className }: MiniSwitchProps) {
   return (
     <div className={`relative h-[16px] w-[36px] rounded-[36px] ${value ? "bg-[#10B981]" : "bg-[#EF4444]"} ${className}`}>
       <div

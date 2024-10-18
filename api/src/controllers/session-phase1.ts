@@ -775,6 +775,9 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
 
     // --- send template
     const cohort = await CohortModel.findById(session.cohortId);
+    if (!cohort) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     let date = getCohortStartDate(cohort);
 
     await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.FILE_SESSION_REMINDER, {

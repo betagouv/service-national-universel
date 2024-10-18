@@ -1,6 +1,6 @@
 import { getFile } from "../../../utils";
 import { readCSVBuffer } from "../../../services/fileService";
-import { ClasseCohortCSV, ClasseCohortImportKey, ClasseCohortImportResult, ClasseCohortMapped, ClasseImportType } from "./classeCohortImport";
+import { ClasseCohortCSV, ClasseCohortImportKey, ClasseCohortImportResult, ClasseCohortMapped, ClasseImportType, AddCohortToClasseResult } from "./classeCohortImport";
 import { mapClassesCohortsForSept2024 } from "./classeCohortMapper";
 import { ClasseDocument, ClasseModel, CohortDocument, CohortModel, YoungModel, PointDeRassemblementModel, SessionPhase1Model, CohesionCenterModel } from "../../../models";
 import { ERRORS, FUNCTIONAL_ERRORS, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
@@ -20,12 +20,13 @@ export const importClasseCohort = async (filePath: string, classeCohortImportKey
   for (const classeCohortToImportMapped of classesCohortsToImportMapped) {
     const classeCohortImportResult: ClasseCohortImportResult = { ...classeCohortToImportMapped };
     try {
-      const updatedClasse: ClasseDocument = await addCohortToClasseByCohortSnuId(classeCohortToImportMapped, classeCohortImportKey, importType);
+      const { updatedClasse, updatedFields }: AddCohortToClasseResult = await addCohortToClasseByCohortSnuId(classeCohortToImportMapped, classeCohortImportKey, importType);
       classeCohortImportResult.cohortId = updatedClasse.cohortId;
       classeCohortImportResult.cohortName = updatedClasse.cohort;
       classeCohortImportResult.classeStatus = updatedClasse.status;
       classeCohortImportResult.classeTotalSeats = updatedClasse.totalSeats;
       classeCohortImportResult.result = "success";
+      classeCohortImportResult.updated = updatedFields.join(", ");
     } catch (error) {
       logger.warn(error.stack);
       classeCohortImportResult.classeTotalSeats = undefined;
@@ -44,12 +45,14 @@ export const addCohortToClasseByCohortSnuId = async (
   classeCohortToImportMapped: ClasseCohortMapped,
   classeCohortImportKey: ClasseCohortImportKey,
   importType: ClasseImportType,
-) => {
+): Promise<AddCohortToClasseResult> => {
   if (!classeCohortToImportMapped.cohortCode) {
     throw new Error(FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED);
   }
   const cohort = await findCohortBySnuIdOrThrow(classeCohortToImportMapped.cohortCode);
-  return addCohortToClasse(classeCohortToImportMapped, cohort._id, classeCohortImportKey, importType);
+  const { updatedClasse, updatedFields } = await addCohortToClasse(classeCohortToImportMapped, cohort._id, classeCohortImportKey, importType);
+
+  return { updatedClasse, updatedFields };
 };
 
 export const addCohortToClasse = async (
@@ -57,7 +60,7 @@ export const addCohortToClasse = async (
   cohortId: string,
   classeCohortImportKey: ClasseCohortImportKey,
   importType: ClasseImportType,
-) => {
+): Promise<AddCohortToClasseResult> => {
   if (!classeCohortToImportMapped.classeId) {
     throw new Error(FUNCTIONAL_ERRORS.NO_CLASSE_ID_PROVIDED);
   }
@@ -73,19 +76,21 @@ export const addCohortToClasse = async (
     throw new Error(ERRORS.CLASSE_NOT_FOUND);
   }
 
+  let updatedFields: string[] = [];
   if (importType === ClasseImportType.FIRST_CLASSE_COHORT) {
     classe.set({ cohortId: cohortId, cohort: cohort.name, status: STATUS_CLASSE.ASSIGNED, totalSeats: classeCohortToImportMapped.classeTotalSeats });
-  } else if (importType === ClasseImportType.NEXT_CLASSE_COHORT) {
-    classe.set({ cohortId: cohortId, cohort: cohort.name, totalSeats: classeCohortToImportMapped.classeTotalSeats });
-    if (cohort._id.toString() !== classe.cohortId) {
-      await updateYoungsCohorts(classe._id, cohort, classeCohortImportKey);
+    updatedFields.push("cohortId", "cohort", "status", "totalSeats");
+    logger.info(`${ClasseImportType.FIRST_CLASSE_COHORT} - Classe ${classeCohortToImportMapped.classeId} updated with cohort ${cohortId} - ${cohort.name}`);
+  } else if (importType === ClasseImportType.NEXT_CLASSE_COHORT || importType === ClasseImportType.PDR_AND_CENTER) {
+    await updateClasseForNextCohortOrPdrAndCenter(classe, cohort, classeCohortToImportMapped, classeCohortImportKey, updatedFields);
+
+    if (importType === ClasseImportType.PDR_AND_CENTER) {
+      await processSessionPhasePdrAndCenter(classeCohortToImportMapped, classe, updatedFields);
     }
-  } else if (importType === ClasseImportType.PDR_AND_CENTER) {
-    await processSessionPhasePdrAndCenter(classeCohortToImportMapped, classe);
   }
 
-  logger.info(`classeImportService - addCohortToClasse() - Classe ${classeCohortToImportMapped.classeId} updated with cohort ${cohortId} - ${cohort.name}`);
-  return classe.save({ fromUser: { firstName: `IMPORT_CLASSE_COHORT_${classeCohortImportKey}` } });
+  await classe.save({ fromUser: { firstName: `IMPORT_CLASSE_COHORT_${classeCohortImportKey}` } });
+  return { updatedClasse: classe, updatedFields };
 };
 
 export const updateYoungsCohorts = async (classeId: string, cohort: CohortDocument, classeCohortImportKey: ClasseCohortImportKey) => {
@@ -105,40 +110,63 @@ export const updateYoungsCohorts = async (classeId: string, cohort: CohortDocume
   }
 };
 
-export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped: ClasseCohortMapped, classe: ClasseDocument) => {
-  if (!classeCohortToImportMapped.centerCode) {
-    throw new Error(FUNCTIONAL_ERRORS.NO_CENTER_CODE_PROVIDED);
-  }
-  if (!classeCohortToImportMapped.pdrCode) {
-    throw new Error(FUNCTIONAL_ERRORS.NO_PDR_CODE_PROVIDED);
-  }
-  if (!classeCohortToImportMapped.sessionCode) {
-    throw new Error(FUNCTIONAL_ERRORS.NO_SESSION_CODE_PROVIDED);
-  }
-  const cohesionCenter = await CohesionCenterModel.findOne({ matricule: classeCohortToImportMapped.centerCode });
-  if (!cohesionCenter) {
-    throw new Error(ERRORS.COHESION_CENTER_NOT_FOUND);
+export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped: ClasseCohortMapped, classe: ClasseDocument, updatedFields: string[]) => {
+  if (classeCohortToImportMapped.sessionCode) {
+    const session = await SessionPhase1Model.findOne({ sejourSnuId: classeCohortToImportMapped.sessionCode });
+    if (!session) {
+      throw new Error(ERRORS.SESSION_NOT_FOUND);
+    }
+
+    classe.set({ sessionId: session._id });
+    updatedFields.push("sessionId");
   }
 
-  classe.set({ cohesionCenterId: cohesionCenter._id });
+  if (classeCohortToImportMapped.centerCode) {
+    const cohesionCenter = await CohesionCenterModel.findOne({ matricule: classeCohortToImportMapped.centerCode });
+    if (!cohesionCenter) {
+      throw new Error(ERRORS.COHESION_CENTER_NOT_FOUND);
+    }
 
-  const pdr = await PointDeRassemblementModel.findOne({ matricule: classeCohortToImportMapped.pdrCode });
-  if (!pdr) {
-    throw new Error(ERRORS.PDR_NOT_FOUND);
+    classe.set({ cohesionCenterId: cohesionCenter._id });
+    updatedFields.push("cohesionCenterId");
   }
 
-  classe.set({ pointDeRassemblementId: pdr._id });
+  if (classeCohortToImportMapped.pdrCode) {
+    const pdr = await PointDeRassemblementModel.findOne({ matricule: classeCohortToImportMapped.pdrCode });
+    if (!pdr) {
+      throw new Error(ERRORS.PDR_NOT_FOUND);
+    }
 
-  const session = await SessionPhase1Model.findOne({ sejourSnuId: classeCohortToImportMapped.sessionCode });
-  if (!session) {
-    throw new Error(ERRORS.SESSION_NOT_FOUND);
+    classe.set({ pointDeRassemblementId: pdr._id });
+    updatedFields.push("pointDeRassemblementId");
   }
 
-  classe.set({ sessionId: session._id });
-
-  classe.set({ statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
+  if (classe.sessionId && classe.cohesionCenterId && classe.pointDeRassemblementId) {
+    classe.set({ statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
+    updatedFields.push("statusPhase1");
+  }
 
   logger.info(
-    `processSessionPhasePdrAndCenter - Classe ${classeCohortToImportMapped.classeId} updated with Cohort ${classeCohortToImportMapped.cohortCode}, Center ${cohesionCenter.name}, PDR ${pdr.name}, and Session ${session.codeCentre}`,
+    `${ClasseImportType.PDR_AND_CENTER} - Classe ${classeCohortToImportMapped.classeId} updated with Cohort ${classeCohortToImportMapped.cohortCode}, Center ${classeCohortToImportMapped.centerCode}, PDR ${classeCohortToImportMapped.pdrCode}, and Session ${classeCohortToImportMapped.sessionCode}`,
   );
+};
+
+export const updateClasseForNextCohortOrPdrAndCenter = async (
+  classe: ClasseDocument,
+  cohort: CohortDocument,
+  classeCohortToImportMapped: ClasseCohortMapped,
+  classeCohortImportKey: ClasseCohortImportKey,
+  updatedFields: string[],
+) => {
+  classe.set({ cohortId: cohort._id, cohort: cohort.name, totalSeats: classeCohortToImportMapped.classeTotalSeats });
+  updatedFields.push("cohortId", "cohort", "totalSeats");
+  if (classe.status === STATUS_CLASSE.VERIFIED) {
+    classe.set({ status: STATUS_CLASSE.ASSIGNED });
+    updatedFields.push("status");
+  }
+  if (cohort._id.toString() !== classe.cohortId) {
+    await updateYoungsCohorts(classe._id, cohort, classeCohortImportKey);
+    updatedFields.push("youngsCohorts");
+  }
+  logger.info(`${ClasseImportType.NEXT_CLASSE_COHORT} - Classe ${classe._id} updated with cohort ${cohort._id} - ${cohort.name}`);
 };

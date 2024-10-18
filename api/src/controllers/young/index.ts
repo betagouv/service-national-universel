@@ -1,24 +1,22 @@
-const express = require("express");
-const passport = require("passport");
-const fetch = require("node-fetch");
-const queryString = require("querystring");
-const crypto = require("crypto");
-const router = express.Router();
-const jwt = require("jsonwebtoken");
-const Joi = require("joi");
-const mime = require("mime-types");
-const fs = require("fs");
-const fileUpload = require("express-fileupload");
+import express from "express";
+import passport from "passport";
+import fetch from "node-fetch";
+import queryString from "querystring";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import Joi from "joi";
+import mime from "mime-types";
+import fs from "fs";
+import fileUpload from "express-fileupload";
 
-const { decrypt, encrypt } = require("../../cryptoUtils");
-const { getRedisClient } = require("../../redis");
-const config = require("config");
-const { logger } = require("../../logger");
-const { capture, captureMessage } = require("../../sentry");
-const { ReferentModel, YoungModel, ApplicationModel, MissionModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel } = require("../../models");
-const AuthObject = require("../../auth");
-const YoungAuth = new AuthObject(YoungModel);
-const {
+import { decrypt, encrypt } from "../../cryptoUtils";
+import { getRedisClient } from "../../redis";
+import config from "config";
+import { logger } from "../../logger";
+import { capture, captureMessage } from "../../sentry";
+import { ReferentModel, YoungModel, ApplicationModel, MissionModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel } from "../../models";
+import AuthObject from "../../auth";
+import {
   uploadFile,
   validatePassword,
   ERRORS,
@@ -31,19 +29,18 @@ const {
   autoValidationSessionPhase1Young,
   deleteFile,
   updateSeatsTakenInBusLine,
-} = require("../../utils");
-const { getMimeFromFile, getMimeFromBuffer } = require("../../utils/file");
-const { sendTemplate, unsync } = require("../../brevo");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../../cookie-options");
-const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
-const patches = require("../patches");
-const { serializeYoung, serializeApplication } = require("../../utils/serializer");
-const {
+} from "../../utils";
+import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
+import { sendTemplate, unsync } from "../../brevo";
+import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
+import { validateYoung, validateId, validatePhase1Document } from "../../utils/validator";
+import patches from "../patches";
+import { serializeYoung, serializeApplication } from "../../utils/serializer";
+import {
   canDeleteYoung,
   canGetYoungByEmail,
   canInviteYoung,
   canEditYoung,
-  canSendTemplateToYoung,
   canViewYoungApplications,
   canEditPresenceYoung,
   canDeletePatchesHistory,
@@ -57,14 +54,21 @@ const {
   youngCanWithdraw,
   translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
-} = require("snu-lib");
-const { getFilteredSessions } = require("../../utils/cohort");
-const { anonymizeApplicationsFromYoungId } = require("../../services/application");
-const { anonymizeContractsFromYoungId } = require("../../services/contract");
-const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
-const { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } = require("../../jwt-options");
-const scanFile = require("../../utils/virusScanner");
-const emailsEmitter = require("../../emails");
+  ReferentType,
+  YoungType,
+} from "snu-lib";
+import { getFilteredSessions } from "../../utils/cohort";
+import { anonymizeApplicationsFromYoungId } from "../../services/application";
+import { anonymizeContractsFromYoungId } from "../../services/contract";
+import { getFillingRate, FILLING_RATE_LIMIT } from "../../services/inscription-goal";
+import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
+import scanFile from "../../utils/virusScanner";
+import emailsEmitter from "../../emails";
+import { UserRequest } from "../request";
+import { FileTypeResult } from "file-type";
+
+const router = express.Router();
+const YoungAuth = new AuthObject(YoungModel);
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
@@ -76,12 +80,12 @@ router.post("/email-validation", passport.authenticate("young", { session: false
 router.get("/email-validation/token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.requestNewEmailValidationToken(req, res));
 router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
-router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
-router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
-router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.resetPassword(req, res));
-router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.checkPassword(req, res));
+router.post("/forgot_password", async (req: UserRequest, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
+router.post("/forgot_password_reset", async (req: UserRequest, res) => YoungAuth.forgotPasswordReset(req, res));
+router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.resetPassword(req, res));
+router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.checkPassword(req, res));
 
-router.post("/signup_verify", async (req, res) => {
+router.post("/signup_verify", async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
     if (error) {
@@ -99,7 +103,7 @@ router.post("/signup_verify", async (req, res) => {
   }
 });
 
-router.post("/signup_invite", async (req, res) => {
+router.post("/signup_invite", async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       invitationToken: Joi.string().required(),
@@ -117,6 +121,7 @@ router.post("/signup_invite", async (req, res) => {
     const young = await YoungModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
+    // @ts-expect-error FIXME: legacy field ?
     if (young.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.YOUNG_ALREADY_REGISTERED });
 
     if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
@@ -128,7 +133,7 @@ router.post("/signup_invite", async (req, res) => {
     young.set({ invitationExpires: null });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
 
     await young.save({ fromUser: req.user });
 
@@ -143,7 +148,7 @@ router.post(
   "/file/:key",
   passport.authenticate("young", { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
-  async (req, res) => {
+  async (req: UserRequest, res) => {
     try {
       const rootKeys = [
         "cniFiles",
@@ -185,7 +190,7 @@ router.post(
         const { name, tempFilePath, mimetype } = currentFile;
         const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
-        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
+        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers!))) {
           fs.unlinkSync(tempFilePath);
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
@@ -217,7 +222,7 @@ router.post(
   },
 );
 
-router.post("/invite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/invite", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = validateYoung(req.body);
     if (error) {
@@ -229,6 +234,14 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 
     const obj = { ...value };
 
+    if (!obj.cohortId) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const cohort = await CohortModel.findById(obj.cohortId);
+    if (!cohort) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    obj.cohort = cohort.name;
     obj.acceptRI = REGLEMENT_INTERIEUR_VERSION;
 
     const formatedDate = new Date(obj.birthdateAt).setUTCHours(11, 0, 0);
@@ -275,7 +288,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
   }
 });
 
-router.get("/validate_phase3/:young/:token", async (req, res) => {
+router.get("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       young: Joi.string().required(),
@@ -300,7 +313,7 @@ router.get("/validate_phase3/:young/:token", async (req, res) => {
   }
 });
 
-router.put("/validate_phase3/:young/:token", async (req, res) => {
+router.put("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       young: Joi.string().required(),
@@ -339,7 +352,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
   }
 });
 
-router.put("/update_phase3/:young", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/update_phase3/:young", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       young: Joi.string().required(),
@@ -374,9 +387,9 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, YoungModel));
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => await patches.get(req, res, YoungModel));
 
-router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -415,14 +428,15 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     const youngName = `${young.firstName} ${young.lastName}`;
     const toName = `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`;
     const structureName = young.phase3StructureName;
-    const startAt = young.phase3MissionStartAt.toLocaleDateString("fr");
-    const endAt = young.phase3MissionEndAt.toLocaleDateString("fr");
+    const startAt = young.phase3MissionStartAt?.toLocaleDateString("fr");
+    const endAt = young.phase3MissionEndAt?.toLocaleDateString("fr");
     const cta = `${config.ADMIN_URL}/validate?token=${young.phase3Token}&young_id=${young._id}`;
 
     await sendTemplate(SENDINBLUE_TEMPLATES.referent.VALIDATE_MISSION_PHASE3, {
-      emailTo: [{ name: toName, email: young.phase3TutorEmail }],
+      emailTo: [{ name: toName, email: young.phase3TutorEmail! }],
       params: { toName, youngName, structureName, startAt, endAt, cta },
     });
+    // @ts-expect-error not required ("" or null)
     young.phase3Token = null;
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
@@ -432,7 +446,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
   }
 });
 
-router.put("/accept-cgu", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/accept-cgu", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -447,13 +461,13 @@ router.put("/accept-cgu", passport.authenticate("young", { session: false, failW
   }
 });
 
-router.put("/accept-ri", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/accept-ri", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
       params: {
         cta: `${config.APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
         youngFirstName: young.firstName,
@@ -468,7 +482,7 @@ router.put("/accept-ri", passport.authenticate("young", { session: false, failWi
   }
 });
 
-router.put("/:id/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = validateYoung(req.body);
 
@@ -521,7 +535,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
+    const sessions = await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
     const session = sessions.find(({ name }) => name === cohort);
     if (!session && cohort !== "à venir") return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
@@ -573,9 +587,9 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         },
       });
     }
-    const emailsTo = [];
-    if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
-    if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+    const emailsTo: { name: string; email: string }[] = [];
+    if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! });
+    if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! });
     if (emailsTo.length !== 0) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE, {
         emailTo: emailsTo,
@@ -603,7 +617,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
   }
 });
 
-router.get("/:id/application", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/application", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
     if (error) {
@@ -628,7 +642,7 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
     for (let i = 0; i < data.length; i++) {
       const application = data[i];
       const mission = await MissionModel.findById(application.missionId);
-      let tutor = {};
+      let tutor: ReferentType | null = null;
       if (mission?.tutorId) tutor = await ReferentModel.findById(mission.tutorId);
       if (mission?.tutorId && !application.tutorId) application.tutorId = mission.tutorId;
       if (mission?.structureId && !application.structureId) application.structureId = mission.structureId;
@@ -642,7 +656,7 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
 });
 
 // Get authorization from France Connect.
-router.post("/france-connect/authorization-url", async (req, res) => {
+router.post("/france-connect/authorization-url", async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
     if (error) {
@@ -672,7 +686,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 });
 
 // Get user information for authorized user on France Connect.
-router.post("/france-connect/user-info", async (req, res) => {
+router.post("/france-connect/user-info", async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required(), state: Joi.string().required() })
       .unknown()
@@ -700,7 +714,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 
     if (token["status"] === "fail") {
       captureMessage(`France Connect User Information failed: ${JSON.stringify({ token })}`);
-      return res.sendStatus(403, token);
+      return res.sendStatus(403);
     }
 
     const franceConnectToken = token["id_token"];
@@ -716,7 +730,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 
     if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {
       capture(`France Connect User Information failed: ${JSON.stringify({ storedNonce, storedState, token })}`);
-      return res.sendStatus(403, token);
+      return res.sendStatus(403);
     }
 
     // … then get user info.
@@ -735,7 +749,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 });
 
 // Delete one user (only admin can delete user)
-router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -777,10 +791,10 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
     for (const key in young.files) {
       if (key.length) {
-        for (const file in key) {
+        for (const file in key as any) {
           try {
-            if (key.includes("military")) await deleteFile(`app/young/${id}/military-preparation/${key}/${file._id}`);
-            else await deleteFile(`app/young/${id}/${key}/${file._id}`);
+            if (key.includes("military")) await deleteFile(`app/young/${id}/military-preparation/${key}/${(file as any)._id}`);
+            else await deleteFile(`app/young/${id}/${key}/${(file as any)._id}`);
             young.set({ files: { [key]: undefined } });
           } catch (e) {
             capture(e);
@@ -802,7 +816,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
     young.set({ parent1Location: { lat: undefined, lon: undefined } });
     young.set({ parent2Location: { lat: undefined, lon: undefined } });
     young.set({ medicosocialStructureLocation: { lat: undefined, lon: undefined } });
-    young.set({ email: `${young._doc["_id"]}@delete.com` });
+    young.set({ email: `${young._doc!["_id"]}@delete.com` });
     young.set({ status: YOUNG_STATUS.DELETED });
 
     await young.save({ fromUser: req.user });
@@ -820,7 +834,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
   }
 });
 
-router.put("/withdraw", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/withdraw", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
       .unknown()
@@ -835,7 +849,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
     if (!youngCanWithdraw(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
-    const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
+    const inscriptionStatus = ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young.status!);
 
     if (mandatoryPhasesDone || inscriptionStatus) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -866,11 +880,13 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
     // If they are CLE, we notify the class referent.
     try {
       if (young.cohort === YOUNG_SOURCE.CLE) {
-        const referent = await ReferentModel.findOne({ role: ROLES.REFERENT_CLASS, classeId: young.classeId });
-        await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
-          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-          params: { youngFirstName: young.firstName, youngLastName: young.lastName, raisondesistement: withdrawnReason },
-        });
+        const referent = await ReferentModel.findOne({ role: ROLES.REFERENT_CLASSE, classeId: young.classeId });
+        if (referent) {
+          await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
+            emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+            params: { youngFirstName: young.firstName, youngLastName: young.lastName, raisondesistement: withdrawnReason },
+          });
+        }
       }
     } catch (e) {
       capture(e);
@@ -883,7 +899,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
   }
 });
 
-router.put("/abandon", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/abandon", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
       .unknown()
@@ -898,7 +914,7 @@ router.put("/abandon", passport.authenticate("young", { session: false, failWith
     if (!youngCanWithdraw(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
-    const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
+    const inscriptionStatus = ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young.status);
 
     if (mandatoryPhasesDone || !inscriptionStatus) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -922,7 +938,7 @@ router.put("/abandon", passport.authenticate("young", { session: false, failWith
   }
 });
 
-router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.string().required().email().validate(req.query.email, { stripUnknown: true });
     if (error) {
@@ -938,7 +954,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   }
 });
 
-router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const keys = ["cohesionStayMedical", "imageRight", "rules", "agreement", "convocation"];
     const { error: documentError, value: document } = Joi.string()
@@ -978,7 +994,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
   }
 });
 
-router.post("/phase1/multiaction/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/phase1/multiaction/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       departSejourMotif: Joi.string().required(),
@@ -998,7 +1014,7 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
     const youngs = await YoungModel.find({ _id: { $in: ids } });
     if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (youngs.some((young) => !canEditPresenceYoung(req.user, young))) {
+    if (youngs.some((young) => !canEditPresenceYoung(req.user))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -1021,7 +1037,7 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
   }
 });
 
-router.post("/phase1/multiaction/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/phase1/multiaction/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];
     const { error, value } = Joi.object({
@@ -1044,7 +1060,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
     const youngs = await YoungModel.find({ _id: { $in: ids } });
     if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (youngs.some((young) => !canEditPresenceYoung(req.user, young))) {
+    if (youngs.some((young) => !canEditPresenceYoung(req.user))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -1063,8 +1079,8 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
       await updatePlacesSessionPhase1(sessionPhase1, req.user);
       if (key === "cohesionStayPresence" && newValue === "true") {
-        let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
-        if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+        let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }];
+        if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! });
         await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
           emailTo,
           params: {
@@ -1082,7 +1098,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
   }
 });
 
-router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       youngId: Joi.string().required(),
@@ -1106,7 +1122,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
-    let mimeFromFile = null;
+    let mimeFromFile: FileTypeResult["mime"] | null = null;
     try {
       mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {
@@ -1136,4 +1152,4 @@ router.use("/note", require("./note").default);
 router.use("/:id/point-de-rassemblement", require("./point-de-rassemblement"));
 router.use("/account", require("./account"));
 
-module.exports = router;
+export default router;

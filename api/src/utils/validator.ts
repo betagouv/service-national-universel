@@ -329,6 +329,7 @@ export function validateYoung(young: YoungDto, user?: UserDto) {
     gender: Joi.string().allow(null, ""),
     birthdateAt: Joi.string().allow(null, ""),
     cohort: Joi.string().allow(null, ""),
+    cohortId: Joi.string().allow(null, ""),
     parentStatementOfHonorInvalidId: Joi.string().allow(null, ""),
     originalCohort: Joi.string().allow(null, ""),
     cohortChangeReason: Joi.string().allow(null, ""),
@@ -695,6 +696,8 @@ export function validatePhase1Document(phase1document, key) {
       return Joi.object({
         convocationFileDownload: Joi.string().trim().required().valid("true"),
       }).validate(phase1document);
+    default:
+      return { value: null, error: { key: "unknow " + key } };
   }
 }
 
