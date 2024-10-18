@@ -51,11 +51,11 @@ describe("POST /cle/classe-import", () => {
     const notExistingCohortCode = "not-existing-cohort";
 
     const mockFileBody = `Identifiant de la classe engagée,Session formule,Effectif de jeunes concernés
-${classe1?._id},${cohort?.snuId},42
-${notExistingClasseId},${cohort?.snuId}
-${classe2?._id},${notExistingCohortCode}
-${classe3?._id},""
-"",${cohort?.snuId}`;
+      ${classe1?._id},${cohort?.snuId},42
+      ${notExistingClasseId},${cohort?.snuId}
+      ${classe2?._id},${notExistingCohortCode}
+      ${classe3?._id},""
+      "",${cohort?.snuId}`;
 
     const mockFileBuffer = { Body: Buffer.from(mockFileBody) };
     (getFile as jest.Mock).mockResolvedValue(mockFileBuffer);
@@ -73,7 +73,6 @@ ${classe3?._id},""
         cohortName: cohort.name,
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
         updated: "cohortId, cohort, status, totalSeats",
-        error: "",
       },
       {
         classeId: notExistingClasseId,
@@ -104,6 +103,7 @@ ${classe3?._id},""
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
     ];
+    console.log(response.body);
     expect(response.body.ok).toBe(true);
     expect(response.body.data).toEqual(expectedResponse);
   });
