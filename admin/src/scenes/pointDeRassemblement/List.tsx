@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { useHistory, useParams, useLocation } from "react-router-dom";
 import { PointDeRassemblementType, ROLES, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
-import Calendar from "../../assets/icons/Calendar";
 import ExternalLink from "../../assets/icons/ExternalLink";
 import Menu from "../../assets/icons/Menu";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -104,6 +103,7 @@ const ListPoints = ({ user }) => {
   const [paramData, setParamData] = React.useState({ page: 0 });
   const [size, setSize] = useState(10);
   const filterArray = [
+    { title: "Matricule", name: "matricule", missingLabel: "Non renseigné" },
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
@@ -145,6 +145,7 @@ const ListPoints = ({ user }) => {
                   // @ts-ignore
                   Identifiant: item._id.toString(),
                   Code: item.code,
+                  Matricule: item.matricule,
                   Cohortes: item?.cohorts.map((e) => e).join(", "),
                   Nom: item.name,
                   Adresse: item.address,
