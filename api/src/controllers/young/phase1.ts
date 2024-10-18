@@ -28,7 +28,7 @@ import { YoungModel, SessionPhase1Model, CohesionCenterModel, PointDeRassembleme
 import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "../../utils";
 import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
 import { UserRequest } from "../request";
-import { FILLING_RATE_LIMIT, getFillingRate } from "../../services/inscription-goal";
+import { getCompletionObjectifs } from "../../services/inscription-goal";
 
 const router = express.Router({ mergeParams: true });
 
@@ -90,9 +90,12 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (young.status === "WAITING_LIST") {
       // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
       const departement = getDepartmentForEligibility(young);
-      const fillingRate = await getFillingRate(departement, cohort.name);
-      if (fillingRate >= FILLING_RATE_LIMIT) {
-        return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
+      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      if (completionObjectif.isAtteint) {
+        return res.status(400).send({
+          ok: false,
+          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
+        });
       }
       young.set({ status: "VALIDATED" });
     }
