@@ -159,7 +159,7 @@ describe("Referent", () => {
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
       // admin: ajout d'un jeune au departement avec depassement
       response = (
         await createYoungThenUpdate(
@@ -172,7 +172,7 @@ describe("Referent", () => {
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
       // ajout d'un jeune HZR sur un autre departement sans dépassement
       response = (
         await createYoungThenUpdate(
