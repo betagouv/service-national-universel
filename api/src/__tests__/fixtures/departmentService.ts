@@ -1,10 +1,10 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { DepartmentServiceType } from "snu-lib";
+import { departmentList, DepartmentServiceType, regionList } from "snu-lib";
 
 function getNewDepartmentServiceFixture(): Partial<DepartmentServiceType> {
   return {
-    department: faker.location.state(),
-    region: faker.location.state(),
+    department: faker.helpers.arrayElement(departmentList),
+    region: faker.helpers.arrayElement(regionList),
     directionName: faker.company.name(),
     serviceName: faker.company.name(),
     serviceNumber: faker.number.int().toString(),

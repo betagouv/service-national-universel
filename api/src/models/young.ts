@@ -148,6 +148,8 @@ schema.index({ ligneId: 1 });
 schema.index({ sessionPhase1Id: 1 });
 schema.index({ sessionPhase1Id: 1, status: 1 });
 schema.index({ classeId: -1 });
+schema.index({ department: 1 });
+schema.index({ region: 1 });
 
 export type YoungDocument<T = {}> = DocumentExtended<YoungType & T>;
 type SchemaExtended = YoungDocument & UserExtension & { previousStatus?: YoungType["status"] };
