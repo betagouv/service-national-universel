@@ -5,11 +5,10 @@
  *   POST  /young/:youngId/phase1/dispense        -> Passe le statut d'un jeune en dispensé
  */
 
-const express = require("express");
-const passport = require("passport");
-const Joi = require("joi");
-
-const {
+import express from "express";
+import passport from "passport";
+import Joi from "joi";
+import {
   canEditPresenceYoung,
   ROLES,
   canAssignManually,
@@ -18,27 +17,22 @@ const {
   YOUNG_STATUS_PHASE1,
   REFERENT_DEPARTMENT_SUBROLE,
   getDepartmentByZip,
-} = require("snu-lib");
-
-const config = require("config");
-const { capture } = require("../../sentry");
-const { sendTemplate } = require("../../brevo");
-
-const { YoungModel } = require("../../models");
-const { SessionPhase1Model } = require("../../models");
-const { CohesionCenterModel } = require("../../models");
-const { PointDeRassemblementModel } = require("../../models");
-const { LigneBusModel } = require("../../models");
-const { CohortModel } = require("../../models");
-const { ReferentModel } = require("../../models");
-const { DepartmentServiceModel } = require("../../models");
-
-const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } = require("../../utils");
-const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
+  getDepartmentForEligibility,
+  FUNCTIONAL_ERRORS,
+  DepartmentServiceType,
+} from "snu-lib";
+import config from "config";
+import { capture } from "../../sentry";
+import { sendTemplate } from "../../brevo";
+import { YoungModel, SessionPhase1Model, CohesionCenterModel, PointDeRassemblementModel, LigneBusModel, CohortModel, ReferentModel, DepartmentServiceModel } from "../../models";
+import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "../../utils";
+import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
+import { UserRequest } from "../request";
+import { getCompletionObjectifs } from "../../services/inscription-goal";
 
 const router = express.Router({ mergeParams: true });
 
-router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const allowedKeys = ["self-going", "ref-select", "young-select", "local"];
     const { error, value } = Joi.object({
@@ -94,10 +88,19 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
 
     // update youngs infos
     if (young.status === "WAITING_LIST") {
+      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+      const departement = getDepartmentForEligibility(young);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      if (completionObjectif.isAtteint) {
+        return res.status(400).send({
+          ok: false,
+          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
+        });
+      }
       young.set({ status: "VALIDATED" });
     }
 
-    if ([YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED].includes(young.statusPhase1)) {
+    if (([YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED] as string[]).includes(young.statusPhase1)) {
       young.set({ statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED });
     }
 
@@ -133,11 +136,15 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
+      res.status(400).send({ ok: false, code: error.message });
+    } else {
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
   }
 });
 
-router.post("/dispense", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/dispense", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       statusPhase1MotifDetail: Joi.string().required(),
@@ -171,7 +178,7 @@ router.post("/dispense", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       departSejourMotif: Joi.string().required(),
@@ -216,13 +223,13 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
 
     // si toujours rien on envoie a son contact Convocation
 
-    let contactsConv = [];
+    let contactsConv: DepartmentServiceType["contacts"] = [];
     if (!managers.length && !secretariat.length) {
       const serviceDep = await DepartmentServiceModel.find({ department: young.department });
       if (!serviceDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       contactsConv = serviceDep[0].contacts.filter((contact) => contact.cohort === young.cohort);
       contactsConv = contactsConv.map((contact) => {
-        const [firstName, lastName] = contact.contactName.split(" ");
+        const [firstName, lastName] = contact.contactName!.split(" ");
         const email = contact.contactMail;
 
         return {
@@ -261,7 +268,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
   }
 });
 
-router.put("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -291,7 +298,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived", "youngPhase1Agreement", "isTravelingByPlane"];
     const { error, value } = Joi.object({
@@ -334,7 +341,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     }
 
     if (key === "cohesionStayPresence" && newValue === "true") {
-      let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }];
+      let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }];
       if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
       await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
         emailTo,
@@ -352,4 +359,4 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
   }
 });
 
-module.exports = router;
+export default router;

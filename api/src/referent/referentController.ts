@@ -109,8 +109,8 @@ import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
 import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
-import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
-import { ca } from "date-fns/locale";
+import { getCompletionObjectifs } from "../services/inscription-goal";
+import SNUpport from "../SNUpport";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -530,13 +530,21 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     let { __v, ...newYoung } = value;
 
     // Vérification des objectifs à la validation d'un jeune
-    if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
+    if (
+      young.source !== YOUNG_SOURCE.CLE &&
+      value.status === YOUNG_STATUS.VALIDATED &&
+      young.status !== YOUNG_STATUS.VALIDATED &&
+      (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
+    ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
       const departement = getDepartmentForEligibility(young);
-      const fillingRate = await getFillingRate(departement, cohort.name);
-      if (fillingRate >= FILLING_RATE_LIMIT) {
-        return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
+      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      if (completionObjectif.isAtteint) {
+        return res.status(400).send({
+          ok: false,
+          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
+        });
       }
     }
 
@@ -1551,6 +1559,21 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     await referent.deleteOne();
     logger.debug(`Referent ${req.params.id} has been deleted`);
+
+    if (referent.role === ROLES.REFERENT_DEPARTMENT || referent.role === ROLES.REFERENT_REGION) {
+      const response = await SNUpport.api(`/v0/referent`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email: referent.email }),
+      });
+
+      if (!response.ok) {
+        logger.error(`Failed to delete referent from SNUPPORT: ${response.statusText}`);
+      }
+    }
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

@@ -7,7 +7,7 @@ import { HiHome, HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
-import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-lib";
+import { ROLES, canExportConvoyeur, getDepartmentNumber, translate, getZonedDate } from "snu-lib";
 import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -388,8 +388,8 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     "ID CENTRE": data.centerId,
                     "MATRICULE DU CENTRE": data.centerCode,
                     "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
-                    "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
-                    "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
+                    "HEURE D'ARRIVEE AU CENTRE": getZonedDate(data.centerArrivalTime),
+                    "HEURE DE DÉPART DU CENTRE": getZonedDate(data.centerDepartureTime),
 
                     // * followerCapacity !== Total des followers mais c'est la sémantique ici
                     "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
