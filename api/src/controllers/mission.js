@@ -47,6 +47,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
 
+    if (checkedMission.mainDomain) {
+      if (!checkedMission.domains) checkedMission.domains = [];
+      if (!checkedMission.domains.includes(checkedMission.mainDomain)) {
+        checkedMission.domains.push(checkedMission.mainDomain);
+      }
+    }
+
     //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
     if (checkedMission.startAt) checkedMission.startAt = fixDate(checkedMission.startAt);
     if (checkedMission.endAt) checkedMission.endAt = fixDate(checkedMission.endAt);
@@ -113,6 +120,13 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (checkedMission.mainDomain) {
+      if (!checkedMission.domains) checkedMission.domains = [];
+      if (!checkedMission.domains.includes(checkedMission.mainDomain)) {
+        checkedMission.domains.push(checkedMission.mainDomain);
+      }
+    }
 
     //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
     if (checkedMission.startAt) checkedMission.startAt = fixDate(checkedMission.startAt);
