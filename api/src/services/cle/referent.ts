@@ -242,6 +242,8 @@ export async function deleteOldReferentClasse(user: UserDto) {
     }
     logger.debug(`Referent - deleteOldReferentClasse(): deleting ${referentClasse?._id} - ${referentClasse?.email}`);
     referentClasse.set({ deletedAt: new Date() });
+    const newEmail = `deleted-${referentClasse._id}-${referentClasse.email}`;
+    referentClasse.set({ deletedAt: new Date(), email: newEmail });
     referentClasse.save({ fromUser: user });
     const mailResponse = await sendTemplate(SENDINBLUE_TEMPLATES.CLE.SUPPRESSION_ANCIEN_REFERENT_CLASSE_TEMPLATE, {
       emailTo: [{ name: `${referentClasse.firstName} ${referentClasse.lastName}`, email: referentClasse.email }],
