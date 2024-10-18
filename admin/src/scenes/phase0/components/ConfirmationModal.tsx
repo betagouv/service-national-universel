@@ -1,7 +1,23 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { Modal } from "reactstrap";
 import Loader from "../../../components/Loader";
 import { BorderButton, PlainButton } from "./Buttons";
+
+interface ConfirmationModalProps {
+  isOpen: boolean;
+  size?: "sm" | "md" | "lg";
+  icon?: ReactNode;
+  title: string;
+  message: string;
+  children?: ReactNode;
+  onCancel: () => void;
+  onConfirm: () => void;
+  loading?: boolean;
+  loadingText?: string;
+  confirmText?: string;
+  confirmMode?: string;
+  cancelText?: string;
+}
 
 export default function ConfirmationModal({
   isOpen,
@@ -17,7 +33,7 @@ export default function ConfirmationModal({
   confirmText = "Confirmer",
   confirmMode = "blue",
   cancelText = "Annuler",
-}) {
+}: ConfirmationModalProps) {
   return (
     <Modal size={size} centered isOpen={isOpen} toggle={onCancel}>
       {loading ? (

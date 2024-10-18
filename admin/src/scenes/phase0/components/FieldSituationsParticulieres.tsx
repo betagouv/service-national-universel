@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import CorrectionRequest from "./CorrectionRequest";
 import { SPECIFIC_SITUATIONS_KEY } from "../commons";
@@ -6,11 +6,34 @@ import Minus from "../../../assets/icons/Minus";
 import ConfirmationModal from "./ConfirmationModal";
 import CorrectedRequest from "./CorrectedRequest";
 
+interface ConfirmModalOptions {
+  icon?: ReactNode;
+  title: string;
+  message: string;
+  confirmLabel: string;
+  confirmColor: string;
+  confirm: () => void;
+}
+
+interface FieldSituationsParticulieresProps {
+  group?: { hover?: boolean } | null;
+  name: string;
+  label?: string;
+  young: boolean;
+  mode: "correction" | "edition" | "readonly";
+  className?: string;
+  onStartRequest?: (value: string) => void;
+  currentRequest?: string;
+  correctionRequest?: any;
+  onCorrectionRequestChange?: (value: boolean) => void;
+  onChange?: (key: string, value: "true" | "false") => void;
+}
+
 /**
  * mode: could be "correction|edition|readonly" (par défaut readonly)
  */
 export default function FieldSituationsParticulieres({
-  group = null,
+  group,
   name,
   label,
   young,
@@ -21,12 +44,12 @@ export default function FieldSituationsParticulieres({
   correctionRequest,
   onCorrectionRequestChange,
   onChange,
-}) {
+}: FieldSituationsParticulieresProps) {
   const [mouseIn, setMouseIn] = useState(false);
   const [opened, setOpened] = useState(false);
   const [hasValidRequest, setHasValidRequest] = useState(false);
   const [requestButtonClass, setRequestButtonClass] = useState("");
-  const [confirmModal, setConfirmModal] = useState(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalOptions | null>(null);
 
   useEffect(() => {
     setOpened(currentRequest === name);
@@ -73,17 +96,17 @@ export default function FieldSituationsParticulieres({
     });
   }
 
-  function confirmRemoveSituation(key) {
+  function confirmRemoveSituation(key: string) {
     setConfirmModal(null);
     onChange && onChange(key, "false");
   }
 
-  function addSituation(key) {
+  function addSituation(key: string) {
     onChange && onChange(key, "true");
   }
 
   // --- tags
-  const tags = [];
+  const tags: ReactNode[] = [];
   for (const key of SPECIFIC_SITUATIONS_KEY) {
     if (young[key] === "true") {
       tags.push(
