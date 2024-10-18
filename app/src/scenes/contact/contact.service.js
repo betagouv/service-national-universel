@@ -37,7 +37,7 @@ export const articleSummaries = [
   {
     title: "Séjour : Que prendre dans ma valise ?",
     description: "Voici le trousseau indicatif à apporter. Les consignes sur des affaires spécifiques vous seront directement communiquées par les centres.",
-    slug: "dans-ma-valise-materiel-trousseau",
+    slug: "dans-ma-valise-materiel-trousseau-4",
   },
   {
     title: "Séjour : Que prendre dans ma valise ?",
@@ -115,7 +115,7 @@ export const questions = [
     value: "PHASE_1_LUGGAGE",
     category: "QUESTION",
     label: "Séjour - Que prendre dans ma valise ?",
-    articles: ["dans-ma-valise-materiel-trousseau"],
+    articles: ["dans-ma-valise-materiel-trousseau-4"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
     displayForm: true,
