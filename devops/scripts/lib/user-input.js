@@ -58,14 +58,10 @@ function parseBool(input) {
   return null;
 }
 
-function parseItem(type, name, value, fallback) {
+function parseValue(type, name, value) {
   let _value = value;
   if (!_value) {
-    if (fallback === undefined) {
-      throw new Error(`${name} is not set`);
-    } else {
-      _value = String(fallback);
-    }
+    throw new Error(`${name} value is not set`);
   }
   switch (type) {
     case STRING:
@@ -74,13 +70,13 @@ function parseItem(type, name, value, fallback) {
     case INTEGER:
       _value = parseInt(_value);
       if (Object.is(_value, NaN)) {
-        throw new Error(`${name} is not a valid integer`);
+        throw new Error(`${name} value is not a valid integer`);
       }
       break;
     case BOOLEAN:
       _value = parseBool(_value);
       if (_value === null) {
-        throw new Error(`${name} is not a valid boolean`);
+        throw new Error(`${name} value is not a valid boolean`);
       }
       break;
   }
@@ -91,12 +87,11 @@ function parseOption(arg) {
   const index = arg.indexOf("=");
   if (index === -1) {
     return {
-      name: arg,
-      value: "true",
+      name: arg.substring(OPTION.length),
     };
   } else {
     return {
-      name: arg.substring(0, index),
+      name: arg.substring(OPTION.length, index),
       value: arg.substring(index + 1),
     };
   }
@@ -208,47 +203,145 @@ class UserInput {
     return this._env(BOOLEAN, name, description, options);
   }
 
-  _handleEnvironment(source, result) {
-    for (const env of this.config.envs) {
-      result[env.name] = parseItem(
-        env.type,
-        env.name,
-        source[env.name],
-        env.default
-      );
-    }
-  }
-
-  _handleOptions(source, result) {
-    for (const item of source) {
-      const { name, value } = parseOption(item);
-      const option = this.config.opts.find((i) => OPTION + i.name === name);
-      if (option) {
-        result[option.name] = parseItem(
-          option.type,
-          name,
-          value,
-          option.default
-        );
+  _rewriteArgs(source) {
+    const args = [];
+    for (const arg of source) {
+      if (arg.startsWith(SHORTCUT) && !arg.startsWith(OPTION)) {
+        for (const char of arg.slice(1)) {
+          args.push(SHORTCUT + char);
+        }
       } else {
-        throw new Error(`Invalid option: ${name}`);
+        args.push(arg);
       }
     }
+    return args;
   }
 
-  _handleArgs(source, result) {
-    if (source.length < this.config.args.length) {
-      throw new Error("Required arguments are missing");
+  _parseOption(result, token) {
+    const option = parseOption(token);
+    const display = OPTION + option.name;
+    if (option.name in result) {
+      throw new Error(`Option ${display} has already been set`);
     }
-    if (source.length > this.config.args.length) {
-      throw new Error("Too much arguments were provided");
+    const config = this.config.opts.find((i) => i.name === option.name);
+    if (!config) {
+      throw new Error(`Unknown option ${display}`);
     }
-    let i = 0;
+    if (option.value === undefined) {
+      if (config.type === BOOLEAN) {
+        option.value = "true";
+      } else {
+        throw new Error(`Option ${display} requires a value`);
+      }
+    }
+    option.value = parseValue(config.type, display, option.value);
+    return option;
+  }
+
+  _parseShortcut(args, result, token) {
+    const shortcut = token.substring(SHORTCUT.length);
+    const config = this.config.opts.find((i) => i.shortcut === shortcut);
+    if (!config) {
+      throw new Error(`Unknown option ${token}`);
+    }
+    const display = `${token} (${OPTION}${config.name})`;
+    if (config.name in result) {
+      throw new Error(`Option ${display} has already been set`);
+    }
+    if (config.type === BOOLEAN) {
+      return { name: config.name, value: true };
+    }
+    const value = args.shift();
+    if (value === undefined || value.startsWith(SHORTCUT)) {
+      throw new Error(`Option ${display} requires a value`);
+    }
+    return {
+      name: config.name,
+      value: parseValue(config.type, display, value),
+    };
+  }
+
+  _parsePositional(index, token) {
+    const config = this.config.args[index];
+    if (!config) {
+      throw new Error(`Too much arguments`);
+    }
+    return {
+      name: config.name,
+      value: parseValue(config.type, config.name, token),
+    };
+  }
+
+  _parseArgs(args) {
+    const result = {};
+
+    let index = 0;
+    while (args.length) {
+      const token = args.shift();
+      let item;
+      if (token.startsWith(OPTION)) {
+        item = this._parseOption(result, token);
+      } else if (token.startsWith(SHORTCUT)) {
+        item = this._parseShortcut(args, result, token);
+      } else {
+        item = this._parsePositional(index, token);
+        index += 1;
+      }
+      result[item.name] = item.value;
+    }
+    return result;
+  }
+
+  _camelize(source) {
+    const result = {};
+    for (const key in source) {
+      result[camelize(key)] = source[key];
+    }
+    return result;
+  }
+
+  _handleArgs() {
+    const args = this._rewriteArgs(process.argv.slice(2));
+    if (args.find((i) => i === SHORTCUT + "h" || i === OPTION + "help")) {
+      this._logUsageThenExit(0);
+      return {};
+    }
+
+    const result = this._parseArgs(args);
+
     for (const arg of this.config.args) {
-      const item = source[i];
-      result[arg.name] = parseItem(arg.type, arg.name, item, arg.default);
-      i += 1;
+      if (!(arg.name in result)) {
+        if (arg.default === undefined) {
+          throw new Error("Missing required parameters");
+        }
+        result[arg.name] = arg.default;
+      }
     }
+
+    for (const arg of this.config.opts) {
+      if (!(arg.name in result) && arg.default !== undefined) {
+        result[arg.name] = arg.default;
+      }
+    }
+
+    return this._camelize(result);
+  }
+
+  _handleEnvironment() {
+    const result = {};
+    for (const env of this.config.envs) {
+      let value;
+      if (env.name in process.env) {
+        value = parseValue(env.type, env.name, process.env[env.name]);
+      } else if (env.default !== undefined) {
+        value = env.default;
+      } else {
+        throw new Error(`Missing required environment variable ${env.name}`);
+      }
+      result[env.name] = value;
+    }
+
+    return result;
   }
 
   logUsage() {
@@ -284,57 +377,19 @@ class UserInput {
     }
   }
 
-  _parse() {
-    const result = {};
-
-    this._handleEnvironment(process.env, result);
-
-    const args = process.argv.slice(2);
-
-    const options = args.filter((arg) => arg.startsWith(OPTION));
-    this._handleOptions(options, result);
-
-    const positionals = args.filter((arg) => !arg.startsWith(OPTION));
-    this._handleArgs(positionals, result);
-
-    return result;
+  _logUsageThenExit(exitCode) {
+    this.logUsage();
+    process.exit(exitCode);
   }
 
   validate() {
     try {
-      const result = this._parse();
-      if (result["help"]) {
-        this.logUsage();
-        process.exit(0);
-      }
-      delete result["help"];
-      return result;
+      return { ...this._handleArgs(), ...this._handleEnvironment() };
     } catch (error) {
       console.error(error.message);
-      this.logUsage();
-      process.exit(1);
+      this._logUsageThenExit(1);
     }
   }
 }
 
-/*
-positionals:
-- positionals without default are required positionals (throw if not set)
-- positionals with default are optional positionals
-- optionals positionals must be declared after required positionals
-- all positionals must be present in the output
-
-envs:
-- envs without default are required envs (throw if not set)
-- envs with default are optional envs
-- all envs must be present in the output
-
-options:
-- every options are optionals
-- options set must be present in the output
-- options with defatul must be present in the output
-- boolean options takes no value
-
-check existence of config (shortcut, option, env, args)
-*/
 module.exports = UserInput;

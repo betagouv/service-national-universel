@@ -12,8 +12,6 @@ function parseRegistryEndpoint(endpoint) {
   return { imageEndpoint: parsed[0], tagName: parsed[1] };
 }
 
-const DEFAULT_LIFETIME = 21;
-
 class CleanCI {
   constructor(client, options = {}) {
     this.client = client;
@@ -21,7 +19,7 @@ class CleanCI {
     this.containerNamespace = options.containerNamespace;
     this.applyChanges = options.applyChanges;
 
-    const lifetimeDays = options.lifetime ?? DEFAULT_LIFETIME;
+    const lifetimeDays = options.lifetime;
     const lifetimeMs = lifetimeDays * 24 * 3600000;
     this.limit = new Date(Date.now() - lifetimeMs).toISOString();
   }
@@ -119,9 +117,11 @@ if (require.main === module) {
     .optInt(
       "lifetime",
       `Number of days without update after which an image tag will be deleted`,
-      { default: DEFAULT_LIFETIME }
+      { default: 21, shortcut: "l" }
     )
-    .optBool("apply-changes", "Disable simulation mode", { default: false })
+    .optBool("apply-changes", "Apply listed changes on infrastructure", {
+      default: false,
+    })
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .validate();
