@@ -7,6 +7,28 @@ const BOOLEAN = "boolean";
 
 const PAD = 40;
 const OPTION = "--";
+const SHORTCUT = "-";
+
+function logDefault(item) {
+  if (item.default === undefined) {
+    return "";
+  }
+  return ` (default: ${item.default})`;
+}
+
+function logOption(option) {
+  let name = "";
+
+  if (option.shortcut) {
+    name += SHORTCUT + option.shortcut + ", ";
+  }
+
+  name += OPTION + option.name;
+  if (option.type !== BOOLEAN) {
+    name += "=...";
+  }
+  return name;
+}
 
 function parseBool(input) {
   if (input === "1" || input === "true") {
@@ -21,7 +43,7 @@ function parseBool(input) {
 function parseItem(type, name, value, fallback) {
   let _value = value;
   if (!_value) {
-    if (fallback === undefined || fallback === null || fallback === "") {
+    if (fallback === undefined) {
       throw new Error(`${name} is not set`);
     } else {
       _value = String(fallback);
@@ -68,6 +90,7 @@ function camelize(value) {
 
 const KEBAB_CASE_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const ENV_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const SHORTCUT_PATTERN = /^[a-z]{1}$/;
 
 class UserInput {
   constructor(description) {
@@ -77,7 +100,7 @@ class UserInput {
       opts: [],
       envs: [],
     };
-    this.optBool("help", "Print command-line options");
+    this.optBool("help", "Print command-line options", { shortcut: "h" });
   }
 
   _arg(type, name, description, options) {
@@ -87,16 +110,29 @@ class UserInput {
     if (this.config.args.find((i) => i.name === name)) {
       throw new Error(`${name} already configured`);
     }
-    this.config.args.push({ ...options, type, name, description });
+    const arg = { ...options, type, name, description };
+    if (arg.default === null || arg.default === "") {
+      throw new Error(`${name} has invalid default value`);
+    }
+    if (
+      arg.default === undefined &&
+      this.config.args.length &&
+      this.config.args.at(-1).default !== undefined
+    ) {
+      throw new Error(
+        "Optional arguments must be declared after required arguments"
+      );
+    }
+    this.config.args.push(arg);
     return this;
   }
 
   arg(name, description, options) {
-    return this._arg(STRING, name, description);
+    return this._arg(STRING, name, description, options);
   }
 
   argInt(name, description, options) {
-    return this._arg(INTEGER, name, description);
+    return this._arg(INTEGER, name, description, options);
   }
 
   _opt(type, name, description, options) {
@@ -106,20 +142,32 @@ class UserInput {
     if (this.config.opts.find((i) => i.name === name)) {
       throw new Error(`${name} already configured`);
     }
-    this.config.opts.push({ ...options, type, name, description });
+    const opt = { ...options, type, name, description };
+    if (opt.default === null || opt.default === "") {
+      throw new Error(`${name} has invalid default value`);
+    }
+    if (opt.shortcut !== undefined) {
+      if (!opt.shortcut.match(SHORTCUT_PATTERN)) {
+        throw new Error(`Invalid shortcut for ${name}`);
+      }
+      if (this.config.opts.find((i) => i.shortcut === opt.shortcut)) {
+        throw new Error(`shorcut ${opt.shortcut} already configured`);
+      }
+    }
+    this.config.opts.push(opt);
     return this;
   }
 
   option(name, description, options) {
-    return this._opt(STRING, name, description);
+    return this._opt(STRING, name, description, options);
   }
 
   optInt(name, description, options) {
-    return this._opt(INTEGER, name, description);
+    return this._opt(INTEGER, name, description, options);
   }
 
   optBool(name, description, options) {
-    return this._opt(BOOLEAN, name, description);
+    return this._opt(BOOLEAN, name, description, options);
   }
 
   _env(type, name, description, options) {
@@ -129,7 +177,11 @@ class UserInput {
     if (this.config.envs.find((i) => i.name === name)) {
       throw new Error(`${name} already configured`);
     }
-    this.config.envs.push({ ...options, type, name, description });
+    const env = { ...options, type, name, description };
+    if (env.default === null || env.default === "") {
+      throw new Error(`${name} has invalid default value`);
+    }
+    this.config.envs.push(env);
     return this;
   }
 
@@ -186,30 +238,34 @@ class UserInput {
 
   logUsage() {
     const argNames = this.config.args
-      .map((arg) => "<" + arg.name + ">")
+      .map((arg) => (arg.default === undefined ? arg.name : `[${arg.name}]`))
       .join(" ");
     const fileName = path.basename(process.argv[1]);
-    console.log(`Usage: node ${fileName} ${argNames}`);
+    console.log(`Usage: node ${fileName} [options] ${argNames}`);
 
     console.log(`\n${this.description}`);
 
     console.log("\nPositional arguments:");
     for (const arg of this.config.args) {
-      console.log(`  ${arg.name.padEnd(PAD)}${arg.description}`);
+      console.log(
+        `  ${arg.name.padEnd(PAD)}${arg.description}${logDefault(arg)}`
+      );
     }
 
     console.log("\nOptions:");
     for (const option of this.config.opts) {
-      let name = OPTION + option.name;
-      if (option.type !== BOOLEAN) {
-        name += "=...";
-      }
-      console.log(`  ${name.padEnd(PAD)}${option.description}`);
+      console.log(
+        `  ${logOption(option).padEnd(PAD)}${option.description}${logDefault(
+          option
+        )}`
+      );
     }
 
     console.log("\nEnvironment variables:");
     for (const env of this.config.envs) {
-      console.log(`  ${env.name.padEnd(PAD)}${env.description}`);
+      console.log(
+        `  ${env.name.padEnd(PAD)}${env.description}${logDefault(env)}`
+      );
     }
   }
 
