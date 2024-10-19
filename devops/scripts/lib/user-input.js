@@ -208,7 +208,7 @@ class UserInput {
     return this._env(BOOLEAN, name, description, options);
   }
 
-  _parseEnvironment(source, result) {
+  _handleEnvironment(source, result) {
     for (const env of this.config.envs) {
       result[env.name] = parseItem(
         env.type,
@@ -219,7 +219,7 @@ class UserInput {
     }
   }
 
-  _parseOptions(source, result) {
+  _handleOptions(source, result) {
     for (const item of source) {
       const { name, value } = parseOption(item);
       const option = this.config.opts.find((i) => OPTION + i.name === name);
@@ -236,7 +236,7 @@ class UserInput {
     }
   }
 
-  _parsePositionals(source, result) {
+  _handleArgs(source, result) {
     if (source.length < this.config.args.length) {
       throw new Error("Required arguments are missing");
     }
@@ -285,20 +285,18 @@ class UserInput {
   }
 
   _parse() {
-    console.log(this.config);
     const result = {};
 
-    this._parseEnvironment(process.env, result);
+    this._handleEnvironment(process.env, result);
 
     const args = process.argv.slice(2);
 
     const options = args.filter((arg) => arg.startsWith(OPTION));
-    this._parseOptions = this._parseOptions(options, result);
+    this._handleOptions(options, result);
 
     const positionals = args.filter((arg) => !arg.startsWith(OPTION));
-    this._parsePositionals = this._parsePositionals(positionals, result);
+    this._handleArgs(positionals, result);
 
-    console.log(result);
     return result;
   }
 
