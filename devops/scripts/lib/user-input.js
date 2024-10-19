@@ -1,9 +1,9 @@
 const process = require("node:process");
 const path = require("node:path");
 
-const STRING = "str";
-const INTEGER = "int";
-const BOOLEAN = "bool";
+const STRING = "string";
+const INTEGER = "integer";
+const BOOLEAN = "boolean";
 
 const PAD = 40;
 const OPTION = "--";
@@ -11,16 +11,21 @@ const OPTION = "--";
 function parseBool(input) {
   if (input === "1" || input === "true") {
     return true;
-  } else if (input === "0" || input === "false") {
+  }
+  if (input === "0" || input === "false") {
     return false;
   }
   return null;
 }
 
-function parseItem(type, name, value) {
+function parseItem(type, name, value, fallback) {
   let _value = value;
   if (!_value) {
-    throw new Error(`${name} is not set`);
+    if (fallback === undefined || fallback === null || fallback === "") {
+      throw new Error(`${name} is not set`);
+    } else {
+      _value = String(fallback);
+    }
   }
   switch (type) {
     case STRING:
@@ -111,25 +116,30 @@ class UserInput {
     return this._opt(BOOLEAN, name, description);
   }
 
-  _env(type, name, description) {
+  _env(type, name, description, options) {
     if (!name.match(ENV_PATTERN)) {
       throw new Error(`Invalid format for ${name} : identifier case expected`);
     }
-    this.config.envs.push({ type, name, description });
+    this.config.envs.push({ ...options, type, name, description });
     return this;
   }
 
-  env(name, description) {
-    return this._env(STRING, name, description);
+  env(name, description, options) {
+    return this._env(STRING, name, description, options);
   }
 
-  envBool(name, description) {
-    return this._env(BOOLEAN, name, description);
+  envBool(name, description, options) {
+    return this._env(BOOLEAN, name, description, options);
   }
 
   _parseEnvironment(source, result) {
     for (const env of this.config.envs) {
-      result[env.name] = parseItem(env.type, env.name, source[env.name]);
+      result[env.name] = parseItem(
+        env.type,
+        env.name,
+        source[env.name],
+        env.default
+      );
     }
   }
 
@@ -192,6 +202,7 @@ class UserInput {
   }
 
   _parse() {
+    console.log(this.config);
     const result = {};
 
     this._parseEnvironment(process.env, result);
@@ -204,6 +215,7 @@ class UserInput {
     const positionals = args.filter((arg) => !arg.startsWith(OPTION));
     this._parsePositionals = this._parsePositionals(positionals, result);
 
+    console.log(result);
     return result;
   }
 
@@ -224,4 +236,24 @@ class UserInput {
   }
 }
 
+/*
+positionals:
+- positionals without default are required positionals (throw if not set)
+- positionals with default are optional positionals
+- optionals positionals must be declared after required positionals
+- all positionals must be present in the output
+
+envs:
+- envs without default are required envs (throw if not set)
+- envs with default are optional envs
+- all envs must be present in the output
+
+options:
+- every options are optionals
+- options set must be present in the output
+- options with defatul must be present in the output
+- boolean options takes no value
+
+check existence of config (shortcut, option, env, args)
+*/
 module.exports = UserInput;
