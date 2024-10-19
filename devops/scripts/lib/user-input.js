@@ -80,45 +80,54 @@ class UserInput {
     this.optBool("help", "Print command-line options");
   }
 
-  _arg(type, name, description) {
+  _arg(type, name, description, options) {
     if (!name.match(KEBAB_CASE_PATTERN)) {
       throw new Error(`Invalid format for ${name} : kebab-case expected`);
     }
-    this.config.args.push({ type, name, description });
+    if (this.config.args.find((i) => i.name === name)) {
+      throw new Error(`${name} already configured`);
+    }
+    this.config.args.push({ ...options, type, name, description });
     return this;
   }
 
-  arg(name, description) {
+  arg(name, description, options) {
     return this._arg(STRING, name, description);
   }
 
-  argInt(name, description) {
+  argInt(name, description, options) {
     return this._arg(INTEGER, name, description);
   }
 
-  _opt(type, name, description) {
+  _opt(type, name, description, options) {
     if (!name.match(KEBAB_CASE_PATTERN)) {
       throw new Error(`Invalid format for ${name} : kebab-case expected`);
     }
-    this.config.opts.push({ type, name, description });
+    if (this.config.opts.find((i) => i.name === name)) {
+      throw new Error(`${name} already configured`);
+    }
+    this.config.opts.push({ ...options, type, name, description });
     return this;
   }
 
-  option(name, description) {
+  option(name, description, options) {
     return this._opt(STRING, name, description);
   }
 
-  optInt(name, description) {
+  optInt(name, description, options) {
     return this._opt(INTEGER, name, description);
   }
 
-  optBool(name, description) {
+  optBool(name, description, options) {
     return this._opt(BOOLEAN, name, description);
   }
 
   _env(type, name, description, options) {
     if (!name.match(ENV_PATTERN)) {
       throw new Error(`Invalid format for ${name} : identifier case expected`);
+    }
+    if (this.config.envs.find((i) => i.name === name)) {
+      throw new Error(`${name} already configured`);
     }
     this.config.envs.push({ ...options, type, name, description });
     return this;
@@ -148,8 +157,12 @@ class UserInput {
       const { name, value } = parseOption(item);
       const option = this.config.opts.find((i) => OPTION + i.name === name);
       if (option) {
-        const key = camelize(option.name);
-        result[key] = parseItem(option.type, name, value);
+        result[option.name] = parseItem(
+          option.type,
+          name,
+          value,
+          option.default
+        );
       } else {
         throw new Error(`Invalid option: ${name}`);
       }
@@ -166,8 +179,7 @@ class UserInput {
     let i = 0;
     for (const arg of this.config.args) {
       const item = source[i];
-      const key = camelize(arg.name);
-      result[key] = parseItem(arg.type, arg.name, item);
+      result[arg.name] = parseItem(arg.type, arg.name, item, arg.default);
       i += 1;
     }
   }

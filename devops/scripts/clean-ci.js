@@ -118,9 +118,10 @@ if (require.main === module) {
     .arg("container-namespace", "Container's namespace")
     .optInt(
       "lifetime",
-      `Number of days without update after which an image tag will be deleted (default: ${DEFAULT_LIFETIME} days)`
+      `Number of days without update after which an image tag will be deleted (default: ${DEFAULT_LIFETIME} days)`,
+      { default: DEFAULT_LIFETIME }
     )
-    .optBool("apply-changes", "Disable simulation mode")
+    .optBool("apply-changes", "Disable simulation mode", { default: false })
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .validate();
