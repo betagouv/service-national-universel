@@ -19,7 +19,7 @@ class CleanCI {
     this.client = client;
     this.registryName = options.registryName;
     this.containerNamespace = options.containerNamespace;
-    this.dryRun = options.dryRun ?? true;
+    this.applyChanges = options.applyChanges;
 
     const lifetimeDays = options.lifetime ?? DEFAULT_LIFETIME;
     const lifetimeMs = lifetimeDays * 24 * 3600000;
@@ -27,8 +27,10 @@ class CleanCI {
   }
 
   async run() {
-    if (this.dryRun) {
-      console.log("Dry mode enabled");
+    if (!this.applyChanges) {
+      console.log(
+        "Changes won't be applied as applyChanges option is disabled"
+      );
     }
 
     const registry = await this.client.findRegistry(this.registryName);
@@ -70,7 +72,7 @@ class CleanCI {
       console.log(`Deleting ${name} :`);
       for (const item of items) {
         logItemCb(item);
-        if (!this.dryRun) {
+        if (this.applyChanges) {
           try {
             await deleteItemCb(item);
           } catch (error) {
@@ -118,7 +120,7 @@ if (require.main === module) {
       "lifetime",
       `Number of days without update after which an image tag will be deleted (default: ${DEFAULT_LIFETIME} days)`
     )
-    .optBool("dry-run", "Enable Dry Run mode")
+    .optBool("apply-changes", "Disable simulation mode")
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .validate();
