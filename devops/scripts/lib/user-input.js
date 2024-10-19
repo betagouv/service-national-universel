@@ -30,6 +30,24 @@ function logOption(option) {
   return name;
 }
 
+function validateName(name, pattern) {
+  if (!name.match(pattern)) {
+    throw new Error(`Invalid format for ${opt.name}`);
+  }
+}
+
+function validateDefault(item) {
+  if (item.default === null || item.default === "") {
+    throw new Error(`${item.name} has invalid default value`);
+  }
+}
+
+function validateShortcut(item) {
+  if (!item.shortcut.match(SHORTCUT_PATTERN)) {
+    throw new Error(`Invalid shortcut for ${item.name}`);
+  }
+}
+
 function parseBool(input) {
   if (input === "1" || input === "true") {
     return true;
@@ -103,17 +121,21 @@ class UserInput {
     this.optBool("help", "Print command-line options", { shortcut: "h" });
   }
 
-  _arg(type, name, description, options) {
-    if (!name.match(KEBAB_CASE_PATTERN)) {
-      throw new Error(`Invalid format for ${name} : kebab-case expected`);
+  validateNameUnique(name) {
+    for (const array of Object.values(this.config)) {
+      if (array.find((i) => i.name === name)) {
+        throw new Error(`${name} already configured`);
+      }
     }
-    if (this.config.args.find((i) => i.name === name)) {
-      throw new Error(`${name} already configured`);
+  }
+
+  validateShortcutUnique(shortcut) {
+    if (this.config.opts.find((i) => i.shortcut === shortcut)) {
+      throw new Error(`shorcut ${shortcut} already configured`);
     }
-    const arg = { ...options, type, name, description };
-    if (arg.default === null || arg.default === "") {
-      throw new Error(`${name} has invalid default value`);
-    }
+  }
+
+  validateArgsSequence(arg) {
     if (
       arg.default === undefined &&
       this.config.args.length &&
@@ -123,6 +145,15 @@ class UserInput {
         "Optional arguments must be declared after required arguments"
       );
     }
+  }
+
+  _arg(type, name, description, options) {
+    validateName(name, KEBAB_CASE_PATTERN);
+    this.validateNameUnique(name);
+
+    const arg = { ...options, type, name, description };
+    validateDefault(arg);
+    this.validateArgsSequence(arg);
     this.config.args.push(arg);
     return this;
   }
@@ -136,23 +167,13 @@ class UserInput {
   }
 
   _opt(type, name, description, options) {
-    if (!name.match(KEBAB_CASE_PATTERN)) {
-      throw new Error(`Invalid format for ${name} : kebab-case expected`);
-    }
-    if (this.config.opts.find((i) => i.name === name)) {
-      throw new Error(`${name} already configured`);
-    }
+    validateName(name, KEBAB_CASE_PATTERN);
+    this.validateNameUnique(name);
     const opt = { ...options, type, name, description };
-    if (opt.default === null || opt.default === "") {
-      throw new Error(`${name} has invalid default value`);
-    }
+    validateDefault(opt);
     if (opt.shortcut !== undefined) {
-      if (!opt.shortcut.match(SHORTCUT_PATTERN)) {
-        throw new Error(`Invalid shortcut for ${name}`);
-      }
-      if (this.config.opts.find((i) => i.shortcut === opt.shortcut)) {
-        throw new Error(`shorcut ${opt.shortcut} already configured`);
-      }
+      validateShortcut(opt);
+      this.validateShortcutUnique(opt.shortcut);
     }
     this.config.opts.push(opt);
     return this;
@@ -171,16 +192,10 @@ class UserInput {
   }
 
   _env(type, name, description, options) {
-    if (!name.match(ENV_PATTERN)) {
-      throw new Error(`Invalid format for ${name} : identifier case expected`);
-    }
-    if (this.config.envs.find((i) => i.name === name)) {
-      throw new Error(`${name} already configured`);
-    }
+    validateName(name, ENV_PATTERN);
+    this.validateNameUnique(name);
     const env = { ...options, type, name, description };
-    if (env.default === null || env.default === "") {
-      throw new Error(`${name} has invalid default value`);
-    }
+    validateDefault(env);
     this.config.envs.push(env);
     return this;
   }
