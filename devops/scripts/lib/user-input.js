@@ -67,9 +67,11 @@ const ENV_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 class UserInput {
   constructor(description) {
     this.description = description;
-    this.args = [];
-    this.opts = [];
-    this.envs = [];
+    this.config = {
+      args: [],
+      opts: [],
+      envs: [],
+    };
     this.optBool("help", "Print command-line options");
   }
 
@@ -77,7 +79,7 @@ class UserInput {
     if (!name.match(KEBAB_CASE_PATTERN)) {
       throw new Error(`Invalid format for ${name} : kebab-case expected`);
     }
-    this.args.push({ type, name, description });
+    this.config.args.push({ type, name, description });
     return this;
   }
 
@@ -93,7 +95,7 @@ class UserInput {
     if (!name.match(KEBAB_CASE_PATTERN)) {
       throw new Error(`Invalid format for ${name} : kebab-case expected`);
     }
-    this.opts.push({ type, name, description });
+    this.config.opts.push({ type, name, description });
     return this;
   }
 
@@ -113,7 +115,7 @@ class UserInput {
     if (!name.match(ENV_PATTERN)) {
       throw new Error(`Invalid format for ${name} : identifier case expected`);
     }
-    this.envs.push({ type, name, description });
+    this.config.envs.push({ type, name, description });
     return this;
   }
 
@@ -126,7 +128,7 @@ class UserInput {
   }
 
   _parseEnvironment(source, result) {
-    for (const env of this.envs) {
+    for (const env of this.config.envs) {
       result[env.name] = parseItem(env.type, env.name, source[env.name]);
     }
   }
@@ -134,7 +136,7 @@ class UserInput {
   _parseOptions(source, result) {
     for (const item of source) {
       const { name, value } = parseOption(item);
-      const option = this.opts.find((i) => OPTION + i.name === name);
+      const option = this.config.opts.find((i) => OPTION + i.name === name);
       if (option) {
         const key = camelize(option.name);
         result[key] = parseItem(option.type, name, value);
@@ -145,14 +147,14 @@ class UserInput {
   }
 
   _parsePositionals(source, result) {
-    if (source.length < this.args.length) {
+    if (source.length < this.config.args.length) {
       throw new Error("Required arguments are missing");
     }
-    if (source.length > this.args.length) {
+    if (source.length > this.config.args.length) {
       throw new Error("Too much arguments were provided");
     }
     let i = 0;
-    for (const arg of this.args) {
+    for (const arg of this.config.args) {
       const item = source[i];
       const key = camelize(arg.name);
       result[key] = parseItem(arg.type, arg.name, item);
@@ -161,19 +163,21 @@ class UserInput {
   }
 
   logUsage() {
-    const argNames = this.args.map((arg) => "<" + arg.name + ">").join(" ");
+    const argNames = this.config.args
+      .map((arg) => "<" + arg.name + ">")
+      .join(" ");
     const fileName = path.basename(process.argv[1]);
     console.log(`Usage: node ${fileName} ${argNames}`);
 
     console.log(`\n${this.description}`);
 
     console.log("\nPositional arguments:");
-    for (const arg of this.args) {
+    for (const arg of this.config.args) {
       console.log(`  ${arg.name.padEnd(PAD)}${arg.description}`);
     }
 
     console.log("\nOptions:");
-    for (const option of this.opts) {
+    for (const option of this.config.opts) {
       let name = OPTION + option.name;
       if (option.type !== BOOLEAN) {
         name += "=...";
@@ -182,7 +186,7 @@ class UserInput {
     }
 
     console.log("\nEnvironment variables:");
-    for (const env of this.envs) {
+    for (const env of this.config.envs) {
       console.log(`  ${env.name.padEnd(PAD)}${env.description}`);
     }
   }
