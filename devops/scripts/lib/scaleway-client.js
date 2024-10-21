@@ -66,6 +66,19 @@ class ScalewayClient {
     );
   }
 
+  async findSecrets(projectId) {
+    return this._findAll(
+      `${this.endpoint}/secret-manager/v1beta1/regions/${this.region}/secrets?project_id=${projectId}&page_size=100`,
+      "secrets"
+    );
+  }
+
+  async deleteSecret(secretId) {
+    return this._deleteOne(
+      `${this.endpoint}/containers/v1beta1/regions/${this.region}/secrets/${secretId}`
+    );
+  }
+
   async findSecretVersion(name, revision) {
     return this._getOne(
       `${this.endpoint}/secret-manager/v1beta1/regions/${this.region}/secrets-by-path/versions/${revision}/access?project_id=${this.project.id}&secret_name=${name}`

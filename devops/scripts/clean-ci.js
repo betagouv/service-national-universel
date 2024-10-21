@@ -1,3 +1,10 @@
+const {
+  imageTag,
+  environmentFromContainer,
+  environmentFromSecret,
+  parseRegistryEndpoint,
+} = require("./lib/utils");
+
 function buildEndpointIndex(registryEndpoint, images) {
   const index = {};
   for (const image of images) {
@@ -5,11 +12,6 @@ function buildEndpointIndex(registryEndpoint, images) {
     index[id] = image.id;
   }
   return index;
-}
-
-function parseRegistryEndpoint(endpoint) {
-  const parsed = endpoint.split(":");
-  return { imageEndpoint: parsed[0], tagName: parsed[1] };
 }
 
 class CleanCI {
@@ -25,6 +27,57 @@ class CleanCI {
     this.limit = new Date(Date.now() - lifetimeMs).toISOString();
   }
 
+  async _deleteImageTags(images) {
+    const deletableTags = await this._getDeletableImageTags();
+    let deletedItems = [];
+
+    for (const image of images) {
+      let tags = await this.scaleway.findImageTags(image.id);
+      tags = tags.filter(
+        (t) =>
+          t.name !== "latest" &&
+          (t.updated_at < this.limit || deletableTags.has(t.name))
+      );
+
+      const items = await this._genericDeleteAll({
+        name: `${image.name} image tags`,
+        items: tags,
+        logItemCb: (i) => console.log(i.id, i.name),
+        deleteItemCb: (i) => this.scaleway.deleteImageTag(i.id),
+        getIdCb: (i) => i.name,
+      });
+      deletedItems = deletedItems.concat(items);
+    }
+    return new Set(deletedItems);
+  }
+
+  async _deleteSecrets(projectId, environments) {
+    const secrets = await this.scaleway.findSecrets(projectId);
+    const deletableSecrets = secrets.filter((i) =>
+      environments.has(environmentFromSecret(i.name))
+    );
+    await this._genericDeleteAll({
+      name: "secrets",
+      items: deletableSecrets,
+      logItemCb: (i) => console.log(i.id, i.name),
+      deleteItemCb: (i) => this.scaleway.deleteSecret(i.id),
+      getIdCb: (i) => i.id,
+    });
+  }
+
+  async _deleteContainers(containers, environments) {
+    const deletableContainers = containers.filter((i) =>
+      environments.has(environmentFromContainer(i.name))
+    );
+    return await this._genericDeleteAll({
+      name: "containers",
+      items: deletableContainers,
+      logItemCb: (i) => console.log(i.id, i.name, i.registry_image),
+      deleteItemCb: (i) => this.scaleway.deleteContainer(i.id),
+      getIdCb: (i) => i.id,
+    });
+  }
+
   async run() {
     if (!this.applyChanges) {
       console.log(
@@ -32,83 +85,86 @@ class CleanCI {
       );
     }
 
-    const prs = await this.github.findRecentlyUpdatedPullRequests(
-      "main",
-      "closed"
-    );
-    console.log(prs[0]);
-
-    return;
-
     const registry = await this.scaleway.findRegistry(this.registryName);
     const images = await this.scaleway.findImages(registry.id);
 
-    for (const image of images) {
-      let tags = await this.scaleway.findImageTags(image.id);
-      tags = tags.filter((t) => t.updated_at < this.limit);
-
-      await this._genericDeleteAll({
-        name: `${image.name} image tags`,
-        items: tags,
-        logItemCb: (i) => console.log(i.id, i.name),
-        deleteItemCb: (i) => this.scaleway.deleteImageTag(i.id),
-      });
-    }
+    const deletedTags = await this._deleteImageTags(images);
 
     const containerNs = await this.scaleway.findContainerNamespace(
       this.containerNamespace
     );
     const containers = await this.scaleway.findContainers(containerNs.id);
-
     const endpoints = buildEndpointIndex(registry.endpoint, images);
 
-    const containersToDelete = await this._getContainersToDelete(
+    const environments = await this._getDeletableEnvironments(
+      deletedTags,
       containers,
       endpoints
     );
-    await this._genericDeleteAll({
-      name: "containers",
-      items: containersToDelete,
-      logItemCb: (i) => console.log(i.id, i.name, i.registry_image),
-      deleteItemCb: (i) => this.scaleway.deleteContainer(i.id),
-    });
+    if (environments.size) {
+      console.log("The following environments will be deleted: ");
+      environments.forEach((i) => console.log(" - " + i));
+    }
+
+    await this._deleteContainers(containers, environments);
+    await this._deleteSecrets(containerNs.project_id, environments);
   }
 
-  async _genericDeleteAll({ items, name, logItemCb, deleteItemCb }) {
+  async _genericDeleteAll({ items, name, logItemCb, deleteItemCb, getIdCb }) {
+    const deletedItems = [];
     if (items.length) {
       console.log(`Deleting ${name} :`);
       for (const item of items) {
         logItemCb(item);
-        if (this.applyChanges) {
-          try {
+        try {
+          if (this.applyChanges) {
             await deleteItemCb(item);
-          } catch (error) {
-            console.error(error.message);
           }
+          deletedItems.push(getIdCb(item));
+        } catch (error) {
+          console.error(error.message);
         }
       }
     }
+    return deletedItems;
   }
 
-  async _getContainersToDelete(containers, endpoints) {
-    const containersToDelete = [];
+  async _getDeletableImageTags() {
+    console.log("Retreiving commits for Pull Request recently closed :");
+    const prs = await this.github.findRecentlyUpdatedPullRequests(
+      "main",
+      "closed"
+    );
+    const tags = new Set();
+    for (const pr of prs) {
+      console.log(` - #${pr.number}: ${pr.title} (${pr.url})`);
+      const commits = await this.github._findAll(
+        pr.commits_url + "?per_page=100"
+      );
+      commits.forEach((i) => tags.add(imageTag(i.sha)));
+    }
+    return tags;
+  }
+
+  async _getDeletableEnvironments(deletedTags, containers, endpoints) {
+    const environments = new Set();
     for (const container of containers) {
       const { imageEndpoint, tagName } = parseRegistryEndpoint(
         container.registry_image
       );
+      if (deletedTags.has(tagName)) {
+        environments.add(environmentFromContainer(container.name));
+        continue;
+      }
       const imageId = endpoints[imageEndpoint];
       if (imageId && tagName) {
         const tags = await this.scaleway.findImageTagsByName(imageId, tagName);
         if (!tags.length) {
-          containersToDelete.push({
-            id: container.id,
-            name: container.name,
-            registry_image: container.registry_image,
-          });
+          environments.add(environmentFromContainer(container.name));
         }
       }
     }
-    return containersToDelete;
+    return environments;
   }
 }
 
