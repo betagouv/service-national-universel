@@ -1,26 +1,26 @@
 import React, { ReactNode, useState } from "react";
 import cx from "classnames";
 
-import { YOUNG_SOURCE, YoungDto } from "snu-lib";
+import { YOUNG_SOURCE, YOUNG_STATUS, YoungDto } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 
 import ChevronDown from "@/assets/icons/ChevronDown";
 import CloseIcon from "@/assets/Close";
 import Modal from "@/components/ui/modals/Modal";
 
-import { REJECTION_REASONS } from "./commons";
+import { REJECTION_REASONS, REJECTION_REASONS_KEY, REJECTION_REASONS_TYPE } from "./commons";
 
 const rejectionReasonOptions = [
   <option value="" key="none">
     Motif
   </option>,
-  <option value="NOT_FRENCH" key="NOT_FRENCH">
+  <option value={REJECTION_REASONS_KEY.NOT_FRENCH} key="NOT_FRENCH">
     {REJECTION_REASONS.NOT_FRENCH}
   </option>,
-  <option value="TOO_YOUNG" key="TOO_YOUNG">
+  <option value={REJECTION_REASONS_KEY.TOO_YOUNG} key="TOO_YOUNG">
     {REJECTION_REASONS.TOO_YOUNG}
   </option>,
-  <option value="OTHER" key="OTHER">
+  <option value={REJECTION_REASONS_KEY.OTHER} key="OTHER">
     {REJECTION_REASONS.OTHER}
   </option>,
 ];
@@ -54,12 +54,20 @@ interface YoungConfirmationModalProps {
   young: YoungDto;
   content: ConfirmModalContentData;
   onClose: () => void;
-  onConfirm: ({ rejectionReason, rejectionMessage, state }: { rejectionReason: string; rejectionMessage: string; state?: ConfirmModalContentData["type"] }) => void;
+  onConfirm: ({
+    rejectionReason,
+    rejectionMessage,
+    state,
+  }: {
+    rejectionReason?: REJECTION_REASONS_TYPE;
+    rejectionMessage?: string;
+    state?: ConfirmModalContentData["type"];
+  }) => void;
   onReject: () => void;
 }
 
 export default function YoungConfirmationModal({ young, content, onClose, onConfirm }: YoungConfirmationModalProps) {
-  const [rejectionReason, setRejectionReason] = useState("");
+  const [rejectionReason, setRejectionReason] = useState<REJECTION_REASONS_TYPE>("");
   const [rejectionMessage, setRejectionMessage] = useState("");
 
   console.log(content);
@@ -73,20 +81,20 @@ export default function YoungConfirmationModal({ young, content, onClose, onConf
             <CloseIcon className="absolute top-3 right-3 cursor-pointer text-gray-400" height={10} onClick={onClose} />
           </Modal.Header>
           <Modal.Content>
-            {(content.type === "VALIDATED" || content.type === "SESSION_FULL") && <p className="mb-0 text-center text-xl leading-7">{content.message}</p>}
-            {content.type === "REFUSED" && (
+            {(content.type === YOUNG_STATUS.VALIDATED || content.type === "SESSION_FULL") && <p className="mb-0 text-center text-xl leading-7">{content.message}</p>}
+            {content.type === YOUNG_STATUS.REFUSED && (
               <div className="mt-[24px]">
                 <div className="mb-[16px] flex w-[100%] items-center rounded-[6px] border-[1px] border-[#D1D5DB] bg-white pr-[15px]">
                   <select
                     value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
+                    onChange={(e) => setRejectionReason(e.target.value as REJECTION_REASONS_TYPE)}
                     className="block grow appearance-none bg-[transparent] p-[15px]"
                     disabled={young.source === YOUNG_SOURCE.CLE}>
                     {rejectionReasonOptions}
                   </select>
                   <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
                 </div>
-                {rejectionReason === "OTHER" && (
+                {rejectionReason === REJECTION_REASONS_KEY.OTHER && (
                   <textarea
                     value={rejectionMessage}
                     onChange={(e) => setRejectionMessage(e.target.value)}

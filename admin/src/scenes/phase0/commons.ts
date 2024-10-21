@@ -10,6 +10,14 @@ export const REJECTION_REASONS = {
   OTHER: "Autre (préciser)",
 };
 
+export const REJECTION_REASONS_KEY = {
+  NOT_FRENCH: "NOT_FRENCH",
+  TOO_YOUNG: "TOO_YOUNG",
+  OTHER: "OTHER",
+} as const;
+
+export type REJECTION_REASONS_TYPE = keyof typeof REJECTION_REASONS_KEY | "";
+
 export const SPECIFIC_SITUATIONS_KEY = [
   "qpv",
   "handicap",

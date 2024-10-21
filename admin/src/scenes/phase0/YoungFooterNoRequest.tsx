@@ -10,9 +10,10 @@ import api from "@/services/api";
 
 import CheckCircle from "@/assets/icons/CheckCircle";
 import XCircle from "@/assets/icons/XCircle";
-
-import { PlainButton } from "./components/Buttons";
 import ShieldCheck from "@/assets/icons/ShieldCheck";
+
+import { REJECTION_REASONS_KEY, REJECTION_REASONS_TYPE } from "./commons";
+import { PlainButton } from "./components/Buttons";
 import YoungConfirmationModal, { ConfirmModalContentData } from "./YoungConfirmationModal";
 
 const youngCleREfusedMessage =
@@ -21,11 +22,11 @@ const youngCleREfusedMessage =
 interface YoungFooterNoRequestProps {
   processing: boolean;
   young: YoungDto;
-  onProcess: (type?: ConfirmModalContentData["type"], message?: { reason: string; message: string } | null) => void;
+  onProcess: (type?: ConfirmModalContentData["type"], message?: { reason: REJECTION_REASONS_TYPE; message: string } | null) => void;
   footerClass: string;
 }
 
-export function YoungFooterNoRequest({ processing, onProcess, young, footerClass }: YoungFooterNoRequestProps) {
+export function YoungFooterNoRequest({ processing, young, onProcess, footerClass }: YoungFooterNoRequestProps) {
   const [confirmModal, setConfirmModal] = useState<ConfirmModalContentData | null>(null);
 
   async function handleValidateYoung() {
@@ -60,17 +61,25 @@ export function YoungFooterNoRequest({ processing, onProcess, young, footerClass
       type: "REFUSED",
       confirmLabel: "Confirmer le refus",
       confirmColor: "danger",
-      rejectReason: young.source === YOUNG_SOURCE.CLE ? "OTHER" : undefined,
+      rejectReason: young.source === YOUNG_SOURCE.CLE ? REJECTION_REASONS_KEY.OTHER : undefined,
       rejectMessage: young.source === YOUNG_SOURCE.CLE ? youngCleREfusedMessage : undefined,
     });
   }
 
-  function handleConfirm({ rejectionReason, rejectionMessage, state }: { rejectionReason: string; rejectionMessage: string; state?: ConfirmModalContentData["type"] }) {
-    if (confirmModal?.type === "REFUSED") {
-      if (rejectionReason === "") {
+  function handleConfirm({
+    rejectionReason,
+    rejectionMessage,
+    state,
+  }: {
+    rejectionReason: REJECTION_REASONS_TYPE;
+    rejectionMessage: string;
+    state?: ConfirmModalContentData["type"];
+  }) {
+    if (confirmModal?.type === YOUNG_STATUS.REFUSED) {
+      if (!rejectionReason) {
         setConfirmModal((prev) => ({ ...prev!, errorMessage: "Vous devez obligatoirement sélectionner un motif." }));
         return;
-      } else if (rejectionReason === "OTHER" && rejectionMessage.trim().length === 0) {
+      } else if (rejectionReason === REJECTION_REASONS_KEY.OTHER && rejectionMessage.trim().length === 0) {
         setConfirmModal((prev) => ({ ...prev!, errorMessage: "Pour le motif 'Autre', vous devez précisez un message." }));
         return;
       } else {
@@ -79,7 +88,7 @@ export function YoungFooterNoRequest({ processing, onProcess, young, footerClass
     }
     onProcess(
       state || confirmModal?.type,
-      confirmModal?.type === "REFUSED"
+      confirmModal?.type === YOUNG_STATUS.REFUSED
         ? {
             reason: rejectionReason,
             message: rejectionMessage,

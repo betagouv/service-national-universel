@@ -8,7 +8,7 @@ import api from "@/services/api";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
-import { REJECTION_REASONS } from "./commons";
+import { REJECTION_REASONS, REJECTION_REASONS_KEY, REJECTION_REASONS_TYPE } from "./commons";
 import YoungHeader from "./components/YoungHeader";
 import SectionConsentements from "./components/sections/consentements/SectionConsentements";
 import SectionParents from "./components/sections/SectionParents";
@@ -170,7 +170,7 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
     setProcessing(false);
   }
 
-  async function processRegistration(state?: ConfirmModalContentData["type"], data?: { reason: string; message: string } | null) {
+  async function processRegistration(state?: ConfirmModalContentData["type"], data?: { reason: REJECTION_REASONS_TYPE; message: string } | null) {
     setProcessing(true);
     try {
       const body = {
@@ -181,7 +181,7 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
       };
 
       if (state === YOUNG_STATUS.REFUSED) {
-        if (data?.reason === "OTHER") {
+        if (data?.reason === REJECTION_REASONS_KEY.OTHER) {
           body.inscriptionRefusedMessage = data.message;
         } else {
           body.inscriptionRefusedMessage = REJECTION_REASONS[data!.reason];
