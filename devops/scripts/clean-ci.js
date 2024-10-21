@@ -13,8 +13,9 @@ function parseRegistryEndpoint(endpoint) {
 }
 
 class CleanCI {
-  constructor(client, options = {}) {
-    this.client = client;
+  constructor(scalewayClient, githubClient, options = {}) {
+    this.scaleway = scalewayClient;
+    this.github = githubClient;
     this.registryName = options.registryName;
     this.containerNamespace = options.containerNamespace;
     this.applyChanges = options.applyChanges;
@@ -31,25 +32,33 @@ class CleanCI {
       );
     }
 
-    const registry = await this.client.findRegistry(this.registryName);
-    const images = await this.client.findImages(registry.id);
+    const prs = await this.github.findRecentlyUpdatedPullRequests(
+      "main",
+      "closed"
+    );
+    console.log(prs[0]);
+
+    return;
+
+    const registry = await this.scaleway.findRegistry(this.registryName);
+    const images = await this.scaleway.findImages(registry.id);
 
     for (const image of images) {
-      let tags = await this.client.findImageTags(image.id);
+      let tags = await this.scaleway.findImageTags(image.id);
       tags = tags.filter((t) => t.updated_at < this.limit);
 
       await this._genericDeleteAll({
         name: `${image.name} image tags`,
         items: tags,
         logItemCb: (i) => console.log(i.id, i.name),
-        deleteItemCb: (i) => this.client.deleteImageTag(i.id),
+        deleteItemCb: (i) => this.scaleway.deleteImageTag(i.id),
       });
     }
 
-    const containerNs = await this.client.findContainerNamespace(
+    const containerNs = await this.scaleway.findContainerNamespace(
       this.containerNamespace
     );
-    const containers = await this.client.findContainers(containerNs.id);
+    const containers = await this.scaleway.findContainers(containerNs.id);
 
     const endpoints = buildEndpointIndex(registry.endpoint, images);
 
@@ -61,7 +70,7 @@ class CleanCI {
       name: "containers",
       items: containersToDelete,
       logItemCb: (i) => console.log(i.id, i.name, i.registry_image),
-      deleteItemCb: (i) => this.client.deleteContainer(i.id),
+      deleteItemCb: (i) => this.scaleway.deleteContainer(i.id),
     });
   }
 
@@ -89,7 +98,7 @@ class CleanCI {
       );
       const imageId = endpoints[imageEndpoint];
       if (imageId && tagName) {
-        const tags = await this.client.findImageTagsByName(imageId, tagName);
+        const tags = await this.scaleway.findImageTagsByName(imageId, tagName);
         if (!tags.length) {
           containersToDelete.push({
             id: container.id,
@@ -106,6 +115,7 @@ class CleanCI {
 if (require.main === module) {
   const UserInput = require("./lib/user-input");
   const ScalewayClient = require("./lib/scaleway-client");
+  const GithubClient = require("./lib/github-client");
 
   const input = new UserInput(
     `Sequentially delete the following resources:
@@ -124,13 +134,15 @@ if (require.main === module) {
     })
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
+    .env("GITHUB_TOKEN", "Github access token")
     .validate();
 
-  const client = new ScalewayClient(
+  const github = new GithubClient(input.GITHUB_TOKEN);
+  const scaleway = new ScalewayClient(
     input.SCW_SECRET_KEY,
     input.SCW_ORGANIZATION_ID
   );
-  new CleanCI(client, input).run();
+  new CleanCI(scaleway, github, input).run();
 }
 
 module.exports = {
