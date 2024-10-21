@@ -18,9 +18,36 @@ function parseRegistryEndpoint(endpoint) {
   return { imageEndpoint: parsed[0], tagName: parsed[1] };
 }
 
+async function genericDeleteAll({
+  items,
+  name,
+  logItemCb,
+  deleteItemCb,
+  getIdCb,
+  applyChanges,
+}) {
+  const deletedItems = [];
+  if (items.length) {
+    console.log(`Deleting ${name} :`);
+    for (const item of items) {
+      logItemCb(item);
+      try {
+        if (applyChanges) {
+          await deleteItemCb(item);
+        }
+        deletedItems.push(getIdCb(item));
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+  }
+  return deletedItems;
+}
+
 module.exports = {
   imageTag,
   environmentFromContainer,
   environmentFromSecret,
   parseRegistryEndpoint,
+  genericDeleteAll,
 };
