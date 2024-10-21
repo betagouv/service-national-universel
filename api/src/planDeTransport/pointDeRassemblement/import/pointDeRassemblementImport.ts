@@ -29,6 +29,5 @@ export type PointDeRassemblementImportMapped = Pick<
   PointDeRassemblementType,
   "name" | "address" | "city" | "zip" | "department" | "region" | "academie" | "particularitesAcces" | "matricule"
 > & {
-  _id?: string;
   complementAddress: string;
 };
