@@ -8,7 +8,7 @@ interface File {
   side?: string;
 }
 
-interface CorrectionRequest {
+export interface CorrectionRequest {
   moderatorId?: string;
   cohort?: string;
   field?: string;

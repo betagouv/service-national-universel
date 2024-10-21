@@ -103,7 +103,20 @@ export function Button({ children, className = "", onClick = () => {}, spinner =
   }
 }
 
-export function RoundButton({ children, className = "", onClick = () => {}, spinner = false, icon, href, target, rel, mode = "blue", disabled = false }) {
+interface RoundButtonProps {
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+  spinner?: boolean;
+  icon?: { type: any; props: any };
+  href?: string;
+  target?: string;
+  rel?: string;
+  mode?: string;
+  disabled?: boolean;
+}
+
+export function RoundButton({ children, className = "", onClick = () => {}, spinner = false, icon, href, target, rel, mode = "blue", disabled = false }: RoundButtonProps) {
   let color;
 
   switch (mode) {

@@ -129,7 +129,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     }
     const program = await ProgramModel.findById(checkedId);
     if (!canCreateOrUpdateProgram(req.user, program)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    await program.remove();
+    await program.deleteOne();
     logger.debug(`Program ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {

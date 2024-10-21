@@ -1,17 +1,17 @@
 import { COHORT_TYPE, ERRORS, CohortType } from "snu-lib";
 import { CohortDocument, CohortModel } from "../models";
 
-const isInscriptionOpenOnSomeCohorts = async (): Promise<Boolean> => {
+const isInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
   const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
   return cohorts.some((cohort) => cohort.isInscriptionOpen);
 };
 
-const isReInscriptionOpenOnSomeCohorts = async (): Promise<Boolean> => {
+const isReInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
   const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
   return cohorts.some((cohort) => cohort.isReInscriptionOpen);
 };
 
-export const isInscriptionOpen = async (cohortName: String | undefined): Promise<Boolean> => {
+export const isInscriptionOpen = async (cohortName: String | undefined): Promise<boolean> => {
   if (cohortName) {
     const cohort = await CohortModel.findOne({ name: cohortName });
     if (!cohort) return false;
@@ -20,7 +20,7 @@ export const isInscriptionOpen = async (cohortName: String | undefined): Promise
   return isInscriptionOpenOnSomeCohorts();
 };
 
-export const isReInscriptionOpen = async (cohortName: String | undefined): Promise<Boolean> => {
+export const isReInscriptionOpen = async (cohortName?: String): Promise<boolean> => {
   if (cohortName) {
     const cohort = await CohortModel.findOne({ name: cohortName });
     if (!cohort) return false;

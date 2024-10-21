@@ -15,6 +15,7 @@ import { ROLES, translateStatusClasse, translate, EtablissementType, ClasseType 
 import { getCohortGroups } from "@/services/cohort.service";
 import ClasseRow from "./list/ClasseRow";
 import { exportExcelSheet, ClasseExport } from "./utils";
+import { is } from "date-fns/locale";
 
 interface ClasseProps extends ClasseType {
   referentClasse: { firstName: string; lastName: string }[];
@@ -104,11 +105,20 @@ export default function List() {
     { title: "Académie", name: "academy", missingLabel: "Non renseigné" },
     { title: "Année scolaire", name: "schoolYear", missingLabel: "Non renseigné", defaultValue: ["2024-2025"] },
     {
-      title: "Classe vide",
+      title: "Classe Vide",
       name: "seatsTaken",
       missingLabel: "Non renseigné",
+      isSingle: true,
       translate: (item) => (item === 0 ? "Oui" : "Non"),
-      filter: (item) => Number(item.key) === 0,
+      reduce: (data) => {
+        const zeroSeats = data.filter((item) => item.key === 0);
+        const oneOrMoreSeats = data.filter((item) => item.key > 0);
+
+        return [
+          { key: 0, doc_count: zeroSeats.reduce((acc, item) => acc + item.doc_count, 0) },
+          { key: 1, doc_count: oneOrMoreSeats.reduce((acc, item) => acc + item.doc_count, 0) },
+        ];
+      },
     },
   ].filter(Boolean);
 
@@ -169,8 +179,8 @@ export default function List() {
                 sortOptions={[
                   { label: "Nom (A > Z)", field: "name.keyword", order: "asc" },
                   { label: "Nom (Z > A)", field: "name.keyword", order: "desc" },
-                  { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
-                  { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
+                  { label: "Nombre d'élève décroissant", field: "seatsTaken", order: "desc" },
+                  { label: "Nombre d'élève croissant", field: "seatsTaken", order: "asc" },
                 ]}
                 selectedFilters={selectedFilters}
                 pagination={paramData}

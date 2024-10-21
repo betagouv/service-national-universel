@@ -1,8 +1,8 @@
 import { ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
-import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE } from "./constants/constants";
-import { ClasseType, SessionPhase1Type } from "./mongoSchema";
+import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
+import { PointDeRassemblementType, SessionPhase1Type } from "./mongoSchema";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -16,6 +16,7 @@ const ROLES = {
   HEAD_CENTER: "head_center",
   VISITOR: "visitor",
   DSNJ: "dsnj",
+  INJEP: "injep",
   TRANSPORTER: "transporter",
   ADMINISTRATEUR_CLE: "administrateur_cle",
   REFERENT_CLASSE: "referent_classe",
@@ -556,7 +557,7 @@ function canViewMeetingPoints(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER].includes(actor.role);
 }
 
-function canUpdateMeetingPoint(actor, meetingPoint = null) {
+function canUpdateMeetingPoint(actor, meetingPoint: PointDeRassemblementType | null = null) {
   if (isAdmin(actor)) return true;
   if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     if (!meetingPoint) return true;
@@ -993,21 +994,18 @@ function canAllowSNU(actor) {
 }
 
 function canEditEstimatedSeats(actor) {
-  if (actor.role === ROLES.ADMIN) return true;
+  if (isAdmin(actor)) return true;
   const now = new Date();
   const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
   return actor.role === ROLES.ADMINISTRATEUR_CLE && now <= limitDateEstimatedSeats;
 }
 
 function canEditTotalSeats(actor) {
-  if (actor.role === ROLES.ADMIN) {
+  if (isAdmin(actor)) return true;
+  if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     const now = new Date();
     const limitDateTotalSeat = new Date(LIMIT_DATE_TOTAL_SEATS);
-    if (now <= limitDateTotalSeat) {
-      return false;
-    } else {
-      return true;
-    }
+    return now <= limitDateTotalSeat;
   }
   const limitDatesEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS).toISOString();
   const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();
@@ -1030,12 +1028,22 @@ function canCreateEtablissement(user: UserDto) {
 }
 
 //CLE
-function canValidateMultipleYoungsInClass(actor: UserDto, classe: ClasseType) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+function canValidateMultipleYoungsInClass(actor: UserDto) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
-function canValidateYoungInClass(actor: UserDto, classe: ClasseType) {
-  if (isAdmin(actor)) return true;
-  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+
+const phaseStatusOptionsByRole = {
+  0: { DEFAULT: [] },
+  1: {
+    [ROLES.ADMIN]: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
+    DEFAULT: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
+  },
+  2: { DEFAULT: [YOUNG_STATUS_PHASE2.WAITING_REALISATION, YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.VALIDATED] },
+  3: { DEFAULT: [YOUNG_STATUS_PHASE3.WAITING_REALISATION, YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED] },
+};
+
+function getPhaseStatusOptions(actor: UserDto, phase: number) {
+  return phaseStatusOptionsByRole[phase][actor.role] || phaseStatusOptionsByRole[phase].DEFAULT || [];
 }
 
 export {
@@ -1192,5 +1200,5 @@ export {
   canUpdateReferentClasse,
   canCreateEtablissement,
   canValidateMultipleYoungsInClass,
-  canValidateYoungInClass,
+  getPhaseStatusOptions,
 };

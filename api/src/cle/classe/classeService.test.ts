@@ -414,15 +414,8 @@ describe("canEditTotalSeats", () => {
     jest.useRealTimers();
   });
 
-  it("should return false if user is ADMIN and date is before LIMIT_DATES_ESTIMATED_SEATS", () => {
+  it("should return true if user is ADMIN", () => {
     const user = { role: ROLES.ADMIN };
-    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() - 24 * 60 * 60 * 1000));
-    expect(canEditTotalSeats(user)).toBe(false);
-  });
-
-  it("should return true if user is ADMIN and date is after LIMIT_DATES_ESTIMATED_SEATS", () => {
-    const user = { role: ROLES.ADMIN };
-    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() + 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user)).toBe(true);
   });
 
@@ -436,6 +429,22 @@ describe("canEditTotalSeats", () => {
     const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();
 
     expect(isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats)).toBe(true);
+    expect(canEditTotalSeats(user1)).toBe(true);
+    expect(canEditTotalSeats(user2)).toBe(true);
+  });
+
+  it("should return false if user is REFERENT_REGION or REFERENT_DEPARTMENT and date is after LIMIT_DATE_TOTAL_SEATS", () => {
+    const user1 = { role: ROLES.REFERENT_REGION };
+    const user2 = { role: ROLES.REFERENT_DEPARTMENT };
+    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() + 24 * 60 * 60 * 1000));
+    expect(canEditTotalSeats(user1)).toBe(false);
+    expect(canEditTotalSeats(user2)).toBe(false);
+  });
+
+  it("should return true if user is REFERENT_REGION or REFERENT_DEPARTMENT and date is before LIMIT_DATE_TOTAL_SEATS", () => {
+    const user1 = { role: ROLES.REFERENT_REGION };
+    const user2 = { role: ROLES.REFERENT_DEPARTMENT };
+    jest.setSystemTime(new Date(LIMIT_DATE_TOTAL_SEATS.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user1)).toBe(true);
     expect(canEditTotalSeats(user2)).toBe(true);
   });
@@ -454,11 +463,6 @@ describe("canEditTotalSeats", () => {
     jest.setSystemTime(new Date(LIMIT_DATE_ESTIMATED_SEATS.getTime() - 24 * 60 * 60 * 1000));
     expect(canEditTotalSeats(user1)).toBe(false);
     expect(canEditTotalSeats(user2)).toBe(false);
-  });
-
-  it("should return false if user is not ADMIN, ADMINISTRATEUR_CLE, or REFERENT_CLASSE", () => {
-    const user = { role: ROLES.RESPONSIBLE };
-    expect(canEditTotalSeats(user)).toBe(false);
   });
 });
 
@@ -490,6 +494,10 @@ describe("ClasseStateManager.compute function", () => {
   jest.mock("../../emails", () => ({
     emit: jest.fn(),
   }));
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it("should throw an error if YoungModel is not provided", async () => {
     await expect(ClasseStateManager.compute(_id, fromUser, {})).rejects.toThrow("YoungModel is required");
@@ -537,7 +545,7 @@ describe("ClasseStateManager.compute function", () => {
     expect(mockedClasse.save).toHaveBeenCalledWith({ fromUser });
   });
 
-  it("should transition class to STATUS_CLASSE.OPEN when inscription open", async () => {
+  it("should transition class to STATUS_CLASSE.OPEN when inscription open AND it not full", async () => {
     const patchedClasse = {
       ...mockedClasse,
       status: STATUS_CLASSE.ASSIGNED,
@@ -564,6 +572,86 @@ describe("ClasseStateManager.compute function", () => {
     expect(patchedClasse.set).toHaveBeenCalledWith({ seatsTaken: 0 });
     expect(patchedClasse.set).toHaveBeenCalledWith({ status: STATUS_CLASSE.OPEN });
     expect(patchedClasse.save).toHaveBeenCalledWith({ fromUser });
+  });
+
+  it("should NOT transition class to STATUS_CLASSE.OPEN when it's full even if inscription is open", async () => {
+    const patchedClasse = {
+      ...mockedClasse,
+      status: STATUS_CLASSE.CLOSED,
+      totalSeats: 1,
+    };
+
+    const now = new Date();
+    const oneDayBefore = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const oneDayAfter = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    const mockedCohort = {
+      name: "Example Cohort",
+      inscriptionStartDate: oneDayBefore,
+      inscriptionEndDate: oneDayAfter,
+    };
+
+    const patchedYoungs = [
+      {
+        _id: "student1",
+        status: "VALIDATED",
+        save: saveStudentMock,
+        set: jest.fn(function (data) {
+          Object.assign(this, data);
+        }),
+      },
+    ];
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(patchedClasse);
+    jest.spyOn(YoungModel, "find").mockReturnValueOnce({
+      lean: jest.fn().mockResolvedValue(patchedYoungs),
+    } as any);
+    jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
+
+    const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
+
+    expect(mockedClasse.set).toHaveBeenCalledWith({ seatsTaken: 1 });
+    expect(patchedClasse.set).not.toHaveBeenCalledWith({ status: STATUS_CLASSE.OPEN });
+  });
+
+  it("should transition class to STATUS_CLASSE.CLOSED when it's full even if inscription is open", async () => {
+    const patchedClasse = {
+      ...mockedClasse,
+      status: STATUS_CLASSE.OPEN,
+      totalSeats: 1,
+    };
+
+    const now = new Date();
+    const oneDayBefore = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    const oneDayAfter = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    const mockedCohort = {
+      name: "Example Cohort",
+      inscriptionStartDate: oneDayBefore,
+      inscriptionEndDate: oneDayAfter,
+    };
+
+    const patchedYoungs = [
+      {
+        _id: "student1",
+        status: "VALIDATED",
+        save: saveStudentMock,
+        set: jest.fn(function (data) {
+          Object.assign(this, data);
+        }),
+      },
+    ];
+
+    jest.spyOn(ClasseModel, "findById").mockResolvedValueOnce(patchedClasse);
+    jest.spyOn(YoungModel, "find").mockReturnValueOnce({
+      lean: jest.fn().mockResolvedValue(patchedYoungs),
+    } as any);
+    jest.spyOn(CohortModel, "findOne").mockResolvedValueOnce(mockedCohort);
+
+    const computedClasse = await ClasseStateManager.compute(_id, fromUser, options);
+
+    expect(mockedClasse.set).toHaveBeenCalledWith({ seatsTaken: 1 });
+    expect(mockedClasse.set).toHaveBeenCalledWith({ status: STATUS_CLASSE.CLOSED });
   });
 
   it("should transition class to STATUS_CLASSE.CLOSED when inscription close", async () => {

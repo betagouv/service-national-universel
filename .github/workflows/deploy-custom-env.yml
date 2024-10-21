@@ -57,7 +57,7 @@ jobs:
 
   run_tests_api:
     needs: prepare
-    uses: ./.github/workflows/run-tests-api.yml
+    uses: ./.github/workflows/run-tests-api-pr.yml
     with:
       branch_name: ${{ needs.prepare.outputs.branch_name }}
     secrets: inherit

@@ -50,7 +50,7 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualMission, event, value) {
-  const missionInfos = await actualMission.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const missionInfos = await actualMission.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let mission = rebuildMission(missionInfos);
 
   const anonymisedMission = new MissionModel(mission).anonymise();

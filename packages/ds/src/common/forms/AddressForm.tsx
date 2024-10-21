@@ -65,13 +65,13 @@ export default function AddressForm({
         <Input
           label="Ville"
           value={data.city}
-          disabled
+          disabled={readOnly}
           className="col-span-2 md:col-span-1"
         />
         <Input
           label="Code postal"
           value={data.zip}
-          disabled
+          disabled={readOnly}
           className="col-span-2 md:col-span-1"
         />
         {!readOnly && (

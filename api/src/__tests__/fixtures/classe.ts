@@ -1,4 +1,6 @@
 import { ClasseType } from "snu-lib";
+import { Types } from "mongoose";
+const { ObjectId } = Types;
 
 export function createFixtureClasse(fields: Partial<ClasseType> = {}): Partial<ClasseType> {
   const classe: Partial<ClasseType> = {
@@ -23,7 +25,7 @@ export function createFixtureClasse(fields: Partial<ClasseType> = {}): Partial<C
     type: "FULL",
     estimatedSeats: 20,
     trimester: "T1",
-    cohortId: "1",
+    cohortId: new ObjectId().toString(),
     ...fields,
   };
   return classe;

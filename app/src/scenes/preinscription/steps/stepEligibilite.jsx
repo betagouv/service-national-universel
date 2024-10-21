@@ -20,14 +20,15 @@ import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import ProgressBar from "../components/ProgressBar";
-import { supportURL } from "@/config";
+import { environment, supportURL } from "@/config";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 import ErrorComponent from "@/components/error";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
   const [STEPS, context, isBirthdayModificationDisabled, uri, bdcUri] = isLoggedIn
-    ? [REINSCRIPTION_STEPS, ReinscriptionContext, true, "reinscription", "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    ? [REINSCRIPTION_STEPS, ReinscriptionContext, true, "reinscription", "jetais-inscrit-en-2023-2024-comment-me-reinscrire-en-2024-2025"]
     : [PREINSCRIPTION_STEPS, PreInscriptionContext, false, "preinscription", "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const [data, setData] = React.useContext(context);
   const [error, setError] = React.useState({});
@@ -82,7 +83,7 @@ export default function StepEligibilite() {
         // Zip du jeune
         // ! Vérifie que ça a la bouille d'un zipcode mais ds les faits, on peut mettre nimp en 5 chiffres
         if (!data?.isAbroad && !(data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
-          errors.zip = "Vous devez sélectionner un code postal";
+          errors.zip = "Vous devez saisir un code postal";
         }
       } else {
         // School
@@ -111,6 +112,9 @@ export default function StepEligibilite() {
 
   const handleSubmit = async () => {
     plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
+    if (isFeatureEnabled(FEATURES_NAME.API_ENG_TRACKING, undefined, environment)) {
+      window.apieng && window.apieng("trackAccount");
+    }
 
     const errors = validateForm();
 
@@ -152,12 +156,7 @@ export default function StepEligibilite() {
     setLoading(true);
 
     try {
-      const {
-        ok,
-        code,
-        data: sessions,
-        message,
-      } = await api.post(`/preinscription/eligibilite`, {
+      const { data: sessions, message } = await api.post(`/preinscription/eligibilite`, {
         schoolDepartment: data.school?.departmentName || data.school?.department,
         department: data.department,
         schoolRegion: data.school?.region,

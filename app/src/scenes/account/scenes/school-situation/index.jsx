@@ -8,21 +8,11 @@ import FormDescription from "../../components/FormDescription";
 import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import Loader from "@/components/Loader";
-import { fetchClass } from "@/services/classe.service";
-import { useQuery } from "@tanstack/react-query";
-import { validateId } from "@/utils";
+import useClass from "@/scenes/cle/useClass";
 
 const AccountSchoolSituationPage = () => {
   const { young, isCLE } = useAuth();
-  const {
-    isPending,
-    isError,
-    data: classe,
-  } = useQuery({
-    queryKey: ["class", young?.classeId],
-    queryFn: () => fetchClass(young?.classeId),
-    enabled: validateId(young?.classeId),
-  });
+  const { isPending, isError, data: classe } = useClass(young?.classeId);
   if (isError) toastr.error("Impossible de joindre le service.");
 
   const values = {

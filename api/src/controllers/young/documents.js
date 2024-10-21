@@ -17,7 +17,7 @@ const { generatePdfIntoStream } = require("../../utils/pdf-renderer");
 const { getMimeFromFile } = require("../../utils/file");
 const { sendDocumentEmailTask } = require("../../queues/sendMailQueue");
 
-router.post("/:type/:template", async (req, res) => {
+router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
@@ -186,7 +186,7 @@ router.post(
 
         // Create document
         const newFile = {
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           name: decodeURIComponent(name),
           size,
           uploadedAt: Date.now(),
@@ -275,7 +275,7 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
 
     const recordToDelete = young.files[key].id(fileId);
     if (!recordToDelete) return res.status(404).send({ ok: false, code: ERRORS.FILE_NOT_FOUND });
-    recordToDelete.remove();
+    recordToDelete.deleteOne();
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ data: young.files[key], ok: true });

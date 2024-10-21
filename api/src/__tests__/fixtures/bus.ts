@@ -1,12 +1,14 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { BusType } from "../../models/bus";
+import { Types } from "mongoose";
+const { ObjectId } = Types;
+import { BusType } from "snu-lib";
 
 function getNewBusFixture(): Partial<BusType> {
   return {
     idExcel: faker.lorem.words(),
     capacity: faker.number.int({ min: 11, max: 20 }),
     placesLeft: faker.number.int({ min: 1, max: 10 }),
-    cohortId: "1",
+    cohortId: new ObjectId().toString(),
   };
 }
 

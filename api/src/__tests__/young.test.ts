@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES } from "snu-lib";
 import { sendTemplate } from "../brevo";
 import * as fileUtils from "../utils/file";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { initRedisClient, closeRedisClient } from "../redis";
 import { getNewApplicationFixture } from "./fixtures/application";
@@ -74,6 +74,7 @@ beforeAll(() => {
 afterAll(() => {
   return Promise.all([dbClose(), closeRedisClient()]);
 });
+afterEach(resetAppAuth);
 
 describe("Young", () => {
   describe("PUT /young/:id/soft-delete", () => {
@@ -160,11 +161,11 @@ describe("Young", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       young.firstName = "MY NEW NAME";
       await young.save();
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
-      const res = await request(getAppHelper()).get(`/young/${young._id}/patches`).send();
+
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .get(`/young/${young._id}/patches`)
+        .send();
       expect(res.status).toBe(403);
-      passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if young found with patches", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
@@ -194,13 +195,9 @@ describe("Young", () => {
     });
     it("should return 200 if young found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
 
-      const res = await request(getAppHelper()).put(`/young/${young._id}/validate-mission-phase3`).send({});
+      const res = await request(getAppHelper(young)).put(`/young/${young._id}/validate-mission-phase3`).send({});
       expect(res.statusCode).toEqual(200);
-      passport.user = previous;
     });
     it("should be only accessible by young", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
@@ -212,12 +209,9 @@ describe("Young", () => {
     it("should be only accessible for yourself if you are a young", async () => {
       const me = await createYoungHelper(getNewYoungFixture());
       const they = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = me;
-      const res = await request(getAppHelper()).put(`/young/${they._id}/validate-mission-phase3`).send();
+
+      const res = await request(getAppHelper(me)).put(`/young/${they._id}/validate-mission-phase3`).send();
       expect(res.statusCode).toEqual(403);
-      passport.user = previous;
     });
   });
 
@@ -275,10 +269,8 @@ describe("Young", () => {
   describe("PUT /young/account/profile", () => {
     it("should return 200 if young is updated", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      const res = await request(getAppHelper()).put("/young/account/profile").send({
+
+      const res = await request(getAppHelper(young)).put("/young/account/profile").send({
         gender: "male",
         phone: "0600000000",
         phoneZone: "FRANCE",
@@ -287,19 +279,14 @@ describe("Young", () => {
       expect(res.body.data.gender).toEqual("male");
       expect(res.body.data.phone).toEqual("0600000000");
       expect(res.body.data.phoneZone).toEqual("FRANCE");
-      passport.user = previous;
     });
     it("should return 400 if parameters are wrong", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      const res = await request(getAppHelper()).put("/young/account/profile").send({
+      const res = await request(getAppHelper(young)).put("/young/account/profile").send({
         firstName: "foo",
         lastName: "bar",
       });
       expect(res.statusCode).toEqual(400);
-      passport.user = previous;
     });
 
     it.skip("should not cascade status to WITHDRAWN if not validated", async () => {
@@ -309,32 +296,24 @@ describe("Young", () => {
         statusPhase2: "WAITING_REALISATION",
         statusPhase3: "WAITING_REALISATION",
       });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
+      const response = await request(getAppHelper(young)).put("/young").send({ status: "WITHDRAWN" });
       const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.status).toEqual("WITHDRAWN");
       expect(updatedYoung.statusPhase1).toEqual("WAITING_AFFECTATION");
       expect(updatedYoung.statusPhase2).toEqual("WAITING_REALISATION");
       expect(updatedYoung.statusPhase3).toEqual("WAITING_REALISATION");
-      passport.user = previous;
     });
 
     it.skip("should not cascade status to WITHDRAWN if validated", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase1: "DONE", statusPhase2: "VALIDATED", statusPhase3: "VALIDATED" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
+      const response = await request(getAppHelper(young)).put("/young").send({ status: "WITHDRAWN" });
       const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.status).toEqual("WITHDRAWN");
       expect(updatedYoung.statusPhase1).toEqual("DONE");
       expect(updatedYoung.statusPhase2).toEqual("VALIDATED");
       expect(updatedYoung.statusPhase3).toEqual("VALIDATED");
-      passport.user = previous;
     });
 
     it("should be only accessible by young", async () => {
@@ -347,9 +326,8 @@ describe("Young", () => {
   describe("PUT /young/account/parents", () => {
     it("should return 200 if parents are updated", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      passport.user = young;
-      const response = await request(getAppHelper()).put("/young/account/parents").send({
+
+      const response = await request(getAppHelper(young)).put("/young/account/parents").send({
         parent1Status: "mother",
         parent1FirstName: "foo",
         parent1LastName: "bar",
@@ -382,9 +360,8 @@ describe("Young", () => {
 
     it("should return 400 if parent 1 status is not given", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      passport.user = young;
-      const response = await request(getAppHelper()).put("/young/account/parents").send({ parent1Status: "" });
+
+      const response = await request(getAppHelper(young)).put("/young/account/parents").send({ parent1Status: "" });
       expect(response.statusCode).toEqual(400);
     });
   });
@@ -392,10 +369,8 @@ describe("Young", () => {
   describe("PUT young/account/mission-preferences", () => {
     it("should return 200 if mission preferences are updated", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), domains: ["foo"] });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      const response = await request(getAppHelper())
+
+      const response = await request(getAppHelper(young))
         .put("/young/account/mission-preferences")
         .send({
           domains: ["bar"],
@@ -437,7 +412,6 @@ describe("Young", () => {
       expect(updatedYoung.mobilityNearRelativeAddress).toEqual("foo");
       expect(updatedYoung.mobilityNearRelativeZip).toEqual("foo");
       expect(updatedYoung.mobilityNearRelativeCity).toEqual("foo");
-      passport.user = previous;
     });
   });
 
@@ -551,12 +525,8 @@ describe("Young", () => {
       );
       const young = await createYoungHelper({ ...getNewYoungFixture(), cohort: cohort.name, cohortId: cohort._id });
 
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-
       getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
-      let res = await request(getAppHelper())
+      let res = await request(getAppHelper(young))
         .post(`/young/${young._id}/documents/cniFiles`)
         .field("body", JSON.stringify({ names: ["image.jpeg"], category: "cniNew", expirationDate: "2024-06-25T09:33:21.470Z" }))
         .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
@@ -565,24 +535,19 @@ describe("Young", () => {
 
       // With military file.
       getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
-      res = await request(getAppHelper())
+      res = await request(getAppHelper(young))
         .post(`/young/${young._id}/documents/militaryPreparationFilesIdentity`)
         .field("body", JSON.stringify({ names: ["image.jpeg"] }))
         .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
       expect(res.status).toEqual(200);
       expect(res.body.ok).toEqual(true);
-
-      passport.user = previous;
     });
 
     it("should send file for the young with cohort avenir", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohort: COHORTS.AVENIR }));
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
 
       getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
-      let res = await request(getAppHelper())
+      let res = await request(getAppHelper(young))
         .post(`/young/${young._id}/documents/cniFiles`)
         .field("body", JSON.stringify({ names: ["image.jpeg"], category: "cniNew", expirationDate: "2024-06-25T09:33:21.470Z" }))
         .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
@@ -597,47 +562,34 @@ describe("Young", () => {
         .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
       expect(res.status).toEqual(200);
       expect(res.body.ok).toEqual(true);
-
-      passport.user = previous;
     });
 
     it("should not accept invalid body", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
 
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper(young))
         .post(`/young/${young._id}/documents/cniFiles`)
         .send({ body: JSON.stringify({ expirationDate: null }) });
       expect(res.status).toEqual(400);
-      passport.user = previous;
     });
 
     it("should not accept invalid param key", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
 
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper(young))
         .post(`/young/${young._id}/documents/thisPropertyDoesNotExists`)
         .send({ body: JSON.stringify({ names: ["e"] }) });
       expect(res.status).toEqual(400);
-      passport.user = previous;
     });
 
     it("should not accept invalid file mime", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      const res = await request(getAppHelper())
+
+      const res = await request(getAppHelper(young))
         .post(`/young/${young._id}/documents/cniFiles`)
         .field("body", JSON.stringify({ names: ["test.csv"] }))
         .attach("file", Buffer.from("contenu"), { filename: "test.csv", contentType: "text/csv" });
       expect(res.status).toEqual(400);
-      passport.user = previous;
     });
   });
 
@@ -683,9 +635,8 @@ describe("Young", () => {
     });
     it("should return 200 if young found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      passport.user = young;
-      const res = await request(getAppHelper())
+
+      const res = await request(getAppHelper(young))
         .post("/young/" + young._id + "/email/" + validTemplate)
         .send({ message: "hello" });
       expect(res.statusCode).toEqual(200);
@@ -695,9 +646,7 @@ describe("Young", () => {
       sendTemplate.mockClear();
       const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
       const young = await createYoungHelper(getNewYoungFixture({ source: "CLE" }));
-      const passport = require("passport");
-      passport.user = tutor;
-      const res = await request(getAppHelper()).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`).send({ status: "VALIDATED" });
+      const res = await request(getAppHelper(tutor)).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`).send({ status: "VALIDATED" });
       expect(res.statusCode).toEqual(200);
       expect(sendTemplate).toHaveBeenCalledTimes(1);
       expect(sendTemplate).toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, {
@@ -724,26 +673,23 @@ describe("Young", () => {
   describe("GET /young/:id/application", () => {
     it("should return 404 when young does not exist", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const passport = require("passport");
-      passport.user = referent;
-      const res = await request(getAppHelper()).get("/young/" + notExistingYoungId + "/application");
+
+      const res = await request(getAppHelper(referent)).get("/young/" + notExistingYoungId + "/application");
       expect(res.status).toBe(404);
     });
     it("should return empty array when young has no application", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      passport.user = young;
-      const res = await request(getAppHelper()).get("/young/" + young._id + "/application");
+
+      const res = await request(getAppHelper(young)).get("/young/" + young._id + "/application");
       expect(res.body.data).toStrictEqual([]);
       expect(res.status).toBe(200);
     });
     it("should return applications", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      passport.user = young;
+
       const mission = await createMissionHelper(getNewMissionFixture());
       await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const res = await request(getAppHelper()).get("/young/" + young._id + "/application");
+      const res = await request(getAppHelper(young)).get("/young/" + young._id + "/application");
       expect(res.status).toBe(200);
       expect(res.body.data.length).toBe(1);
       expect(res.body.data[0].status).toBe("WAITING_VALIDATION");
@@ -753,44 +699,60 @@ describe("Young", () => {
       const secondYoung = await createYoungHelper(getNewYoungFixture());
       const mission = await createMissionHelper(getNewMissionFixture());
       await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
 
       // Successful request
-      let res = await request(getAppHelper()).get("/young/" + young._id + "/application");
+      let res = await request(getAppHelper(young)).get("/young/" + young._id + "/application");
       expect(res.status).toBe(200);
 
       // Failed request (not allowed)
-      res = await request(getAppHelper()).get("/young/" + secondYoung._id + "/application");
+      res = await request(getAppHelper(young)).get("/young/" + secondYoung._id + "/application");
       expect(res.status).toBe(403);
-
-      passport.user = previous;
     });
   });
   describe("YoungModel post save hook", () => {
     it("should call StateManager.Classe.compute if source is CLE", async () => {
-      const cohortFixture = getNewCohortFixture({ type: "CLE" });
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      const cohortFixture = getNewCohortFixture({ type: "CLE", instructionEndDate: tomorrow });
       const cohort = await createCohortHelper(cohortFixture);
       const classe = createFixtureClasse({ seatsTaken: 0, status: "OPEN", cohort: cohort.name, cohortId: cohort._id });
       const classeId = (await createClasse(classe))._id;
-      const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId });
+      const youngFixture = getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId, cohort: cohort.name, cohortId: cohort._id });
       const young = await createYoungHelper(youngFixture);
       const updatedYoung = { ...young.toObject(), status: "VALIDATED" };
       await young.set(updatedYoung).save();
-      const passport = require("passport");
-      const previous = passport.user.role;
-      passport.user.role = ROLES.ADMIN;
-      const res = await request(getAppHelper()).put(`/referent/young/${young._id}`).send({
-        status: "VALIDATED",
-      });
+
+      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .put(`/referent/young/${young._id}`)
+        .send({
+          status: "VALIDATED",
+        });
 
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe("VALIDATED");
 
       const updatedClasse = await ClasseModel.findById(classeId);
       expect(updatedClasse?.seatsTaken).toBe(1);
-      passport.user.role = previous;
+    });
+  });
+
+  describe("POST /young/invite", () => {
+    it("should create a new young user and send an invitation email", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = getNewYoungFixture({ cohortId: cohort._id.toString() });
+
+      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post("/young/invite")
+        .send(young);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty("young");
+      expect(res.body.young).toHaveProperty("invitationToken");
+      expect(res.body.young).toHaveProperty("invitationExpires");
+      expect(res.body.young).toHaveProperty("status", "WAITING_VALIDATION");
+      expect(res.body.young).toHaveProperty("cohort", cohort.name);
+      expect(res.body.young).toHaveProperty("cohortId", cohort._id.toString());
     });
   });
 });

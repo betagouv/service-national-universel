@@ -1,9 +1,8 @@
 import React from "react";
-import { useDispatch } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "@/services/plausible";
 import Input from "../../../components/dsfr/forms/input";
-import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import queryString from "query-string";
@@ -11,7 +10,6 @@ import { useHistory } from "react-router-dom";
 import { BsShieldLock } from "react-icons/bs";
 import { isValidRedirectUrl, DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
 import { captureMessage } from "../../../sentry";
-import { cohortsInit } from "@/utils/cohorts";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN = DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS / 60 / 1000;
 
@@ -23,7 +21,7 @@ export default function Signin() {
   const [rememberMe, setRememberMe] = React.useState(false);
   const disabled = !token2FA || loading;
 
-  const dispatch = useDispatch();
+  const { login } = useAuth();
 
   const params = queryString.parse(location.search);
   const { redirect, email } = params;
@@ -33,12 +31,10 @@ export default function Signin() {
     try {
       const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
 
-      if (!response.user || !response.token) return;
+      if (!response.user) return;
 
-      api.setToken(response.token);
       plausibleEvent("2FA/ Connexion réussie");
-      dispatch(setYoung(response.user));
-      await cohortsInit();
+      await login(response.user);
 
       const redirectionApproved = isValidRedirectUrl(redirect);
 

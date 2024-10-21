@@ -13,18 +13,17 @@ import { PHONE_ZONES, isPhoneNumberWellFormated, FEATURES_NAME, isFeatureEnabled
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import IconFrance from "@/assets/IconFrance";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
-import { useDispatch } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
 import dayjs from "dayjs";
 import API from "@/services/api";
-import { setYoung } from "@/redux/auth/actions";
 import { capture } from "@/sentry";
 import { RiInformationLine } from "react-icons/ri";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
 import { SignupButtons, InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
 import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
-import { cohortsInit } from "@/utils/cohorts";
+import emojiRegex from "emoji-regex";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -32,7 +31,7 @@ export default function StepProfil() {
   const [loading, setLoading] = React.useState(false);
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
-  const dispatch = useDispatch();
+  const { login } = useAuth();
   const parcours = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase();
   const isCLE = parcours === YOUNG_SOURCE.CLE;
   const classeId = new URLSearchParams(window.location.search).get("classeId");
@@ -54,6 +53,21 @@ export default function StepProfil() {
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
   const trimmedEmail = data?.email?.trim();
   const trimmedEmailConfirm = data?.emailConfirm?.trim();
+
+  const handleNameChange = (field) => (value) => {
+    // Expression régulière pour supprimer les caractères invalides
+    const invalidCharRegex = /[^a-zA-ZÀ-ÿ\s'\-^¨éèëâçù]/g;
+    // Expression régulière pour correspondre aux emojis
+    const emojiReg = emojiRegex();
+
+    // Supprimer les caractères invalides
+    let fixedValue = value.replace(invalidCharRegex, "");
+    // Supprimer les emojis
+    fixedValue = fixedValue.replace(emojiReg, "");
+
+    // Mettre à jour l'état avec la valeur nettoyée
+    setData({ ...data, [field]: fixedValue });
+  };
 
   const validate = () => {
     let errors = {};
@@ -138,16 +152,14 @@ export default function StepProfil() {
 
     try {
       setLoading(true);
-      const { code, ok, token, user } = await API.post(`/young/signup`, values);
+      const { code, ok, user } = await API.post(`/young/signup`, values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
       }
       if (user) {
         plausibleEvent("CLE/CTA preinscription - infos persos");
-        if (token) API.setToken(token);
-        await cohortsInit();
-        dispatch(setYoung(user));
+        await login(user);
         history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
       }
     } catch (e) {
@@ -242,16 +254,16 @@ export default function StepProfil() {
             state={error.firstName ? "error" : "default"}
             stateRelatedMessage={error.firstName}
             value={data.firstName}
-            onChange={(e) => setData({ ...data, firstName: e })}
+            onChange={handleNameChange("firstName")}
           />
 
           <Input
             label={isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
             value={data.lastName}
-            onChange={(e) => setData({ ...data, lastName: e })}
+            onChange={handleNameChange("lastName")}
             onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })}
-            state={error.firstName ? "error" : "default"}
-            stateRelatedMessage={error.firstName}
+            state={error.lastName ? "error" : "default"}
+            stateRelatedMessage={error.lastName}
           />
 
           {isCLE && (

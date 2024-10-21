@@ -1,42 +1,13 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "./types";
+import { InterfaceExtended, SessionPhase1TokenSchema } from "snu-lib";
+
+import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
 const MODELNAME = "sessionphase1token";
 
-const schema = new Schema({
-  token: {
-    type: String,
-    documentation: {
-      description: "Token de session publique",
-    },
-  },
-
-  startAt: {
-    type: Date,
-    documentation: {
-      description: "Date de debut validité du token",
-    },
-  },
-
-  expireAt: {
-    type: Date,
-    documentation: {
-      description: "Date de fin validité du token",
-    },
-  },
-
-  sessionId: {
-    type: String,
-    documentation: {
-      description: "Id de session",
-    },
-  },
-
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
+const schema = new Schema(SessionPhase1TokenSchema);
 
 schema.plugin(patchHistory, {
   mongoose,
@@ -62,7 +33,7 @@ schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   next();
 });
 
-export type SessionPhase1TokenType = InterfaceExtended<InferSchemaType<typeof schema>>;
+type SessionPhase1TokenType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type SessionPhase1TokenDocument<T = {}> = DocumentExtended<SessionPhase1TokenType & T>;
 type SchemaExtended = SessionPhase1TokenDocument & UserExtension;
 

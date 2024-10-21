@@ -1,12 +1,20 @@
 import { ROLES, translate } from "../../utils";
 
 // @todo : supervisor has structure ?
-export const roleOptions = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.DSNJ].map(
-  (key) => ({
-    value: key,
-    label: translate(key),
-  }),
-);
+export const roleOptions = [
+  ROLES.REFERENT_DEPARTMENT,
+  ROLES.REFERENT_REGION,
+  ROLES.ADMIN,
+  ROLES.RESPONSIBLE,
+  ROLES.SUPERVISOR,
+  ROLES.HEAD_CENTER,
+  ROLES.VISITOR,
+  ROLES.DSNJ,
+  ROLES.INJEP,
+].map((key) => ({
+  value: key,
+  label: translate(key),
+}));
 
 export const MODE_DEFAULT = "default";
 export const MODE_EDITION = "edition";

@@ -257,8 +257,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       try {
         const qpv = await getQPV(value.zip, value.city, value.address);
         if (qpv === true) young.set({ qpv: "true" });
-        else if (qpv === false) value.qpv = "false";
-        else value.qpv = undefined;
+        else if (qpv === false) young.set({ qpv: "false" });
+        else young.set({ qpv: undefined });
       } catch (error) {
         // Continue
       }

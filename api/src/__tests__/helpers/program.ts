@@ -10,7 +10,7 @@ async function getProgramByIdHelper(programId) {
 
 async function deleteProgramByIdHelper(programId) {
   const program = await getProgramByIdHelper(programId);
-  await program?.remove();
+  await program?.deleteOne();
 }
 
 async function createProgramHelper(program) {

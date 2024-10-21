@@ -31,3 +31,4 @@ export * from "./utils/request";
 export * from "./utils/cohortUtils";
 export * from "./young";
 export * from "./mongoSchema";
+export * from "./constants/cohesionCenter";
