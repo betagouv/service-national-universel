@@ -11,6 +11,7 @@ import NotFound from "@/components/layout/NotFound";
 
 export default function Index() {
   useDocumentTitle("Classes");
+  console.log("test");
 
   return (
     <Switch>
