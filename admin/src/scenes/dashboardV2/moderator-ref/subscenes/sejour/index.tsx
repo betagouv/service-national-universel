@@ -20,6 +20,10 @@ import {
   getDepartmentNumber,
 } from "snu-lib";
 
+import { AuthState } from "@/redux/auth/reducer";
+import { CohortState } from "@/redux/cohorts/reducer";
+
+import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
@@ -29,15 +33,79 @@ import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "../../../components/sejour/Presences";
 import StatusPhase1 from "../../../components/sejour/StatusPhase1";
 import TabSession from "./components/TabSession";
-import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 import BandeauInfo from "../../../components/BandeauInfo";
 
+type FilterOption = {
+  key: string;
+  label: string;
+};
+
+type Filter = {
+  id: string;
+  name: string;
+  fullValue: string;
+  options: FilterOption[];
+  translate?: (value: string) => string;
+  sort?: (value: string) => number;
+} | null;
+
+type SessionByCenter = {
+  centerId?: string;
+  centerName?: string;
+  centerCity?: string;
+  department?: string;
+  region?: string;
+  total?: number;
+  presence?: number;
+  presenceJDM?: string;
+};
+
+type CenterStats = {
+  typology?: string;
+  domains?: string;
+  capacity?: string;
+  totalCenter?: string;
+  placesTotalSession?: string;
+  placesLeftSession?: string;
+  status?: string;
+  timeSchedule?: {
+    false?: string;
+  };
+  totalSession?: string;
+};
+
+type YoungStats = {
+  statusPhase1?: string;
+  statusPhase1Total?: string;
+  pdrTotal?: string;
+  participation?: {
+    false: string;
+  };
+  participationTotal?: string;
+  presence?: string;
+  JDM?: string;
+  depart?: string;
+  departTotal?: string;
+  departMotif?: string;
+  pdr?: {
+    NR?: string;
+    false?: string;
+  };
+};
+
 export default function Index() {
-  const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   //useStates
-  const [selectedFilters, setSelectedFilters] = useState({
+  const [selectedFilters, setSelectedFilters] = useState<{
+    status: string[];
+    statusPhase1: string[];
+    cohort: string[];
+    region: string[];
+    department: string[];
+    academy: string[];
+  }>({
     status: [YOUNG_STATUS.VALIDATED],
     statusPhase1: [YOUNG_STATUS_PHASE1.AFFECTED],
     cohort: [],
@@ -45,20 +113,20 @@ export default function Index() {
     department: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
     academy: [],
   });
-  const [filterArray, setFilterArray] = useState([]);
-  const [data, setData] = useState({});
-  const [dataCenter, setDataCenter] = useState({});
-  const [sessionByCenter, setSessionByCenter] = useState(null);
+  const [filterArray, setFilterArray] = useState<Filter[]>([]);
+  const [data, setData] = useState<YoungStats>({});
+  const [dataCenter, setDataCenter] = useState<CenterStats>({});
+  const [sessionByCenter, setSessionByCenter] = useState<SessionByCenter | null>(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
     user.role === ROLES.REFERENT_REGION
-      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
-      : academyList.map((a) => ({ key: a, label: a }));
+      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a: string) => ({ key: a, label: a }))
+      : academyList.map((a: string) => ({ key: a, label: a }));
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let filters = [
+    const filters = [
       {
         id: "status",
         name: "Statut d’inscription",
@@ -71,7 +139,7 @@ export default function Index() {
         fullValue: "Tous",
         fixed: [YOUNG_STATUS_PHASE1.AFFECTED],
         options: Object.keys(YOUNG_STATUS_PHASE1)
-          .filter((s) => ![YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(s))
+          .filter((s) => !([YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION] as string[]).includes(s))
           .map((status) => ({ key: status, label: translatePhase1(status) })),
       },
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
@@ -170,9 +238,11 @@ export default function Index() {
             <div className="flex w-[30%] flex-col gap-4">
               <BoxWithPercentage
                 total={data?.pdrTotal || 0}
+                // @ts-expect-error fixme
                 number={data?.pdr?.NR + data?.pdr?.false || 0}
                 title="Point de rassemblement"
                 subLabel="restants à confirmer"
+                // @ts-expect-error jsx
                 redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ hasMeetingInformation: "false" })] })}
               />
               <BoxWithPercentage
@@ -180,11 +250,14 @@ export default function Index() {
                 number={data?.participation?.false || 0}
                 title="Participation"
                 subLabel="restants à confirmer"
+                // @ts-expect-error jsx
                 redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ youngPhase1Agreement: "false" })] })}
               />
             </div>
+            {/* @ts-expect-error jsx */}
             <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} />
           </div>
+          {/* @ts-expect-error jsx */}
           <Presences presence={data?.presence} JDM={data?.JDM} depart={data?.depart} departTotal={data?.departTotal} departMotif={data?.departMotif} filter={selectedFilters} />
           <h1 className="text-[28px] font-bold leading-8 text-gray-900">Centres</h1>
           <div className="grid grid-cols-3 gap-4">
@@ -193,12 +266,14 @@ export default function Index() {
               capacity={dataCenter?.capacity || 0}
               redirect={getNewLink({ base: "/centre/liste/liste-centre", filter: selectedFilters }, "center")}
             />
+            {/* @ts-expect-error fixme */}
             <OccupationCardHorizontal total={dataCenter?.placesTotalSession || 0} taken={dataCenter?.placesTotalSession - dataCenter?.placesLeftSession || 0} />
             <BoxWithPercentage
               total={dataCenter?.totalSession || 0}
               number={dataCenter?.timeSchedule?.false || 0}
               title="Emplois du temps"
               subLabel="restants à renseigner"
+              // @ts-expect-error jsx
               redirect={getNewLink({ base: `/centre/liste/session`, filter: selectedFilters, filtersUrl: ["hasTimeSchedule=false"] }, "session")}
             />
           </div>

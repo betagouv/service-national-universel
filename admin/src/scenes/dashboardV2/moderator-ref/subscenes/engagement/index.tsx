@@ -20,15 +20,37 @@ import { orderCohort } from "../../../../../components/filters-system-v2/compone
 import ExportEngagementReport from "./components/ExportEngagementReport";
 import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
 import BandeauInfo from "../../../components/BandeauInfo";
+import { AuthState } from "@/redux/auth/reducer";
+import { CohortState } from "@/redux/cohorts/reducer";
+
+type FilterOption = {
+  key: string;
+  label: string;
+};
+
+type Filter = {
+  id: string;
+  name: string;
+  fullValue: string;
+  options: FilterOption[];
+  translate?: (value: string) => string;
+  sort?: (value: string) => number;
+} | null;
 
 export default function Index() {
-  const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const [modalExport, setModalExport] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("0 %");
 
-  const [selectedFilters, setSelectedFilters] = useState({
+  const [selectedFilters, setSelectedFilters] = useState<{
+    status: string[];
+    region: string[];
+    academy: string[];
+    department: string[];
+    cohorts: string[];
+  }>({
     status: [YOUNG_STATUS.VALIDATED],
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     academy: [],
@@ -36,11 +58,11 @@ export default function Index() {
     cohorts: [],
   });
 
-  const [filterArray, setFilterArray] = useState([]);
-  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [filterArray, setFilterArray] = useState<Filter[]>([]);
+  const [departmentOptions, setDepartmentOptions] = useState<FilterOption[]>([]);
 
   useEffect(() => {
-    let filters = [
+    const filters = [
       {
         id: "status",
         name: "Statut d’inscription",
@@ -98,8 +120,8 @@ export default function Index() {
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
     user.role === ROLES.REFERENT_REGION
-      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
-      : academyList.map((a) => ({ key: a, label: a }));
+      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a: string) => ({ key: a, label: a }))
+      : academyList.map((a: string) => ({ key: a, label: a }));
 
   const computeFilteredDepartment = () => {
     if (selectedFilters.academy?.length) {
