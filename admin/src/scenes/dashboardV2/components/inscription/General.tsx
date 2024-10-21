@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 
 import { academyList, departmentToAcademy, REFERENT_ROLES, region2department, regionList, ROLES, getDepartmentNumber, CohortDto } from "snu-lib";
 import api from "@/services/api";
-import { getCohortNameList } from "@/services/cohort.service";
+import { filterCurrentAndNextCohorts, getCohortNameList } from "@/services/cohort.service";
 import { getNewLink } from "@/utils";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
@@ -18,7 +18,6 @@ import { getDepartmentOptions, getFilteredDepartment } from "../common";
 import StatutPhase from "./StatutPhase";
 import Details from "./Details";
 import TabSchool from "./TabSchool";
-import { isAfter, isBefore } from "date-fns";
 
 type FilterOption = {
   key: string;
@@ -67,9 +66,7 @@ export default function General({ selectedFilters, onSelectedFiltersChange }: Ge
 
   useEffect(() => {
     // toutes les cohort en cours (date de fin non passée) + celles non commencées
-    const cohortsFilters = cohorts
-      .filter((cohort) => (cohort.dateStart && isBefore(new Date(), cohort.dateStart)) || (cohort.dateEnd && isAfter(cohort.dateEnd, new Date())))
-      .map(({ name }) => name);
+    const cohortsFilters = filterCurrentAndNextCohorts(cohorts).map(({ name }) => name);
     console.log("cohortsFilters", cohortsFilters);
     onSelectedFiltersChange({ cohort: cohortsFilters });
 
@@ -167,15 +164,13 @@ export default function General({ selectedFilters, onSelectedFiltersChange }: Ge
           ]}
           goal={goal}
           showTooltips={true}
-          legendUrls={
-            [
-              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
-              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
-              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
-              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
-              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
-            ]
-          }
+          legendUrls={[
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
+          ]}
         />
       </div>
       <TotalInscription totalInscriptions={totalInscriptions} goal={goal} />

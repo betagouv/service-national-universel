@@ -10,6 +10,7 @@ import { getDepartmentOptions, getFilteredDepartment } from "@/scenes/dashboardV
 import HorizontalBar from "@/scenes/dashboardV2/components/graphs/HorizontalBar";
 import VolontaireSection from "./VolontaireSection";
 import { useSelector } from "react-redux";
+import { filterCurrentAndNextCohorts } from "@/services/cohort.service";
 
 export default function Index({ user }) {
   const cohorts = useSelector((state) => state.Cohorts);
@@ -18,8 +19,16 @@ export default function Index({ user }) {
   const [inAndOutCohort, setInAndOutCohort] = useState();
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({
-    cohort: cohorts.filter((e) => e.type === COHORT_TYPE.VOLONTAIRE && e.name.match(/2024/)).map((e) => e.name),
+    cohort: [],
   });
+
+  useEffect(() => {
+    // toutes les cohort en cours (date de fin non passée) + celles non commencées (HTS: avec objectif)
+    const cohortsFilters = filterCurrentAndNextCohorts(cohorts)
+      .filter(({ type }) => type === COHORT_TYPE.VOLONTAIRE)
+      .map(({ name }) => name);
+    setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
+  }, []);
 
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList?.map((r) => ({ key: r, label: r }));
   const academyOptions =

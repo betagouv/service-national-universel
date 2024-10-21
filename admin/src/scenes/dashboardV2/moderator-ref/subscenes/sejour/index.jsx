@@ -1,12 +1,11 @@
 import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { HiHome } from "react-icons/hi";
 
 import api from "@/services/api";
 import plausibleEvent from "@/services/plausible";
 import { getNewLink } from "@/utils";
-import { getCohortNameList } from "@/services/cohort.service";
+import { filterCurrentAndNextCohorts, getCohortNameList } from "@/services/cohort.service";
 import { Page, Header, DropdownButton } from "@snu/ds/admin";
 import {
   ROLES,
@@ -126,8 +125,8 @@ export default function Index() {
   }, [JSON.stringify(selectedFilters)]);
 
   useEffect(() => {
-    //regex to get all cohort 2024
-    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
+    // toutes les cohort en cours (date de fin non passée) + celles non commencées
+    const cohortsFilters = filterCurrentAndNextCohorts(cohorts).map(({ name }) => name);
     setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
     setIsLoading(false);
   }, []);
