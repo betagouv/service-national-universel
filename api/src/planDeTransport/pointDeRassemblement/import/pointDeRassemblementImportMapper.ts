@@ -21,9 +21,6 @@ export const mapPointDeRassemblements = (rawPdrs: PointDeRassemblementCSV[]): Po
     if (!rawPdrWithoutId.name) {
       throw new Error("NO NAME " + rawPdrWithoutId.matricule);
     }
-    if (rawPdr["ID temporaire PDR"]) {
-      return { _id: rawPdr["ID temporaire PDR"].toLowerCase(), ...rawPdrWithoutId };
-    }
     return rawPdrWithoutId;
   });
 };
