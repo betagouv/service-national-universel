@@ -55,7 +55,6 @@ export default function YoungConfirmationModal({ young, content, onClose, onConf
   const [rejectionReason, setRejectionReason] = useState<REJECTION_REASONS_TYPE>("");
   const [rejectionMessage, setRejectionMessage] = useState("");
 
-  console.log(content);
   return (
     <Modal isOpen={!!content}>
       {content && (
