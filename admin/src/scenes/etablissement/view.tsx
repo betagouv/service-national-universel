@@ -57,6 +57,7 @@ export default function View() {
       <Header
         title={etablissement.name}
         breadcrumb={[
+          { title: "Séjours" },
           ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && {
             title: "Établissements",
             to: "/etablissement",

@@ -66,7 +66,7 @@ export default function List() {
 
   return (
     <Page>
-      <Header title="Établissements" breadcrumb={[{ title: "Établissements" }]} actions={getActionsList()} />
+      <Header title="Établissements" breadcrumb={[{ title: "Séjours" }, { title: "Établissements" }]} actions={getActionsList()} />
       <Container className="!p-0">
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
           <div className="flex items-stretch justify-between  bg-white px-4 pt-2">

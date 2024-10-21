@@ -15,7 +15,6 @@ import { ROLES, translateStatusClasse, translate, EtablissementType, ClasseType 
 import { getCohortGroups } from "@/services/cohort.service";
 import ClasseRow from "./list/ClasseRow";
 import { exportExcelSheet, ClasseExport } from "./utils";
-import { is } from "date-fns/locale";
 
 interface ClasseProps extends ClasseType {
   referentClasse: { firstName: string; lastName: string }[];
@@ -129,7 +128,7 @@ export default function List() {
     <Page>
       <Header
         title="Classes"
-        breadcrumb={[{ title: "Classes" }]}
+        breadcrumb={[{ title: "Séjours" }, { title: "Classes" }]}
         actions={[
           [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (
             <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />

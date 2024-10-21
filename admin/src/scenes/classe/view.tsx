@@ -232,6 +232,7 @@ export default function View() {
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status) as TStatus} />}
         breadcrumb={[
+          { title: "Séjours" },
           {
             title: "Classes",
             to: "/classes",
