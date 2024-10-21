@@ -139,7 +139,6 @@ export function getConfirmModalContent({
   isLCavailable?: boolean;
   young: YoungDto;
 }) {
-  console.log(source, isGoalReached, isLCavailable, isDatePassed);
   const modalContent: ConfirmModalContentData = {
     icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
     title: "",
