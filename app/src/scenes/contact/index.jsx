@@ -65,14 +65,14 @@ export default function Contact() {
 
         {/* Logged in users get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (
-          <div className="my-8 space-y-6">
+          <section id="shortcuts" className="my-8 space-y-6">
             <CardLink label="Débloquez votre accès gratuit au code de la route" picto={<UnlockPictogram />} url="/phase1" />
             <CardLink
               label="Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?"
               picto={<QuestionBubblePictogram />}
               url="/phase1"
             />
-          </div>
+          </section>
         ) : (
           <fieldset id="parcours" className="my-10 space-y-4">
             <legend className="text-base">Choisir le type de profil qui me concerne :</legend>
