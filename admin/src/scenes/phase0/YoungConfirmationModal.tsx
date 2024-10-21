@@ -14,7 +14,7 @@ export interface ConfirmModalContentData {
   icon: ReactNode;
   title: ReactNode | string;
   message: string;
-  type: "WAITING_LIST" | "VALIDATED" | "REFUSED" | "SESSION_FULL";
+  type: "WAITING_LIST" | "VALIDATED" | "REFUSED";
   infoLink?: {
     href: string;
     text: string;
@@ -66,7 +66,7 @@ export default function YoungConfirmationModal({ young, content, onClose, onConf
             <CloseIcon className="absolute top-3 right-3 cursor-pointer text-gray-400" height={10} onClick={onClose} />
           </Modal.Header>
           <Modal.Content>
-            {(content.type === YOUNG_STATUS.VALIDATED || content.type === "SESSION_FULL") && <p className="mb-0 text-center text-xl leading-7">{content.message}</p>}
+            {content.type === YOUNG_STATUS.VALIDATED && <p className="mb-0 text-center text-xl leading-7">{content.message}</p>}
             {content.type === YOUNG_STATUS.REFUSED && (
               <div className="mt-[24px]">
                 <div className="mb-[16px] flex w-[100%] items-center rounded-[6px] border-[1px] border-[#D1D5DB] bg-white pr-[15px]">
