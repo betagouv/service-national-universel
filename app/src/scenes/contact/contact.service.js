@@ -134,7 +134,7 @@ export const questions = [
     category: "QUESTION",
     value: "PHASE_1_ITEMS",
     label: "Séjour - Dois-je apporter des affaires spécifiques (draps, duvets, autres...) ?",
-    articles: ["dans-ma-valise-materiel-trousseau"],
+    articles: ["dans-ma-valise-materiel-trousseau-4"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
     displayForm: true,

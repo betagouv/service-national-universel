@@ -17,7 +17,7 @@ import Select from "@/components/dsfr/forms/Select";
 import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
-import SecondaryButton from "@/components/dsfr/ui/buttons/SecondaryButton";
+import Button from "@codegouvfr/react-dsfr/Button";
 import plausibleEvent from "@/services/plausible";
 
 export default function Contact() {
@@ -120,15 +120,15 @@ export default function Contact() {
             {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
             {question && articles.length > 0 && <Solutions articles={articles} />}
 
-            {questionObject?.displayForm && !showForm && (
-              <SecondaryButton
-                className="my-8 w-full md:w-auto"
+            {questionObject?.displayForm && !showForm && articles.length > 0 && (
+              <Button
+                priority="secondary"
                 onClick={() => {
                   setShowForm(true);
                   plausibleEvent("Besoin d'aide - Je n'ai pas trouve de reponse");
                 }}>
                 Ecrire au support
-              </SecondaryButton>
+              </Button>
             )}
 
             {shouldShowForm && isLoggedIn && <ContactForm category={category} question={question} parcours={parcours} />}
