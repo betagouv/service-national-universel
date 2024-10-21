@@ -8,6 +8,7 @@ import api from "@/services/api";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
+import { REJECTION_REASONS } from "./commons";
 import YoungHeader from "./components/YoungHeader";
 import SectionConsentements from "./components/sections/consentements/SectionConsentements";
 import SectionParents from "./components/sections/SectionParents";
@@ -16,7 +17,7 @@ import SectionOldConsentements from "./components/sections/consentements/Section
 import { YoungFooterPending } from "./YoungFooterPending";
 import { YoungFooterSent } from "./YoungFooterSent";
 import { YoungFooterNoRequest } from "./YoungFooterNoRequest";
-import { REJECTION_REASONS } from "./commons";
+import { ConfirmModalContentData } from "./YoungConfirmationModal";
 
 interface VolontairePhase0ViewProps {
   young: YoungDto;
@@ -169,7 +170,7 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
     setProcessing(false);
   }
 
-  async function processRegistration(state, data) {
+  async function processRegistration(state?: ConfirmModalContentData["type"], data?: { reason: string; message: string } | null) {
     setProcessing(true);
     try {
       const body = {
@@ -179,11 +180,11 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
         inscriptionRefusedMessage: "",
       };
 
-      if (state === "REFUSED") {
-        if (data.reason === "OTHER") {
+      if (state === YOUNG_STATUS.REFUSED) {
+        if (data?.reason === "OTHER") {
           body.inscriptionRefusedMessage = data.message;
         } else {
-          body.inscriptionRefusedMessage = REJECTION_REASONS[data.reason];
+          body.inscriptionRefusedMessage = REJECTION_REASONS[data!.reason];
         }
       }
 
@@ -197,14 +198,14 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
       // TODO: move notification logic to referent controller
       const validationTemplate = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED;
       switch (state) {
-        case "REFUSED":
+        case YOUNG_STATUS.REFUSED:
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message: body.inscriptionRefusedMessage });
           break;
-        case "WAITING_LIST":
+        case YOUNG_STATUS.WAITING_LIST:
           await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
           break;
-        case "VALIDATED":
+        case YOUNG_STATUS.VALIDATED:
           await api.post(`/young/${young._id}/email/${validationTemplate}`);
           break;
       }

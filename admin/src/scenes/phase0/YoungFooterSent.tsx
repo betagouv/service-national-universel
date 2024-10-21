@@ -5,7 +5,7 @@ import { YoungDto } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 
 import { BorderButton } from "./components/Buttons";
-import { ConfirmModalContentData } from "./YoungFooterNoRequest";
+import { ConfirmModalContentData } from "./YoungConfirmationModal";
 
 export function YoungFooterSent({
   young,
