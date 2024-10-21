@@ -164,15 +164,10 @@ export default function General({ selectedFilters, onSelectedFiltersChange }: Ge
           goal={goal}
           showTooltips={true}
           legendUrls={[
-            // @ts-expect-error js function
             getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
-            // @ts-expect-error js function
             getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
-            // @ts-expect-error js function
             getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
-            // @ts-expect-error js function
             getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
-            // @ts-expect-error js function
             getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
           ]}
         />
