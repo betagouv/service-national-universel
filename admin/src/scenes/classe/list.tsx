@@ -11,11 +11,11 @@ import { capture } from "@/sentry";
 import api from "@/services/api";
 import { Button, Container, Header, Page } from "@snu/ds/admin";
 import { ROLES, translateStatusClasse, translate, EtablissementType, ClasseType } from "snu-lib";
+import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
 
 import { getCohortGroups } from "@/services/cohort.service";
 import ClasseRow from "./list/ClasseRow";
 import { exportExcelSheet, ClasseExport } from "./utils";
-import { is } from "date-fns/locale";
 
 interface ClasseProps extends ClasseType {
   referentClasse: { firstName: string; lastName: string }[];
@@ -79,7 +79,7 @@ export default function List() {
   if (!isClasses || !etablissements) return null;
 
   const filterArray = [
-    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné" },
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     [ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && {
       title: "Établissement",
       name: "etablissementId",
