@@ -53,6 +53,7 @@ describe("importClasseCohort", () => {
           totalSeats: 1,
         } as ClasseDocument,
         updatedFields: ["cohort", "cohortId", "status", "totalSeats"],
+        error: [],
       });
     });
     jest.spyOn(classeImportService, "addCohortToClasseByCohortSnuId").mockImplementationOnce(() => {
@@ -214,6 +215,7 @@ describe("addCohortToClasseByCohortSnuId", () => {
         cohortId: cohortId,
       } as ClasseDocument,
       updatedFields: ["cohort", "cohortId", "status", "totalSeats"],
+      error: [],
     });
 
     await addCohortToClasseByCohortSnuId(classeCohortMapped, importKey, ClasseImportType.NEXT_CLASSE_COHORT);
@@ -346,6 +348,7 @@ describe("processSessionPhasePdrAndCenter", () => {
   const sessionMock = { _id: sessionId, sejourSnuId: "Session 001" };
   let classeMock;
   let updatedFields: string[];
+  let error: string[];
   let classeCohortMapped: ClasseCohortMapped;
   beforeEach(() => {
     jest.resetAllMocks();
@@ -369,6 +372,7 @@ describe("processSessionPhasePdrAndCenter", () => {
     };
 
     updatedFields = [];
+    error = [];
   });
 
   it("should update classe with cohesionCenterId, pointDeRassemblementId, sessionId and statusPhase1", async () => {
@@ -376,7 +380,7 @@ describe("processSessionPhasePdrAndCenter", () => {
     (PointDeRassemblementModel.findOne as jest.Mock).mockResolvedValue(pdrMock);
     (SessionPhase1Model.findOne as jest.Mock).mockResolvedValue(sessionMock);
 
-    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields);
+    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields, error);
 
     expect(SessionPhase1Model.findOne).toHaveBeenCalledWith({ sejourSnuId: classeCohortMapped.sessionCode });
     expect(classeMock.set).toHaveBeenNthCalledWith(1, { sessionId: sessionMock._id });
@@ -385,9 +389,8 @@ describe("processSessionPhasePdrAndCenter", () => {
     expect(classeMock.set).toHaveBeenNthCalledWith(2, { cohesionCenterId: cohesionCenterMock._id });
 
     expect(PointDeRassemblementModel.findOne).toHaveBeenCalledWith({ matricule: classeCohortMapped.pdrCode });
-    expect(classeMock.set).toHaveBeenNthCalledWith(3, { pointDeRassemblementId: pdrMock._id });
+    expect(classeMock.set).toHaveBeenNthCalledWith(3, { pointDeRassemblementId: pdrMock._id, statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
 
-    expect(classeMock.set).toHaveBeenNthCalledWith(4, { statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
     expect(updatedFields).toEqual(["sessionId", "cohesionCenterId", "pointDeRassemblementId", "statusPhase1"]);
   });
 
@@ -396,7 +399,7 @@ describe("processSessionPhasePdrAndCenter", () => {
     classeCohortMapped.centerCode = undefined;
     classeCohortMapped.pdrCode = undefined;
 
-    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields);
+    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields, error);
 
     expect(SessionPhase1Model.findOne).toHaveBeenCalledWith({ sejourSnuId: classeCohortMapped.sessionCode });
     expect(classeMock.set).toHaveBeenCalledWith({ sessionId: sessionMock._id });
@@ -408,43 +411,45 @@ describe("processSessionPhasePdrAndCenter", () => {
     expect(updatedFields).toEqual(["sessionId"]);
   });
 
-  it("should update classe with cohesionCenterId and pdrId and NOT statusPhase1", async () => {
+  it("should update classe with sessionId and cohesionCenterId and NOT pdrId", async () => {
     (SessionPhase1Model.findOne as jest.Mock).mockResolvedValue(sessionMock);
     (CohesionCenterModel.findOne as jest.Mock).mockResolvedValue(cohesionCenterMock);
-    (PointDeRassemblementModel.findOne as jest.Mock).mockResolvedValue(pdrMock);
-    classeCohortMapped.sessionCode = undefined;
+    classeCohortMapped.pdrCode = undefined;
 
-    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields);
+    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields, error);
 
-    expect(SessionPhase1Model.findOne).toHaveBeenCalledTimes(0);
+    expect(SessionPhase1Model.findOne).toHaveBeenCalledWith({ sejourSnuId: classeCohortMapped.sessionCode });
+    expect(classeMock.set).toHaveBeenNthCalledWith(1, { sessionId: sessionMock._id });
     expect(CohesionCenterModel.findOne).toHaveBeenCalledWith({ matricule: classeCohortMapped.centerCode });
-    expect(classeMock.set).toHaveBeenNthCalledWith(1, { cohesionCenterId: cohesionCenterMock._id });
+    expect(classeMock.set).toHaveBeenNthCalledWith(2, { cohesionCenterId: cohesionCenterMock._id });
 
-    expect(PointDeRassemblementModel.findOne).toHaveBeenCalledWith({ matricule: classeCohortMapped.pdrCode });
-    expect(classeMock.set).toHaveBeenNthCalledWith(2, { pointDeRassemblementId: pdrMock._id });
+    expect(PointDeRassemblementModel.findOne).toHaveBeenCalledTimes(0);
 
     expect(classeMock.set).not.toHaveBeenCalledWith({ statusPhase1: STATUS_PHASE1_CLASSE.AFFECTED });
-    expect(updatedFields).toEqual(["cohesionCenterId", "pointDeRassemblementId"]);
+    expect(updatedFields).toEqual(["sessionId", "cohesionCenterId"]);
   });
 
-  it("should throw an error if sessionCode is provided and session is not found", async () => {
+  it("should return an error if sessionCode is provided and session is not found", async () => {
     (SessionPhase1Model.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields)).rejects.toThrow(ERRORS.SESSION_NOT_FOUND);
+    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields, error);
+    expect(error).toEqual([ERRORS.SESSION_NOT_FOUND]);
   });
 
-  it("should throw an error if centerCode is provided and cohesion center is not found", async () => {
+  it("should return an error if centerCode is provided and cohesion center is not found", async () => {
     (SessionPhase1Model.findOne as jest.Mock).mockResolvedValue(sessionMock);
     (CohesionCenterModel.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields)).rejects.toThrow(ERRORS.COHESION_CENTER_NOT_FOUND);
+    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields, error);
+    expect(error).toEqual([ERRORS.COHESION_CENTER_NOT_FOUND]);
   });
 
-  it("should throw an error if pdrCode is provided adn PDR is not found", async () => {
+  it("should return an error if pdrCode is provided and PDR is not found", async () => {
     (SessionPhase1Model.findOne as jest.Mock).mockResolvedValue(sessionMock);
     (CohesionCenterModel.findOne as jest.Mock).mockResolvedValue(cohesionCenterMock);
     (PointDeRassemblementModel.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields)).rejects.toThrow(ERRORS.PDR_NOT_FOUND);
+    await processSessionPhasePdrAndCenter(classeCohortMapped, classeMock as any, updatedFields, error);
+    expect(error).toEqual([ERRORS.PDR_NOT_FOUND]);
   });
 });

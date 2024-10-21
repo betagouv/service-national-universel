@@ -49,6 +49,7 @@ import {
   isYoung,
   inSevenDays,
   FILE_STATUS_PHASE1,
+  STEPS2023,
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
@@ -109,8 +110,7 @@ import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
 import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
-import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
-import { ca } from "date-fns/locale";
+import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
 
 const router = express.Router();
@@ -531,13 +531,21 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     let { __v, ...newYoung } = value;
 
     // Vérification des objectifs à la validation d'un jeune
-    if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
+    if (
+      young.source !== YOUNG_SOURCE.CLE &&
+      value.status === YOUNG_STATUS.VALIDATED &&
+      young.status !== YOUNG_STATUS.VALIDATED &&
+      (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
+    ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
       const departement = getDepartmentForEligibility(young);
-      const fillingRate = await getFillingRate(departement, cohort.name);
-      if (fillingRate >= FILLING_RATE_LIMIT) {
-        return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
+      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      if (completionObjectif.isAtteint) {
+        return res.status(400).send({
+          ok: false,
+          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
+        });
       }
     }
 
@@ -817,6 +825,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const { cohort, cohortChangeReason } = value;
 
     let youngStatus = young.status;
+    let inscriptionStep = young.inscriptionStep2023;
+    let reinscriptionStep = young.reinscriptionStep2023;
     if (cohort === "à venir ") {
       youngStatus = getYoungStatus(young) as YoungType["status"];
     }
@@ -848,6 +858,14 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       });
     }
     const cohortModel = await CohortModel.findOne({ name: cohort });
+    if (
+      cohortModel?.type === YOUNG_SOURCE.CLE &&
+      young.status === YOUNG_STATUS.IN_PROGRESS &&
+      (inscriptionStep === STEPS2023.DOCUMENTS || reinscriptionStep === STEPS2023.DOCUMENTS)
+    ) {
+      young.hasStartedReinscription ? (reinscriptionStep = STEPS2023.REPRESENTANTS) : (inscriptionStep = STEPS2023.REPRESENTANTS);
+    }
+
     young.set({
       status: youngStatus,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
@@ -866,6 +884,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         classeId: value.classeId,
         cniFiles: [],
         "files.cniFiles": [],
+        inscriptionStep2023: inscriptionStep,
+        reinscriptionStep2023: reinscriptionStep,
         latestCNIFileExpirationDate: undefined,
         latestCNIFileCategory: undefined,
         cohesionCenterId: classe.cohesionCenterId,

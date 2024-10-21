@@ -116,8 +116,8 @@ const translate = (value) => {
       return "Modérateur";
     case "dsnj":
       return "DSNJ";
-      case "injep":
-        return "INJEP";
+    case "injep":
+      return "INJEP";
     case "transporter":
       return "Transporteur";
     case "referent_department":
@@ -372,6 +372,8 @@ const translate = (value) => {
       return "PSC1";
     case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED:
       return "L'objectif d'inscription du département a été atteint !";
+    case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED:
+      return "L'objectif d'inscription de la région a été atteint !";
     case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED:
       return "Aucun objectif d'inscription défini pour le département !";
     default:
