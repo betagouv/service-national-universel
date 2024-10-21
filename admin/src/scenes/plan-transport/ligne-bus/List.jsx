@@ -170,7 +170,7 @@ export default function List() {
     <Page>
       <Header
         title="Plan de transport"
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Plan de transport" }]}
+        breadcrumb={[{ title: "Séjours" }, { title: "Plan de transport" }]}
         actions={
           <SelectCohort
             cohort={cohort}

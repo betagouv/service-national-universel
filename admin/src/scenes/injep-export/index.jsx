@@ -107,7 +107,7 @@ const INJEPExport = () => {
       <Page>
         <Header
           title="Données centres & volontaires (INJEP)"
-          breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Séjours" }, { title: "Export INJEP" }]}
+          breadcrumb={[{ title: "Séjours" }, { title: "Export INJEP" }]}
           actions={
             <SelectCohort
               cohort={currentCohort.name}

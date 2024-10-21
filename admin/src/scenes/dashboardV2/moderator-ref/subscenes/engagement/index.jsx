@@ -159,7 +159,7 @@ export default function Index() {
       <BandeauInfo />
       <Header
         title="Tableau de bord"
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]}
+        breadcrumb={[{ title: "Tableau de bord" }]}
         actions={[<DropdownButton title={"Exporter"} optionsGroup={selectOptions} key={"export"} position="right" />]}
       />
       <DashboardContainer availableTab={["general", "engagement", "sejour", "inscription"]} active="engagement">
