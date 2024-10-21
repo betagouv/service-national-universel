@@ -1,6 +1,7 @@
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
+import store from "@/redux/store";
 
 export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort, size = 10) => {
   try {
@@ -114,7 +115,13 @@ export function normalizeString(s) {
 }
 
 export const orderCohort = (cohorts) => {
-  return cohorts.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+  const cohortList = store.getState().Cohorts;
+  const enhancedCohorts = cohorts.map((cohort) => {
+    const cohortData = cohortList.find((c) => c.name === cohort.key);
+    return { ...cohort, dateStart: cohortData?.dateStart };
+  });
+  const sortedCohorts = enhancedCohorts.sort((a, b) => new Date(b.dateStart) - new Date(a.dateStart));
+  return sortedCohorts;
 };
 
 export const transformExistingField = (data) => {
