@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { HiHome } from "react-icons/hi";
 
 import { departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
 import { YOUNG_STATUS } from "snu-lib";
 import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib";
 import { department2region, region2department } from "snu-lib";
-import { getCohortNameList } from "@/services/cohort.service";
+import { filterCurrentAndNextCohorts, getCohortNameList } from "@/services/cohort.service";
 import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
 import DashboardContainer from "../../../components/DashboardContainer";
@@ -92,7 +91,7 @@ export default function Index() {
   }, [JSON.stringify(selectedFilters)]);
 
   useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
+    const cohortsFilters = filterCurrentAndNextCohorts(cohorts).map(({ name }) => name);
     setSelectedFilters({ ...selectedFilters, cohorts: cohortsFilters });
   }, []);
 
