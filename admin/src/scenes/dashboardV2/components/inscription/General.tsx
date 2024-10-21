@@ -18,6 +18,7 @@ import { getDepartmentOptions, getFilteredDepartment } from "../common";
 import StatutPhase from "./StatutPhase";
 import Details from "./Details";
 import TabSchool from "./TabSchool";
+import { isAfter, isBefore } from "date-fns";
 
 type FilterOption = {
   key: string;
@@ -42,8 +43,8 @@ type InscriptionGoalInfo = {
 };
 
 interface GeneralProps {
-  selectedFilters: { cohort: CohortDto[]; department?: string; region?: string; academy?: string };
-  onSelectedFiltersChange: (filters: { cohort: CohortDto[] }) => void;
+  selectedFilters: { cohort: string[]; department?: string; region?: string; academy?: string };
+  onSelectedFiltersChange: (filters: { cohort: string[] }) => void;
 }
 
 export default function General({ selectedFilters, onSelectedFiltersChange }: GeneralProps) {
@@ -65,8 +66,11 @@ export default function General({ selectedFilters, onSelectedFiltersChange }: Ge
     : academyList.map((a: string) => ({ key: a, label: a }));
 
   useEffect(() => {
-    // regex to get all cohort 2024
-    const cohortsFilters: CohortDto[] = getCohortNameList(cohorts).filter((e) => e.match(/2025/));
+    // toutes les cohort en cours (date de fin non passée) + celles non commencées
+    const cohortsFilters = cohorts
+      .filter((cohort) => (cohort.dateStart && isBefore(new Date(), cohort.dateStart)) || (cohort.dateEnd && isAfter(cohort.dateEnd, new Date())))
+      .map(({ name }) => name);
+    console.log("cohortsFilters", cohortsFilters);
     onSelectedFiltersChange({ cohort: cohortsFilters });
 
     setIsLoading(false);
@@ -140,7 +144,7 @@ export default function General({ selectedFilters, onSelectedFiltersChange }: Ge
       inscriptionGoals
         .filter((ig) => filterByRegionAndDepartement(ig, selectedFilters, user))
         // if selectedFilters.cohort is empty --> we select all cohorts thus no .filter()
-        .filter((ig) => !selectedFilters.cohort.length || selectedFilters.cohort.find((cohort) => cohort.name === ig.cohort))
+        .filter((ig) => !selectedFilters.cohort.length || selectedFilters.cohort.find((cohort) => cohort === ig.cohort))
         .reduce((acc, current) => acc + (current.max && !isNaN(Number(current.max)) ? Number(current.max) : 0), 0),
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
@@ -163,13 +167,15 @@ export default function General({ selectedFilters, onSelectedFiltersChange }: Ge
           ]}
           goal={goal}
           showTooltips={true}
-          legendUrls={[
-            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
-            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
-            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
-            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
-            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
-          ]}
+          legendUrls={
+            [
+              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
+              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
+              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
+              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
+              //   getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
+            ]
+          }
         />
       </div>
       <TotalInscription totalInscriptions={totalInscriptions} goal={goal} />

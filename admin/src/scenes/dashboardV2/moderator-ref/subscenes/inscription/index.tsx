@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { HiHome } from "react-icons/hi";
 
-import { CohortDto } from "snu-lib";
 import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
 import { AuthState } from "@/redux/auth/reducer";
@@ -15,7 +13,7 @@ import ExportReport from "./ExportReport";
 export default function Index() {
   const user = useSelector((state: AuthState) => state.Auth.user);
 
-  const [selectedFilters, setSelectedFilters] = useState<{ cohort: CohortDto[]; department?: string; region?: string; academy?: string }>({
+  const [selectedFilters, setSelectedFilters] = useState<{ cohort: string[]; department?: string; region?: string; academy?: string }>({
     cohort: [],
   });
   const [modalExport, setModalExport] = useState(false);
