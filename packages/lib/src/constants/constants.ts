@@ -398,7 +398,7 @@ const MINISTRES = [
     template: "certificates/certificateTemplate2023-08-18.png",
   },
   {
-    date_end: "20-10-2024",
+    date_end: "10-20-2024",
     ministres: ["Nicole Belloubet, Ministre de l'Education Nationale et de la Jeunesse", "Sebastien Lecornu, Ministre des Armées"],
     template: "certificates/certificateTemplate2024_2.png",
   },
