@@ -5,7 +5,6 @@ import { YoungDto } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 
 import { BorderButton } from "./components/Buttons";
-import { ConfirmModalContentData } from "./YoungConfirmationModal";
 
 export function YoungFooterSent({
   young,
@@ -15,7 +14,7 @@ export function YoungFooterSent({
 }: {
   young: YoungDto;
   requests: NonNullable<YoungDto["correctionRequests"]>;
-  onRemindRequests: (type?: ConfirmModalContentData["type"], message?: { reason: string; message: string } | null) => void;
+  onRemindRequests: () => void;
   footerClass: string;
 }) {
   const [sentRequestsCount, setSentRequestsCount] = useState(0);
