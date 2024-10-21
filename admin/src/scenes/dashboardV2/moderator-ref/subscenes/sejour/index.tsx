@@ -242,7 +242,6 @@ export default function Index() {
                 number={data?.pdr?.NR + data?.pdr?.false || 0}
                 title="Point de rassemblement"
                 subLabel="restants à confirmer"
-                // @ts-expect-error jsx
                 redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ hasMeetingInformation: "false" })] })}
               />
               <BoxWithPercentage
@@ -250,7 +249,6 @@ export default function Index() {
                 number={data?.participation?.false || 0}
                 title="Participation"
                 subLabel="restants à confirmer"
-                // @ts-expect-error jsx
                 redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ youngPhase1Agreement: "false" })] })}
               />
             </div>
@@ -273,7 +271,6 @@ export default function Index() {
               number={dataCenter?.timeSchedule?.false || 0}
               title="Emplois du temps"
               subLabel="restants à renseigner"
-              // @ts-expect-error jsx
               redirect={getNewLink({ base: `/centre/liste/session`, filter: selectedFilters, filtersUrl: ["hasTimeSchedule=false"] }, "session")}
             />
           </div>
