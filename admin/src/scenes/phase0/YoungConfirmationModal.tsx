@@ -10,21 +10,6 @@ import Modal from "@/components/ui/modals/Modal";
 
 import { REJECTION_REASONS, REJECTION_REASONS_KEY, REJECTION_REASONS_TYPE } from "./commons";
 
-const rejectionReasonOptions = [
-  <option value="" key="none">
-    Motif
-  </option>,
-  <option value={REJECTION_REASONS_KEY.NOT_FRENCH} key="NOT_FRENCH">
-    {REJECTION_REASONS.NOT_FRENCH}
-  </option>,
-  <option value={REJECTION_REASONS_KEY.TOO_YOUNG} key="TOO_YOUNG">
-    {REJECTION_REASONS.TOO_YOUNG}
-  </option>,
-  <option value={REJECTION_REASONS_KEY.OTHER} key="OTHER">
-    {REJECTION_REASONS.OTHER}
-  </option>,
-];
-
 export interface ConfirmModalContentData {
   icon: ReactNode;
   title: ReactNode | string;
@@ -35,7 +20,7 @@ export interface ConfirmModalContentData {
     text: string;
   };
   confirmLabel?: string;
-  confirmSatus?: "WAITING_LIST" | "VALIDATED" | "REFUSED" | "SESSION_FULL";
+  confirmSatus?: ConfirmModalContentData["type"];
   confirmColor?: string;
   cancelLabel?: string;
   customActions?: {
@@ -45,7 +30,7 @@ export interface ConfirmModalContentData {
     status?: ConfirmModalContentData["type"];
   }[];
   withoutCancelAction?: boolean;
-  rejectReason?: "OTHER";
+  rejectReason?: REJECTION_REASONS_TYPE;
   rejectMessage?: string;
   errorMessage?: string;
 }
@@ -59,8 +44,8 @@ interface YoungConfirmationModalProps {
     rejectionMessage,
     state,
   }: {
-    rejectionReason?: REJECTION_REASONS_TYPE;
-    rejectionMessage?: string;
+    rejectionReason?: ConfirmModalContentData["rejectReason"];
+    rejectionMessage?: ConfirmModalContentData["rejectMessage"];
     state?: ConfirmModalContentData["type"];
   }) => void;
   onReject: () => void;
@@ -90,7 +75,12 @@ export default function YoungConfirmationModal({ young, content, onClose, onConf
                     onChange={(e) => setRejectionReason(e.target.value as REJECTION_REASONS_TYPE)}
                     className="block grow appearance-none bg-[transparent] p-[15px]"
                     disabled={young.source === YOUNG_SOURCE.CLE}>
-                    {rejectionReasonOptions}
+                    <option value="">Motif</option>
+                    {Object.keys(REJECTION_REASONS_KEY).map((reasonKey) => (
+                      <option value={reasonKey} key={reasonKey}>
+                        {REJECTION_REASONS[reasonKey]}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
                 </div>
