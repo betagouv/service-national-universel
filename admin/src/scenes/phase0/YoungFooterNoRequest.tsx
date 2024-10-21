@@ -160,7 +160,7 @@ export function getConfirmModalContent({
   if (source === YOUNG_SOURCE.CLE) {
     title = (
       <span>
-        Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur liste principale</strong>.
+        Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur la classe {young?.classe?.name || ""}</strong>.
       </span>
     );
   } else if (isGoalReached) {

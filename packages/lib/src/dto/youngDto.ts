@@ -84,6 +84,9 @@ export interface YoungDto {
   inscriptionCorrectionMessage?: string;
   inscriptionRefusedMessage?: string;
   classeId?: string;
+  classe?: {
+    name: string;
+  };
   etablissementId?: string;
   source?: string;
   sessionPhase1Id?: string;
