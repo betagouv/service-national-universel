@@ -3,10 +3,11 @@ import { isBefore } from "date-fns";
 import { toastr } from "react-redux-toastr";
 import { HiInformationCircle } from "react-icons/hi";
 
-import { YOUNG_STATUS, YOUNG_SOURCE, YoungDto, getDepartmentForEligibility, translate } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_SOURCE, YoungDto, getDepartmentForEligibility, translate, InscrriptionGoalsRoutes } from "snu-lib";
 
 import { capture } from "@/sentry";
 import api from "@/services/api";
+import { buildRequest } from "@/utils/buildRequest";
 
 import CheckCircle from "@/assets/icons/CheckCircle";
 import XCircle from "@/assets/icons/XCircle";
@@ -16,7 +17,7 @@ import { REJECTION_REASONS_KEY } from "./commons";
 import { PlainButton } from "./components/Buttons";
 import YoungConfirmationModal, { ConfirmModalContentData } from "./YoungConfirmationModal";
 
-const youngCleREfusedMessage =
+const YOUNG_CLE_REFUSED_MESSAGE =
   "Votre inscription au SNU dans le cadre du dispositif Classe et Lycée Engagés a été refusée. Pour plus d'informations, merci de vous rapprocher de votre établissement.";
 
 interface YoungFooterNoRequestProps {
@@ -37,12 +38,23 @@ export function YoungFooterNoRequest({ processing, young, onProcess, footerClass
       const isDatePassed = young.latestCNIFileExpirationDate ? isBefore(new Date(young.latestCNIFileExpirationDate), new Date()) : false;
       let isGoalReached, isLCavailable;
       if (young.source !== YOUNG_SOURCE.CLE) {
-        // on vérifie la completion des objectifs pour le département
+        // on vérifie la completion des objectifs pour la région (en fonction du département)
         // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
         const departement = getDepartmentForEligibility(young);
-        const { ok, code, data: fillingRate } = await api.get(`/inscription-goal/${young.cohort}/department/${departement}`);
+        const {
+          ok,
+          code,
+          data: fillingRate,
+        } = await buildRequest<InscrriptionGoalsRoutes["getTauxRemplissage"]>({
+          method: "GET",
+          path: "/inscription-goal/{cohort}/department/{departement}",
+          params: {
+            cohort: young.cohort!,
+            departement,
+          },
+        })();
         if (!ok) throw new Error(code);
-        isGoalReached = fillingRate >= 1;
+        isGoalReached = fillingRate! >= 1;
         // on vérifie qu'il n'y pas de jeunes en LC
         const { responses } = await api.post("/elasticsearch/young/search", {
           filters: { cohort: [young.cohort], status: [YOUNG_STATUS.WAITING_LIST] },
@@ -65,7 +77,7 @@ export function YoungFooterNoRequest({ processing, young, onProcess, footerClass
       confirmLabel: "Confirmer le refus",
       confirmColor: "danger",
       rejectReason: young.source === YOUNG_SOURCE.CLE ? REJECTION_REASONS_KEY.OTHER : undefined,
-      rejectMessage: young.source === YOUNG_SOURCE.CLE ? youngCleREfusedMessage : undefined,
+      rejectMessage: young.source === YOUNG_SOURCE.CLE ? YOUNG_CLE_REFUSED_MESSAGE : undefined,
     });
   }
 
@@ -120,7 +132,14 @@ export function YoungFooterNoRequest({ processing, young, onProcess, footerClass
         </PlainButton>
       </div>
       {!!confirmModal && (
-        <YoungConfirmationModal young={young} content={confirmModal} onConfirm={handleConfirm} onReject={handleRejectYoung} onClose={() => setConfirmModal(null)} />
+        <YoungConfirmationModal
+          key={JSON.stringify(confirmModal)}
+          young={young}
+          content={confirmModal}
+          onConfirm={handleConfirm}
+          onReject={handleRejectYoung}
+          onClose={() => setConfirmModal(null)}
+        />
       )}
     </div>
   );
@@ -159,7 +178,7 @@ export function getConfirmModalContent({
   } else if (isGoalReached) {
     title = (
       <span>
-        L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+        L&apos;objectif d&apos;inscription de votre région a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
         <strong className="text-bold">validé sur liste complémentaire</strong>.
       </span>
     );
@@ -189,7 +208,7 @@ export function getConfirmModalContent({
   } else {
     title = (
       <span>
-        L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+        L&apos;objectif d&apos;inscription de votre région n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
         <strong className="text-bold">validé sur liste principale</strong>.
       </span>
     );

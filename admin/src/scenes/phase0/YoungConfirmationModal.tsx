@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import cx from "classnames";
 
 import { YOUNG_SOURCE, YOUNG_STATUS, YoungDto } from "snu-lib";
@@ -52,11 +52,16 @@ interface YoungConfirmationModalProps {
 }
 
 export default function YoungConfirmationModal({ young, content, onClose, onConfirm }: YoungConfirmationModalProps) {
-  const [rejectionReason, setRejectionReason] = useState<REJECTION_REASONS_TYPE>("");
-  const [rejectionMessage, setRejectionMessage] = useState("");
+  const [rejectionReason, setRejectionReason] = useState<ConfirmModalContentData["rejectReason"]>("");
+  const [rejectionMessage, setRejectionMessage] = useState<ConfirmModalContentData["rejectMessage"]>("");
+
+  useEffect(() => {
+    setRejectionReason(content.rejectReason);
+    setRejectionMessage(content.rejectMessage);
+  }, [content]);
 
   return (
-    <Modal isOpen={!!content}>
+    <Modal key={JSON.stringify(content)} isOpen={!!content}>
       {content && (
         <>
           <Modal.Header className="flex-col">
