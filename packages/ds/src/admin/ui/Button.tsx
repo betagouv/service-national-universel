@@ -97,7 +97,7 @@ const getStyles = ({ type }: { type: Ttype }) => {
     case "secondary":
       return {
         native: "h-[38px] py-[9px] text-sm",
-        base: "text-gray-700 border !border-gray-300 bg-white hover:bg-gray-50",
+        base: "text-blue-600 border !border-blue-600 bg-white hover:bg-gray-50",
         disabled: "text-gray-700/60 border !border-gray-300/60 bg-white/60",
         loaderColor: "#374151",
       };
