@@ -398,9 +398,14 @@ const MINISTRES = [
     template: "certificates/certificateTemplate2023-08-18.png",
   },
   {
-    date_end: "03-13-2050", // ! Changer ici à l'ajout d'un nouveau
+    date_end: "10-20-2024",
     ministres: ["Nicole Belloubet, Ministre de l'Education Nationale et de la Jeunesse", "Sebastien Lecornu, Ministre des Armées"],
     template: "certificates/certificateTemplate2024_2.png",
+  },
+  {
+    date_end: "03-13-2050", // ! Changer ici à l'ajout d'un nouveau
+    ministres: ["Corinne Orzechowski"],
+    template: "certificates/certificateTemplate2024_3.png",
   },
 ];
 
