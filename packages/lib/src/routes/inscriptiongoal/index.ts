@@ -1,5 +1,5 @@
-import { getTauxRemplissageRoute } from "./getTauxRemplissage";
+import { GetTauxRemplissageRoute } from "./getTauxRemplissage";
 
-export type InscrriptionGoalsRoutes = {
-  getTauxRemplissage: getTauxRemplissageRoute;
+export type InscriptionGoalsRoutes = {
+  GetTauxRemplissage: GetTauxRemplissageRoute;
 };

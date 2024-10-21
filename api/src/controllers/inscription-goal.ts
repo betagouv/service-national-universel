@@ -2,7 +2,7 @@ import express from "express";
 import passport from "passport";
 import Joi from "joi";
 
-import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS, InscrriptionGoalsRoutes } from "snu-lib";
+import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS, InscriptionGoalsRoutes } from "snu-lib";
 
 import { capture } from "../sentry";
 import { YoungModel, InscriptionGoalModel } from "../models";
@@ -93,7 +93,7 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
 router.get(
   "/:cohort/department/:department",
   passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req: RouteRequest<InscrriptionGoalsRoutes["getTauxRemplissage"]>, res: RouteResponse<InscrriptionGoalsRoutes["getTauxRemplissage"]>) => {
+  async (req: RouteRequest<InscriptionGoalsRoutes["GetTauxRemplissage"]>, res: RouteResponse<InscriptionGoalsRoutes["GetTauxRemplissage"]>) => {
     try {
       const { error, value: params } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
       if (error) {

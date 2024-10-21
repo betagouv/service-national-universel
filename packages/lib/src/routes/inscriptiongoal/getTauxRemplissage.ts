@@ -1,8 +1,8 @@
 import { BasicRoute, RouteResponseBody } from "..";
 
-export interface getTauxRemplissageRoute extends BasicRoute {
+export interface GetTauxRemplissageRoute extends BasicRoute {
   method: "GET";
-  path: "/inscription-goal/{cohort}/department/{departement}";
-  params: { cohort: string; departement: string };
+  path: "/inscription-goal/{cohort}/department/{department}";
+  params: { cohort: string; department: string };
   response: RouteResponseBody<number>;
 }
