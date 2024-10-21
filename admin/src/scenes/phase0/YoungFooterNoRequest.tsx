@@ -12,7 +12,7 @@ import CheckCircle from "@/assets/icons/CheckCircle";
 import XCircle from "@/assets/icons/XCircle";
 import ShieldCheck from "@/assets/icons/ShieldCheck";
 
-import { REJECTION_REASONS_KEY, REJECTION_REASONS_TYPE } from "./commons";
+import { REJECTION_REASONS_KEY } from "./commons";
 import { PlainButton } from "./components/Buttons";
 import YoungConfirmationModal, { ConfirmModalContentData } from "./YoungConfirmationModal";
 
@@ -22,7 +22,10 @@ const youngCleREfusedMessage =
 interface YoungFooterNoRequestProps {
   processing: boolean;
   young: YoungDto;
-  onProcess: (type?: ConfirmModalContentData["type"], message?: { reason: REJECTION_REASONS_TYPE; message: string } | null) => void;
+  onProcess: (
+    type?: ConfirmModalContentData["type"],
+    message?: { reason: ConfirmModalContentData["rejectReason"]; message: ConfirmModalContentData["rejectMessage"] } | null,
+  ) => void;
   footerClass: string;
 }
 
@@ -71,15 +74,15 @@ export function YoungFooterNoRequest({ processing, young, onProcess, footerClass
     rejectionMessage,
     state,
   }: {
-    rejectionReason: REJECTION_REASONS_TYPE;
-    rejectionMessage: string;
+    rejectionReason: ConfirmModalContentData["rejectReason"];
+    rejectionMessage: ConfirmModalContentData["rejectMessage"];
     state?: ConfirmModalContentData["type"];
   }) {
     if (confirmModal?.type === YOUNG_STATUS.REFUSED) {
       if (!rejectionReason) {
         setConfirmModal((prev) => ({ ...prev!, errorMessage: "Vous devez obligatoirement sélectionner un motif." }));
         return;
-      } else if (rejectionReason === REJECTION_REASONS_KEY.OTHER && rejectionMessage.trim().length === 0) {
+      } else if (rejectionReason === REJECTION_REASONS_KEY.OTHER && rejectionMessage!.trim().length === 0) {
         setConfirmModal((prev) => ({ ...prev!, errorMessage: "Pour le motif 'Autre', vous devez précisez un message." }));
         return;
       } else {
