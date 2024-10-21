@@ -63,7 +63,7 @@ export const importPointDeRassemblement = async (pdrFilePath: string) => {
   }
 
   // suppression logique de tous les PDR sans matricule (legacy)
-  await PointDeRassemblementModel.updateMany({ matricule: { $exists: false } }, { $set: { deletedAt: new Date() } });
+  await PointDeRassemblementModel.updateMany({ matricule: { $exists: false }, deletedAt: { $exists: false } }, { $set: { deletedAt: new Date() } });
 
   return report;
 };
