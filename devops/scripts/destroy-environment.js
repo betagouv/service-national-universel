@@ -47,7 +47,7 @@ class DestroyEnvironments {
   }
 
   async execute() {
-    console.log("The following environments will be deleted: ");
+    console.log("Trying to delete these environments: ");
     this.environments.forEach((i) => console.log(" - " + i));
 
     const namespace =
@@ -68,7 +68,7 @@ if (require.main === module) {
     - Secrets whose name equals "snu-<environment>"`
   )
     .arg("namespace-name", "Container's namespace")
-    .arg("environment-name", "Name of the environment to delete")
+    .multiple("environments", "Name of the environments to delete")
     .optBool("apply-changes", "Apply listed changes on infrastructure", {
       default: false,
     })
@@ -84,7 +84,6 @@ if (require.main === module) {
     input.SCW_SECRET_KEY,
     input.SCW_ORGANIZATION_ID
   );
-  input.environments = [input.environmentName];
   new DestroyEnvironments(scaleway, input).execute();
 }
 

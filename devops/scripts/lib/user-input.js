@@ -112,12 +112,20 @@ class UserInput {
       args: [],
       opts: [],
       envs: [],
+      multiple: null,
     };
     this.optBool("help", "Print command-line options", { shortcut: "h" });
   }
 
   validateNameUnique(name) {
-    for (const array of Object.values(this.config)) {
+    if (this.config.multiple && name === this.config.multiple.name) {
+      throw new Error(`${name} already configured`);
+    }
+    for (const array of [
+      this.config.args,
+      this.config.opts,
+      this.config.envs,
+    ]) {
       if (array.find((i) => i.name === name)) {
         throw new Error(`${name} already configured`);
       }
@@ -140,6 +148,21 @@ class UserInput {
         "Optional arguments must be declared after required arguments"
       );
     }
+  }
+
+  validateMultiple() {
+    if (this.config.multiple) {
+      throw new Error("Only one multiple argument must be provided");
+    }
+  }
+
+  multiple(name, description) {
+    this.validateMultiple();
+    validateName(name, KEBAB_CASE_PATTERN);
+    this.validateNameUnique(name);
+    const arg = { type: STRING, name, description };
+    this.config.multiple = arg;
+    return this;
   }
 
   _arg(type, name, description, options) {
@@ -262,9 +285,13 @@ class UserInput {
   }
 
   _parsePositional(index, token) {
-    const config = this.config.args[index];
+    let config = this.config.args[index];
     if (!config) {
-      throw new Error(`Too much arguments`);
+      if (this.config.multiple) {
+        config = this.config.multiple;
+      } else {
+        throw new Error(`Too much arguments`);
+      }
     }
     return {
       name: config.name,
@@ -274,6 +301,11 @@ class UserInput {
 
   _parseArgs(args) {
     const result = {};
+
+    const multiple = this.config.multiple;
+    if (multiple) {
+      result[multiple.name] = [];
+    }
 
     let index = 0;
     while (args.length) {
@@ -287,8 +319,17 @@ class UserInput {
         item = this._parsePositional(index, token);
         index += 1;
       }
-      result[item.name] = item.value;
+      if (multiple && multiple.name === item.name) {
+        result[item.name].push(item.value);
+      } else {
+        result[item.name] = item.value;
+      }
     }
+
+    if (multiple && !result[multiple.name].length) {
+      throw new Error("Missing required parameters");
+    }
+
     return result;
   }
 
@@ -345,9 +386,15 @@ class UserInput {
   }
 
   logUsage() {
-    const argNames = this.config.args
+    const multiple = this.config.multiple;
+    let argNames = this.config.args
       .map((arg) => (arg.default === undefined ? arg.name : `[${arg.name}]`))
       .join(" ");
+
+    if (multiple) {
+      argNames += ` ${multiple.name} [...]`;
+    }
+
     const fileName = path.basename(process.argv[1]);
     console.log(`Usage: node ${fileName} [options] ${argNames}`);
 
@@ -358,6 +405,10 @@ class UserInput {
       console.log(
         `  ${arg.name.padEnd(PAD)}${arg.description}${logDefault(arg)}`
       );
+    }
+
+    if (multiple) {
+      console.log(`  ${multiple.name.padEnd(PAD)}${multiple.description}`);
     }
 
     console.log("\nOptions:");
