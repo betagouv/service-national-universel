@@ -17,6 +17,8 @@ import Select from "@/components/dsfr/forms/Select";
 import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
+import SecondaryButton from "@/components/dsfr/ui/buttons/SecondaryButton";
+import plausibleEvent from "@/services/plausible";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
@@ -33,7 +35,7 @@ export default function Contact() {
 
   const knowledgeBaseRole = isLoggedIn ? "young" : "public";
   const questions = getQuestions(category, knowledgeBaseRole, parcours);
-  const questionObject = questions.find((q) => q.id === question);
+  const questionObject = questions.find((q) => q.value === question);
   const articles = getArticles(question);
   const shouldShowForm = questionObject?.displayForm && (articles.length === 0 || showForm);
 
@@ -115,9 +117,20 @@ export default function Contact() {
               </Alert>
             )}
 
-            {/* If there are articles for the selected question, we display them with a button to show the contact form.
-            Otherwise, we show the form directly. */}
-            {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
+            {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
+            {question && articles.length > 0 && <Solutions articles={articles} />}
+
+            {questionObject?.displayForm && !showForm && (
+              <SecondaryButton
+                className="my-8 w-full md:w-auto"
+                onClick={() => {
+                  setShowForm(true);
+                  plausibleEvent("Besoin d'aide - Je n'ai pas trouve de reponse");
+                }}>
+                Ecrire au support
+              </SecondaryButton>
+            )}
+
             {shouldShowForm && isLoggedIn && <ContactForm category={category} question={question} parcours={parcours} />}
             {shouldShowForm && !isLoggedIn && <PublicContactForm category={category} question={question} parcours={parcours} />}
           </>
