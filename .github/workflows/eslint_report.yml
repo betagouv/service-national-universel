@@ -28,7 +28,7 @@ jobs:
             "devops/send-in-blue",
             "packages/lib",
             "knowledge-base-public",
-            "analytics",
+            "devops/analytics",
           ]
     permissions:
       contents: read

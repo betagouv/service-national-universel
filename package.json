@@ -25,7 +25,7 @@
     "app",
     "admin",
     "api",
-    "analytics",
+    "devops/analytics",
     "antivirus"
   ],
   "engines": {

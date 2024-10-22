@@ -22,7 +22,7 @@
       "path": "packages"
     },
     {
-      "path": "analytics"
+      "path": "devops/analytics"
     }
   ],
   "settings": {}
