@@ -475,39 +475,55 @@ describe("Young", () => {
     });
   });
 
-  // Dans __tests__/young.test.ts
-
   describe("POST /young/invite", () => {
     it("should return 403 when user is not authorized to invite young", async () => {
       const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT }));
       const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: false }));
-      const youngFixture = getNewYoungFixture({ cohort: cohort.name });
+      const youngFixture = getNewYoungFixture({ cohortId: cohort._id.toString() });
 
       const passport = require("passport");
       passport.user = referent;
 
       const res = await request(getAppHelper()).post("/young/invite").send(youngFixture);
 
-      expect(res.status).toBe(403);
+      expect(res.statusCode).toBe(403);
       expect(res.body.code).toBe(ERRORS.OPERATION_NOT_ALLOWED);
     });
 
     it("should return 200 when user is authorized to invite young", async () => {
       const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT }));
       const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: true }));
-      const youngFixture = getNewYoungFixture({ cohort: cohort.name });
+      const youngFixture = getNewYoungFixture({ cohortId: cohort._id.toString() });
 
       const passport = require("passport");
       passport.user = referent;
 
       const res = await request(getAppHelper()).post("/young/invite").send(youngFixture);
 
-      expect(res.status).toBe(200);
+      expect(res.statusCode).toBe(200);
       expect(res.body.young).toBeDefined();
       expect(res.body.ok).toBe(true);
     });
-  });
 
+    it("should create a new young user and send an invitation email", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentClasse: true }));
+      const young = getNewYoungFixture({ cohortId: cohort._id.toString() });
+
+      const passport = require("passport");
+      passport.user = referent;
+
+      const res = await request(getAppHelper()).post("/young/invite").send(young);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty("young");
+      expect(res.body.young).toHaveProperty("invitationToken");
+      expect(res.body.young).toHaveProperty("invitationExpires");
+      expect(res.body.young).toHaveProperty("status", "WAITING_VALIDATION");
+      expect(res.body.young).toHaveProperty("cohort", cohort.name);
+      expect(res.body.young).toHaveProperty("cohortId", cohort._id.toString());
+    });
+  });
 
   describe("POST /young/signup_verify", () => {
     it("should return 400 when missing invitationToken", async () => {
@@ -768,25 +784,6 @@ describe("Young", () => {
 
       const updatedClasse = await ClasseModel.findById(classeId);
       expect(updatedClasse?.seatsTaken).toBe(1);
-    });
-  });
-
-  describe("POST /young/invite", () => {
-    it("should create a new young user and send an invitation email", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture());
-      const young = getNewYoungFixture({ cohortId: cohort._id.toString() });
-
-      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
-        .post("/young/invite")
-        .send(young);
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveProperty("young");
-      expect(res.body.young).toHaveProperty("invitationToken");
-      expect(res.body.young).toHaveProperty("invitationExpires");
-      expect(res.body.young).toHaveProperty("status", "WAITING_VALIDATION");
-      expect(res.body.young).toHaveProperty("cohort", cohort.name);
-      expect(res.body.young).toHaveProperty("cohortId", cohort._id.toString());
     });
   });
 });
