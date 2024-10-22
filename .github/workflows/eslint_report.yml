@@ -25,7 +25,7 @@ jobs:
             "api",
             "admin",
             "app",
-            "send-in-blue",
+            "devops/send-in-blue",
             "packages/lib",
             "knowledge-base-public",
             "analytics",
