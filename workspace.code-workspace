@@ -20,6 +20,9 @@
     },
     {
       "path": "devops/analytics"
+    },
+    {
+      "path": "devops/antivirus"
     }
   ],
   "settings": {}
