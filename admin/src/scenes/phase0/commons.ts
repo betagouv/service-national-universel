@@ -4,6 +4,20 @@ import * as fr from "i18n-iso-countries/langs/fr.json";
 countries.registerLocale(fr);
 const countriesList = countries.getNames("fr", { select: "official" });
 
+export const REJECTION_REASONS = {
+  NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
+  TOO_YOUNG: "Le volontaire n'a pas l'âge requis",
+  OTHER: "Autre (préciser)",
+};
+
+export const REJECTION_REASONS_KEY = {
+  NOT_FRENCH: "NOT_FRENCH",
+  TOO_YOUNG: "TOO_YOUNG",
+  OTHER: "OTHER",
+} as const;
+
+export type REJECTION_REASONS_TYPE = keyof typeof REJECTION_REASONS_KEY | "";
+
 export const SPECIFIC_SITUATIONS_KEY = [
   "qpv",
   "handicap",
