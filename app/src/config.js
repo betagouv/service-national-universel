@@ -1,32 +1,24 @@
-function getEnv(name, fallback = undefined) {
-  const runtime = globalThis.runtime_env || {};
-  let v = runtime[name];
-  if (v !== undefined && v !== "") {
-    return v;
+function getEnv(name) {
+  const v = import.meta.env[name];
+  if (v === undefined || v === "") {
+    console.error(`Environment variable ${name} is not defined`);
   }
-  v = import.meta.env[`VITE_${name}`];
-  if (v !== undefined && v !== "") {
-    return v;
-  }
-  if (fallback === undefined) {
-    console.warn(`Environment variable ${name} is not defined`);
-  }
-  return fallback;
+  return v;
 }
 
-let RELEASE = getEnv("RELEASE");
-let apiURL = getEnv("API_URL", "http://localhost:8080");
-let appURL = getEnv("APP_URL", "http://localhost:8081");
-let adminURL = getEnv("ADMIN_URL", "http://localhost:8082");
-let supportURL = getEnv("SUPPORT_URL", "http://localhost:8083");
-let maintenance = getEnv("MAINTENANCE", false) === "true";
-let environment = getEnv("ENVIRONMENT", "development");
-let SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 0.1);
-let SENTRY_SESSION_SAMPLE_RATE = getEnv("SENTRY_SESSION_SAMPLE_RATE", 0.1);
-let SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("SENTRY_ON_ERROR_SAMPLE_RATE", 1.0);
-let franceConnectUrl = getEnv("FRANCE_CONNECT_URL", "https://fcp.integ01.dev-franceconnect.fr/api/v1");
-let API_ENGAGEMENT_URL = getEnv("API_ENGAGEMENT_URL", "https://api.api-engagement.beta.gouv.fr");
-let API_ENGAGEMENT_SNU_ID = getEnv("API_ENGAGEMENT_SNU_ID", "60574864aee4bd176f26a540");
+let RELEASE = getEnv("VITE_RELEASE");
+let apiURL = getEnv("VITE_API_URL");
+let appURL = getEnv("VITE_APP_URL");
+let adminURL = getEnv("VITE_ADMIN_URL");
+let supportURL = getEnv("VITE_SUPPORT_URL");
+let maintenance = getEnv("VITE_MAINTENANCE") === "true";
+let environment = getEnv("VITE_ENVIRONMENT");
+let SENTRY_TRACING_SAMPLE_RATE = getEnv("VITE_SENTRY_TRACING_SAMPLE_RATE");
+let SENTRY_SESSION_SAMPLE_RATE = getEnv("VITE_SENTRY_SESSION_SAMPLE_RATE");
+let SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("VITE_SENTRY_ON_ERROR_SAMPLE_RATE");
+let franceConnectUrl = getEnv("VITE_FRANCE_CONNECT_URL");
+let API_ENGAGEMENT_URL = getEnv("VITE_API_ENGAGEMENT_URL");
+let API_ENGAGEMENT_SNU_ID = getEnv("VITE_API_ENGAGEMENT_SNU_ID");
 
 export {
   apiURL,

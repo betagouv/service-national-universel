@@ -36,7 +36,6 @@ ARG RELEASE=""
 ENV RELEASE=${RELEASE}
 ARG SENTRY_AUTH_TOKEN=""
 ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
-ENV APP_NAME app
 RUN npm run build
 
 FROM nginx AS runner
@@ -51,7 +50,6 @@ COPY --from=builder /app/admin/docker_config docker_config
 
 RUN chmod +x ./docker_start.sh
 
-ENV APP_NAME app
 ARG RELEASE=""
 ENV RELEASE=${RELEASE}
 ENV MAINTENANCE="false"
