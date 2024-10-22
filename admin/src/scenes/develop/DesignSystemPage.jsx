@@ -79,8 +79,6 @@ export default function DesignSystemPage() {
     setValuesSelect({ ...valueSelect, multiAsyncSelect: selectedOption.map((opt) => opt.value) });
   };
 
-  console.log(valueSelect);
-
   const [StatusTitle, setStatusTitle] = useState("Candidature approuvée");
   const [StatusSelect, setStatusSelect] = useState("WAITING_LIST");
 
@@ -187,11 +185,7 @@ export default function DesignSystemPage() {
 
   return (
     <Page>
-      <Header
-        title="Design System"
-        breadcrumb={[{ to: "/", title: <HiHome size={20} className="text-gray-400" /> }, { title: "Design System" }]}
-        actions={[<Button key="header-action-1" title={"Click me"} />]}
-      />
+      <Header title="Design System" breadcrumb={[{ title: "Dev" }, { title: "Design System" }]} actions={[<Button key="header-action-1" title={"Click me"} />]} />
       <Subheader title="Code, preview, test, build and ship." />
       <Navbar
         tab={[

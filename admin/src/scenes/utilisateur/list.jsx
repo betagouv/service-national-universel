@@ -96,10 +96,7 @@ export default function List() {
     <Page>
       <Header
         title={[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Liste de mes contacts" : "Utilisateurs"}
-        breadcrumb={[
-          { title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" },
-          { title: [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Mes contacts" : "Utilisateurs" },
-        ]}
+        breadcrumb={[{ title: [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Mes contacts" : "Utilisateurs" }]}
         actions={[
           <ExportComponent
             key={0}
