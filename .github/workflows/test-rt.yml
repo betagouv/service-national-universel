@@ -21,8 +21,15 @@ jobs:
         with:
           node-version: "18.20"
 
-      - name: Destroy Environment
+      - name: Get environment name
+        id: env_name
+        run: |
+          env_name=$(node get-environment-name.js ${{ github.ref_name }})
+          echo "env_name: $env_name"
+          echo "env_name=$env_name" >> $GITHUB_OUTPUT
+
+      - name: Destroy environment
         env:
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-        run: node destroy-environment.js snu-custom 1970-breadcrumb
+        run: node destroy-environment.js snu-custom ${{ steps.env_name.outputs.env_name }}
