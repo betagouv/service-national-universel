@@ -798,29 +798,30 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const payload = value;
     const { id } = req.params;
     const young = await YoungModel.findById(id);
+
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
     const previousYoung = { ...young.toObject() };
 
     let classe: any = undefined;
     let etablissement: any = undefined;
-    let previousEtablissement: any = undefined;
-    let previousClasse: any = undefined;
-    let errorFetchingClasse: any = undefined;
-
-    if (payload.source === YOUNG_SOURCE.CLE) {
-      const { error, dbClasse, dbEtablissement } = await getClasseAndEtablissement(payload.classeId, payload.etablissementId, "basculeToCLE");
+    if (value.source === YOUNG_SOURCE.CLE) {
+      const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(value.etablissementId), await ClasseModel.findById(value.classeId)]);
+      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
+      if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
       classe = dbClasse;
       etablissement = dbEtablissement;
-      errorFetchingClasse = error;
-    } else if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
-      const { error, dbClasse, dbEtablissement } = await getClasseAndEtablissement(previousYoung.classeId, previousYoung.etablissementId, "basculeToHTS");
-      previousClasse = dbClasse;
-      previousEtablissement = dbEtablissement;
-      errorFetchingClasse = error;
+      if (classe.seatsTaken >= classe.totalSeats) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    if (errorFetchingClasse) {
-      return res.status(errorFetchingClasse.status).send({ ok: false, code: errorFetchingClasse.code });
+
+    let previousEtablissement: any = undefined;
+    let previousClasse: any = undefined;
+    if (young.source === YOUNG_SOURCE.CLE) {
+      const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(young.etablissementId), await ClasseModel.findById(young.classeId)]);
+      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
+      if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
+      previousEtablissement = dbEtablissement;
+      previousClasse = dbClasse;
     }
 
     const { cohort, cohortChangeReason } = payload;
@@ -1051,24 +1052,6 @@ const getYoungSituationIfCLE = (filiere) => {
     return YOUNG_SITUATIONS.GENERAL_SCHOOL;
   }
   return null;
-};
-
-const getClasseAndEtablissement = async (classeId, etablissementId, type: "basculeToCLE" | "basculeToHTS") => {
-  const [dbEtablissement, dbClasse] = await Promise.all([EtablissementModel.findById(etablissementId), ClasseModel.findById(classeId)]);
-
-  if (!dbEtablissement) {
-    return { error: { status: 404, code: ERRORS.ETABLISSEMENT_NOT_FOUND } };
-  }
-  if (!dbClasse) {
-    return { error: { status: 404, code: ERRORS.CLASSE_NOT_FOUND } };
-  }
-  if (type === "basculeToCLE") {
-    if (dbClasse.seatsTaken >= dbClasse.totalSeats) {
-      return { error: { status: 403, code: ERRORS.OPERATION_UNAUTHORIZED } };
-    }
-  }
-
-  return { dbClasse, dbEtablissement };
 };
 
 router.post("/:tutorId/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
