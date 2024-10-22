@@ -33,7 +33,8 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
       temp = temp.filter(filter.filter);
     }
     if (filter?.sort) {
-      filter.sort(temp);
+      // @ts-ignore
+      temp = filter.sort(temp);
     }
     setOptionFilter(temp);
   }, [data, filter, selectedFilters]);
@@ -101,7 +102,8 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
       temp = temp.filter(filter.filter);
     }
     if (filter?.sort) {
-      filter.sort(temp);
+      // @ts-ignore
+      temp = filter.sort(temp);
     }
     if (filter?.reduce) {
       temp = filter.reduce(temp);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
-import { HiPlus, HiHome } from "react-icons/hi";
+import { HiPlus } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -11,11 +11,11 @@ import { capture } from "@/sentry";
 import api from "@/services/api";
 import { Button, Container, Header, Page } from "@snu/ds/admin";
 import { ROLES, translateStatusClasse, translate, EtablissementType, ClasseType } from "snu-lib";
+import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
 
 import { getCohortGroups } from "@/services/cohort.service";
 import ClasseRow from "./list/ClasseRow";
 import { exportExcelSheet, ClasseExport } from "./utils";
-import { is } from "date-fns/locale";
 
 interface ClasseProps extends ClasseType {
   referentClasse: { firstName: string; lastName: string }[];
@@ -79,7 +79,7 @@ export default function List() {
   if (!isClasses || !etablissements) return null;
 
   const filterArray = [
-    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné" },
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     [ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && {
       title: "Établissement",
       name: "etablissementId",
@@ -128,8 +128,8 @@ export default function List() {
   return (
     <Page>
       <Header
-        title="Liste de mes classes"
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes classes" }]}
+        title="Classes"
+        breadcrumb={[{ title: "Séjours" }, { title: "Classes" }]}
         actions={[
           [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (
             <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />

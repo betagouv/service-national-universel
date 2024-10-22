@@ -1,48 +1,80 @@
 import queryString from "query-string";
 import React, { useEffect, useMemo, useState } from "react";
-import { HorizontalBar } from "../../components/graphs";
-
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { academyList, departmentToAcademy, REFERENT_ROLES, region2department, regionList, ROLES, getDepartmentNumber } from "snu-lib";
+
+import { academyList, departmentToAcademy, REFERENT_ROLES, region2department, regionList, ROLES, getDepartmentNumber, CohortDto } from "snu-lib";
 import api from "@/services/api";
-import { FilterDashBoard } from "../../components/FilterDashBoard";
-import StatutPhase from "../../components/inscription/StatutPhase";
-import { getCohortNameList } from "@/services/cohort.service";
-import TotalInscription from "@/scenes/dashboardV2/components/inscription/TotalInscriptions";
-
-import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
+import { filterCurrentAndNextCohorts, getCohortNameList } from "@/services/cohort.service";
 import { getNewLink } from "@/utils";
-import { getDepartmentOptions, getFilteredDepartment } from "../../components/common";
-import Details from "../../components/inscription/Details";
-import TabSchool from "../../components/inscription/TabSchool";
+import { AuthState } from "@/redux/auth/reducer";
+import { CohortState } from "@/redux/cohorts/reducer";
+import TotalInscription from "@/scenes/dashboardV2/components/inscription/TotalInscriptions";
+import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 
-export default function General({ selectedFilters, setSelectedFilters }) {
-  const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
-  const [inscriptionGoals, setInscriptionGoals] = useState();
+import { HorizontalBar } from "../graphs";
+import { FilterDashBoard } from "../FilterDashBoard";
+import { getDepartmentOptions, getFilteredDepartment } from "../common";
+import StatutPhase from "./StatutPhase";
+import Details from "./Details";
+import TabSchool from "./TabSchool";
 
-  const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
+type FilterOption = {
+  key: string;
+  label: string;
+};
+
+type Filter = {
+  id: string;
+  name: string;
+  fullValue: string;
+  options: FilterOption[];
+  translate?: (value: string) => string;
+  sort?: (value: string) => number;
+} | null;
+
+type InscriptionGoalInfo = {
+  cohort: string;
+  department: string;
+  region: string;
+  academy: string;
+  max: number;
+};
+
+interface GeneralProps {
+  selectedFilters: { cohort: string[]; department?: string; region?: string; academy?: string };
+  onSelectedFiltersChange: (filters: { cohort: string[] }) => void;
+}
+
+export default function General({ selectedFilters, onSelectedFiltersChange }: GeneralProps) {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
+
+  const [inscriptionGoals, setInscriptionGoals] = useState<InscriptionGoalInfo[]>();
+  const [inscriptionDetailObject, setInscriptionDetailObject] = useState<{
+    [key: string]: number;
+  }>({});
   const [totalInscriptions, setTotalInscriptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const [filterArray, setFilterArray] = useState([]);
+  const [filterArray, setFilterArray] = useState<Filter[]>([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
+
   const regionOptions = [ROLES.VISITOR, ROLES.REFERENT_REGION].includes(user.role) ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions = [ROLES.VISITOR, ROLES.REFERENT_REGION].includes(user.role)
-    ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
-    : academyList.map((a) => ({ key: a, label: a }));
+    ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a: string) => ({ key: a, label: a }))
+    : academyList.map((a: string) => ({ key: a, label: a }));
 
   useEffect(() => {
-    // regex to get all cohort 2024
-    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
-    setSelectedFilters({ cohort: cohortsFilters });
+    // toutes les cohort en cours (date de fin non passée) + celles non commencées
+    const cohortsFilters = filterCurrentAndNextCohorts(cohorts).map(({ name }) => name);
+    console.log("cohortsFilters", cohortsFilters);
+    onSelectedFiltersChange({ cohort: cohortsFilters });
 
     setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    let filters = [
+    const filters = [
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
             id: "region",
@@ -98,7 +130,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
   useEffect(() => {
     if (isLoading) return;
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
-    else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
+    else getFilteredDepartment(onSelectedFiltersChange, selectedFilters, setDepartmentOptions, user);
     fetchCurrentInscriptions();
     fetchTotalInscriptions();
   }, [JSON.stringify(selectedFilters)]);
@@ -107,9 +139,9 @@ export default function General({ selectedFilters, setSelectedFilters }) {
     () =>
       inscriptionGoals &&
       inscriptionGoals
-        .filter((e) => filterByRegionAndDepartement(e, selectedFilters, user))
+        .filter((ig) => filterByRegionAndDepartement(ig, selectedFilters, user))
         // if selectedFilters.cohort is empty --> we select all cohorts thus no .filter()
-        .filter((e) => !selectedFilters.cohort.length || selectedFilters.cohort.includes(e.cohort))
+        .filter((ig) => !selectedFilters.cohort.length || selectedFilters.cohort.find((cohort) => cohort === ig.cohort))
         .reduce((acc, current) => acc + (current.max && !isNaN(Number(current.max)) ? Number(current.max) : 0), 0),
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
@@ -118,7 +150,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
 
   return (
     <div className="flex flex-col gap-8 ">
-      <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
+      <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={onSelectedFiltersChange} filterArray={filterArray} />
       <div className="rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
         <HorizontalBar
           title="Objectif des inscriptions"
@@ -144,6 +176,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
       <TotalInscription totalInscriptions={totalInscriptions} goal={goal} />
       <StatutPhase values={inscriptionDetailObject} filter={selectedFilters} />
       <div className="flex gap-4">
+        {/* @ts-expect-error jsx */}
         <Details selectedFilters={selectedFilters} />
         <TabSchool filters={selectedFilters} />
       </div>
@@ -151,11 +184,17 @@ export default function General({ selectedFilters, setSelectedFilters }) {
   );
 }
 
-const getInscriptionGoals = async () => {
-  let dataMerged = [];
+const getInscriptionGoals = async (): Promise<InscriptionGoalInfo[]> => {
+  const dataMerged: {
+    cohort: string;
+    department: string;
+    region: string;
+    academy: string;
+    max: number;
+  }[] = [];
   const responses = await api.post("/elasticsearch/dashboard/inscription/inscriptionGoal");
   if (!responses?.hits?.hits) {
-    toastr.error("Une erreur est survenue");
+    toastr.error("Une erreur est survenue", "");
     return [];
   }
   const result = responses.hits.hits;

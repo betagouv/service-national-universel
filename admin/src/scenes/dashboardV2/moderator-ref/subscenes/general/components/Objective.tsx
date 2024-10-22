@@ -10,22 +10,45 @@ import { getDepartmentOptions, getFilteredDepartment } from "@/scenes/dashboardV
 import HorizontalBar from "@/scenes/dashboardV2/components/graphs/HorizontalBar";
 import VolontaireSection from "./VolontaireSection";
 import { useSelector } from "react-redux";
+import { filterCurrentAndNextCohorts } from "@/services/cohort.service";
+import { CohortState } from "@/redux/cohorts/reducer";
+
+type InscriptionGoalInfo = {
+  cohort: string;
+  department: string;
+  region: string;
+  academy: string;
+  max: number;
+};
 
 export default function Index({ user }) {
-  const cohorts = useSelector((state) => state.Cohorts);
-  const [inscriptionGoals, setInscriptionGoals] = useState();
-  const [volontairesData, setVolontairesData] = useState();
-  const [inAndOutCohort, setInAndOutCohort] = useState();
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
+  const [inscriptionGoals, setInscriptionGoals] = useState<InscriptionGoalInfo[]>();
+  const [volontairesData, setVolontairesData] = useState<{
+    [key: string]: { total: number };
+  }>();
+  const [inAndOutCohort, setInAndOutCohort] = useState<{
+    in?: number;
+    out?: number;
+  }>();
   const [departmentOptions, setDepartmentOptions] = useState([]);
-  const [selectedFilters, setSelectedFilters] = useState({
-    cohort: cohorts.filter((e) => e.type === COHORT_TYPE.VOLONTAIRE && e.name.match(/2024/)).map((e) => e.name),
+  const [selectedFilters, setSelectedFilters] = useState<{ cohort: string[]; department?: string; region?: string; academy?: string }>({
+    cohort: [],
   });
+
+  useEffect(() => {
+    // toutes les cohort en cours (date de fin non passée) + celles non commencées (HTS: avec objectif)
+    const cohortsFilters = filterCurrentAndNextCohorts(cohorts)
+      .filter(({ type }) => type === COHORT_TYPE.VOLONTAIRE)
+      .map(({ name }) => name);
+    setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
+  }, []);
 
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList?.map((r) => ({ key: r, label: r }));
   const academyOptions =
     user.role === ROLES.REFERENT_REGION
-      ? [...new Set(region2department[user.region]?.map((d) => departmentToAcademy[d]))]?.map((a) => ({ key: a, label: a }))
-      : academyList?.map((a) => ({ key: a, label: a }));
+      ? [...new Set(region2department[user.region]?.map((d) => departmentToAcademy[d]))]?.map((a: string) => ({ key: a, label: a }))
+      : academyList?.map((a: string) => ({ key: a, label: a }));
 
   const filterArray = [
     ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
@@ -135,26 +158,32 @@ function filterByRegionAndDepartement(e, filters, user) {
   return true;
 }
 
-const getInscriptionGoals = async () => {
-  let dataMerged = [];
+const getInscriptionGoals = async (): Promise<InscriptionGoalInfo[]> => {
+  const dataMerged: {
+    cohort: string;
+    department: string;
+    region: string;
+    academy: string;
+    max: number;
+  }[] = [];
   const responses = await api.post("/elasticsearch/dashboard/inscription/inscriptionGoal");
   if (!responses?.hits?.hits) {
-    toastr.error("Une erreur est survenue");
+    toastr.error("Une erreur est survenue", "");
     return [];
   }
   const result = responses.hits.hits;
-  result?.map((e) => {
+  result.map((e) => {
     const { department, region, academy, cohort, max } = e._source;
     dataMerged[department] = { cohort, department, region, academy, max: (dataMerged[department]?.max ? dataMerged[department].max : 0) + max };
   });
 
-  return result?.map((e) => e._source);
+  return result.map((e) => e._source);
 };
 
 async function getCurrentInscriptions(filters) {
   const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", { filters: filters });
   if (!responses?.aggregations?.status?.buckets) return {};
-  let result = responses.aggregations.status.buckets.reduce((acc, status) => {
+  const result = responses.aggregations.status.buckets.reduce((acc, status) => {
     acc[status.key] = {
       total: status.doc_count,
       phase1: status.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {}),
@@ -166,11 +195,11 @@ async function getCurrentInscriptions(filters) {
   return result;
 }
 
-async function getInAndOutCohort(filters) {
+async function getInAndOutCohort(filters): Promise<{ in?: number; out?: number }> {
   const responses = await api.post("/elasticsearch/dashboard/inscription/getInAndOutCohort", { filters: filters });
   if (!responses?.aggregations) return {};
   const aggreg = responses.aggregations;
-  let result = Object.keys(aggreg).reduce((acc, cohort) => {
+  const result = Object.keys(aggreg).reduce((acc, cohort) => {
     const type = cohort.split("&")[0];
     acc[type] = acc[type] ? acc[type] + aggreg[cohort].doc_count : aggreg[cohort].doc_count;
     return acc;
