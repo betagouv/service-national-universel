@@ -796,14 +796,12 @@ describe("Referent", () => {
     it("should return 409 if the cohort is not valid", async () => {
       const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
       const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
-      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
-        .put(`/referent/young/${young._id}/change-cohort`)
-        .send({
-          source: "VOLONTAIRE",
-          cohort: "invalid cohort",
-          message: "Changing cohort for testing purposes",
-          cohortChangeReason: "Testing",
-        });
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
+        source: "VOLONTAIRE",
+        cohort: "invalid cohort",
+        message: "Changing cohort for testing purposes",
+        cohortChangeReason: "Testing",
+      });
 
       expect(res.status).toEqual(409);
     });
