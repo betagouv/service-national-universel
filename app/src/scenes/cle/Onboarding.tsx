@@ -1,13 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, Redirect, useHistory } from "react-router-dom";
-import queryString from "query-string";
-import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
 import MyClass from "./MyClass";
-import { ModalContainer } from "../../components/modals/Modal";
-import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
@@ -16,6 +12,8 @@ import { RiArrowLeftLine } from "react-icons/ri";
 import { STATUS_CLASSE } from "snu-lib";
 import { Button } from "@snu/ds/dsfr";
 import useClass from "./useClass";
+import { alreadyHaveAnAccountModal } from "../preinscription/components/Modals";
+import AlreadyHaveAnAccountModal from "../preinscription/components/AlreadyHaveAnAccountModal";
 
 const Title = () => (
   <div>
@@ -30,44 +28,10 @@ const Subtitle = ({ refName }) => (
   </span>
 );
 
-const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
-  return (
-    <Modal centered isOpen={isOpen} toggle={onCancel || onChange} size={"md"}>
-      <ModalContainer>
-        <CloseSvg className="close-icon" height={10} width={10} onClick={onCancel || onChange} />
-        <div className="px-8 pb-8">
-          <div className="flex gap-6 text-2xl text-black font-semibold">
-            <p>→</p>
-            <p>J’ai déjà démarré mon inscription dans ma Classe engagée</p>
-          </div>
-          <Link to="/auth">
-            <p className="bg-blue-france-sun-113 hover:bg-blue-france-sun-113-hover text-white w-full p-2.5 text-center my-4">Me connecter</p>
-          </Link>
-          <hr />
-
-          <div className="flex gap-6 text-2xl text-black font-semibold my-4">
-            <p>→</p>
-            <p>Je suis inscrit(e) en tant que volontaire</p>
-          </div>
-
-          <p>Vous avez un compte hors Classes engagées ? Contactez le support pour mettre à jour votre compte et vous faire gagner du temps.</p>
-
-          <Link to={`/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE&classeId=${id}`}>
-            <p
-              onClick={() => plausibleEvent("CLE/CTA preinscription - contact support")}
-              className="bg-blue-france-sun-113 hover:bg-blue-france-sun-113-hover text-white w-full p-2.5 text-center my-4">
-              Contacter le support
-            </p>
-          </Link>
-        </div>
-      </ModalContainer>
-    </Modal>
-  );
-};
-
 const OnBoarding = () => {
   const { isLoggedIn, logout, isCLE } = useAuth();
-  const { id } = queryString.parse(window.location.search);
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id") || "";
   const { isError, isPending, data: classe } = useClass(id);
   if (isLoggedIn && !isCLE) logout({ redirect: false });
   if (isLoggedIn && isCLE) return <Redirect to="/inscription" />;
@@ -90,7 +54,6 @@ const OnBoarding = () => {
 
 const OnboardingContent = ({ classe }) => {
   const history = useHistory();
-  const [showContactSupport, setShowContactSupport] = useState(false);
 
   return (
     <DSFRLayout title="Inscription de l'élève">
@@ -98,7 +61,7 @@ const OnboardingContent = ({ classe }) => {
         <MyClass classe={classe} />
         <hr className="my-4" />
         <div className="fixed sm:z-10 md:z-auto shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-4 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-          <Button className={`sm:!w-full items-center justify-center bg md:!w-auto`} priority="tertiary no outline" onClick={() => setShowContactSupport(true)}>
+          <Button priority="tertiary no outline" onClick={() => alreadyHaveAnAccountModal.open()} className="sm:!w-full items-center justify-center bg md:!w-auto">
             J'ai déjà un compte
           </Button>
           <Button
@@ -110,8 +73,7 @@ const OnboardingContent = ({ classe }) => {
             Démarrer mon inscription
           </Button>
         </div>
-
-        <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={classe.id}></ModalInfo>
+        <AlreadyHaveAnAccountModal />
       </DSFRContainer>
     </DSFRLayout>
   );
