@@ -170,7 +170,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           travelTime: formatTime(line["TEMPS DE ROUTE"]),
           sessionId: session?._id.toString(),
           meetingPointsIds: meetingPointsIds,
-          classeId: line["ID CLASSE"] ? line["ID CLASSE"] : undefined,
+          classeId: line["ID CLASSE"] ? line["ID CLASSE"].toLowerCase() : undefined,
           mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"].split(",") : [],
         };
         const newBusLine = new LigneBusModel(busLineData);
@@ -280,7 +280,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               centerZip: center?.zip,
               centerAddress: center?.address,
               centerName: center?.name,
-              centerCode: center?.code2022,
+              centerCode: center?.matricule,
               centerArrivalTime: busLine.centerArrivalTime,
               centerDepartureTime: busLine.centerDepartureTime,
               pointDeRassemblements,
