@@ -7,7 +7,6 @@ on:
       - main
 
 jobs:
-
   prepare:
     runs-on: ubuntu-latest
     if: github.ref_name == 'main'
@@ -31,7 +30,7 @@ jobs:
 
       - name: Prepare
         id: prepare
-        run : |
+        run: |
           api_image_tag=$(git log --max-count=1 --oneline -- api packages package-lock.json | cut -d " " -f 1)
           echo "api_image_tag: $api_image_tag"
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
@@ -74,12 +73,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [
-          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
-          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
-          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
-          {name: antivirus, tag: "${{needs.prepare.outputs.antivirus_image_tag}}" },
-        ]
+        app:
+          [
+            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+            {
+              name: antivirus,
+              tag: "${{needs.prepare.outputs.antivirus_image_tag}}",
+            },
+          ]
 
     steps:
       - uses: actions/checkout@v4
@@ -119,7 +122,7 @@ jobs:
       PG_CONN_STR: ${{ secrets.SCW_CI_BACKEND_CONN_STR }}
       PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
-      ci_directory: ./terraform/environments/ci
+      ci_directory: ./devops/terraform/environments/ci
 
     steps:
       - uses: actions/checkout@v4
