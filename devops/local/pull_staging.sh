@@ -32,11 +32,12 @@ MONGO_STAGING_URL=$($PROJECT_DIR/api/src/scripts/get_secrets.sh snu-ci | jq -r "
 MONGO_STAGING_NAME=bmwmw2zjc1t8eoc2zfy3
 MONGO_LOCAL_NAME=snu_dev
 MONGO_LOCAL_URL="mongodb://root:password123@localhost:27017/$MONGO_LOCAL_NAME?replicaSet=rs0&authSource=admin&directConnection=true";
+export ES_ENDPOINT=localhost:9200
 
 echo "= DUMP DIR   : $DUMP_DIRECTORY\n"
 echo "> DUMP FROM  : $MONGO_STAGING_URL"
 echo "> RESTORE TO : $MONGO_LOCAL_URL"
-echo "> REINDEXING according to local-development.js configuration"
+echo "> REINDEXING TO : $ES_ENDPOINT"
 
 if [ -z "$MONGO_STAGING_URL" ];then
   echo "MONGO_STAGING_URL is empty"
@@ -72,4 +73,8 @@ echo "Restoring database..."
 mongorestore --drop --gzip $MONGO_LOCAL_URL $DUMP_DIRECTORY/$MONGO_STAGING_NAME
 
 echo "Request full index rebuild..."
+docker-compose -f docker-compose.replica.yml stop es_datariver
 mongosh $MONGO_LOCAL_URL --eval "db.monstache.drop()"
+../ES_datariver/uninstall.sh
+../ES_datariver/install.sh
+docker-compose -f docker-compose.replica.yml restart es_datariver
