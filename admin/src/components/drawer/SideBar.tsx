@@ -232,9 +232,12 @@ const SideBar = ({ sessionsList }) => {
   );
 
   //Components to display depending on user role
-  const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs, Dev];
+  const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs];
   const adminItems = [Dashboard, Volontaire, Inscriptions, SejoursAdmin, Engagement, Utilisateurs];
-  isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) && adminItems.push(Dev);
+  if (isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment)) {
+    godItems.push(Dev);
+    adminItems.push(Dev);
+  }
   const refItems = [Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
   const headCenterItems = [Dashboard, VolontaireHeadCenter, CentresHeadCenter, PlanDeTransport, Contenus, Utilisateurs];
   const transporteurItems = [Point, Centre, Schema, PlanDeTransport];

@@ -13,16 +13,16 @@
       "path": "knowledge-base-public"
     },
     {
-      "path": "pdf"
-    },
-    {
-      "path": "send-in-blue"
+      "path": "devops/send-in-blue"
     },
     {
       "path": "packages"
     },
     {
-      "path": "analytics"
+      "path": "devops/analytics"
+    },
+    {
+      "path": "devops/antivirus"
     }
   ],
   "settings": {}

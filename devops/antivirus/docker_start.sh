@@ -6,4 +6,4 @@ set -ex
 clamd --log=/dev/stdout
 
 # Start your Node.js application
-exec node antivirus/index.js
+exec node devops/antivirus/index.js
