@@ -35,7 +35,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "seatsTaken",
     ];
 
-    const sortFields = ["createdAt", "name.keyword"];
+    const sortFields = ["createdAt", "name.keyword", "seatsTaken"];
 
     // Authorization
     if (!canSearchInElasticSearch(user, "classe")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

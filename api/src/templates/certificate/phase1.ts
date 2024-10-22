@@ -88,7 +88,7 @@ function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter)
     .text(`${COHESION_CENTER_NAME} ${COHESION_CENTER_LOCATION},`)
     .text("validant la ", { continued: true })
     .font(FONT_BOLD)
-    .text("phase 1", { continued: true })
+    .text("phase de cohésion", { continued: true })
     .font(FONT)
     .text(" du Service National Universel.");
   doc.y += 12;

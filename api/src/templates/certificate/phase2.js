@@ -37,7 +37,7 @@ function render(doc, young) {
     .text(",")
     .text("validant la ", { continued: true })
     .font(FONT_BOLD)
-    .text("phase 2", { continued: true })
+    .text("phase engagement", { continued: true })
     .font(FONT)
     .text(" du Service National Universel.")
     .moveDown()

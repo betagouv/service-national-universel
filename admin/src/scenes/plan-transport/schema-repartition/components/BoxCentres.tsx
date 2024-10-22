@@ -10,7 +10,13 @@ import { User } from "@/types";
 import FrenchMap from "@/assets/icons/FrenchMap";
 import ChevronRight from "@/assets/icons/ChevronRight";
 
-export default function BoxCentres({ summary, className, loading, isNational, isDepartmental, user }: BoxProps & { isNational?: boolean; isDepartmental?: boolean; user: User }) {
+interface BoxCentresProps extends BoxProps {
+  isNational?: boolean;
+  isDepartmental?: boolean;
+  user: User;
+}
+
+export default function BoxCentres({ summary, className, loading, isNational, isDepartmental, user }: BoxCentresProps) {
   return (
     <Box className={`overflow-hidden ${className} w-1/3`}>
       <FrenchMap className="absolute right-[-40px] top-[30px] z-[0]" />
@@ -34,7 +40,7 @@ export default function BoxCentres({ summary, className, loading, isNational, is
               <li className="mt-[12px] text-[15px] font-bold leading-[18px] text-[#171725]">{region.name}</li>
               {isDepartmental && (
                 <li className="text-[12px], mt-[2px] leading-[14px] text-[#1F2937]">
-                  {region.departments.map((department) => `${department} (${getDepartmentNumber(department)})`).join(", ")}
+                  {region.departments.map((department) => `${department} (${getDepartmentNumber(department.name)})`).join(", ")}
                 </li>
               )}
             </React.Fragment>

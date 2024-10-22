@@ -224,15 +224,6 @@ export default function SchemaRepartition({ region, department }) {
     }
   }
 
-  const getSchemaRepartitionRoute = () => {
-    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
-      return `/schema-repartition?cohort=${cohort.name}`;
-    }
-    if (region && user.role === ROLES.REFERENT_REGION) {
-      return `/schema-repartition/${region}?cohort=${cohort.name}`;
-    }
-  };
-
   const handleChangeCohort = (cohortName) => {
     setCohort(cohortName);
     history.replace({ pathname: location.pathname, search: `?cohort=${cohortName}` });
@@ -246,7 +237,7 @@ export default function SchemaRepartition({ region, department }) {
 
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Schéma de répartition", to: getSchemaRepartitionRoute() }]} />
+      <Breadcrumbs items={[{ title: "Séjours" }, { title: "Schéma de répartition" }]} />
       <div className="p-[30px]">
         <div className="flex items-center justify-between">
           <PlanTransportBreadcrumb

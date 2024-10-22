@@ -4,7 +4,7 @@ export function injectRoutes(app) {
   app.use("/bus", require("./controllers/bus"));
   app.use("/cohesion-center", require("./cohesionCenter").default);
   app.use("/cohort", require("./cohort/cohortController"));
-  app.use("/cohort-session", require("./controllers/cohort-session"));
+  app.use("/cohort-session", require("./controllers/cohort-session").default);
   app.use("/contract", require("./controllers/contract"));
   app.use("/correction-request", require("./controllers/correction-request").default);
   app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
@@ -33,7 +33,7 @@ export function injectRoutes(app) {
   app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de-repartition"));
   app.use("/tags", require("./controllers/tags"));
   app.use("/waiting-list", require("./controllers/waiting-list"));
-  app.use("/young", require("./controllers/young/index"));
+  app.use("/young", require("./controllers/young/index").default);
   app.use("/young", require("./young/youngController").default);
   app.use("/young-edition", require("./young/edition/youngEditionController").default);
   app.use("/SNUpport", require("./controllers/SNUpport"));

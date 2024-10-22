@@ -1,9 +1,11 @@
 import { GetOneCohortRoute } from "./get";
+import { PostEligibilityRoute } from "./postEligibility";
+import { GetIsIncriptionOpenRoute } from "./getIsIncriptionOpen";
+import { GetIsReincriptionOpenRoute } from "./getIsReIncriptionOpen";
 
 export type CohortsRoutes = {
-  // Get: GetCohortRoute;
-  // Create: CreateCohortRoute,
   GetOne: GetOneCohortRoute;
-  // Update: UpdateCohortRoute,
-  // Delete: DeleteCohortRoute,
+  PostEligibility: PostEligibilityRoute;
+  GetIsIncriptionOpen: GetIsIncriptionOpenRoute;
+  GetIsReincriptionOpen: GetIsReincriptionOpenRoute;
 };

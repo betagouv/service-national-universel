@@ -126,7 +126,7 @@ export default function NationalView() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Table de répartition" }]} />
+      <Breadcrumbs items={[{ title: "Séjours" }, { label: "Table de répartition" }]} />
       <div className="flex w-full flex-col px-8 pb-8 ">
         <div className="flex items-center justify-between py-8">
           <div className="flex flex-col gap-3">

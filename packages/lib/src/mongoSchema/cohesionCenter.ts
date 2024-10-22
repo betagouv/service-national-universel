@@ -183,6 +183,7 @@ export const CohesionCenterSchema = {
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  deletedAt: { type: Date },
 };
 
 const schema = new Schema(CohesionCenterSchema);

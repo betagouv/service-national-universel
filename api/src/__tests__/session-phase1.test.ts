@@ -2,7 +2,7 @@ import request from "supertest";
 import mongoose from "mongoose";
 import { ROLES } from "snu-lib";
 import { LigneBusModel } from "../models";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { mockEsClient } from "./helpers/es";
 import { createSessionPhase1, notExistingSessionPhase1Id } from "./helpers/sessionPhase1";
 import { createSessionWithCohesionCenter } from "./helpers/cohesionCenter";
@@ -31,6 +31,7 @@ jest.mock("../utils", () => ({
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Session Phase 1", () => {
   describe("POST /session-phase1", () => {
@@ -41,13 +42,10 @@ describe("Session Phase 1", () => {
       expect(res.status).toBe(200);
     });
     it("should only not be accessible by responsible", async () => {
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
-
-      const res = await request(getAppHelper()).post("/session-phase1").send(getNewSessionPhase1Fixture());
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .post("/session-phase1")
+        .send(getNewSessionPhase1Fixture());
       expect(res.status).toBe(403);
-
-      passport.user.role = ROLES.ADMIN;
     });
   });
 
@@ -84,8 +82,6 @@ describe("Session Phase 1", () => {
       expect(res.body.data.cohort).toBe("2020");
     });
     it("should be only allowed to admin and referent", async () => {
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
       const cohort = await createCohortHelper(
         getNewCohortFixture({
           sessionEditionOpenForReferentRegion: true,
@@ -95,13 +91,12 @@ describe("Session Phase 1", () => {
       );
       const sessionPhase1 = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohort: cohort.name, cohortId: cohort._id });
 
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
         .put("/session-phase1/" + sessionPhase1._id)
         .send({
           cohort: "2020",
         });
       expect(res.status).toBe(403);
-      passport.user.role = ROLES.ADMIN;
     });
   });
 
@@ -125,14 +120,11 @@ describe("Session Phase 1", () => {
       expect(res.status).toBe(200);
     });
     it("should be only allowed to admin and referents", async () => {
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
         .delete("/session-phase1/" + sessionPhase1._id)
         .send();
       expect(res.status).toBe(403);
-      passport.user.role = ROLES.ADMIN;
     });
     it("should return 403 when youngs are registered to the session", async () => {
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture({ placesLeft: 0 }));

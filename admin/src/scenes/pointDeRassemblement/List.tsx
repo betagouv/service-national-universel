@@ -45,7 +45,7 @@ export default function List() {
   if (!defaultCohortName || !user) return <div></div>;
   return (
     <>
-      <Breadcrumbs items={[{ label: "Points de rassemblement" }]} />
+      <Breadcrumbs items={[{ title: "Séjours" }, { label: "Points de rassemblement" }]} />
       <div className="flex w-full flex-col px-8">
         <div className="flex items-center justify-between py-8">
           <Title>Points de rassemblement</Title>

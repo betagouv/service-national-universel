@@ -8,12 +8,13 @@ import {
   deleteAllDepartmentServicesHelper,
 } from "./helpers/departmentService";
 import { dbConnect, dbClose } from "./helpers/db";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper } from "./helpers/young";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Department service", () => {
   describe("POST /department-service", () => {
@@ -44,15 +45,11 @@ describe("Department service", () => {
     });
     it("should return 403 if a young try to get other department service", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), department: "foo" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
       let departmentServiceFixture = await getDepartmentServicesHelper();
       const departmentService = await createDepartmentServiceHelper(departmentServiceFixture);
-      const res = await request(getAppHelper()).get(`/department-service/bar`).send();
+      const res = await request(getAppHelper(young)).get(`/department-service/bar`).send();
       expect(res.statusCode).toEqual(403);
       await deleteDepartmentServiceByIdHelper(departmentService._id);
-      passport.user = previous;
     });
     it("should return 404 if department service not found", async () => {
       const res = await request(getAppHelper()).get(`/department-service/departementinconnuaubataillon`).send();

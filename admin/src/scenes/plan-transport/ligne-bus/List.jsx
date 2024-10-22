@@ -7,7 +7,7 @@ import { HiHome, HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
-import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-lib";
+import { ROLES, canExportConvoyeur, getDepartmentNumber, translate, getZonedDate } from "snu-lib";
 import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -170,7 +170,7 @@ export default function List() {
     <Page>
       <Header
         title="Plan de transport"
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Plan de transport" }]}
+        breadcrumb={[{ title: "Séjours" }, { title: "Plan de transport" }]}
         actions={
           <SelectCohort
             cohort={cohort}
@@ -386,8 +386,8 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     "REGION DU CENTRE": data.centerRegion,
                     "ID CENTRE": data.centerId,
                     "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
-                    "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
-                    "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
+                    "HEURE D'ARRIVEE AU CENTRE": getZonedDate(data.centerArrivalTime),
+                    "HEURE DE DÉPART DU CENTRE": getZonedDate(data.centerDepartureTime),
 
                     // * followerCapacity !== Total des followers mais c'est la sémantique ici
                     "TOTAL ACCOMPAGNATEURS": data.followerCapacity,

@@ -1,6 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewProgramFixture from "./fixtures/program";
 import {
   getProgramsHelper,
@@ -15,12 +15,12 @@ import { dbConnect, dbClose } from "./helpers/db";
 import { ROLES } from "snu-lib";
 import { getNewReferentFixture } from "./fixtures/referent";
 import { createReferentHelper } from "./helpers/referent";
-import passport from "passport";
 
 jest.mock("passport");
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Program", () => {
   describe("POST /program", () => {
@@ -41,23 +41,16 @@ describe("Program", () => {
     });
     it("should return 403 if user is referent department and create a program for another department", async () => {
       const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: "foo" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = referent;
       const programFixture = { ...getNewProgramFixture(), department: "bar" };
-      const res = await request(getAppHelper()).post("/program").send(programFixture);
+      const res = await request(getAppHelper(referent)).post("/program").send(programFixture);
       expect(res.statusCode).toEqual(403);
-      passport.user = previous;
     });
     it("should return 403 if user is referent region and create a program for another region", async () => {
       const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "foo" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = referent;
+
       const programFixture = { ...getNewProgramFixture(), region: "bar" };
-      const res = await request(getAppHelper()).post("/program").send(programFixture);
+      const res = await request(getAppHelper(referent)).post("/program").send(programFixture);
       expect(res.statusCode).toEqual(403);
-      passport.user = previous;
     });
   });
   describe("PUT /program/:id", () => {
@@ -79,16 +72,12 @@ describe("Program", () => {
     });
     it("should return 403 if user can not update program", async () => {
       const program = await createProgramHelper({ ...getNewProgramFixture(), department: "hip", region: "hop" });
-      const passport = require("passport");
-      passport.user.role = ROLES.REFERENT_DEPARTMENT;
-      let res = await request(getAppHelper()).put("/program/" + program._id);
+
+      let res = await request(getAppHelper({ role: ROLES.REFERENT_DEPARTMENT })).put("/program/" + program._id);
       expect(res.statusCode).toEqual(403);
 
-      passport.user.role = ROLES.REFERENT_REGION;
-      res = await request(getAppHelper()).put("/program/" + program._id);
+      res = await request(getAppHelper({ role: ROLES.REFERENT_REGION })).put("/program/" + program._id);
       expect(res.statusCode).toEqual(403);
-
-      passport.user.role = ROLES.ADMIN;
     });
   });
 
@@ -125,11 +114,7 @@ describe("Program", () => {
     const programHeadCenter = await createProgramHelper(programFixtureHeadCenter);
     const programFixture = getNewProgramFixture();
     const program = await createProgramHelper(programFixture);
-    // @ts-ignore
-    passport.user.role = ROLES.HEAD_CENTER;
-    const res = await request(getAppHelper()).get(`/program/`);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
+    const res = await request(getAppHelper({ role: ROLES.HEAD_CENTER })).get(`/program/`);
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.length).toEqual(1);
     expectProgramToEqual(programFixtureHeadCenter, res.body.data[0]);
@@ -140,6 +125,7 @@ describe("Program", () => {
   it("GET /program/ AS STRUCTURE_MEMBER", async () => {
     await deleteAllProgram();
     let programFixtureRegionDepartment = getNewProgramFixture();
+    const passport = require("passport");
     // @ts-ignore
     programFixtureRegionDepartment.region = passport.user.region;
     // @ts-ignore
@@ -149,11 +135,7 @@ describe("Program", () => {
     programFixtureNoRegionAndDepartment.region = "";
     programFixtureNoRegionAndDepartment.department = "";
     const programNoRegionAndDepartment = await createProgramHelper(programFixtureNoRegionAndDepartment);
-    // @ts-ignore
-    passport.user.role = "structure_member";
-    const res = await request(getAppHelper()).get(`/program/`);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
+    const res = await request(getAppHelper({ role: "structure_member" })).get(`/program/`);
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.length).toEqual(1);
     expectProgramToEqual(programFixtureRegionDepartment, res.body.data[0]);

@@ -1,12 +1,14 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
+import { Types } from "mongoose";
+const { ObjectId } = Types;
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, department2region } from "snu-lib";
 
-import { CohortModel, YoungModel } from "../models";
-import { getInscriptionGoalStats } from "../services/inscription-goal";
+import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
+import { getCompletionObjectifs } from "../services/inscription-goal";
 
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewStructureFixture from "./fixtures/structure";
@@ -26,7 +28,8 @@ import { createFixtureClasse } from "./fixtures/classe";
 import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
-import { ObjectId } from "bson";
+import { createInscriptionGoal } from "./helpers/inscriptionGoal";
+import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -42,6 +45,12 @@ jest.mock("../cryptoUtils", () => ({
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
+beforeEach(async () => {
+  await YoungModel.deleteMany();
+  await CohortModel.deleteMany();
+  await InscriptionGoalModel.deleteMany();
+});
+afterEach(resetAppAuth);
 
 describe("Referent", () => {
   describe("POST /referent/signup_invite/:template", () => {
@@ -62,12 +71,11 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(400);
     });
     it("should return 403 if user can not invite", async () => {
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
       const referentFixture = { ...getNewReferentFixture(), role: ROLES.ADMIN };
-      const res = await request(getAppHelper()).post("/referent/signup_invite/001").send(referentFixture);
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .post("/referent/signup_invite/001")
+        .send(referentFixture);
       expect(res.statusCode).toEqual(403);
-      passport.user.role = ROLES.ADMIN;
     });
     it("should return 409 when user already exists", async () => {
       const fixture = getNewReferentFixture();
@@ -83,11 +91,12 @@ describe("Referent", () => {
       updateYoungFields: Partial<YoungType>,
       newYoungFields?: Partial<YoungType>,
       { keepYoung, queryParam }: { keepYoung?: boolean; queryParam?: string } = {},
+      user?: Partial<UserDto>,
     ) {
       const youngFixture = getNewYoungFixture();
       const originalYoung = await createYoungHelper({ ...youngFixture, ...newYoungFields });
       const modifiedYoung = { ...youngFixture, ...newYoungFields, ...updateYoungFields };
-      const response = await request(getAppHelper())
+      const response = await request(getAppHelper(user))
         .put(`/referent/young/${originalYoung._id}${queryParam || ""}`)
         .send(modifiedYoung);
       const young = await getYoungByIdHelper(originalYoung._id);
@@ -96,81 +105,81 @@ describe("Referent", () => {
       }
       return { young, modifiedYoung, response, id: originalYoung._id };
     }
-    it("should not update young if goal not defined", async () => {
+    it("should not update young if goal not defined (null)", async () => {
       const testName = "Juillet 2023";
       const cohort = await createCohortHelper(getNewCohortFixture({ name: testName }));
       // ajout d'un objectif non définie
-      const res = await request(getAppHelper())
-        .post(`/inscription-goal/${testName}`)
-        .send([{ department: testName, region: testName, max: null }]);
-      expect(res.statusCode).toEqual(200);
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, max: null as any }));
+
       // ajout d'un jeune au departement
-      const passport = require("passport");
-      passport.user.role = ROLES.ADMIN;
       const { response, id: youngId } = await createYoungThenUpdate(
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: testName, department: testName, cohort: cohort.name, cohortId: cohort.id },
+        { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort.id },
         { keepYoung: true },
+        { role: ROLES.ADMIN },
       );
       expect(response.statusCode).not.toEqual(200);
       expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
       await deleteYoungByIdHelper(youngId);
     });
-    it("should not update young if goal reached", async () => {
+    it("should not update young if department goal reached", async () => {
       const testName = "Juillet 2023";
       const now = new Date();
       const tomorrow = new Date(now);
       tomorrow.setDate(now.getDate() + 1);
       const cohort = await createCohortHelper(getNewCohortFixture({ name: testName, instructionEndDate: tomorrow }));
-      const { count } = await getInscriptionGoalStats(testName, testName);
+
       // ajout d'un objectif à 1
-      const res = await request(getAppHelper())
-        .post(`/inscription-goal/${testName}`)
-        .send([{ department: testName, region: testName, max: count + 1 }]);
-      expect(res.statusCode).toEqual(200);
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: testName, max: 1 }));
+
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, testName);
+      expect(completionObjectif.department.objectif).toBe(1);
+      expect(completionObjectif.isAtteint).toBe(false);
+
       // ajout d'un jeune au departement sans depassement
-      const passport = require("passport");
-      passport.user.role = ROLES.HEAD_CENTER;
       const { response: responseSuccessed, id: youngId } = await createYoungThenUpdate(
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: testName, department: testName, schoolDepartment: testName, cohort: testName, cohortId: cohort._id },
+        { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
         { keepYoung: true },
+        { role: ROLES.HEAD_CENTER },
       );
       expect(responseSuccessed.statusCode).toEqual(200);
+
       // ajout d'un jeune au departement avec depassement
       let response = (
         await createYoungThenUpdate(
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
+          { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
       // admin: ajout d'un jeune au departement avec depassement
-      passport.user.role = ROLES.ADMIN;
       response = (
         await createYoungThenUpdate(
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, schoolDepartment: testName, cohortId: cohort._id },
+          { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohortId: cohort._id },
+          undefined,
+          { role: ROLES.ADMIN },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
       // ajout d'un jeune HZR sur un autre departement sans dépassement
       response = (
         await createYoungThenUpdate(
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, cohortId: cohort._id },
+          { cohortId: cohort._id },
         )
       ).response;
       expect(response.statusCode).not.toEqual(200);
@@ -181,12 +190,34 @@ describe("Referent", () => {
           {
             status: YOUNG_STATUS.VALIDATED,
           },
-          { region: testName, department: testName, cohort: cohort.name, cohortId: cohort._id },
+          { region: inscriptionGoal.region, department: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
           { queryParam: "?forceGoal=1" },
         )
       ).response;
       expect(response.statusCode).toEqual(200);
       await deleteYoungByIdHelper(youngId);
+    });
+    it("should not update young if region goal reached (not department)", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, cohortId: cohort._id, max: 1 }));
+      // jeune dans la region mais pas dans le departement
+      await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, cohort: cohort.name, cohortId: cohort._id }));
+
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort.name);
+      expect(completionObjectif.department.isAtteint).toBe(false);
+      expect(completionObjectif.region.isAtteint).toBe(true);
+      expect(completionObjectif.isAtteint).toBe(true);
+
+      const response = (
+        await createYoungThenUpdate(
+          {
+            status: YOUNG_STATUS.VALIDATED,
+          },
+          { department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, region: inscriptionGoal.region, cohort: cohort.name, cohortId: cohort._id },
+        )
+      ).response;
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
     });
     it("should return 404 if young not found", async () => {
       const res = await request(getAppHelper()).put(`/referent/young/${notExistingYoungId}`).send();
@@ -534,11 +565,11 @@ describe("Referent", () => {
       const referent: any = await createReferentHelper(getNewReferentFixture());
       referent.firstName = "MY NEW NAME";
       await referent.save();
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
-      const res = await request(getAppHelper()).get(`/referent/${referent._id}/patches`).send();
+
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .get(`/referent/${referent._id}/patches`)
+        .send();
       expect(res.status).toBe(403);
-      passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if referent found with patches", async () => {
       const referent: any = await createReferentHelper(getNewReferentFixture());
@@ -568,12 +599,11 @@ describe("Referent", () => {
       expectReferentToEqual(referent, res.body.data);
     });
     it("should return 403 if role is not admin", async () => {
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).get(`/referent/${referent._id}`).send();
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .get(`/referent/${referent._id}`)
+        .send();
       expect(res.statusCode).toEqual(403);
-      passport.user.role = ROLES.ADMIN;
     });
   });
 
@@ -608,12 +638,11 @@ describe("Referent", () => {
       );
     });
     it("should return 403 if role is not admin", async () => {
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .put(`/referent/${referent._id}`)
+        .send();
       expect(res.statusCode).toEqual(403);
-      passport.user.role = ROLES.ADMIN;
     });
 
     it("should update tutor name in missions and applications", async () => {
@@ -652,25 +681,22 @@ describe("Referent", () => {
       expect(await getReferentByIdHelper(referent._id)).toBeNull();
     });
     it("should return 403 if role is not admin", async () => {
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).delete(`/referent/${referent._id}`).send();
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .delete(`/referent/${referent._id}`)
+        .send();
       expect(res.statusCode).toEqual(403);
-      passport.user.role = ROLES.ADMIN;
     });
   });
 
   describe("POST /referent/signin_as/:type/:id", () => {
     it("should return 403 if role is not admin", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
-      const res = await request(getAppHelper())
+
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
         .post("/referent/signin_as/referent/" + referent._id)
         .send();
       expect(res.statusCode).toEqual(403);
-      passport.user.role = ROLES.ADMIN;
     });
     it("should return 404 if referent not found", async () => {
       const res = await request(getAppHelper())
@@ -713,16 +739,6 @@ describe("Referent", () => {
     });
   });
   describe("PUT /referent/young/:id/change-cohort", () => {
-    const passport = require("passport");
-    passport.user.role = ROLES.ADMIN;
-    beforeEach(async () => {});
-
-    afterEach(async () => {
-      await YoungModel.deleteMany();
-      await CohortModel.deleteMany();
-      passport.user.role = ROLES.ADMIN;
-    });
-
     it("should change the cohort of the young and cohortId", async () => {
       const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
       const cohort2 = await CohortModel.create({ ...getNewCohortFixture(), name: "à venir" });
@@ -765,13 +781,14 @@ describe("Referent", () => {
     it("should return 403 if the referent is not authorized to change the cohort", async () => {
       const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
       const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
-      passport.user.role = ROLES.VISITOR;
-      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
-        source: "VOLONTAIRE",
-        cohort: cohort1.name,
-        message: "Changing cohort for testing purposes",
-        cohortChangeReason: "Testing",
-      });
+      const res = await request(getAppHelper({ role: ROLES.VISITOR }))
+        .put(`/referent/young/${young._id}/change-cohort`)
+        .send({
+          source: "VOLONTAIRE",
+          cohort: cohort1.name,
+          message: "Changing cohort for testing purposes",
+          cohortChangeReason: "Testing",
+        });
 
       expect(res.status).toEqual(403);
     });

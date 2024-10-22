@@ -140,7 +140,7 @@ const getZonedDate = (date, timeZone = "Europe/Paris") => {
   return zonedDate;
 };
 
-const getDateTimeByTimeZoneOffset = (timeZoneOffset = null) => {
+const getDateTimeByTimeZoneOffset = (timeZoneOffset: number | null = null) => {
   let now = Date.now();
   if (timeZoneOffset) {
     const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC

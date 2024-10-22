@@ -1,5 +1,6 @@
 import Joi from "joi";
-import { UpdateCohortDto } from "snu-lib";
+import { CohortsRoutes, UpdateCohortDto } from "snu-lib";
+import { idSchema } from "../utils/validator";
 
 export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<UpdateCohortDto> => {
   return Joi.object<UpdateCohortDto, true, Omit<UpdateCohortDto, "_id">>({
@@ -80,3 +81,33 @@ const ToFromDateValidator = Joi.object({
   from: Joi.date().allow(null, ""),
   to: Joi.date().allow(null, ""),
 });
+
+const GetIsIncriptionOpenRouteSchema = {
+  query: Joi.object<CohortsRoutes["GetIsIncriptionOpen"]["query"]>({
+    sessionName: Joi.string(),
+  }),
+};
+
+const PostEligibilityRouteSchema = {
+  params: Joi.object<CohortsRoutes["PostEligibility"]["params"]>({
+    id: idSchema(),
+  }),
+  query: Joi.object<CohortsRoutes["PostEligibility"]["query"]>({
+    getAllSessions: Joi.boolean().default(false),
+  }),
+  body: Joi.object<CohortsRoutes["PostEligibility"]["payload"]>({
+    schoolDepartment: Joi.string().allow("", null),
+    department: Joi.string(),
+    region: Joi.string(),
+    schoolRegion: Joi.string().allow("", null),
+    birthdateAt: Joi.date().required(),
+    grade: Joi.string(),
+    status: Joi.string(),
+    zip: Joi.string().allow("", null),
+  }),
+};
+
+export const CohortsRoutesSchema = {
+  PostEligibility: PostEligibilityRouteSchema,
+  GetIsIncriptionOpen: GetIsIncriptionOpenRouteSchema,
+};

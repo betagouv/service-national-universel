@@ -25,7 +25,9 @@ jest.mock("passport");
 beforeEach(async () => {
   await CohortModel.deleteMany();
   await ClasseModel.deleteMany();
+  //@ts-ignore
   passport.user.role = ROLES.ADMIN;
+  //@ts-ignore
   passport.user.subRole = "god";
   jest.spyOn(featureServiceModule, "isFeatureAvailable").mockImplementation(() => Promise.resolve(true));
 });
@@ -70,10 +72,12 @@ ${classe3?._id},""
         cohortCode: cohort.snuId,
         cohortName: cohort.name,
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
+        updated: "cohortId, cohort, status, totalSeats",
       },
       {
         classeId: notExistingClasseId,
         cohortCode: cohort.snuId,
+        classeTotalSeats: "",
         result: "error",
         error: ERRORS.CLASSE_NOT_FOUND,
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
@@ -82,6 +86,7 @@ ${classe3?._id},""
         classeId: classe2._id.toString(),
         cohortCode: notExistingCohortCode,
         result: "error",
+        classeTotalSeats: "",
         error: ERRORS.COHORT_NOT_FOUND,
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
@@ -89,6 +94,7 @@ ${classe3?._id},""
         classeId: classe3._id.toString(),
         cohortCode: "",
         result: "error",
+        classeTotalSeats: "",
         error: FUNCTIONAL_ERRORS.NO_COHORT_CODE_PROVIDED,
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
@@ -96,10 +102,12 @@ ${classe3?._id},""
         classeId: "",
         cohortCode: cohort.snuId,
         result: "error",
+        classeTotalSeats: "",
         error: FUNCTIONAL_ERRORS.NO_CLASSE_ID_PROVIDED,
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
     ];
+    console.log(response.body);
     expect(response.body.ok).toBe(true);
     expect(response.body.data).toEqual(expectedResponse);
   });
@@ -117,9 +125,9 @@ ${classe3?._id},""
   });
 
   it("should return 403 for non-superadmin role", async () => {
+    //@ts-ignore
     passport.user.role = ROLES.VISITOR;
     const response = await request(getAppHelper()).post("/cle/classe/import/classe-cohort").send(requestBody);
-
     expect(response.status).toEqual(403);
     expect(response.body).toEqual({
       ok: false,

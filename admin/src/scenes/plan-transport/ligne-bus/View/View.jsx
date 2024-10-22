@@ -3,7 +3,7 @@ import { HiOutlineBell, HiOutlineChatAlt } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { ROLES, canExportLigneBus, isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
+import { ROLES, canExportLigneBus, getZonedDate, isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
 
 import Bus from "../../../../assets/icons/Bus";
 import Breadcrumbs from "../../../../components/Breadcrumbs";
@@ -175,7 +175,7 @@ export default function View(props) {
   return (
     <>
       <div className="flex justify-between mr-8 items-center">
-        <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
+        <Breadcrumbs items={[{ title: "Séjours" }, { label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
         {canExportLigneBus(user) && data.team.length > 0 ? (
           <SelectAction
             title="Exporter la ligne"
@@ -229,8 +229,8 @@ export default function View(props) {
           <div className="flex gap-4">
             <Itineraire
               meetingsPoints={data.meetingsPointsDetail}
-              aller={data.departuredDate}
-              retour={data.returnDate}
+              aller={getZonedDate(data.departuredDate)}
+              retour={getZonedDate(data.returnDate)}
               center={{ ...data.centerDetail, departureHour: data.centerArrivalTime, returnHour: data.centerDepartureTime }}
               bus={data}
               setBus={setData}

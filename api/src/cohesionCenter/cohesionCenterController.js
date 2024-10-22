@@ -349,10 +349,15 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (center.deletedAt) {
+      return res.status(400).send({ ok: false, code: ERRORS.ALREADY_DELETED, message: "Center is already deleted" });
+    }
+
     const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: center._id });
     if (sessionsPhase1.length !== 0) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    await center.deleteOne();
+    center.deletedAt = new Date();
+    await center.save({ fromUser: req.user });
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

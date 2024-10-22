@@ -35,7 +35,7 @@ export default function List() {
 
   return (
     <div className="mb-8">
-      <Breadcrumbs items={[{ label: "Centres" }]} />
+      <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres" }]} />
       <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
       <div className="flex flex-row">
         <div className="flex w-full flex-1 flex-col px-8">

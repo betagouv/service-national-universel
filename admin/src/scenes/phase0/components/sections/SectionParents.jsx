@@ -17,8 +17,10 @@ import {
   GRADES,
   getAge,
   YOUNG_SOURCE,
-  translateEtbalissementSector,
+  translateEtablissementSector,
   translateColoration,
+  departmentToAcademy,
+  region2zone,
 } from "snu-lib";
 import { filterDataForYoungSection } from "../../utils";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "../../commons";
@@ -57,7 +59,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState(filterDataForYoungSection(young, "parent"));
+  const [youngFiltered, setYoungFiltered] = useState(filterDataForYoungSection(young, "parent"));
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [youngAge, setYoungAge] = useState(0);
@@ -65,19 +67,19 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
   const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
 
   useEffect(() => {
-    if (data) {
-      if (data.grade === GRADES.NOT_SCOLARISE) {
+    if (youngFiltered) {
+      if (youngFiltered.grade === GRADES.NOT_SCOLARISE) {
         setSituationOptions(Object.keys(YOUNG_ACTIVE_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
       } else {
         setSituationOptions(Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
       }
     }
     if (young) {
-      setData({ ...young, psc1Info: young.psc1Info });
+      setYoungFiltered({ ...young, psc1Info: young.psc1Info });
       setHasSpecificSituation(SPECIFIC_SITUATIONS_KEY.findIndex((key) => young[key] === "true") >= 0);
       setYoungAge(getAge(young.birthdateAt));
     } else {
-      setData({});
+      setYoungFiltered({});
       setHasSpecificSituation(false);
       setYoungAge(0);
     }
@@ -88,63 +90,63 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
   }
 
   function onLocalChange(field, value) {
-    const newData = { ...data, [field]: value };
+    const newData = { ...youngFiltered, [field]: value };
     if (field === "grade") {
       if (value === GRADES.NOT_SCOLARISE) {
         newData.schooled = "false";
-        if (!YOUNG_ACTIVE_SITUATIONS[data.situation]) {
+        if (!YOUNG_ACTIVE_SITUATIONS[youngFiltered.situation]) {
           newData.situation = "";
         }
         setSituationOptions(Object.keys(YOUNG_ACTIVE_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
       } else {
         newData.schooled = "true";
-        if (!YOUNG_SCHOOLED_SITUATIONS[data.situation]) {
+        if (!YOUNG_SCHOOLED_SITUATIONS[youngFiltered.situation]) {
           newData.situation = "";
         }
         setSituationOptions(Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
       }
     }
-    setData(newData);
+    setYoungFiltered(newData);
   }
 
   function onSchoolChange(changes) {
-    setData({ ...data, ...changes });
+    setYoungFiltered({ ...youngFiltered, ...changes });
   }
 
   function onCancel() {
-    setData({ ...young });
+    setYoungFiltered({ ...young });
     setErrors({});
   }
 
   const trimmedPhones = {};
-  if (data.parent1Phone) trimmedPhones[1] = data.parent1Phone.replace(/\s/g, "");
-  if (data.parent2Phone) trimmedPhones[2] = data.parent2Phone.replace(/\s/g, "");
+  if (youngFiltered.parent1Phone) trimmedPhones[1] = youngFiltered.parent1Phone.replace(/\s/g, "");
+  if (youngFiltered.parent2Phone) trimmedPhones[2] = youngFiltered.parent2Phone.replace(/\s/g, "");
 
   async function onSave() {
     setSaving(true);
     if (validate()) {
       try {
-        if (data.parent1Phone) data.parent1Phone = trimmedPhones[1];
-        if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
+        if (youngFiltered.parent1Phone) youngFiltered.parent1Phone = trimmedPhones[1];
+        if (youngFiltered.parent2Phone) youngFiltered.parent2Phone = trimmedPhones[2];
 
-        if (data.grade === GRADES.NOT_SCOLARISE) {
-          data.schoolName = "";
-          data.schoolType = "";
-          data.schoolAddress = "";
-          data.schoolComplementAdresse = "";
-          data.schoolZip = "";
-          data.schoolCity = "";
-          data.schoolDepartment = "";
-          data.schoolRegion = "";
-          data.schoolCountry = "";
-          data.schoolLocation = null;
-          data.schoolId = "";
-          data.academy = "";
+        if (youngFiltered.grade === GRADES.NOT_SCOLARISE) {
+          youngFiltered.schoolName = "";
+          youngFiltered.schoolType = "";
+          youngFiltered.schoolAddress = "";
+          youngFiltered.schoolComplementAdresse = "";
+          youngFiltered.schoolZip = "";
+          youngFiltered.schoolCity = "";
+          youngFiltered.schoolDepartment = "";
+          youngFiltered.schoolRegion = "";
+          youngFiltered.schoolCountry = "";
+          youngFiltered.schoolLocation = null;
+          youngFiltered.schoolId = "";
+          youngFiltered.academy = "";
         }
 
-        const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
+        const result = await api.put(`/young-edition/${young._id}/situationparents`, youngFiltered);
         if (result.ok) {
-          toastr.success("Les données ont bien été enregistrées.");
+          toastr.success("Succès !", "Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
           onChange && onChange();
         } else {
@@ -162,17 +164,17 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     let result = true;
     let errors = {};
 
-    if (!data.parent1Status) return true;
+    if (!youngFiltered.parent1Status) return true;
 
-    if (data.parent1Phone) data.parent1Phone = trimmedPhones[1];
-    if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
+    if (youngFiltered.parent1Phone) youngFiltered.parent1Phone = trimmedPhones[1];
+    if (youngFiltered.parent2Phone) youngFiltered.parent2Phone = trimmedPhones[2];
 
     for (let parent = 1; parent <= (young.parent2Status ? 2 : 1); ++parent) {
-      if (["", undefined].includes(data[`parent${parent}Email`]) || !validator.isEmail(data[`parent${parent}Email`])) {
+      if (["", undefined].includes(youngFiltered[`parent${parent}Email`]) || !validator.isEmail(youngFiltered[`parent${parent}Email`])) {
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
-      if (!trimmedPhones[parent] || !data[`parent${parent}Phone`]) {
+      if (!trimmedPhones[parent] || !youngFiltered[`parent${parent}Phone`]) {
         errors[`parent${parent}Phone`] = "Le numéro de téléphone est obligatoire";
         result = false;
       }
@@ -180,28 +182,32 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
         errors[`parent${parent}Phone`] = "Le numéro de téléphone est obligatoire";
         result = false;
       }
-      if (trimmedPhones[parent] && trimmedPhones[parent] !== "" && !isPhoneNumberWellFormated(data[`parent${parent}Phone`], data[`parent${parent}PhoneZone`] || "AUTRE")) {
-        errors[`parent${parent}Phone`] = PHONE_ZONES[data[`parent${parent}PhoneZone`] || "AUTRE"].errorMessage;
+      if (
+        trimmedPhones[parent] &&
+        trimmedPhones[parent] !== "" &&
+        !isPhoneNumberWellFormated(youngFiltered[`parent${parent}Phone`], youngFiltered[`parent${parent}PhoneZone`] || "AUTRE")
+      ) {
+        errors[`parent${parent}Phone`] = PHONE_ZONES[youngFiltered[`parent${parent}PhoneZone`] || "AUTRE"].errorMessage;
         result = false;
       }
-      result = validateEmpty(data, `parent${parent}LastName`, errors) && result;
-      result = validateEmpty(data, `parent${parent}FirstName`, errors) && result;
-      if (!data[`parent${parent}OwnAddress`]) {
+      result = validateEmpty(youngFiltered, `parent${parent}LastName`, errors) && result;
+      result = validateEmpty(youngFiltered, `parent${parent}FirstName`, errors) && result;
+      if (!youngFiltered[`parent${parent}OwnAddress`]) {
         errors[`parent${parent}OwnAddress`] = "Ce champ ne peut pas être vide";
         result = false;
       }
-      if (data[`parent${parent}OwnAddress`] === "true") {
-        result = validateEmpty(data, `parent${parent}Address`, errors) && result;
-        result = validateEmpty(data, `parent${parent}Zip`, errors) && result;
-        result = validateEmpty(data, `parent${parent}City`, errors) && result;
-        result = validateEmpty(data, `parent${parent}Country`, errors) && result;
+      if (youngFiltered[`parent${parent}OwnAddress`] === "true") {
+        result = validateEmpty(youngFiltered, `parent${parent}Address`, errors) && result;
+        result = validateEmpty(youngFiltered, `parent${parent}Zip`, errors) && result;
+        result = validateEmpty(youngFiltered, `parent${parent}City`, errors) && result;
+        result = validateEmpty(youngFiltered, `parent${parent}Country`, errors) && result;
       }
       if (young.source === YOUNG_SOURCE.VOLONTAIRE) {
-        if (!data.situation || data.situation === "") {
+        if (!youngFiltered.situation || youngFiltered.situation === "") {
           errors["situation"] = "Ce champ ne peut pas être vide";
           result = false;
         }
-        if (!data.grade || data.grade === "") {
+        if (!youngFiltered.grade || youngFiltered.grade === "") {
           errors["grade"] = "Ce champ ne peut pas être vide";
           result = false;
         }
@@ -216,7 +222,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
   const handleCheckboxChange = () => {
     const newValue = !isChecked;
     setIsChecked(newValue);
-    setData({ ...data, sameSchoolCLE: newValue ? "false" : "true" });
+    setYoungFiltered({ ...youngFiltered, sameSchoolCLE: newValue ? "false" : "true" });
   };
 
   function parentHasRequest(parentId) {
@@ -255,11 +261,11 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
             <div>
               {young.source === YOUNG_SOURCE.VOLONTAIRE ? (
                 <>
-                  <MiniTitle>Situation</MiniTitle>
+                  <MiniTitle>Situation scolaire</MiniTitle>
                   <Field
                     name="grade"
                     label="Classe"
-                    value={data.grade}
+                    value={youngFiltered.grade}
                     transformer={translateGrade}
                     mode={sectionMode}
                     onStartRequest={onStartRequest}
@@ -275,7 +281,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   <Field
                     name="situation"
                     label="Statut"
-                    value={data.situation}
+                    value={youngFiltered.situation}
                     transformer={translate}
                     mode={sectionMode}
                     className="mt-4 mb-4 flex-[1_1_50%]"
@@ -288,16 +294,73 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                     onChange={(value) => onLocalChange("situation", value)}
                     young={young}
                   />
-                  {data.schooled === "true" && (
+                  <MiniTitle>Établissement</MiniTitle>
+                  {youngFiltered.schooled === "true" && (
                     <>
                       {sectionMode === "edition" ? (
-                        <SchoolEditor young={data} onChange={onSchoolChange} />
+                        <SchoolEditor young={youngFiltered} onChange={onSchoolChange} />
                       ) : (
                         <>
+                          <div className="flex items-center gap-4 mb-[16px]">
+                            <Field
+                              name="schoolZone"
+                              label="Zone"
+                              value={region2zone[youngFiltered?.schoolRegion]}
+                              mode={sectionMode}
+                              className="w-1/2"
+                              onStartRequest={onStartRequest}
+                              currentRequest={currentRequest}
+                              correctionRequest={getCorrectionRequest(requests, "schoolZone")}
+                              onCorrectionRequestChange={onCorrectionRequestChange}
+                              onChange={(value) => onLocalChange("schoolZone", value)}
+                              young={young}
+                            />
+                            <Field
+                              name="schoolAcademy"
+                              label="Académie"
+                              value={departmentToAcademy[youngFiltered?.schoolDepartment]}
+                              mode={sectionMode}
+                              className="w-1/2"
+                              onStartRequest={onStartRequest}
+                              currentRequest={currentRequest}
+                              correctionRequest={getCorrectionRequest(requests, "schoolAcademy")}
+                              onCorrectionRequestChange={onCorrectionRequestChange}
+                              onChange={(value) => onLocalChange("schoolAcademy", value)}
+                              young={young}
+                            />
+                          </div>
+                          <div className="flex items-center gap-4 mb-[16px]">
+                            <Field
+                              name="schoolRegion"
+                              label="Région"
+                              value={youngFiltered.schoolRegion}
+                              mode={sectionMode}
+                              className="w-1/2"
+                              onStartRequest={onStartRequest}
+                              currentRequest={currentRequest}
+                              correctionRequest={getCorrectionRequest(requests, "schoolRegion")}
+                              onCorrectionRequestChange={onCorrectionRequestChange}
+                              onChange={(value) => onLocalChange("schoolRegion", value)}
+                              young={young}
+                            />
+                            <Field
+                              name="schoolDepartment"
+                              label="Département"
+                              value={youngFiltered.schoolDepartment}
+                              mode={sectionMode}
+                              className="w-1/2"
+                              onStartRequest={onStartRequest}
+                              currentRequest={currentRequest}
+                              correctionRequest={getCorrectionRequest(requests, "schoolDepartment")}
+                              onCorrectionRequestChange={onCorrectionRequestChange}
+                              onChange={(value) => onLocalChange("schoolDepartment", value)}
+                              young={young}
+                            />
+                          </div>
                           <Field
                             name="schoolCity"
                             label="Ville de l'établissement"
-                            value={data.schoolCity}
+                            value={youngFiltered.schoolCity}
                             mode={sectionMode}
                             className="mb-[16px]"
                             onStartRequest={onStartRequest}
@@ -310,9 +373,9 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                           <Field
                             name="schoolName"
                             label="Nom de l'établissement"
-                            value={data.schoolName}
+                            value={youngFiltered.schoolName}
                             mode={sectionMode}
-                            className="mb-[16px]"
+                            className="mb-[24px]"
                             onStartRequest={onStartRequest}
                             currentRequest={currentRequest}
                             correctionRequest={getCorrectionRequest(requests, "schoolName")}
@@ -328,34 +391,51 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
               ) : (
                 <>
                   <MiniTitle>Classe engagée</MiniTitle>
-                  <Field name="classeName" label="Nom" value={data?.classe?.name} mode="readonly" className="mb-[16px]" young={young} />
+                  <Field name="classeName" label="Nom" value={youngFiltered?.classe?.name} mode="readonly" className="mb-[16px]" young={young} />
                   <div className="flex items-center gap-4">
-                    <Field name="uniqueKeyAndId" label="Numéro d'identification" value={data?.classe?.uniqueKeyAndId} mode="readonly" className="mb-[16px] w-1/2" young={young} />
+                    <Field
+                      name="uniqueKeyAndId"
+                      label="Numéro d'identification"
+                      value={youngFiltered?.classe?.uniqueKeyAndId}
+                      mode="readonly"
+                      className="mb-[16px] w-1/2"
+                      young={young}
+                    />
                     <Field
                       name="coloration"
                       label="Coloration"
-                      value={data?.classe?.coloration}
+                      value={youngFiltered?.classe?.coloration}
                       mode="readonly"
                       className="mb-[16px] w-1/2"
                       young={young}
                       transformer={translateColoration}
                     />
                   </div>
-                  <Link to={`/classes/${young.classeId}`} className="w-full ">
-                    <Button type="tertiary" title="Voir la classe" className="w-full mb-[16px]" />
+                  <Link to={`/classes/${young.classeId}`}>
+                    <Button type="tertiary" title="Voir la classe" className="w-full mb-[24px] max-w-none" />
                   </Link>
                   <MiniTitle>Situation scolaire</MiniTitle>
                   <Field
                     name="classeStatus"
                     label="Statut"
-                    value={data?.etablissement?.sector}
+                    value={youngFiltered?.etablissement?.sector}
                     mode="readonly"
                     className="mb-[16px]"
                     young={young}
-                    transformer={translateEtbalissementSector}
+                    transformer={translateEtablissementSector}
                   />
-                  <Field name="etablissementCity" label="Ville de l'établissement" value={data?.etablissement?.city} mode="readonly" className="mb-[16px]" young={young} />
-                  <Field name="classeGrade" label="Classe" value={young?.grade} mode="readonly" className="mb-[16px]" young={young} transformer={translateGrade} />
+                  <Field name="classeGrade" label="Classe" value={young?.grade} mode="readonly" className="mb-[24px]" young={young} transformer={translateGrade} />
+                  <MiniTitle>Établissement</MiniTitle>
+                  <div className="flex items-center gap-4 mb-[16px]">
+                    <Field name="etablissementZone" label="Zone" value={region2zone[youngFiltered?.etablissement?.region]} mode="readonly" className="w-1/2" young={young} />
+                    <Field name="etablissementAcademy" label="Académie" value={youngFiltered?.etablissement?.academy} mode="readonly" className="w-1/2" young={young} />
+                  </div>
+                  <div className="flex items-center gap-4 mb-[16px]">
+                    <Field name="etablissementRegion" label="Région" value={youngFiltered?.etablissement?.region} mode="readonly" className="w-1/2" young={young} />
+                    <Field name="etablissementDepartment" label="Département" value={youngFiltered?.etablissement?.department} mode="readonly" className="w-1/2" young={young} />
+                  </div>
+                  <Field name="etablissementCity" label="Ville" value={youngFiltered?.etablissement?.city} mode="readonly" className="mb-[16px]" young={young} />
+                  <Field name="etablissementName" label="Nom" value={youngFiltered?.etablissement?.name} mode="readonly" className="mb-[24px]" young={young} />
                   <div className="flex items-center">
                     <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} className="mr-2" />
                     <p className="text-xs font-base text-gray-900 mr-1">Situation de l’élève différente de celle de la Classe engagée</p>
@@ -368,7 +448,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 <MiniTitle>Situations particulières</MiniTitle>
                 <FieldSituationsParticulieres
                   name="specificSituations"
-                  young={data}
+                  young={youngFiltered}
                   mode={sectionMode === "edition" ? "edition" : "readonly"}
                   onStartRequest={onStartRequest}
                   currentRequest={currentRequest}
@@ -376,11 +456,11 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   onCorrectionRequestChange={onCorrectionRequestChange}
                   onChange={onLocalChange}
                 />
-                {data.specificAmenagment === "true" && (
+                {youngFiltered.specificAmenagment === "true" && (
                   <Field
                     name="specificAmenagmentType"
                     label="Nature de l'aménagement spécifique"
-                    value={data.specificAmenagmentType}
+                    value={youngFiltered.specificAmenagmentType}
                     mode={sectionMode === "edition" ? "edition" : "readonly"}
                     onStartRequest={onStartRequest}
                     currentRequest={currentRequest}
@@ -392,7 +472,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 )}
               </div>
             )}
-            <div className="mt-[16px]">
+            <div className="mt-[24px]">
               <div className="flex flex">
                 <MiniTitle>Titulaire du PSC1</MiniTitle>
                 <HiInformationCircle data-tip data-for="psc1Info" className="mt-0.5 ml-1 text-gray-400" />
@@ -402,7 +482,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
               </ReactTooltip>
               <Field
                 name="psc1Info"
-                value={data?.psc1Info || "Non renseigné"}
+                value={youngFiltered?.psc1Info || "Non renseigné"}
                 transformer={translate}
                 mode={sectionMode}
                 onStartRequest={onStartRequest}
@@ -424,7 +504,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
               <Field
                 name={`parent${currentParent}Status`}
                 label="Statut"
-                value={data[`parent${currentParent}Status`]}
+                value={youngFiltered[`parent${currentParent}Status`]}
                 transformer={translate}
                 mode={sectionMode}
                 className="mb-[16px]"
@@ -441,7 +521,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 <Field
                   name={`parent${currentParent}LastName`}
                   label="Nom"
-                  value={data[`parent${currentParent}LastName`]}
+                  value={youngFiltered[`parent${currentParent}LastName`]}
                   mode={sectionMode}
                   className="mr-[8px] flex-[1_1_50%]"
                   onStartRequest={onStartRequest}
@@ -454,7 +534,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 <Field
                   name={`parent${currentParent}FirstName`}
                   label="Prénom"
-                  value={data[`parent${currentParent}FirstName`]}
+                  value={youngFiltered[`parent${currentParent}FirstName`]}
                   mode={sectionMode}
                   className="ml-[8px] flex-[1_1_50%]"
                   onStartRequest={onStartRequest}
@@ -468,7 +548,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
               <Field
                 name={`parent${currentParent}Email`}
                 label="Email"
-                value={data[`parent${currentParent}Email`]}
+                value={youngFiltered[`parent${currentParent}Email`]}
                 mode={sectionMode}
                 className="mb-[16px]"
                 onStartRequest={onStartRequest}
@@ -483,12 +563,12 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 name={`parent${currentParent}Phone`}
                 className="mb-[16px]"
                 young={young}
-                value={data[`parent${currentParent}Phone`]}
+                value={youngFiltered[`parent${currentParent}Phone`]}
                 onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
-                zoneValue={data[`parent${currentParent}PhoneZone`]}
+                zoneValue={youngFiltered[`parent${currentParent}PhoneZone`]}
                 onChangeZone={(value) => onLocalChange(`parent${currentParent}PhoneZone`, value)}
                 mode={sectionMode}
-                placeholder={PHONE_ZONES[data[`parent${currentParent}PhoneZone`]]?.example}
+                placeholder={PHONE_ZONES[youngFiltered[`parent${currentParent}PhoneZone`]]?.example}
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}
@@ -497,7 +577,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
               <Field
                 name={`parent${currentParent}OwnAddress`}
                 label="Adresse différente de celle du volontaire"
-                value={data[`parent${currentParent}OwnAddress`]}
+                value={youngFiltered[`parent${currentParent}OwnAddress`]}
                 transformer={translate}
                 mode={sectionMode === "edition" ? "edition" : "readonly"}
                 onStartRequest={onStartRequest}
@@ -509,7 +589,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 onChange={(value) => onLocalChange(`parent${currentParent}OwnAddress`, value)}
                 young={young}
               />
-              {data[`parent${currentParent}OwnAddress`] === "true" && (
+              {youngFiltered[`parent${currentParent}OwnAddress`] === "true" && (
                 <FieldsGroup
                   name={`parent${currentParent}Address`}
                   mode={sectionMode === "edition" ? "edition" : "readonly"}
@@ -524,7 +604,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   <Field
                     name={`parent${currentParent}Address`}
                     label="Adresse"
-                    value={data[`parent${currentParent}Address`] || ""}
+                    value={youngFiltered[`parent${currentParent}Address`] || ""}
                     mode={sectionMode}
                     className="mb-[16px]"
                     onChange={(value) => onLocalChange(`parent${currentParent}Address`, value)}
@@ -533,7 +613,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   <Field
                     name={`parent${currentParent}Zip`}
                     label="Code postal"
-                    value={data[`parent${currentParent}Zip`] || ""}
+                    value={youngFiltered[`parent${currentParent}Zip`] || ""}
                     mode={sectionMode}
                     className="mr-[8px] mb-[16px] inline-block w-[calc(50%-8px)]"
                     onChange={(value) => onLocalChange(`parent${currentParent}Zip`, value)}
@@ -542,7 +622,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   <Field
                     name={`parent${currentParent}City`}
                     label="Ville"
-                    value={data[`parent${currentParent}City`] || ""}
+                    value={youngFiltered[`parent${currentParent}City`] || ""}
                     mode={sectionMode}
                     className="ml-[8px] mb-[16px] inline-block w-[calc(50%-8px)]"
                     onChange={(value) => onLocalChange(`parent${currentParent}City`, value)}
@@ -551,7 +631,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   <Field
                     name={`parent${currentParent}Country`}
                     label="Pays"
-                    value={data[`parent${currentParent}Country`] || ""}
+                    value={youngFiltered[`parent${currentParent}Country`] || ""}
                     mode={sectionMode}
                     className="mb-[16px]"
                     type="select"
@@ -562,7 +642,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   />
                 </FieldsGroup>
               )}
-              {data[`parent${currentParent}FromFranceConnect`] === "true" && (
+              {youngFiltered[`parent${currentParent}FromFranceConnect`] === "true" && (
                 <div className="mt-[16px] flex items-center rounded-[7px] bg-[#F9FAFB] p-[18px]">
                   <FranceConnect className="mr-[28px] flex-[0_0_100px]" />
                   <div>
@@ -580,10 +660,10 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
         {oldCohort && (
           <div className="mt-[32px] flex">
             <div className="flex-[1_0_50%] pr-[56px]">
-              {data.motivations && (
+              {youngFiltered.motivations && (
                 <div>
                   <div className="">Motivations</div>
-                  <div className="">&laquo;&nbsp;{data.motivations}&nbsp;&raquo;</div>
+                  <div className="">&laquo;&nbsp;{youngFiltered.motivations}&nbsp;&raquo;</div>
                 </div>
               )}
             </div>
@@ -591,7 +671,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
             <div className="flex-[1_0_50%] pl-[56px]">
               <FileField
                 mode={sectionMode}
-                young={data}
+                young={youngFiltered}
                 label="Droit à l'image"
                 onChange={onLocalChange}
                 statusField="imageRightFilesStatus"
@@ -599,7 +679,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 updateYoung={onChange}
               />
               {youngAge && youngAge < 15 && (
-                <FileField mode={sectionMode} young={data} label="Accord pour les mineurs de moins de 15 ans" fileType="parentConsentmentFiles" updateYoung={onChange} />
+                <FileField mode={sectionMode} young={youngFiltered} label="Accord pour les mineurs de moins de 15 ans" fileType="parentConsentmentFiles" updateYoung={onChange} />
               )}
             </div>
           </div>

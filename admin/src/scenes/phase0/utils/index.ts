@@ -1,7 +1,8 @@
+import { YOUNG_SOURCE, YoungDto } from "snu-lib";
 import validator from "validator";
 
-export function filterDataForYoungSection(data, section) {
-  let bodyYoungSection = {};
+export function filterDataForYoungSection(data: any, section: "identite" | "parent") {
+  let bodyYoungSection: Partial<YoungDto> & { etablissementDepartment?: string } = {};
   if (section === "identite") {
     bodyYoungSection = {
       _id: data._id,
@@ -9,6 +10,7 @@ export function filterDataForYoungSection(data, section) {
       lastName: data.lastName,
       gender: data.gender,
       email: data.email,
+      etablissementDepartment: data.source === YOUNG_SOURCE.VOLONTAIRE ? data.schoolDepartment : data.etablissement?.department,
       phone: data.phone,
       phoneZone: data.phoneZone,
       latestCNIFileExpirationDate: data.latestCNIFileExpirationDate,

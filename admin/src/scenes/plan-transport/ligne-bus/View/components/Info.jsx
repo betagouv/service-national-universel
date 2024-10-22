@@ -3,7 +3,7 @@ import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, Link } from "react-router-dom";
-import { canEditLigneBusGeneralInfo, isBusEditionOpen, translate } from "snu-lib";
+import { canEditLigneBusGeneralInfo, getZonedDate, isBusEditionOpen, translate } from "snu-lib";
 import Pencil from "../../../../../assets/icons/Pencil";
 import Loader from "../../../../../components/Loader";
 import { capture } from "../../../../../sentry";
@@ -154,7 +154,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
                 label="Date de départ"
                 Icon={BsArrowRight}
                 onChange={(e) => setData({ ...data, departuredDate: e })}
-                value={new Date(data.departuredDate)}
+                value={getZonedDate(data.departuredDate)}
                 error={errors?.departuredDate}
                 readOnly={!editInfo}
               />
@@ -162,7 +162,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
                 label="Date de retour"
                 Icon={BsArrowLeft}
                 onChange={(e) => setData({ ...data, returnDate: e })}
-                value={new Date(data.returnDate)}
+                value={getZonedDate(data.returnDate)}
                 error={errors?.returnDate}
                 readOnly={!editInfo}
               />
