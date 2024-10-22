@@ -1,10 +1,8 @@
-name: Test RT
+name: Destroy environment
 
 on:
+  delete:
   workflow_dispatch:
-  push:
-    branches:
-      - tmp-rt-no-ci
 
 defaults:
   run:
@@ -24,7 +22,7 @@ jobs:
       - name: Get environment name
         id: env_name
         run: |
-          env_name=$(node get-environment-name.js ${{ github.ref_name }})
+          env_name=$(node get-environment-name.js ${{ github.event.ref }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
