@@ -411,7 +411,7 @@ export const computeImportSummary = (lines: PdtLine[]) => {
   // Count total unique PDR
   const pdrCount = lines.reduce((acc: string[], line: PdtLine) => {
     for (let i = 1; i <= countPdr; i++) {
-      if (line[`MATRICULE PDR ${i}`] && !acc.includes(line[`MATRICULE PDR ${i}`]) && mongoose.Types.ObjectId.isValid(line[`MATRICULE PDR ${i}`])) {
+      if (line[`MATRICULE PDR ${i}`] && !acc.includes(line[`MATRICULE PDR ${i}`])) {
         acc.push(line[`MATRICULE PDR ${i}`]);
       }
     }
