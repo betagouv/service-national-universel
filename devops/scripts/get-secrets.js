@@ -1,33 +1,48 @@
 const process = require("node:process");
 const UserInput = require("./lib/user-input");
 const ScalewayClient = require("./lib/scaleway-client");
+const { format } = require("node:path");
 
-function _envMappings(env) {
-  switch (env) {
-    case "ci":
-      return { projectName: "snu-ci", secretName: "snu-ci" };
-    case "staging":
-      return { projectName: "snu-production", secretName: "snu-staging" };
-    case "production":
-      return { projectName: "snu-production", secretName: "snu-production" };
+const SECRET_FORMATS = {
+  JSON: "json",
+  ENVFILE: "envfile",
+};
+
+function _parseSecret(format, data) {
+  switch (format) {
+    case SECRET_FORMATS.JSON:
+      return JSON.parse(data);
+    case SECRET_FORMATS.ENVFILE:
+      return parseEnvFile(data);
+      break;
     default:
-      throw new Error(`Unknown environment: ${env}`);
+      throw new Error("Unknown secret format");
   }
+}
+
+function parseEnvFile(data) {
+  const keys = {};
+  for (const line of data.split("\n")) {
+    const index = line.indexOf("=");
+    if (index > 0) {
+      const key = line.substring(0, index);
+      const value = line.substring(index + 1).replace(/^"|"$/g, "");
+      if (value) {
+        keys[key] = value;
+      }
+    }
+  }
+  return keys;
 }
 
 class GetSecrets {
   constructor(scalewayClient, options = {}) {
     this.scaleway = scalewayClient;
 
-    if (options.environment) {
-      const { projectName, secretName } = _envMappings(options.environment);
-      this.projectName = projectName;
-      this.secretName = secretName;
-    } else {
-      this.projectName = options.projectName;
-      this.secretName = options.secretName;
-    }
+    this.projectName = options.projectName;
+    this.secretName = options.secretName;
     this.revision = options.revision ?? "latest_enabled";
+    this.format = options.format;
 
     this.project = options.project;
   }
@@ -35,18 +50,27 @@ class GetSecrets {
   async execute() {
     const project =
       this.project ?? (await this.scaleway.findProject(this.projectName));
-    const secrets = await this.scaleway.getSecrets(
+    const data = await this.scaleway.getSecrets(
       project.id,
       this.secretName,
       this.revision
     );
-    return secrets;
+    return _parseSecret(this.format, data);
   }
 }
 
-if (require.main === module) {
-  const input = new UserInput(`Build application MonCompte`)
-    .arg("environment", "Environment (ci, staging, production)")
+async function main() {
+  const input = new UserInput(`Retreive secrets from Scaleway`)
+    .arg("project-name", "Project Name")
+    .arg("secret-name", "Secret Name")
+    .opt(
+      "format",
+      `Format of the secret file (${SECRET_FORMATS.JSON}, ${SECRET_FORMATS.ENVFILE})`,
+      {
+        default: SECRET_FORMATS.JSON,
+        shortcut: "f",
+      }
+    )
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .validate();
@@ -55,11 +79,15 @@ if (require.main === module) {
     input.SCW_ORGANIZATION_ID
   );
 
-  const secrets = new GetSecrets(scaleway, {
-    environment: input.environment,
-  })
-    .execute()
-    .then((secrets) => console.log(secrets));
+  const secrets = await new GetSecrets(scaleway, input).execute();
+
+  for (const key of Object.keys(secrets)) {
+    console.log(`${key}="${secrets[key]}"`);
+  }
 }
 
-module.exports = GetSecrets;
+if (require.main === module) {
+  main();
+}
+
+module.exports = { GetSecrets, SECRET_FORMATS };

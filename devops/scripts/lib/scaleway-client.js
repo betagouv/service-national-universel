@@ -138,7 +138,7 @@ class ScalewayClient {
     const secret = await this.findSecretVersion(projectId, name, revision);
     const decodedData = Buffer.from(secret.data, "base64").toString("utf8");
 
-    return JSON.parse(decodedData);
+    return decodedData;
   }
 }
 
