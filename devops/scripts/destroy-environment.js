@@ -61,7 +61,7 @@ class DestroyEnvironments {
   }
 }
 
-if (require.main === module) {
+function main() {
   const input = new UserInput(
     `Sequentially delete the following resources:
     - Containers whose name begins with <environment>
@@ -85,6 +85,10 @@ if (require.main === module) {
     input.SCW_ORGANIZATION_ID
   );
   new DestroyEnvironments(scaleway, input).execute();
+}
+
+if (require.main === module) {
+  main();
 }
 
 module.exports = DestroyEnvironments;

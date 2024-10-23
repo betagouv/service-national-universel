@@ -125,7 +125,7 @@ class CleanCI {
   }
 }
 
-if (require.main === module) {
+function main() {
   const input = new UserInput(
     `Sequentially delete the following resources:
   - Image Tags not updated since <lifetime> days
@@ -156,6 +156,10 @@ if (require.main === module) {
     input.SCW_ORGANIZATION_ID
   );
   new CleanCI(scaleway, github, input).execute();
+}
+
+if (require.main === module) {
+  main();
 }
 
 module.exports = CleanCI;
