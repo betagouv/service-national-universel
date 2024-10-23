@@ -105,7 +105,10 @@ const generateCohesionCentersExport = async (cohort, action = "upload") => {
 const generateYoungsExport = async (cohort, afterSession = false, action = "upload") => {
   const sessions = await SessionPhase1Model.find({ cohortId: cohort._id }).select({ _id: 1, cohesionCenterId: 1, dateStart: 1 });
   const cohesionCenterIds = sessions.map(({ cohesionCenterId }) => cohesionCenterId);
-  const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds, deletedAt: { $exists: false } } }).select({ _id: 1, name: 1, code2022: 1 });
+  const cohesionCenters = await CohesionCenterModel.find({
+    _id: { $in: cohesionCenterIds },
+    deletedAt: { $exists: false },
+  }).select({ _id: 1, name: 1, code2022: 1 });
   const cohesionCenterParSessionId = {};
   const statusList = afterSession ? ["VALIDATED"] : ["WAITING_LIST", "VALIDATED"];
   const q = { cohort: cohort.name, status: { $in: statusList } };
