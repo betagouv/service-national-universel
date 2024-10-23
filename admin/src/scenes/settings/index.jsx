@@ -6,8 +6,8 @@ import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { BiLoaderAlt } from "react-icons/bi";
 import { isAfter } from "date-fns";
-import { isSuperAdmin, ROLES, COHORT_TYPE } from "snu-lib";
-import { Container } from "@snu/ds/admin";
+import { isSuperAdmin, ROLES, COHORT_TYPE, COHORT_STATUS } from "snu-lib";
+import { Select } from "@snu/ds/admin";
 
 import api from "@/services/api";
 
@@ -137,6 +137,12 @@ export default function Settings() {
       </div>
     );
 
+  const statusOptions = [
+    { value: COHORT_STATUS.DRAFT, label: "Brouillon" },
+    { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
+    { value: COHORT_STATUS.ARCHIVED, label: "Archivée" },
+  ];
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Paramétrage dynamique" }]} />
@@ -166,6 +172,22 @@ export default function Settings() {
                     <InputText label="Nom de la cohort" value={data.name} disabled />
                     <InputText label="Identifiant" value={data.snuId} disabled />
                   </div>
+
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs font-medium text-gray-900">Statut</p>
+                      <MdInfoOutline data-tip data-for="statut" className="h-5 w-5 cursor-pointer text-gray-400" />
+                      <ReactTooltip id="statut" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                          Statut de la cohorte. Si la cohorte est publiée, les volontaires peuvent s’inscrire. Si elle est archivée, ils ne peuvent plus poursuivre la phase
+                          engagement.
+                        </p>
+                      </ReactTooltip>
+                    </div>
+
+                    <Select label="Statut" value={data.status} options={statusOptions} onChange={(e) => setData({ ...data, status: e })} disabled={isLoading || readOnly} />
+                  </div>
+
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Dates du séjour</p>
