@@ -25,8 +25,8 @@
     "app",
     "admin",
     "api",
-    "analytics",
-    "antivirus"
+    "devops/analytics",
+    "devops/antivirus"
   ],
   "engines": {
     "node": "^18.20",

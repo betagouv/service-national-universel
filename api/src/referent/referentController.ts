@@ -29,6 +29,7 @@ import {
   CohortModel,
   SessionPhase1Document,
   CohesionCenterDocument,
+  SchoolRAMSESModel,
 } from "../models";
 
 import emailsEmitter from "../emails";
@@ -794,9 +795,12 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    const payload = value;
     const { id } = req.params;
     const young = await YoungModel.findById(id);
+
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
     const previousYoung = { ...young.toObject() };
 
     let classe: any = undefined;
@@ -820,18 +824,19 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       previousClasse = dbClasse;
     }
 
-    if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
-
-    const { cohort, cohortChangeReason } = value;
+    const { cohort, cohortChangeReason } = payload;
 
     let youngStatus = young.status;
     let inscriptionStep = young.inscriptionStep2023;
     let reinscriptionStep = young.reinscriptionStep2023;
-    if (cohort === "à venir ") {
-      youngStatus = getYoungStatus(young) as YoungType["status"];
-    }
-    if (value.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
+    if (payload.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
       youngStatus = YOUNG_STATUS.VALIDATED;
+    }
+    if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
+      youngStatus = getYoungStatusForBasculeCLEtoHTS(young) as YoungType["status"];
+    }
+    if (cohort === "à venir ") {
+      youngStatus = getYoungStatusForAVenir(young) as YoungType["status"];
     }
 
     const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
@@ -876,12 +881,12 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohesionStayMedicalFileReceived: undefined,
       cohortId: cohortModel?._id,
     });
-    if (value.source === YOUNG_SOURCE.CLE) {
+    if (payload.source === YOUNG_SOURCE.CLE) {
       const correctionRequestsFiltered = young?.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];
       young.set({
         source: YOUNG_SOURCE.CLE,
-        etablissementId: value.etablissementId,
-        classeId: value.classeId,
+        etablissementId: payload.etablissementId,
+        classeId: payload.classeId,
         cniFiles: [],
         "files.cniFiles": [],
         inscriptionStep2023: inscriptionStep,
@@ -902,7 +907,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         schoolRegion: etablissement.region,
         schoolCountry: etablissement.country,
         schoolId: undefined,
-        //TODO ajouter le grade de l'eleve deduit de la classe
         situation: getYoungSituationIfCLE(classe.filiere),
       });
       if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
@@ -912,10 +916,9 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         });
       }
     } else {
-      if (value.source === YOUNG_SOURCE.VOLONTAIRE) {
+      if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
         if (young.source !== YOUNG_SOURCE.VOLONTAIRE) {
           young.set({
-            status: youngStatus,
             statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
             cniFiles: [],
             "files.cniFiles": [],
@@ -924,11 +927,26 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
           });
         }
       }
+      const step2023 = young.hasStartedReinscription ? "reinscriptionStep2023" : "inscriptionStep2023";
+      const step2023Value =
+        young.status === YOUNG_STATUS.NOT_AUTORISED ? "WAITING_CONSENT" : young.hasStartedReinscription ? young.reinscriptionStep2023 : young.inscriptionStep2023;
+      const school = await SchoolRAMSESModel.findOne({ uai: previousEtablissement?.uai });
       young.set({
         // Init if young was previously CLE
         source: YOUNG_SOURCE.VOLONTAIRE,
+        status: youngStatus,
+        [step2023]: step2023Value,
         etablissementId: undefined,
         classeId: undefined,
+        schoolId: school?._id ?? undefined,
+        schoolName: school?.fullName ?? undefined,
+        schoolType: school?.type ?? undefined,
+        schoolAddress: school?.adresse ?? undefined,
+        schoolZip: school?.postcode ?? undefined,
+        schoolCity: school?.city ?? undefined,
+        schoolDepartment: school?.department ?? undefined,
+        schoolRegion: school?.region ?? undefined,
+        schoolCountry: school?.country ?? undefined,
       });
     }
 
@@ -978,7 +996,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       previousYoung,
       cohortName: cohort,
       cohortChangeReason,
-      message: value.message,
+      message: payload.message,
       classe,
     });
 
@@ -989,13 +1007,28 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
   }
 });
 
-const getYoungStatus = (young: YoungType) => {
+const getYoungStatusForAVenir = (young: YoungType) => {
   switch (young.status) {
     case YOUNG_STATUS.IN_PROGRESS:
       return YOUNG_STATUS.IN_PROGRESS;
     case YOUNG_STATUS.WAITING_VALIDATION:
       return YOUNG_STATUS.WAITING_VALIDATION;
     case YOUNG_STATUS.WAITING_CORRECTION:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    default:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+  }
+};
+
+const getYoungStatusForBasculeCLEtoHTS = (young: YoungType) => {
+  switch (young.status) {
+    case YOUNG_STATUS.WITHDRAWN:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    case YOUNG_STATUS.REFUSED:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    case YOUNG_STATUS.NOT_AUTORISED:
+      return YOUNG_STATUS.IN_PROGRESS;
+    case YOUNG_STATUS.VALIDATED:
       return YOUNG_STATUS.WAITING_VALIDATION;
     default:
       return YOUNG_STATUS.WAITING_VALIDATION;
