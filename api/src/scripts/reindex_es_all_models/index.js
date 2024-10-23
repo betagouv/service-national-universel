@@ -106,7 +106,6 @@ async function reindexESAllModels() {
       YoungModel,
       LigneBusModel,
       PlanTransportModel,
-      EmailModel,
       ClasseModel,
       EtablissementModel,
     ];
