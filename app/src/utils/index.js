@@ -53,9 +53,10 @@ const permissionApp = (y) => {
 };
 
 export function hasCompletedPhase2(y) {
-  if ([YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(y.statusPhase2)) {
+  if ([YOUNG_STATUS_PHASE2.VALIDATED, YOUNG_STATUS_PHASE2.EXEMPTED].includes(y.statusPhase2)) {
     return true;
   }
+  return false;
 }
 
 export function wasYoungExcluded(y) {
