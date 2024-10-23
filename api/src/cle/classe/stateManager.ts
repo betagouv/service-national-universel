@@ -26,7 +26,7 @@ const ClasseStateManager = {
     const isInscriptionClosed = isCohortInscriptionClosed(classeCohort);
 
     // Open
-    if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status as any) && isInscriptionOpen) {
+    if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status as any) && isInscriptionOpen && seatsValidated < classe.totalSeats) {
       classe.set({ status: STATUS_CLASSE.OPEN });
       classe = await classe.save({ fromUser });
       return classe;

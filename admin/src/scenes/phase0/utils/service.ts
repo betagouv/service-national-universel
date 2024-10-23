@@ -1,6 +1,6 @@
 import api from "@/services/api";
 import { User } from "@/types";
-import { STATUS_CLASSE } from "snu-lib";
+import { ClasseSchoolYear } from "snu-lib";
 
 export const getClasses = async (etablissementId: string) => {
   if (!etablissementId) return [];
@@ -15,7 +15,7 @@ export const getClasses = async (etablissementId: string) => {
 
   const { responses } = await api.post(`/elasticsearch/cle/classe/search`, query);
   return responses[0].hits.hits
-    .filter((hit) => [STATUS_CLASSE.OPEN].includes(hit._source.status))
+    .filter((hit) => hit._source.seatsTaken < hit._source.totalSeats && hit._source.schoolYear === ClasseSchoolYear.YEAR_2024_2025)
     .map((hit) => {
       const label = `${hit._source.uniqueKeyAndId} - ${hit._source.name ?? "(Nom à renseigner)"}`;
       return { value: hit._source, _id: hit._id, label, classe: { ...hit._source, _id: hit._id, label } };

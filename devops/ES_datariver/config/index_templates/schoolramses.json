@@ -1,0 +1,138 @@
+{
+  "index_patterns": ["schoolramses"],
+  "template": {
+    "settings": {
+      "index": {
+        "analysis": {
+          "analyzer": {
+            "folding": {
+              "filter": ["lowercase", "asciifolding"],
+              "tokenizer": "standard"
+            }
+          }
+        },
+        "number_of_replicas": "0",
+        "default_pipeline": "schoolramses"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "departmentName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "folded": {
+              "analyzer": "folding",
+              "type": "text"
+            }
+          }
+        },
+        "country": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "folded": {
+              "analyzer": "folding",
+              "type": "text"
+            }
+          }
+        },
+        "createdAt": {
+          "type": "date"
+        },
+        "city": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "folded": {
+              "analyzer": "folding",
+              "type": "text"
+            }
+          }
+        },
+        "__v": {
+          "type": "long"
+        },
+        "adresse": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "folded": {
+              "analyzer": "folding",
+              "type": "text"
+            }
+          }
+        },
+        "postcode": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "fullName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "folded": {
+              "analyzer": "folding",
+              "type": "text"
+            }
+          }
+        },
+        "region": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "folded": {
+              "analyzer": "folding",
+              "type": "text"
+            }
+          }
+        },
+        "type": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "uai": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "updatedAt": {
+          "type": "date"
+        }
+      }
+    }
+  },
+  "composed_of": []
+}

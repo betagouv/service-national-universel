@@ -28,12 +28,14 @@ export function buildRequestPath(path: BasicRoute["path"], params: BasicRoute["p
       }
     }
   }
+  // Remove optionnal params if they are not filled
+  finalPath = finalPath.replace(/\/\{[a-zA-Z0-9]+\?\}/g, "");
 
   return finalPath;
 }
 
 export function buildRequestQueryString(query: BasicRoute["query"] = {}): string {
-  if (!query || Object.keys(query).length > 0) {
+  if (!query || Object.keys(query).length === 0) {
     return "";
   }
   return `?${qs.stringify(query)}`;

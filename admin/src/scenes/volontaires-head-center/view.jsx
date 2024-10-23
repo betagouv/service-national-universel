@@ -24,7 +24,7 @@ export default function VolontaireHeadCenter({ ...props }) {
     getYoung();
   }, [props.match.params.id]);
 
-  if (!young) return <div />;
+  if (!young) return;
   return (
     <>
       <Breadcrumbs items={[{ label: "Volontaires", to: `/centre/${young.cohesionCenterId}/${young.sessionPhase1Id}/general` }, { label: "Fiche du volontaire" }]} />

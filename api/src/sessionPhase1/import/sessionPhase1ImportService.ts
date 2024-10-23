@@ -17,7 +17,7 @@ export interface SessionCohesionCenterImportReport {
 
 export const importCohesionCenter = async (sessionCenterFilePath: string) => {
   const sessionCenterFile = await getFile(sessionCenterFilePath);
-  const sessionCenterToImport: SessionCohesionCenterCSV[] = await readCSVBuffer<SessionCohesionCenterCSV>(Buffer.from(sessionCenterFile.Body), true);
+  const sessionCenterToImport: SessionCohesionCenterCSV[] = await readCSVBuffer<SessionCohesionCenterCSV>(Buffer.from(sessionCenterFile.Body));
 
   const mappedSessionCenter = mapSessionCohesionCentersForSept2024(sessionCenterToImport);
 
@@ -95,6 +95,7 @@ const createSession = async (
     cohortId: foundCohort._id,
     cohort: foundCohort.name,
     placesTotal: sessionCenter.sessionPlaces,
+    placesLeft: sessionCenter.sessionPlaces,
     department: foundCenter.department,
     region: foundCenter.region,
     codeCentre: foundCenter.matricule,

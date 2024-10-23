@@ -1,7 +1,8 @@
-import { getCohortPeriod, translate } from "snu-lib";
+import { CohortDto, getCohortPeriod, translate } from "snu-lib";
 import API from "./api";
 import { IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
+import { isBefore } from "date-fns";
 
 export const getCohortByName = async (cohortName) => {
   try {
@@ -42,8 +43,14 @@ export const getCohorts = async () => {
   }
 };
 
-export const getCohortNameList = (cohorts) => {
+export const getCohortNameList = (cohorts: CohortDto[]) => {
   return cohorts.map((cohort) => cohort.name);
+};
+
+// toutes les cohort en cours (date de fin non passée) + celles non commencées
+export const filterCurrentAndNextCohorts = (cohorts: CohortDto[]) => {
+  const cohortsFiltered = cohorts.filter((cohort) => (cohort.dateStart && isBefore(new Date(), cohort.dateStart)) || (cohort.dateEnd && isBefore(new Date(), cohort.dateEnd)));
+  return cohortsFiltered;
 };
 
 export const getCohortSelectOptions = (cohorts, short = false) => {

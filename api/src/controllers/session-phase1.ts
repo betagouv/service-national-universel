@@ -323,7 +323,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     cohesionCenter.set({ cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
     cohesionCenter.save({ fromUser: req.user });
 
-    await sessionPhase1.remove();
+    await sessionPhase1.deleteOne();
     await updateHeadCenter(sessionPhase1.headCenterId, req.user);
     res.status(200).send({ ok: true });
   } catch (error) {
@@ -420,7 +420,7 @@ router.post("/check-token/:token", async (req: UserRequest, res: Response) => {
       let arrayMeetingPoints: string[] = [];
       ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
 
-      const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
+      const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints }, deletedAt: { $exists: false } });
 
       for (const young of youngs) {
         const tempYoung = {
@@ -775,6 +775,9 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
 
     // --- send template
     const cohort = await CohortModel.findById(session.cohortId);
+    if (!cohort) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     let date = getCohortStartDate(cohort);
 
     await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.FILE_SESSION_REMINDER, {

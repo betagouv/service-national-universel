@@ -11,7 +11,7 @@ export function FieldsGroup({
   correctionLabel,
   className = "",
   children,
-  noflex,
+  noflex = false,
   mode,
   currentRequest,
   onStartRequest,

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { HiHome, HiPlus } from "react-icons/hi";
+import { HiPlus } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
 import { Page, Header, Button } from "@snu/ds/admin";
-import { ROLES, translate, isCoordinateurEtablissement, isChefEtablissement, isReferentOrAdmin, ReferentDto, EtablissementDto } from "snu-lib";
+import { ROLES, translate, isCoordinateurEtablissement, isChefEtablissement, isReferentOrAdmin, ReferentDto, EtablissementType } from "snu-lib";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 import Loader from "@/components/Loader";
@@ -22,7 +22,7 @@ export default function View() {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const { id } = useParams<{ id: string }>();
   const [classeId, setClasseId] = useState("");
-  const [etablissement, setEtablissement] = useState<EtablissementDto | null>(null);
+  const [etablissement, setEtablissement] = useState<EtablissementType | null>(null);
   const [contacts, setContacts] = useState<ReferentDto[]>([]);
 
   const history = useHistory();
@@ -56,7 +56,14 @@ export default function View() {
     <Page>
       <Header
         title={etablissement.name}
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Fiche de mon établissement" }]}
+        breadcrumb={[
+          { title: "Séjours" },
+          ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && {
+            title: "Établissements",
+            to: "/etablissement",
+          },
+          { title: "Fiche de l'établissement" },
+        ].filter(Boolean)}
         actions={[
           [ROLES.ADMIN].includes(user.role) && (
             <Button

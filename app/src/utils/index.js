@@ -3,6 +3,8 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PH
 export * from "snu-lib";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
+import { toastr } from "react-redux-toastr";
+import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "./navigation";
 
 function addOneDay(date) {
   const newDate = new Date(date);
@@ -187,3 +189,15 @@ export const validateId = (id) => {
 };
 
 export const desktopBreakpoint = 768;
+
+export function displaySignupToast(user) {
+  const url = window.location.pathname;
+  const shouldDisplaySignupToast =
+    !url.includes("/representants-legaux") &&
+    ((user.status === YOUNG_STATUS.IN_PROGRESS && user.inscriptionStep2023 !== INSCRIPTION_STEPS.EMAIL_WAITING_VALIDATION) ||
+      (user.status === YOUNG_STATUS.REINSCRIPTION && user.reInscriptionStep2023 !== REINSCRIPTION_STEPS.ELIGIBILITE));
+
+  if (shouldDisplaySignupToast) {
+    toastr.success("Connexion réussie", "Vous pouvez reprendre votre inscription là où vous l'avez laissée.", { timeOut: 3 });
+  }
+}
