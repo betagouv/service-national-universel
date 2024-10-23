@@ -7,13 +7,13 @@ const AlreadyHaveAnAccountModal = () => {
   const params = new URLSearchParams(window.location.search);
   const id = params.get("id") || "";
   return (
-    <alreadyHaveAnAccountModal.Component title="Finaliser mon inscription" iconId="fr-icon-edit-line">
+    <alreadyHaveAnAccountModal.Component title="Finaliser mon inscription" iconId="fr-icon-edit-line" size="small">
       <p>Vous avez déjà créé votre compte mais vous n'avez pas terminé votre inscription&nbsp;?</p>
-      <Link to="/auth" className="w-full">
-        <Button className="w-full">Me connecter</Button>
+      <Link to="/auth">
+        <Button style={{ width: "100%", textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center" }}>Me connecter</Button>
       </Link>
       <div className="relative my-2 px-2">
-        <span className="text-sm font-bold left-1/2 absolute top-4">OU</span>
+        <span className="absolute text-sm font-bold left-1/2 -translate-x-1/2 top-4 bg-white px-3">OU</span>
         <br></br>
         <hr className=""></hr>
       </div>
