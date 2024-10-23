@@ -5,7 +5,6 @@ class ScalewayClient {
   constructor(secretKey, organizationId) {
     this.secretKey = secretKey;
     this.organizationId = organizationId;
-    this.project = null;
   }
 
   async _getOne(url) {
@@ -55,10 +54,6 @@ class ScalewayClient {
     }
   }
 
-  async setProject(name) {
-    this.project = await this.findProject(name);
-  }
-
   async findProject(name) {
     return this._findOne(
       `${this.endpoint}/account/v3/projects?organization_id=${this.organizationId}&name=${name}`,
@@ -79,9 +74,9 @@ class ScalewayClient {
     );
   }
 
-  async findSecretVersion(name, revision) {
+  async findSecretVersion(projectId, name, revision) {
     return this._getOne(
-      `${this.endpoint}/secret-manager/v1beta1/regions/${this.region}/secrets-by-path/versions/${revision}/access?project_id=${this.project.id}&secret_name=${name}`
+      `${this.endpoint}/secret-manager/v1beta1/regions/${this.region}/secrets-by-path/versions/${revision}/access?project_id=${projectId}&secret_name=${name}`
     );
   }
 
@@ -139,8 +134,8 @@ class ScalewayClient {
     );
   }
 
-  async getSecrets(name, revision) {
-    const secret = await this.findSecretVersion(name, revision);
+  async getSecrets(projectId, name, revision) {
+    const secret = await this.findSecretVersion(projectId, name, revision);
     const decodedData = Buffer.from(secret.data, "base64").toString("utf8");
 
     return JSON.parse(decodedData);
