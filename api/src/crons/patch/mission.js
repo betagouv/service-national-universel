@@ -67,7 +67,7 @@ async function createLog(patch, actualMission, event, value) {
     body: JSON.stringify({
       evenement_nom: event,
       evenement_type: "mission",
-      evenement_valeur: value.toString() || "",
+      evenement_valeur: value?.toString() || "",
       mission_id: patch.ref.toString(),
       mission_structureId: actualMission.structureId.toString(),
       mission_status: mission.status || actualMission.status,
