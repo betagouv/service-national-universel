@@ -1,4 +1,5 @@
 import React from "react";
+import cx from "classnames";
 
 type OwnProps = {
   tab: Array<{
@@ -18,22 +19,34 @@ export default function Navbar({ tab, button }: OwnProps) {
         {tab.map((tabItem, index) => (
           <div
             key={`tab-${index}`}
-            className={`flex gap-1.5 text-sm leading-5 font-medium text-gray-500 cursor-pointer pb-3.5
-            ${tabItem.isActive && "border-b-2 border-blue-600 !text-blue-600"}
-            `}
+            className={cx(
+              "flex items-end gap-x-1.5 text-sm leading-5 font-medium cursor-pointer pb-3.5 border-b-2",
+              {
+                "border-blue-600 text-blue-600": tabItem.isActive,
+                " border-transparent text-gray-500": !tabItem.isActive,
+              },
+            )}
             onClick={tabItem.onClick}
           >
-            <div>
-              <span
-                className={`text-[10px] leading-4 ml-8 ${
-                  !tabItem.isActive && "text-gray-400"
-                }`}
+            <div className="mb-1">{tabItem.leftIcon}</div>
+            <div className="flex flex-col">
+              {tabItem.label ? (
+                <span
+                  className={cx("text-[10px] leading-4", {
+                    "text-blue-500": tabItem.isActive,
+                    "text-gray-400": !tabItem.isActive,
+                  })}
+                >
+                  {tabItem.label}
+                </span>
+              ) : null}
+              <div
+                className={cx("truncate mr-3", {
+                  "mb-1": !tabItem.label,
+                  "text-gray-400": !tabItem.isActive,
+                })}
               >
-                {tabItem.label}
-              </span>
-              <div className="flex gap-2">
-                {tabItem.leftIcon}
-                <span className="truncate mr-3">{tabItem.title}</span>
+                {tabItem.title}
               </div>
             </div>
           </div>
