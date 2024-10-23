@@ -39,9 +39,6 @@ const errorMessages = {
   hasSpecialSituation: "Merci de choisir au moins une option.",
 };
 
-// TODO: remove this
-const cohortExcluded = ["Octobre 2024 - Nouvelle-Calédonie", "Toussaint 2024", "Toussaint 2024 - La Réunion"];
-
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
 const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified", "coordinatesAccuracyLevel"];
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
@@ -326,10 +323,7 @@ export default function StepCoordonnees() {
       requiredFields.push("situation");
     }
 
-    // TODO: remove this
-    if (!cohortExcluded.includes(young.cohort)) {
-      (!psc1Info || psc1Info === "") && (errors.psc1Info = "Ce champ est obligatoire");
-    }
+    if (!psc1Info || psc1Info === "") errors.psc1Info = "Ce champ est obligatoire";
 
     if (hasSpecialSituation === undefined) {
       errors.hasSelectedSpecialSituation = "Ce champ est obligatoire";
