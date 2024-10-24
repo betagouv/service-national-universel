@@ -671,6 +671,8 @@ function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
     if (!cohort) return false;
 
     switch (actor.role) {
+      case ROLES.ADMIN:
+        return true;
       case ROLES.REFERENT_DEPARTMENT:
         return cohort.inscriptionOpenForReferentDepartment === true;
       case ROLES.REFERENT_REGION:

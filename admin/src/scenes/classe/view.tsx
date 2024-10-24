@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Badge } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes, ROLES } from "snu-lib";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes, canInviteYoung } from "snu-lib";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
 import { AuthState } from "@/redux/auth/reducer";
@@ -225,20 +225,8 @@ export default function View() {
   };
 
   const canPerformManualInscriptionActions = useMemo(() => {
-    if (!cohort) return false;
-
-    switch (user.role) {
-      case ROLES.REFERENT_DEPARTMENT:
-        return cohort.inscriptionOpenForReferentDepartment === true;
-      case ROLES.REFERENT_REGION:
-        return cohort.inscriptionOpenForReferentRegion === true;
-      case ROLES.REFERENT_CLASSE:
-        return cohort.inscriptionOpenForReferentClasse === true;
-      case ROLES.ADMINISTRATEUR_CLE:
-        return cohort.inscriptionOpenForAdministrateurCle === true;
-      default:
-        return false;
-    }
+    return canInviteYoung(user, cohort ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.role, cohort]);
 
   if (!classe) return <Loader />;
