@@ -1,6 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 
-import { COHORT_TYPE, COHORT_TYPE_LIST } from "../constants/constants";
+import { COHORT_STATUS, COHORT_STATUS_LIST, COHORT_TYPE, COHORT_TYPE_LIST } from "../constants/constants";
 import { departmentLookUp } from "../region-and-departments";
 
 import { InterfaceExtended } from "..";
@@ -45,6 +45,14 @@ export const CohortSchema = {
     required: true,
     documentation: {
       description: "Cohorte name (defined in snu lib)",
+    },
+  },
+  status: {
+    type: String,
+    enum: COHORT_STATUS_LIST,
+    default: COHORT_STATUS.DRAFT,
+    documentation: {
+      description: "Statut de la cohorte",
     },
   },
   dsnjExportDates: {
