@@ -1,4 +1,4 @@
-import { ReferentDto, UserDto } from "./dto";
+import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
@@ -667,8 +667,23 @@ function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: stri
   }
 }
 
-function canInviteYoung(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
+function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
+    if (!cohort) return false;
+
+    switch (actor.role) {
+      case ROLES.ADMIN:
+        return true;
+      case ROLES.REFERENT_DEPARTMENT:
+        return cohort.inscriptionOpenForReferentDepartment === true;
+      case ROLES.REFERENT_REGION:
+        return cohort.inscriptionOpenForReferentRegion === true;
+      case ROLES.REFERENT_CLASSE:
+        return cohort.inscriptionOpenForReferentClasse === true;
+      case ROLES.ADMINISTRATEUR_CLE:
+        return cohort.inscriptionOpenForAdministrateurCle === true;
+      default:
+        return false;
+    }
 }
 
 function canSendTemplateToYoung(actor, young) {
