@@ -329,7 +329,6 @@ export default function Settings() {
                           placeholder="Date et heure"
                           value={data.reInscriptionEndDate || data.inscriptionEndDate}
                           error={error.reInscriptionEndDate}
-                          // onChange={(e) => {}}
                           onChange={(e) => setData({ ...data, reInscriptionEndDate: e })}
                           readOnly={readOnly}
                           disabled={isLoading || !data.inscriptionEndDate}
