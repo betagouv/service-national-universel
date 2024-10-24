@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -8,7 +8,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { getDepartmentNumber, translateCniExpired, translateYoungSource } from "snu-lib";
+import { canInviteYoung, getDepartmentNumber, translateCniExpired, translateYoungSource } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -64,7 +64,60 @@ export default function Inscription() {
     })();
   }, []);
 
+  const baseInscriptionPath = useMemo(() => {
+    const hasFilterSelectedOneClass = selectedFilters?.classeId?.filter?.length === 1;
+    const selectedClassId = selectedFilters?.classeId?.filter[0];
+
+    if (!hasFilterSelectedOneClass) {
+      return "/inscription/create";
+    }
+
+    const classe = classes?.find((c) => c._id === selectedClassId);
+
+    if (!classe) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe");
+      return "/inscription/create";
+    }
+
+    return `/inscription/create?classeId=${selectedClassId}`;
+  }, [classes, selectedFilters?.classeId?.filter]);
+
+  const fetchCohortAndResolveInscriptionPath = useCallback(async () => {
+    if (!baseInscriptionPath.includes("classeId")) {
+      return baseInscriptionPath;
+    }
+
+    const selectedClassId = selectedFilters?.classeId?.filter[0];
+    const classe = classes?.find((c) => c._id === selectedClassId);
+
+    try {
+      const { ok, data: cohort } = await api.get(`/cohort/${classe.cohortId}`);
+      if (!ok) {
+        throw new Error("Failed to fetch cohort");
+      }
+
+      if (!canInviteYoung(user, cohort)) {
+        return null;
+      }
+
+      return baseInscriptionPath;
+    } catch (error) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohort");
+      return "/inscription/create";
+    }
+  }, [baseInscriptionPath, classes, selectedFilters?.classeId?.filter, user]);
+
   if (!classes || !etablissements) return <Loader />;
+
+  const handleClickInscription = async (event) => {
+    event.preventDefault();
+    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
+
+    const inscriptionPath = await fetchCohortAndResolveInscriptionPath();
+    if (inscriptionPath) {
+      history.push(inscriptionPath);
+    }
+  };
 
   const filterArray = [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
@@ -238,11 +291,12 @@ export default function Inscription() {
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
             <Link
-              to={selectedFilters?.classeId?.filter?.length === 1 ? `/volontaire/create?classeId=${selectedFilters?.classeId?.filter[0]}` : "/volontaire/create"}
-              onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}
+              disabled={true}
+              to={baseInscriptionPath}
+              onClick={handleClickInscription}
               className="ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out">
               <AiOutlinePlus className="text-white h-4 w-4 group-hover:!text-blue-600" />
-
+              {/* TODO: condition a ajouter ici : canInviteYoung */}
               <p>{selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}</p>
             </Link>
             <ExportComponent

@@ -150,13 +150,23 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
   }
 
   const isManualInscriptionActionDisabled = !(classe?.status === STATUS_CLASSE.OPEN || canPerformManualInscriptionActions);
+  const optionsInscriptionFiltered =
+    classe?.status !== STATUS_CLASSE.OPEN && canPerformManualInscriptionActions
+      ? [
+          {
+            ...optionsInscription[0],
+            // override items to keep only manual inscription
+            items: optionsInscription[0].items.filter((i) => i.key === "manual"),
+          },
+        ]
+      : optionsInscription;
 
   actionsList.push(
     <DropdownButton
       key="inscription"
       title="Inscrire les élèves"
       type="wired"
-      optionsGroup={optionsInscription}
+      optionsGroup={optionsInscriptionFiltered}
       position="right"
       buttonClassName={cx("mr-2", isManualInscriptionActionDisabled && "cursor-not-allowed")}
       disabled={isManualInscriptionActionDisabled}
