@@ -16,6 +16,7 @@ import ModalRattacherCentre from "./components/ModalRattacherCentre";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { getCohortGroups } from "@/services/cohort.service";
 import { getDefaultCohort } from "@/utils/session";
+import { title } from "process";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -80,6 +81,7 @@ const ListSession = ({ firstSession }) => {
   const [size, setSize] = useState(10);
   const filterArray = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
+    { title: "Matricule", name: "codeCentre", missingLabel: "Non renseigné" },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
       title: "Département",
@@ -100,7 +102,6 @@ const ListSession = ({ firstSession }) => {
       translate,
     },
   ];
-  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", missingLabel: "Non renseignée" });
 
   if (!firstSession) return <div></div>;
   return (
@@ -141,7 +142,7 @@ const ListSession = ({ firstSession }) => {
                   const hasSanitaryContactEmail = Boolean(data?.sanitaryContactEmail).toString();
                   return {
                     "Id centre": center?._id?.toString(),
-                    "Code du centre": center?.code2022,
+                    Matricule: center?.matricule,
                     "Nom du centre": center?.name,
                     "Désignation du centre": center?.centerDesignation,
                     "Id de la session": data?._id?.toString(),
@@ -223,6 +224,7 @@ const ListCenter = ({ firstSession }) => {
   });
   const [size, setSize] = useState(10);
   const filterArray = [
+    { title: "Matricule", name: "matricule", missingLabel: "Non renseigné" },
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     {
       title: "Région",
@@ -250,7 +252,6 @@ const ListCenter = ({ firstSession }) => {
       translate: (e) => translateDomainCenter(e),
     },
   ];
-  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", missingLabel: "Non renseignée" });
 
   const history = useHistory();
 
@@ -281,7 +282,7 @@ const ListCenter = ({ firstSession }) => {
               return all?.map((data) => {
                 return {
                   Id: data._id.toString(),
-                  "Code du centre": data?.code2022,
+                  Matricule: data?.matricule,
                   Nom: data?.name,
                   "Désignation du centre": data?.centerDesignation,
                   "Cohorte(s)": data?.cohorts
