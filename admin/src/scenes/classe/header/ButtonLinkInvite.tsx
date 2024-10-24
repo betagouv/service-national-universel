@@ -6,7 +6,6 @@ import plausibleEvent from "@/services/plausible";
 import { Modal, Button } from "@snu/ds/admin";
 import { ProfilePic } from "@snu/ds";
 import { copyToClipboard } from "@/utils";
-import { appURL } from "@/config";
 
 interface Props {
   url: string;
@@ -43,7 +42,7 @@ export default function ButtonLinkInvite({ url }: Props) {
               title="Copier le lien"
               className="mt-6 !w-80 flex items-center justify-center"
               onClick={() => {
-                copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${url}`);
+                copyToClipboard(url);
                 setShowModal(false);
               }}
             />
