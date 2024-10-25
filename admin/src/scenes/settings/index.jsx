@@ -179,13 +179,17 @@ export default function Settings() {
                       <MdInfoOutline data-tip data-for="statut" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="statut" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Statut de la cohorte. Si la cohorte est publiée, les volontaires peuvent s’inscrire. Si elle est archivée, ils ne peuvent plus poursuivre la phase
-                          engagement.
+                          Si la cohorte est publiée, les volontaires peuvent s’inscrire. Si elle est archivée, ils ne peuvent plus poursuivre la phase engagement.
                         </p>
                       </ReactTooltip>
                     </div>
 
-                    <Select label="Statut" value={data.status} options={statusOptions} onChange={(e) => setData({ ...data, status: e })} disabled={isLoading || readOnly} />
+                    <Select
+                      value={statusOptions.find((o) => o.value === data.status)}
+                      options={statusOptions}
+                      onChange={(e) => setData({ ...data, status: e.value })}
+                      disabled={isLoading || readOnly}
+                    />
                   </div>
 
                   <div className="flex flex-col gap-3">
