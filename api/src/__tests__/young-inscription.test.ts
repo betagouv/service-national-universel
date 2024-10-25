@@ -190,6 +190,7 @@ describe("Young Inscription", () => {
         paiBeneficiary: "false",
         allergies: "true",
         moreInformation: "false",
+        psc1Info: "false",
       };
 
       let typeUrlParam = "next";
