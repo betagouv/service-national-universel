@@ -4,6 +4,8 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
 import MyClass from "./MyClass";
+import { alreadyHaveAnAccountModal } from "../preinscription/components/Modals";
+import AlreadyHaveAnAccountModal from "../preinscription/components/AlreadyHaveAnAccountModal";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
@@ -12,8 +14,6 @@ import { RiArrowLeftLine } from "react-icons/ri";
 import { STATUS_CLASSE } from "snu-lib";
 import { Button } from "@snu/ds/dsfr";
 import useClass from "./useClass";
-import { alreadyHaveAnAccountModal } from "../preinscription/components/Modals";
-import AlreadyHaveAnAccountModal from "../preinscription/components/AlreadyHaveAnAccountModal";
 
 const Title = () => (
   <div>

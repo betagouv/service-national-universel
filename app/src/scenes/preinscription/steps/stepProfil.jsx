@@ -178,24 +178,7 @@ export default function StepProfil() {
 
   return (
     <>
-      {isCLE ? (
-        <Container className="p-6">
-          <div className="flex gap-4 items-center">
-            <div className="md:order-2">
-              <p className="reset font-semibold text-base leading-relaxed">Vous avez déjà créé votre compte mais vous n'avez pas terminé votre inscription&nbsp;?</p>
-              <Link to="/auth" className="text-blue-france-sun-113 leading-relaxed">
-                Finaliser mon inscription
-                <HiArrowRight className="inline-block ml-1" />
-              </Link>
-            </div>
-            <div className="flex-none">
-              <img src={PenSvg} alt="Icone crayon" />
-            </div>
-          </div>
-        </Container>
-      ) : (
-        <ProgressBar isReinscription={false} />
-      )}
+      {isCLE ? <LoginMessage /> : <ProgressBar isReinscription={false} />}
       <DSFRContainer
         title="Créez votre compte"
         supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}`}
@@ -389,5 +372,24 @@ export default function StepProfil() {
         />
       </DSFRContainer>
     </>
+  );
+}
+
+function LoginMessage() {
+  return (
+    <Container className="p-6">
+      <div className="flex gap-4 items-center">
+        <div className="md:order-2">
+          <p className="reset font-semibold text-base leading-relaxed">Vous avez déjà créé votre compte mais vous n'avez pas terminé votre inscription&nbsp;?</p>
+          <Link to="/auth" className="text-blue-france-sun-113 leading-relaxed">
+            Finaliser mon inscription
+            <HiArrowRight className="inline-block ml-1" />
+          </Link>
+        </div>
+        <div className="flex-none">
+          <img src={PenSvg} alt="Icone crayon" />
+        </div>
+      </div>
+    </Container>
   );
 }
