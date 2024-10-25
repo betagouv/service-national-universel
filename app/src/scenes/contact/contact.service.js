@@ -12,12 +12,6 @@ export const roleOptions = [
 
 export const departmentOptions = departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label));
 
-export const alertMessage = {
-  [YOUNG_SOURCE.CLE]:
-    "Si vous avez des questions sur votre inscription ou votre séjour dans le cadre de votre classe engagée, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
-  [YOUNG_SOURCE.VOLONTAIRE]: "Aucun sujet disponible.",
-};
-
 export const articleSummaries = [
   {
     title: "Séjour : Quelles sont les dates des séjours 2024 ?",
@@ -128,7 +122,8 @@ export const questions = [
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE],
     displayForm: false,
-    message: "Si vous avez une question sur votre parcours SNU, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
+    message:
+      "Si vous avez des questions sur votre inscription ou votre séjour dans le cadre de votre classe engagée, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
   },
   {
     category: "QUESTION",
@@ -147,7 +142,8 @@ export const questions = [
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE],
     displayForm: false,
-    message: "Si vous avez une question sur votre parcours SNU, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
+    message:
+      "Si vous avez des questions sur votre inscription ou votre séjour dans le cadre de votre classe engagée, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
   },
   {
     category: "QUESTION",
@@ -166,7 +162,8 @@ export const questions = [
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE],
     displayForm: false,
-    message: "Si vous avez une question sur votre parcours SNU, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
+    message:
+      "Si vous avez des questions sur votre inscription ou votre séjour dans le cadre de votre classe engagée, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
   },
   {
     category: "QUESTION",
