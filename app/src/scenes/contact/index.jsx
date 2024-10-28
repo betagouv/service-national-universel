@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import useAuth from "@/services/useAuth";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
-import { alertMessage, categories, getArticles, getCategoryFromQuestion, getQuestions } from "./contact.service";
+import { categories, getArticles, getCategoryFromQuestion, getQuestions } from "./contact.service";
 import { YOUNG_SOURCE } from "snu-lib";
 
 import ContactForm from "./components/ContactForm";
@@ -17,6 +17,8 @@ import Select from "@/components/dsfr/forms/Select";
 import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
+import Button from "@codegouvfr/react-dsfr/Button";
+import plausibleEvent from "@/services/plausible";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
@@ -33,8 +35,9 @@ export default function Contact() {
 
   const knowledgeBaseRole = isLoggedIn ? "young" : "public";
   const questions = getQuestions(category, knowledgeBaseRole, parcours);
+  const questionObject = questions.find((q) => q.value === question);
   const articles = getArticles(question);
-  const shouldShowForm = question && (articles.length === 0 || showForm);
+  const shouldShowForm = questionObject?.displayForm && (articles.length === 0 || showForm);
 
   const handleSelectParcours = (value) => {
     setParcours(value);
@@ -56,27 +59,20 @@ export default function Contact() {
   return (
     <DSFRLayout title="Formulaire de contact">
       <DSFRContainer title="Je n'ai pas trouvé de réponse à ma question">
-        {new Date() > new Date("2024-07-22") && new Date() < new Date("2024-08-30") ? (
-          <p className="leading-relaxed mb-10">
-            Contactez nos équipes. En raison de la période estivale, les délais de traitement de votre demande peuvent être prolongés. Votre demande sera traitée dès que possible.
-            Vous recevrez une réponse par mail.
-          </p>
-        ) : (
-          <p className="leading-relaxed mb-10">
-            Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
-          </p>
-        )}
+        <p className="leading-relaxed mb-10">
+          Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
+        </p>
 
         {/* Logged in users get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (
-          <div className="my-8 space-y-6">
+          <section id="shortcuts" className="my-8 space-y-6">
             <CardLink label="Débloquez votre accès gratuit au code de la route" picto={<UnlockPictogram />} url="/phase1" />
             <CardLink
               label="Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?"
               picto={<QuestionBubblePictogram />}
               url="/phase1"
             />
-          </div>
+          </section>
         ) : (
           <fieldset id="parcours" className="my-10 space-y-4">
             <legend className="text-base">Choisir le type de profil qui me concerne :</legend>
@@ -100,24 +96,41 @@ export default function Contact() {
         )}
 
         {/* Category */}
-        <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} name="Catégorie" />
+        <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={!!categoryFromURl} />
 
         {/* Question */}
-        {category && questions.length > 0 && (
-          <Select label="Sujet" options={questions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} name="Question" />
-        )}
+        {category && questions.length > 0 && <Select label="Sujet" options={questions} value={question} onChange={handleSelectQuestion} disabled={!!questionFromURl} />}
 
         {parcours && (
           <>
             {category && questions.length === 0 && (
               <Alert className="my-8">
                 <p className="text-lg font-semibold">Information</p>
-                <p>{alertMessage[parcours]}</p>
+                <p>Aucun sujet disponible.</p>
+              </Alert>
+            )}
+
+            {category && questionObject?.message && (
+              <Alert className="my-8">
+                <p className="text-lg font-semibold">Information</p>
+                <p>{questionObject.message}</p>
               </Alert>
             )}
 
             {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
-            {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
+            {question && articles.length > 0 && <Solutions articles={articles} />}
+
+            {questionObject?.displayForm && !showForm && articles.length > 0 && (
+              <Button
+                priority="secondary"
+                onClick={() => {
+                  setShowForm(true);
+                  plausibleEvent("Besoin d'aide - Je n'ai pas trouve de reponse");
+                }}>
+                Ecrire au support
+              </Button>
+            )}
+
             {shouldShowForm && isLoggedIn && <ContactForm category={category} question={question} parcours={parcours} />}
             {shouldShowForm && !isLoggedIn && <PublicContactForm category={category} question={question} parcours={parcours} />}
           </>
