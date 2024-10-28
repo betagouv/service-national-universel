@@ -4,7 +4,7 @@ import Joi from "joi";
 
 import { capture } from "../sentry";
 import { getFilteredSessions } from "../utils/cohort";
-import { createContact } from "../brevo";
+import { createContact, MAILING_LISTS } from "../brevo";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { RouteRequest, RouteResponse } from "../controllers/request";
 import { PreinscriptionRoutesSchema } from "./preinscriptionValidator";
@@ -54,7 +54,7 @@ router.post("/create-lead", async (req, res) => {
   try {
     const data = await createContact({
       email: value.email,
-      listIds: [706],
+      listIds: [MAILING_LISTS.INSCRIPTION],
       attributes: {
         REGION: value.region,
       },
