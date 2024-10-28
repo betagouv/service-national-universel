@@ -1,4 +1,4 @@
-import { COHORT_TYPE, ERRORS, CohortType } from "snu-lib";
+import { COHORT_TYPE, ERRORS, CohortType, getZonedDate } from "snu-lib";
 import { CohortDocument, CohortModel } from "../models";
 
 const isInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
@@ -43,7 +43,7 @@ export const getCohortIdsFromCohortName = async (cohortNames: string[]): Promise
 };
 
 export const isCohortInscriptionOpen = (cohort: CohortType): boolean => {
-  const now = new Date();
+  const now = getZonedDate(new Date(), "Europe/Paris");
   const inscriptionStartDate = new Date(cohort.inscriptionStartDate);
   const inscriptionEndDate = new Date(cohort.inscriptionEndDate);
   const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
@@ -51,7 +51,7 @@ export const isCohortInscriptionOpen = (cohort: CohortType): boolean => {
 };
 
 export const isCohortInscriptionClosed = (cohort: CohortType): boolean => {
-  const now = new Date();
+  const now = getZonedDate(new Date(), "Europe/Paris");
   const inscriptionStartDate = new Date(cohort.inscriptionStartDate);
   const inscriptionEndDate = new Date(cohort.inscriptionEndDate);
   const isInscriptionClosed = now >= inscriptionEndDate || now <= inscriptionStartDate;
