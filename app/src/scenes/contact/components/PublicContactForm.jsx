@@ -47,7 +47,7 @@ export default function PublicContactForm({ category, question, parcours }) {
 
   useEffect(() => {
     if (classe?.name && classe?.etablissement) {
-      const classeString = `J'ai un compte volontaire et je souhaite m'inscrire au SNU dans le cadre de ma classe engagée : ${classe?.name}, établissement : ${classe?.etablissement?.name}.`;
+      const classeString = `J'ai un compte volontaire et je souhaite m'inscrire au SNU dans le cadre de ma classe engagée : ${classe?.name} (code ${classe?.uniqueKeyAndId}), établissement : ${classe?.etablissement?.name}.`;
       setMessage(classeString);
     }
   }, [classe?.name, classe?.etablissement]);
