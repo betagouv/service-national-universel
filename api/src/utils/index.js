@@ -225,7 +225,6 @@ const updatePlacesCenter = async (center, fromUser) => {
       logger.debug(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
       center.set({ placesLeft });
       await center.save({ fromUser });
-      await center.index();
     }
   } catch (e) {
     capture(e);
@@ -247,7 +246,6 @@ const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
       logger.debug(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
       sessionPhase1.set({ placesLeft });
       await sessionPhase1.save({ fromUser });
-      await sessionPhase1.index();
     }
   } catch (e) {
     capture(e);
@@ -341,7 +339,6 @@ const updatePlacesBus = async (bus) => {
       logger.debug(`Bus ${bus.id}: total ${bus.capacity}, left from ${bus.placesLeft} to ${placesLeft}`);
       bus.set({ placesLeft });
       await bus.save();
-      await bus.index();
     }
   } catch (e) {
     capture(e);
@@ -365,14 +362,12 @@ async function updateSeatsTakenInBusLine(busline) {
     if (busline.youngSeatsTaken !== seatsTaken) {
       busline.set({ youngSeatsTaken: seatsTaken });
       await busline.save();
-      await busline.index();
 
       // Do the same update with planTransport
       const planTransport = await PlanTransportModel.findById(busline._id);
       if (!planTransport) throw new Error("PlanTransport not found");
       planTransport.set({ youngSeatsTaken: seatsTaken, lineFillingRate: planTransport.youngCapacity && Math.floor((seatsTaken / planTransport.youngCapacity) * 100) });
       await planTransport.save();
-      await planTransport.index();
     }
   } catch (e) {
     capture(e);
