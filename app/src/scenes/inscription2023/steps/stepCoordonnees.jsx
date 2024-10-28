@@ -174,7 +174,7 @@ export default function StepCoordonnees() {
       setData({
         ...data,
         schooled: young.schooled || data.schooled,
-        situation: young.situation || data.situation,
+        situation: situationOptions.some((option) => option.value === young.situation) ? young.situation : data.situation,
         birthCountry: young.birthCountry || data.birthCountry,
         birthCity: young.birthCity || data.birthCity,
         birthCityZip: young.birthCityZip || data.birthCityZip,
@@ -551,7 +551,7 @@ export default function StepCoordonnees() {
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
             options={situationOptions}
             nativeSelectProps={{
-              value: situation,
+              value: situationOptions.some((option) => option.value === situation) ? situation : undefined,
               onChange: (e) => updateData("situation")(e.target.value),
             }}
             state={(corrections?.situation || errors.situation) && "error"}
