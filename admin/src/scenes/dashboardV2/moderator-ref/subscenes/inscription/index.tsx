@@ -1,20 +1,21 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { HiHome } from "react-icons/hi";
 
 import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
-import plausibleEvent from "../../../../../services/plausible";
-import ExportReport from "./ExportReport";
+import { AuthState } from "@/redux/auth/reducer";
+import plausibleEvent from "@/services/plausible";
 import DashboardContainer from "../../../components/DashboardContainer";
 import BandeauInfo from "../../../components/BandeauInfo";
 import General from "../../../components/inscription/General";
+import ExportReport from "./ExportReport";
 
 export default function Index() {
-  const [selectedFilters, setSelectedFilters] = useState({
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
+  const [selectedFilters, setSelectedFilters] = useState<{ cohort: string[]; department?: string; region?: string; academy?: string }>({
     cohort: [],
   });
-  const user = useSelector((state) => state.Auth.user);
   const [modalExport, setModalExport] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("0 %");
@@ -56,11 +57,11 @@ export default function Index() {
       <BandeauInfo />
       <Header
         title="Tableau de bord"
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]}
+        breadcrumb={[{ title: "Tableau de bord" }]}
         actions={[<DropdownButton title={"Exporter"} optionsGroup={selectOptions} key={"export"} position="right" />]}
       />
       <DashboardContainer active="inscription" availableTab={["general", "engagement", "sejour", "inscription"]}>
-        <General selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
+        <General selectedFilters={selectedFilters} onSelectedFiltersChange={setSelectedFilters} />
       </DashboardContainer>
       <ModalConfirmation
         isOpen={modalExport}

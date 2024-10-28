@@ -109,7 +109,7 @@ const DSNJExport = () => {
       <Page>
         <Header
           title="Données centres & volontaires (DSNJ)"
-          breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" />, to: "/" }, { title: "Séjours" }, { title: "Export DSNJ" }]}
+          breadcrumb={[{ title: "Séjours" }, { title: "Export DSNJ" }]}
           actions={
             <SelectCohort
               cohort={currentCohort.name}

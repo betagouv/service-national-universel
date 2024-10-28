@@ -2,13 +2,13 @@ import express from "express";
 import passport from "passport";
 import Joi from "joi";
 
-import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS } from "snu-lib";
+import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS, InscriptionGoalsRoutes } from "snu-lib";
 
 import { capture } from "../sentry";
 import { YoungModel, InscriptionGoalModel } from "../models";
 import { ERRORS } from "../utils";
 import { getCompletionObjectifs } from "../services/inscription-goal";
-import { UserRequest } from "./request";
+import { RouteRequest, RouteResponse, UserRequest } from "./request";
 
 const router = express.Router();
 
@@ -90,29 +90,33 @@ router.get("/:department/current", passport.authenticate("referent", { session: 
   }
 });
 
-router.get("/:cohort/department/:department", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value: params } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
-    if (error) {
+router.get(
+  "/:cohort/department/:department",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  async (req: RouteRequest<InscriptionGoalsRoutes["GetTauxRemplissage"]>, res: RouteResponse<InscriptionGoalsRoutes["GetTauxRemplissage"]>) => {
+    try {
+      const { error, value: params } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const { department, cohort } = params;
+      const completionObjectif = await getCompletionObjectifs(department, cohort);
+
+      return res.status(200).json({ ok: true, data: completionObjectif.tauxRemplissage });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
+        res.status(400).send({ ok: false, code: error.message });
+      } else {
+        res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+      }
     }
-
-    if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const { department, cohort } = params;
-    const completionObjectif = await getCompletionObjectifs(department, cohort);
-
-    return res.status(200).json({ ok: true, data: completionObjectif.tauxRemplissage });
-  } catch (error) {
-    capture(error);
-    if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
-      res.status(400).send({ ok: false, code: error.message });
-    } else {
-      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  }
-});
+  },
+);
 
 router.get("/:cohort/department/:department/reached", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {

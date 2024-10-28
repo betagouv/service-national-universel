@@ -32,7 +32,7 @@ export default function Regional() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Table de répartition", to: `/table-repartition${cohort && `?cohort=${cohort}`}` }, { label: region }]} />
+      <Breadcrumbs items={[{ title: "Séjours" }, { label: "Table de répartition", to: `/table-repartition${cohort && `?cohort=${cohort}`}` }, { label: region }]} />
       <div className="flex w-full flex-col px-8 pb-8 ">
         {/* HEADER */}
         <div className="flex items-center justify-between py-8">

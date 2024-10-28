@@ -175,7 +175,7 @@ export default function View(props) {
   return (
     <>
       <div className="flex justify-between mr-8 items-center">
-        <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
+        <Breadcrumbs items={[{ title: "Séjours" }, { label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
         {canExportLigneBus(user) && data.team.length > 0 ? (
           <SelectAction
             title="Exporter la ligne"

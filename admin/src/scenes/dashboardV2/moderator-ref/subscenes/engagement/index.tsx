@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { HiHome } from "react-icons/hi";
 
 import { departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
 import { YOUNG_STATUS } from "snu-lib";
 import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib";
 import { department2region, region2department } from "snu-lib";
-import { getCohortNameList } from "@/services/cohort.service";
+import { filterCurrentAndNextCohorts, getCohortNameList } from "@/services/cohort.service";
 import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
 import DashboardContainer from "../../../components/DashboardContainer";
@@ -21,15 +20,37 @@ import { orderCohort } from "../../../../../components/filters-system-v2/compone
 import ExportEngagementReport from "./components/ExportEngagementReport";
 import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
 import BandeauInfo from "../../../components/BandeauInfo";
+import { AuthState } from "@/redux/auth/reducer";
+import { CohortState } from "@/redux/cohorts/reducer";
+
+type FilterOption = {
+  key: string;
+  label: string;
+};
+
+type Filter = {
+  id: string;
+  name: string;
+  fullValue: string;
+  options: FilterOption[];
+  translate?: (value: string) => string;
+  sort?: (value: string) => number;
+} | null;
 
 export default function Index() {
-  const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const [modalExport, setModalExport] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("0 %");
 
-  const [selectedFilters, setSelectedFilters] = useState({
+  const [selectedFilters, setSelectedFilters] = useState<{
+    status: string[];
+    region: string[];
+    academy: string[];
+    department: string[];
+    cohorts: string[];
+  }>({
     status: [YOUNG_STATUS.VALIDATED],
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     academy: [],
@@ -37,11 +58,11 @@ export default function Index() {
     cohorts: [],
   });
 
-  const [filterArray, setFilterArray] = useState([]);
-  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [filterArray, setFilterArray] = useState<Filter[]>([]);
+  const [departmentOptions, setDepartmentOptions] = useState<FilterOption[]>([]);
 
   useEffect(() => {
-    let filters = [
+    const filters = [
       {
         id: "status",
         name: "Statut d’inscription",
@@ -92,15 +113,15 @@ export default function Index() {
   }, [JSON.stringify(selectedFilters)]);
 
   useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
+    const cohortsFilters = filterCurrentAndNextCohorts(cohorts).map(({ name }) => name);
     setSelectedFilters({ ...selectedFilters, cohorts: cohortsFilters });
   }, []);
 
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
     user.role === ROLES.REFERENT_REGION
-      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
-      : academyList.map((a) => ({ key: a, label: a }));
+      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a: string) => ({ key: a, label: a }))
+      : academyList.map((a: string) => ({ key: a, label: a }));
 
   const computeFilteredDepartment = () => {
     if (selectedFilters.academy?.length) {
@@ -159,7 +180,7 @@ export default function Index() {
       <BandeauInfo />
       <Header
         title="Tableau de bord"
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400" /> }, { title: "Tableau de bord" }]}
+        breadcrumb={[{ title: "Tableau de bord" }]}
         actions={[<DropdownButton title={"Exporter"} optionsGroup={selectOptions} key={"export"} position="right" />]}
       />
       <DashboardContainer availableTab={["general", "engagement", "sejour", "inscription"]} active="engagement">

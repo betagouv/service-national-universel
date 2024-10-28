@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  prod_directory: ./terraform/environments/production
-  staging_directory: ./terraform/environments/production/staging
+  prod_directory: ./devops/terraform/environments/production
+  staging_directory: ./devops/terraform/environments/production/staging
   production_branch: "production"
 
 jobs:
