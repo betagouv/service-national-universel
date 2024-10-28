@@ -164,7 +164,6 @@ export default function List() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
-              // @ts-expect-error jsx component
               intermediateFilters={[getCohortGroups("cohorts")]}
             />
             <SortOption
