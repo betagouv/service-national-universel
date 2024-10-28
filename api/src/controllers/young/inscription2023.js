@@ -205,7 +205,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
-      psc1Info: Joi.string().trim().valid("true", "false").allow(null),
+      psc1Info: Joi.string().trim().valid("true", "false").required(),
     };
 
     if (!isCle(young)) {
