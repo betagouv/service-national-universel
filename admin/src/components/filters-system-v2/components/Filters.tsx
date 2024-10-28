@@ -16,6 +16,38 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+export interface Filter {
+  title: string;
+  name: string;
+  missingLabel: string;
+  translate?: (item: any) => any;
+  filter?: any[];
+  // custom ?
+  parentGroup?: string;
+  customComponent?: any;
+  defaultValue?: string;
+  getQuery?: (value: any) => any;
+  allowEmpty?: boolean;
+  disabledBaseQuery?: boolean;
+  options?: any;
+}
+
+interface FiltersProps {
+  route: string;
+  pageId: string;
+  filters: Filter[];
+  searchPlaceholder?: string;
+  setData: (data: any) => void;
+  selectedFilters: { [key: string]: Filter };
+  setSelectedFilters: (filters: { [key: string]: Filter }) => void;
+  paramData: any;
+  setParamData: (data: any) => void;
+  defaultUrlParam?: any;
+  size?: any;
+  intermediateFilters?: any[];
+  disabled?: boolean;
+}
+
 export default function Filters({
   route,
   pageId,
@@ -30,25 +62,25 @@ export default function Filters({
   size,
   intermediateFilters = [],
   disabled = false,
-}) {
+}: FiltersProps) {
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState({});
   const [filtersVisible, setFiltersVisible] = useState(filters);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [savedView, setSavedView] = useState([]);
   const [firstLoad, setFirstLoad] = useState(true);
-  const [isShowing, setIsShowing] = useState(false);
+  const [isShowing, setIsShowing] = useState<string | boolean>(false);
 
   const location = useLocation();
   const history = useHistory();
 
-  const ref = useRef(null);
-  const refFilter = useRef(null);
+  const ref = useRef<HTMLButtonElement>(null);
+  const refFilter = useRef<HTMLDivElement>(null);
 
   const hasSomeFilterSelected =
     selectedFilters &&
     Object.keys(selectedFilters).find(
-      (key) => selectedFilters[key]?.filter?.length > 0 && selectedFilters[key]?.filter[0]?.toString().trim() !== "" && filters.find((f) => f.name === key),
+      (key) => selectedFilters[key]?.filter?.length && selectedFilters[key]?.filter?.[0]?.toString().trim() !== "" && filters.find((f) => f.name === key),
     );
 
   // Initialization
@@ -87,10 +119,10 @@ export default function Filters({
         setCategories([]);
         return;
       }
-      const newCategories = [];
+      const newCategories: string[] = [];
       filtersVisible?.forEach((f) => {
-        if (!newCategories.includes(f.parentGroup)) {
-          newCategories.push(f.parentGroup);
+        if (!newCategories.includes(f.parentGroup || "")) {
+          newCategories.push(f.parentGroup || "");
         }
       });
       setCategories(newCategories);
@@ -103,7 +135,11 @@ export default function Filters({
       buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort, size).then((res) => {
         if (!res) return;
         setDataFilter({ ...dataFilter, ...res.newFilters });
-        const newParamData = {
+        const newParamData: {
+          count: number;
+          filters: { [key: string]: Filter };
+          page?: number;
+        } = {
           count: res.count,
           filters: { ...dataFilter, ...res.newFilters },
         };
@@ -130,7 +166,7 @@ export default function Filters({
     const newFilters = {};
     filters.map((f) => {
       if (f?.customComponent?.getQuery) {
-        newFilters[f.name] = { filter: f.defaultValue, customComponentQuery: f.getQuery(f.defaultValue) };
+        newFilters[f.name] = { filter: f.defaultValue, customComponentQuery: f.getQuery?.(f.defaultValue) };
       } else {
         newFilters[f.name] = { filter: f?.defaultValue ? f.defaultValue : [] };
       }
@@ -182,8 +218,9 @@ export default function Filters({
             <input
               name={"searchbar"}
               placeholder={searchPlaceholder}
-              value={selectedFilters?.searchbar?.filter[0] || ""}
+              value={selectedFilters?.searchbar?.filter?.[0] || ""}
               onChange={(e) => {
+                // @ts-expect-error
                 setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
               }}
               className={`h-full w-full text-xs text-gray-600`}
@@ -249,6 +286,7 @@ export default function Filters({
                                       allowEmpty: false,
                                       customComponent: (setFilter, filter) => (
                                         <IntermediateFilter
+                                          // @ts-expect-error
                                           selectedFilters={selectedFilters}
                                           setSelectedFilters={setSelectedFilters}
                                           setParamData={setParamData}
@@ -262,8 +300,11 @@ export default function Filters({
                                   return (
                                     <FilterPopOver
                                       key={item.title}
+                                      // @ts-expect-error
                                       filter={customItem}
+                                      // @ts-expect-error
                                       selectedFilters={selectedFilters}
+                                      // @ts-expect-error
                                       setSelectedFilters={setSelectedFilters}
                                       data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name] || []}
                                       isShowing={isShowing === item.name}

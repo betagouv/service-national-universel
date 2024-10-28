@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, ReactElement } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import { AiOutlineCheck } from "react-icons/ai";
@@ -7,7 +7,16 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Select({ options, selected, setSelected, label, readOnly = false, icon }) {
+interface SelectProps {
+  options: { value: string; label: string }[];
+  selected?: { value: string; label: string };
+  setSelected: (selected: { value: string; label: string }) => void;
+  label: string;
+  readOnly?: boolean;
+  icon?: ReactElement;
+}
+
+export default function Select({ options, selected, setSelected, label, readOnly = false, icon }: SelectProps) {
   return (
     <div className="w-full">
       <Listbox value={selected} onChange={setSelected}>

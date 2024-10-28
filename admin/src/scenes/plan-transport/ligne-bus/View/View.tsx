@@ -1,16 +1,30 @@
 import React from "react";
+import { RouteComponentProps } from "react-router-dom";
 import { HiOutlineBell, HiOutlineChatAlt } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { ROLES, canExportLigneBus, getZonedDate, isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
+import {
+  CohesionCenterType,
+  CohortType,
+  LigneBusType,
+  PointDeRassemblementType,
+  ROLES,
+  canExportLigneBus,
+  getZonedDate,
+  isLigneBusDemandeDeModificationOpen,
+  ligneBusCanCreateDemandeDeModification,
+  translate,
+} from "snu-lib";
 
-import Bus from "../../../../assets/icons/Bus";
-import Breadcrumbs from "../../../../components/Breadcrumbs";
-import Loader from "../../../../components/Loader";
-import SelectAction from "../../../../components/SelectAction";
-import { capture } from "../../../../sentry";
-import api from "../../../../services/api";
+import { AuthState } from "@/redux/auth/reducer";
+import Bus from "@/assets/icons/Bus";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import Loader from "@/components/Loader";
+import SelectAction from "@/components/SelectAction";
+import { capture } from "@/sentry";
+import api from "@/services/api";
+
 import { Title } from "../../components/commons";
 import { exportLigneBusJeune } from "../../util";
 import Creation from "../modificationPanel/Creation";
@@ -22,15 +36,22 @@ import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
 import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
 
-export default function View(props) {
-  const [data, setData] = React.useState(null);
-  const [dataForCheck, setDataForCheck] = React.useState(null);
+export default function View(props: RouteComponentProps<{ id: string }>) {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
+  const [data, setData] = React.useState<(LigneBusType & { centerDetail?: CohesionCenterType; meetingsPointsDetail?: Array<PointDeRassemblementType & LigneBusType> }) | null>(
+    null,
+  );
+  const [cohort, setCohort] = React.useState<CohortType | null>(null);
+  const [dataForCheck, setDataForCheck] = React.useState<{
+    meetingPoints: { youngsCount: number; meetingPointId: string }[];
+    youngsCountBus: number;
+    busVolume: number;
+  } | null>(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
   const [nbYoung, setNbYoung] = React.useState();
-  const [cohort, setCohort] = React.useState();
   const [addOpen, setAddOpen] = React.useState(false);
-  const user = useSelector((state) => state.Auth.user);
   const [isLoading, setIsLoading] = React.useState(false);
 
   const getBus = async () => {
@@ -51,7 +72,7 @@ export default function View(props) {
       await getCohortDetails(reponseBus.cohort);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus", "");
     }
   };
 
@@ -66,7 +87,7 @@ export default function View(props) {
       setDataForCheck(reponseCheck);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus", "");
     }
   };
 
@@ -79,12 +100,12 @@ export default function View(props) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
       }
       reponseDemandeDeModification.sort((a, b) => {
-        return new Date(b.createdAt) - new Date(a.createdAt);
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
       setDemandeDeModification(reponseDemandeDeModification);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus", "");
     }
   };
 
@@ -98,7 +119,7 @@ export default function View(props) {
     } catch (e) {
       console.log(e);
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte", "");
     }
   };
 
@@ -113,11 +134,11 @@ export default function View(props) {
         return toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification", translate(code));
       }
       setIsLoading(false);
-      toastr.success("Notification envoyée !");
+      toastr.success("Notification envoyée !", "");
     } catch (e) {
       capture(e);
       setIsLoading(false);
-      toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification");
+      toastr.error("Oups, une erreur est survenue lors de l'envoi de la notification", "");
     }
   };
 
@@ -131,13 +152,13 @@ export default function View(props) {
   }, [data]);
   if (!data) return <Loader />;
 
-  const leader = data.team.filter((item) => item.role === "leader")[0]?._id || null;
+  const leader = data.team.filter((item) => item.role === "leader")[0]?._id?.toString() || null;
 
-  let exportItems = [
+  const exportItems = [
     {
       key: "exportData",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data, "total", data.team);
+        await exportLigneBusJeune(cohort?.name, data, "total", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -149,7 +170,7 @@ export default function View(props) {
     {
       key: "exportDataAller",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data, "Aller", data.team);
+        await exportLigneBusJeune(cohort?.name, data, "Aller", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -161,7 +182,7 @@ export default function View(props) {
     {
       key: "exportDataRetour",
       action: async () => {
-        await exportLigneBusJeune(cohort.name, data, "Retour", data.team);
+        await exportLigneBusJeune(cohort?.name, data, "Retour", data.team);
       },
       render: (
         <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
@@ -245,12 +266,12 @@ export default function View(props) {
               .filter((item) => item.role === "supervisor")
               .map((value) => (
                 <BusTeam
-                  key={value._id}
+                  key={value._id?.toString()}
                   bus={data}
                   setBus={setData}
                   title="Encadrant"
                   role={"supervisor"}
-                  idTeam={value._id}
+                  idTeam={value._id?.toString()}
                   addOpen={addOpen}
                   setAddOpen={setAddOpen}
                   cohort={cohort}
@@ -263,7 +284,7 @@ export default function View(props) {
 
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">
-              {data.meetingsPointsDetail.map((pdr, index) => (
+              {data.meetingsPointsDetail?.map((pdr, index) => (
                 <PointDeRassemblement
                   bus={data}
                   pdr={pdr}

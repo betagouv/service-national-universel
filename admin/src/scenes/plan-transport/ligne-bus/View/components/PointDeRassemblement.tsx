@@ -1,39 +1,72 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { canEditLigneBusPointDeRassemblement, isBusEditionOpen, isPdrEditionOpen, ROLES, translate } from "snu-lib";
-import DoubleProfil from "../../components/Icons/DoubleProfil";
-import Pencil from "../../../../../assets/icons/Pencil";
-import ExternalLink from "../../../../../assets/icons/ExternalLink";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { BsChevronDown, BsSearch } from "react-icons/bs";
+import { toastr } from "react-redux-toastr";
+
+import { canEditLigneBusPointDeRassemblement, CohortType, isBusEditionOpen, LigneBusType, PointDeRassemblementType, ROLES, translate } from "snu-lib";
+
+import { AuthState } from "@/redux/auth/reducer";
+import api from "@/services/api";
+import Pencil from "@/assets/icons/Pencil";
+import ExternalLink from "@/assets/icons/ExternalLink";
+import { capture } from "@/sentry";
+import Loader from "@/components/Loader";
+
 import Select from "../../components/Select";
 import Field from "../../components/Field";
-import PDR from "../../components/Icons/PDR";
-import { BsChevronDown, BsSearch } from "react-icons/bs";
-import { capture } from "../../../../../sentry";
-import { toastr } from "react-redux-toastr";
-import api from "../../../../../services/api";
-import Loader from "../../../../../components/Loader";
+import PDRIcon from "../../components/Icons/PDR";
+import { Button } from "@snu/ds/admin";
 
 const options = [
   { label: "Bus", value: "bus" },
   { label: "Train", value: "train" },
   { label: "Avion", value: "avion" },
-  // { label: "Fusée", value: "fusée" },
 ];
 
 const keys = ["code", "name", "city", "zip", "department", "region"];
 
-export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, getVolume, cohort }) {
-  const user = useSelector((state) => state.Auth.user);
+interface FormErrors {
+  meetingHour?: string;
+  busArrivalHour?: string;
+  departureHour?: string;
+  returnHour?: string;
+}
+
+type FormValue = Partial<
+  PointDeRassemblementType &
+    LigneBusType & {
+      transportType?: string;
+      meetingHour?: string;
+      busArrivalHour?: string;
+      departureHour?: string;
+      returnHour?: string;
+      meetingPointId?: string;
+    }
+>;
+
+interface PointDeRassemblementProps {
+  bus: LigneBusType;
+  setBus: React.Dispatch<React.SetStateAction<LigneBusType>>;
+  index: number;
+  pdr: FormValue;
+  volume?: { youngsCount: number; meetingPointId: string }[];
+  getVolume?: () => void;
+  cohort?: CohortType | null;
+}
+
+export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, getVolume, cohort }: PointDeRassemblementProps) {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
   const [editPdr, setEditPdr] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState({});
+  const [errors, setErrors] = React.useState<FormErrors>({});
   const [open, setOpen] = React.useState(false);
-  const [listPDR, setListPDR] = React.useState([]);
-  const [filteredPDR, setFilteredPDR] = React.useState([]);
+  const [listPDR, setListPDR] = React.useState<FormValue[]>([]);
+  const [filteredPDR, setFilteredPDR] = React.useState<FormValue[]>([]);
   const [search, setSearch] = React.useState("");
-  const [selectedPDR, setSelectedPDR] = React.useState(pdr);
-  const [data, setData] = React.useState({
+  const [selectedPDR, setSelectedPDR] = React.useState<FormValue>(pdr);
+  const [data, setData] = React.useState<FormValue>({
     transportType: pdr.transportType || "bus",
     meetingHour: pdr.meetingHour || "",
     busArrivalHour: pdr.busArrivalHour || "",
@@ -41,9 +74,10 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
     returnHour: pdr.returnHour || "",
   });
 
-  const refSelect = React.useRef(null);
-  const refInput = React.useRef(null);
-  const refContainer = React.useRef(null);
+  const refSelect = React.useRef<HTMLDivElement>(null);
+  const refInput = React.useRef<HTMLInputElement>(null);
+  const refContainer = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (refContainer.current && refContainer.current.contains(event.target)) {
@@ -88,17 +122,17 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
 
   React.useEffect(() => {
     if (listPDR.length === 0) return;
-    let filteredPDR = listPDR
+    const filteredPDR = listPDR
       .filter((item) => {
         if (search === "") return true;
-        for (let key of keys) {
+        for (const key of keys) {
           if (item[key].toLowerCase().includes(search?.toLowerCase())) {
             return true;
           }
         }
         return false;
       })
-      .filter((item) => !bus.meetingPointsIds.includes(item._id.toString()));
+      .filter((item) => !bus.meetingPointsIds.includes(item._id?.toString() || ""));
 
     setFilteredPDR(filteredPDR);
   }, [search, listPDR, bus]);
@@ -107,13 +141,13 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
     try {
       setIsLoading(true);
       setErrors({});
-      let errors = {};
+      const errors: FormErrors = {};
 
       const regex = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
-      if (!regex.test(data.meetingHour)) errors.meetingHour = "Format invalide (hh:mm)";
-      if (!regex.test(data.busArrivalHour)) errors.busArrivalHour = "Format invalide (hh:mm)";
-      if (!regex.test(data.departureHour)) errors.departureHour = "Format invalide (hh:mm)";
-      if (!regex.test(data.returnHour)) errors.returnHour = "Format invalide (hh:mm)";
+      if (!regex.test(data.meetingHour || "")) errors.meetingHour = "Format invalide (hh:mm)";
+      if (!regex.test(data.busArrivalHour || "")) errors.busArrivalHour = "Format invalide (hh:mm)";
+      if (!regex.test(data.departureHour || "")) errors.departureHour = "Format invalide (hh:mm)";
+      if (!regex.test(data.returnHour || "")) errors.returnHour = "Format invalide (hh:mm)";
 
       //check if meeting hour is before bus arrival hour
       if (checkTime(data.departureHour, data.meetingHour)) errors.meetingHour = "L'heure de convocation doit être avant l'heure de départ";
@@ -138,13 +172,13 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
         return setIsLoading(false);
       }
       setBus(ligneInfo);
-      await getVolume();
+      await getVolume?.();
       setEditPdr(false);
       setIsLoading(false);
       setSearch("");
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification des informations du point de rassemblement");
+      toastr.error("Oups, une erreur est survenue lors de la modification des informations du point de rassemblement", "");
       setIsLoading(false);
     }
   };
@@ -162,10 +196,6 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
         <div className="flex items-center gap-4">
           <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
-          <div className="ml-3 flex items-center gap-2">
-            <DoubleProfil className="text-gray-400" />
-            <div className="pb-1 text-lg font-medium leading-5 text-gray-900">{volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0} </div>
-          </div>
         </div>
         {canEditLigneBusPointDeRassemblement(user) || isBusEditionOpen(user, cohort) ? (
           <>
@@ -330,8 +360,14 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
             />
           </div>
         </div>
+        <div className="mt-3 flex items-center gap-2">
+          <div className="pb-1 text-lg font-medium leading-5 text-gray-900"> </div>
+          <Link to={`/ligne-de-bus/volontaires/point-de-rassemblement/${pdr._id?.toString()}?cohort=${cohort?.name}`} className="w-full">
+            <Button type="tertiary" title={`Voir les volontaires (${volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0})`} className="w-full max-w-none" />
+          </Link>
+        </div>
         <div className="mt-8 flex justify-end">
-          <PDR />
+          <PDRIcon />
         </div>
       </div>
     </div>
@@ -339,8 +375,8 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
 }
 
 function checkTime(time1, time2) {
-  var time1Split = time1.split(":");
-  var time2Split = time2.split(":");
+  const time1Split = time1.split(":");
+  const time2Split = time2.split(":");
 
   // Check if the hours are equal
   if (time1Split[0] === time2Split[0]) {

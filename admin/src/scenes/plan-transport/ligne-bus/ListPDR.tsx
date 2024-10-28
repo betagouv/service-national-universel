@@ -1,8 +1,18 @@
 import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory } from "react-router-dom";
-import { formatDateFR, getDepartmentNumber, translate, translatePhase1, youngPlanDeTranportExportFields } from "snu-lib";
+import { Link, RouteComponentProps, useHistory } from "react-router-dom";
+import {
+  CohesionCenterType,
+  formatDateFR,
+  getDepartmentNumber,
+  LigneBusType,
+  LigneToPointType,
+  PointDeRassemblementType,
+  translate,
+  translatePhase1,
+  youngPlanDeTranportExportFields,
+} from "snu-lib";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import Loader from "../../../components/Loader";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
@@ -10,29 +20,35 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 import { Title } from "../components/commons";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
 
 const contactTypes = {
   email: "Adresse e-mail",
   phone: "Téléphone",
 };
 
-export default function ListPDR(props) {
-  const id = props.match && props.match.params && props.match.params.id;
-  if (!id) return <div />;
-  const cohort = new URLSearchParams(props.location.search).get("cohort");
-  const [PDR, setPDR] = React.useState();
-  const [bus, setBus] = React.useState();
-  const [PDRDetails, setPDRDetails] = React.useState([]);
-  const [centers, setCenters] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [isExportOpen, setIsExportOpen] = React.useState(false);
+const pageId = "listYoungPDR";
+
+export default function ListPDR(props: RouteComponentProps<{ id: string }>) {
   const history = useHistory();
 
-  const [data, setData] = React.useState([]);
-  const pageId = "listYoungPDR";
-  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [bus, setBus] = React.useState<LigneBusType[]>();
+  const [PDRDetails, setPDRDetails] = React.useState<LigneToPointType[]>([]);
+  const [centers, setCenters] = React.useState<CohesionCenterType[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [isExportOpen, setIsExportOpen] = React.useState(false);
+
+  const [data, setData] = React.useState<LigneBusType[]>([]);
+  const [selectedFilters, setSelectedFilters] = React.useState<{ [key: string]: Filter }>({});
   const [paramData, setParamData] = React.useState({ page: 0 });
   const [size, setSize] = useState(10);
+  const [PDR, setPDR] = React.useState<PointDeRassemblementType>();
+
+  const cohort = new URLSearchParams(props.location.search).get("cohort");
+  const ligneId = new URLSearchParams(props.location.search).get("ligneId");
+
+  const id = props.match && props.match.params && props.match.params.id;
+  if (!id) return <div />;
 
   const fetchData = async () => {
     try {
@@ -44,8 +60,8 @@ export default function ListPDR(props) {
         return history.push(`/point-de-rassemblement/${id}`);
       }
 
-      const centerIds = [];
-      for await (const b of data.bus) {
+      const centerIds: string[] = [];
+      for await (const b of data.bus as LigneBusType[]) {
         if (!b.centerId && centerIds.includes(b.centerId)) continue;
         centerIds.push(b.centerId);
         const { ok, code, data } = await api.get(`/cohesion-center/${b.centerId}`);
@@ -62,7 +78,7 @@ export default function ListPDR(props) {
       setLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement");
+      toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement", "");
     }
   };
 
@@ -71,10 +87,10 @@ export default function ListPDR(props) {
   }, []);
 
   function transformVolontaires(data, values) {
-    let all = data;
+    const all = data;
     return all.map((data) => {
-      let b = bus.find((option) => option?._id?.toString() === data.ligneId);
-      let center = centers.find((option) => option?._id?.toString() === b?.centerId);
+      const b = bus?.find((option) => option?._id?.toString() === data.ligneId);
+      const center = centers.find((option) => option?._id?.toString() === b?.centerId);
       const allFields = {
         identity: {
           ID: data._id.toString(),
@@ -118,12 +134,12 @@ export default function ListPDR(props) {
         },
         phase1Transport: {
           "ID du transport": b?.busId || "",
-          "ID du point de rassemblement": PDR.code || "",
-          "Nom du point de rassemblement": PDR.name || "",
-          "Adresse du point de rassemblement": PDR.address || "",
-          "Ville du point de rassemblement": PDR.city || "",
-          "Département du point de rassemblement": PDR.department || "",
-          "Région du point de rassemblement": PDR.region || "",
+          "ID du point de rassemblement": PDR?.code || "",
+          "Nom du point de rassemblement": PDR?.name || "",
+          "Adresse du point de rassemblement": PDR?.address || "",
+          "Ville du point de rassemblement": PDR?.city || "",
+          "Département du point de rassemblement": PDR?.department || "",
+          "Région du point de rassemblement": PDR?.region || "",
           "Date et heure de départ (aller)": formatDateFR(b?.departuredDate) + " - " + PDRDetails.find((option) => option?.lineId === b?._id.toString())?.departureHour || "",
           "Date et heure d’arrivée (retour)": formatDateFR(b?.returnDate) + " - " + PDRDetails.find((option) => option?.lineId === b?._id.toString())?.returnHour || "",
         },
@@ -134,7 +150,7 @@ export default function ListPDR(props) {
         },
       };
 
-      let fields = { ID: data._id };
+      const fields = { ID: data._id };
       for (const element of values) {
         let key;
         for (key in allFields[element]) fields[key] = allFields[element][key];
@@ -145,14 +161,14 @@ export default function ListPDR(props) {
 
   if (loading) return <Loader />;
 
-  const filterArray = [
+  const filterArray: Filter[] = [
     {
       title: "Ligne",
       name: "ligneId",
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
-        return bus.find((option) => option._id.toString() === item)?.busId;
+        return bus?.find((option) => option._id.toString() === item)?.busId;
       },
     },
     {
@@ -161,7 +177,7 @@ export default function ListPDR(props) {
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
-        return bus.find((option) => option?.sessionId?.toString() === item).centerId;
+        return bus?.find((option) => option?.sessionId?.toString() === item)?.centerId;
       },
     },
     {
@@ -170,8 +186,8 @@ export default function ListPDR(props) {
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
-        let b = bus.find((option) => option?.sessionId?.toString() === item);
-        return centers.find((option) => option._id.toString() === b.centerId)?.name;
+        const b = bus?.find((option) => option?.sessionId?.toString() === item);
+        return centers.find((option) => option._id.toString() === b?.centerId)?.name;
       },
     },
     {
@@ -180,11 +196,10 @@ export default function ListPDR(props) {
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A") return item;
-        let b = bus.find((option) => option?.sessionId?.toString() === item);
-        return centers.find((option) => option._id.toString() === b.centerId)?.city;
+        const b = bus?.find((option) => option?.sessionId?.toString() === item);
+        return centers.find((option) => option._id.toString() === b?.centerId)?.city;
       },
     },
-
     {
       title: "Région du volontaire",
       name: "region",
@@ -204,9 +219,9 @@ export default function ListPDR(props) {
         <Title>Volontaires</Title>
         <div className="flex items-center gap-2 rounded-full bg-gray-200 py-1 px-2 leading-7">
           <div className="text-xs leading-5 text-gray-800">
-            {PDR.address}, {PDR.zip}, {PDR.city}
+            {PDR?.address}, {PDR?.zip}, {PDR?.city}
           </div>
-          <Link to={`/point-de-rassemblement/${PDR._id}`} target="_blank">
+          <Link to={`/point-de-rassemblement/${PDR?._id}`} target="_blank">
             <ExternalLink className="font-bold leading-5 text-[#9CA3AF]" />
           </Link>
         </div>
@@ -216,9 +231,9 @@ export default function ListPDR(props) {
         <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
           <div className="flex items-center gap-2">
             <Filters
-              defaultUrlParam={`cohort=${cohort}`}
+              defaultUrlParam={ligneId ? `cohort=${cohort}&ligneId=${ligneId}` : `cohort=${cohort}`}
               pageId={pageId}
-              route={`/elasticsearch/young/by-point-de-rassemblement/${PDR._id}/search`}
+              route={`/elasticsearch/young/by-point-de-rassemblement/${PDR?._id}/search`}
               setData={(value) => setData(value)}
               filters={filterArray}
               searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
@@ -236,11 +251,10 @@ export default function ListPDR(props) {
           <ModalExport
             isOpen={isExportOpen}
             setIsOpen={setIsExportOpen}
-            route={`/elasticsearch/young/by-point-de-rassemblement/${PDR._id}/export`}
+            route={`/elasticsearch/young/by-point-de-rassemblement/${PDR?._id}/export`}
             transform={transformVolontaires}
             exportFields={youngPlanDeTranportExportFields}
             selectedFilters={selectedFilters}
-            filters={filterArray}
             exportTitle="volontaires"
           />
         </div>

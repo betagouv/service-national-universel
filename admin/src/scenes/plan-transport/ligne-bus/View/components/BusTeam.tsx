@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { canEditLigneBusTeam, isBusEditionOpen, isTeamLeaderOrSupervisorEditable, translate } from "snu-lib";
+import { canEditLigneBusTeam, CohortType, isBusEditionOpen, isTeamLeaderOrSupervisorEditable, LigneBusType, translate } from "snu-lib";
 import validator from "validator";
 import Bin from "../../../../../assets/Bin";
 import Pencil from "../../../../../assets/icons/Pencil";
@@ -10,25 +10,60 @@ import { capture } from "../../../../../sentry";
 import api from "../../../../../services/api";
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
+import { AuthState } from "@/redux/auth/reducer";
 
-export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam, cohort }) {
-  const user = useSelector((state) => state.Auth.user);
+interface BusTeamProps {
+  bus: LigneBusType;
+  setBus: React.Dispatch<React.SetStateAction<LigneBusType>>;
+  title: string;
+  role: string;
+  addOpen?: boolean;
+  setAddOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  idTeam?: string | null;
+  cohort?: CohortType | null;
+}
+
+interface BusTeamData {
+  role: string;
+  idTeam?: string;
+  firstname?: string;
+  lastname?: string;
+  birthdate?: Date;
+  mail?: string;
+  phone?: string;
+  forth: boolean;
+  back: boolean;
+}
+
+interface FormErrors {
+  firstname?: string;
+  lastname?: string;
+  birthdate?: string;
+  mail?: string;
+  phone?: string;
+  travel?: string;
+}
+
+export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam, cohort }: BusTeamProps) {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState({});
-  const [data, setData] = React.useState({
+  const [errors, setErrors] = React.useState<FormErrors>({});
+  const [data, setData] = React.useState<BusTeamData>({
     idTeam: "create",
     role: role,
     forth: false,
     back: false,
   });
+
   React.useEffect(() => {
     if (!idTeam && setAddOpen) setEditInfo(true);
     if (idTeam) {
-      const member = bus.team.filter((item) => item._id === idTeam);
+      const member = bus.team.filter((item) => item._id?.toString() === idTeam);
       setData({
         role: role,
-        idTeam: member[0]._id,
+        idTeam: member[0]._id?.toString(),
         firstname: member[0].firstName,
         lastname: member[0].lastName,
         birthdate: member[0].birthdate,
@@ -45,7 +80,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
     try {
       setIsLoading(true);
       setErrors({});
-      let errors = {};
+      const errors: FormErrors = {};
 
       const errorEmail = "Adresse email invalide";
       const errorPhone = "Numéro de téléphone invalide";
@@ -83,7 +118,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification de la ligne");
+      toastr.error("Oups, une erreur est survenue lors de la modification de la ligne", "");
       setIsLoading(false);
     }
   };
@@ -106,7 +141,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression");
+      toastr.error("Oups, une erreur est survenue lors de la suppression", "");
       setIsLoading(false);
     }
   };
@@ -120,7 +155,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
             {!editInfo ? (
               <>
                 {role === "supervisor" && bus.team.filter((item) => item.role === "supervisor").length && bus.team.length < 11 && !addOpen ? (
-                  <button className="flex text-blue-600 mr-[44rem] mt-1 cursor-pointer text-sm hover:underline" onClick={() => setAddOpen(true)}>
+                  <button className="flex text-blue-600 mr-[44rem] mt-1 cursor-pointer text-sm hover:underline" onClick={() => setAddOpen?.(true)}>
                     + Ajouter un encadrant
                   </button>
                 ) : null}

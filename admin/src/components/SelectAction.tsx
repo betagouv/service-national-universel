@@ -1,5 +1,25 @@
-import React from "react";
+import React, { ReactElement } from "react";
 import ChevronDown from "../assets/icons/ChevronDown";
+
+type OptionGroupItem = {
+  key: string;
+  render: React.ReactNode;
+};
+
+interface SelectActionProps {
+  optionsGroup: Array<{
+    key: string;
+    title: string | React.ReactNode;
+    items: Array<OptionGroupItem>;
+  }>;
+  title: string;
+  Icon?: ReactElement;
+  disabled?: boolean;
+  alignItems?: "left" | "center" | "right";
+  buttonClassNames?: string;
+  textClassNames?: string;
+  rightIconClassNames?: string;
+}
 
 export default function SelectAction({
   optionsGroup,
@@ -10,11 +30,11 @@ export default function SelectAction({
   buttonClassNames = "border-[1px] border-gray-300",
   textClassNames = "text-gray-700 font-medium text-sm",
   rightIconClassNames = "text-gray-400",
-}) {
+}: SelectActionProps) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [loadingLabel, setLoadingLabel] = React.useState("Chargement...");
-  const ref = React.useRef(null);
+  const ref = React.useRef<HTMLDivElement>(null);
 
   const onClickItem = async (item) => {
     setLoading(true);
