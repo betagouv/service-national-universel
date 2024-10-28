@@ -2,7 +2,7 @@ import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
-import { PointDeRassemblementType, SessionPhase1Type } from "./mongoSchema";
+import { PointDeRassemblementType, ReferentType, SessionPhase1Type, YoungType } from "./mongoSchema";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -33,6 +33,8 @@ const SUB_ROLES = {
   coordinateur_cle: "coordinateur_cle",
   none: "",
 };
+
+export const SUB_ROLE_GOD = "god";
 
 const SUPPORT_ROLES = {
   admin: "Modérateur",
@@ -472,35 +474,35 @@ function canSendPlanDeTransport(user) {
   return [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.TRANSPORTER].includes(user.role);
 }
 
-function isAdmin(user: UserDto) {
+function isAdmin(user: Pick<UserDto, "role">) {
   return ROLES.ADMIN === user.role;
 }
 
-function isReferentRegDep(user: UserDto) {
+function isReferentRegDep(user: Pick<UserDto, "role">) {
   return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 }
 
-function isSupervisor(user: UserDto) {
+function isSupervisor(user: Pick<UserDto, "role">) {
   return ROLES.SUPERVISOR === user.role;
 }
 
-function isReferentOrAdmin(user: UserDto) {
+function isReferentOrAdmin(user: Pick<UserDto, "role">) {
   return isAdmin(user) || isReferentRegDep(user);
 }
 
-function isAdminCle(user) {
+function isAdminCle(user: Pick<UserDto, "role">) {
   return user?.role === ROLES.ADMINISTRATEUR_CLE;
 }
 
-function isChefEtablissement(user) {
+function isChefEtablissement(user: Pick<UserDto, "role" | "subRole">) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.referent_etablissement;
 }
 
-function isCoordinateurEtablissement(user) {
+function isCoordinateurEtablissement(user: Pick<UserDto, "role" | "subRole">) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.coordinateur_cle;
 }
 
-function isReferentClasse(user) {
+function isReferentClasse(user: Pick<UserDto, "role">) {
   return user?.role === ROLES.REFERENT_CLASSE;
 }
 
@@ -517,16 +519,24 @@ const canEditPresenceYoung = (actor) => {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 };
 
-const canSigninAs = (actor, target, source) => {
-  if (isAdmin(actor)) return true;
+const canSigninAs = (
+  actor: Pick<UserDto, "role" | "department" | "region">,
+  target: Pick<ReferentType, "role" | "subRole" | "department" | "region"> | Pick<YoungType, "department" | "region">,
+  source: "referent" | "young",
+) => {
+  if (isAdmin(actor)) return source === "young" || (target as ReferentType).subRole !== SUB_ROLE_GOD;
   if (!isReferentRegDep(actor)) return false;
 
   if (source === "referent") {
+    // ReferentType
+    const targetReferent = target as Pick<ReferentType, "role" | "subRole" | "department" | "region">;
     const allowedTargetRoles = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];
-    if (!allowedTargetRoles.includes(target.role)) return false;
-    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.some((d) => target.department.includes(d))) return true;
+    if (!allowedTargetRoles.includes(targetReferent.role!)) return false;
+    if (actor.role === ROLES.REFERENT_DEPARTMENT && (actor.department as string[]).some((d) => targetReferent.department.includes(d))) return true;
   } else {
-    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department)) return true;
+    // YoungType
+    const targetYoung = target as Pick<YoungType, "department" | "region">;
+    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(targetYoung.department!)) return true;
   }
   if (actor.role === ROLES.REFERENT_REGION && actor.region === target.region) return true;
   return false;
@@ -923,7 +933,7 @@ function canCreateTags(actor) {
 }
 
 function isSuperAdmin(actor) {
-  return [ROLES.ADMIN].includes(actor.role) && actor.subRole === "god";
+  return [ROLES.ADMIN].includes(actor.role) && actor.subRole === SUB_ROLE_GOD;
 }
 
 function canCheckIfRefExist(actor) {

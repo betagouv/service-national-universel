@@ -2,7 +2,7 @@ import request from "supertest";
 import passport from "passport";
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { ClasseSchoolYear, InvitationType, ROLES, STATUS_CLASSE, SUB_ROLES, UserDto } from "snu-lib";
+import { ClasseSchoolYear, InvitationType, ROLES, STATUS_CLASSE, SUB_ROLE_GOD, SUB_ROLES, UserDto } from "snu-lib";
 
 import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import {
@@ -356,7 +356,7 @@ describe("POST /cle/referent/send-invitation-chef-etablissement", () => {
     // @ts-ignore
     passport.user.role = ROLES.ADMIN;
     // @ts-ignore
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
 
     const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();
 
@@ -395,7 +395,7 @@ describe("POST /cle/referent/send-invitation-referent-classe", () => {
     // @ts-ignore
     passport.user.role = ROLES.ADMIN;
     // @ts-ignore
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
 
     const res = await request(getAppHelper()).post("/cle/referent/send-invitation-referent-classe-verifiee").send();
 

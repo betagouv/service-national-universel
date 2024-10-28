@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { HiHome } from "react-icons/hi";
 
 import dayjs from "@/utils/dayjs.utils";
 import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
 import { BsDownload } from "react-icons/bs";
 import { IoFlashOutline } from "react-icons/io5";
-import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs, ERRORS } from "snu-lib";
+import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs, ERRORS, SUB_ROLE_GOD } from "snu-lib";
 import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
@@ -243,7 +242,7 @@ const Hit = ({ hit, onClick, user, structure }) => {
         {hit.role && (
           <>
             <Badge title={translate(hit.role)} />
-            {hit.subRole && hit.subRole !== "god" ? <Badge title={translate(hit.subRole)} status={"secondary"} /> : null}
+            {hit.subRole && hit.subRole !== SUB_ROLE_GOD ? <Badge title={translate(hit.subRole)} status={"secondary"} /> : null}
           </>
         )}
       </td>

@@ -3,7 +3,7 @@ import { Schema, InferSchemaType } from "mongoose";
 import { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } from "../roles";
 import { ReferentCreatedBy, InvitationType } from "../constants/referentConstants";
 
-import { InterfaceExtended } from "..";
+import { InterfaceExtended, SUB_ROLE_GOD } from "..";
 
 const referentMetadataSchema = {
   createdBy: {
@@ -191,7 +191,7 @@ export const ReferentSchema = {
 
   subRole: {
     type: String,
-    enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"],
+    enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, SUB_ROLE_GOD],
   },
 
   // Specific fields
