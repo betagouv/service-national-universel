@@ -474,35 +474,40 @@ function canSendPlanDeTransport(user) {
   return [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.TRANSPORTER].includes(user.role);
 }
 
-function isAdmin(user: Pick<UserDto, "role">) {
+interface UserRoles {
+  role?: ReferentType["role"];
+  subRole?: ReferentType["subRole"];
+}
+
+function isAdmin(user: UserRoles) {
   return ROLES.ADMIN === user.role;
 }
 
-function isReferentRegDep(user: Pick<UserDto, "role">) {
-  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
+function isReferentRegDep(user: UserRoles) {
+  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role || "");
 }
 
-function isSupervisor(user: Pick<UserDto, "role">) {
+function isSupervisor(user: UserRoles) {
   return ROLES.SUPERVISOR === user.role;
 }
 
-function isReferentOrAdmin(user: Pick<UserDto, "role">) {
+function isReferentOrAdmin(user: UserRoles) {
   return isAdmin(user) || isReferentRegDep(user);
 }
 
-function isAdminCle(user: Pick<UserDto, "role">) {
+function isAdminCle(user: UserRoles) {
   return user?.role === ROLES.ADMINISTRATEUR_CLE;
 }
 
-function isChefEtablissement(user: Pick<UserDto, "role" | "subRole">) {
+function isChefEtablissement(user: UserRoles) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.referent_etablissement;
 }
 
-function isCoordinateurEtablissement(user: Pick<UserDto, "role" | "subRole">) {
+function isCoordinateurEtablissement(user: UserRoles) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.coordinateur_cle;
 }
 
-function isReferentClasse(user: Pick<UserDto, "role">) {
+function isReferentClasse(user: UserRoles) {
   return user?.role === ROLES.REFERENT_CLASSE;
 }
 
