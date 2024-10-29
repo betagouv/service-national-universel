@@ -318,7 +318,7 @@ export default function Inscription() {
         <div className="flex items-center justify-between py-8">
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
-            {!invitationState.isLoading || invitationState.canInvite ? (
+            {!invitationState.isLoading && invitationState.canInvite ? (
               <Link
                 to={baseInscriptionPath}
                 onClick={handleClickInscription}
