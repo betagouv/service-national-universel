@@ -42,7 +42,7 @@ export default function ModalExport({ isOpen, setIsOpen, route, transform, expor
             <p className="text-center text-sm text-gray-400">Rappel des filtres appliqués</p>
             <p className="text-center text-sm text-gray-600">
               {Object.keys(selectedFilters)
-                .filter((e) => selectedFilters[e]?.filter?.length && selectedFilters[e]?.filter[0] !== "")
+                .filter((e) => selectedFilters[e]?.filter?.length && selectedFilters?.[e]?.filter[0] !== "")
                 .map((e) => `${translateField(e)} : ${translate(selectedFilters[e]?.filter)}`)
                 .join(" • ")}
             </p>

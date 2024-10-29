@@ -17,15 +17,18 @@ function classNames(...classes) {
 }
 
 export interface Filter {
-  title: string;
-  name: string;
-  missingLabel: string;
+  title?: string;
+  name?: string;
+  missingLabel?: string;
   translate?: (item: any) => any;
   filter?: any[];
   // custom ?
   parentGroup?: string;
   customComponent?: any;
-  defaultValue?: string;
+  defaultValue?: string | string[];
+  isSingle?: boolean;
+  reduce?: (value: any[]) => any[];
+  sort?: (value: any[]) => any[];
   getQuery?: (value: any) => any;
   allowEmpty?: boolean;
   disabledBaseQuery?: boolean;
@@ -166,9 +169,9 @@ export default function Filters({
     const newFilters = {};
     filters.map((f) => {
       if (f?.customComponent?.getQuery) {
-        newFilters[f.name] = { filter: f.defaultValue, customComponentQuery: f.getQuery?.(f.defaultValue) };
+        newFilters[f?.name || ""] = { filter: f.defaultValue, customComponentQuery: f.getQuery?.(f.defaultValue) };
       } else {
-        newFilters[f.name] = { filter: f?.defaultValue ? f.defaultValue : [] };
+        newFilters[f?.name || ""] = { filter: f?.defaultValue ? f.defaultValue : [] };
       }
     });
     return newFilters;
@@ -306,7 +309,7 @@ export default function Filters({
                                       selectedFilters={selectedFilters}
                                       // @ts-expect-error
                                       setSelectedFilters={setSelectedFilters}
-                                      data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name] || []}
+                                      data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name || ""] || []}
                                       isShowing={isShowing === item.name}
                                       setIsShowing={(value) => setIsShowing(value)}
                                       setParamData={setParamData}
