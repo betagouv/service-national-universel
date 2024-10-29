@@ -166,7 +166,7 @@ export function getConfirmModalContent({
   } else if (isGoalReached) {
     title = (
       <span>
-        L&apos;objectif d&apos;inscription de votre région a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+        L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
         <strong className="text-bold">validé sur liste complémentaire</strong>.
       </span>
     );
@@ -196,7 +196,7 @@ export function getConfirmModalContent({
   } else {
     title = (
       <span>
-        L&apos;objectif d&apos;inscription de votre région n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+        L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
         <strong className="text-bold">validé sur liste principale</strong>.
       </span>
     );
