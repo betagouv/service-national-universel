@@ -223,7 +223,6 @@ export default function Filters({
               placeholder={searchPlaceholder}
               value={selectedFilters?.searchbar?.filter?.[0] || ""}
               onChange={(e) => {
-                // @ts-expect-error
                 setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
               }}
               className={`h-full w-full text-xs text-gray-600`}
@@ -307,7 +306,6 @@ export default function Filters({
                                       filter={customItem}
                                       // @ts-expect-error
                                       selectedFilters={selectedFilters}
-                                      // @ts-expect-error
                                       setSelectedFilters={setSelectedFilters}
                                       data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name || ""] || []}
                                       isShowing={isShowing === item.name}
