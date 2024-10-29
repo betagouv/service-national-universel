@@ -54,7 +54,7 @@ export const getCompletionObjectifs = async (department: string, cohort: string)
   return {
     department: completionObjectifDepartement,
     region: completionObjectifRegion,
-    // completion des objectifs départemententaux et régionaux
+    // completion des objectifs départementaux et régionaux
     isAtteint: completionObjectifRegion.isAtteint || completionObjectifDepartement.isAtteint,
     tauxRemplissage: Math.max(completionObjectifRegion.tauxRemplissage, completionObjectifDepartement.tauxRemplissage),
     tauxLimiteRemplissage: FILLING_RATE_LIMIT,
