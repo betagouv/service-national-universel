@@ -188,6 +188,8 @@ export default function Settings() {
                       value={statusOptions.find((o) => o.value === data.status)}
                       options={statusOptions}
                       onChange={(e) => setData({ ...data, status: e.value })}
+                       closeMenuOnSelect
+
                       disabled={isLoading || readOnly}
                     />
                   </div>
