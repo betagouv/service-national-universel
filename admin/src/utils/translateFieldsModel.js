@@ -712,12 +712,70 @@ const translateFieldContract = (f) => {
   }
 };
 
+export const translateFieldClasse = (f) => {
+  switch (f) {
+    case "etablissementId":
+      return "ID de l'établissement";
+    case "referentClasseIds":
+      return "ID du référent";
+    case "cohort":
+      return "Cohorte";
+    case "uniqueKeyAndId":
+      return "Clé unique";
+    case "name":
+      return "Nom";
+    case "coloration":
+      return "Coloration";
+    case "estimatedSeats":
+      return "Effectif prévisionnel";
+    case "totalSeats":
+      return "Effectif ajusté";
+    case "filiere":
+      return "Filière";
+    case "grade":
+      return "Niveau";
+    case "grades/0":
+      return "Niveau";
+    case "grades/1":
+      return "Niveau";
+    case "grades/2":
+      return "Niveau";
+    case "cohesionCenterId":
+      return "ID du centre de cohésion";
+    case "sessionId":
+      return "ID de la session";
+    case "ligneId":
+      return "ID de la ligne de bus";
+    case "pointDeRassemblementId":
+      return "ID du point de rassemblement";
+    case "status":
+      return "Statut";
+    case "statusPhase1":
+      return "Statut de la phase 1";
+    case "department":
+      return "Département";
+    case "region":
+      return "Région";
+    case "academy":
+      return "Académie";
+    case "schoolYear":
+      return "Année scolaire";
+    case "type":
+      return "Type";
+    case "createdAt":
+      return "Créé(e) le";
+    default:
+      return f;
+  }
+};
+
 export const translateModelFields = (model, field) => {
   if (model === "structure") return translateFieldStructure(field);
   if (model === "young") return translateFieldYoung(field);
   if (model === "referent") return translateFieldReferent(field);
   if (model === "mission") return translateFieldMission(field);
   if (model === "contract") return translateFieldContract(field);
+  if (model === "classe") return translateFieldClasse(field);
   return field;
 };
 

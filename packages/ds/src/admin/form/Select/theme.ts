@@ -27,7 +27,7 @@ export default function useReactSelectTheme({
       backgroundColor: disabled ? "#F9FAFB" : "white",
       border: cx({
         "1px solid #EF4444": error,
-        "1px solid #3B82F6": !error && isActive,
+        "2px solid #3B82F6": !error && isActive,
         "1px solid #E5E7EB": !error && !isActive,
       }),
       "&:hover": {

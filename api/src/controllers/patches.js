@@ -19,7 +19,8 @@ const get = async (req, res, model) => {
     if (!elem) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const data = await elem.patches.find({ ref: elem.id }).sort("-date");
-    return res.status(200).send({ ok: true, data });
+    return data;
+    //return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -33,7 +33,7 @@ import {
 
 import { capture, captureMessage } from "../../sentry";
 import { ERRORS, isReferent } from "../../utils";
-import { idSchema, validateId } from "../../utils/validator";
+import { idSchema, validateId, validateUpdateApplication } from "../../utils/validator";
 import emailsEmitter from "../../emails";
 import { RouteRequest, RouteResponse, UserRequest } from "../../controllers/request";
 import {
@@ -52,7 +52,7 @@ import {
 
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
-
+import patches from "../../controllers/patches";
 import { ClassesRoutesSchema } from "./classeValidator";
 import {
   buildUniqueClasseId,
@@ -79,6 +79,7 @@ import { accessControlMiddleware } from "../../middlewares/accessControlMiddlewa
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { isCohortInscriptionOpen } from "../../cohort/cohortService";
+import { isEmpty } from "bullmq";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -630,6 +631,22 @@ router.put("/:id/verify", async (req: UserRequest, res) => {
     classe = await classe.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: classe });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/patches", async (req: UserRequest, res) => {
+  try {
+    const classePatches = await patches.get(req, res, ClasseModel);
+    if (!classePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const pathsToIgnore = ["/seatsTaken", "/cohortId", "/uniqueKey", "/uniqueId", "/comments", "/trimester", "/metadata", "/id", "/updatedAt", "/referents"];
+    classePatches.forEach((patch) => {
+      patch.ops = patch.ops.filter((op) => !pathsToIgnore.includes(op.path));
+      patch.ops = patch.ops.filter((op) => !(op.op === "add" && (op.value === null || (Array.isArray(op.value) && op.value.length === 0))));
+    });
+    return res.status(200).send({ ok: true, data: classePatches });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

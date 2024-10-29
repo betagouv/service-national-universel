@@ -1367,11 +1367,16 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.get(
-  "/:id/patches",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req: UserRequest, res: Response) => await patches.get(req, res, ReferentModel),
-);
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    const referentPatches = await patches.get(req, res, ReferentModel);
+    if (!referentPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data: referentPatches });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 async function populateReferent(ref) {
   if (ref.subRole === SUB_ROLES.referent_etablissement) {

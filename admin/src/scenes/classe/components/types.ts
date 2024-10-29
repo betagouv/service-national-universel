@@ -20,3 +20,18 @@ export type InfoBus = {
   returnDate: string;
   returnHour: string;
 };
+
+type ClasseUpdateOperation = {
+  op: "add" | "remove" | "replace";
+  path: string;
+  value?: any;
+};
+
+export type ClassePatchesType = {
+  _id: string;
+  ops: ClasseUpdateOperation[];
+  modelName: "classe";
+  ref: string;
+  date: string;
+  user?: { firstName: string; lastName?: string };
+};

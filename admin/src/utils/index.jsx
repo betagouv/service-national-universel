@@ -1,7 +1,7 @@
 import PasswordValidator from "password-validator";
 import React from "react";
 import slugify from "slugify";
-import { formatStringLongDate, ROLES, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2 } from "snu-lib";
+import { formatStringLongDate, ROLES, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2, translateStatusClasse } from "snu-lib";
 import api from "../services/api";
 import { translateModelFields } from "./translateFieldsModel";
 import { environment } from "../config";
@@ -243,6 +243,8 @@ export function translateHistory(path, value) {
     return translateEngagement(value);
   } else if (isIsoDate(value)) {
     return formatStringLongDate(value);
+  } else if (path.includes("status")) {
+    return translateStatusClasse(value);
   } else {
     return translate(value);
   }

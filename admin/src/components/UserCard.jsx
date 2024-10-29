@@ -13,6 +13,13 @@ export default function UserCard({ user }) {
     if (user?.role === "Volontaire") return `/volontaire/${user._id}`;
     return null;
   }
+  function getAuthor(user) {
+    if (user.role) {
+      return translate(user.role);
+    } else {
+      return "Script";
+    }
+  }
 
   if (!user) return null;
   return (
@@ -22,10 +29,10 @@ export default function UserCard({ user }) {
           {getAvatar(user)}
         </div>
         <div className="flex w-10/12 flex-col leading-5">
-          <p className="w-full truncate font-medium decoration-2 underline-offset-2">
+          <p className="w-full truncate font-medium decoration-2 underline-offset-2 text-sm">
             {user.firstName} {user.lastName && user.lastName}
           </p>
-          <p className="w-full truncate capitalize text-gray-400 decoration-2 underline-offset-2">{translate(user?.role)}</p>
+          <p className="w-full truncate capitalize text-gray-500 text-xs decoration-2 underline-offset-2">{getAuthor(user)}</p>
         </div>
       </div>
     </a>
