@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import { Listbox, Transition } from "@headlessui/react";
@@ -43,13 +43,19 @@ export default function Inscription() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
   const [size, setSize] = useState(10);
+  const [invitationState, setInvitationState] = useState({
+    canInvite: false,
+    isLoading: true,
+  });
+
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
       try {
         const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
           filters: {},
-          exportFields: ["name", "uniqueKeyAndId"],
+          exportFields: ["name", "uniqueKeyAndId", "cohort"],
         });
         const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
           filters: {},
@@ -69,17 +75,17 @@ export default function Inscription() {
     const selectedClassId = selectedFilters?.classeId?.filter[0];
 
     if (!hasFilterSelectedOneClass) {
-      return "/inscription/create";
+      return "/volontaire/create";
     }
 
     const classe = classes?.find((c) => c._id === selectedClassId);
 
     if (!classe) {
       toastr.error("Oups, une erreur est survenue lors de la récupération de la classe");
-      return "/inscription/create";
+      throw new Error("Failed to fetch class");
     }
 
-    return `/inscription/create?classeId=${selectedClassId}`;
+    return `/volontaire/create?classeId=${selectedClassId}`;
   }, [classes, selectedFilters?.classeId?.filter]);
 
   const fetchCohortAndResolveInscriptionPath = useCallback(async () => {
@@ -91,7 +97,7 @@ export default function Inscription() {
     const classe = classes?.find((c) => c._id === selectedClassId);
 
     try {
-      const { ok, data: cohort } = await api.get(`/cohort/${classe.cohortId}`);
+      const { ok, data: cohort } = await api.get(`/cohort/${classe.cohort}`);
       if (!ok) {
         throw new Error("Failed to fetch cohort");
       }
@@ -102,10 +108,32 @@ export default function Inscription() {
 
       return baseInscriptionPath;
     } catch (error) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohort");
-      return "/inscription/create";
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
+      throw new Error("Failed to fetch cohort");
     }
   }, [baseInscriptionPath, classes, selectedFilters?.classeId?.filter, user]);
+
+  useEffect(() => {
+    const checkCanInvite = async () => {
+      setInvitationState((prev) => ({ ...prev, isLoading: true }));
+
+      if (!baseInscriptionPath.includes("classeId")) {
+        setInvitationState({
+          canInvite: true,
+          isLoading: false,
+        });
+        return;
+      }
+
+      const resultFetchCohortPath = await fetchCohortAndResolveInscriptionPath();
+      setInvitationState({
+        canInvite: !!resultFetchCohortPath,
+        isLoading: false,
+      });
+    };
+
+    checkCanInvite();
+  }, [baseInscriptionPath, fetchCohortAndResolveInscriptionPath]);
 
   if (!classes || !etablissements) return <Loader />;
 
@@ -290,15 +318,15 @@ export default function Inscription() {
         <div className="flex items-center justify-between py-8">
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
-            <Link
-              disabled={true}
-              to={baseInscriptionPath}
-              onClick={handleClickInscription}
-              className="ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out">
-              <AiOutlinePlus className="text-white h-4 w-4 group-hover:!text-blue-600" />
-              {/* TODO: condition a ajouter ici : canInviteYoung */}
-              <p>{selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}</p>
-            </Link>
+            {!invitationState.isLoading || invitationState.canInvite ? (
+              <Link
+                to={baseInscriptionPath}
+                onClick={handleClickInscription}
+                className="w-full ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out">
+                <AiOutlinePlus className="h-4 w-4 group-hover:!text-blue-600" />
+                <p>{selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}</p>
+              </Link>
+            ) : null}
             <ExportComponent
               title="Exporter les inscriptions"
               exportTitle="Volontaires"
