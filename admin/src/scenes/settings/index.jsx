@@ -178,9 +178,17 @@ export default function Settings() {
                       <p className="text-xs font-medium text-gray-900">Statut</p>
                       <MdInfoOutline data-tip data-for="statut" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="statut" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
-                        <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Si la cohorte est publiée, les volontaires peuvent s’inscrire. Si elle est archivée, ils ne peuvent plus poursuivre la phase engagement.
-                        </p>
+                        <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                          <li>
+                            Si la cohorte est en <strong>brouillon</strong>, elle est ignorée lors de la recherche d'éligibilité.
+                          </li>
+                          <li className="mt-3">
+                            Si elle est <strong>publiée</strong>, les volontaires peuvent s’inscrire si l'inscription est ouverte (voir cadre ci-dessous).
+                          </li>
+                          <li className="mt-3">
+                            Si elle est <strong>archivée</strong>, ils ne peuvent plus poursuivre la phase engagement.
+                          </li>
+                        </ul>
                       </ReactTooltip>
                     </div>
 
@@ -188,8 +196,7 @@ export default function Settings() {
                       value={statusOptions.find((o) => o.value === data.status)}
                       options={statusOptions}
                       onChange={(e) => setData({ ...data, status: e.value })}
-                       closeMenuOnSelect
-
+                      closeMenuOnSelect
                       disabled={isLoading || readOnly}
                     />
                   </div>
