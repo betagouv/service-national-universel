@@ -1,19 +1,12 @@
-import API from "./api";
-import { toastr } from "react-redux-toastr";
-import { capture } from "../sentry";
+import { apiURL } from "@/config";
 
 export async function fetchReInscriptionOpen() {
-  try {
-    const { ok, data, code } = await API.get(`/cohort-session/isReInscriptionOpen`);
-    if (!ok) {
-      capture(new Error(code));
-      toastr.error("Oups, une erreur est survenue", code);
-      return null;
-    }
-    return data;
-  } catch (e) {
-    capture(e);
-    toastr.error("Erreur de connexion", e.message);
-    return null;
-  }
+  fetch(`${apiURL}/cohort-session/isReInscriptionOpen`, {
+    headers: { "x-user-timezone": new Date().getTimezoneOffset() },
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) throw new Error(res.code);
+      return res.data;
+    });
 }
