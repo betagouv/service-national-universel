@@ -25,6 +25,7 @@ import SelectAction from "@/components/SelectAction";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 
+import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
 import { Title } from "../../components/commons";
 import { exportLigneBusJeune } from "../../util";
 import Creation from "../modificationPanel/Creation";
@@ -34,7 +35,12 @@ import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
-import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
+
+export interface DataForCheck {
+  meetingPoints: { youngsCount: number; meetingPointId: string }[];
+  youngsCountBus: number;
+  busVolume: number;
+}
 
 export default function View(props: RouteComponentProps<{ id: string }>) {
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -43,11 +49,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
     null,
   );
   const [cohort, setCohort] = React.useState<CohortType | null>(null);
-  const [dataForCheck, setDataForCheck] = React.useState<{
-    meetingPoints: { youngsCount: number; meetingPointId: string }[];
-    youngsCountBus: number;
-    busVolume: number;
-  } | null>(null);
+  const [dataForCheck, setDataForCheck] = React.useState<DataForCheck | null>(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
   const [nbYoung, setNbYoung] = React.useState();

@@ -3,26 +3,49 @@ import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, Link } from "react-router-dom";
-import { canEditLigneBusGeneralInfo, getZonedDate, isBusEditionOpen, translate } from "snu-lib";
-import Pencil from "../../../../../assets/icons/Pencil";
-import Loader from "../../../../../components/Loader";
-import { capture } from "../../../../../sentry";
-import api from "../../../../../services/api";
+
+import { canEditLigneBusGeneralInfo, CohortType, getZonedDate, isBusEditionOpen, LigneBusType, translate } from "snu-lib";
+
+import Pencil from "@/assets/icons/Pencil";
+import Loader from "@/components/Loader";
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import { Button } from "@snu/ds/admin";
+import { AuthState } from "@/redux/auth/reducer";
+
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
 import Select from "../../components/Select";
-import { Button } from "@snu/ds/admin";
+import { DataForCheck } from "../View";
 
 const options = [
   { label: "Oui", value: true },
   { label: "Non", value: false },
 ];
 
-export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
-  const user = useSelector((state) => state.Auth.user);
+interface FormErrors {
+  busId?: string;
+  departuredDate?: string;
+  returnDate?: string;
+  youngCapacity?: string;
+  totalCapacity?: string;
+  followerCapacity?: string;
+  travelTime?: string;
+}
+
+interface InfoProps {
+  bus: LigneBusType;
+  setBus: React.Dispatch<React.SetStateAction<LigneBusType>>;
+  dataForCheck: DataForCheck | null;
+  nbYoung?: number;
+  cohort: CohortType | null;
+}
+
+export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }: InfoProps) {
+  const user = useSelector((state: AuthState) => state.Auth.user);
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState({});
+  const [errors, setErrors] = React.useState<FormErrors>({});
   const [data, setData] = React.useState({
     busId: bus.busId || "",
     departuredDate: bus.departuredDate || "",
@@ -56,7 +79,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
     try {
       setIsLoading(true);
       setErrors({});
-      let errors = {};
+      const errors: FormErrors = {};
       if (!data.busId) errors.busId = "Ce champ est obligatoire";
       if (!data.departuredDate) errors.departuredDate = "Ce champ est obligatoire";
       if (!data.returnDate) errors.returnDate = "Ce champ est obligatoire";
@@ -64,20 +87,20 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
       if (!data.totalCapacity) errors.totalCapacity = "Ce champ est obligatoire";
       if (!data.followerCapacity) errors.followerCapacity = "Ce champ est obligatoire";
       if (!data.travelTime) errors.travelTime = "Ce champ est obligatoire";
-      if (isNaN(data?.youngCapacity)) errors.youngCapacity = "La capacité doit être un nombre";
-      if (isNaN(data?.followerCapacity)) errors.followerCapacity = "La capacité doit être un nombre";
-      if (isNaN(data?.totalCapacity)) errors.totalCapacity = "La capacité doit être un nombre";
+      if (isNaN(data?.youngCapacity as number)) errors.youngCapacity = "La capacité doit être un nombre";
+      if (isNaN(data?.followerCapacity as number)) errors.followerCapacity = "La capacité doit être un nombre";
+      if (isNaN(data?.totalCapacity as number)) errors.totalCapacity = "La capacité doit être un nombre";
 
-      data.totalCapacity = parseInt(data.totalCapacity);
-      data.youngCapacity = parseInt(data.youngCapacity);
-      data.followerCapacity = parseInt(data.followerCapacity);
+      data.totalCapacity = parseInt(data.totalCapacity as string);
+      data.youngCapacity = parseInt(data.youngCapacity as string);
+      data.followerCapacity = parseInt(data.followerCapacity as string);
 
       //total capacity must be greater than young capacity + follower capacity
       if (data?.totalCapacity < data?.youngCapacity + data?.followerCapacity) {
         errors.totalCapacity = "La capacité totale doit être supérieure ou égale à la capacité volontaire + la capacité accompagnateurs";
       }
 
-      if (dataForCheck.youngsCountBus > data.youngCapacity) {
+      if (dataForCheck && dataForCheck.youngsCountBus > data.youngCapacity) {
         errors.youngCapacity = "La capacité volontaire est trop faible par rapport au nombre de volontaire deja affectés à cette ligne";
       }
 
@@ -99,7 +122,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification de la ligne");
+      toastr.error("Oups, une erreur est survenue lors de la modification de la ligne", "");
       setIsLoading(false);
     }
   };
@@ -153,7 +176,9 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
               <DatePickerList
                 label="Date de départ"
                 Icon={BsArrowRight}
+                // @ts-ignore
                 onChange={(e) => setData({ ...data, departuredDate: e })}
+                // @ts-ignore
                 value={getZonedDate(data.departuredDate)}
                 error={errors?.departuredDate}
                 readOnly={!editInfo}
@@ -161,7 +186,9 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
               <DatePickerList
                 label="Date de retour"
                 Icon={BsArrowLeft}
+                // @ts-ignore
                 onChange={(e) => setData({ ...data, returnDate: e })}
+                // @ts-ignore
                 value={getZonedDate(data.returnDate)}
                 error={errors?.returnDate}
                 readOnly={!editInfo}
@@ -185,14 +212,14 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
             <Field
               label="Capacité accompagnateur"
               onChange={(e) => setData({ ...data, followerCapacity: e.target.value })}
-              value={data.followerCapacity}
+              value={data.followerCapacity as string}
               error={errors?.followerCapacity}
               readOnly={!editInfo}
             />
             <Field
               label="Capacité volontaire"
               onChange={(e) => setData({ ...data, youngCapacity: e.target.value })}
-              value={data.youngCapacity}
+              value={data.youngCapacity as string}
               error={errors?.youngCapacity}
               readOnly={!editInfo}
             />
@@ -201,7 +228,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
             <Field
               label="Capacité totale"
               onChange={(e) => setData({ ...data, totalCapacity: e.target.value })}
-              value={data.totalCapacity}
+              value={data.totalCapacity as string}
               error={errors?.totalCapacity}
               readOnly={!editInfo}
             />
@@ -216,15 +243,21 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
           <div className="flex items-center gap-4">
             <Select
               label="Pause déjeuner aller"
+              // @ts-ignore
               options={options}
+              // @ts-ignore
               selected={options.find((e) => e.value === data.lunchBreak)}
+              // @ts-ignore
               setSelected={(e) => setData({ ...data, lunchBreak: e.value })}
               readOnly={!editInfo}
             />
             <Select
               label="Pause déjeuner retour"
+              // @ts-ignore
               options={options}
+              // @ts-ignore
               selected={options.find((e) => e.value === data.lunchBreakReturn)}
+              // @ts-ignore
               setSelected={(e) => setData({ ...data, lunchBreakReturn: e.value })}
               readOnly={!editInfo}
             />

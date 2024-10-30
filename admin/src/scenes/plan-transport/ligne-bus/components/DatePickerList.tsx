@@ -2,10 +2,21 @@ import React from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import fr from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
+import { IconType } from "react-icons";
 import { FiCalendar } from "react-icons/fi";
 registerLocale("fr", fr);
 
-export default function DatePickerList({ value, label, onChange, error = "", disabled = false, readOnly = false, Icon = false }) {
+interface DatePickerListProps {
+  value: string;
+  label: string;
+  onChange: (date: string) => void;
+  error?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  Icon?: IconType;
+}
+
+export default function DatePickerList({ value, label, onChange, error = "", disabled = false, readOnly = false, Icon }: DatePickerListProps) {
   return (
     <div className={`flex w-full flex-col rounded-lg border-[1px] border-gray-300 py-2 px-2.5 ${disabled ? "bg-gray-100" : ""} ${error ? "border-red-500" : ""}`}>
       <div className="flex w-full items-center gap-x-2">
