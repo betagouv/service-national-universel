@@ -11,7 +11,7 @@ import { notExisitingMissionId, createMissionHelper, getMissionByIdHelper } from
 import { createReferentHelper } from "./helpers/referent";
 import { notExistingYoungId, createYoungHelper, getYoungByIdHelper } from "./helpers/young";
 import { createCohortHelper } from "./helpers/cohort";
-import { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 jest.setTimeout(60_000);
 
@@ -129,8 +129,8 @@ describe("Application", () => {
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(403);
     });
-    it("should return 403 when cohort is too old", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "2019" }));
+    it("should return 403 when cohort is archived", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.ARCHIVED }));
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();

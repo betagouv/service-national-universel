@@ -5,7 +5,7 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const { logger } = require("../logger");
-const { MissionModel, ApplicationModel, StructureModel, ReferentModel } = require("../models");
+const { MissionModel, ApplicationModel, StructureModel, ReferentModel, CohortModel } = require("../models");
 // eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung } = require("../utils/index");
 const { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } = require("../services/application");
@@ -296,13 +296,15 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     // Add application for young.
     if (isYoung(req.user)) {
       const application = await ApplicationModel.findOne({ missionId: checkedId, youngId: req.user._id });
+      const cohort = await CohortModel.findOne({ _id: mission.cohortId });
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({
         ok: true,
         data: {
           ...serializeMission(mission),
           tutor: missionTutor,
           application: application ? serializeApplication(application) : null,
-          ...(await getAuthorizationToApply(mission, req.user)),
+          ...(await getAuthorizationToApply(mission, req.user, cohort)),
         },
       });
     }
