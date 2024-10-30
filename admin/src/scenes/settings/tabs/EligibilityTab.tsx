@@ -12,7 +12,7 @@ import ReactTooltip from "react-tooltip";
 
 type EligibilityTabsProps = {
   cohort?: CohortDto;
-  readOnly: boolean;
+  readOnly?: boolean;
   getCohort: () => void;
 };
 
