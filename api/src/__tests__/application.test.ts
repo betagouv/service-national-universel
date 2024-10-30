@@ -71,7 +71,8 @@ describe("Application", () => {
       expect(res.status).toBe(400);
     });
     it("should create an application when priority is given", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -94,7 +95,8 @@ describe("Application", () => {
       expect(res.body.data.youngId).toBe(young._id.toString());
     });
     it("should update young status", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -107,7 +109,8 @@ describe("Application", () => {
       expect([...updatedYoung!.phase2ApplicationStatus]).toStrictEqual(["WAITING_VALIDATION"]);
     });
     it("should update mission places left status", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 100, placesTotal: 100 });
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
