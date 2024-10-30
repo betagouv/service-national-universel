@@ -296,7 +296,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     // Add application for young.
     if (isYoung(req.user)) {
       const application = await ApplicationModel.findOne({ missionId: checkedId, youngId: req.user._id });
-      const cohort = await CohortModel.findOne({ _id: mission.cohortId });
+      const cohort = await CohortModel.findById(req.user.cohortId);
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({
         ok: true,
