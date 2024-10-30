@@ -28,6 +28,8 @@ import { settings, uselessSettings } from "./utils";
 import { InformationsConvoyage } from "@/scenes/settings/InformationsConvoyage";
 import { CleSettings } from "@/scenes/settings/CleSettings";
 
+import { ManualInscriptionSettings } from "./phase0/ManualInscriptionSettings";
+
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
 
@@ -372,6 +374,7 @@ export default function Settings() {
                       </>
                     )}
                   </div>
+                  <ManualInscriptionSettings cohort={data} setCohort={setData} isLoading={isLoading} readOnly={readOnly} />
                 </div>
                 <div className="flex w-[10%] justify-center items-center">
                   <div className="w-[1px] h-[90%] border-r-[1px] border-gray-200"></div>

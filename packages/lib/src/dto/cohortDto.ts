@@ -64,6 +64,10 @@ export type CohortDto = {
     editionOpenForReferentDepartment?: boolean;
     editionOpenForHeadOfCenter?: boolean;
   } | null;
+  inscriptionOpenForReferentClasse?: boolean;
+  inscriptionOpenForReferentRegion?: boolean;
+  inscriptionOpenForReferentDepartment?: boolean;
+  inscriptionOpenForAdministrateurCle?: boolean;
 };
 
 export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId">;

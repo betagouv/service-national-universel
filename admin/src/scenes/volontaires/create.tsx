@@ -518,8 +518,6 @@ export default function Create() {
     }
   }, [values.schoolDepartment, values.department, values.schoolRegion, values.region, values.grade, values.birthdateAt]);
 
-  console.log(values.cohort, values.cohortId);
-
   return (
     <div className="py-4 px-8">
       <ConfirmationModal

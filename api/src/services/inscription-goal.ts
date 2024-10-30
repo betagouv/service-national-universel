@@ -37,7 +37,7 @@ export const getCompletionObjectifRegion = async (region: string, cohort: string
 };
 
 // Vérification des objectifs pour un département donné
-export const getCompletionObjectifDepartement = async (department: string, cohort: string) => {
+export const getCompletionObjectifDepartement = async (department: string, cohort: string): Promise<CompletionObjectif> => {
   const jeunesCount = (await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments()) || 0;
   const objectif = await InscriptionGoalModel.findOne({ department, cohort });
   if (!objectif || !objectif.max) {
@@ -54,9 +54,9 @@ export const getCompletionObjectifs = async (department: string, cohort: string)
   return {
     department: completionObjectifDepartement,
     region: completionObjectifRegion,
-    // uniquement la région est utilisé pour la completion des objectifs
-    isAtteint: completionObjectifRegion.isAtteint,
-    tauxRemplissage: completionObjectifRegion.tauxRemplissage,
+    // completion des objectifs départementaux et régionaux
+    isAtteint: completionObjectifRegion.isAtteint || completionObjectifDepartement.isAtteint,
+    tauxRemplissage: Math.max(completionObjectifRegion.tauxRemplissage, completionObjectifDepartement.tauxRemplissage),
     tauxLimiteRemplissage: FILLING_RATE_LIMIT,
   };
 };
