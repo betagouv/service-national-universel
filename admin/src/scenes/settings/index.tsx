@@ -112,7 +112,7 @@ export default function Settings() {
         )}
         {/* Informations générales */}
         {generalTabActive && (
-          <GeneralTab data={cohort} setData={setCohort} cohort={currentCohortName} getCohort={getCohort} isLoading={isLoading} setIsLoading={setIsLoading} readOnly={isReadOnly} />
+          <GeneralTab cohort={cohort} onCohortChange={setCohort} getCohort={getCohort} isLoading={isLoading} onLoadingChange={setIsLoading} readOnly={isReadOnly} />
         )}
         {/* Eligibilité */}
         {eligibilityTabActive && <EligibilityTab cohort={cohort} readOnly={isReadOnly} getCohort={getCohort} />}

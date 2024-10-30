@@ -5,7 +5,7 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { MdInfoOutline } from "react-icons/md";
 import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
-import { COHORT_TYPE } from "snu-lib";
+import { COHORT_TYPE, CohortDto } from "snu-lib";
 
 import api from "@/services/api";
 
@@ -23,46 +23,63 @@ import { CleSettings } from "../components/CleSettings";
 import { InformationsConvoyage } from "../components/InformationsConvoyage";
 import { ManualInscriptionSettings } from "../phase0/ManualInscriptionSettings";
 
-export default function GeneralTab({ data, setData, cohort, readOnly, getCohort, isLoading, setIsLoading }) {
+// Define the interface for GeneralTab props
+interface GeneralTabProps {
+  cohort?: CohortDto;
+  onCohortChange: React.Dispatch<React.SetStateAction<CohortDto>>;
+  readOnly: boolean;
+  getCohort: () => void;
+  isLoading: boolean;
+  onLoadingChange: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+// Use the interface for the props object
+export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort, isLoading, onLoadingChange }: GeneralTabProps) {
   const [error, setError] = useState<{ [key: string]: string }>({});
-  const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(data.reInscriptionStartDate || data.reInscriptionEndDate);
+  const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(cohort?.reInscriptionStartDate || cohort?.reInscriptionEndDate);
 
   const onSubmit = async () => {
     try {
       const err = {} as { [key: string]: string };
-      if (!data.dateStart) err.dateStart = "La date de début est obligatoire";
-      if (!data.dateEnd) err.dateEnd = "La date de fin est obligatoire";
-      if (!data.inscriptionStartDate) err.inscriptionStartDate = "La date d'ouverture des inscriptions est obligatoire";
-      if (!data.inscriptionEndDate) err.inscriptionEndDate = "La date de fermeture des inscriptions est obligatoire";
-      if (!data.instructionEndDate) err.instructionEndDate = "La date de fermeture des inscriptions est obligatoire";
+      if (!cohort!.dateStart) err.dateStart = "La date de début est obligatoire";
+      if (!cohort!.dateEnd) err.dateEnd = "La date de fin est obligatoire";
+      if (!cohort!.inscriptionStartDate) err.inscriptionStartDate = "La date d'ouverture des inscriptions est obligatoire";
+      if (!cohort!.inscriptionEndDate) err.inscriptionEndDate = "La date de fermeture des inscriptions est obligatoire";
+      if (!cohort!.instructionEndDate) err.instructionEndDate = "La date de fermeture des inscriptions est obligatoire";
 
-      if (isAfter(new Date(data.reInscriptionStartDate), new Date(data.reInscriptionEndDate)))
+      if (isAfter(new Date(cohort!.reInscriptionStartDate as Date), new Date(cohort!.reInscriptionEndDate as Date)))
         err.reInscriptionStartDate = "La date d'ouverture des réinscriptions est antérieure a la date de cloture.";
-      if (isAfter(new Date(data.reInscriptionEndDate), new Date(data.inscriptionEndDate)))
+      if (isAfter(new Date(cohort!.reInscriptionEndDate as Date), new Date(cohort!.inscriptionEndDate)))
         err.reInscriptionEndDate = "Les dates de cloture de réinscription ne peuvent pas etre postérieures a celles de réinscription.";
       setError(err);
       if (Object.values(err).length > 0) {
         return toastr.warning("Veuillez corriger les erreurs dans le formulaire", "");
       }
 
-      setIsLoading(true);
-      delete data.snuId;
-      const { ok, code } = await api.put(`/cohort/${encodeURIComponent(cohort)}`, data);
+      onLoadingChange(true);
+      // @ts-ignore
+      delete cohort.snuId;
+      const { ok, code } = await api.put(`/cohort/${encodeURIComponent(cohort!.name)}`, cohort);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", code);
         await getCohort();
-        return setIsLoading(false);
+        return onLoadingChange(false);
       }
       toastr.success("La session a bien été mise à jour", "");
       await getCohort();
-      setIsLoading(false);
+      onLoadingChange(false);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", "");
       await getCohort();
-      setIsLoading(false);
+      onLoadingChange(false);
     }
   };
+
+  if (!cohort) {
+    return null;
+  }
+
   return (
     <div className="flex w-full flex-col gap-8">
       <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
@@ -81,8 +98,8 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     </ul>
                   </ReactTooltip>
                 </div>
-                <InputText label="Nom de la cohort" value={data.name} disabled readOnly />
-                <InputText label="Identifiant" value={data.snuId} disabled readOnly />
+                <InputText label="Nom de la cohort" value={cohort.name} disabled readOnly />
+                <InputText label="Identifiant" value={cohort.snuId} disabled readOnly />
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
@@ -96,9 +113,11 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   <DatePickerInput
                     mode="single"
                     label="Début"
-                    value={data.dateStart}
+                    // @ts-ignore
+                    value={cohort.dateStart}
                     error={error.dateStart}
-                    onChange={(e) => setData({ ...data, dateStart: e })}
+                    // @ts-ignore
+                    onChange={(e) => onCohortChange({ ...cohort, dateStart: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
                     placeholder={"JJ/MM/AAAA"}
@@ -106,9 +125,11 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   <DatePickerInput
                     mode="single"
                     label="Fin"
-                    value={data.dateEnd}
+                    // @ts-ignore
+                    value={cohort.dateEnd}
                     error={error.dateEnd}
-                    onChange={(e) => setData({ ...data, dateEnd: e })}
+                    // @ts-ignore
+                    onChange={(e) => onCohortChange({ ...cohort, dateEnd: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
                     placeholder={"JJ/MM/AAAA"}
@@ -132,8 +153,8 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   placeholder="Indiquez l’URL d’un article de la BDC"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data.uselessInformation?.toolkit || ""}
-                  onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, toolkit: e.target.value } })}
+                  value={cohort.uselessInformation?.toolkit || ""}
+                  onChange={(e) => onCohortChange({ ...cohort, uselessInformation: { ...cohort.uselessInformation, toolkit: e.target.value } })}
                 />
               </div>
               <div className="flex flex-col gap-3">
@@ -150,8 +171,8 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   placeholder="Précisez en quelques mots"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data?.uselessInformation?.zones || ""}
-                  onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, zones: e.target.value } })}
+                  value={cohort?.uselessInformation?.zones || ""}
+                  onChange={(e) => onCohortChange({ ...cohort, uselessInformation: { ...cohort.uselessInformation, zones: e.target.value } })}
                   rows={2}
                 />
               </div>
@@ -169,8 +190,8 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   placeholder="Précisez en quelques mots"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data?.uselessInformation?.eligibility || ""}
-                  onChange={(e) => setData({ ...data, uselessInformation: { ...data.uselessInformation, eligibility: e.target.value } })}
+                  value={cohort?.uselessInformation?.eligibility || ""}
+                  onChange={(e) => onCohortChange({ ...cohort, uselessInformation: { ...cohort.uselessInformation, eligibility: e.target.value } })}
                   rows={2}
                 />
               </div>
@@ -201,9 +222,11 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   isTime
                   label="Ouverture"
                   placeholder="Date et heure"
-                  value={data.inscriptionStartDate}
+                  // @ts-ignore
+                  value={cohort.inscriptionStartDate}
                   error={error.inscriptionStartDate}
-                  onChange={(e) => setData({ ...data, inscriptionStartDate: e })}
+                  // @ts-ignore
+                  onChange={(e) => onCohortChange({ ...cohort, inscriptionStartDate: e })}
                   readOnly={readOnly}
                   disabled={isLoading}
                 />
@@ -212,8 +235,10 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   isTime={true}
                   label="Fermeture"
                   placeholder="Date et heure"
-                  value={data.inscriptionEndDate}
-                  onChange={(e) => setData({ ...data, inscriptionEndDate: e })}
+                  // @ts-ignore
+                  value={cohort.inscriptionEndDate}
+                  // @ts-ignore
+                  onChange={(e) => onCohortChange({ ...cohort, inscriptionEndDate: e })}
                   readOnly={readOnly}
                   disabled={isLoading}
                   error={error.inscriptionEndDate}
@@ -226,9 +251,11 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <SimpleToggle
                   label="Dates spécifiques"
                   disabled={isLoading || readOnly}
+                  // @ts-ignore
                   value={showSpecificDatesReInscription}
                   onChange={(v) => {
-                    if (v == false) setData({ ...data, reInscriptionEndDate: null, reInscriptionStartDate: null });
+                    if (v == false) onCohortChange({ ...cohort, reInscriptionEndDate: null, reInscriptionStartDate: null });
+                    // @ts-ignore
                     setShowSpecificDatesReInscription(v);
                   }}
                 />
@@ -239,9 +266,10 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       isTime
                       label="Ouverture"
                       placeholder="Date et heure"
-                      value={data.reInscriptionStartDate || data.inscriptionStartDate}
+                      // @ts-ignore
+                      value={cohort.reInscriptionStartDate || cohort.inscriptionStartDate}
                       error={error.reInscriptionStartDate}
-                      onChange={(e) => setData({ ...data, reInscriptionStartDate: e })}
+                      onChange={(e) => onCohortChange({ ...cohort, reInscriptionStartDate: e })}
                       readOnly={readOnly}
                       disabled={isLoading}
                     />
@@ -250,16 +278,17 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       isTime
                       label="Fermeture"
                       placeholder="Date et heure"
-                      value={data.reInscriptionEndDate || data.inscriptionEndDate}
+                      // @ts-ignore
+                      value={cohort.reInscriptionEndDate || cohort.inscriptionEndDate}
                       error={error.reInscriptionEndDate}
-                      onChange={(e) => setData({ ...data, reInscriptionEndDate: e })}
+                      onChange={(e) => onCohortChange({ ...cohort, reInscriptionEndDate: e })}
                       readOnly={readOnly}
-                      disabled={isLoading || !data.inscriptionEndDate}
+                      disabled={isLoading || !cohort.inscriptionEndDate}
                     />
                   </>
                 )}
               </div>
-              <ManualInscriptionSettings cohort={data} setCohort={setData} isLoading={isLoading} readOnly={readOnly} />
+              <ManualInscriptionSettings cohort={cohort} setCohort={onCohortChange} isLoading={isLoading} readOnly={readOnly} />
             </div>
             <div className="flex w-[10%] justify-center items-center">
               <div className="w-[1px] h-[90%] border-r-[1px] border-gray-200"></div>
@@ -272,10 +301,10 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   <ReactTooltip id="modification_volontaire" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
                       <li>
-                        Fermeture de la possibilité de modifier ou corriger son dossier d’inscription (pour les dossiers {data.type === COHORT_TYPE.CLE && "“en cours”"}, “en
+                        Fermeture de la possibilité de modifier ou corriger son dossier d’inscription (pour les dossiers {cohort.type === COHORT_TYPE.CLE && "“en cours”"}, “en
                         attente de validation” et “en attente de correction”).
                       </li>
-                      {data.type !== COHORT_TYPE.CLE && <li>Le bouton d’accès au dossier est masqué sur le compte volontaire et l’URL d’accès au formulaire bloquée.</li>}
+                      {cohort.type !== COHORT_TYPE.CLE && <li>Le bouton d’accès au dossier est masqué sur le compte volontaire et l’URL d’accès au formulaire bloquée.</li>}
                     </ul>
                   </ReactTooltip>
                 </div>
@@ -285,8 +314,10 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     isTime
                     label="Fermeture"
                     placeholder="Date"
-                    value={data.inscriptionModificationEndDate}
-                    onChange={(e) => setData({ ...data, inscriptionModificationEndDate: e })}
+                    // @ts-ignore
+                    value={cohort.inscriptionModificationEndDate}
+                    // @ts-ignore
+                    onChange={(e) => onCohortChange({ ...cohort, inscriptionModificationEndDate: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
                     error={error.inscriptionModificationEndDate}
@@ -310,8 +341,10 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     isTime
                     label="Fermeture"
                     placeholder="Date"
-                    value={data.instructionEndDate}
-                    onChange={(e) => setData({ ...data, instructionEndDate: e })}
+                    // @ts-ignore
+                    value={cohort.instructionEndDate}
+                    // @ts-ignore
+                    onChange={(e) => onCohortChange({ ...cohort, instructionEndDate: e })}
                     readOnly={readOnly}
                     disabled={isLoading}
                     error={error.instructionEndDate}
@@ -344,20 +377,20 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <SimpleToggle
                   label="Référents régionaux"
                   disabled={isLoading || readOnly}
-                  value={data.sessionEditionOpenForReferentRegion}
-                  onChange={() => setData({ ...data, sessionEditionOpenForReferentRegion: !data.sessionEditionOpenForReferentRegion })}
+                  value={cohort.sessionEditionOpenForReferentRegion}
+                  onChange={() => onCohortChange({ ...cohort, sessionEditionOpenForReferentRegion: !cohort.sessionEditionOpenForReferentRegion })}
                 />
                 <SimpleToggle
                   label="Référents départementaux"
                   disabled={isLoading || readOnly}
-                  value={data.sessionEditionOpenForReferentDepartment}
-                  onChange={() => setData({ ...data, sessionEditionOpenForReferentDepartment: !data.sessionEditionOpenForReferentDepartment })}
+                  value={cohort.sessionEditionOpenForReferentDepartment}
+                  onChange={() => onCohortChange({ ...cohort, sessionEditionOpenForReferentDepartment: !cohort.sessionEditionOpenForReferentDepartment })}
                 />
                 <SimpleToggle
                   label="Transporteurs"
                   disabled={isLoading || readOnly}
-                  value={data.sessionEditionOpenForTransporter}
-                  onChange={() => setData({ ...data, sessionEditionOpenForTransporter: !data.sessionEditionOpenForTransporter })}
+                  value={cohort.sessionEditionOpenForTransporter}
+                  onChange={() => onCohortChange({ ...cohort, sessionEditionOpenForTransporter: !cohort.sessionEditionOpenForTransporter })}
                 />
               </div>
 
@@ -374,33 +407,34 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <SimpleToggle
                   label="Référents régionaux"
                   disabled={isLoading || readOnly}
-                  value={data.pdrEditionOpenForReferentRegion}
-                  onChange={() => setData({ ...data, pdrEditionOpenForReferentRegion: !data.pdrEditionOpenForReferentRegion })}
+                  value={cohort.pdrEditionOpenForReferentRegion}
+                  onChange={() => onCohortChange({ ...cohort, pdrEditionOpenForReferentRegion: !cohort.pdrEditionOpenForReferentRegion })}
                 />
                 <SimpleToggle
                   label="Référents départementaux"
                   disabled={isLoading || readOnly}
-                  value={data.pdrEditionOpenForReferentDepartment}
-                  onChange={() => setData({ ...data, pdrEditionOpenForReferentDepartment: !data.pdrEditionOpenForReferentDepartment })}
+                  value={cohort.pdrEditionOpenForReferentDepartment}
+                  onChange={() => onCohortChange({ ...cohort, pdrEditionOpenForReferentDepartment: !cohort.pdrEditionOpenForReferentDepartment })}
                 />
                 <SimpleToggle
                   label="Transporteurs"
                   disabled={isLoading || readOnly}
-                  value={data.pdrEditionOpenForTransporter}
-                  onChange={() => setData({ ...data, pdrEditionOpenForTransporter: !data.pdrEditionOpenForTransporter })}
+                  value={cohort.pdrEditionOpenForTransporter}
+                  onChange={() => onCohortChange({ ...cohort, pdrEditionOpenForTransporter: !cohort.pdrEditionOpenForTransporter })}
                 />
               </div>
               <InformationsConvoyage
                 disabled={isLoading || readOnly}
-                informationsConvoyageData={data?.informationsConvoyage}
-                handleChange={(informationsConvoyage) => setData({ ...data, informationsConvoyage: informationsConvoyage })}
+                // @ts-ignore
+                informationsConvoyageData={cohort?.informationsConvoyage}
+                handleChange={(informationsConvoyage) => onCohortChange({ ...cohort, informationsConvoyage: informationsConvoyage })}
               />
             </div>
             <div className="flex w-[10%] items-center justify-center">
               <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
             </div>
             <div className="flex w-[45%] flex-col gap-4">
-              {data.type !== COHORT_TYPE.CLE && (
+              {cohort.type !== COHORT_TYPE.CLE && (
                 <>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
@@ -416,17 +450,18 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       label="Référents régionaux"
                       disabled={isLoading}
                       readOnly={readOnly}
-                      value={data.repartitionSchemaCreateAndEditGroupAvailability}
-                      onChange={() => setData({ ...data, repartitionSchemaCreateAndEditGroupAvailability: !data.repartitionSchemaCreateAndEditGroupAvailability })}
+                      // @ts-ignore
+                      value={cohort.repartitionSchemaCreateAndEditGroupAvailability}
+                      onChange={() => onCohortChange({ ...cohort, repartitionSchemaCreateAndEditGroupAvailability: !cohort.repartitionSchemaCreateAndEditGroupAvailability })}
                       range={{
-                        from: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityFrom || undefined,
-                        to: data?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityTo || undefined,
+                        from: cohort?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityFrom || undefined,
+                        to: cohort?.uselessInformation?.repartitionSchemaCreateAndEditGroupAvailabilityTo || undefined,
                       }}
                       onChangeRange={(range) => {
-                        setData({
-                          ...data,
+                        onCohortChange({
+                          ...cohort,
                           uselessInformation: {
-                            ...data.uselessInformation,
+                            ...cohort.uselessInformation,
                             repartitionSchemaCreateAndEditGroupAvailabilityFrom: range?.from,
                             repartitionSchemaCreateAndEditGroupAvailabilityTo: range?.to,
                           },
@@ -447,14 +482,14 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     <SimpleToggle
                       label="Référents régionaux"
                       disabled={isLoading || readOnly}
-                      value={data.schemaAccessForReferentRegion}
-                      onChange={() => setData({ ...data, schemaAccessForReferentRegion: !data.schemaAccessForReferentRegion })}
+                      value={cohort.schemaAccessForReferentRegion}
+                      onChange={() => onCohortChange({ ...cohort, schemaAccessForReferentRegion: !cohort.schemaAccessForReferentRegion })}
                     />
                     <SimpleToggle
                       label="Référents départementaux"
                       disabled={isLoading || readOnly}
-                      value={data.schemaAccessForReferentDepartment}
-                      onChange={() => setData({ ...data, schemaAccessForReferentDepartment: !data.schemaAccessForReferentDepartment })}
+                      value={cohort.schemaAccessForReferentDepartment}
+                      onChange={() => onCohortChange({ ...cohort, schemaAccessForReferentDepartment: !cohort.schemaAccessForReferentDepartment })}
                     />
                   </div>
                 </>
@@ -474,17 +509,18 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   label="Transporteur"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data.repartitionSchemaDownloadAvailability}
-                  onChange={() => setData({ ...data, repartitionSchemaDownloadAvailability: !data.repartitionSchemaDownloadAvailability })}
+                  // @ts-ignore
+                  value={cohort.repartitionSchemaDownloadAvailability}
+                  onChange={() => onCohortChange({ ...cohort, repartitionSchemaDownloadAvailability: !cohort.repartitionSchemaDownloadAvailability })}
                   range={{
-                    from: data?.uselessInformation?.repartitionSchemaDownloadAvailabilityFrom || undefined,
-                    to: data?.uselessInformation?.repartitionSchemaDownloadAvailabilityTo || undefined,
+                    from: cohort?.uselessInformation?.repartitionSchemaDownloadAvailabilityFrom || undefined,
+                    to: cohort?.uselessInformation?.repartitionSchemaDownloadAvailabilityTo || undefined,
                   }}
                   onChangeRange={(range) => {
-                    setData({
-                      ...data,
+                    onCohortChange({
+                      ...cohort,
                       uselessInformation: {
-                        ...data.uselessInformation,
+                        ...cohort.uselessInformation,
                         repartitionSchemaDownloadAvailabilityFrom: range?.from,
                         repartitionSchemaDownloadAvailabilityTo: range?.to,
                       },
@@ -505,8 +541,8 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                 <SimpleToggle
                   label="Transporteurs"
                   disabled={isLoading || readOnly}
-                  value={data.busEditionOpenForTransporter}
-                  onChange={() => setData({ ...data, busEditionOpenForTransporter: !data.busEditionOpenForTransporter })}
+                  value={cohort.busEditionOpenForTransporter}
+                  onChange={() => onCohortChange({ ...cohort, busEditionOpenForTransporter: !cohort.busEditionOpenForTransporter })}
                 />
               </div>
               <div className="flex flex-col gap-3">
@@ -523,17 +559,18 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   label="Référents régionaux"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data.isTransportPlanCorrectionRequestOpen}
-                  onChange={() => setData({ ...data, isTransportPlanCorrectionRequestOpen: !data.isTransportPlanCorrectionRequestOpen })}
+                  // @ts-ignore
+                  value={cohort.isTransportPlanCorrectionRequestOpen}
+                  onChange={() => onCohortChange({ ...cohort, isTransportPlanCorrectionRequestOpen: !cohort.isTransportPlanCorrectionRequestOpen })}
                   range={{
-                    from: data?.uselessInformation?.isTransportPlanCorrectionRequestOpenFrom || undefined,
-                    to: data?.uselessInformation?.isTransportPlanCorrectionRequestOpenTo || undefined,
+                    from: cohort?.uselessInformation?.isTransportPlanCorrectionRequestOpenFrom || undefined,
+                    to: cohort?.uselessInformation?.isTransportPlanCorrectionRequestOpenTo || undefined,
                   }}
                   onChangeRange={(range) => {
-                    setData({
-                      ...data,
+                    onCohortChange({
+                      ...cohort,
                       uselessInformation: {
-                        ...data.uselessInformation,
+                        ...cohort.uselessInformation,
                         isTransportPlanCorrectionRequestOpenFrom: range?.from,
                         isTransportPlanCorrectionRequestOpenTo: range?.to,
                       },
@@ -567,17 +604,18 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   label="Volontaires"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data.isAssignmentAnnouncementsOpenForYoung}
-                  onChange={() => setData({ ...data, isAssignmentAnnouncementsOpenForYoung: !data.isAssignmentAnnouncementsOpenForYoung })}
+                  // @ts-ignore
+                  value={cohort.isAssignmentAnnouncementsOpenForYoung}
+                  onChange={() => onCohortChange({ ...cohort, isAssignmentAnnouncementsOpenForYoung: !cohort.isAssignmentAnnouncementsOpenForYoung })}
                   range={{
-                    from: data?.uselessInformation?.isAssignmentAnnouncementsOpenForYoungFrom || undefined,
-                    to: data?.uselessInformation?.isAssignmentAnnouncementsOpenForYoungTo || undefined,
+                    from: cohort?.uselessInformation?.isAssignmentAnnouncementsOpenForYoungFrom || undefined,
+                    to: cohort?.uselessInformation?.isAssignmentAnnouncementsOpenForYoungTo || undefined,
                   }}
                   onChangeRange={(range) => {
-                    setData({
-                      ...data,
+                    onCohortChange({
+                      ...cohort,
                       uselessInformation: {
-                        ...data.uselessInformation,
+                        ...cohort.uselessInformation,
                         isAssignmentAnnouncementsOpenForYoungFrom: range?.from,
                         isAssignmentAnnouncementsOpenForYoungTo: range?.to,
                       },
@@ -585,7 +623,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   }}
                 />
               </div>
-              {data.type !== COHORT_TYPE.CLE && (
+              {cohort.type !== COHORT_TYPE.CLE && (
                 <>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
@@ -604,22 +642,23 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       label="Modérateurs"
                       disabled={isLoading}
                       readOnly={readOnly}
-                      value={data.manualAffectionOpenForAdmin}
+                      // @ts-ignore
+                      value={cohort.manualAffectionOpenForAdmin}
                       onChange={() =>
-                        setData({
-                          ...data,
-                          manualAffectionOpenForAdmin: !data.manualAffectionOpenForAdmin,
+                        onCohortChange({
+                          ...cohort,
+                          manualAffectionOpenForAdmin: !cohort.manualAffectionOpenForAdmin,
                         })
                       }
                       range={{
-                        from: data?.uselessInformation?.manualAffectionOpenForAdminFrom || undefined,
-                        to: data?.uselessInformation?.manualAffectionOpenForAdminTo || undefined,
+                        from: cohort?.uselessInformation?.manualAffectionOpenForAdminFrom || undefined,
+                        to: cohort?.uselessInformation?.manualAffectionOpenForAdminTo || undefined,
                       }}
                       onChangeRange={(range) => {
-                        setData({
-                          ...data,
+                        onCohortChange({
+                          ...cohort,
                           uselessInformation: {
-                            ...data.uselessInformation,
+                            ...cohort.uselessInformation,
                             manualAffectionOpenForAdminFrom: range?.from,
                             manualAffectionOpenForAdminTo: range?.to,
                           },
@@ -630,22 +669,23 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       label="Référents régionaux"
                       disabled={isLoading}
                       readOnly={readOnly}
-                      value={data.manualAffectionOpenForReferentRegion}
+                      // @ts-ignore
+                      value={cohort.manualAffectionOpenForReferentRegion}
                       onChange={() =>
-                        setData({
-                          ...data,
-                          manualAffectionOpenForReferentRegion: !data.manualAffectionOpenForReferentRegion,
+                        onCohortChange({
+                          ...cohort,
+                          manualAffectionOpenForReferentRegion: !cohort.manualAffectionOpenForReferentRegion,
                         })
                       }
                       range={{
-                        from: data?.uselessInformation?.manualAffectionOpenForReferentRegionFrom || undefined,
-                        to: data?.uselessInformation?.manualAffectionOpenForReferentRegionTo || undefined,
+                        from: cohort?.uselessInformation?.manualAffectionOpenForReferentRegionFrom || undefined,
+                        to: cohort?.uselessInformation?.manualAffectionOpenForReferentRegionTo || undefined,
                       }}
                       onChangeRange={(range) => {
-                        setData({
-                          ...data,
+                        onCohortChange({
+                          ...cohort,
                           uselessInformation: {
-                            ...data.uselessInformation,
+                            ...cohort.uselessInformation,
                             manualAffectionOpenForReferentRegionFrom: range?.from,
                             manualAffectionOpenForReferentRegionTo: range?.to,
                           },
@@ -656,22 +696,23 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       label="Référents départementaux"
                       disabled={isLoading}
                       readOnly={readOnly}
-                      value={data.manualAffectionOpenForReferentDepartment}
+                      // @ts-ignore
+                      value={cohort.manualAffectionOpenForReferentDepartment}
                       onChange={() =>
-                        setData({
-                          ...data,
-                          manualAffectionOpenForReferentDepartment: !data.manualAffectionOpenForReferentDepartment,
+                        onCohortChange({
+                          ...cohort,
+                          manualAffectionOpenForReferentDepartment: !cohort.manualAffectionOpenForReferentDepartment,
                         })
                       }
                       range={{
-                        from: data?.uselessInformation?.manualAffectionOpenForReferentDepartmentFrom || undefined,
-                        to: data?.uselessInformation?.manualAffectionOpenForReferentDepartmentTo || undefined,
+                        from: cohort?.uselessInformation?.manualAffectionOpenForReferentDepartmentFrom || undefined,
+                        to: cohort?.uselessInformation?.manualAffectionOpenForReferentDepartmentTo || undefined,
                       }}
                       onChangeRange={(range) => {
-                        setData({
-                          ...data,
+                        onCohortChange({
+                          ...cohort,
                           uselessInformation: {
-                            ...data.uselessInformation,
+                            ...cohort.uselessInformation,
                             manualAffectionOpenForReferentDepartmentFrom: range?.from,
                             manualAffectionOpenForReferentDepartmentTo: range?.to,
                           },
@@ -700,8 +741,9 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                       placeholder={"Date"}
                       disabled={isLoading}
                       readOnly={readOnly}
-                      value={data.pdrChoiceLimitDate}
-                      onChange={(value) => setData({ ...data, pdrChoiceLimitDate: value })}
+                      // @ts-ignore
+                      value={cohort.pdrChoiceLimitDate}
+                      onChange={(value) => onCohortChange({ ...cohort, pdrChoiceLimitDate: value })}
                       error={error.pdrChoiceLimitDate}
                     />
                   </div>
@@ -731,17 +773,18 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   label="Tout utilisateur"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data.busListAvailability}
-                  onChange={() => setData({ ...data, busListAvailability: !data.busListAvailability })}
+                  // @ts-ignore
+                  value={cohort.busListAvailability}
+                  onChange={() => onCohortChange({ ...cohort, busListAvailability: !cohort.busListAvailability })}
                   range={{
-                    from: data?.uselessInformation?.busListAvailabilityFrom || undefined,
-                    to: data?.uselessInformation?.busListAvailabilityTo || undefined,
+                    from: cohort?.uselessInformation?.busListAvailabilityFrom || undefined,
+                    to: cohort?.uselessInformation?.busListAvailabilityTo || undefined,
                   }}
                   onChangeRange={(range) => {
-                    setData({
-                      ...data,
+                    onCohortChange({
+                      ...cohort,
                       uselessInformation: {
-                        ...data.uselessInformation,
+                        ...cohort.uselessInformation,
                         busListAvailabilityFrom: range?.from,
                         busListAvailabilityTo: range?.to,
                       },
@@ -763,17 +806,18 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   label="Chefs de centre"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data.youngCheckinForHeadOfCenter}
-                  onChange={() => setData({ ...data, youngCheckinForHeadOfCenter: !data.youngCheckinForHeadOfCenter })}
+                  // @ts-ignore
+                  value={cohort.youngCheckinForHeadOfCenter}
+                  onChange={() => onCohortChange({ ...cohort, youngCheckinForHeadOfCenter: !cohort.youngCheckinForHeadOfCenter })}
                   range={{
-                    from: data?.uselessInformation?.youngCheckinForHeadOfCenterFrom || undefined,
-                    to: data?.uselessInformation?.youngCheckinForHeadOfCenterTo || undefined,
+                    from: cohort?.uselessInformation?.youngCheckinForHeadOfCenterFrom || undefined,
+                    to: cohort?.uselessInformation?.youngCheckinForHeadOfCenterTo || undefined,
                   }}
                   onChangeRange={(range) => {
-                    setData({
-                      ...data,
+                    onCohortChange({
+                      ...cohort,
                       uselessInformation: {
-                        ...data.uselessInformation,
+                        ...cohort.uselessInformation,
                         youngCheckinForHeadOfCenterFrom: range?.from,
                         youngCheckinForHeadOfCenterTo: range?.to,
                       },
@@ -784,17 +828,18 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   label="Modérateurs"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data.youngCheckinForAdmin}
-                  onChange={() => setData({ ...data, youngCheckinForAdmin: !data.youngCheckinForAdmin })}
+                  // @ts-ignore
+                  value={cohort.youngCheckinForAdmin}
+                  onChange={() => onCohortChange({ ...cohort, youngCheckinForAdmin: !cohort.youngCheckinForAdmin })}
                   range={{
-                    from: data?.uselessInformation?.youngCheckinForAdminFrom || undefined,
-                    to: data?.uselessInformation?.youngCheckinForAdminTo || undefined,
+                    from: cohort?.uselessInformation?.youngCheckinForAdminFrom || undefined,
+                    to: cohort?.uselessInformation?.youngCheckinForAdminTo || undefined,
                   }}
                   onChangeRange={(range) => {
-                    setData({
-                      ...data,
+                    onCohortChange({
+                      ...cohort,
                       uselessInformation: {
-                        ...data.uselessInformation,
+                        ...cohort.uselessInformation,
                         youngCheckinForAdminFrom: range?.from,
                         youngCheckinForAdminTo: range?.to,
                       },
@@ -805,17 +850,18 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   label="Référents régionaux"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data.youngCheckinForRegionReferent}
-                  onChange={() => setData({ ...data, youngCheckinForRegionReferent: !data.youngCheckinForRegionReferent })}
+                  // @ts-ignore
+                  value={cohort.youngCheckinForRegionReferent}
+                  onChange={() => onCohortChange({ ...cohort, youngCheckinForRegionReferent: !cohort.youngCheckinForRegionReferent })}
                   range={{
-                    from: data?.uselessInformation?.youngCheckinForRegionReferentFrom || undefined,
-                    to: data?.uselessInformation?.youngCheckinForRegionReferentTo || undefined,
+                    from: cohort?.uselessInformation?.youngCheckinForRegionReferentFrom || undefined,
+                    to: cohort?.uselessInformation?.youngCheckinForRegionReferentTo || undefined,
                   }}
                   onChangeRange={(range) => {
-                    setData({
-                      ...data,
+                    onCohortChange({
+                      ...cohort,
                       uselessInformation: {
-                        ...data.uselessInformation,
+                        ...cohort.uselessInformation,
                         youngCheckinForRegionReferentFrom: range?.from,
                         youngCheckinForRegionReferentTo: range?.to,
                       },
@@ -826,17 +872,18 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   label="Référents départementaux"
                   disabled={isLoading}
                   readOnly={readOnly}
-                  value={data.youngCheckinForDepartmentReferent}
-                  onChange={() => setData({ ...data, youngCheckinForDepartmentReferent: !data.youngCheckinForDepartmentReferent })}
+                  // @ts-ignore
+                  value={cohort.youngCheckinForDepartmentReferent}
+                  onChange={() => onCohortChange({ ...cohort, youngCheckinForDepartmentReferent: !cohort.youngCheckinForDepartmentReferent })}
                   range={{
-                    from: data?.uselessInformation?.youngCheckinForDepartmentReferentFrom || undefined,
-                    to: data?.uselessInformation?.youngCheckinForDepartmentReferentTo || undefined,
+                    from: cohort?.uselessInformation?.youngCheckinForDepartmentReferentFrom || undefined,
+                    to: cohort?.uselessInformation?.youngCheckinForDepartmentReferentTo || undefined,
                   }}
                   onChangeRange={(range) => {
-                    setData({
-                      ...data,
+                    onCohortChange({
+                      ...cohort,
                       uselessInformation: {
-                        ...data.uselessInformation,
+                        ...cohort.uselessInformation,
                         youngCheckinForDepartmentReferentFrom: range?.from,
                         youngCheckinForDepartmentReferentTo: range?.to,
                       },
@@ -852,15 +899,16 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                     <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Par défaut 9e jour après le début du séjour.</p>
                   </ReactTooltip>
                 </div>
-                <NumberInput days={data.daysToValidate} label={"Nombre de jour pour validation"} onChange={(e) => setData({ ...data, daysToValidate: e })} />
+                {/* @ts-ignore */}
+                <NumberInput days={cohort.daysToValidate} label={"Nombre de jour pour validation"} onChange={(e) => onCohortChange({ ...cohort, daysToValidate: e })} />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {data.type === COHORT_TYPE.CLE && (
-        <CleSettings cleSettingsData={data} isLoading={isLoading} readOnly={readOnly} onChange={(cleSettingsData) => setData({ ...data, ...cleSettingsData })} />
+      {cohort.type === COHORT_TYPE.CLE && (
+        <CleSettings cleSettingsData={cohort} isLoading={isLoading} readOnly={readOnly} onChange={(cleSettingsData) => onCohortChange({ ...cohort, ...cleSettingsData })} />
       )}
 
       {!readOnly && (
