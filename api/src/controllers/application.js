@@ -24,6 +24,7 @@ const {
   translateAddFilePhase2,
   translateAddFilesPhase2,
   APPLICATION_STATUS,
+  canViewPatchesHistory,
 } = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
 const {
@@ -836,6 +837,27 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ApplicationModel));
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const application = await ApplicationModel.findById(id);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const applicationPatches = await patches.get(req, res, ApplicationModel);
+    if (!applicationPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: applicationPatches });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: error.message });
+  }
+});
 
 module.exports = router;

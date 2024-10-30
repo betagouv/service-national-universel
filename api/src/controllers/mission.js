@@ -11,7 +11,7 @@ const { ERRORS, isYoung } = require("../utils/index");
 const { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } = require("../services/application");
 const { getTutorName } = require("../services/mission");
 const { validateId, validateMission } = require("../utils/validator");
-const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId, canViewPatchesHistory } = require("snu-lib");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../brevo");
@@ -313,7 +313,28 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, MissionModel));
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const mission = await MissionModel.findById(id);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const missionPatches = await patches.get(req, res, MissionModel);
+    if (!missionPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: missionPatches });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: error.message });
+  }
+});
 
 router.get("/:id/application", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

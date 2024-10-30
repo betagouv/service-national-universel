@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, getAge, canCreateOrUpdateContract, canViewContract, ROLES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, getAge, canCreateOrUpdateContract, canViewContract, ROLES, canViewPatchesHistory } = require("snu-lib");
 const { capture } = require("../sentry");
 const { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } = require("../models");
 const { ERRORS, isYoung, isReferent } = require("../utils");
@@ -327,7 +327,28 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ContractModel));
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const contract = await ContractModel.findById(id);
+    if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const contractPatches = await patches.get(req, res, ContractModel);
+    if (!contractPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: contractPatches });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: error.message });
+  }
+});
 
 // Get a contract by its token.
 router.get("/token/:token", async (req, res) => {
