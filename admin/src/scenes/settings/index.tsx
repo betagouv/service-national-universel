@@ -19,19 +19,21 @@ import { CiSettings } from "react-icons/ci";
 import { MdOutlinePlace } from "react-icons/md";
 import EligibilityTab from "./tabs/EligibilityTab";
 import GeneralTab from "./tabs/GeneralTab";
+import { CohortState } from "@/redux/cohorts/reducer";
 
 export default function Settings() {
   const { user } = useSelector((state: AuthState) => state.Auth);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const hasSuperAdminAccess = isSuperAdmin(user);
-  const readOnly = !hasSuperAdminAccess;
+  const isReadOnly = !hasSuperAdminAccess;
   const [isLoading, setIsLoading] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
-  const cohort = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort") || "") : "Toussaint 2024";
+  const currentCohortName = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort") || "") : cohorts[0].name;
 
   const [currentTab, setCurrentTab] = useState<"general" | "eligibility">("general");
-  const [data, setData] = useState<CohortDto>({} as CohortDto);
+  const [cohort, setCohort] = useState<CohortDto>();
 
   const history = useHistory();
 
@@ -40,12 +42,12 @@ export default function Settings() {
 
   const getCohort = async () => {
     try {
-      const { ok, data: reponseCohort } = await api.get("/cohort/" + encodeURIComponent(cohort));
+      const { ok, data: reponseCohort } = await api.get("/cohort/" + encodeURIComponent(currentCohortName));
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du séjour", "");
       }
 
-      setData(reponseCohort);
+      setCohort(reponseCohort);
 
       setIsLoading(false);
     } catch (e) {
@@ -55,10 +57,10 @@ export default function Settings() {
   };
 
   useEffect(() => {
-    if (!cohort) return;
+    if (!currentCohortName) return;
     setIsLoading(true);
     getCohort();
-  }, [cohort]);
+  }, [currentCohortName]);
 
   if (user.role !== ROLES.ADMIN)
     return (
@@ -81,21 +83,17 @@ export default function Settings() {
       isActive: currentTab === "general",
       onClick: () => setCurrentTab("general"),
     },
-    hasSuperAdminAccess
-      ? {
-          title: "Éligibilités",
-          isActive: currentTab === "eligibility",
-          leftIcon: <MdOutlinePlace size={20} className="mt-0.5" />,
-          onClick: () => setCurrentTab("eligibility"),
-        }
-      : null,
-  ].filter(Boolean) as {
-    title: React.ReactNode;
-    label?: string;
-    isActive?: boolean;
-    leftIcon?: React.ReactNode;
-    onClick?: () => void;
-  }[];
+    ...(hasSuperAdminAccess
+      ? [
+          {
+            title: "Éligibilités",
+            isActive: currentTab === "eligibility",
+            leftIcon: <MdOutlinePlace size={20} className="mt-0.5" />,
+            onClick: () => setCurrentTab("eligibility"),
+          },
+        ]
+      : []),
+  ];
 
   return (
     <>
@@ -103,7 +101,7 @@ export default function Settings() {
       <div className="flex w-full flex-col px-8 pb-8">
         <div className="flex items-center justify-between py-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrages dynamiques</div>
-          <SelectCohort cohort={cohort} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} />
+          <SelectCohort cohort={currentCohortName} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} />
         </div>
         <Navbar tab={tabs} />
 
@@ -114,10 +112,10 @@ export default function Settings() {
         )}
         {/* Informations générales */}
         {generalTabActive && (
-          <GeneralTab data={data} setData={setData} cohort={cohort} getCohort={getCohort} isLoading={isLoading} setIsLoading={setIsLoading} readOnly={readOnly} />
+          <GeneralTab data={cohort} setData={setCohort} cohort={currentCohortName} getCohort={getCohort} isLoading={isLoading} setIsLoading={setIsLoading} readOnly={isReadOnly} />
         )}
         {/* Eligibilité */}
-        {eligibilityTabActive && <EligibilityTab cohort={data} readOnly={readOnly} getCohort={getCohort} />}
+        {eligibilityTabActive && <EligibilityTab cohort={cohort} readOnly={isReadOnly} getCohort={getCohort} />}
       </div>
     </>
   );

@@ -11,7 +11,7 @@ import { IoWarningOutline } from "react-icons/io5";
 import ReactTooltip from "react-tooltip";
 
 type EligibilityTabsProps = {
-  cohort: CohortDto;
+  cohort?: CohortDto;
   readOnly: boolean;
   getCohort: () => void;
 };
@@ -45,10 +45,10 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
 
   useEffect(() => {
     setFormValues({
-      zones: cohort.eligibility?.zones || [],
-      schoolLevels: cohort.eligibility?.schoolLevels || [],
-      bornAfter: cohort.eligibility?.bornAfter || null,
-      bornBefore: cohort.eligibility?.bornBefore || null,
+      zones: cohort?.eligibility?.zones || [],
+      schoolLevels: cohort?.eligibility?.schoolLevels || [],
+      bornAfter: cohort?.eligibility?.bornAfter || null,
+      bornBefore: cohort?.eligibility?.bornBefore || null,
     });
   }, [cohort]);
 
@@ -70,7 +70,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
       }
 
       setIsLoading(true);
-      const { ok, code } = await api.put(`/cohort/${cohort._id?.toString()}/eligibility`, formValues);
+      const { ok, code } = await api.put(`/cohort/${cohort?._id?.toString()}/eligibility`, formValues);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la mise à jour de l'élégibilité", translate(code));
       }
@@ -96,6 +96,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
               label="Né après le"
               placeholder="JJ/MM/AAAA"
               isTime={false}
+              // @ts-ignore
               value={formValues.bornAfter}
               onChange={(e) => setFormValues({ ...formValues, bornAfter: e })}
               error={error?.bornAfter || ""}
@@ -108,6 +109,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
               label="Né avant le"
               placeholder="JJ/MM/AAAA"
               isTime={false}
+              // @ts-ignore
               value={formValues.bornBefore}
               onChange={(e) => setFormValues({ ...formValues, bornBefore: e })}
               error={error.bornBefore || ""}
