@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { Page } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, YOUNG_STATUS, STATUS_CLASSE, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, canInviteYoung } from "snu-lib";
 import Loader from "@/components/Loader";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
@@ -197,6 +197,11 @@ export default function Details(props) {
     setIsLoading(false);
     setErrors({});
   };
+
+  const canPerformManualInscriptionActions = useMemo(() => {
+    return canInviteYoung(user, cohort ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.role, cohort]);
 
   if (!classe) return <Loader />;
 
