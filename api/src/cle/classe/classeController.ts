@@ -646,8 +646,6 @@ router.get("/:id/patches", async (req: UserRequest, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    console.log(req.user);
-
     if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const classe = await ClasseModel.findById(id);

@@ -17,6 +17,7 @@ const {
   isSupervisor,
   isAdmin,
   SENDINBLUE_TEMPLATES,
+  canViewPatchesHistory,
 } = require("snu-lib");
 const patches = require("./patches");
 const { sendTemplate } = require("../brevo");
@@ -202,7 +203,28 @@ router.get("/:id/mission", passport.authenticate("referent", { session: false, f
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, StructureModel));
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const structure = await StructureModel.findById(id);
+    if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const structurePatches = await patches.get(req, res, StructureModel);
+    if (!structurePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: structurePatches });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: error.message });
+  }
+});
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
