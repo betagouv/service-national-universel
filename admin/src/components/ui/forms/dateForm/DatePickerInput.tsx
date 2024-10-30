@@ -10,9 +10,9 @@ function classNames(...classes) {
 }
 
 interface DatePickerWrapperProps {
-  label: string;
-  value: Date | null;
-  onChange: (date: Date) => void;
+  label?: string;
+  value: string | null;
+  onChange: (date: Date | null) => void;
   disabled?: boolean;
   error?: string;
   mode?: "single" | "range";

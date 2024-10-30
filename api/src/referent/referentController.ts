@@ -29,6 +29,7 @@ import {
   CohortModel,
   SessionPhase1Document,
   CohesionCenterDocument,
+  SchoolRAMSESModel,
 } from "../models";
 
 import emailsEmitter from "../emails";
@@ -49,6 +50,7 @@ import {
   isYoung,
   inSevenDays,
   FILE_STATUS_PHASE1,
+  STEPS2023,
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
@@ -96,19 +98,21 @@ import {
   YOUNG_SITUATIONS,
   CLE_FILIERE,
   canValidateMultipleYoungsInClass,
-  canValidateYoungInClass,
   ClasseSchoolYear,
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
   YoungType,
+  getDepartmentForEligibility,
+  isAdmin,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
-import { shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
+import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
-import { FILLING_RATE_LIMIT, getFillingRate } from "../services/inscription-goal";
+import { getCompletionObjectifs } from "../services/inscription-goal";
+import SNUpport from "../SNUpport";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -142,6 +146,7 @@ function cleanReferentData(referent) {
   const fieldsToKeep = {
     admin: [],
     dsnj: [],
+    injep: [],
     head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "cohortIds", "sessionPhase1Id"],
     referent_department: ["department", "region"],
     referent_region: ["department", "region"],
@@ -522,15 +527,26 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
-
+    const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
     // Vérification des objectifs à la validation d'un jeune
-    if (young.source !== YOUNG_SOURCE.CLE && value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
-      const fillingRate = await getFillingRate(young.department, young.cohort);
-      if (fillingRate >= FILLING_RATE_LIMIT) {
-        return res.status(400).send({ ok: false, code: FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
+    if (
+      young.source !== YOUNG_SOURCE.CLE &&
+      value.status === YOUNG_STATUS.VALIDATED &&
+      young.status !== YOUNG_STATUS.VALIDATED &&
+      (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
+    ) {
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+      const departement = getDepartmentForEligibility(young);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      if (completionObjectif.isAtteint) {
+        return res.status(400).send({
+          ok: false,
+          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
+        });
       }
     }
 
@@ -603,18 +619,33 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
     }
 
-    if (newYoung.status === YOUNG_STATUS.VALIDATED && !young.reinscriptionStep2023) {
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.hasStartedReinscription === false) {
       newYoung.inscriptionStep2023 = "DONE";
-    }
-    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.reinscriptionStep2023) {
+    } else if (newYoung.status === YOUNG_STATUS.VALIDATED && young.hasStartedReinscription === true) {
       newYoung.reinscriptionStep2023 = "DONE";
     }
 
-    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.source === YOUNG_SOURCE.CLE) {
-      const classe = await ClasseModel.findById(young.classeId);
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (!canValidateYoungInClass(req.user, classe)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // verification des dates de fin d'instruction si jeune est VALIDATED
+    if (newYoung.status === YOUNG_STATUS.VALIDATED) {
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (young.source === YOUNG_SOURCE.CLE) {
+        const classe = await ClasseModel.findById(young.classeId);
+        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInsctructionOpen = now < cohort.instructionEndDate;
+        const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+        if (remainingPlaces <= 0) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+        if (!isInsctructionOpen && !isAdmin(req.user)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      } else {
+        const now = new Date();
+        const isInsctructionOpen = now < cohort.instructionEndDate;
+        if (!isInsctructionOpen && !isAdmin(req.user)) {
+          return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
       }
     }
 
@@ -635,13 +666,18 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (await shouldSwitchYoungByIdToLC(id, value.status)) {
       await switchYoungByIdToLC(id);
     }
+    await mightAddInProgressStatus(young, req.user);
 
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    if (Object.keys(FUNCTIONAL_ERRORS).includes(error.message)) {
+      res.status(400).send({ ok: false, code: error.message });
+    } else {
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
   }
 });
 
@@ -660,26 +696,53 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    if (!canValidateMultipleYoungsInClass(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const youngs = await YoungModel.find({ _id: { $in: payload.youngIds }, source: "CLE" });
     if (!youngs) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (youngs.length !== payload.youngIds.length) return res.status(404).send({ ok: false, code: ERRORS.BAD_REQUEST });
 
-    const classeId = youngs[0].classeId;
+    const classeIds = youngs.map((y) => y.classeId);
 
-    const classe = await ClasseModel.findById(classeId);
-    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const classes = await ClasseModel.find({ _id: { $in: classeIds } });
+    if (!classes.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canValidateMultipleYoungsInClass(req.user, classe)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (payload.status === YOUNG_STATUS.VALIDATED) {
+      for (const classe of classes) {
+        const cohort = await CohortModel.findById(classe.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const now = new Date();
+        const isInstructionOpen = now < new Date(cohort.instructionEndDate);
+        if (!isInstructionOpen) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `Classe ${classe._id} is closed` });
+        }
+        const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+        if (youngs.length > remainingPlaces) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: `No seats left in classe ${classe._id}` });
+        }
+      }
     }
 
-    for (const young of youngs) {
-      young.set({ status: payload.status });
-      await young.save({ fromUser: req.user });
-      await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
-    }
+    const youngsSet: string[] = [];
 
-    return res.status(200).send({ ok: true, data: payload.youngIds });
+    await Promise.all(
+      youngs.map(async (young) => {
+        try {
+          young.set({ status: payload.status });
+          await young.save({ fromUser: req.user });
+          if (payload.status === YOUNG_STATUS.VALIDATED) {
+            await sendEmailToYoung(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, young);
+          }
+          youngsSet.push(young._id);
+        } catch (e) {
+          capture(e);
+        }
+      }),
+    );
+
+    return res.status(200).send({ ok: true, data: youngsSet });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -732,9 +795,12 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    const payload = value;
     const { id } = req.params;
     const young = await YoungModel.findById(id);
+
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
     const previousYoung = { ...young.toObject() };
 
     let classe: any = undefined;
@@ -745,6 +811,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
       classe = dbClasse;
       etablissement = dbEtablissement;
+      if (classe.seatsTaken >= classe.totalSeats) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let previousEtablissement: any = undefined;
@@ -757,16 +824,22 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       previousClasse = dbClasse;
     }
 
-    if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
-
-    const { cohort, cohortChangeReason } = value;
+    const { cohort, cohortChangeReason } = payload;
 
     let youngStatus = young.status;
+    let inscriptionStep = young.inscriptionStep2023;
+    let reinscriptionStep = young.reinscriptionStep2023;
+    if (payload.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
+      youngStatus = YOUNG_STATUS.VALIDATED;
+    }
+    if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
+      youngStatus = getYoungStatusForBasculeCLEtoHTS(young) as YoungType["status"];
+    }
     if (cohort === "à venir ") {
-      youngStatus = getYoungStatus(young) as YoungType["status"];
+      youngStatus = getYoungStatusForAVenir(young) as YoungType["status"];
     }
 
-    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] as string);
+    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
@@ -790,6 +863,14 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       });
     }
     const cohortModel = await CohortModel.findOne({ name: cohort });
+    if (
+      cohortModel?.type === YOUNG_SOURCE.CLE &&
+      young.status === YOUNG_STATUS.IN_PROGRESS &&
+      (inscriptionStep === STEPS2023.DOCUMENTS || reinscriptionStep === STEPS2023.DOCUMENTS)
+    ) {
+      young.hasStartedReinscription ? (reinscriptionStep = STEPS2023.REPRESENTANTS) : (inscriptionStep = STEPS2023.REPRESENTANTS);
+    }
+
     young.set({
       status: youngStatus,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
@@ -800,14 +881,16 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohesionStayMedicalFileReceived: undefined,
       cohortId: cohortModel?._id,
     });
-    if (value.source === YOUNG_SOURCE.CLE) {
+    if (payload.source === YOUNG_SOURCE.CLE) {
       const correctionRequestsFiltered = young?.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];
       young.set({
         source: YOUNG_SOURCE.CLE,
-        etablissementId: value.etablissementId,
-        classeId: value.classeId,
+        etablissementId: payload.etablissementId,
+        classeId: payload.classeId,
         cniFiles: [],
         "files.cniFiles": [],
+        inscriptionStep2023: inscriptionStep,
+        reinscriptionStep2023: reinscriptionStep,
         latestCNIFileExpirationDate: undefined,
         latestCNIFileCategory: undefined,
         cohesionCenterId: classe.cohesionCenterId,
@@ -824,7 +907,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         schoolRegion: etablissement.region,
         schoolCountry: etablissement.country,
         schoolId: undefined,
-        //TODO ajouter le grade de l'eleve deduit de la classe
         situation: getYoungSituationIfCLE(classe.filiere),
       });
       if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
@@ -834,10 +916,9 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         });
       }
     } else {
-      if (value.source === YOUNG_SOURCE.VOLONTAIRE) {
+      if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
         if (young.source !== YOUNG_SOURCE.VOLONTAIRE) {
           young.set({
-            status: youngStatus,
             statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
             cniFiles: [],
             "files.cniFiles": [],
@@ -846,11 +927,26 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
           });
         }
       }
+      const step2023 = young.hasStartedReinscription ? "reinscriptionStep2023" : "inscriptionStep2023";
+      const step2023Value =
+        young.status === YOUNG_STATUS.NOT_AUTORISED ? "WAITING_CONSENT" : young.hasStartedReinscription ? young.reinscriptionStep2023 : young.inscriptionStep2023;
+      const school = await SchoolRAMSESModel.findOne({ uai: previousEtablissement?.uai });
       young.set({
         // Init if young was previously CLE
         source: YOUNG_SOURCE.VOLONTAIRE,
+        status: youngStatus,
+        [step2023]: step2023Value,
         etablissementId: undefined,
         classeId: undefined,
+        schoolId: school?._id ?? undefined,
+        schoolName: school?.fullName ?? undefined,
+        schoolType: school?.type ?? undefined,
+        schoolAddress: school?.adresse ?? undefined,
+        schoolZip: school?.postcode ?? undefined,
+        schoolCity: school?.city ?? undefined,
+        schoolDepartment: school?.department ?? undefined,
+        schoolRegion: school?.region ?? undefined,
+        schoolCountry: school?.country ?? undefined,
       });
     }
 
@@ -900,7 +996,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       previousYoung,
       cohortName: cohort,
       cohortChangeReason,
-      message: value.message,
+      message: payload.message,
       classe,
     });
 
@@ -911,13 +1007,28 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
   }
 });
 
-const getYoungStatus = (young: YoungType) => {
+const getYoungStatusForAVenir = (young: YoungType) => {
   switch (young.status) {
     case YOUNG_STATUS.IN_PROGRESS:
       return YOUNG_STATUS.IN_PROGRESS;
     case YOUNG_STATUS.WAITING_VALIDATION:
       return YOUNG_STATUS.WAITING_VALIDATION;
     case YOUNG_STATUS.WAITING_CORRECTION:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    default:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+  }
+};
+
+const getYoungStatusForBasculeCLEtoHTS = (young: YoungType) => {
+  switch (young.status) {
+    case YOUNG_STATUS.WITHDRAWN:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    case YOUNG_STATUS.REFUSED:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    case YOUNG_STATUS.NOT_AUTORISED:
+      return YOUNG_STATUS.IN_PROGRESS;
+    case YOUNG_STATUS.VALIDATED:
       return YOUNG_STATUS.WAITING_VALIDATION;
     default:
       return YOUNG_STATUS.WAITING_VALIDATION;
@@ -1467,30 +1578,48 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const referents = await ReferentModel.find({ structureId: referent.structureId });
-    const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
-    if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
-    if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
-
-    const classes = await ClasseModel.find({ referentClasseIds: { $in: [referent._id] } });
-    if (classes.length > 0) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSES });
-
-    if (referent.subRole === SUB_ROLES.referent_etablissement && referent.role === ROLES.ADMINISTRATEUR_CLE) {
-      const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [referent._id] } });
-      if (etablissement) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+    if (referent.role === ROLES.RESPONSIBLE || referent.role === ROLES.SUPERVISOR) {
+      const referents = await ReferentModel.find({ structureId: referent.structureId });
+      const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
+      if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
+      if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
     }
+    if (referent.role === ROLES.ADMINISTRATEUR_CLE || referent.role === ROLES.REFERENT_CLASSE) {
+      const classes = await ClasseModel.find({ referentClasseIds: { $in: [referent._id] }, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
+      if (classes.length > 0) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSES });
 
-    if (referent.subRole === SUB_ROLES.coordinateur_cle && referent.role === ROLES.ADMINISTRATEUR_CLE) {
-      const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: [referent._id] } });
-      if (etablissement) {
-        const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
-        etablissement.set({ coordinateurIds: coordinateur });
-        await etablissement.save({ fromUser: req.user });
+      if (referent.subRole === SUB_ROLES.referent_etablissement) {
+        const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [referent._id] } });
+        if (etablissement) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+      }
+
+      if (referent.subRole === SUB_ROLES.coordinateur_cle) {
+        const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: [referent._id] } });
+        if (etablissement) {
+          const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
+          etablissement.set({ coordinateurIds: coordinateur });
+          await etablissement.save({ fromUser: req.user });
+        }
       }
     }
 
-    await referent.remove();
+    await referent.deleteOne();
     logger.debug(`Referent ${req.params.id} has been deleted`);
+
+    if (referent.role === ROLES.REFERENT_DEPARTMENT || referent.role === ROLES.REFERENT_REGION) {
+      const response = await SNUpport.api(`/v0/referent`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email: referent.email }),
+      });
+
+      if (!response.ok) {
+        logger.error(`Failed to delete referent from SNUPPORT: ${response.statusText}`);
+      }
+    }
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

@@ -4,12 +4,12 @@ import { fr } from "@codegouvfr/react-dsfr";
 
 type OwnProps = {
   onClickNext: React.MouseEventHandler<HTMLButtonElement>;
-  onClickPrevious: React.MouseEventHandler<HTMLButtonElement>;
-  labelNext: string;
-  labelPrevious: string;
-  disabled: boolean;
-  collapsePrevious: boolean;
-  text: string;
+  onClickPrevious?: React.MouseEventHandler<HTMLButtonElement>;
+  labelNext?: string;
+  labelPrevious?: string;
+  disabled?: boolean;
+  collapsePrevious?: boolean;
+  text?: string;
 };
 
 export default function SignupButtons({

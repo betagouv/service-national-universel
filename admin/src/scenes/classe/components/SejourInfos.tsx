@@ -53,12 +53,16 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
             <Label
               title="Centre"
               name="centre"
-              tooltip="vous devez indiquez la cohorte avant d'indiquer le centre, si la cohorte séléctionner est CLE 23 24, vous ne pourrez associer aucun centre"
+              tooltip={
+                ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)
+                  ? "vous devez indiquez la cohorte avant d'indiquer le centre, si la cohorte séléctionner est CLE 23 24, vous ne pourrez associer aucun centre"
+                  : null
+              }
             />
             <Select
               isAsync
               className="mb-3"
-              placeholder={"Choisissez un centre existant"}
+              placeholder={![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? "Choisissez un centre existant" : "Non renseigné"}
               loadOptions={(q) => searchSessions({ q, cohort: classe.cohort })}
               defaultOptions={() => searchSessions({ q: "", cohort: classe.cohort })}
               noOptionsMessage={"Aucun centre ne correspond à cette recherche"}
@@ -105,12 +109,16 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
             <Label
               title="Point de rassemblement"
               name="pdr"
-              tooltip="Le point de rassemblement est automatiquement pré rempli avec l'adresse de l'établissement, vous pouvez le modifier si besoin"
+              tooltip={
+                ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)
+                  ? "Le point de rassemblement est automatiquement pré rempli avec l'adresse de l'établissement, vous pouvez le modifier si besoin"
+                  : null
+              }
             />
             <Select
               isAsync
               className="mb-3"
-              placeholder={"Choisissez un point de rassemblement existant"}
+              placeholder={![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? "Choisissez un point de rassemblement existant" : "Non renseigné"}
               loadOptions={(q) => searchPointDeRassemblements({ q, cohort: classe.cohort })}
               defaultOptions={() =>
                 searchPointDeRassemblements({

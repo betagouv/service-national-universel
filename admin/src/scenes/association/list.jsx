@@ -97,7 +97,7 @@ export default function List() {
 
   return (
     <div className="mb-8">
-      <Breadcrumbs items={[{ label: "Associations" }]} />
+      <Breadcrumbs items={[{ title: "Engagement" }, { label: "Associations" }]} />
       <div className="flex flex-col gap-6 py-2 px-8">
         <div className="flex flex-1 justify-between items-center">
           <div className="text-2xl font-bold leading-7 text-[#242526]">Annuaire des associations</div>

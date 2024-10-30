@@ -11,6 +11,11 @@ export const YoungDSNJExportDatesSchema = {
   youngsAfterSession: Date,
 };
 
+export const YoungINJEPExportDatesSchema = {
+  youngsBeforeSession: Date,
+  youngsAfterSession: Date,
+};
+
 export const YoungEligibilitySchema = {
   zones: {
     type: [String],
@@ -46,6 +51,12 @@ export const CohortSchema = {
     type: new Schema(YoungDSNJExportDatesSchema),
     documentation: {
       description: "Dates when DSNJ export are generated",
+    },
+  },
+  injepExportDates: {
+    type: new Schema(YoungINJEPExportDatesSchema),
+    documentation: {
+      description: "Dates when INJEP export are generated",
     },
   },
 
@@ -330,6 +341,35 @@ export const CohortSchema = {
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+
+  inscriptionOpenForReferentClasse: {
+    type: Boolean,
+    default: true,
+    documentation: {
+      description: "Ouverture ou fermeture de l'inscription manuelle pour les référents de classe",
+    },
+  },
+  inscriptionOpenForReferentRegion: {
+    type: Boolean,
+    default: true,
+    documentation: {
+      description: "Ouverture ou fermeture de l'inscription manuelle pour les référents régionaux",
+    },
+  },
+  inscriptionOpenForReferentDepartment: {
+    type: Boolean,
+    default: true,
+    documentation: {
+      description: "Ouverture ou fermeture de l'inscription manuelle pour les référents départementaux",
+    },
+  },
+  inscriptionOpenForAdministrateurCle: {
+    type: Boolean,
+    default: true,
+    documentation: {
+      description: "Ouverture ou fermeture de l'inscription manuelle pour les administrateurs CLE",
+    },
+  },
 };
 
 const schema = new Schema(CohortSchema);

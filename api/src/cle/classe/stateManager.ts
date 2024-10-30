@@ -26,14 +26,14 @@ const ClasseStateManager = {
     const isInscriptionClosed = isCohortInscriptionClosed(classeCohort);
 
     // Open
-    if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status as any) && isInscriptionOpen) {
+    if ([STATUS_CLASSE.ASSIGNED, STATUS_CLASSE.CLOSED].includes(classe.status as any) && isInscriptionOpen && seatsValidated < classe.totalSeats) {
       classe.set({ status: STATUS_CLASSE.OPEN });
       classe = await classe.save({ fromUser });
       return classe;
     }
 
     // Closed
-    if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats === seatsValidated) {
+    if ((classe.status !== STATUS_CLASSE.CLOSED && isInscriptionClosed) || classe.totalSeats <= seatsValidated) {
       classe.set({ status: STATUS_CLASSE.CLOSED });
       classe = await classe.save({ fromUser });
       return classe;

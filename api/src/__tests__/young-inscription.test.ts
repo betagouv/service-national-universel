@@ -1,5 +1,5 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper, getYoungByIdHelper } from "./helpers/young";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -11,49 +11,46 @@ import getNewCohortFixture from "./fixtures/cohort";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
 }));
 
-describe("Young", () => {
+describe("Young Inscription", () => {
   describe("PUT /young/inscription2023/eligibilite", () => {
     it("Should return 404 when young is not found", async () => {
       let res = await request(getAppHelper()).put("/young/inscription2023/eligibilite");
       expect(res.status).toBe(404);
 
-      const passport = require("passport");
-      passport.user._id = null;
-      res = await request(getAppHelper()).put("/young/inscription2023/eligibilite");
+      res = await request(getAppHelper({ _id: null } as any)).put("/young/inscription2023/eligibilite");
       expect(res.status).toBe(404);
-
-      const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
     });
 
     it("Should return 400 when eliligibility scheme is invalid", async () => {
+      const user = await createYoungHelper(getNewYoungFixture());
       const eligibilityObj = {
         birthdateAt: "",
         schooled: "",
         grade: "",
         schoolName: "",
       };
-      let res = await request(getAppHelper()).put("/young/inscription2023/eligibilite");
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/eligibilite");
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).put("/young/inscription2023/eligibilite").send({});
+      res = await request(getAppHelper(user)).put("/young/inscription2023/eligibilite").send({});
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper()).put("/young/inscription2023/eligibilite").send(eligibilityObj);
+      res = await request(getAppHelper(user)).put("/young/inscription2023/eligibilite").send(eligibilityObj);
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper())
+      res = await request(getAppHelper(user))
         .put("/young/inscription2023/eligibilite")
         .send({ ...eligibilityObj, grade: "grade-test" });
       expect(res.status).toBe(400);
 
-      res = await request(getAppHelper())
+      res = await request(getAppHelper(user))
         .put("/young/inscription2023/eligibilite")
         .send({
           ...eligibilityObj,
@@ -70,9 +67,7 @@ describe("Young", () => {
     // "Should return 403 if update is not authorized";
 
     it("Should return 200 otherwise", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
 
       const eligibilityObj = {
         birthdateAt: "2006-09-25",
@@ -90,9 +85,9 @@ describe("Young", () => {
         zip: "75008",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/eligibilite").send(eligibilityObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/eligibilite").send(eligibilityObj);
       const responseData = res.body.data;
-      const updatedYoung = await getYoungByIdHelper(passport.user._id);
+      const updatedYoung = await getYoungByIdHelper(user._id);
       expect(res.status).toBe(200);
 
       const formatedDate = new Date(eligibilityObj.birthdateAt);
@@ -104,23 +99,17 @@ describe("Young", () => {
 
   describe("PUT /young/inscription2023/noneligible", () => {
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-
-      let res = await request(getAppHelper()).put("/young/inscription2023/noneligible");
+      let res = await request(getAppHelper({})).put("/young/inscription2023/noneligible");
       expect(res.status).toBe(404);
 
-      passport.user._id = null;
-      res = await request(getAppHelper()).put("/young/inscription2023/noneligible");
+      res = await request(getAppHelper({ _id: null } as any)).put("/young/inscription2023/noneligible");
       expect(res.status).toBe(404);
     });
     it("Should return 200 otherwise", async () => {
       const user = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      passport.user = user;
-      let res = await request(getAppHelper()).put("/young/inscription2023/noneligible");
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/noneligible");
       const responseData = res.body.data;
-      const updatedYoung = await getYoungByIdHelper(passport.user._id);
+      const updatedYoung = await getYoungByIdHelper(user._id);
       expect(res.status).toBe(200);
       expect(updatedYoung?.status).toBe(YOUNG_STATUS.NOT_ELIGIBLE);
       expect(responseData.status).toBe(YOUNG_STATUS.NOT_ELIGIBLE);
@@ -133,14 +122,10 @@ describe("Young", () => {
       expect(res.status).toBe(400);
     });
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-
-      let res = await request(getAppHelper()).put("/young/inscription2023/coordinates/next");
+      let res = await request(getAppHelper({})).put("/young/inscription2023/coordinates/next");
       expect(res.status).toBe(404);
 
-      passport.user._id = null;
-      res = await request(getAppHelper()).put("/young/inscription2023/coordinates/next");
+      res = await request(getAppHelper({ _id: null } as any)).put("/young/inscription2023/coordinates/next");
       expect(res.status).toBe(404);
     });
 
@@ -148,18 +133,17 @@ describe("Young", () => {
       let typeUrlParam = "next";
 
       const user = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      passport.user = user;
 
-      let res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`);
+      let res = await request(getAppHelper(user)).put(`/young/inscription2023/coordinates/${typeUrlParam}`);
       expect(res.status).toBe(400);
 
       typeUrlParam = "correction";
-      res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`);
+      res = await request(getAppHelper(user)).put(`/young/inscription2023/coordinates/${typeUrlParam}`);
       expect(res.status).toBe(400);
     });
 
     it("Should return 400 when body sent is invalid when type url param is 'next' or 'correction'", async () => {
+      const user = await createYoungHelper(getNewYoungFixture());
       let typeUrlParam = "next";
 
       const coordonneeObj = {
@@ -170,18 +154,16 @@ describe("Young", () => {
         phone: "0600010203",
       };
 
-      let res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
+      let res = await request(getAppHelper(user)).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
       expect(res.status).toBe(400);
 
       typeUrlParam = "correction";
-      res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
+      res = await request(getAppHelper(user)).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
       expect(res.status).toBe(400);
     });
 
     it("Should return 200 when body sent is valid when type url param is 'next' or 'correction'", async () => {
       const user = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      passport.user = user;
 
       const coordonneeObj = {
         gender: "female",
@@ -208,13 +190,14 @@ describe("Young", () => {
         paiBeneficiary: "false",
         allergies: "true",
         moreInformation: "false",
+        psc1Info: "false",
       };
 
       let typeUrlParam = "next";
-      let res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
+      let res = await request(getAppHelper(user)).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(coordonneeObj);
       expect(res.status).toBe(200);
       const nextResponseData = res.body.data;
-      const nextUpdatedYoung = await getYoungByIdHelper(passport.user._id);
+      const nextUpdatedYoung = await getYoungByIdHelper(user._id);
 
       typeUrlParam = "correction";
 
@@ -224,10 +207,10 @@ describe("Young", () => {
         handicap: "false",
       };
 
-      res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(correctCoordonneeObj);
+      res = await request(getAppHelper(user)).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(correctCoordonneeObj);
       expect(res.status).toBe(200);
       const correctionResponseData = res.body.data;
-      const correctionUpdatedYoung = await getYoungByIdHelper(passport.user._id);
+      const correctionUpdatedYoung = await getYoungByIdHelper(user._id);
 
       // @ts-ignore
       delete coordonneeObj.livesInFrance;
@@ -266,19 +249,17 @@ describe("Young", () => {
     });
 
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-
       const consentementObj = {
         consentment1: true,
         consentment2: true,
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/consentement").send(consentementObj);
+      let res = await request(getAppHelper({})).put("/young/inscription2023/consentement").send(consentementObj);
       expect(res.status).toBe(404);
 
-      passport.user._id = null;
-      res = await request(getAppHelper()).put("/young/inscription2023/consentement").send(consentementObj);
+      res = await request(getAppHelper({ _id: null } as any))
+        .put("/young/inscription2023/consentement")
+        .send(consentementObj);
       expect(res.status).toBe(404);
     });
 
@@ -286,18 +267,16 @@ describe("Young", () => {
     // "Should return 403 if update is not authorized"
 
     it("Should return 200 otherwise", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
 
       const consentementObj = {
         consentment1: true,
         consentment2: true,
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/consentement").send(consentementObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/consentement").send(consentementObj);
       const responseData = res.body.data;
-      const updatedYoung = await getYoungByIdHelper(passport.user._id);
+      const updatedYoung = await getYoungByIdHelper(user._id);
       expect(res.status).toBe(200);
       expect(responseData).toMatchObject({ acceptCGU: "true", consentment: "true", inscriptionStep2023: STEPS2023.REPRESENTANTS });
       expect(updatedYoung).toMatchObject({ acceptCGU: "true", consentment: "true", inscriptionStep2023: STEPS2023.REPRESENTANTS });
@@ -312,22 +291,17 @@ describe("Young", () => {
 
     it("Should return 400 when no body is sent when type url param is 'next' or 'correction'", async () => {
       const user = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      passport.user = user;
 
       let typeUrlParam = "next";
-      let res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`);
+      let res = await request(getAppHelper(user)).put(`/young/inscription2023/representants/${typeUrlParam}`);
       expect(res.status).toBe(400);
 
       typeUrlParam = "correction";
-      res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`);
+      res = await request(getAppHelper(user)).put(`/young/inscription2023/representants/${typeUrlParam}`);
       expect(res.status).toBe(400);
     });
 
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-
       const representantObj = {
         parent1Status: "mother",
         parent1FirstName: "Jane",
@@ -338,11 +312,12 @@ describe("Young", () => {
         parent2: false,
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/representants/next").send(representantObj);
+      let res = await request(getAppHelper({})).put("/young/inscription2023/representants/next").send(representantObj);
       expect(res.status).toBe(404);
 
-      passport.user._id = null;
-      res = await request(getAppHelper()).put("/young/inscription2023/representants/next").send(representantObj);
+      res = await request(getAppHelper({ _id: null } as any))
+        .put("/young/inscription2023/representants/next")
+        .send(representantObj);
       expect(res.status).toBe(404);
     });
 
@@ -350,9 +325,7 @@ describe("Young", () => {
     // "Should return 403 if update is not authorized"
 
     it("Should return 200 otherwise", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
 
       const representantObj = {
         parent1Status: "mother",
@@ -364,10 +337,10 @@ describe("Young", () => {
         parent2: false,
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/representants/next").send(representantObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/representants/next").send(representantObj);
       expect(res.status).toBe(200);
       const nextResponseData = res.body.data;
-      const nextUpdatedYoung = await getYoungByIdHelper(passport.user._id);
+      const nextUpdatedYoung = await getYoungByIdHelper(user._id);
 
       const correctRepresentantObj = {
         ...representantObj,
@@ -378,7 +351,7 @@ describe("Young", () => {
       res = await request(getAppHelper()).put("/young/inscription2023/representants/correction").send(correctRepresentantObj);
       expect(res.status).toBe(200);
       const correctionResponseData = res.body.data;
-      const correctionUpdatedYoung = await getYoungByIdHelper(passport.user._id);
+      const correctionUpdatedYoung = await getYoungByIdHelper(user._id);
 
       // @ts-ignore
       delete representantObj.parent2;
@@ -393,18 +366,14 @@ describe("Young", () => {
 
   describe("PUT /young/inscription2023/confirm", () => {
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-      let res = await request(getAppHelper()).put("/young/inscription2023/confirm");
+      let res = await request(getAppHelper({})).put("/young/inscription2023/confirm");
       expect(res.status).toBe(404);
     });
 
     it("Should return 200 otherwise", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/confirm");
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/confirm");
       expect(res.status).toBe(200);
       expect(res.body.data).toMatchObject({ informationAccuracy: "true", inscriptionStep2023: STEPS2023.WAITING_CONSENT });
     });
@@ -423,23 +392,20 @@ describe("Young", () => {
     });
 
     it("Should return 409 when the cohort is not found", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
+
       const cohortObj = {
         cohort: "no existing value",
       };
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/changeCohort").send(cohortObj);
       expect(res.status).toBe(409);
     });
 
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
       const cohortObj = {
         cohort: "Juillet 2023",
       };
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").set("x-user-timezone", "-60").send(cohortObj);
+      let res = await request(getAppHelper({})).put("/young/inscription2023/changeCohort").set("x-user-timezone", "-60").send(cohortObj);
       expect(res.status).toBe(404);
     });
 
@@ -447,20 +413,17 @@ describe("Young", () => {
     // "Should return 403 if update is not authorized"
 
     it("Should return 409 if the cohort goal is reached or the cohort session is not found or full", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
 
       const cohortObj = {
         cohort: "Juillet 2023",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").set("x-user-timezone", "-60").send(cohortObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/changeCohort").set("x-user-timezone", "-60").send(cohortObj);
       expect(res.status).toBe(409);
     });
 
     it.skip("Should return 200 otherwise", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(
         getNewYoungFixture({
           cohort: "Février 2023 - C",
@@ -472,13 +435,12 @@ describe("Young", () => {
           zip: "75008",
         }),
       );
-      passport.user = user;
 
       const cohortObj = {
         cohort: "Juillet 2023",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/changeCohort").send(cohortObj);
       expect(res.status).toBe(200);
       expect(res.body.data).toMatchObject({ cohort: "Juillet 2023" });
     });
@@ -491,18 +453,14 @@ describe("Young", () => {
     });
 
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/next");
+      let res = await request(getAppHelper({})).put("/young/inscription2023/documents/next");
       expect(res.status).toBe(404);
     });
 
     it("Should return 409 when young has no provided cni file using 'next' route param", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/next");
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/documents/next");
       expect(res.status).toBe(409);
     });
 
@@ -516,21 +474,28 @@ describe("Young", () => {
         expirationDate: new Date().toISOString(),
       };
 
-      const passport = require("passport");
       // @ts-ignore
       const user = await createYoungHelper(getNewYoungFixture({ files: { cniFiles: [cniFile] } }));
-      passport.user = user;
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/next");
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/documents/next");
       expect(res.status).toBe(400);
     });
 
     it("Should return 400 when the body is invalid using 'next' route param", async () => {
+      const cniFile = {
+        name: "CNI_TEST.pdf",
+        uploadedAt: new Date().toISOString(),
+        size: 150244,
+        mimetype: "application/pdf",
+        category: "cniNew",
+        expirationDate: new Date().toISOString(),
+      };
+      const user = await createYoungHelper(getNewYoungFixture({ files: { cniFiles: [cniFile] } }));
       const documentObj = {
         date: "invalid value",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/next").send(documentObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/documents/next").send(documentObj);
       expect(res.status).toBe(400);
     });
 
@@ -544,12 +509,10 @@ describe("Young", () => {
         expirationDate: new Date().toISOString(),
       };
 
-      const passport = require("passport");
       const cohort = await createCohortHelper(getNewCohortFixture());
 
       // @ts-ignore
       const user = await createYoungHelper(getNewYoungFixture({ files: { cniFiles: [cniFile] }, cohort: cohort.name, cohortId: cohort._id }));
-      passport.user = user;
 
       const documentObj = {
         date: new Date(),
@@ -557,9 +520,9 @@ describe("Young", () => {
 
       const CNIFileNotValidOnStart = documentObj.date < new Date("07/17/2023");
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/next").send(documentObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/documents/next").send(documentObj);
       const nextResponseData = res.body.data;
-      const nextUpdatedYoung = await getYoungByIdHelper(passport.user._id);
+      const nextUpdatedYoung = await getYoungByIdHelper(user._id);
       expect(res.status).toBe(200);
       expect(nextResponseData).toMatchObject({ CNIFileNotValidOnStart: CNIFileNotValidOnStart + "", latestCNIFileExpirationDate: documentObj.date.toISOString() });
       expect(nextUpdatedYoung).toMatchObject({ CNIFileNotValidOnStart: CNIFileNotValidOnStart + "", latestCNIFileExpirationDate: documentObj.date });
@@ -575,43 +538,36 @@ describe("Young", () => {
         expirationDate: new Date().toISOString(),
       };
 
-      const passport = require("passport");
-      // @ts-ignore
       const user = await createYoungHelper(getNewYoungFixture({ cohort: COHORTS.AVENIR, files: { cniFiles: [cniFile] } }));
-      passport.user = user;
 
       const documentObj = {
         date: new Date(),
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/next").send(documentObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/documents/next").send(documentObj);
       const nextResponseData = res.body.data;
-      const nextUpdatedYoung = await getYoungByIdHelper(passport.user._id);
+      const nextUpdatedYoung = await getYoungByIdHelper(user._id);
       expect(res.status).toBe(200);
       expect(nextResponseData).toMatchObject({ latestCNIFileExpirationDate: documentObj.date.toISOString() });
       expect(nextUpdatedYoung).toMatchObject({ latestCNIFileExpirationDate: documentObj.date });
     });
 
     it("Should return 400 when no body is provided using 'correction' route param", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/correction");
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/documents/correction");
       expect(res.status).toBe(400);
     });
 
     it("Should return 400 when body is invalid using 'correction' route param", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
 
       const fileObj = {
         latestCNIFileExpirationDate: "invalid value",
         latestCNIFileCategory: "invalid value",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/correction").send(fileObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/documents/correction").send(fileObj);
       expect(res.status).toBe(400);
     });
 
@@ -619,10 +575,8 @@ describe("Young", () => {
     // "Should return 403 using 'correction' route param if update is not authorized";
 
     it("Should return 200 otherwise using 'correction' route param", async () => {
-      const passport = require("passport");
       const cohort = await createCohortHelper(getNewCohortFixture());
       const user = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
-      passport.user = user;
 
       const fileObj = {
         latestCNIFileExpirationDate: new Date(),
@@ -631,9 +585,9 @@ describe("Young", () => {
 
       const CNIFileNotValidOnStart = fileObj.latestCNIFileExpirationDate < new Date("07/17/2023");
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/documents/correction").send(fileObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/documents/correction").send(fileObj);
       const correctionResponseData = res.body.data;
-      const correctionUpdatedYoung = await getYoungByIdHelper(passport.user._id);
+      const correctionUpdatedYoung = await getYoungByIdHelper(user._id);
       expect(res.status).toBe(200);
       expect(correctionResponseData).toMatchObject({ CNIFileNotValidOnStart: CNIFileNotValidOnStart + "" });
       expect(correctionUpdatedYoung).toMatchObject({ CNIFileNotValidOnStart: CNIFileNotValidOnStart + "" });
@@ -642,37 +596,30 @@ describe("Young", () => {
 
   describe("PUT /young/inscription2023/relance", () => {
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-      let res = await request(getAppHelper()).put("/young/inscription2023/relance");
+      let res = await request(getAppHelper({})).put("/young/inscription2023/relance");
       expect(res.status).toBe(404);
     });
 
     it("Should return 200 otherwise", async () => {
-      const passport = require("passport");
       const cohort = await createCohortHelper(getNewCohortFixture());
       const user = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
-      passport.user = user;
-      let res = await request(getAppHelper()).put("/young/inscription2023/relance");
+
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/relance");
       expect(res.status).toBe(200);
     });
   });
 
   describe("PUT /young/inscription2023/done", () => {
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-      let res = await request(getAppHelper()).put("/young/inscription2023/done");
+      let res = await request(getAppHelper({})).put("/young/inscription2023/done");
       expect(res.status).toBe(404);
     });
 
     it("Should return 200 otherwise", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
-      let res = await request(getAppHelper()).put("/young/inscription2023/done");
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/done");
       const responseData = res.body.data;
-      const updatedYoung = await getYoungByIdHelper(passport.user._id);
+      const updatedYoung = await getYoungByIdHelper(user._id);
       expect(res.status).toBe(200);
       expect(responseData).toMatchObject({ inscriptionStep2023: STEPS2023.DONE });
       expect(updatedYoung).toMatchObject({ inscriptionStep2023: STEPS2023.DONE });
@@ -681,19 +628,15 @@ describe("Young", () => {
 
   describe("PUT /young/inscription2023/goToInscriptionAgain", () => {
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-      let res = await request(getAppHelper()).put("/young/inscription2023/goToInscriptionAgain");
+      let res = await request(getAppHelper({})).put("/young/inscription2023/goToInscriptionAgain");
       expect(res.status).toBe(404);
     });
 
     it("Should return 200 otherwise", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
-      let res = await request(getAppHelper()).put("/young/inscription2023/goToInscriptionAgain");
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/goToInscriptionAgain");
       const responseData = res.body.data;
-      const updatedYoung = await getYoungByIdHelper(passport.user._id);
+      const updatedYoung = await getYoungByIdHelper(user._id);
       expect(res.status).toBe(200);
       expect(responseData).toMatchObject({ inscriptionStep2023: STEPS2023.CONFIRM });
       expect(updatedYoung).toMatchObject({ inscriptionStep2023: STEPS2023.CONFIRM });
@@ -702,25 +645,24 @@ describe("Young", () => {
 
   describe("PUT /young/inscription2023/profil", () => {
     it("Should return 400 if no body is provided", async () => {
-      let res = await request(getAppHelper()).put("/young/inscription2023/profil");
+      const user = await createYoungHelper(getNewYoungFixture());
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/profil");
       expect(res.status).toBe(400);
     });
 
     it("Should return 400 if the body provided is invalid", async () => {
+      const user = await createYoungHelper(getNewYoungFixture());
       const profilObj = {
         firstName: 0,
         lastName: ["invalid", "value"],
         email: "invalid email value",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/profil").send(profilObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/profil").send(profilObj);
       expect(res.status).toBe(400);
     });
 
     it("Should return 404 when young is not found", async () => {
-      const passport = require("passport");
-      passport.user = {};
-
       const profilObj = {
         firstName: "John",
         lastName: "DOE",
@@ -728,7 +670,7 @@ describe("Young", () => {
         phone: "600000000",
         phoneZone: "FRANCE",
       };
-      let res = await request(getAppHelper()).put("/young/inscription2023/profil").send(profilObj);
+      let res = await request(getAppHelper({})).put("/young/inscription2023/profil").send(profilObj);
       expect(res.status).toBe(404);
     });
 
@@ -736,9 +678,7 @@ describe("Young", () => {
     // "Should return 403 using 'correction' route param if update is not authorized"
 
     it("Should return 200 otherwise", async () => {
-      const passport = require("passport");
       const user = await createYoungHelper(getNewYoungFixture());
-      passport.user = user;
 
       const profilObj = {
         firstName: faker.person.firstName().toLowerCase(),
@@ -748,9 +688,9 @@ describe("Young", () => {
         phoneZone: "FRANCE",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/profil").send(profilObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/profil").send(profilObj);
       const responseData = res.body.data;
-      const updatedYoung = await getYoungByIdHelper(passport.user._id);
+      const updatedYoung = await getYoungByIdHelper(user._id);
 
       expect(res.status).toBe(200);
       expect(responseData).toMatchObject({ ...profilObj, firstName: profilObj.firstName.charAt(0).toUpperCase() + profilObj.firstName.slice(1) });

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { department2region, translate } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
-import { categories, departmentOptions, getClasseIdFromLink, getQuestions, roleOptions } from "../contact.service";
+import { categories, departmentOptions, getClasseIdFromLink, roleOptions } from "../contact.service";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
@@ -14,9 +14,7 @@ import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import MyClass from "@/scenes/cle/MyClass";
-import { useQuery } from "@tanstack/react-query";
-import { fetchClass } from "@/services/classe.service";
-import { validateId } from "@/utils";
+import useClass from "@/scenes/cle/useClass";
 
 export default function PublicContactForm({ category, question, parcours }) {
   const history = useHistory();
@@ -29,38 +27,23 @@ export default function PublicContactForm({ category, question, parcours }) {
   const [lastName, setLastName] = useState("");
   const [department, setDepartment] = useState("");
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
 
   const params = new URLSearchParams(window.location.search);
   const classeIdFromURL = params.get("classeId");
   const classeIdFromLink = getClasseIdFromLink(link);
   const classeId = classeIdFromURL || classeIdFromLink;
 
-  const {
-    isPending,
-    isError,
-    data: classe,
-  } = useQuery({
-    queryKey: ["class", classeId],
-    queryFn: () => fetchClass(classeId),
-    enabled: validateId(classeId),
-  });
+  const { isPending, isError, data: classe } = useClass(classeId);
 
-  const questions = getQuestions(category, "public", parcours);
+  const classeString = `J'ai un compte volontaire et je souhaite m'inscrire au SNU dans le cadre de ma classe engagée : ${classe?.name}, établissement : ${classe?.etablissement?.name}.`;
+  const [message, setMessage] = useState(classe?.name && classe?.etablissement ? classeString : "");
 
   const disabled = () => {
     if (loading) return true;
-    if (!role || !category || !question || !firstName || !lastName || !email || !department) return true;
+    if (!role || !category || !question.label || !firstName || !lastName || !email || !department) return true;
     if (!message) return true;
     return false;
   };
-
-  useEffect(() => {
-    if (classe?.name && classe?.etablissement) {
-      const classeString = `J'ai un compte volontaire et je souhaite m'inscrire au SNU dans le cadre de ma classe engagée : ${classe?.name}, établissement : ${classe?.etablissement?.name}.`;
-      setMessage(classeString);
-    }
-  }, [classe?.name, classe?.etablissement]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,7 +62,7 @@ export default function PublicContactForm({ category, question, parcours }) {
 
       const response = await API.post("/SNUpport/ticket/form", {
         message,
-        subject: `${categories.find((e) => e.value === category)?.label} - ${questions.find((e) => e.value === question)?.label}`,
+        subject: `${categories.find((e) => e.value === category)?.label} - ${question.label}`,
         firstName,
         lastName,
         email,
@@ -87,7 +70,7 @@ export default function PublicContactForm({ category, question, parcours }) {
         role,
         parcours,
         subjectStep1: category,
-        subjectStep2: question,
+        subjectStep2: question.label,
         region: department2region[department],
         fromPage: new URLSearchParams(window.location.search).get("from "),
         files: uploadedFiles,
@@ -108,7 +91,7 @@ export default function PublicContactForm({ category, question, parcours }) {
 
   return (
     <form onSubmit={handleSubmit} disabled={disabled()} autoComplete="on">
-      {question === "HTS_TO_CLE" && !classeIdFromURL && (
+      {question.value === "HTS_TO_CLE" && !classeIdFromURL && (
         <>
           <label className="w-full">
             Lien transmis par le référent
@@ -119,7 +102,7 @@ export default function PublicContactForm({ category, question, parcours }) {
           )}
         </>
       )}
-      {question === "HTS_TO_CLE" && classeId && (
+      {question.value === "HTS_TO_CLE" && classeId && (
         <div className="flex items-center border my-12 px-8 py-4">
           {isPending && <p className="animate-pulse text-center">Chargement de la classe...</p>}
           {isError && <p className="text-center">Impossible de récupérer les informations de votre classe engagée 🤔</p>}

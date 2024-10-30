@@ -21,6 +21,7 @@ import NumberInput from "@/components/ui/forms/NumberInput";
 
 import { CleSettings } from "../components/CleSettings";
 import { InformationsConvoyage } from "../components/InformationsConvoyage";
+import { ManualInscriptionSettings } from "../phase0/ManualInscriptionSettings";
 
 export default function GeneralTab({ data, setData, cohort, readOnly, getCohort, isLoading, setIsLoading }) {
   const [error, setError] = useState<{ [key: string]: string }>({});
@@ -258,6 +259,7 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   </>
                 )}
               </div>
+              <ManualInscriptionSettings cohort={data} setCohort={setData} isLoading={isLoading} readOnly={readOnly} />
             </div>
             <div className="flex w-[10%] justify-center items-center">
               <div className="w-[1px] h-[90%] border-r-[1px] border-gray-200"></div>
@@ -270,9 +272,10 @@ export default function GeneralTab({ data, setData, cohort, readOnly, getCohort,
                   <ReactTooltip id="modification_volontaire" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                     <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
                       <li>
-                        Fermeture de la possibilité de modifier ou corriger son dossier d’inscription (pour les dossiers “en attente de validation” et “en attente de correction”).
+                        Fermeture de la possibilité de modifier ou corriger son dossier d’inscription (pour les dossiers {data.type === COHORT_TYPE.CLE && "“en cours”"}, “en
+                        attente de validation” et “en attente de correction”).
                       </li>
-                      <li>Le bouton d’accès au dossier est masqué sur le compte volontaire et l’URL d’accès au formulaire bloquée.</li>
+                      {data.type !== COHORT_TYPE.CLE && <li>Le bouton d’accès au dossier est masqué sur le compte volontaire et l’URL d’accès au formulaire bloquée.</li>}
                     </ul>
                   </ReactTooltip>
                 </div>

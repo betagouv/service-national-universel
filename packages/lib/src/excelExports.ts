@@ -115,6 +115,12 @@ const youngExportFields = [
     ],
   },
   {
+    id: "cle",
+    title: "Élèves CLE",
+    desc: ["Nationalité française", "Établissement UAI", "Classe Id", "Coloration"],
+    fields: ["frenchNationality", "etablissementId", "classeId"],
+  },
+  {
     id: "representative1",
     title: "Représentant légal 1",
     desc: ["Statut", "Nom", "Prénom", "Email", "Téléphone", "Adresse", "Code postal", "Ville", "Département et région du représentant légal"],

@@ -1,24 +1,63 @@
+import { department2region, FUNCTIONAL_ERRORS } from "snu-lib";
 import { InscriptionGoalModel, YoungModel } from "../models";
 
-export const getFillingRate = async (department, cohort) => {
-  const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments();
-  const inscriptionGoal = await InscriptionGoalModel.findOne({ department, cohort });
-  if (!inscriptionGoal || !inscriptionGoal.max) {
-    throw new Error("Objectifs de la région non accessibles ou inexistants");
+interface CompletionObjectif {
+  jeunesCount: number;
+  objectif: number;
+  tauxRemplissage: number;
+  isAtteint: boolean;
+}
+
+// Vérification des objectifs pour une région donnée
+export const getCompletionObjectifRegion = async (region: string, cohort: string): Promise<CompletionObjectif> => {
+  const regionGoal = await InscriptionGoalModel.aggregate<{ _id: string; total: number }>([
+    {
+      $match: {
+        region,
+        cohort,
+        max: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "region",
+        total: {
+          $sum: "$max",
+        },
+      },
+    },
+  ]);
+  const total = regionGoal?.[0]?.total;
+  if (!total) {
+    throw new Error(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
   }
-  const fillingRate = (youngCount || 0) / (inscriptionGoal?.max || 1);
-  return fillingRate;
+  const jeunesCount = (await YoungModel.find({ region, status: { $in: ["VALIDATED"] }, cohort }).countDocuments()) || 0;
+  const tauxRemplissage = jeunesCount / total;
+  return { jeunesCount, objectif: total, tauxRemplissage, isAtteint: tauxRemplissage >= FILLING_RATE_LIMIT };
 };
 
-export const getInscriptionGoalStats = async (department, cohort) => {
-  const count = (await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments()) || 0;
-  const inscriptionGoal = await InscriptionGoalModel.findOne({ department, cohort });
-  const max = inscriptionGoal?.max || 1;
+// Vérification des objectifs pour un département donné
+export const getCompletionObjectifDepartement = async (department: string, cohort: string): Promise<CompletionObjectif> => {
+  const jeunesCount = (await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments()) || 0;
+  const objectif = await InscriptionGoalModel.findOne({ department, cohort });
+  if (!objectif || !objectif.max) {
+    throw new Error(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
+  }
+  const tauxRemplissage = jeunesCount / objectif.max;
+  return { jeunesCount, objectif: objectif.max, tauxRemplissage, isAtteint: tauxRemplissage >= FILLING_RATE_LIMIT };
+};
+
+// Vérification des objectifs pour un département et la région associée
+export const getCompletionObjectifs = async (department: string, cohort: string) => {
+  const completionObjectifDepartement = await getCompletionObjectifDepartement(department, cohort);
+  const completionObjectifRegion = await getCompletionObjectifRegion(department2region[department], cohort);
   return {
-    count,
-    max,
-    fillingRate: count / max,
-    rateLimit: FILLING_RATE_LIMIT,
+    department: completionObjectifDepartement,
+    region: completionObjectifRegion,
+    // completion des objectifs départementaux et régionaux
+    isAtteint: completionObjectifRegion.isAtteint || completionObjectifDepartement.isAtteint,
+    tauxRemplissage: Math.max(completionObjectifRegion.tauxRemplissage, completionObjectifDepartement.tauxRemplissage),
+    tauxLimiteRemplissage: FILLING_RATE_LIMIT,
   };
 };
 

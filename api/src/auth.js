@@ -16,7 +16,7 @@ const {
   checkJwtTrustTokenVersion,
 } = require("./jwt-options");
 const { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString, YOUNG_STATUS } = require("./utils");
 const {
   SENDINBLUE_TEMPLATES,
   PHONE_ZONES_NAMES_ARR,
@@ -150,7 +150,7 @@ class Auth {
 
       const cohortModel = await CohortModel.findOne({ name: cohort });
 
-      const user = await this.model.create({
+      const user = new this.model({
         email,
         phone,
         phoneZone,
@@ -180,6 +180,14 @@ class Auth {
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
       });
 
+      await user.save({
+        fromUser: {
+          _id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      });
       if (isEmailValidationEnabled) {
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
           emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
@@ -258,15 +266,17 @@ class Auth {
       const count = await this.countDocumentsInView(normalizedFirstName, normalizedLastName, formatedDate);
       if (count > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
-      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-
       const classe = await ClasseModel.findOne({ _id: classeId });
       if (!classe) {
         return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
 
-      const countOfUsersInClass = await this.model.countDocuments({ classeId, deletedAt: { $exists: false } });
+      const countOfUsersInClass = await this.model.countDocuments({
+        classeId,
+        deletedAt: { $exists: false },
+        status: YOUNG_STATUS.VALIDATED,
+      });
+      logger.info(`Auth / signup - youngs : ${countOfUsersInClass} in class ${classeId}`);
       if (countOfUsersInClass >= classe.totalSeats) {
         return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
@@ -320,7 +330,15 @@ class Auth {
         cohortId: cohort?._id,
       };
 
-      const user = await this.model.create(userData);
+      const user = new this.model(userData);
+      await user.save({
+        fromUser: {
+          _id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      });
       if (!user) {
         throw new Error("Error while creating user");
       }

@@ -1,8 +1,7 @@
 import React from "react";
 import Toggle from "../../../Toggle";
-
 interface SimpleToggleProps {
-  value: boolean;
+  value?: boolean;
   disabled?: boolean;
   label: string;
   onChange: (value: boolean) => void;

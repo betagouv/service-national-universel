@@ -273,14 +273,14 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const referentsLinkedToStructure = await ReferentModel.find({ structureId: checkedId });
 
     for (const referent of referentsLinkedToStructure) {
-      await referent.remove();
+      await referent.deleteOne();
     }
 
     for (const mission of missionsLinkedToReferent) {
-      await mission.remove();
+      await mission.deleteOne();
     }
 
-    await structure.remove();
+    await structure.deleteOne();
     logger.debug(`Structure ${req.params.id} has been deleted by ${req.user._id}`);
     res.status(200).send({ ok: true });
   } catch (error) {

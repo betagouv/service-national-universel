@@ -3,6 +3,7 @@ const { logger } = require("./logger");
 
 // Require this first!
 const { initSentry } = require("./sentry");
+
 initSentry();
 
 // NODE_ENV environment variable (default "development") is used by :

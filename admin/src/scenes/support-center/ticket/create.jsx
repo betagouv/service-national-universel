@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { translate, ROLES } from "../../../utils";
 import { capture } from "../../../sentry";
 
-import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesStructure, subjectsStructure, step1Public } from "./workflow";
+import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesExport, subjectsExport, typesStructure, subjectsStructure, step1Public } from "./workflow";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
@@ -43,6 +43,9 @@ export default function Create(props) {
       setSubjectsList(subjectsStructure);
     } else if ([ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.TRANSPORTER].includes(user.role)) {
       setTypeList(step1Public);
+    } else if ([ROLES.DSNJ, ROLES.INJEP].includes(user.role)) {
+      setTypeList(typesExport);
+      setSubjectsList(subjectsExport);
     }
   }, [user]);
 

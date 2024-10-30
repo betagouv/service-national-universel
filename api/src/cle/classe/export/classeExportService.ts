@@ -3,7 +3,10 @@ import { serializeReferent, serializeYoung } from "../../../utils/serializer";
 
 export const findCohesionCentersForClasses = async (classes) => {
   const cohesionCenterIds = classes.map(({ cohesionCenterId }) => cohesionCenterId).filter(Boolean);
-  const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } });
+  const cohesionCenters = await CohesionCenterModel.find({
+    _id: { $in: cohesionCenterIds },
+    deletedAt: { $exists: false },
+  });
   return cohesionCenters;
 };
 

@@ -9,7 +9,7 @@ type OptionGroupItem = {
   render: React.ReactNode;
   loadingLabel?: string;
   optionClassNames?: string;
-  action?: () => Promise<void>;
+  action?: () => void;
 };
 
 type TStatus =

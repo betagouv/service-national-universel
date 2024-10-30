@@ -71,6 +71,10 @@ export type CohortDto = {
     editionOpenForHeadOfCenter?: boolean;
   } | null;
   eligibility?: Eligibility;
+  inscriptionOpenForReferentClasse?: boolean;
+  inscriptionOpenForReferentRegion?: boolean;
+  inscriptionOpenForReferentDepartment?: boolean;
+  inscriptionOpenForAdministrateurCle?: boolean;
 };
 
 export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId" | "eligibility">;

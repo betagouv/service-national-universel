@@ -1,17 +1,17 @@
-import { COHORT_TYPE, ERRORS, CohortType } from "snu-lib";
+import { COHORT_TYPE, ERRORS, CohortType, getZonedDate } from "snu-lib";
 import { CohortDocument, CohortModel } from "../models";
 
-const isInscriptionOpenOnSomeCohorts = async (): Promise<Boolean> => {
+const isInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
   const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
   return cohorts.some((cohort) => cohort.isInscriptionOpen);
 };
 
-const isReInscriptionOpenOnSomeCohorts = async (): Promise<Boolean> => {
+const isReInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
   const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
   return cohorts.some((cohort) => cohort.isReInscriptionOpen);
 };
 
-export const isInscriptionOpen = async (cohortName: String | undefined): Promise<Boolean> => {
+export const isInscriptionOpen = async (cohortName: String | undefined): Promise<boolean> => {
   if (cohortName) {
     const cohort = await CohortModel.findOne({ name: cohortName });
     if (!cohort) return false;
@@ -20,7 +20,7 @@ export const isInscriptionOpen = async (cohortName: String | undefined): Promise
   return isInscriptionOpenOnSomeCohorts();
 };
 
-export const isReInscriptionOpen = async (cohortName: String | undefined): Promise<Boolean> => {
+export const isReInscriptionOpen = async (cohortName?: String): Promise<boolean> => {
   if (cohortName) {
     const cohort = await CohortModel.findOne({ name: cohortName });
     if (!cohort) return false;
@@ -43,7 +43,7 @@ export const getCohortIdsFromCohortName = async (cohortNames: string[]): Promise
 };
 
 export const isCohortInscriptionOpen = (cohort: CohortType): boolean => {
-  const now = new Date();
+  const now = getZonedDate(new Date(), "Europe/Paris");
   const inscriptionStartDate = new Date(cohort.inscriptionStartDate);
   const inscriptionEndDate = new Date(cohort.inscriptionEndDate);
   const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
@@ -51,7 +51,7 @@ export const isCohortInscriptionOpen = (cohort: CohortType): boolean => {
 };
 
 export const isCohortInscriptionClosed = (cohort: CohortType): boolean => {
-  const now = new Date();
+  const now = getZonedDate(new Date(), "Europe/Paris");
   const inscriptionStartDate = new Date(cohort.inscriptionStartDate);
   const inscriptionEndDate = new Date(cohort.inscriptionEndDate);
   const isInscriptionClosed = now >= inscriptionEndDate || now <= inscriptionStartDate;

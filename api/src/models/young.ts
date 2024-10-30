@@ -1,17 +1,18 @@
+import config from "config";
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
+
 import { YOUNG_SOURCE, YOUNG_STATUS, YoungSchema, YoungSchemaCorrectionRequest, YoungSchemaFile, YoungSchemaNote, YoungType } from "snu-lib";
+
 import esClient from "../es";
 import * as brevo from "../brevo";
-import config from "config";
 import anonymize from "../anonymization/young";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
+import ClasseStateManager from "../cle/classe/stateManager";
 
 const MODELNAME = "young";
-
-const ClasseStateManager = require("../cle/classe/stateManager").default;
 
 const schema = new Schema({
   ...YoungSchema,
@@ -71,7 +72,7 @@ schema.post<SchemaExtended>("save", async function (doc) {
 schema.post("findOneAndUpdate", function (doc) {
   brevo.sync(doc, MODELNAME);
 });
-schema.post("remove", function (doc) {
+schema.post("deleteOne", function (doc) {
   brevo.unsync(doc);
 });
 
@@ -114,37 +115,41 @@ schema.plugin(patchHistory, {
   ],
 });
 
-schema.plugin(
-  mongooseElastic(esClient, {
-    selectiveIndexing: true,
-    ignore: [
-      "historic",
-      "missionsInMail",
-      "password",
-      "lastLogoutAt",
-      "passwordChangedAt",
-      "nextLoginAttemptIn",
-      "forgotPasswordResetToken",
-      "forgotPasswordResetExpires",
-      "invitationExpires",
-      "phase3Token",
-      "loginAttempts",
-      "parent1Inscription2023Token",
-      "parent2Inscription2023Token",
-      "updatedAt",
-      "lastActivityAt",
-      "userIps",
-      "token2FA",
-      "token2FAExpires",
-    ],
-  }),
-  MODELNAME,
-);
+if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  schema.plugin(
+    mongooseElastic(esClient, {
+      selectiveIndexing: true,
+      ignore: [
+        "historic",
+        "missionsInMail",
+        "password",
+        "lastLogoutAt",
+        "passwordChangedAt",
+        "nextLoginAttemptIn",
+        "forgotPasswordResetToken",
+        "forgotPasswordResetExpires",
+        "invitationExpires",
+        "phase3Token",
+        "loginAttempts",
+        "parent1Inscription2023Token",
+        "parent2Inscription2023Token",
+        "updatedAt",
+        "lastActivityAt",
+        "userIps",
+        "token2FA",
+        "token2FAExpires",
+      ],
+    }),
+    MODELNAME,
+  );
+}
 
 schema.index({ ligneId: 1 });
 schema.index({ sessionPhase1Id: 1 });
 schema.index({ sessionPhase1Id: 1, status: 1 });
 schema.index({ classeId: -1 });
+schema.index({ department: 1 });
+schema.index({ region: 1 });
 
 export type YoungDocument<T = {}> = DocumentExtended<YoungType & T>;
 type SchemaExtended = YoungDocument & UserExtension & { previousStatus?: YoungType["status"] };

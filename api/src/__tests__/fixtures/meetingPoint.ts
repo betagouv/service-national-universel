@@ -1,6 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import { Types } from "mongoose";
-import { MeetingPointType } from "../../models";
+import { MeetingPointType } from "snu-lib";
 const { ObjectId } = Types;
 
 function getNewMeetingPointFixture(): Partial<MeetingPointType> {
@@ -18,7 +18,7 @@ function getNewMeetingPointFixture(): Partial<MeetingPointType> {
     departureAtString: faker.lorem.words(),
     returnAt: faker.date.past(),
     returnAtString: faker.lorem.words(),
-    cohortId: "1",
+    cohortId: new ObjectId().toString(),
   };
 }
 

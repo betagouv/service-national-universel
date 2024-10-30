@@ -3,8 +3,8 @@ import { Switch } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 
-import { YoungDto } from "snu-lib";
-
+import { YoungDto, ROLES } from "snu-lib";
+import { AuthState } from "@/redux/auth/reducer";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import { SentryRoute } from "@/sentry";
 import api from "@/services/api";
@@ -26,20 +26,27 @@ import CustomMission from "./customMission";
 
 export default function Index({ ...props }) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
 
   const { data: young, refetch } = useQuery<YoungDto>({
     queryKey: ["young", props.match.params.id],
     queryFn: async () => (await api.get(`/referent/young/${props.match.params.id}`))?.data,
     enabled: !!props.match?.params?.id,
+    refetchOnWindowFocus: false,
   });
   useDocumentTitle(young ? (young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : `${young.firstName} ${young.lastName}`) : "Volontaires");
 
   const getDetail = () => {
-    let mode = ([YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young?.status || "") ? "correction" : "readonly";
+    if (!young) return;
+
+    let mode: "correction" | "readonly" = ([YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young?.status || "")
+      ? "correction"
+      : "readonly";
     const cohort = cohorts.find(({ _id, name }) => _id === young?.cohortId || name === young?.cohort);
-    if (new Date() > new Date(cohort?.instructionEndDate || "")) {
+    if (user.role !== ROLES.ADMIN && new Date() > new Date(cohort?.instructionEndDate || "")) {
       mode = "readonly";
     }
+
     return <VolontairePhase0View young={young} onChange={refetch} globalMode={mode} />;
   };
 
