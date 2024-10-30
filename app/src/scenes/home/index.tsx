@@ -1,6 +1,6 @@
 import React from "react";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, hasAccessToReinscription } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, hasAccessToReinscription, hasCompletedPhase1 } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../utils/cohorts";
 import Affected from "./Affected";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
@@ -18,7 +18,7 @@ import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
 import AvenirCohort from "./AvenirCohort";
-import { isCohortTooOld, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
 import { fetchReInscriptionOpen } from "../../services/reinscription.service";
@@ -47,12 +47,15 @@ export default function Home() {
 
   // Je peux accéder à la Homepage de la Phase 2 si j'ai validé ma phase 1 et que ma cohorte me permet encore de faire la phase 2 :
   const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
+  const hasEquivalence = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence);
   const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
-  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
+
+  if (hasCompletedPhase1(young)) {
     // les volontaires des première cohortes n'ont plus le droit de faire la phase 2 SAUF si ils l'ont commencé
-    if (isCohortTooOld(young) && !hasCompletedPhase2(young) && !hasMission) {
+    if (isCohortTooOld(young) && !hasCompletedPhase2(young) && !hasMission && !hasEquivalence) {
       return <DelaiDepasse />;
-    } else if (hasWithdrawn) {
+    }
+    if (hasWithdrawn) {
       return <Withdrawn />;
     }
     return <HomePhase2 />;

@@ -59,6 +59,13 @@ export function hasCompletedPhase2(y) {
   return false;
 }
 
+export function hasCompletedPhase1(y) {
+  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1)) {
+    return true;
+  }
+  return false;
+}
+
 export function wasYoungExcluded(y) {
   return y?.departSejourMotif === "Exclusion";
 }
