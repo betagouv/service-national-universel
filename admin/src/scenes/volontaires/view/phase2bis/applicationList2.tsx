@@ -7,20 +7,21 @@ import Loader from "../../../../components/Loader";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, translate, SENDINBLUE_TEMPLATES } from "../../../../utils";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC, translate, SENDINBLUE_TEMPLATES, ApplicationType, MissionType, ContractType } from "../../../../utils";
 import { SelectStatusApplicationPhase2 } from "./components/SelectStatusApplicationPhase2";
 import Tag from "../../../../components/Tag";
 import ReactTooltip from "react-tooltip";
 
+type PopulatedApplicationType = ApplicationType & { mission: MissionType; contract: ContractType };
+
 export default function ApplicationList({ young, onChangeApplication }) {
-  const [applications, setApplications] = useState(null);
-  const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+  const [applications, setApplications] = useState<PopulatedApplicationType[]>();
 
   useEffect(() => {
     getApplications();
   }, []);
 
-  const getApplications = async () => {
+  async function getApplications() {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
     if (!ok) {
@@ -28,56 +29,36 @@ export default function ApplicationList({ young, onChangeApplication }) {
       return toastr.error("Oups, une erreur est survenue", code);
     }
     return setApplications(data);
-  };
+  }
 
   if (!applications) return <Loader />;
   if (!applications.length) return <div className="m-8 text-center italic">Aucune candidature n&apos;est liée à ce volontaire.</div>;
   return (
     <div className="space-y-8 px-12 pt-6 pb-12">
       {applications.map((hit, i) => (
-        <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} optionsType={optionsType} />
+        <Hit key={hit._id} young={young} hit={hit} onChangeApplication={onChangeApplication} />
       ))}
     </div>
   );
 }
 
-const Hit = ({ hit, index, young, onChangeApplication }) => {
-  const [mission, setMission] = useState();
-  const [contract, setContract] = useState();
+type modalType = { isOpen: boolean; onConfirm?: () => void; title: string; message: string };
+
+const Hit = ({ hit, young, onChangeApplication }) => {
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   const history = useHistory();
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modal, setModal] = useState<modalType>({ isOpen: false, onConfirm: undefined, title: "", message: "" });
 
-  useEffect(() => {
-    (async () => {
-      if (!hit.missionId) return;
-      const { ok, data, code } = await api.get(`/mission/${hit.missionId}`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      setMission(data);
-      if (!hit.contractId) return;
-      const { ok: okContract, data: dataContract, code: codeContract } = await api.get(`/contract/${hit.contractId}`);
-      if (!okContract) {
-        capture(codeContract);
-        return toastr.error("Oups, une erreur est survenue", codeContract);
-      }
-      setContract(dataContract);
-    })();
-  }, []);
-
-  if (!mission) return null;
   return (
     <div className="flex gap-6 rounded-xl bg-white p-3 shadow-ninaButton">
       {/* icon */}
       <div className="my-auto pl-2">
-        <IconDomain domain={mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : mission?.mainDomain} />
+        <IconDomain domain={hit.mission?.isMilitaryPreparation === "true" ? "PREPARATION_MILITARY" : hit.mission?.mainDomain} />
       </div>
 
       <div className="grid flex-1 grid-rows-4">
         <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-gray-500">
-          <p className="">{mission.structureName}</p>
+          <p className="">{hit.mission.structureName}</p>
           {/* Choix*/}
           <p className="">{hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION && "Mission proposée au volontaire"}</p>
         </div>
@@ -85,7 +66,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
         <div className="row-span-2 flex items-center justify-between">
           <div className="w-1/2 overflow-hidden">
             <Link to={`/mission/${hit.missionId}`} className="my-auto text-lg font-semibold leading-6 text-gray-900">
-              {mission.name}
+              {hit.mission.name}
             </Link>
           </div>
 
@@ -93,11 +74,11 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           <div className="w-1/6 space-y-1 text-xs font-medium">
             <div>
               <span className="text-gray-500">Du </span>
-              <span className="text-gray-700">{formatStringDateTimezoneUTC(mission.startAt)}</span>
+              <span className="text-gray-700">{formatStringDateTimezoneUTC(hit.mission.startAt)}</span>
             </div>
             <div>
               <span className="text-gray-500">Au </span>
-              <span className="text-gray-700">{formatStringDateTimezoneUTC(mission.endAt)}</span>
+              <span className="text-gray-700">{formatStringDateTimezoneUTC(hit.mission.endAt)}</span>
             </div>
           </div>
 
@@ -105,7 +86,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           <div className="flex w-1/6 justify-between">
             {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) ? (
               <div className="flex flex-col">
-                {contract?.invitationSent === "true" ? (
+                {hit.contract?.invitationSent === "true" ? (
                   <div className="text-xs font-medium text-gray-700 ">Contrat {hit.contractStatus === "VALIDATED" ? "signé" : "envoyé"}</div>
                 ) : (
                   <div className="flex flex-row items-center">
@@ -122,10 +103,10 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                   </div>
                 )}
               </div>
-            ) : mission.placesLeft <= 1 ? (
-              <div className="text-xs font-medium text-gray-700"> {mission.placesLeft} place disponible</div>
+            ) : hit.mission.placesLeft <= 1 ? (
+              <div className="text-xs font-medium text-gray-700"> {hit.mission.placesLeft} place disponible</div>
             ) : (
-              <div className="text-xs font-medium text-gray-700"> {mission.placesLeft} places disponibles</div>
+              <div className="text-xs font-medium text-gray-700"> {hit.mission.placesLeft} places disponibles</div>
             )}
             <div>
               <NavLink
@@ -135,7 +116,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                 data-for="tooltip-application">
                 <Eye width={16} height={16} />
               </NavLink>
-              <ReactTooltip id="tooltip-application" type="light" place="top" effect="solid" className="custom-tooltip-radius shadow-xl" tooltipRadius="6">
+              <ReactTooltip id="tooltip-application" type="light" place="top" effect="solid" className="custom-tooltip-radius shadow-xl">
                 <div className="text-xs">Voir la candidature</div>
               </ReactTooltip>
             </div>
@@ -154,45 +135,47 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
               dropdownClassName="right-3"
             />
             {hit.status === "WAITING_VALIDATION" && (
-              <div
-                className="mt-1 cursor-pointer text-xs text-blue-600 underline"
-                onClick={async () => {
-                  setModal({
-                    isOpen: true,
-                    title: "Renvoyer un mail",
-                    message: "Souhaitez-vous renvoyer un mail à la structure ?",
-                    onConfirm: async () => {
-                      try {
-                        const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION}`);
-                        if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-                        toastr.success("L'email a bien été envoyé");
-                      } catch (e) {
-                        toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                      }
-                    },
-                  });
-                }}>
-                Relancer la structure
+              <>
+                <button
+                  className="mt-1 cursor-pointer text-xs text-blue-600 underline"
+                  onClick={async () => {
+                    setModal({
+                      isOpen: true,
+                      title: "Renvoyer un mail",
+                      message: "Souhaitez-vous renvoyer un mail à la structure ?",
+                      onConfirm: async () => {
+                        try {
+                          const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION}`);
+                          if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                          toastr.success("L'email a bien été envoyé", "");
+                        } catch (e) {
+                          toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                        }
+                      },
+                    });
+                  }}>
+                  Relancer la structure
+                </button>
                 <ModalConfirm
                   isOpen={modal?.isOpen}
                   title={modal?.title}
                   message={modal?.message}
-                  onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+                  onCancel={() => setModal({ isOpen: false, onConfirm: undefined, title: "", message: "" })}
                   onConfirm={() => {
-                    modal?.onConfirm();
-                    setModal({ isOpen: false, onConfirm: null });
+                    modal.onConfirm && modal?.onConfirm();
+                    setModal({ isOpen: false, onConfirm: undefined, title: "", message: "" });
                   }}
                 />
-              </div>
+              </>
             )}
           </div>
         </div>
 
         {/* tags */}
         <div className="flex h-8 items-center gap-2">
-          <Tag tag={`${mission.city} ${mission.zip}`} />
-          {mission.domains && mission.domains.map((tag, index) => <Tag key={index} tag={translate(tag)} />)}
-          {mission.isMilitaryPreparation === "true" && <Tag tag="Préparation militaire" />}
+          <Tag tag={`${hit.mission.city} ${hit.mission.zip}`} />
+          {hit.mission.domains && hit.mission.domains.map((tag, index) => <Tag key={index} tag={translate(tag)} />)}
+          {hit.mission.isMilitaryPreparation === "true" && <Tag tag="Préparation militaire" />}
         </div>
       </div>
     </div>

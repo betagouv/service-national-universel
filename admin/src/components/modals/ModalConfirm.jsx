@@ -13,7 +13,7 @@ export default function ModalConfirm({
   showHeaderIcon = false,
   title,
   message,
-  onChange,
+  onChange = () => {},
   onCancel,
   onConfirm,
   size = "md",

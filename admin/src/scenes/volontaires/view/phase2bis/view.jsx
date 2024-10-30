@@ -7,13 +7,11 @@ import { ROLES, applicationExportFields, formatDateFRTimezoneUTC, formatLongDate
 import Menu from "../../../../assets/icons/Menu";
 import Pencil from "../../../../assets/icons/Pencil";
 import { Box, BoxTitle } from "../../../../components/box";
-import DownloadAttestationButton from "../../../../components/buttons/DownloadAttestationButton";
-import MailAttestationButton from "../../../../components/buttons/MailAttestationButton";
 import { ModalExport } from "../../../../components/filters-system-v2";
 import SelectStatus from "../../../../components/selectStatus";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
-import { ENABLE_PM, ES_NO_LIMIT, YOUNG_PHASE, YOUNG_STATUS_PHASE2, translate } from "../../../../utils";
+import { ENABLE_PM, YOUNG_PHASE, YOUNG_STATUS_PHASE2, translate } from "../../../../utils";
 import YoungHeader from "../../../phase0/components/YoungHeader";
 import CardEquivalence from "../../components/Equivalence";
 import Toolbox from "../../components/Toolbox";
@@ -33,48 +31,25 @@ export default function Phase2({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
 
   const [dataPreference, setDataPreference] = React.useState({
-    professionnalProject: "",
-    professionnalProjectPrecision: "",
-    engaged: "",
-    desiredLocation: "",
-    engagedDescription: "",
-    domains: [],
-    missionFormat: "",
-    mobilityTransport: [],
-    period: "",
-    mobilityTransportOther: "",
-    mobilityNearHome: "false",
-    mobilityNearSchool: "false",
-    mobilityNearRelative: "false",
-    mobilityNearRelativeName: "",
-    mobilityNearRelativeAddress: "",
-    mobilityNearRelativeZip: "",
-    mobilityNearRelativeCity: "",
-    periodRanking: [],
+    professionnalProject: young?.professionnalProject || "",
+    professionnalProjectPrecision: young?.professionnalProjectPrecision || "",
+    engaged: young?.engaged || "false",
+    desiredLocation: young?.desiredLocation || "",
+    engagedDescription: young?.engagedDescription || "",
+    domains: young?.domains ? [...young.domains] : [],
+    missionFormat: young?.missionFormat || "",
+    mobilityTransport: young?.mobilityTransport ? [...young.mobilityTransport] : [],
+    period: young?.period || "",
+    mobilityTransportOther: young?.mobilityTransportOther || "",
+    mobilityNearHome: young?.mobilityNearHome || "false",
+    mobilityNearSchool: young?.mobilityNearSchool || "false",
+    mobilityNearRelative: young?.mobilityNearRelative || "false",
+    mobilityNearRelativeName: young?.mobilityNearRelativeName || "",
+    mobilityNearRelativeAddress: young?.mobilityNearRelativeAddress || "",
+    mobilityNearRelativeZip: young?.mobilityNearRelativeZip || "",
+    mobilityNearRelativeCity: young?.mobilityNearRelativeCity || "",
+    periodRanking: young?.periodRanking ? [...young.periodRanking] : [],
   });
-
-  React.useEffect(() => {
-    setDataPreference({
-      professionnalProject: young?.professionnalProject || "",
-      professionnalProjectPrecision: young?.professionnalProjectPrecision || "",
-      engaged: young?.engaged || "false",
-      desiredLocation: young?.desiredLocation || "",
-      engagedDescription: young?.engagedDescription || "",
-      domains: young?.domains ? [...young.domains] : [],
-      missionFormat: young?.missionFormat || "",
-      mobilityTransport: young?.mobilityTransport ? [...young.mobilityTransport] : [],
-      period: young?.period || "",
-      mobilityTransportOther: young?.mobilityTransportOther || "",
-      mobilityNearHome: young?.mobilityNearHome || "false",
-      mobilityNearSchool: young?.mobilityNearSchool || "false",
-      mobilityNearRelative: young?.mobilityNearRelative || "false",
-      mobilityNearRelativeName: young?.mobilityNearRelativeName || "",
-      mobilityNearRelativeAddress: young?.mobilityNearRelativeAddress || "",
-      mobilityNearRelativeZip: young?.mobilityNearRelativeZip || "",
-      mobilityNearRelativeCity: young?.mobilityNearRelativeCity || "",
-      periodRanking: young?.periodRanking ? [...young.periodRanking] : [],
-    });
-  }, [young, editPreference]);
 
   const onSubmit = async () => {
     try {
