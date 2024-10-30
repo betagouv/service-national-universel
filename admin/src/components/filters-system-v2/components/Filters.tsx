@@ -124,8 +124,8 @@ export default function Filters({
       }
       const newCategories: string[] = [];
       filtersVisible?.forEach((f) => {
-        if (!newCategories.includes(f.parentGroup || "")) {
-          newCategories.push(f.parentGroup || "");
+        if (!newCategories.includes(f.parentGroup!)) {
+          newCategories.push(f.parentGroup!);
         }
       });
       setCategories(newCategories);

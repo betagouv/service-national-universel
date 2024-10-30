@@ -45,14 +45,12 @@ export default function ListPDR(props: RouteComponentProps<{ id: string }>) {
   const [PDR, setPDR] = React.useState<PointDeRassemblementType>();
 
   const cohort = new URLSearchParams(props.location.search).get("cohort");
-  const ligneId = new URLSearchParams(props.location.search).get("ligneId");
 
-  const id = props.match && props.match.params && props.match.params.id;
-  if (!id) return <div />;
+  const id = props.match?.params?.id;
 
   const fetchData = async () => {
     try {
-      if (!id || !cohort) return <div />;
+      if (!id || !cohort) return;
 
       const { ok, code, data } = await api.get(`/point-de-rassemblement/${id}/bus/${cohort}`);
       if (!ok) {
@@ -159,6 +157,7 @@ export default function ListPDR(props: RouteComponentProps<{ id: string }>) {
     });
   }
 
+  if (!id) return <div />;
   if (loading) return <Loader />;
 
   const filterArray: Filter[] = [
@@ -231,7 +230,7 @@ export default function ListPDR(props: RouteComponentProps<{ id: string }>) {
         <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
           <div className="flex items-center gap-2">
             <Filters
-              defaultUrlParam={ligneId ? `cohort=${cohort}&ligneId=${ligneId}` : `cohort=${cohort}`}
+              defaultUrlParam={`cohort=${cohort}`}
               pageId={pageId}
               route={`/elasticsearch/young/by-point-de-rassemblement/${PDR?._id}/search`}
               setData={(value) => setData(value)}

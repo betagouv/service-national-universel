@@ -78,6 +78,8 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
   const refInput = React.useRef<HTMLInputElement>(null);
   const refContainer = React.useRef<HTMLDivElement>(null);
 
+  const youngsCount = volume?.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0;
+
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (refContainer.current && refContainer.current.contains(event.target)) {
@@ -137,7 +139,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
     setFilteredPDR(filteredPDR);
   }, [search, listPDR, bus]);
 
-  const onSubmitInfo = async () => {
+  const handleSubmitInfo = async () => {
     try {
       setIsLoading(true);
       setErrors({});
@@ -183,12 +185,13 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
     }
   };
 
-  if (!volume)
+  if (!volume) {
     return (
       <div className="w-full rounded-xl bg-white p-8">
         <Loader />
       </div>
     );
+  }
 
   return (
     <div className="w-full rounded-xl bg-white p-8">
@@ -211,7 +214,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
               <div className="absolute top-0 right-0 flex flex-col items-end justify-end gap-2">
                 <button
                   className="flex cursor-pointer items-center gap-2 rounded-full  border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={onSubmitInfo}
+                  onClick={handleSubmitInfo}
                   disabled={isLoading}>
                   <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                   Enregistrer les changements
@@ -249,7 +252,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
           </p>
         </div>
         <div className="mt-8 flex flex-col gap-4">
-          {user.role === ROLES.ADMIN && editPdr && !volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount && (
+          {user.role === ROLES.ADMIN && editPdr && !youngsCount && (
             <div className="relative">
               <div
                 ref={refContainer}
@@ -362,8 +365,11 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
         </div>
         <div className="mt-3 flex items-center gap-2">
           <div className="pb-1 text-lg font-medium leading-5 text-gray-900"> </div>
-          <Link to={`/ligne-de-bus/volontaires/point-de-rassemblement/${pdr._id?.toString()}?cohort=${cohort?.name}`} className="w-full">
-            <Button type="tertiary" title={`Voir les volontaires (${volume.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0})`} className="w-full max-w-none" />
+          <Link
+            target="_blank"
+            to={`/ligne-de-bus/volontaires/point-de-rassemblement/${pdr._id?.toString()}?cohort=${cohort?.name}&ligneId=${bus._id.toString()}`}
+            className="w-full">
+            <Button type="tertiary" title={`Voir les volontaires attendus (${youngsCount})`} className="w-full max-w-none" />
           </Link>
         </div>
         <div className="mt-8 flex justify-end">
