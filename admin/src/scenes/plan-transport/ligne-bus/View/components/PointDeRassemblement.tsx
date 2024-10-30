@@ -47,7 +47,7 @@ type FormValue = Partial<
 
 interface PointDeRassemblementProps {
   bus: LigneBusType;
-  setBus: React.Dispatch<React.SetStateAction<LigneBusType>>;
+  onBusChange: React.Dispatch<React.SetStateAction<LigneBusType>>;
   index: number;
   pdr: FormValue;
   volume?: { youngsCount: number; meetingPointId: string }[];
@@ -55,7 +55,7 @@ interface PointDeRassemblementProps {
   cohort?: CohortType | null;
 }
 
-export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, getVolume, cohort }: PointDeRassemblementProps) {
+export default function PointDeRassemblement({ bus, onBusChange, index, pdr, volume, getVolume, cohort }: PointDeRassemblementProps) {
   const user = useSelector((state: AuthState) => state.Auth.user);
 
   const [editPdr, setEditPdr] = React.useState(false);
@@ -173,7 +173,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
         toastr.error("Oups, une erreur est survenue lors de la modification des informations du point de rassemblement", translate(code));
         return setIsLoading(false);
       }
-      setBus(ligneInfo);
+      onBusChange(ligneInfo);
       await getVolume?.();
       setEditPdr(false);
       setIsLoading(false);
@@ -369,7 +369,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
             target="_blank"
             to={`/ligne-de-bus/volontaires/point-de-rassemblement/${pdr._id?.toString()}?cohort=${cohort?.name}&ligneId=${bus._id.toString()}`}
             className="w-full">
-            <Button type="tertiary" title={`Voir les volontaires attendus (${youngsCount})`} className="w-full max-w-none" />
+            <Button type="tertiary" title={`Voir les volontaires (${youngsCount})`} className="w-full max-w-none" />
           </Link>
         </div>
         <div className="mt-8 flex justify-end">

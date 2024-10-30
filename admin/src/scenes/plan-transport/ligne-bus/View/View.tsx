@@ -288,7 +288,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
                 <PointDeRassemblement
                   bus={data}
                   pdr={pdr}
-                  setBus={setData}
+                  onBusChange={setData}
                   index={index}
                   key={index}
                   volume={dataForCheck?.meetingPoints}

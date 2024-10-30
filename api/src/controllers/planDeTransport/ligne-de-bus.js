@@ -586,6 +586,8 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
                     { $eq: ["$sessionPhase1Id", ligneBus.sessionId] },
                     { $eq: ["$ligneId", ligneBus._id.toString()] },
                     { $eq: ["$meetingPointId", "$$meetingPoint"] },
+                    { $ne: ["$cohesionStayPresence", "false"] },
+                    { $ne: ["$departInform", "true"] },
                   ],
                 },
               },
