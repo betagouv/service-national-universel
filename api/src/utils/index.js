@@ -482,8 +482,8 @@ async function updateYoungPhase2StatusAndHours(young, fromUser) {
     }
 
     // Mise à jour des statuts des applications
-    young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
-
+    const applications_v2 = await ApplicationModel.find({ youngId: young._id });
+    young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
     // Sauvegarde du modèle young
     await young.save({ fromUser });
   } catch (e) {
