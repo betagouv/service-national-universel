@@ -104,6 +104,7 @@ import {
   YoungType,
   getDepartmentForEligibility,
   isAdmin,
+  canViewPatchesHistory,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -113,6 +114,7 @@ import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToL
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
+import { path } from "pdfkit";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -1369,6 +1371,17 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const referent = await ReferentModel.findById(id);
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const referentPatches = await patches.get(req, res, ReferentModel);
     if (!referentPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: referentPatches });

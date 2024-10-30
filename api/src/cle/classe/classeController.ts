@@ -29,11 +29,12 @@ import {
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
   ReferentType,
+  canViewPatchesHistory,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
 import { ERRORS, isReferent } from "../../utils";
-import { idSchema, validateId, validateUpdateApplication } from "../../utils/validator";
+import { idSchema, validateId } from "../../utils/validator";
 import emailsEmitter from "../../emails";
 import { RouteRequest, RouteResponse, UserRequest } from "../../controllers/request";
 import {
@@ -639,17 +640,30 @@ router.put("/:id/verify", async (req: UserRequest, res) => {
 
 router.get("/:id/patches", async (req: UserRequest, res) => {
   try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    console.log(req.user);
+
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const classe = await ClasseModel.findById(id);
+    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const classePatches = await patches.get(req, res, ClasseModel);
     if (!classePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const pathsToIgnore = ["/seatsTaken", "/cohortId", "/uniqueKey", "/uniqueId", "/comments", "/trimester", "/metadata", "/id", "/updatedAt", "/referents"];
     classePatches.forEach((patch) => {
       patch.ops = patch.ops.filter((op) => !pathsToIgnore.includes(op.path));
-      patch.ops = patch.ops.filter((op) => !(op.op === "add" && (op.value === null || (Array.isArray(op.value) && op.value.length === 0))));
     });
     return res.status(200).send({ ok: true, data: classePatches });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: error.message });
   }
 });
 

@@ -57,6 +57,7 @@ import {
   ReferentType,
   getDepartmentForEligibility,
   FUNCTIONAL_ERRORS,
+  canViewPatchesHistory,
 } from "snu-lib";
 import { getFilteredSessions } from "../../utils/cohort";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
@@ -403,6 +404,17 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const young = await YoungModel.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const youngPatches = await patches.get(req, res, YoungModel);
     if (!youngPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: youngPatches });

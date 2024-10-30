@@ -11,19 +11,27 @@ const get = async (req, res, model) => {
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      throw new Error(ERRORS.INVALID_PARAMS);
     }
-    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewPatchesHistory(req.user)) throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
 
     const elem = await model.findById(value.id);
-    if (!elem) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!elem) throw new Error(ERRORS.NOT_FOUND);
 
     const data = await elem.patches.find({ ref: elem.id }).sort("-date");
+    //sometime we create an object with a field null, we don't want to send it
+    data.forEach((patch) => {
+      patch.ops = patch.ops.filter((op) => {
+        const isAddOperation = op.op === "add";
+        const hasValue = op.value !== null;
+        const isNotEmptyArray = !Array.isArray(op.value) || op.value.length > 0;
+        return !(isAddOperation && (!hasValue || !isNotEmptyArray));
+      });
+    });
     return data;
-    //return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    throw error;
   }
 };
 

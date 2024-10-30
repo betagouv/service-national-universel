@@ -226,7 +226,7 @@ function HistoryRow({ patch }) {
             </p>
           </td>
           <td className="w-[23%]">
-            <p className="truncate text-gray-400 text-sm leading-5">{translateHistory(op.path, op.originalValue)}</p>
+            <p className="truncate text-gray-400 text-sm leading-5">{translateHistory(op.path, op.originalValue || "Vide")}</p>
           </td>
           <td className="w-[23%] flex items-center gap-2">
             <HiArrowRight size={16} className="mt-0.5" />

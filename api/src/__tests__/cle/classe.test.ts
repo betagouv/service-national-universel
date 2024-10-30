@@ -999,3 +999,41 @@ describe("POST /:id/certificate/:key", () => {
     generateImageRightSpy.mockRestore();
   });
 });
+
+describe("GET /cle/classe/:id/patches", () => {
+  it("should return 404 if classe not found", async () => {
+    const classeId = new ObjectId();
+    const res = await request(getAppHelper()).get(`/cle/classe/${classeId}/patches`).send();
+    expect(res.statusCode).toEqual(404);
+  });
+  it("should return 403 if not admin", async () => {
+    const classe = await createClasse(createFixtureClasse());
+    classe.name = "MY NEW NAME";
+    await classe.save();
+
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      .get(`/cle/classe/${classe._id}/patches`)
+      .send();
+    expect(res.status).toBe(403);
+  });
+  it("should return 200 if classe found with patches", async () => {
+    const classe = await createClasse(createFixtureClasse());
+    classe.name = "MY NEW NAME";
+    await classe.save();
+    const res = await request(getAppHelper()).get(`/cle/classe/${classe._id}/patches`).send();
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/name", value: "MY NEW NAME" })]),
+        }),
+      ]),
+    );
+  });
+  it("should be only accessible by referents", async () => {
+    const passport = require("passport");
+    const classeId = new ObjectId();
+    await request(getAppHelper()).get(`/cle/classe/${classeId}/patches`).send();
+    expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+  });
+});
