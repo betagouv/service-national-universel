@@ -138,7 +138,7 @@ export default function Index() {
   };
 
   const computeDepartmentOptions = () => {
-    setDepartmentOptions(user?.department?.map((d) => ({ key: d, label: d })));
+    setDepartmentOptions((user?.department as string[])?.map((d) => ({ key: d, label: d })));
   };
 
   async function loadData() {}

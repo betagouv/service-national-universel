@@ -3,7 +3,7 @@ import plausibleEvent from "@/services/plausible";
 import store from "@/redux/store";
 import { setUser, setPreviousSignin } from "@/redux/auth/actions";
 
-const signinAs = async (type, userId) => {
+export const signinAs = async (type: "referent" | "young", userId: string) => {
   const { ok, data, token } = await api.post(`/referent/signin_as/${type}/${userId}`);
   if (!ok) throw new Error("Une erreur est survenue lors de la connexion");
   if (!data) throw new Error("Erreur : aucune données d'utilisateur");
@@ -17,7 +17,7 @@ const signinAs = async (type, userId) => {
   return data;
 };
 
-const restorePreviousSignin = async () => {
+export const restorePreviousSignin = async () => {
   const { previousSigninToken } = store.getState().Auth;
   if (!previousSigninToken) throw new Error("Aucune connexion précédente");
 
@@ -33,5 +33,3 @@ const restorePreviousSignin = async () => {
     console.log(e);
   }
 };
-
-export { signinAs, restorePreviousSignin };

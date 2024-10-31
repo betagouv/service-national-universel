@@ -4,7 +4,7 @@ import getNewCohortFixture from "./fixtures/cohort";
 import { createCohortHelper } from "./helpers/cohort";
 import { createClasse } from "./helpers/classe";
 import { createFixtureClasse } from "./fixtures/classe";
-import { COHORT_TYPE, ROLES, STATUS_CLASSE } from "snu-lib";
+import { COHORT_TYPE, ROLES, STATUS_CLASSE, SUB_ROLE_GOD } from "snu-lib";
 import passport from "passport";
 import { dbConnect, dbClose } from "./helpers/db";
 import { ClasseModel } from "../models";
@@ -68,7 +68,7 @@ describe("PUT /:cohort", () => {
     // @ts-ignore
     const previous = passport.user.subRole;
     // @ts-ignore
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
     const cohortFixture = getNewCohortFixture();
     const res = await request(getAppHelper())
       .put(`/cohort/${cohortFixture.name}`)
@@ -84,7 +84,7 @@ describe("PUT /:cohort", () => {
     // @ts-ignore
     const previous = passport.user.subRole;
     // @ts-ignore
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
     const now = new Date();
     const cohortFixture = getNewCohortFixture();
     const cohort = await createCohortHelper(cohortFixture);
@@ -105,7 +105,7 @@ describe("PUT /:cohort", () => {
     // @ts-ignore
     const previous = passport.user.subRole;
     // @ts-ignore
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
     const now = new Date();
     const oneMonthAfter = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
     const cohortFixture = getNewCohortFixture({ type: COHORT_TYPE.CLE });
@@ -134,7 +134,7 @@ describe("PUT /:cohort", () => {
     // @ts-ignore
     const previous = passport.user.subRole;
     // @ts-ignore
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
     const now = new Date();
     const oneMonthBefore = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
     const cohortFixture = getNewCohortFixture({ type: COHORT_TYPE.CLE });
