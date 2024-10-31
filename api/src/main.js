@@ -17,6 +17,7 @@ const { logger } = require("./logger");
 
 const { capture } = require("./sentry");
 const { setupExpressErrorHandler } = require("@sentry/node");
+
 const { initDB, closeDB } = require("./mongo");
 const { initRedisClient, closeRedisClient } = require("./redis");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");

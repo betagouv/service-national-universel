@@ -57,6 +57,7 @@ import {
   ReferentType,
   getDepartmentForEligibility,
   FUNCTIONAL_ERRORS,
+  CohortDto,
 } from "snu-lib";
 import { getFilteredSessions } from "../../utils/cohort";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
@@ -231,7 +232,10 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canInviteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const cohortObj = await CohortModel.findById(value.cohortId);
+    const cohortDto: CohortDto | null = cohortObj ? (cohortObj.toObject() as CohortDto) : null;
+
+    if (!canInviteYoung(req.user, cohortDto)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const obj = { ...value };
 
