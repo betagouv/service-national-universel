@@ -399,7 +399,6 @@ async function updateYoungPhase2StatusAndHours(young, fromUser) {
   try {
     // Récupération des applications et équivalences pertinentes
     const applications = await ApplicationModel.find({ youngId: young._id });
-    const filterApplication = applications.filter((a) => ["VALIDATED", "IN_PROGRESS", "DONE", "WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(a.status));
     const equivalences = await MissionEquivalenceModel.find({
       youngId: young._id,
       status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
@@ -407,7 +406,7 @@ async function updateYoungPhase2StatusAndHours(young, fromUser) {
 
     // Calcul des heures effectuées
     const totalHoursDone =
-      filterApplication.reduce((acc, application) => {
+      applications.reduce((acc, application) => {
         if (application.status === "DONE") {
           return acc + Number(application.missionDuration || 0);
         }
@@ -422,7 +421,7 @@ async function updateYoungPhase2StatusAndHours(young, fromUser) {
 
     // Calcul des heures estimées
     const totalHoursEstimated =
-      filterApplication.reduce((acc, application) => {
+      applications.reduce((acc, application) => {
         if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
           return acc + Number(application.missionDuration || 0);
         }
