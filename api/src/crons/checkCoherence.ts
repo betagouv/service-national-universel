@@ -1,3 +1,5 @@
+import { YOUNG_STATUS } from "snu-lib";
+
 import { YoungModel } from "../models";
 import { logger } from "../logger";
 import { capture } from "../sentry";
@@ -6,7 +8,7 @@ import slack from "../slack";
 export const handler = async () => {
   try {
     // get all young without cohortId
-    const youngs = await YoungModel.find({ cohort: { $exists: true }, cohortId: { $exists: false } }).select({ _id: 1, cohort: 1 });
+    const youngs = await YoungModel.find({ cohort: { $exists: true }, cohortId: { $exists: false }, status: { $ne: YOUNG_STATUS.DELETED } }).select({ _id: 1, cohort: 1 });
 
     if (youngs.length > 0) {
       const youngsCountByCohort = youngs.reduce((acc, cur) => {
