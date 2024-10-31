@@ -14,6 +14,7 @@ import Breadcrumbs from "./layout/Breadcrumbs";
 import Page from "./layout/Page";
 import Subheader from "./layout/Subheader";
 import Navbar from "./layout/Navbar";
+import NavbarControlled from "./layout/NavbarControlled";
 
 // UI
 import Badge from "./ui/Badge";
@@ -37,6 +38,7 @@ export {
   Page,
   Subheader,
   Navbar,
+  NavbarControlled,
 
   // UI
   Badge,

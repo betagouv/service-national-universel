@@ -21,7 +21,6 @@ interface DatePickerWrapperProps {
   readOnly?: boolean;
   className?: string;
 }
-
 export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, isTime, placeholder, readOnly = false, className }: DatePickerWrapperProps) {
   const [time, setTime] = useState(value ? `${String(dayjs(value).utc().hour()).padStart(2, "0")}:${String(dayjs(value).utc().minute()).padStart(2, "0")}` : "00:00");
 
@@ -79,9 +78,9 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                     disabled={true}
                     value={
                       value
-                        ? // @ts-ignore
+                        ? // @ts-expect-error toUtcLocally
                           dayjs(value).toUtcLocally().format("DD/MM/YYYY") +
-                          // @ts-ignore
+                          // @ts-expect-error shiftTimeToUtc
                           (isTime ? " " + dayjs().hour(dayjs(value).utc().hour()).minute(dayjs(value).utc().minute()).shiftTimeToUtc().format("HH:mm") : "")
                         : ""
                     }
@@ -123,7 +122,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                             </div>
                             {/* 42 * 5 =  */}
                             <div className="max-h-[210px] overflow-hidden">
-                              {/* @ts-ignore */}
+                              {/* @ts-expect-error --tw-translate-y */}
                               <div className={`-translate-y-[0px]`} style={{ "--tw-translate-y": `-${42 * (getHoursOrMinutes(c) ?? 0)}px` }}>
                                 {[
                                   "",
