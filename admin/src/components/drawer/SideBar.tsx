@@ -5,7 +5,7 @@ import cx from "classnames";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 
-import { FEATURES_NAME, ROLES, isFeatureEnabled } from "snu-lib";
+import { FEATURES_NAME, ROLES, SUB_ROLE_GOD, isFeatureEnabled } from "snu-lib";
 
 import api from "@/services/api";
 import useDevice from "@/hooks/useDevice";
@@ -254,7 +254,7 @@ const SideBar = ({ sessionsList }) => {
       case ROLES.REFERENT_REGION:
         return refItems;
       case ROLES.ADMIN:
-        return user.subRole === "god" ? godItems : adminItems;
+        return user.subRole === SUB_ROLE_GOD ? godItems : adminItems;
       case ROLES.HEAD_CENTER:
         return headCenterItems;
       case ROLES.TRANSPORTER:

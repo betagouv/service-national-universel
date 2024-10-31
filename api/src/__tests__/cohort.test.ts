@@ -4,7 +4,7 @@ import getNewCohortFixture from "./fixtures/cohort";
 import { createCohortHelper } from "./helpers/cohort";
 import { createClasse } from "./helpers/classe";
 import { createFixtureClasse } from "./fixtures/classe";
-import { COHORT_TYPE, ERRORS, ROLES, STATUS_CLASSE } from "snu-lib";
+import { COHORT_TYPE, ERRORS, ROLES, STATUS_CLASSE, SUB_ROLE_GOD } from "snu-lib";
 import { dbConnect, dbClose } from "./helpers/db";
 import { ClasseModel } from "../models";
 
@@ -168,7 +168,7 @@ describe("Cohort", () => {
     });
 
     it("should return 404 if cohort is not found", async () => {
-      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: SUB_ROLE_GOD }))
         .put("/cohort/507f1f77bcf86cd799439011/eligibility")
         .send({
           zones: ["zone1"],
@@ -182,7 +182,7 @@ describe("Cohort", () => {
 
     it("should return 200 when cohort is updated successfully", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture());
-      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: SUB_ROLE_GOD }))
         .put(`/cohort/${encodeURIComponent(cohort._id)}/eligibility`)
         .send({
           zones: ["Sarthe"],
