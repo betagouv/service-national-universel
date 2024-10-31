@@ -898,7 +898,8 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
     // If they are CLE, we notify the class referent.
     try {
       if (cohort?.type === YOUNG_SOURCE.CLE) {
-        const referent = await ReferentModel.findOne({ role: ROLES.REFERENT_CLASSE, classeId: young.classeId });
+        const classe = await ClasseModel.findById(young.classeId);
+        const referent = await ReferentModel.findById(classe?.referentClasseIds[0]);
         if (referent) {
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
             emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
