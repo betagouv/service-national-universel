@@ -54,8 +54,6 @@ import {
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
-  cancelPendingApplications,
-  cancelPendingEquivalence,
 } from "../utils";
 import { validateId, idSchema, validateSelf, validateYoung, validateReferent } from "../utils/validator";
 import { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } from "../utils/serializer";
@@ -113,6 +111,7 @@ import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToL
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
+import { cancelPendingApplications, cancelPendingEquivalence } from "../young/applicationService";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);

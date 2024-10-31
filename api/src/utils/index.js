@@ -3,18 +3,7 @@ const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
-const {
-  YoungModel,
-  ReferentModel,
-  ContractModel,
-  PlanTransportModel,
-  LigneBusModel,
-  MeetingPointModel,
-  ApplicationModel,
-  SessionPhase1Model,
-  CohortModel,
-  MissionEquivalenceModel,
-} = require("../models");
+const { YoungModel, ReferentModel, ContractModel, PlanTransportModel, LigneBusModel, MeetingPointModel, ApplicationModel, SessionPhase1Model, CohortModel } = require("../models");
 
 const { sendEmail, sendTemplate } = require("../brevo");
 const path = require("path");
@@ -22,19 +11,7 @@ const fs = require("fs");
 const { addDays } = require("date-fns");
 const config = require("config");
 const { logger } = require("../logger");
-const {
-  getDepartureDate,
-  YOUNG_STATUS_PHASE1,
-  YOUNG_STATUS_PHASE2,
-  SENDINBLUE_TEMPLATES,
-  YOUNG_STATUS,
-  APPLICATION_STATUS,
-  FILE_STATUS_PHASE1,
-  ROLES,
-  SUB_ROLES,
-  EQUIVALENCE_STATUS,
-  ERRORS: LIB_ERRORS,
-} = require("snu-lib");
+const { getDepartureDate, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
 const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
 const dayjs = require("dayjs");
@@ -395,209 +372,6 @@ const sendAutoCancelMeetingPoint = async (young) => {
   );
 };
 
-async function updateYoungPhase2StatusAndHours(young, fromUser) {
-  try {
-    // Récupération des applications et équivalences pertinentes
-    const applications = await ApplicationModel.find({
-      youngId: young._id,
-      status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE", "WAITING_VALIDATION", "WAITING_VERIFICATION"] },
-    });
-    const equivalences = await MissionEquivalenceModel.find({
-      youngId: young._id,
-      status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
-    });
-
-    // Calcul des heures effectuées
-    const totalHoursDone =
-      applications.reduce((acc, application) => {
-        if (application.status === "DONE") {
-          return acc + Number(application.missionDuration || 0);
-        }
-        return acc;
-      }, 0) +
-      equivalences.reduce((acc, equivalence) => {
-        if (equivalence.status === "VALIDATED") {
-          return acc + (equivalence.missionDuration || 0);
-        }
-        return acc;
-      }, 0);
-
-    // Calcul des heures estimées
-    const totalHoursEstimated =
-      applications.reduce((acc, application) => {
-        if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
-          return acc + Number(application.missionDuration || 0);
-        }
-        return acc;
-      }, 0) +
-      equivalences.reduce((acc, equivalence) => {
-        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status)) {
-          return acc + (equivalence.missionDuration || 0);
-        }
-        return acc;
-      }, 0);
-
-    // Mise à jour des heures dans le modèle young
-    young.set({
-      phase2NumberHoursDone: String(totalHoursDone),
-      phase2NumberHoursEstimated: String(totalHoursEstimated),
-      statusPhase2UpdatedAt: Date.now(),
-    });
-
-    // Mise à jour du statut de la phase 2
-    const activeApplication = applications.filter((a) => ["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS", "WAITING_VERIFICATION"].includes(a.status));
-    const pendingApplication = applications.filter((a) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(a.status));
-
-    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
-      // Ne pas changer le statut si déjà VALIDATED ou WITHDRAWN
-      young.set({ statusPhase2ValidatedAt: Date.now() });
-      await cancelPendingApplications(pendingApplication, fromUser);
-    } else if (Number(young.phase2NumberHoursDone) >= 84) {
-      // Valider la phase 2 si 84 heures effectuées
-      young.set({
-        statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
-        statusPhase2ValidatedAt: Date.now(),
-        "files.militaryPreparationFilesIdentity": [],
-        "files.militaryPreparationFilesCensus": [],
-        "files.militaryPreparationFilesAuthorization": [],
-        "files.militaryPreparationFilesCertificate": [],
-        statusMilitaryPreparationFiles: undefined,
-      });
-      await cancelPendingApplications(pendingApplication, fromUser);
-      let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
-      let cc = getCcOfYoung({ template, young });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
-        },
-        cc,
-      });
-    } else if (activeApplication.length) {
-      // Mettre le statut en IN_PROGRESS si une application est active
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
-    } else {
-      // Sinon, attendre la réalisation
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
-    }
-
-    // Mise à jour des statuts des applications
-    young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
-
-    // Sauvegarde du modèle young
-    await young.save({ fromUser });
-  } catch (e) {
-    capture(e);
-  }
-}
-
-async function updateYoungPhase2Hours(young, fromUser) {
-  try {
-    const applications = await ApplicationModel.find({
-      youngId: young._id,
-      status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
-    });
-    const equivalences = await MissionEquivalenceModel.find({
-      youngId: young._id,
-      status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
-    });
-    const totalHoursDone =
-      applications.reduce((acc, application) => {
-        if (application.status === "DONE") {
-          return acc + Number(application.missionDuration || 0);
-        }
-        return acc;
-      }, 0) +
-      equivalences.reduce((acc, equivalence) => {
-        if (equivalence.status === "VALIDATED") {
-          return acc + (equivalence.missionDuration || 0);
-        }
-        return acc;
-      }, 0);
-    const totalHoursEstimated =
-      applications.reduce((acc, application) => {
-        if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
-          return acc + Number(application.missionDuration || 0);
-        }
-        return acc;
-      }, 0) +
-      equivalences.reduce((acc, equivalence) => {
-        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status)) {
-          return acc + (equivalence.missionDuration || 0);
-        }
-        return acc;
-      }, 0);
-
-    young.set({
-      phase2NumberHoursDone: String(totalHoursDone),
-      phase2NumberHoursEstimated: String(totalHoursEstimated),
-    });
-
-    await young.save({ fromUser });
-  } catch (e) {
-    capture(e);
-  }
-}
-
-// This function should always be called after updateYoungPhase2Hours.
-// This could be refactored in one function.
-const updateStatusPhase2 = async (young, fromUser) => {
-  try {
-    const applications = await ApplicationModel.find({ youngId: young._id });
-
-    const activeApplication = applications.filter(
-      (a) =>
-        a.status === APPLICATION_STATUS.WAITING_VALIDATION ||
-        a.status === APPLICATION_STATUS.VALIDATED ||
-        a.status === APPLICATION_STATUS.IN_PROGRESS ||
-        a.status === APPLICATION_STATUS.WAITING_VERIFICATION,
-    );
-
-    const pendingApplication = applications.filter((a) => a.status === APPLICATION_STATUS.WAITING_VALIDATION || a.status === APPLICATION_STATUS.WAITING_VERIFICATION);
-
-    young.set({ statusPhase2UpdatedAt: Date.now() });
-
-    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
-      // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
-      young.set({ statusPhase2ValidatedAt: Date.now() });
-      await cancelPendingApplications(pendingApplication, fromUser);
-    } else if (Number(young.phase2NumberHoursDone) >= 84) {
-      // We change young status to DONE if he has 84 hours of phase 2 done.
-      young.set({
-        statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
-        statusPhase2ValidatedAt: Date.now(),
-        "files.militaryPreparationFilesIdentity": [],
-        "files.militaryPreparationFilesCensus": [],
-        "files.militaryPreparationFilesAuthorization": [],
-        "files.militaryPreparationFilesCertificate": [],
-        statusMilitaryPreparationFiles: undefined,
-      });
-      await cancelPendingApplications(pendingApplication, fromUser);
-      let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
-      let cc = getCcOfYoung({ template, young });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
-        },
-        cc,
-      });
-    } else if (activeApplication.length) {
-      // We change young status to IN_PROGRESS if he has an 'active' application.
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
-    } else {
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
-    }
-
-    const applications_v2 = await ApplicationModel.find({ youngId: young._id });
-    young.set({ phase2ApplicationStatus: applications_v2.map((e) => e.status) });
-
-    await young.save({ fromUser });
-  } catch (e) {
-    capture(e);
-  }
-};
-
 const checkStatusContract = (contract) => {
   if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
   // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
@@ -658,36 +432,6 @@ const updateYoungStatusPhase2Contract = async (young, fromUser) => {
     capture(e);
   }
 };
-
-async function cancelPendingApplications(pendingApplication, fromUser) {
-  for (const application of pendingApplication) {
-    application.set({ status: APPLICATION_STATUS.CANCEL });
-    await application.save({ fromUser });
-    await sendNotificationApplicationClosedBecausePhase2Validated(application);
-  }
-}
-
-async function cancelPendingEquivalence(pendingEquivalences, fromUser) {
-  for (const equivalence of pendingEquivalences) {
-    equivalence.set({ status: EQUIVALENCE_STATUS.REFUSED, message: "La phase 2 a été validée" });
-    await equivalence.save({ fromUser });
-  }
-}
-
-async function sendNotificationApplicationClosedBecausePhase2Validated(application) {
-  if (application.tutorId) {
-    const responsible = await ReferentModel.findById(application.tutorId);
-    if (responsible)
-      await sendTemplate(SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION_PHASE_2_VALIDATED, {
-        emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
-        params: {
-          missionName: application.missionName,
-          youngFirstName: application.youngFirstName,
-          youngLastName: application.youngLastName,
-        },
-      });
-  }
-}
 
 function isYoung(user) {
   return user instanceof YoungModel;
@@ -1091,9 +835,6 @@ module.exports = {
   isYoung,
   isReferent,
   inSevenDays,
-  updateYoungPhase2Hours,
-  updateStatusPhase2,
-  updateYoungPhase2StatusAndHours,
   getSignedUrlForApiAssociation,
   updateYoungStatusPhase2Contract,
   checkStatusContract,
@@ -1110,8 +851,6 @@ module.exports = {
   autoValidationSessionPhase1Young,
   getReferentManagerPhase2,
   SUPPORT_BUCKET_CONFIG,
-  cancelPendingApplications,
-  cancelPendingEquivalence,
   updateYoungApplicationFilesType,
   updateHeadCenter,
   getTransporter,
