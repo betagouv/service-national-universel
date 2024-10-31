@@ -5,6 +5,7 @@ import { Button, Input } from "@snu/ds/dsfr";
 import { calculateAge } from "snu-lib";
 import { capture } from "@/sentry";
 import { createLead } from "../preinscription.repository";
+import { getDepartmentByZip } from "snu-lib";
 
 export default function CreateContactForm({ data, setState, setStateRelatedMessage }) {
   const [email, setEmail] = useState("");
@@ -50,7 +51,7 @@ export default function CreateContactForm({ data, setState, setStateRelatedMessa
       const { id, code } = await createLead({
         email: trimmedEmail,
         birthdate,
-        region: data.school?.region || data.region,
+        region: data.school?.region || getDepartmentByZip(data.zip),
         isAbroad: data.isAbroad,
       });
 
