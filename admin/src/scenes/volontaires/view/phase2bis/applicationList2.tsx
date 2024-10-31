@@ -15,27 +15,35 @@ import ReactTooltip from "react-tooltip";
 type PopulatedApplicationType = ApplicationType & { mission: MissionType; contract: ContractType };
 
 export default function ApplicationList({ young, onChangeApplication }) {
+  const [loading, setLoading] = useState(false);
   const [applications, setApplications] = useState<PopulatedApplicationType[]>();
 
   useEffect(() => {
+    if (!young?._id) return;
     getApplications();
-  }, []);
+  }, [young]);
 
   async function getApplications() {
-    if (!young) return;
-    const { ok, data, code } = await api.get(`/young/${young._id}/application`);
-    if (!ok) {
-      capture(new Error(code));
-      return toastr.error("Oups, une erreur est survenue", code);
+    setLoading(true);
+    try {
+      const { ok, data, code } = await api.get(`/young/${young._id}/application`);
+      if (!ok) {
+        capture(new Error(code));
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
+      setApplications(data);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue", e.message);
     }
-    return setApplications(data);
+    setLoading(false);
   }
 
-  if (!applications) return <Loader />;
-  if (!applications.length) return <div className="m-8 text-center italic">Aucune candidature n&apos;est liée à ce volontaire.</div>;
+  if (loading) return <Loader />;
+  if (!applications?.length) return <div className="m-8 text-center italic">Aucune candidature n&apos;est liée à ce volontaire.</div>;
   return (
     <div className="space-y-8 px-12 pt-6 pb-12">
-      {applications.map((hit, i) => (
+      {applications.map((hit) => (
         <Hit key={hit._id} young={young} hit={hit} onChangeApplication={onChangeApplication} />
       ))}
     </div>
