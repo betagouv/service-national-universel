@@ -140,7 +140,6 @@ export default function Settings() {
     );
 
   const statusOptions = [
-    { value: COHORT_STATUS.DRAFT, label: "Brouillon" },
     { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
     { value: COHORT_STATUS.ARCHIVED, label: "Archivée" },
   ];

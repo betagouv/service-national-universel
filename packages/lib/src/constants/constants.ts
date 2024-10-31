@@ -770,7 +770,6 @@ const COHORT_TYPE = {
 } as const;
 
 const COHORT_STATUS = {
-  DRAFT: "DRAFT",
   PUBLISHED: "PUBLISHED",
   ARCHIVED: "ARCHIVED",
 } as const;

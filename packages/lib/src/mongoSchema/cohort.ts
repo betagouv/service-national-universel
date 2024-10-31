@@ -50,7 +50,7 @@ export const CohortSchema = {
   status: {
     type: String,
     enum: COHORT_STATUS_LIST,
-    default: COHORT_STATUS.DRAFT,
+    default: COHORT_STATUS.PUBLISHED,
     documentation: {
       description: "Statut de la cohorte",
     },
