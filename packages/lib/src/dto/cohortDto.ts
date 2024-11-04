@@ -76,6 +76,10 @@ export type CohortDto = {
   inscriptionOpenForReferentRegion?: boolean;
   inscriptionOpenForReferentDepartment?: boolean;
   inscriptionOpenForAdministrateurCle?: boolean;
+  inscriptionHTSStartOffsetForReferentRegion?: number;
+  inscriptionHTSEndOffsetForReferentRegion?: number;
+  inscriptionHTSStartOffsetForReferentDepartment?: number;
+  inscriptionHTSEndOffsetForReferentDepartment?: number;
 };
 
 export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId" | "eligibility">;

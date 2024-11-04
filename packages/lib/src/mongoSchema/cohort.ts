@@ -378,6 +378,37 @@ export const CohortSchema = {
       description: "Ouverture ou fermeture de l'inscription manuelle pour les administrateurs CLE",
     },
   },
+  inscriptionHTSStartOffsetForReferentRegion: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Décalage en jours pour la date de début d'inscription HTS pour les référents régionaux",
+    },
+  },
+
+  inscriptionHTSEndOffsetForReferentRegion: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Décalage en jours pour la date de fin d'instruction HTS pour les référents régionaux",
+    },
+  },
+
+  inscriptionHTSStartOffsetForReferentDepartment: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Décalage en jours pour la date de début d'inscription HTS pour les référents départementaux",
+    },
+  },
+
+  inscriptionHTSEndOffsetForReferentDepartment: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Décalage en jours pour la date de fin d'instruction HTS pour les référents départementaux",
+    },
+  },
 };
 
 const schema = new Schema(CohortSchema);

@@ -17,6 +17,10 @@ export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<Up
     inscriptionOpenForReferentRegion: Joi.boolean().default(false),
     inscriptionOpenForReferentDepartment: Joi.boolean().default(false),
     inscriptionOpenForAdministrateurCle: Joi.boolean().default(false),
+    inscriptionHTSStartOffsetForReferentRegion: Joi.number().default(0),
+    inscriptionHTSEndOffsetForReferentRegion: Joi.number().default(0),
+    inscriptionHTSStartOffsetForReferentDepartment: Joi.number().default(0),
+    inscriptionHTSEndOffsetForReferentDepartment: Joi.number().default(0),
     // --
     inscriptionModificationEndDate: Joi.date(),
     instructionEndDate: Joi.date().required(),

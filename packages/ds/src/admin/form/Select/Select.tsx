@@ -196,7 +196,7 @@ export default function SelectButton(props: SelectProps) {
           />
         ) : (
           <Select
-            placeholder={placeholder}
+            {...(placeholder ? { placeholder } : { placeholder: value })}
             options={options}
             noOptionsMessage={() => noOptionsMessage}
             defaultValue={defaultValue}

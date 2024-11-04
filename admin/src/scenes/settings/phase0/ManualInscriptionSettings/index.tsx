@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from "react";
-import { CohortDto } from "snu-lib";
-import { getManualInscriptionTogglesByCohortType } from "./getManualInscriptionTogglesByCohortType";
+import { CohortDto, COHORT_TYPE } from "snu-lib";
+import { getManualInscriptionTogglesByCohortType, ManualInscriptionTogglesByCohortTypeProps } from "./getManualInscriptionTogglesByCohortType";
 import ReactTooltip from "react-tooltip";
 import React from "react";
 import { MdInfoOutline } from "react-icons/md";
 
 interface ManualInscriptionSettingsProps {
-  cohort: CohortDto;
+  cohort: CohortDto & { type: (typeof COHORT_TYPE)[keyof typeof COHORT_TYPE] };
   setCohort: React.Dispatch<React.SetStateAction<CohortDto>>;
   isLoading: boolean;
   readOnly: boolean;
@@ -20,21 +20,28 @@ export const ManualInscriptionSettings: React.FC<ManualInscriptionSettingsProps>
     [setCohort],
   );
 
-  const renderedManualInscriptionTogglesByCohortType = useMemo(
-    () => getManualInscriptionTogglesByCohortType({ cohort, handleToggleChange, isLoading, readOnly }),
-    // Disabled exhaustive-deps because we don't want to re-render the component when the all props data changes only specific fields should trigger a re-render
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      cohort.type,
-      cohort.inscriptionOpenForReferentRegion,
-      cohort.inscriptionOpenForReferentDepartment,
-      cohort.inscriptionOpenForReferentClasse,
-      cohort.inscriptionOpenForAdministrateurCle,
+  const handleOffsetChange = useCallback(
+    (field: keyof CohortDto, value: number) => {
+      setCohort((prevCohort) => ({
+        ...prevCohort,
+        [field]: value,
+      }));
+    },
+    [setCohort],
+  );
+
+  const renderedManualInscriptionTogglesByCohortType = useMemo(() => {
+    const baseProps = {
+      cohort,
       handleToggleChange,
       isLoading,
       readOnly,
-    ],
-  );
+    };
+
+    return getManualInscriptionTogglesByCohortType(
+      (cohort.type === COHORT_TYPE.VOLONTAIRE ? { ...baseProps, handleOffsetChange } : baseProps) as ManualInscriptionTogglesByCohortTypeProps,
+    );
+  }, [cohort, handleToggleChange, handleOffsetChange, isLoading, readOnly]);
 
   // If no rendered toggles according to the cohort type, we don't display anything
   if (!renderedManualInscriptionTogglesByCohortType) return null;

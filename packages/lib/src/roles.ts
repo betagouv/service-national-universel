@@ -1,9 +1,8 @@
 import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
-import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
+import { COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
 import { PointDeRassemblementType, ReferentType, SessionPhase1Type, YoungType } from "./mongoSchema";
-
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
 
@@ -683,22 +682,57 @@ function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: stri
 }
 
 function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
-    if (!cohort) return false;
+  if (!cohort) return false;
+  if (cohort.type !== COHORT_TYPE.CLE && cohort.type !== COHORT_TYPE.VOLONTAIRE) return false;
 
-    switch (actor.role) {
-      case ROLES.ADMIN:
-        return true;
-      case ROLES.REFERENT_DEPARTMENT:
+  switch (actor.role) {
+    case ROLES.ADMIN:
+      return true;
+    case ROLES.REFERENT_DEPARTMENT: {
+      if (cohort.type === COHORT_TYPE.CLE) {
         return cohort.inscriptionOpenForReferentDepartment === true;
-      case ROLES.REFERENT_REGION:
-        return cohort.inscriptionOpenForReferentRegion === true;
-      case ROLES.REFERENT_CLASSE:
-        return cohort.inscriptionOpenForReferentClasse === true;
-      case ROLES.ADMINISTRATEUR_CLE:
-        return cohort.inscriptionOpenForAdministrateurCle === true;
-      default:
-        return false;
+      }
+
+      if (!cohort.inscriptionOpenForReferentDepartment) return false;
+
+      const inscriptionHTSStartOffsetForReferentDepartmentDate = new Date(cohort.inscriptionStartDate);
+      const inscriptionHTSEndOffsetForReferentDepartmentDate = new Date(cohort.instructionEndDate);
+
+      return isNowBetweenDates(
+        inscriptionHTSStartOffsetForReferentDepartmentDate.setDate(
+          inscriptionHTSStartOffsetForReferentDepartmentDate.getDate() + (cohort.inscriptionHTSStartOffsetForReferentDepartment ?? 0),
+        ),
+        inscriptionHTSEndOffsetForReferentDepartmentDate.setDate(
+          inscriptionHTSEndOffsetForReferentDepartmentDate.getDate() + (cohort.inscriptionHTSEndOffsetForReferentDepartment ?? 0),
+        ),
+      );
     }
+    case ROLES.REFERENT_REGION: {
+      if (cohort.type === COHORT_TYPE.CLE) {
+        return cohort.inscriptionOpenForReferentClasse === true;
+      }
+
+      if (!cohort.inscriptionOpenForReferentClasse) return false;
+
+      const inscriptionHTSStartOffsetForReferentRegionDate = new Date(cohort.inscriptionStartDate);
+      const inscriptionHTSEndOffsetForReferentRegionDate = new Date(cohort.instructionEndDate);
+
+      return isNowBetweenDates(
+        inscriptionHTSStartOffsetForReferentRegionDate.setDate(
+          inscriptionHTSStartOffsetForReferentRegionDate.getDate() + (cohort.inscriptionHTSStartOffsetForReferentRegion ?? 0),
+        ),
+        inscriptionHTSEndOffsetForReferentRegionDate.setDate(
+          inscriptionHTSEndOffsetForReferentRegionDate.getDate() + (cohort.inscriptionHTSEndOffsetForReferentRegion ?? 0),
+        ),
+      );
+    }
+    case ROLES.REFERENT_CLASSE:
+      return cohort.inscriptionOpenForReferentClasse === true;
+    case ROLES.ADMINISTRATEUR_CLE:
+      return cohort.inscriptionOpenForAdministrateurCle === true;
+    default:
+      return false;
+  }
 }
 
 function canSendTemplateToYoung(actor, young) {
