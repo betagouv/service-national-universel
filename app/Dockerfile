@@ -1,5 +1,5 @@
 FROM node:18.20-alpine AS base
-ARG APP_NAME="app"
+ENV APP_NAME="app"
 
 FROM base AS builder
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
@@ -33,7 +33,6 @@ COPY turbo.json turbo.json
 COPY tsconfig.front.json tsconfig.front.json
 
 # secrets
-ARG SENTRY_AUTH_TOKEN
 ARG VITE_ENVIRONMENT
 ARG VITE_RELEASE
 ARG VITE_API_URL
@@ -47,7 +46,12 @@ ARG VITE_SENTRY_ON_ERROR_SAMPLE_RATE
 ARG VITE_FRANCE_CONNECT_URL
 ARG VITE_API_ENGAGEMENT_URL
 ARG VITE_API_ENGAGEMENT_SNU_ID
-RUN npm run build -- -- --mode ${VITE_ENVIRONMENT}
+
+ENV RELEASE=${VITE_RELEASE}
+
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) \
+    npm run build -- -- --mode ${VITE_ENVIRONMENT}
 
 FROM nginx AS runner
 

@@ -21,6 +21,8 @@ function _envMappings(env) {
   }
 }
 
+const SECRET_KEYS = new Set(["SENTRY_AUTH_TOKEN"]);
+
 async function main() {
   const input = new UserInput(`Build application MonCompte`)
     .arg("environment", "Environment (ci, staging, production)")
@@ -39,15 +41,23 @@ async function main() {
     format: SECRET_FORMATS.ENVFILE,
   }).execute();
 
+  const env = { ...process.env };
   const args = ["build", "-t", "test", "-f", "app/Dockerfile", "."];
   for (const key in config) {
-    args.push("--build-arg");
-    const value = process.env[key] || config[key]; // TODO remove override from env ?
-    args.push(`${key}=${value}`);
+    const value = env[key] || config[key]; // TODO remove override from env ?
+    if (SECRET_KEYS.has(key)) {
+      args.push("--secret");
+      args.push(`id=${key}`);
+      env[key] = value;
+    } else {
+      args.push("--build-arg");
+      args.push(`${key}=${value}`);
+    }
   }
 
   spawn("docker", args, {
     stdio: "inherit",
+    env,
     cwd: path.resolve(__dirname, "../.."), // ROOT
   });
 }
