@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { PointDeRassemblementType } from "snu-lib";
+import { departmentList, PointDeRassemblementType, regionList } from "snu-lib";
 
 function getNewPointDeRassemblementFixture(object: Partial<PointDeRassemblementType> = {}): Partial<PointDeRassemblementType> {
   return {
@@ -9,13 +9,16 @@ function getNewPointDeRassemblementFixture(object: Partial<PointDeRassemblementT
     address: faker.location.streetAddress(),
     zip: faker.location.zipCode(),
     city: faker.location.city(),
-    department: faker.location.state(),
-    region: faker.location.state(),
+    department: faker.helpers.arrayElement(departmentList),
+    region: faker.helpers.arrayElement(regionList),
+    academie: faker.location.state(),
     // country: faker.location.country(),
     location: {
       lat: Number(faker.location.latitude()),
       lon: Number(faker.location.longitude()),
     },
+    matricule: faker.lorem.words(),
+    particularitesAcces: faker.lorem.words(),
     ...object,
   };
 }

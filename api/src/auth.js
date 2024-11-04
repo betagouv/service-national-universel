@@ -150,7 +150,7 @@ class Auth {
 
       const cohortModel = await CohortModel.findOne({ name: cohort });
 
-      const user = await this.model.create({
+      const user = new this.model({
         email,
         phone,
         phoneZone,
@@ -180,6 +180,14 @@ class Auth {
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
       });
 
+      await user.save({
+        fromUser: {
+          _id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      });
       if (isEmailValidationEnabled) {
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
           emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
@@ -322,7 +330,15 @@ class Auth {
         cohortId: cohort?._id,
       };
 
-      const user = await this.model.create(userData);
+      const user = new this.model(userData);
+      await user.save({
+        fromUser: {
+          _id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      });
       if (!user) {
         throw new Error("Error while creating user");
       }
@@ -376,6 +392,7 @@ class Auth {
       if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
 
       const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
+
       if (!match) {
         const loginAttempts = (user.loginAttempts || 0) + 1;
 

@@ -77,7 +77,7 @@ export default function Index({ ...props }) {
 
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Missions", to: "/mission" }, { label: "Fiche de la mission" }]} />
+      <Breadcrumbs items={[{ title: "Engagement" }, { label: "Missions", to: "/mission" }, { label: "Fiche de la mission" }]} />
       <Switch>
         <SentryRoute path="/mission/:id/youngs/:tab" component={() => <Youngs mission={mission} updateMission={fetchMission} applications={applications} />} />
         <SentryRoute path="/mission/:id/historique" component={() => <Historic mission={mission} />} />

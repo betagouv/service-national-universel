@@ -14,7 +14,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     // Configuration
     const { user, body } = req;
-    const searchFields = ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"];
+    const searchFields = ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "pointDeRassemblements.matricule", "centerCode", "centerCity", "centerRegion"];
     const filterFields = [
       "busId.keyword",
       "cohort.keyword",
@@ -25,6 +25,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "pointDeRassemblements.department.keyword",
       "pointDeRassemblements.city.keyword",
       "pointDeRassemblements.code.keyword",
+      "pointDeRassemblements.matricule.keyword",
       "centerName.keyword",
       "centerRegion.keyword",
       "centerDepartment.keyword",

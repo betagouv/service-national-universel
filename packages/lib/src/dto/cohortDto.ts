@@ -1,7 +1,15 @@
+export type Eligibility = {
+  zones?: string[];
+  schoolLevels?: string[];
+  bornAfter?: Date | null;
+  bornBefore?: Date | null;
+};
+
 export type CohortDto = {
   _id?: string;
   snuId: string;
   name: string;
+  status: string;
   type: string;
   dateStart: Date;
   dateEnd: Date;
@@ -63,9 +71,14 @@ export type CohortDto = {
     editionOpenForReferentDepartment?: boolean;
     editionOpenForHeadOfCenter?: boolean;
   } | null;
+  eligibility?: Eligibility;
+  inscriptionOpenForReferentClasse?: boolean;
+  inscriptionOpenForReferentRegion?: boolean;
+  inscriptionOpenForReferentDepartment?: boolean;
+  inscriptionOpenForAdministrateurCle?: boolean;
 };
 
-export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId">;
+export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId" | "eligibility">;
 
 type ToFromDate = {
   from?: string | null;

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, UserDto, YoungDto } from "snu-lib";
+import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, UserDto, YoungDto, SUB_ROLE_GOD } from "snu-lib";
 import { isYoung } from "../utils";
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -329,6 +329,7 @@ export function validateYoung(young: YoungDto, user?: UserDto) {
     gender: Joi.string().allow(null, ""),
     birthdateAt: Joi.string().allow(null, ""),
     cohort: Joi.string().allow(null, ""),
+    cohortId: Joi.string().allow(null, ""),
     parentStatementOfHonorInvalidId: Joi.string().allow(null, ""),
     originalCohort: Joi.string().allow(null, ""),
     cohortChangeReason: Joi.string().allow(null, ""),
@@ -578,6 +579,7 @@ export function validateYoung(young: YoungDto, user?: UserDto) {
     militaryPreparationCorrectionMessage: Joi.string().allow(null, ""),
     missionsInMail: Joi.array().items(Joi.any().allow(null, "")),
     classeId: Joi.string().allow(null, ""),
+    psc1Info: Joi.string().allow(null, ""),
   };
 
   if (!isYoung(user)) {
@@ -664,7 +666,7 @@ export function validateSelf(referent) {
       password: Joi.string().allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
-        .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"]),
+        .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, SUB_ROLE_GOD]),
       phone: Joi.string().allow(null, ""),
       mobile: Joi.string().allow(null, ""),
     })
@@ -694,6 +696,8 @@ export function validatePhase1Document(phase1document, key) {
       return Joi.object({
         convocationFileDownload: Joi.string().trim().required().valid("true"),
       }).validate(phase1document);
+    default:
+      return { value: null, error: { key: "unknow " + key } };
   }
 }
 

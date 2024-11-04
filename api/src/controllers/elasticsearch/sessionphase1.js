@@ -23,6 +23,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "typology.keyword",
       "domain.keyword",
       "hasPedagoProject.keyword",
+      "sanitaryContactEmailExist",
       "headCenterExist",
     ];
     // check query parameters to fill cohesionCenter
@@ -58,6 +59,37 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         headCenterExistAggs: () => {
           return {
             terms: { field: "headCenterId.keyword", size: ES_NO_LIMIT, missing: "N/A" },
+          };
+        },
+        sanitaryContactEmailExist: (query, value) => {
+          const conditions = [];
+          // Condition for entries that have the "sanitaryContactEmail" field and it is not empty.
+          if (value.includes("true")) {
+            conditions.push({
+              bool: {
+                must: [{ exists: { field: "sanitaryContactEmail.keyword" } }, { bool: { must_not: { term: { "sanitaryContactEmail.keyword": "" } } } }],
+              },
+            });
+          }
+          // Condition for entries that do NOT have the "sanitaryContactEmail" field or it is empty.
+          if (value.includes("false")) {
+            conditions.push({
+              bool: {
+                should: [{ bool: { must_not: { exists: { field: "sanitaryContactEmail.keyword" } } } }, { term: { "sanitaryContactEmail.keyword": "" } }],
+                minimum_should_match: 1,
+              },
+            });
+          }
+          // If there are conditions, add them as filters.
+          if (conditions.length) {
+            query.bool.must.push({ bool: { should: conditions } });
+          }
+
+          return query;
+        },
+        sanitaryContactEmailExistAggs: () => {
+          return {
+            terms: { field: "sanitaryContactEmail.keyword", size: ES_NO_LIMIT, missing: "N/A" },
           };
         },
       },

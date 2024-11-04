@@ -17,7 +17,7 @@ export const canUpdateCohort = (cohort?: CohortDto, user?: UserDto | ReferentDto
   );
 };
 
-export const canUpdateCenter = (cohort: CohortDto | undefined, user: ReferentDto | undefined): boolean => {
+export const canUpdateCenter = (cohort?: CohortDto, user?: UserDto): boolean => {
   if (!user) return false;
   if (!cohort) return true;
 

@@ -25,7 +25,7 @@ const { sendTemplate } = require("../../brevo");
 const config = require("config");
 
 const updateModificationDependencies = async (modif, fromUser) => {
-  const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });
+  const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": new ObjectId(modif._id) });
   const modificationBus = planDeTransport.modificationBuses.find((modificationBus) => modificationBus._id.toString() === modif._id.toString());
   const copyModif = JSON.parse(JSON.stringify(modif));
   modificationBus.set({ ...copyModif });

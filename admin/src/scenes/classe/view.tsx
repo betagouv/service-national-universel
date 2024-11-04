@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { HiHome } from "react-icons/hi";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
@@ -8,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { Page, Header, Badge } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes } from "snu-lib";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes, canInviteYoung } from "snu-lib";
 import { appURL } from "@/config";
 import Loader from "@/components/Loader";
 import { AuthState } from "@/redux/auth/reducer";
@@ -225,6 +224,11 @@ export default function View() {
     setErrors({});
   };
 
+  const canPerformManualInscriptionActions = useMemo(() => {
+    return canInviteYoung(user, cohort ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.role, cohort]);
+
   if (!classe) return <Loader />;
 
   return (
@@ -233,14 +237,14 @@ export default function View() {
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status) as TStatus} />}
         breadcrumb={[
-          { title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" to="/" /> },
+          { title: "Séjours" },
           {
-            title: "Mes classes",
+            title: "Classes",
             to: "/classes",
           },
           { title: "Fiche de la classe" },
         ]}
-        actions={getHeaderActionList({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus })}
+        actions={getHeaderActionList({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus, canPerformManualInscriptionActions })}
       />
       <GeneralInfos
         classe={classe}
@@ -272,7 +276,7 @@ export default function View() {
         />
       )}
 
-      {(rights.showCenter || rights.showPDR) && (
+      {(rights.showCenter || rights.showPDR) && classe?.status !== STATUS_CLASSE.WITHDRAWN && (
         <SejourInfos
           classe={classe}
           setClasse={setClasse}

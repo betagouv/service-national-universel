@@ -3,6 +3,7 @@ import Joi from "joi";
 import { capture } from "../sentry";
 import { ERRORS } from "../utils";
 import { RouteRequest } from "../controllers/request";
+import { logger } from "../logger";
 
 export interface SchemaValidator {
   params?: Joi.AnySchema;
@@ -50,6 +51,7 @@ export function requestBodyValidator<T>(validator: Joi.AnySchema<T> | undefined,
   if (body && validator) {
     const { error, value } = validator.validate(body, { stripUnknown: true });
     if (error) {
+      logger.debug(error);
       throw new Error(ERRORS.INVALID_BODY);
     }
     return value;

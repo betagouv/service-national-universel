@@ -13,6 +13,7 @@ export type Center = {
   centerDesignation: string;
   city: string;
   code: string;
+  matricule?: string;
   code2022: string;
   cohorts: string[];
   complement: string;

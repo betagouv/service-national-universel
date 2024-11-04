@@ -5,7 +5,7 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const { logger } = require("../logger");
-const { MissionModel, ApplicationModel, StructureModel, ReferentModel } = require("../models");
+const { MissionModel, ApplicationModel, StructureModel, ReferentModel, CohortModel } = require("../models");
 // eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung } = require("../utils/index");
 const { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } = require("../services/application");
@@ -16,7 +16,7 @@ const { serializeMission, serializeApplication } = require("../utils/serializer"
 const patches = require("./patches");
 const { sendTemplate } = require("../brevo");
 const config = require("config");
-const { putLocation } = require("../services/gouv.fr/api-adresse");
+const { getNearestLocation } = require("../services/gouv.fr/api-adresse");
 
 //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
 const fixDate = (dateString) => {
@@ -47,6 +47,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
 
+    if (checkedMission.mainDomain) {
+      if (!checkedMission.domains) checkedMission.domains = [];
+      if (!checkedMission.domains.includes(checkedMission.mainDomain)) {
+        checkedMission.domains.push(checkedMission.mainDomain);
+      }
+    }
+
     //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
     if (checkedMission.startAt) checkedMission.startAt = fixDate(checkedMission.startAt);
     if (checkedMission.endAt) checkedMission.endAt = fixDate(checkedMission.endAt);
@@ -58,7 +65,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        checkedMission.location = await getNearestLocation(checkedMission.city, checkedMission.zip);
         if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
           return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
         }
@@ -114,13 +121,20 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
+    if (checkedMission.mainDomain) {
+      if (!checkedMission.domains) checkedMission.domains = [];
+      if (!checkedMission.domains.includes(checkedMission.mainDomain)) {
+        checkedMission.domains.push(checkedMission.mainDomain);
+      }
+    }
+
     //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
     if (checkedMission.startAt) checkedMission.startAt = fixDate(checkedMission.startAt);
     if (checkedMission.endAt) checkedMission.endAt = fixDate(checkedMission.endAt);
 
     if (checkedMission.status === MISSION_STATUS.WAITING_VALIDATION) {
       if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
-        checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+        checkedMission.location = await getNearestLocation(checkedMission.city, checkedMission.zip);
         if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
           return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
         }
@@ -282,13 +296,15 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     // Add application for young.
     if (isYoung(req.user)) {
       const application = await ApplicationModel.findOne({ missionId: checkedId, youngId: req.user._id });
+      const cohort = await CohortModel.findById(req.user.cohortId);
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({
         ok: true,
         data: {
           ...serializeMission(mission),
           tutor: missionTutor,
           application: application ? serializeApplication(application) : null,
-          ...(await getAuthorizationToApply(mission, req.user)),
+          ...(await getAuthorizationToApply(mission, req.user, cohort)),
         },
       });
     }
@@ -381,7 +397,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     const applications = await ApplicationModel.find({ missionId: mission._id });
     if (applications && applications.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
-    await mission.remove();
+    await mission.deleteOne();
 
     logger.debug(`Mission ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });

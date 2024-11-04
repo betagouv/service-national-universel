@@ -13,6 +13,8 @@ const YOUNG_STATUS = {
   NOT_AUTORISED: "NOT_AUTORISED",
 } as const;
 
+const YOUNG_STATUS_LIST = Object.values(YOUNG_STATUS);
+
 const YOUNG_STATUS_PHASE1 = {
   WAITING_AFFECTATION: "WAITING_AFFECTATION",
   AFFECTED: "AFFECTED",
@@ -398,9 +400,14 @@ const MINISTRES = [
     template: "certificates/certificateTemplate2023-08-18.png",
   },
   {
-    date_end: "03-13-2050", // ! Changer ici à l'ajout d'un nouveau
+    date_end: "10-20-2024",
     ministres: ["Nicole Belloubet, Ministre de l'Education Nationale et de la Jeunesse", "Sebastien Lecornu, Ministre des Armées"],
     template: "certificates/certificateTemplate2024_2.png",
+  },
+  {
+    date_end: "03-13-2050", // ! Changer ici à l'ajout d'un nouveau
+    ministres: ["Corinne Orzechowski"],
+    template: "certificates/certificateTemplate2024_3.png",
   },
 ];
 
@@ -762,6 +769,11 @@ const COHORT_TYPE = {
   CLE: "CLE",
 } as const;
 
+const COHORT_STATUS = {
+  PUBLISHED: "PUBLISHED",
+  ARCHIVED: "ARCHIVED",
+} as const;
+
 const TYPE_CLASSE = {
   GROUP: "GROUP",
   FULL: "FULL",
@@ -782,12 +794,14 @@ const STATUS_CLASSE_LIST = Object.values(STATUS_CLASSE);
 const STATUS_PHASE1_CLASSE_LIST = Object.values(STATUS_PHASE1_CLASSE);
 const YOUNG_SOURCE_LIST = Object.values(YOUNG_SOURCE);
 const COHORT_TYPE_LIST = Object.values(COHORT_TYPE);
+const COHORT_STATUS_LIST = Object.values(COHORT_STATUS);
 const CLE_COLORATION_LIST = Object.values(CLE_COLORATION);
 const CLE_FILIERE_LIST = Object.values(CLE_FILIERE);
 const TYPE_CLASSE_LIST = Object.values(TYPE_CLASSE);
 
 export {
   YOUNG_STATUS,
+  YOUNG_STATUS_LIST,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE1_MOTIF,
   YOUNG_STATUS_PHASE2,
@@ -845,6 +859,8 @@ export {
   YOUNG_SOURCE_LIST,
   COHORT_TYPE,
   COHORT_TYPE_LIST,
+  COHORT_STATUS,
+  COHORT_STATUS_LIST,
   CLE_COLORATION,
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
@@ -856,6 +872,7 @@ export {
 };
 export default {
   YOUNG_STATUS,
+  YOUNG_STATUS_LIST,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE1_MOTIF,
   YOUNG_STATUS_PHASE2,

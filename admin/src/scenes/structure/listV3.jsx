@@ -16,7 +16,7 @@ export default function ListV3() {
 
   return (
     <div className="mb-8">
-      <Breadcrumbs items={[{ label: "Centres" }]} />
+      <Breadcrumbs items={[{ title: "Engagement" }, { label: "Structures" }]} />
       <div className="flex flex-row">
         <div className="flex w-full flex-1 flex-col px-8">
           <div className="flex items-center justify-between py-8">

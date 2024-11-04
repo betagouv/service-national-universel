@@ -9,3 +9,8 @@ export const emailValidationNoticeModal = createModal({
   id: "email-validation-notice",
   isOpenedByDefault: false,
 });
+
+export const alreadyHaveAnAccountModal = createModal({
+  id: "already-have-an-account",
+  isOpenedByDefault: false,
+});

@@ -72,7 +72,7 @@ jobs:
           echo "registry_id=$registry_id" >> $GITHUB_OUTPUT
 
       - name: Get images
-        working-directory: terraform/environments/ci
+        working-directory: devops/terraform/environments/ci
         run: |
           curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
             "https://api.scaleway.com/registry/v1/regions/${{ env.region }}/images?namespace_id=${{ steps.registry_id.outputs.registry_id }}&name=${{ env.image_name }}" \
@@ -88,7 +88,7 @@ jobs:
           PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
           PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
           project_id: 1b29c5d9-9723-400a-aa8b-0c85ae3567f7
-        working-directory: terraform/environments/ci
+        working-directory: devops/terraform/environments/ci
         run: |
           # Get all CI container namespaces
           # the grep excludes snu-ci namespace

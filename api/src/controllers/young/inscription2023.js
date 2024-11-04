@@ -205,7 +205,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
-      psc1Info: Joi.string().trim().valid("true", "false").allow(null),
+      psc1Info: Joi.string().trim().valid("true", "false").required(),
     };
 
     if (!isCle(young)) {
@@ -257,8 +257,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       try {
         const qpv = await getQPV(value.zip, value.city, value.address);
         if (qpv === true) young.set({ qpv: "true" });
-        else if (qpv === false) value.qpv = "false";
-        else value.qpv = undefined;
+        else if (qpv === false) young.set({ qpv: "false" });
+        else young.set({ qpv: undefined });
       } catch (error) {
         // Continue
       }

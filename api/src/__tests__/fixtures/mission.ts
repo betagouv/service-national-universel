@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { MissionType } from "../../models";
+import { departmentList, MissionType, regionList } from "snu-lib";
 
 function getNewMissionFixture(): Partial<MissionType> {
   return {
@@ -25,8 +25,8 @@ function getNewMissionFixture(): Partial<MissionType> {
     address: faker.location.streetAddress(),
     zip: faker.location.zipCode(),
     city: faker.location.city(),
-    department: faker.location.state(),
-    region: faker.location.state(),
+    department: faker.helpers.arrayElement(departmentList),
+    region: faker.helpers.arrayElement(regionList),
     country: faker.location.country(),
     location: {
       lat: Number(faker.location.latitude()),

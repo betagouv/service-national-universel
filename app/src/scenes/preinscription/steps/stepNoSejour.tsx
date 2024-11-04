@@ -24,17 +24,23 @@ export default function NonEligible() {
 
   return (
     <DSFRContainer title="Nous n'avons pas trouvé de séjour correspondant à votre situation.">
-      <div className="mt-2 mb-12">
-        <Highlight>📬 Soyez informé(e) de l’ouverture des inscriptions pour les prochaines sessions SNU en renseignant votre adresse e-mail et votre date de naissance.</Highlight>
-      </div>
+      {isLoggedIn ? null : (
+        <>
+          <div className="mt-2 mb-12">
+            <Highlight>
+              📬 Soyez informé(e) de l’ouverture des inscriptions pour les prochaines sessions SNU en renseignant votre adresse e-mail et votre date de naissance.
+            </Highlight>
+          </div>
 
-      {state === "error" && <Alert severity="error" title="Une erreur est survenue" description={stateRelatedMessage} closable />}
-      {state === "success" && <Alert severity="success" title="Merci !" description="Nous vous tiendrons informé(e) de l'ouverture des inscriptions." closable />}
-      {state === "info" && <Alert severity="info" title="Information" description={stateRelatedMessage} closable />}
+          {state === "error" && <Alert severity="error" title="Une erreur est survenue" description={stateRelatedMessage} closable />}
+          {state === "success" && <Alert severity="success" title="Merci !" description="Nous vous tiendrons informé(e) de l'ouverture des inscriptions." closable />}
+          {state === "info" && <Alert severity="info" title="Information" description={stateRelatedMessage} closable />}
 
-      {state !== "success" && <CreateContactForm data={data} setState={setState} setStateRelatedMessage={setStateRelatedMessage} />}
+          {state !== "success" && <CreateContactForm data={data} setState={setState} setStateRelatedMessage={setStateRelatedMessage} />}
 
-      <hr className="my-8" />
+          <hr className="my-8" />
+        </>
+      )}
 
       <EngagementPrograms />
       <SignupButtons onClickNext={onClickButton} labelNext="Revenir à l'accueil" />

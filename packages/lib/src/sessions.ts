@@ -1,39 +1,41 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
+import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { isCle } from "./young";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { shouldDisplayDateByCohortName } from "./utils/cohortUtils";
+import { CohortType } from "./mongoSchema/cohort";
+import { YoungType } from "./mongoSchema/young";
 
 const COHORTS_WITH_JDM_COUNT = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
 
-const getCohortStartDate = (cohort) => {
-  return new Date(cohort.dateStart);
+const getCohortStartDate = (cohort: CohortType) => {
+  return getZonedDate(cohort.dateStart);
 };
 
-const getCohortEndDate = (cohort) => {
-  return new Date(cohort.dateEnd);
+const getCohortEndDate = (cohort: CohortType) => {
+  return getZonedDate(cohort.dateEnd);
 };
 
-const getSchoolYear = (etablissement: EtablissementDto) => {
+const getSchoolYear = (etablissement?: EtablissementDto) => {
   const schoolYears = etablissement?.schoolYears || [];
   return schoolYears[schoolYears.length - 1];
 };
 
-const getCohortYear = (cohort) => cohort?.dateStart?.slice(0, 4);
+const getCohortYear = (cohort?: CohortType & { dateStart?: string }) => cohort?.dateStart?.slice(0, 4);
 
-const getCohortPeriod = (cohort, withBold = false) => {
-  if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
+const getCohortPeriod = (cohort?: Pick<CohortType, "name" | "dateStart" | "dateEnd">, withBold = false) => {
+  if (!cohort?.dateStart || !cohort?.dateEnd) return cohort?.name || cohort;
 
-  if(!shouldDisplayDateByCohortName(cohort.name)) {
+  if (!shouldDisplayDateByCohortName(cohort.name)) {
     return "à venir";
   }
 
   // Fonction pour formater les dates avec la localisation française
   const formatDate = (dateString, dateFormat) => {
-    return format(new Date(dateString), dateFormat, { locale: fr });
+    return format(getZonedDate(dateString), dateFormat, { locale: fr });
   };
 
   // Formater les mois et années pour comparaison
@@ -62,8 +64,6 @@ const getCohortPeriod = (cohort, withBold = false) => {
 
   return formattedPeriod;
 };
-
-
 
 const formatShortCohortPeriod = (cohort) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
@@ -131,9 +131,11 @@ function shouldForceRedirectToReinscription(young) {
   return young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status);
 }
 
-const isCohortTooOld = (young) => ["2019", "2020"].includes(young.cohort);
+const isCohortTooOld = (cohort: CohortType) => {
+  return cohort.status === COHORT_STATUS.ARCHIVED;
+};
 
-function hasAccessToReinscription(young) {
+function hasAccessToReinscription(young: YoungType, cohort: CohortType) {
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
@@ -143,32 +145,38 @@ function hasAccessToReinscription(young) {
       return false;
     }
 
-    if ([YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) {
       return false;
     }
 
-    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
+    if (young.status === YOUNG_STATUS.ABANDONED || young.status === YOUNG_STATUS.WITHDRAWN) {
       return true;
     }
 
-    if ([YOUNG_STATUS_PHASE1.NOT_DONE].includes(young.statusPhase1)) {
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
       return true;
     }
 
     return false;
   }
 
-  if (isCohortTooOld(young)) {
+  if (isCohortTooOld(cohort)) {
     return false;
   }
 
-  if (young.cohort === "à venir" && ![YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) {
+  if (
+    young.cohort === "à venir" &&
+    young.status !== YOUNG_STATUS.NOT_AUTORISED &&
+    young.status !== YOUNG_STATUS.REFUSED &&
+    young.status !== YOUNG_STATUS.DELETED &&
+    young.status !== YOUNG_STATUS.NOT_ELIGIBLE
+  ) {
     return true;
   }
   if (young.status === YOUNG_STATUS.ABANDONED) {
     return true;
   }
-  if (young.status === YOUNG_STATUS.WITHDRAWN && ![YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+  if (young.status === YOUNG_STATUS.WITHDRAWN && !(young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED || young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE)) {
     return true;
   }
   if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {

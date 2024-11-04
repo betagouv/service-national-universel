@@ -36,7 +36,7 @@ router.post("/youngs/", passport.authenticate("referent", { session: false, fail
 router.post("/meetingPoints", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
-    let meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: [...req.body] } });
+    let meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: [...req.body] }, deletedAt: { $exists: false } });
     if (!meetingPoints || !meetingPoints.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     res.status(200).send({ ok: true, data: meetingPoints });
   } catch (error) {
