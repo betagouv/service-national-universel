@@ -19,7 +19,7 @@ import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
 import AvenirCohort from "./AvenirCohort";
-import { isCohortTooOld } from "snu-lib";
+import { EQUIVALENCE_STATUS, isCohortTooOld } from "snu-lib";
 import { capture } from "@/sentry";
 import { toastr } from "react-redux-toastr";
 import API from "@/services/api";
@@ -80,8 +80,9 @@ export default function Home() {
     }
     const hasCompletedPhase2 = [YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(young.statusPhase2);
     const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
+    const hasEquivalence = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence);
 
-    if (isCohortTooOld(cohort) && !hasCompletedPhase2 && !hasMission) {
+    if (isCohortTooOld(cohort) && !hasCompletedPhase2 && !hasMission && !hasEquivalence) {
       return <DelaiDepasse />;
     }
 
