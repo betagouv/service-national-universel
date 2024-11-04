@@ -116,7 +116,6 @@ import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToL
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
-import { path } from "pdfkit";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
