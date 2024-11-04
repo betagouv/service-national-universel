@@ -57,6 +57,7 @@ import {
   ReferentType,
   getDepartmentForEligibility,
   FUNCTIONAL_ERRORS,
+  CohortDto,
 } from "snu-lib";
 import { getFilteredSessions } from "../../utils/cohort";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
@@ -231,7 +232,10 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canInviteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const cohortObj = await CohortModel.findById(value.cohortId);
+    const cohortDto: CohortDto | null = cohortObj ? (cohortObj.toObject() as CohortDto) : null;
+
+    if (!canInviteYoung(req.user, cohortDto)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const obj = { ...value };
 
@@ -894,7 +898,8 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
     // If they are CLE, we notify the class referent.
     try {
       if (cohort?.type === YOUNG_SOURCE.CLE) {
-        const referent = await ReferentModel.findOne({ role: ROLES.REFERENT_CLASSE, classeId: young.classeId });
+        const classe = await ClasseModel.findById(young.classeId);
+        const referent = await ReferentModel.findById(classe?.referentClasseIds[0]);
         if (referent) {
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
             emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],

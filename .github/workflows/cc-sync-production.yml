@@ -35,7 +35,7 @@ jobs:
           PG_CONN_STR: ${{ secrets.SCW_PROD_BACKEND_CONN_STR }}
           PGUSER: ${{ secrets.SCW_PROD_BACKEND_USER }}
           PGPASSWORD: ${{ secrets.SCW_PROD_BACKEND_PASSWORD }}
-          prod_directory: ./terraform/environments/production
+          prod_directory: ./devops/terraform/environments/production
         run: |
           terraform init
           output=$(terraform output -json)

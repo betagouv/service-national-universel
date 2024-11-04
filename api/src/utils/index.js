@@ -225,7 +225,6 @@ const updatePlacesCenter = async (center, fromUser) => {
       logger.debug(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
       center.set({ placesLeft });
       await center.save({ fromUser });
-      await center.index();
     }
   } catch (e) {
     capture(e);
@@ -247,7 +246,6 @@ const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
       logger.debug(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
       sessionPhase1.set({ placesLeft });
       await sessionPhase1.save({ fromUser });
-      await sessionPhase1.index();
     }
   } catch (e) {
     capture(e);
@@ -341,7 +339,6 @@ const updatePlacesBus = async (bus) => {
       logger.debug(`Bus ${bus.id}: total ${bus.capacity}, left from ${bus.placesLeft} to ${placesLeft}`);
       bus.set({ placesLeft });
       await bus.save();
-      await bus.index();
     }
   } catch (e) {
     capture(e);
@@ -365,14 +362,12 @@ async function updateSeatsTakenInBusLine(busline) {
     if (busline.youngSeatsTaken !== seatsTaken) {
       busline.set({ youngSeatsTaken: seatsTaken });
       await busline.save();
-      await busline.index();
 
       // Do the same update with planTransport
       const planTransport = await PlanTransportModel.findById(busline._id);
       if (!planTransport) throw new Error("PlanTransport not found");
       planTransport.set({ youngSeatsTaken: seatsTaken, lineFillingRate: planTransport.youngCapacity && Math.floor((seatsTaken / planTransport.youngCapacity) * 100) });
       await planTransport.save();
-      await planTransport.index();
     }
   } catch (e) {
     capture(e);
@@ -403,10 +398,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
 async function updateYoungPhase2StatusAndHours(young, fromUser) {
   try {
     // Récupération des applications et équivalences pertinentes
-    const applications = await ApplicationModel.find({
-      youngId: young._id,
-      status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE", "WAITING_VALIDATION", "WAITING_VERIFICATION"] },
-    });
+    const applications = await ApplicationModel.find({ youngId: young._id });
     const equivalences = await MissionEquivalenceModel.find({
       youngId: young._id,
       status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
@@ -488,7 +480,6 @@ async function updateYoungPhase2StatusAndHours(young, fromUser) {
 
     // Mise à jour des statuts des applications
     young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
-
     // Sauvegarde du modèle young
     await young.save({ fromUser });
   } catch (e) {

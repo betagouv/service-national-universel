@@ -39,9 +39,6 @@ const errorMessages = {
   hasSpecialSituation: "Merci de choisir au moins une option.",
 };
 
-// TODO: remove this
-const cohortExcluded = ["Octobre 2024 - Nouvelle-Calédonie", "Toussaint 2024", "Toussaint 2024 - La Réunion"];
-
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
 const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified", "coordinatesAccuracyLevel"];
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
@@ -177,7 +174,7 @@ export default function StepCoordonnees() {
       setData({
         ...data,
         schooled: young.schooled || data.schooled,
-        situation: young.situation || data.situation,
+        situation: situationOptions.some((option) => option.value === young.situation) ? young.situation : data.situation,
         birthCountry: young.birthCountry || data.birthCountry,
         birthCity: young.birthCity || data.birthCity,
         birthCityZip: young.birthCityZip || data.birthCityZip,
@@ -326,10 +323,7 @@ export default function StepCoordonnees() {
       requiredFields.push("situation");
     }
 
-    // TODO: remove this
-    if (!cohortExcluded.includes(young.cohort)) {
-      (!psc1Info || psc1Info === "") && (errors.psc1Info = "Ce champ est obligatoire");
-    }
+    if (!psc1Info || psc1Info === "") errors.psc1Info = "Ce champ est obligatoire";
 
     if (hasSpecialSituation === undefined) {
       errors.hasSelectedSpecialSituation = "Ce champ est obligatoire";
@@ -557,7 +551,7 @@ export default function StepCoordonnees() {
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
             options={situationOptions}
             nativeSelectProps={{
-              value: situation,
+              value: situationOptions.some((option) => option.value === situation) ? situation : undefined,
               onChange: (e) => updateData("situation")(e.target.value),
             }}
             state={(corrections?.situation || errors.situation) && "error"}
@@ -780,33 +774,29 @@ export default function StepCoordonnees() {
             )}
           </>
         )}
-        {!cohortExcluded.includes(young.cohort) && (
-          <>
-            <hr className="my-2" />
-            <div className="flex mt-4 items-center gap-3 mb-4">
-              <h2 className="m-0 text-lg font-semibold leading-6 align-left">Formation PSC1</h2>
-              <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-                <ul className="text-gray-800">
-                  <li> La formation PSC1 permet d'acquérir les gestes de premiers secours pour être capable d'intervenir en cas d'urgence.</li>
-                  <li> Avoir validé le PSC1 n'est pas obligatoire pour participer au séjour de cohésion.</li>
-                </ul>
-              </ReactTooltip>
-              <div data-tip data-for="tooltip-nationalite">
-                <RiInformationFill className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover text-[24px] ml-2" />
-              </div>
-            </div>
-            <BooleanRadioButtons
-              legend="Avez-vous validé le PSC1 (Prévention et Secours Civiques de niveau 1) ?"
-              hintText=""
-              value={psc1Info}
-              options={[{ value: "true" }, { value: "false" }]}
-              onChange={(e) => updateData("psc1Info")(e.target.value)}
-              orientation="horizontal"
-              state={(corrections?.psc1Info || errors.psc1Info) && "error"}
-              stateRelatedMessage={errors.psc1Info}
-            />
-          </>
-        )}
+        <hr className="my-2" />
+        <div className="flex mt-4 items-center gap-3 mb-4">
+          <h2 className="m-0 text-lg font-semibold leading-6 align-left">Formation PSC1</h2>
+          <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+            <ul className="text-gray-800">
+              <li> La formation PSC1 permet d'acquérir les gestes de premiers secours pour être capable d'intervenir en cas d'urgence.</li>
+              <li> Avoir validé le PSC1 n'est pas obligatoire pour participer au séjour de cohésion.</li>
+            </ul>
+          </ReactTooltip>
+          <div data-tip data-for="tooltip-nationalite">
+            <RiInformationFill className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover text-[24px] ml-2" />
+          </div>
+        </div>
+        <BooleanRadioButtons
+          legend="Avez-vous validé le PSC1 (Prévention et Secours Civiques de niveau 1) ?"
+          hintText=""
+          value={psc1Info}
+          options={[{ value: "true" }, { value: "false" }]}
+          onChange={(e) => updateData("psc1Info")(e.target.value)}
+          orientation="horizontal"
+          state={(corrections?.psc1Info || errors.psc1Info) && "error"}
+          stateRelatedMessage={errors.psc1Info}
+        />
         <SignupButtons onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />
       </DSFRContainer>
       <ModalConfirm

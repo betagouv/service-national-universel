@@ -14,6 +14,7 @@ import {
   ERRORS,
   FUNCTIONAL_ERRORS,
   EtablissementType,
+  SUB_ROLE_GOD,
 } from "snu-lib";
 
 import { ClasseModel, CohortModel, YoungModel, EtablissementDocument } from "../../models";
@@ -773,7 +774,7 @@ describe("isClasseStatusCreated", () => {
 
 describe("canUpdateReferentClasseBasedOnStatus", () => {
   it("should return true for super admin", async () => {
-    const user = { role: ROLES.ADMIN, subRole: "god" };
+    const user = { role: ROLES.ADMIN, subRole: SUB_ROLE_GOD };
     const classeId = new ObjectId().toString();
     const isClasseStatusCreatedSpy = jest.spyOn(classService, "isClasseStatusCreated");
 

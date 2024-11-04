@@ -68,7 +68,7 @@ jobs:
       PG_CONN_STR: ${{ secrets.SCW_CI_BACKEND_CONN_STR }}
       PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
-      custom_directory: ./terraform/environments/ci/custom
+      custom_directory: ./devops/terraform/environments/ci/custom
 
     steps:
       - uses: actions/checkout@v4

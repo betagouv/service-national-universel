@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { HiHome } from "react-icons/hi";
-
-import dayjs from "@/utils/dayjs.utils";
-import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
 import { BsDownload } from "react-icons/bs";
 import { IoFlashOutline } from "react-icons/io5";
-import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs, ERRORS } from "snu-lib";
+
+import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs, ERRORS, SUB_ROLE_GOD, StructureType, DepartmentServiceType, ReferentType } from "snu-lib";
+import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
+
+import dayjs from "@/utils/dayjs.utils";
+import { signinAs } from "@/utils/signinAs";
+import { getCohortGroups } from "@/services/cohort.service";
+import { AuthState } from "@/redux/auth/reducer";
+
 import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
@@ -20,17 +24,15 @@ import plausibleEvent from "../../services/plausible";
 import { ROLES, canDeleteReferent, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
-import { signinAs } from "@/utils/signinAs";
-import { getCohortGroups } from "@/services/cohort.service";
 
 export default function List() {
-  const [responsable, setResponsable] = useState(null);
-  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
-  const [structures, setStructures] = useState();
-  const [services, setServices] = useState();
+  const [responsable, setResponsable] = useState<ReferentType | null>(null);
+  const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
+  const [structures, setStructures] = useState<StructureType[]>();
+  const [services, setServices] = useState<DepartmentServiceType[]>();
 
   //List params
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<ReferentType[]>([]);
   const pageId = "referent-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({
@@ -96,16 +98,14 @@ export default function List() {
     <Page>
       <Header
         title={[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Liste de mes contacts" : "Utilisateurs"}
-        breadcrumb={[
-          { title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" },
-          { title: [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Mes contacts" : "Utilisateurs" },
-        ]}
+        breadcrumb={[{ title: [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Mes contacts" : "Utilisateurs" }]}
         actions={[
           <ExportComponent
             key={0}
             title="Exporter"
             exportTitle="Utilisateurs"
             route={`/elasticsearch/referent/export${user.role === ROLES.HEAD_CENTER ? "?cohort=" + sessionPhase1?.cohort : ""}`}
+            // @ts-expect-error jsx component
             filters={filterArray}
             selectedFilters={selectedFilters}
             setIsOpen={() => true}
@@ -117,15 +117,13 @@ export default function List() {
             }}
             transform={(all) => {
               return all.map((data) => {
-                let structure = {};
+                let structure: Partial<StructureType> = {};
                 if (data.structureId && structures) {
-                  structure = structures.find((s) => s._id === data.structureId);
-                  if (!structure) structure = {};
+                  structure = structures.find((s) => s._id === data.structureId) || {};
                 }
-                let service = {};
+                let service: Partial<DepartmentServiceType> = {};
                 if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
-                  service = services.find((s) => s.department === data.department);
-                  if (!service) service = {};
+                  service = services.find((s) => s.department === data.department) || {};
                 }
                 return {
                   _id: data._id,
@@ -140,7 +138,7 @@ export default function List() {
                   Région: data.region,
                   Structure: structure?.name || "",
                   "Nom de la direction du service départemental": service?.directionName || "",
-                  "Adresse du service départemental": service?.address + service?.complementAddress || "",
+                  "Adresse du service départemental": (service?.address || "") + (service?.complementAddress || ""),
                   "Code Postal du service départemental": service?.zip || "",
                   "Ville du service départemental": service?.city || "",
                   "Créé lé": formatLongDateFR(data.createdAt),
@@ -246,7 +244,7 @@ const Hit = ({ hit, onClick, user, structure }) => {
         {hit.role && (
           <>
             <Badge title={translate(hit.role)} />
-            {hit.subRole && hit.subRole !== "god" ? <Badge title={translate(hit.subRole)} status={"secondary"} /> : null}
+            {hit.subRole && hit.subRole !== SUB_ROLE_GOD ? <Badge title={translate(hit.subRole)} status={"secondary"} /> : null}
           </>
         )}
       </td>
@@ -269,14 +267,30 @@ const Hit = ({ hit, onClick, user, structure }) => {
   );
 };
 
-const Action = ({ hit, structure }) => {
-  const user = useSelector((state) => state.Auth.user);
+interface ActionProps {
+  hit: ReferentType;
+  structure: StructureType;
+}
+
+interface ModalState {
+  isOpen: boolean;
+  onConfirm?: (() => void) | null;
+  title?: string;
+  message?: string;
+  value?: string;
+}
+
+const Action = ({ hit, structure }: ActionProps) => {
+  const user = useSelector((state: AuthState) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
-  const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
-  const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
+  const [modal, setModal] = useState<ModalState>({ isOpen: false, onConfirm: null });
+  const [modalTutor, setModalTutor] = useState<ModalState>({
+    isOpen: false,
+    onConfirm: null,
+  });
+  const [modalUniqueResponsable, setModalUniqueResponsable] = useState<ModalState & { responsable?: ReferentType }>({ isOpen: false });
+  const [modalReferentDeleted, setModalReferentDeleted] = useState<ModalState>({ isOpen: false });
   const [handleImpersonateLoading, setHandleImpersonateLoading] = useState(false);
 
   const handleImpersonate = async () => {
@@ -293,20 +307,20 @@ const Action = ({ hit, structure }) => {
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
     }
   };
-  const onClickDelete = () => {
+  const handleClickDelete = () => {
     setModal({
       isOpen: true,
-      onConfirm: onConfirmDelete,
+      onConfirm: handleConfirmDelete,
       title: `Êtes-vous sûr(e) de vouloir supprimer le compte de ${hit.firstName} ${hit.lastName} ?`,
       message: "Cette action est irréversible.",
     });
   };
 
-  const onDeleteTutorLinked = (target) => {
+  const handleDeleteTutorLinked = (target) => {
     setModalTutor({
       isOpen: true,
       value: target,
-      onConfirm: () => onConfirmDelete(target),
+      onConfirm: () => handleConfirmDelete(),
     });
   };
 
@@ -323,12 +337,12 @@ const Action = ({ hit, structure }) => {
     });
   };
 
-  const onConfirmDelete = async () => {
+  const handleConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${hit._id}`);
-      if (!ok && code === ERRORS.OPERATION_UNAUTHORIZED) return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === ERRORS.OPERATION_UNAUTHORIZED) return toastr.error("Vous n'avez pas les droits pour effectuer cette action", "");
       if (!ok && code === ERRORS.LINKED_STRUCTURE) return onUniqueResponsible(hit);
-      if (!ok && code === ERRORS.LINKED_MISSIONS) return onDeleteTutorLinked(hit);
+      if (!ok && code === ERRORS.LINKED_MISSIONS) return handleDeleteTutorLinked(hit);
       if (!ok && code === ERRORS.LINKED_CLASSES) return onUniqueResponsible(hit);
       if (!ok && code === ERRORS.LINKED_ETABLISSEMENT) return onUniqueResponsible(hit);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
@@ -351,6 +365,7 @@ const Action = ({ hit, structure }) => {
           {
             key: "actions",
             title: "",
+            // @ts-expect-error null value are filtered
             items: [
               {
                 key: "view",
@@ -361,30 +376,32 @@ const Action = ({ hit, structure }) => {
                 ),
               },
               canSigninAs(user, hit, "referent") ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
-              canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? { key: "delete", render: <p>Supprimer le profil</p>, action: onClickDelete } : null,
+              canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? { key: "delete", render: <p>Supprimer le profil</p>, action: handleClickDelete } : null,
             ].filter(Boolean),
           },
         ]}
       />
 
+      {/* @ts-expect-error jsx component */}
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
         message={modal?.message}
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
-          modal?.onConfirm();
+          modal?.onConfirm?.();
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
+      {/* @ts-expect-error jsx component */}
       <ModalChangeTutor
         isOpen={modalTutor?.isOpen}
-        title={modalTutor?.title}
-        message={modalTutor?.message}
+        // title={modalTutor?.title}
+        // message={modalTutor?.message}
         tutor={modalTutor?.value}
         onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
-          modalTutor?.onConfirm();
+          modalTutor?.onConfirm?.();
           setModalTutor({ isOpen: false, onConfirm: null });
         }}
       />

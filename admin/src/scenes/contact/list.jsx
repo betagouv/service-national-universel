@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Page, Header, Container, Badge, DropdownButton } from "@snu/ds/admin";
-import { formatLongDateFR, getDepartmentNumber, ROLES, translate } from "snu-lib";
+import { formatLongDateFR, getDepartmentNumber, ROLES, SUB_ROLE_GOD, translate } from "snu-lib";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { BsDownload } from "react-icons/bs";
 import api from "@/services/api";
@@ -294,7 +294,7 @@ const Hit = ({ hit }) => {
         {hit.role && (
           <>
             <Badge title={translate(hit.role)} />
-            {hit.subRole && hit.subRole !== "god" ? <Badge title={translate(hit.subRole)} status={"secondary"} /> : null}
+            {hit.subRole && hit.subRole !== SUB_ROLE_GOD ? <Badge title={translate(hit.subRole)} status={"secondary"} /> : null}
           </>
         )}
       </td>
