@@ -54,7 +54,7 @@ export default function HistoryRow({ patch, type }: Props) {
             )}
           </td>
           <td className="w-[23%]">
-            {type === "young" && !patch.oldStudent && <p className="truncate text-gray-400 text-sm leading-5">{translateHistory(op.path, op.originalValue || "Vide")}</p>}
+            {(type !== "young" || !patch.oldStudent) && <p className="truncate text-gray-400 text-sm leading-5">{translateHistory(op.path, op.originalValue || "Vide")}</p>}
           </td>
           <td className="w-[23%] flex items-center gap-2">
             {type === "young" && patch.oldStudent ? (
