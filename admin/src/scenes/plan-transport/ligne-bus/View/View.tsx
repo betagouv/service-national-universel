@@ -291,7 +291,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
                   bus={data}
                   pdr={pdr}
                   onBusChange={setData}
-                  index={index}
+                  index={index + 1}
                   key={index}
                   volume={dataForCheck?.meetingPoints}
                   getVolume={getDataForCheck}
