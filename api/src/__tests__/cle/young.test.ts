@@ -63,3 +63,45 @@ describe("GET /cle/young/by-classe-historic/:id/patches", () => {
     expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
   });
 });
+
+describe("GET /cle/young/by-classe-historic/:id/patches/old-student", () => {
+  it("should return 404 if classe not found", async () => {
+    const classeId = new ObjectId();
+    const res = await request(getAppHelper()).get(`/cle/young/by-classe-historic/${classeId}/patches/old-student`).send();
+    expect(res.statusCode).toEqual(404);
+  });
+  it("should return 403 if not admin", async () => {
+    const classe = await createClasse(createFixtureClasse());
+    classe.name = "MY NEW NAME";
+    await classe.save();
+
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      .get(`/cle/young/by-classe-historic/${classe._id}/patches/old-student`)
+      .send();
+    expect(res.status).toBe(403);
+  });
+  it("should return 200 if classe found with young and patches", async () => {
+    const classe = await createClasse(createFixtureClasse());
+    const young = await createYoungHelper(getNewYoungFixture({ classeId: classe._id }));
+    const fakeClasseId = new ObjectId().toString();
+    young.classeId = fakeClasseId;
+    await young.save();
+    const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .get(`/cle/young/by-classe-historic/${classe._id}/patches/old-student`)
+      .send();
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/classeId", value: fakeClasseId })]),
+        }),
+      ]),
+    );
+  });
+  it("should be only accessible by referents", async () => {
+    const passport = require("passport");
+    const classeId = new ObjectId();
+    await request(getAppHelper()).get(`/cle/young/by-classe-historic/${classeId}/patches/old-student`).send();
+    expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+  });
+});
