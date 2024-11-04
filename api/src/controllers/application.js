@@ -850,7 +850,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false, f
     const application = await ApplicationModel.findById(id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const applicationPatches = await patches.get(req, res, ApplicationModel);
+    const applicationPatches = await patches.get(req, ApplicationModel);
     if (!applicationPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: applicationPatches });

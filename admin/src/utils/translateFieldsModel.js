@@ -748,7 +748,7 @@ export const translateFieldClasse = (f) => {
       return "ID de la ligne de bus";
     case "pointDeRassemblementId":
       return "ID du point de rassemblement";
-    case "status":
+    case "classeStatus":
       return "Statut";
     case "statusPhase1":
       return "Statut de la phase 1";

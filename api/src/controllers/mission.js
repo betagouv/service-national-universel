@@ -326,7 +326,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false, f
     const mission = await MissionModel.findById(id);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const missionPatches = await patches.get(req, res, MissionModel);
+    const missionPatches = await patches.get(req, MissionModel);
     if (!missionPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: missionPatches });

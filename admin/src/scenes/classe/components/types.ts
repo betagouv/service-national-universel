@@ -24,7 +24,8 @@ export type InfoBus = {
 type ClasseUpdateOperation = {
   op: "add" | "remove" | "replace";
   path: string;
-  value?: any;
+  value?: string;
+  originalValue?: string;
 };
 
 export type ClassePatchesType = {
@@ -34,4 +35,15 @@ export type ClassePatchesType = {
   ref: string;
   date: string;
   user?: { firstName: string; lastName?: string };
+};
+
+export type ClasseYoungPatchesType = {
+  _id: string;
+  ops: ClasseUpdateOperation[];
+  modelName: "young";
+  ref: string;
+  date: string;
+  user?: { firstName: string; lastName?: string };
+  young: { firstName: string; lastName: string };
+  oldStudent?: boolean;
 };

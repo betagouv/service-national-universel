@@ -419,7 +419,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false, f
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const youngPatches = await patches.get(req, res, YoungModel);
+    const youngPatches = await patches.get(req, YoungModel);
     if (!youngPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: youngPatches });
   } catch (error) {

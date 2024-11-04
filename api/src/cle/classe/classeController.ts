@@ -651,13 +651,20 @@ router.get("/:id/patches", async (req: UserRequest, res) => {
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const classePatches = await patches.get(req, res, ClasseModel);
+    let classePatches = await patches.get(req, ClasseModel);
     if (!classePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const pathsToIgnore = ["/seatsTaken", "/cohortId", "/uniqueKey", "/uniqueId", "/comments", "/trimester", "/metadata", "/id", "/updatedAt", "/referents"];
     classePatches.forEach((patch) => {
       patch.ops = patch.ops.filter((op) => !pathsToIgnore.includes(op.path));
+      patch.ops.forEach((op) => {
+        if (op.path === "/status") {
+          op.path = "/classeStatus";
+        }
+      });
     });
+    classePatches = classePatches.filter((patch) => patch.ops.length > 0);
+
     return res.status(200).send({ ok: true, data: classePatches });
   } catch (error) {
     capture(error);

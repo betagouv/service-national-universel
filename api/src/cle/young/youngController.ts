@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import passport from "passport";
 
-import { canSearchStudent, ROLES, YOUNG_STATUS, YoungDto } from "snu-lib";
+import { canSearchStudent, ROLES, YOUNG_STATUS, YoungDto, canViewPatchesHistory } from "snu-lib";
 
 import { validateId } from "../../utils/validator";
 import { ERRORS } from "../../utils";
@@ -9,6 +9,8 @@ import { capture } from "../../sentry";
 import { ClasseModel, YoungModel, EtablissementModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
 import { getValidatedYoungsWithSession, getYoungsImageRight, getYoungsParentAllowSNU } from "../../young/youngService";
+import patches from "../../controllers/patches";
+import { th } from "date-fns/locale";
 
 const router = express.Router();
 
@@ -53,6 +55,103 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
     });
 
     return res.status(200).send({ ok: true, data: result });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/by-classe-historic/:idClasse/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.idClasse);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const classe = await ClasseModel.findById(id);
+    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const youngs = await YoungModel.find({ classeId: classe._id });
+
+    const youngPatches: any = [];
+
+    const pathsToFilter = ["/status"];
+
+    const promises = youngs.map(async (young) => {
+      let youngPatche = await patches.get({ params: { id: young._id.toString() }, user: req.user }, YoungModel);
+
+      if (!youngPatche) {
+        throw new Error(`patch not found for young ${young._id}`);
+      }
+
+      youngPatche.forEach((patch) => {
+        patch.ops = patch.ops.filter((op) => pathsToFilter.includes(op.path));
+      });
+
+      youngPatche = youngPatche.filter((patch) => patch.ops.length > 0);
+
+      youngPatche.forEach((patch) => {
+        patch.young = { firstName: young.firstName, lastName: young.lastName };
+      });
+
+      return youngPatche;
+    });
+
+    try {
+      const results = await Promise.all(promises);
+      results.forEach((result) => {
+        youngPatches.push(...result);
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
+
+    return res.status(200).send({ ok: true, data: youngPatches });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+//Cette route recupere les patches des anciens élèves qui sont passés par la classe mais n'y sont plus
+router.get("/by-classe-historic/:idClasse/patches/old-student", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.idClasse);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const classe = await ClasseModel.findById(id);
+    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let youngPatches = await patches.getOldStudentPatches({ classeId: id, user: req.user });
+
+    const pathsToFilter = ["/classeId"];
+
+    const promises = youngPatches.map(async (youngPatch) => {
+      const young = await YoungModel.findById(youngPatch.ref);
+      if (!young) {
+        throw new Error(`Young not found ${youngPatch.ref}`);
+      }
+      youngPatch.ops = youngPatch.ops.filter((op) => pathsToFilter.includes(op.path));
+      youngPatch.young = { firstName: young.firstName, lastName: young.lastName };
+      youngPatch.oldStudent = true;
+      return youngPatch;
+    });
+
+    try {
+      youngPatches = await Promise.all(promises);
+    } catch (error) {
+      throw new Error(error);
+    }
+
+    return res.status(200).send({ ok: true, data: youngPatches });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

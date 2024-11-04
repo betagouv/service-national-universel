@@ -340,7 +340,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false, f
     const contract = await ContractModel.findById(id);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const contractPatches = await patches.get(req, res, ContractModel);
+    const contractPatches = await patches.get(req, ContractModel);
     if (!contractPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: contractPatches });

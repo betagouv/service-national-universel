@@ -1382,7 +1382,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false, f
     const referent = await ReferentModel.findById(id);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const referentPatches = await patches.get(req, res, ReferentModel);
+    const referentPatches = await patches.get(req, ReferentModel);
     if (!referentPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: referentPatches });
   } catch (error) {

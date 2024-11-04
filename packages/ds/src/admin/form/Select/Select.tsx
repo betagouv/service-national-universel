@@ -23,7 +23,7 @@ export type SelectProps = {
   options?: SelectOption[];
   defaultValue?: string | null;
   className?: string;
-  placeholder?: string;
+  placeholder?: string | ReactElement;
   label?: string;
   isActive?: boolean;
   readOnly?: boolean;
@@ -37,6 +37,7 @@ export type SelectProps = {
   isSearchable?: boolean;
   isOpen?: boolean;
   badge?: ReactElement;
+  badgePosition?: "left" | "right";
   controlCustomStyle?: CSSObject;
   menuCustomStyle?: CSSObject;
   optionCustomStyle?: CSSObject;
@@ -54,7 +55,7 @@ export type SelectProps = {
     | boolean
     | GroupBase<string>[]
     | (() => Promise<GroupBase<string>[]>);
-  size?: "sm" | "lg";
+  size?: "sm" | "md" | "lg";
 };
 
 export default function SelectButton(props: SelectProps) {
@@ -84,6 +85,7 @@ export default function SelectButton(props: SelectProps) {
     defaultOptions = true,
     isOpen,
     badge,
+    badgePosition = "right",
   } = props;
 
   const customStyles = useReactSelectTheme(props);
@@ -130,6 +132,14 @@ export default function SelectButton(props: SelectProps) {
   };
   const ValueContainerComponent = (props: ValueContainerProps<any, false>) => {
     if (!badge) return <components.ValueContainer {...props} />;
+    if (badgePosition === "left") {
+      return (
+        <div className="flex grow justify-between">
+          {badge}
+          <components.ValueContainer {...props} />
+        </div>
+      );
+    }
     return (
       <div className="flex grow justify-between">
         <components.ValueContainer {...props} />

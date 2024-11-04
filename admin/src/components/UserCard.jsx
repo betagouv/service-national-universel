@@ -24,7 +24,7 @@ export default function UserCard({ user }) {
   }
   function getAuthor(user) {
     if (!user) return "Auteur inconnu";
-    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
+    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName.toUpperCase()}`;
     if (user.firstName && !user.lastName) return user.firstName;
   }
 
@@ -32,7 +32,7 @@ export default function UserCard({ user }) {
     <a
       href={getLink(user)}
       className={cx("group flex w-full flex-col", {
-        "hover:cursor-pointer": getLink(user) !== null,
+        "hover:cursor-pointer hover:text-blue-600": getLink(user) !== null,
         "hover:text-inherit": getLink(user) === null,
       })}>
       <div className="flex items-center gap-2">

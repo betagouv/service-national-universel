@@ -16,6 +16,8 @@ type OwnProps = {
   readOnly?: boolean;
   error?: string;
   max?: number;
+  high?: number;
+  icon?: React.ReactNode;
 };
 
 export default function InputText({
@@ -31,6 +33,8 @@ export default function InputText({
   readOnly,
   error,
   max,
+  high = 54,
+  icon,
 }: OwnProps) {
   const {
     baseClass,
@@ -53,7 +57,7 @@ export default function InputText({
           focusActive,
           bgColorClass,
           borderColorClass,
-          "px-[13px] py-[9px] h-[54px]",
+          `px-[13px] py-[9px] h-[${high}px]`,
         )}
       >
         <div className="flex flex-1 flex-col justify-center">
@@ -68,18 +72,21 @@ export default function InputText({
               {label}
             </label>
           )}
-          <input
-            type={type}
-            name={name}
-            id={name}
-            className={getInputClass({ label })}
-            placeholder={placeholder}
-            disabled={disabled}
-            value={value}
-            readOnly={readOnly}
-            onChange={(e) => onChange?.(e)}
-            maxLength={max}
-          />
+          <div className="flex items-center gap-2">
+            {icon}
+            <input
+              type={type}
+              name={name}
+              id={name}
+              className={getInputClass({ label })}
+              placeholder={placeholder}
+              disabled={disabled}
+              value={value}
+              readOnly={readOnly}
+              onChange={(e) => onChange?.(e)}
+              maxLength={max}
+            />
+          </div>
         </div>
         {isErrorActive && <ErrorIcon />}
       </div>
@@ -90,7 +97,7 @@ export default function InputText({
 
 const getInputClass = ({ label }: { label?: string }) => {
   const baseClass =
-    "font-normal leading-5 text-gray-900 text-sm placeholder:text-gray-500 disabled:text-gray-500 disabled:bg-gray-50 disabled:cursor-default read-only:cursor-default";
+    "font-normal leading-5 text-gray-900 text-sm placeholder:text-gray-500 disabled:text-gray-500 disabled:bg-gray-50 disabled:cursor-default read-only:cursor-default w-full";
   if (label) {
     return classNames(baseClass, "");
   } else {

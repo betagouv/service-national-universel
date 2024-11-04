@@ -243,7 +243,7 @@ export function translateHistory(path, value) {
     return translateEngagement(value);
   } else if (isIsoDate(value)) {
     return formatStringLongDate(value);
-  } else if (path.includes("status")) {
+  } else if (path.includes("classeStatus")) {
     return translateStatusClasse(value);
   } else {
     return translate(value);

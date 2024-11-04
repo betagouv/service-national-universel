@@ -20,11 +20,12 @@ import {
   isAdmin,
   translateStatusClasse,
   ReferentType,
+  translateAction,
 } from "snu-lib";
 import { CohortDto } from "snu-lib/src/dto";
 import api from "@/services/api";
 import { User } from "@/types";
-
+import { translateModelFields } from "@/utils";
 export const statusClassForBadge = (status) => {
   let statusClasse;
 
@@ -391,4 +392,71 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
   XLSX.utils.book_append_sheet(workbook, sheet, type === "schema-de-repartition" ? "Répartition des classes" : "Liste des classes");
   const fileName = type === "schema-de-repartition" ? "classes-schema-repartition.xlsx" : "classes_list.xlsx";
   return { workbook, fileName };
+}
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+export function getPathOptions(patches) {
+  if (!patches) return [];
+  const pathOptions: SelectOption[] = patches.flatMap((patch) =>
+    patch.ops.map((op) => ({
+      value: op.path,
+      label: translateModelFields("classe", op.path.slice(1)),
+    })),
+  );
+  const uniquePathOptions: SelectOption[] = Array.from(new Map(pathOptions.map((item) => [item.value, item])).values());
+  return uniquePathOptions;
+}
+
+export function getActionOptions(patches) {
+  if (!patches) return [];
+  const actionOptions: SelectOption[] = patches.flatMap((patch) =>
+    patch.ops.map((op) => ({
+      value: op.op,
+      label: translateAction(op.op),
+    })),
+  );
+  const uniqueActionOptions: SelectOption[] = Array.from(new Map(actionOptions.map((item) => [item.value, item])).values());
+  return uniqueActionOptions;
+}
+
+export function getValueOptions(patches) {
+  if (!patches) return [];
+  const valueOptions: SelectOption[] = patches.flatMap((patch) =>
+    patch.ops.map((op) => ({
+      value: op.value,
+      label: translate(op.value),
+    })),
+  );
+  const uniqueValueOptions: SelectOption[] = Array.from(new Map(valueOptions.map((item) => [item.value, item])).values());
+  return uniqueValueOptions;
+}
+
+export function getUserOptions(patches) {
+  if (!patches) return [];
+  const userOptions: SelectOption[] = patches.flatMap((patch) => {
+    if (!patch.user || !patch.user.lastName) return [];
+    return {
+      value: patch.user.firstName,
+      label: patch.user.lastName ? `${patch.user.firstName} ${patch.user.lastName}` : patch.user.firstName,
+    };
+  });
+  const uniqueUserOptions: SelectOption[] = Array.from(new Map(userOptions.map((item) => [item.value, item])).values());
+  return uniqueUserOptions;
+}
+
+export function getYoungOptions(patches) {
+  if (!patches) return [];
+  const youngOptions: SelectOption[] = patches.flatMap((patch) => {
+    if (!patch.young) return [];
+    return {
+      value: patch.young.firstName,
+      label: `${patch.young.firstName} ${patch.young.lastName}`,
+    };
+  });
+  const uniqueYoungOptions: SelectOption[] = Array.from(new Map(youngOptions.map((item) => [item.value, item])).values());
+  return uniqueYoungOptions;
 }

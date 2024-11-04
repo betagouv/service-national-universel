@@ -1,35 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
-import { HiArrowRight, HiFilter, HiTrash } from "react-icons/hi";
+import { HiArrowRight, HiFilter, HiTrash, HiSearch } from "react-icons/hi";
+import { LuHistory } from "react-icons/lu";
 
 import { Page, Container, Select } from "@snu/ds/admin";
 import api from "@/services/api";
 import Loader from "@/components/Loader";
 import { capture } from "@/sentry";
-import { translate, formatLongDateFR, translateAction } from "snu-lib";
-import { translateHistory, translateModelFields } from "@/utils";
-import UserCard from "@/components/UserCard";
+import { translate } from "snu-lib";
 
 import ClasseHeader from "../header/ClasseHeader";
 import { ClassePatchesType } from "../components/types";
-
-interface SelectOption {
-  value: string;
-  label: string;
-}
+import HistoryRow from "../components/HistoryRow";
+import { getPathOptions, getActionOptions, getUserOptions } from "../utils";
 
 export default function Historique(props) {
   const [classe, setClasse] = useState(props.classe);
   const studentStatus = props.studentStatus;
   const [isLoading, setIsLoading] = useState(false);
+  const [isNoPatches, setIsNoPatches] = useState(false);
   const [patches, setPatches] = useState<ClassePatchesType[]>([]);
-  const [filteredPatches, setFilteredPatches] = useState<ClassePatchesType[]>([]);
   const [pathFilter, setPathFilter] = useState("");
   const [actionFilter, setActionFilter] = useState("");
   const [userFilter, setUserFilter] = useState("");
-  const [pathOptions, setPathOptions] = useState<SelectOption[]>([]);
-  const [actionOptions, setActionOptions] = useState<SelectOption[]>([]);
-  const [userOptions, setUserOptions] = useState<SelectOption[]>([]);
+  const filteredPatches = getFilteredPatches(patches);
+  const pathOptions = getPathOptions(patches);
+  const actionOptions = getActionOptions(patches);
+  const userOptions = getUserOptions(patches);
 
   const getPatches = async () => {
     try {
@@ -37,36 +34,11 @@ export default function Historique(props) {
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de l'historique", translate(code));
       }
-      setPatches(data);
-      setFilteredPatches(data);
-
-      const pathOptions: SelectOption[] = data.flatMap((patch) =>
-        patch.ops.map((op) => ({
-          value: op.path,
-          label: translateModelFields("classe", op.path.slice(1)),
-        })),
-      );
-      const uniquePathOptions: SelectOption[] = Array.from(new Map(pathOptions.map((item) => [item.value, item])).values());
-      setPathOptions(uniquePathOptions);
-
-      const actionOptions: SelectOption[] = data.flatMap((patch) =>
-        patch.ops.map((op) => ({
-          value: op.op,
-          label: translateAction(op.op),
-        })),
-      );
-      const uniqueActionOptions: SelectOption[] = Array.from(new Map(actionOptions.map((item) => [item.value, item])).values());
-      setActionOptions(uniqueActionOptions);
-
-      const userOptions: SelectOption[] = data.flatMap((patch) => {
-        if (!patch.user || !patch.user.lastName) return [];
-        return {
-          value: patch.user.firstName,
-          label: patch.user.lastName ? `${patch.user.firstName} ${patch.user.lastName}` : patch.user.firstName,
-        };
+      data.forEach((patch) => {
+        patch.ops = patch.ops.filter((op) => typeof op.value !== "object");
       });
-      const uniqueUserOptions: SelectOption[] = Array.from(new Map(userOptions.map((item) => [item.value, item])).values());
-      setUserOptions(uniqueUserOptions);
+      setPatches(data);
+      if (!data.length) setIsNoPatches(true);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération de l'historique", translate(e.message));
@@ -77,10 +49,10 @@ export default function Historique(props) {
     if (classe?._id) getPatches();
   }, [classe]);
 
-  useEffect(() => {
-    let filteredData = patches;
+  function getFilteredPatches(patches: ClassePatchesType[]) {
+    let filteredPatches = patches;
     if (pathFilter !== "") {
-      filteredData = filteredData.map((patch) => {
+      filteredPatches = filteredPatches.map((patch) => {
         const filteredOps = patch.ops.filter((op) => op.path === pathFilter);
 
         return {
@@ -90,7 +62,7 @@ export default function Historique(props) {
       });
     }
     if (actionFilter !== "") {
-      filteredData = filteredData.map((patch) => {
+      filteredPatches = filteredPatches.map((patch) => {
         const filteredOps = patch.ops.filter((op) => op.op === actionFilter);
 
         return {
@@ -100,71 +72,91 @@ export default function Historique(props) {
       });
     }
     if (userFilter !== "") {
-      filteredData = filteredData.filter((patch) => patch.user?.firstName === userFilter);
+      filteredPatches = filteredPatches.filter((patch) => patch.user?.firstName === userFilter);
     }
-    setFilteredPatches(filteredData);
-  }, [pathFilter, actionFilter, userFilter, patches]);
+    return filteredPatches;
+  }
 
-  if (!classe || !patches.length) return <Loader />;
+  if (!classe) return <Loader />;
 
   return (
     <Page>
       <ClasseHeader classe={classe} setClasse={setClasse} isLoading={isLoading} setIsLoading={setIsLoading} studentStatus={studentStatus} page={"Historique"} />
       <Container className="!px-0 !pb-0">
-        <FilterComponent
-          pathFilter={pathFilter}
-          setPathFilter={setPathFilter}
-          actionFilter={actionFilter}
-          setActionFilter={setActionFilter}
-          userFilter={userFilter}
-          setUserFilter={setUserFilter}
-          uniquePathOptions={pathOptions}
-          actionOptions={actionOptions}
-          uniqueUserOptions={userOptions}
-        />
-        <table className="mt-6 mb-2 flex w-full flex-col table-auto divide-y divide-gray-200 border-gray-100">
-          <thead>
-            <tr className="flex items-center py-2 px-4 text-xs leading-5 font-[500] uppercase text-gray-500 bg-gray-50 ">
-              <span className="w-[30%]">Action</span>
-              <span className="w-[23%]">Avant</span>
-              <span className="flex items-center gap-2 w-[23%]">
-                <HiArrowRight size={16} className="mt-0.5" /> Après
-              </span>
-              <span className="w-[23%]">Auteur</span>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredPatches.map((hit) => (
-              //@ts-ignore
-              <HistoryRow key={hit._id} patch={hit} />
-            ))}
-          </tbody>
-        </table>
+        {isNoPatches ? (
+          <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
+            <LuHistory size={64} className="text-gray-400 mb-8" strokeWidth="1" />
+            <p className="text-base leading-5 text-gray-400">Il n'y a aucun historique pour cette classe</p>
+          </div>
+        ) : patches.length === 0 ? (
+          <Loader />
+        ) : (
+          <>
+            <FilterComponent
+              pathFilter={pathFilter}
+              setPathFilter={setPathFilter}
+              actionFilter={actionFilter}
+              setActionFilter={setActionFilter}
+              userFilter={userFilter}
+              setUserFilter={setUserFilter}
+              pathOptions={pathOptions}
+              actionOptions={actionOptions}
+              userOptions={userOptions}
+            />
+            <table className="mt-6 mb-2 flex w-full flex-col table-auto divide-y divide-gray-200 border-gray-100">
+              <thead>
+                <tr className="flex items-center py-2 px-4 text-xs leading-5 font-[500] uppercase text-gray-500 bg-gray-50 cursor-default">
+                  <span className="w-[30%]">Action</span>
+                  <span className="w-[23%]">Avant</span>
+                  <span className="flex items-center gap-2 w-[23%]">
+                    <HiArrowRight size={16} className="mt-0.5" /> Après
+                  </span>
+                  <span className="w-[23%]">Auteur</span>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredPatches.map((hit) => (
+                  <HistoryRow key={hit._id} patch={hit} type={"classe"} />
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </Container>
     </Page>
   );
 }
 
-function FilterComponent({ pathFilter, setPathFilter, actionFilter, setActionFilter, userFilter, setUserFilter, uniquePathOptions, actionOptions, uniqueUserOptions }) {
+function FilterComponent({ pathFilter, setPathFilter, actionFilter, setActionFilter, userFilter, setUserFilter, pathOptions, actionOptions, userOptions }) {
   const isFilterActive = pathFilter !== "" || actionFilter !== "" || userFilter !== "";
+  const [placeholder, setPlaceholder] = useState("Donnée modifiée");
+  const [menuClosed, setMenuClosed] = useState(false);
 
   return (
     <div className="flex items-center justify-center w-full gap-3 text-gray-400 px-6 py-2">
-      <div className={`flex items-center gap-2 w-[10%] ${isFilterActive ? "text-blue-600" : ""}`}>
-        <HiFilter size={20} className="mt-0.5" />
-        <p>Filter par : </p>
+      <div className="flex items-center gap-2 w-[10%]">
+        <HiFilter size={20} className={`mt-0.5 ${isFilterActive ? "text-blue-600" : "text-gray-400"}`} />
+        <p className={`${isFilterActive ? "text-blue-600" : "text-gray-500"}`}>Filter par : </p>
       </div>
       <Select
         className="w-[30%]"
+        size="md"
+        badge={placeholder === "Rechercher..." ? <HiSearch size={20} className="mt-2 ml-2" /> : undefined}
+        badgePosition="left"
+        key={menuClosed.toString()}
         maxMenuHeight={400}
-        key={Math.random()}
         isActive={pathFilter !== ""}
-        placeholder={"Donnée modifiée"}
-        options={uniquePathOptions}
+        placeholder={placeholder}
+        onMenuOpen={() => setPlaceholder("Rechercher...")}
+        onMenuClose={() => {
+          setPlaceholder("Donnée modifiée");
+          setMenuClosed((prev) => !prev);
+        }}
+        options={pathOptions}
         closeMenuOnSelect={true}
         isClearable={true}
-        isSearchable={false}
-        value={uniquePathOptions.find((option) => option.value === pathFilter) || null}
+        isSearchable={true}
+        value={pathOptions.find((option) => option.value === pathFilter) || null}
         onChange={(option) => {
           if (!option) return setPathFilter("");
           setPathFilter(option.value);
@@ -190,11 +182,11 @@ function FilterComponent({ pathFilter, setPathFilter, actionFilter, setActionFil
         key={Math.random()}
         isActive={userFilter !== ""}
         placeholder={"Auteur"}
-        options={uniqueUserOptions}
+        options={userOptions}
         closeMenuOnSelect={true}
         isClearable={true}
         isSearchable={false}
-        value={uniqueUserOptions.find((option) => option.value === userFilter) || null}
+        value={userOptions.find((option) => option.value === userFilter) || null}
         onChange={(option) => {
           if (!option) return setUserFilter("");
           setUserFilter(option.value);
@@ -211,32 +203,5 @@ function FilterComponent({ pathFilter, setPathFilter, actionFilter, setActionFil
         </button>
       )}
     </div>
-  );
-}
-
-function HistoryRow({ patch }) {
-  return (
-    <>
-      {patch.ops.map((op, index) => (
-        <tr key={index} className="flex cursor-default items-center px-4 py-3 hover:bg-slate-50">
-          <td className="w-[30%]">
-            <p className="truncate hover:overflow-visible text-gray-900 font-[700] text-base leading-5">{translateModelFields("classe", op.path.slice(1))}</p>
-            <p className="text-gray-500">
-              {translateAction(op.op)} • {formatLongDateFR(patch.date)}
-            </p>
-          </td>
-          <td className="w-[23%]">
-            <p className="truncate text-gray-400 text-sm leading-5">{translateHistory(op.path, op.originalValue || "Vide")}</p>
-          </td>
-          <td className="w-[23%] flex items-center gap-2">
-            <HiArrowRight size={16} className="mt-0.5" />
-            <p className="truncate text-gray-900">{translateHistory(op.path, op.value)}</p>
-          </td>
-          <td className="w-[23%]">
-            <UserCard user={patch.user} />
-          </td>
-        </tr>
-      ))}
-    </>
   );
 }

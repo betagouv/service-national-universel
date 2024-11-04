@@ -216,7 +216,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false, f
     const structure = await StructureModel.findById(id);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const structurePatches = await patches.get(req, res, StructureModel);
+    const structurePatches = await patches.get(req, StructureModel);
     if (!structurePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: structurePatches });
