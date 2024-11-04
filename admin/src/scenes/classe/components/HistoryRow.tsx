@@ -23,6 +23,13 @@ export default function HistoryRow({ patch, type }: Props) {
     if (patch.young) return `/volontaire/${patch.ref}`;
     return "";
   }
+
+  if (type === "young" && patch.user) {
+    if (!patch.user.role) {
+      if (patch.user.email) patch.user.role = "Volontaire";
+    }
+  }
+
   return (
     <>
       {patch.ops.map((op, index) => (
@@ -47,12 +54,10 @@ export default function HistoryRow({ patch, type }: Props) {
             )}
           </td>
           <td className="w-[23%]">
-            {/* @ts-ignore */}
-            {!patch.oldStudent && <p className="truncate text-gray-400 text-sm leading-5">{translateHistory(op.path, op.originalValue || "Vide")}</p>}
+            {type === "young" && !patch.oldStudent && <p className="truncate text-gray-400 text-sm leading-5">{translateHistory(op.path, op.originalValue || "Vide")}</p>}
           </td>
           <td className="w-[23%] flex items-center gap-2">
-            {/* @ts-ignore */}
-            {patch.oldStudent ? (
+            {type === "young" && patch.oldStudent ? (
               <p className="text-red-700">A quitté la classe</p>
             ) : (
               <>

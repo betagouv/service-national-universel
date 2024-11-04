@@ -43,7 +43,7 @@ export type ClasseYoungPatchesType = {
   modelName: "young";
   ref: string;
   date: string;
-  user?: { firstName: string; lastName?: string };
+  user?: { firstName: string; lastName?: string; role?: string; email?: string };
   young: { firstName: string; lastName: string };
   oldStudent?: boolean;
 };

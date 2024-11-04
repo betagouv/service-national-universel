@@ -17,11 +17,11 @@ import { getValueOptions, getUserOptions, getYoungOptions } from "../utils";
 export default function Inscriptions(props) {
   const [classe, setClasse] = useState(props.classe);
   const studentStatus = props.studentStatus;
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [patches, setPatches] = useState<ClasseYoungPatchesType[]>([]);
   const [oldYoungPatches, setOldYoungPatches] = useState<ClasseYoungPatchesType[]>([]);
   const [allPatches, setAllPatches] = useState<ClasseYoungPatchesType[]>([]);
-  const [noYoung, setNoYoung] = useState(false);
+  const [isNoYoung, setIsNoYoung] = useState(false);
   const [youngFilter, setYoungFilter] = useState("");
   const [valueFilter, setValueFilter] = useState("");
   const [userFilter, setUserFilter] = useState("");
@@ -44,7 +44,6 @@ export default function Inscriptions(props) {
   };
 
   const getOldPatches = async () => {
-    setIsLoading(true);
     try {
       const { ok, code, data } = await api.get(`/cle/young/by-classe-historic/${classe._id}/patches/old-student`);
       if (!ok) {
@@ -66,13 +65,11 @@ export default function Inscriptions(props) {
     }
   }, [classe]);
 
-  console.log(oldYoungPatches);
-
   useEffect(() => {
     setAllPatches([...patches, ...oldYoungPatches]);
-    if (patches.length === 0 && oldYoungPatches.length === 0 && !isLoading) setNoYoung(true);
-    else setNoYoung(false);
-  }, [patches, oldYoungPatches, isLoading]);
+    if (patches.length === 0 && oldYoungPatches.length === 0 && !isLoading) setIsNoYoung(true);
+    else setIsNoYoung(false);
+  }, [patches, oldYoungPatches]);
 
   function getFilteredPatches(patches: ClasseYoungPatchesType[]) {
     let filteredPatches = patches;
@@ -117,13 +114,13 @@ export default function Inscriptions(props) {
     <Page>
       <ClasseHeader classe={classe} setClasse={setClasse} isLoading={isLoading} setIsLoading={setIsLoading} studentStatus={studentStatus} page={"Inscriptions"} />
       <Container className="!px-0">
-        {noYoung ? (
+        {allPatches.length === 0 ? (
+          <Loader />
+        ) : isNoYoung ? (
           <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
             <LuHistory size={64} className="text-gray-400 mb-8" strokeWidth="1" />
             <p className="text-base leading-5 text-gray-400">Il n'y a aucun élève inscrit dans cette classe</p>
           </div>
-        ) : allPatches.length === 0 ? (
-          <Loader />
         ) : (
           <>
             <FilterComponent
