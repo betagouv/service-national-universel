@@ -5,7 +5,7 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { MdInfoOutline } from "react-icons/md";
 import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
-import { COHORT_TYPE, CohortDto } from "snu-lib";
+import { COHORT_STATUS, COHORT_TYPE, CohortDto } from "snu-lib";
 
 import api from "@/services/api";
 
@@ -22,6 +22,7 @@ import NumberInput from "@/components/ui/forms/NumberInput";
 import { CleSettings } from "../components/CleSettings";
 import { InformationsConvoyage } from "../components/InformationsConvoyage";
 import { ManualInscriptionSettings } from "../phase0/ManualInscriptionSettings";
+import { Select } from "@snu/ds/admin";
 
 // Define the interface for GeneralTab props
 interface GeneralTabProps {
@@ -37,6 +38,10 @@ interface GeneralTabProps {
 export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort, isLoading, onLoadingChange }: GeneralTabProps) {
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(cohort?.reInscriptionStartDate || cohort?.reInscriptionEndDate);
+  const statusOptions = [
+    { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
+    { value: COHORT_STATUS.ARCHIVED, label: "Archivée" },
+  ];
 
   const onSubmit = async () => {
     try {
@@ -100,6 +105,31 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                 </div>
                 <InputText label="Nom de la cohort" value={cohort.name} disabled readOnly />
                 <InputText label="Identifiant" value={cohort.snuId} disabled readOnly />
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-medium text-gray-900">Statut</p>
+                    <MdInfoOutline data-tip data-for="statut" className="h-5 w-5 cursor-pointer text-gray-400" />
+                    <ReactTooltip id="statut" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                      <ul className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                        <li>
+                          Si la cohorte est <strong>publiée</strong>, les volontaires peuvent s’inscrire si l'inscription est ouverte (voir cadre ci-dessous).
+                        </li>
+                        <li className="mt-2">
+                          Si elle est <strong>archivée</strong>, ils ne peuvent plus poursuivre la phase engagement.
+                        </li>
+                      </ul>
+                    </ReactTooltip>
+                  </div>
+
+                  <Select
+                    value={statusOptions.find((o) => o.value === cohort.status) || null}
+                    options={statusOptions}
+                    onChange={(e) => onCohortChange({ ...cohort, status: e.value })}
+                    closeMenuOnSelect
+                    disabled={isLoading || readOnly}
+                  />
+                </div>
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">

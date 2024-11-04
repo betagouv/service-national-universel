@@ -165,8 +165,11 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const young = await YoungModel.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const cohort = await CohortModel.findById(young.cohortId);
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     if (isYoung(req.user)) {
-      const { canApply, message } = await getAuthorizationToApply(mission, young);
+      const { canApply, message } = await getAuthorizationToApply(mission, young, cohort);
       if (!canApply) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
       }
