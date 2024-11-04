@@ -30,6 +30,8 @@ import {
   SessionPhase1Document,
   CohesionCenterDocument,
   SchoolRAMSESModel,
+  YoungDocument,
+  ReferentDocument,
 } from "../models";
 
 import emailsEmitter from "../emails";
@@ -247,29 +249,42 @@ router.post("/reset_password", passport.authenticate("referent", { session: fals
 
 router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    const { error, value: params } = Joi.object({ id: Joi.string().required(), type: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    const { error, value: params } = Joi.object({
+      id: idSchema(),
+      type: Joi.string().allow("young", "referent").required(),
+    })
+      .unknown()
+      .validate(req.params, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { id, type } = params;
 
-    let user: any = null;
-    if (type === "referent") user = await ReferentModel.findById(id);
-    else if (type === "young") user = await YoungModel.findById(id);
-    if (!user) return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
+    let user: ReferentDocument | YoungDocument | null = null;
+    if (type === "referent") {
+      user = await ReferentModel.findById(id);
+    } else if (type === "young") {
+      user = await YoungModel.findById(id);
+    }
+    if (!user) {
+      return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
+    }
 
-    if (!canSigninAs(req.user, user, type)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSigninAs(req.user, user, type)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
-    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
-    else if (type === "young") {
+    if (type === "referent") {
+      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+    } else if (type === "young") {
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     }
 
-    return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user) });
+    return res.status(200).json({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

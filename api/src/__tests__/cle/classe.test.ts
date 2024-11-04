@@ -2,7 +2,7 @@ import request from "supertest";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 import emailsEmitter from "../../emails";
-import snuLib, { FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
+import snuLib, { FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, SUB_ROLE_GOD } from "snu-lib";
 import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS, ClasseCertificateKeys } from "snu-lib";
 import * as classeService from "../../cle/classe/classeService";
 import { dbConnect, dbClose } from "../helpers/db";
@@ -857,7 +857,7 @@ describe("PUT /cle/classe/:id/referent", () => {
       email: "john.doe@example.com",
     };
 
-    const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+    const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: SUB_ROLE_GOD }))
       .put(`/cle/classe/${classe._id}/referent`)
       .send(newReferentDetails); // sending new referent data
     const updatedReferent: ReferentDocument = (await ReferentModel.findOne({ email: newReferentDetails.email }))!;

@@ -3,7 +3,7 @@ import request from "supertest";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, department2region } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, SUB_ROLE_GOD } from "snu-lib";
 
 import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
 import { getCompletionObjectifs } from "../services/inscription-goal";
@@ -704,9 +704,17 @@ describe("Referent", () => {
         .send();
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 404 if type param is not found", async () => {
+    it("should return 400 if type param is not found", async () => {
       const res = await request(getAppHelper()).post("/referent/signin_as/foo/bar").send();
-      expect(res.statusCode).toEqual(404);
+      expect(res.statusCode).toEqual(400);
+    });
+    it("should return 403 when impersonate user has subrole god", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ subRole: SUB_ROLE_GOD }));
+
+      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post("/referent/signin_as/referent/" + referent._id)
+        .send();
+      expect(res.statusCode).toEqual(403);
     });
     it("should return 200 if referent found", async () => {
       const referent: any = await createReferentHelper(getNewReferentFixture());

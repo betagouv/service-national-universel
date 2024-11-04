@@ -398,10 +398,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
 async function updateYoungPhase2StatusAndHours(young, fromUser) {
   try {
     // Récupération des applications et équivalences pertinentes
-    const applications = await ApplicationModel.find({
-      youngId: young._id,
-      status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE", "WAITING_VALIDATION", "WAITING_VERIFICATION"] },
-    });
+    const applications = await ApplicationModel.find({ youngId: young._id });
     const equivalences = await MissionEquivalenceModel.find({
       youngId: young._id,
       status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
@@ -483,7 +480,6 @@ async function updateYoungPhase2StatusAndHours(young, fromUser) {
 
     // Mise à jour des statuts des applications
     young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
-
     // Sauvegarde du modèle young
     await young.save({ fromUser });
   } catch (e) {

@@ -6,7 +6,7 @@ import { ClasseModel, CohortModel } from "../../models";
 import { createFixtureClasse } from "../fixtures/classe";
 import getNewCohortFixture from "../fixtures/cohort";
 import passport from "passport";
-import { ERRORS, FUNCTIONAL_ERRORS, ROLES, STATUS_CLASSE } from "snu-lib";
+import { ERRORS, FUNCTIONAL_ERRORS, ROLES, STATUS_CLASSE, SUB_ROLE_GOD } from "snu-lib";
 import { dbClose, dbConnect } from "../helpers/db";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
 import mongoose from "mongoose";
@@ -28,7 +28,7 @@ beforeEach(async () => {
   //@ts-ignore
   passport.user.role = ROLES.ADMIN;
   //@ts-ignore
-  passport.user.subRole = "god";
+  passport.user.subRole = SUB_ROLE_GOD;
   jest.spyOn(featureServiceModule, "isFeatureAvailable").mockImplementation(() => Promise.resolve(true));
 });
 
