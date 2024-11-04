@@ -27,7 +27,7 @@ export default function StatsInfos({ classe, user, studentStatus, validatedYoung
           </Link>
         ),
       ]}>
-      <div className="flex justify-between">
+      <div className="flex justify-between" style={{ pointerEvents: "none" }}>
         <table className="flex-1">
           <tbody>
             <tr className="border-b border-gray-200">

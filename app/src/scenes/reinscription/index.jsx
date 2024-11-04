@@ -18,6 +18,7 @@ import FutureCohort from "../inscription2023/FutureCohort";
 import useAuth from "@/services/useAuth";
 import { fetchReInscriptionOpen } from "../../services/reinscription.service";
 import { useQuery } from "@tanstack/react-query";
+import { getCohort } from "@/utils/cohorts";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -45,12 +46,13 @@ const Step = () => {
 
 export default function ReInscription() {
   const { young } = useAuth();
+  const cohort = getCohort(young.cohort);
   const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useQuery({
     queryKey: ["isReInscriptionOpen"],
     queryFn: fetchReInscriptionOpen,
   });
 
-  if (!hasAccessToReinscription(young)) return <Redirect to="/" />;
+  if (!hasAccessToReinscription(young, cohort)) return <Redirect to="/" />;
 
   if (isReinscriptionOpenLoading) return <Loader />;
 

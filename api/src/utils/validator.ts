@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, UserDto, YoungDto } from "snu-lib";
+import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, UserDto, YoungDto, SUB_ROLE_GOD } from "snu-lib";
 import { isYoung } from "../utils";
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -666,7 +666,7 @@ export function validateSelf(referent) {
       password: Joi.string().allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
-        .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"]),
+        .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, SUB_ROLE_GOD]),
       phone: Joi.string().allow(null, ""),
       mobile: Joi.string().allow(null, ""),
     })

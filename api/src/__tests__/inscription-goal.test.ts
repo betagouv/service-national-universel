@@ -1,11 +1,13 @@
+import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
 import getAppHelper from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
 import { createInscriptionGoal } from "./helpers/inscriptionGoal";
-import { department2region, FUNCTIONAL_ERRORS, YOUNG_STATUS } from "snu-lib";
+import { department2region, FUNCTIONAL_ERRORS, region2department, YOUNG_STATUS } from "snu-lib";
 import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
+import { getCompletionObjectifs } from "../services/inscription-goal";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -62,8 +64,16 @@ describe("Inscription Goal", () => {
       expect(res.body.data).toBeGreaterThan(0);
       expect(res.body.data).toBeLessThan(1);
     });
-    it("should return filling at 1 when department goal is reached", async () => {
+    it("should return filling at 1 when department goal is reached (not region)", async () => {
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ max: 1 }));
+      await createInscriptionGoal(
+        getNewInscriptionGoalFixture({
+          max: 1,
+          cohort: inscriptionGoal.cohort,
+          department: faker.helpers.arrayElement(region2department[inscriptionGoal.region!]),
+          region: inscriptionGoal.region,
+        }),
+      );
       await createYoungHelper(
         getNewYoungFixture({
           status: YOUNG_STATUS.VALIDATED,
@@ -73,6 +83,9 @@ describe("Inscription Goal", () => {
           cohortId: inscriptionGoal.cohortId,
         }),
       );
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, inscriptionGoal.cohort);
+      expect(completionObjectif.department.objectif).toBe(1);
+      expect(completionObjectif.region.objectif).toBe(2);
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(200);
       expect(res.body.data).toBe(1);
