@@ -164,6 +164,7 @@ const Hit = ({ hit, young, onChangeApplication }) => {
                   }}>
                   Relancer la structure
                 </button>
+                {/* @ts-expect-error jsx component */}
                 <ModalConfirm
                   isOpen={modal?.isOpen}
                   title={modal?.title}
