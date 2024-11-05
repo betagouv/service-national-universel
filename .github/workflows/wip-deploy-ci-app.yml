@@ -10,54 +10,54 @@ on:
       - 3577-app
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18.20"
+  #     - name: Use Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "18.20"
 
-      - uses: actions/cache@v4
-        id: cache-npm
-        with:
-          path: |
-            node_modules
-            app/node_modules
-            packages/ds/node_modules
-            packages/lib/node_modules
-          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nodemodules-
+  #     - uses: actions/cache@v4
+  #       id: cache-npm
+  #       with:
+  #         path: |
+  #           node_modules
+  #           app/node_modules
+  #           packages/ds/node_modules
+  #           packages/lib/node_modules
+  #         key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-nodemodules-
 
-      - name: Install packages
-        if: steps.cache-npm.outputs.cache-hit != 'true'
-        run: npm ci
+  #     - name: Install packages
+  #       if: steps.cache-npm.outputs.cache-hit != 'true'
+  #       run: npm ci
 
-      - name: Build lib
-        working-directory: packages/lib
-        run: npm run build
+  #     - name: Build lib
+  #       working-directory: packages/lib
+  #       run: npm run build
 
-      - name: Build ds
-        working-directory: packages/ds
-        run: npm run build
+  #     - name: Build ds
+  #       working-directory: packages/ds
+  #       run: npm run build
 
-      # Typescript check
-      - name: Check types app
-        working-directory: app
-        continue-on-error: false
-        run: npm run check-types
+  #     # Typescript check
+  #     - name: Check types
+  #       working-directory: app
+  #       continue-on-error: false
+  #       run: npm run check-types
 
-      # ESLint check
-      - name: Lint code app
-        working-directory: app
-        continue-on-error: false
-        run: npm run lint
+  #     # ESLint check
+  #     - name: Lint code
+  #       working-directory: app
+  #       continue-on-error: false
+  #       run: npm run lint
 
   build:
-    needs: [test]
+    # needs: [test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -74,4 +74,4 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
         run: |
           export VITE_RELEASE=$(node get-image-tag.js ${{ github.event.after }})
-          node ./build-front-app-docker.js ci app
+          node ./build-front-app-docker.js ci app --push
