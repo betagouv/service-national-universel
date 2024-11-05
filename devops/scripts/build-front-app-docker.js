@@ -8,11 +8,10 @@ const { childProcess } = require("./lib/utils");
 const SECRET_KEYS = new Set(["SENTRY_AUTH_TOKEN"]);
 const RELEASE_KEY = "VITE_RELEASE";
 
-const APP_NAME = "app";
-
 async function main() {
   const input = new UserInput(`Build application MonCompte`)
     .arg("environment", "Environment (ci, staging, production)")
+    .arg("application", "Application (app, admin)")
     .optBool("push", "Push image on registry", {
       default: false,
     })
@@ -24,7 +23,10 @@ async function main() {
     input.SCW_SECRET_KEY,
     input.SCW_ORGANIZATION_ID
   );
-  const { projectName, secretName, registry } = getConfig(input.environment);
+  const { projectName, secretName, registry } = getConfig(
+    input.environment,
+    input.application
+  );
   const config = await new GetSecrets(scaleway, {
     projectName: projectName,
     secretName: secretName,
@@ -34,7 +36,7 @@ async function main() {
   const env = { ...process.env };
   const values = { ...config, ...env }; // override config from env
 
-  const image = `${registry}/${APP_NAME}:${values[RELEASE_KEY]}`;
+  const image = `${registry}:${values[RELEASE_KEY]}`;
 
   const args = [
     "build",
@@ -43,7 +45,7 @@ async function main() {
     "-t",
     image,
     "-f",
-    `${APP_NAME}/Dockerfile`,
+    `${input.application}/Dockerfile`,
     ".",
   ];
   for (const key in config) {
