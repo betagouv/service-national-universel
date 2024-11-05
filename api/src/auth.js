@@ -30,6 +30,7 @@ const {
   isAdminCle,
   isReferentClasse,
 } = require("snu-lib");
+
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
