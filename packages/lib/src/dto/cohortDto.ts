@@ -12,6 +12,7 @@ export type CohortDto = {
   status: string;
   type: string;
   dateStart: Date;
+  cohortGroupId: string;
   dateEnd: Date;
   inscriptionStartDate: Date;
   inscriptionEndDate: Date;

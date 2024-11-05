@@ -12,7 +12,8 @@ const router = express.Router();
 
 router.get("/", async (_req: RouteRequest<CohortGroupRoutes["GetCohortGroupRoute"]>, res: RouteResponse<CohortGroupRoutes["GetCohortGroupRoute"]>) => {
   try {
-    const data = await getCohortGroupsWithDateStart();
+    const data = await CohortGroupModel.find();
+    // const data = await getCohortGroupsWithDateStart();
     return res.json({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -25,11 +26,12 @@ router.post(
   requestValidatorMiddleware({
     body: Joi.object({
       name: Joi.string().required(),
-      type: Joi.string().valid(COHORT_TYPE_LIST),
+      type: Joi.string().valid(...COHORT_TYPE_LIST),
       year: Joi.number(),
     }),
   }),
-  accessControlMiddleware([ROLES.ADMIN]),
+
+  // accessControlMiddleware([ROLES.ADMIN]),
   async (req: RouteRequest<CohortGroupRoutes["PostCohortGroupRoute"]>, res: RouteResponse<CohortGroupRoutes["PostCohortGroupRoute"]>) => {
     try {
       const { name, type, year } = req.body;

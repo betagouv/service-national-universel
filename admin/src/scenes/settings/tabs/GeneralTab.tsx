@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 import { isAfter } from "date-fns";
 import { BiLoaderAlt } from "react-icons/bi";
@@ -18,6 +18,8 @@ import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 import InputText from "@/components/ui/forms/InputText";
 import InputTextarea from "@/components/ui/forms/InputTextarea";
 import NumberInput from "@/components/ui/forms/NumberInput";
+import CreatableSelect from "react-select/creatable";
+import Field from "@/components/ui/forms/Field";
 
 import { CleSettings } from "../components/CleSettings";
 import { InformationsConvoyage } from "../components/InformationsConvoyage";
@@ -34,14 +36,62 @@ interface GeneralTabProps {
   onLoadingChange: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+interface CohortGroupOption {
+  value: string;
+  label: string;
+}
+
 // Use the interface for the props object
 export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort, isLoading, onLoadingChange }: GeneralTabProps) {
   const [error, setError] = useState<{ [key: string]: string }>({});
+  const [cohortGroupOptions, setCohortGroupOptions] = useState<CohortGroupOption[]>([]);
+  const [newCohortGroup, setNewCohortGroup] = useState({ name: "" });
+  const [creationCohortGroup, setCreationCohortGroup] = useState(false);
+  const cohortGroupSelectRef = useRef(null);
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(cohort?.reInscriptionStartDate || cohort?.reInscriptionEndDate);
+
   const statusOptions = [
     { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
     { value: COHORT_STATUS.ARCHIVED, label: "Archivée" },
   ];
+
+  // Récupérer les groupes de cohortes au démarrage du composant
+  useEffect(() => {
+    const fetchCohortGroups = async () => {
+      try {
+        const { data: cohortGroupData } = await api.get("/cohort-group/");
+        setCohortGroupOptions(
+          cohortGroupData.map((group) => ({
+            value: group._id,
+            label: group.name,
+          })),
+        );
+      } catch (error) {
+        console.error("Erreur lors de la récupération des groupes de cohortes :", error);
+      }
+    };
+
+    fetchCohortGroups();
+  }, []);
+
+  const createCohortGroup = async () => {
+    try {
+      const cohortYear = new Date(cohort.dateStart).getFullYear();
+      const { data: createdGroup } = await api.post("/cohort-group/create", {
+        name: newCohortGroup.name,
+        type: cohort?.type,
+        year: cohortYear,
+      });
+      // Mettez à jour l'état avec le nouveau groupe créé
+      setCohortGroupOptions((prevOptions) => [...prevOptions, { value: createdGroup._id, label: createdGroup.name }]);
+
+      onCohortChange({ ...cohort, cohortGroupId: createdGroup._id });
+      setCreationCohortGroup(false);
+      setNewCohortGroup({ name: "" });
+    } catch (error) {
+      console.error("Erreur lors de la création du groupe de cohortes :", error);
+    }
+  };
 
   const onSubmit = async () => {
     try {
@@ -51,7 +101,6 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
       if (!cohort!.inscriptionStartDate) err.inscriptionStartDate = "La date d'ouverture des inscriptions est obligatoire";
       if (!cohort!.inscriptionEndDate) err.inscriptionEndDate = "La date de fermeture des inscriptions est obligatoire";
       if (!cohort!.instructionEndDate) err.instructionEndDate = "La date de fermeture des inscriptions est obligatoire";
-
       if (isAfter(new Date(cohort!.reInscriptionStartDate as Date), new Date(cohort!.reInscriptionEndDate as Date)))
         err.reInscriptionStartDate = "La date d'ouverture des réinscriptions est antérieure a la date de cloture.";
       if (isAfter(new Date(cohort!.reInscriptionEndDate as Date), new Date(cohort!.inscriptionEndDate)))
@@ -99,7 +148,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   <ReactTooltip id="identification" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md ">
                     <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       <li>Nom donné à la cohorte.</li>
-                      <li>Identifiant techniq§ue donné à la cohorte.</li>
+                      <li>Identifiant technique donné à la cohorte.</li>
                     </ul>
                   </ReactTooltip>
                 </div>
@@ -129,6 +178,65 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                     closeMenuOnSelect
                     disabled={isLoading || readOnly}
                   />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-medium text-gray-900">Groupe de cohorte</p>
+                    <MdInfoOutline data-tip data-for="statut" className="h-5 w-5 cursor-pointer text-gray-400" />
+                    <ReactTooltip id="statut" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                      <ul className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                        <li>Permet de rattacher une cohorte à un groupement de cohorte pour que les jeunes puissent facilement changer de séjour.</li>
+                        <li className="mt-2">Le jeunes n'auront pas besoin de se réinscirent pour accèder aux cohortes appartenant aux mêmes groupe de cohorte</li>
+                        <li className="mt-2">Permet aussi aux jeunes d'être sûr de mettre à jour leurs informations lors de la reinscription</li>
+                      </ul>
+                    </ReactTooltip>
+                  </div>
+
+                  <div>
+                    <CreatableSelect
+                      ref={cohortGroupSelectRef}
+                      options={cohortGroupOptions}
+                      value={cohort.cohortGroupId ? cohortGroupOptions.find((o) => o.value === cohort.cohortGroupId) : null}
+                      onChange={(selected) => {
+                        if (selected) {
+                          onCohortChange({ ...cohort, cohortGroupId: selected.value });
+                        }
+                      }}
+                      formatCreateLabel={() => (
+                        <div className="flex flex-col items-center gap-2" onClick={() => setCreationCohortGroup(true)}>
+                          <div className="text-sm">Le groupe recherché n'est pas dans la liste ?</div>
+                          <div className="font-medium text-blue-600">Créer un nouveau groupe de cohortes</div>
+                        </div>
+                      )}
+                      placeholder="Sélectionnez un groupe de cohorte"
+                      isValidNewOption={() => true}
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          padding: "10px",
+                          minHeight: "40px",
+                        }),
+                      }}
+                    />
+
+                    {creationCohortGroup && (
+                      <div className="mt-4">
+                        <div className="text-lg font-medium text-gray-900">Créer un groupe de cohortes</div>
+                        <Field
+                          label="Nom du groupe"
+                          name="name"
+                          onChange={(cohortGroup) => setNewCohortGroup({ ...newCohortGroup, name: cohortGroup })}
+                          value={newCohortGroup.name}
+                          placeholder="Entrez le nom du groupe"
+                        />
+                        <div className="flex w-full justify-end mt-4">
+                          <div className="inline-block cursor-pointer rounded bg-blue-600 py-2.5 px-4 text-sm font-medium text-white" onClick={createCohortGroup}>
+                            Créer le groupe
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col gap-3">

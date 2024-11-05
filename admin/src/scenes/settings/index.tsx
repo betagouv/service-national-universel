@@ -28,7 +28,7 @@ export default function Settings() {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [currentTab, setCurrentTab] = useState<"general" | "eligibility">("general");
-  const [cohort, setCohort] = useState<CohortDto>();
+  const [cohort, setCohort] = useState<CohortDto | object>({});
   const [isLoading, setIsLoading] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
