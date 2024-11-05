@@ -1,29 +1,21 @@
-function getEnv(name: string, fallback?: string | number | boolean) {
-  const runtime = globalThis.runtime_env || {};
-  let v = runtime[name];
-  if (v !== undefined && v !== "") {
-    return v;
-  }
+function getEnv(name: string) {
   // @ts-expect-error import.meta
-  v = import.meta.env[`VITE_${name}`];
-  if (v !== undefined && v !== "") {
-    return v;
+  const v = import.meta.env[name];
+  if (v === undefined || v === "") {
+    console.error(`Environment variable ${name} is not defined`);
   }
-  if (fallback === undefined) {
-    console.warn(`Environment variable ${name} is not defined`);
-  }
-  return fallback;
+  return v;
 }
 
-const apiURL = getEnv("API_URL", "http://localhost:8080");
-const appURL = getEnv("APP_URL", "http://localhost:8081");
-const adminURL = getEnv("ADMIN_URL", "http://localhost:8082");
-const supportURL = getEnv("SUPPORT_URL", "http://localhost:8083");
-const maintenance = getEnv("MAINTENANCE", false) === "true";
-const environment: "production" | "staging" | "ci" | "custom" | "test" | "development" = getEnv("ENVIRONMENT", "development");
-const RELEASE = getEnv("RELEASE");
-const SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 0.1);
-const SENTRY_SESSION_SAMPLE_RATE = getEnv("SENTRY_SESSION_SAMPLE_RATE", 0.1);
-const SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("SENTRY_ON_ERROR_SAMPLE_RATE", 1);
+const apiURL = getEnv("VITE_API_URL");
+const appURL = getEnv("VITE_APP_URL");
+const adminURL = getEnv("VITE_ADMIN_URL");
+const supportURL = getEnv("VITE_SUPPORT_URL");
+const maintenance = getEnv("VITE_MAINTENANCE") === "true";
+const environment: "production" | "staging" | "ci" | "custom" | "test" | "development" = getEnv("VITE_ENVIRONMENT");
+const RELEASE = getEnv("VITE_RELEASE");
+const SENTRY_TRACING_SAMPLE_RATE = getEnv("VITE_SENTRY_TRACING_SAMPLE_RATE");
+const SENTRY_SESSION_SAMPLE_RATE = getEnv("VITE_SENTRY_SESSION_SAMPLE_RATE");
+const SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("VITE_SENTRY_ON_ERROR_SAMPLE_RATE");
 
 export { apiURL, appURL, RELEASE, SENTRY_TRACING_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_ON_ERROR_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };
