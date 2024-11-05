@@ -31,6 +31,8 @@ export default function UserCard({ user }) {
   return (
     <a
       href={getLink(user)}
+      target="_blank"
+      rel="noreferrer"
       className={cx("group flex w-full flex-col", {
         "hover:cursor-pointer hover:text-blue-600": getLink(user) !== null,
         "hover:text-inherit": getLink(user) === null,
