@@ -1,7 +1,7 @@
 import express from "express";
 import { RouteRequest, RouteResponse } from "../controllers/request";
 import { capture } from "../sentry";
-import { CohortGroupRoutes, ERRORS, ROLES } from "snu-lib";
+import { COHORT_TYPE_LIST, CohortGroupRoutes, ERRORS, ROLES } from "snu-lib";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
 import { CohortGroupModel } from "../models/cohortGroup";
 import Joi from "joi";
@@ -25,13 +25,15 @@ router.post(
   requestValidatorMiddleware({
     body: Joi.object({
       name: Joi.string().required(),
+      type: Joi.string().valid(COHORT_TYPE_LIST),
+      year: Joi.number(),
     }),
   }),
   accessControlMiddleware([ROLES.ADMIN]),
   async (req: RouteRequest<CohortGroupRoutes["PostCohortGroupRoute"]>, res: RouteResponse<CohortGroupRoutes["PostCohortGroupRoute"]>) => {
     try {
-      const { name } = req.body;
-      const data = new CohortGroupModel({ name });
+      const { name, type, year } = req.body;
+      const data = new CohortGroupModel({ name, type, year });
       await data.save({ fromUser: req.user });
       return res.json({ ok: true, data });
     } catch (error) {
@@ -55,12 +57,12 @@ router.put(
   async (req: RouteRequest<CohortGroupRoutes["PutCohortGroupRoute"]>, res: RouteResponse<CohortGroupRoutes["PutCohortGroupRoute"]>) => {
     try {
       const { id } = req.params;
-      const { name } = req.body;
+      const { name, type, year } = req.body;
       const data = await CohortGroupModel.findById(id);
       if (!data) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
-      data.name = name;
+      data.set({ name, type, year });
       await data.save({ fromUser: req.user });
       return res.json({ ok: true, data });
     } catch (error) {

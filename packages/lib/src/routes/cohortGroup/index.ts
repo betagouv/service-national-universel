@@ -4,7 +4,7 @@ import { BasicRoute, RouteResponseBody } from "..";
 interface PostCohortGroupRoute extends BasicRoute {
   method: "POST";
   path: "/cohort-group";
-  payload: { name: string };
+  payload: { name: string; type: string; year: number };
   response: RouteResponseBody<CohortGroupType>;
 }
 
@@ -18,7 +18,7 @@ interface PutCohortGroupRoute extends BasicRoute {
   method: "PUT";
   path: "/cohort-group/:id";
   params: { id: string };
-  payload: { name: string };
+  payload: { name: string; type: string; year: number };
   response: RouteResponseBody<CohortGroupType>;
 }
 

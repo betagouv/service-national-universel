@@ -1,6 +1,6 @@
 import { Schema, InferSchemaType } from "mongoose";
 
-import { InterfaceExtended } from "..";
+import { COHORT_TYPE_LIST, InterfaceExtended } from "..";
 
 export const CohortGroupSchema = {
   name: {
@@ -8,6 +8,19 @@ export const CohortGroupSchema = {
     required: true,
     documentation: {
       description: "Nom du groupe de cohortes. Exp: CLE 2024, HTS 2025.",
+    },
+  },
+  type: {
+    type: String,
+    enum: COHORT_TYPE_LIST,
+    documentation: {
+      description: "Type de cohortes : CLE ou VOLONTAIRE.",
+    },
+  },
+  year: {
+    type: Number,
+    documentation: {
+      description: "Année de la cohorte.",
     },
   },
   createdAt: { type: Date, default: Date.now },
