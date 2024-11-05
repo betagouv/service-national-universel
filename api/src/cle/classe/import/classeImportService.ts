@@ -135,7 +135,6 @@ export const processSessionPhasePdrAndCenter = async (classeCohortToImportMapped
               if (classeCohortToImportMapped.pdrCode) {
                 try {
                   const pdr = await PointDeRassemblementModel.findOne({ matricule: classeCohortToImportMapped.pdrCode });
-                  console.log("LAAAA", pdr);
                   if (!pdr) {
                     error.push(ERRORS.PDR_NOT_FOUND);
                   } else {
