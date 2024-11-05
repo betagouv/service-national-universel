@@ -138,11 +138,17 @@ export default function List() {
           [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
             <Button
               title="Exporter le SR"
+              className="mr-2"
               onClick={() => exportData({ type: "schema-de-repartition" })}
               loading={exportLoading}
               disabled={!isCohortSelected}
               tooltip="Vous devez selectionner une cohort pour pouvoir exporter le SR"
             />
+          ),
+          user.role === ROLES.ADMIN && (
+            <Link to="/classes/import">
+              <Button title="Mettre à jour" className="mr-2" loading={exportLoading} />
+            </Link>
           ),
         ].filter(Boolean)}
       />
