@@ -5,7 +5,8 @@ on:
     paths:
       - "app/**"
       - "packages/**"
-    branches:
+      - ".github/**" # TODO: remove
+    branches: # TODO: remove
       - 3577-app
 
 jobs:
