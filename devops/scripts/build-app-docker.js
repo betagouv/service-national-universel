@@ -1,4 +1,4 @@
-const { spawn } = require("node:child_process");
+const { spawnSync } = require("node:child_process");
 const process = require("node:process");
 const path = require("node:path");
 const UserInput = require("./lib/user-input");
@@ -14,6 +14,9 @@ const APP_NAME = "app";
 async function main() {
   const input = new UserInput(`Build application MonCompte`)
     .arg("environment", "Environment (ci, staging, production)")
+    .optBool("push", "Push image on registry", {
+      default: false,
+    })
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .validate();
@@ -32,12 +35,14 @@ async function main() {
   const env = { ...process.env };
   const values = { ...config, ...env }; // override config from env
 
+  const image = `${registry}/${APP_NAME}:${values[RELEASE_KEY]}`;
+
   const args = [
     "build",
     "--label",
     `created_at=${new Date().toISOString()}`,
     "-t",
-    `${registry}/${APP_NAME}:${values[RELEASE_KEY]}`,
+    image,
     "-f",
     `${APP_NAME}/Dockerfile`,
     ".",
@@ -54,11 +59,19 @@ async function main() {
     }
   }
 
-  spawn("docker", args, {
+  spawnSync("docker", args, {
     stdio: "inherit",
     env,
     cwd: path.resolve(__dirname, "../.."),
   });
+
+  if (input.push) {
+    spawnSync("docker", ["push", image], {
+      stdio: "inherit",
+      env,
+      cwd: path.resolve(__dirname, "../.."),
+    });
+  }
 }
 
 if (require.main === module) {
