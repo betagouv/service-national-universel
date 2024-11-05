@@ -1,3 +1,6 @@
+const path = require("node:path");
+const { spawn } = require("node:child_process");
+
 const IMAGE_TAG_LENGTH = 9;
 
 function imageTag(commit) {
@@ -26,6 +29,24 @@ function environmentFromSecret(secretName) {
 function parseRegistryEndpoint(endpoint) {
   const parsed = endpoint.split(":");
   return { imageEndpoint: parsed[0], tagName: parsed[1] };
+}
+
+function childProcess(command, args, options) {
+  let proc = spawn(command, args, {
+    stdio: "inherit",
+    cwd: path.resolve(__dirname, "../../.."), // Project root directory
+    ...options,
+  });
+  return new Promise((resolve, reject) => {
+    proc.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`ChildProcess exited with status ${code}`));
+      }
+    });
+    proc.on("error", reject);
+  });
 }
 
 async function genericDeleteAll({
@@ -61,4 +82,5 @@ module.exports = {
   parseRegistryEndpoint,
   genericDeleteAll,
   environmentFromBranch,
+  childProcess,
 };

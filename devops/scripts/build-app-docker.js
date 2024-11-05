@@ -1,10 +1,9 @@
-const { spawnSync } = require("node:child_process");
 const process = require("node:process");
-const path = require("node:path");
 const UserInput = require("./lib/user-input");
 const ScalewayClient = require("./lib/scaleway-client");
 const { GetSecrets, SECRET_FORMATS } = require("./get-secrets");
 const { getConfig } = require("./lib/config");
+const { childProcess } = require("./lib/utils");
 
 const SECRET_KEYS = new Set(["SENTRY_AUTH_TOKEN"]);
 const RELEASE_KEY = "VITE_RELEASE";
@@ -59,18 +58,10 @@ async function main() {
     }
   }
 
-  spawnSync("docker", args, {
-    stdio: "inherit",
-    env,
-    cwd: path.resolve(__dirname, "../.."),
-  });
+  await childProcess("docker", args, { env });
 
   if (input.push) {
-    spawnSync("docker", ["push", image], {
-      stdio: "inherit",
-      env,
-      cwd: path.resolve(__dirname, "../.."),
-    });
+    await childProcess("docker", ["push", image], { env });
   }
 }
 

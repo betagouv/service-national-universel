@@ -1,9 +1,9 @@
-const { spawn } = require("node:child_process");
 const process = require("node:process");
 const path = require("node:path");
 const UserInput = require("./lib/user-input");
 const ScalewayClient = require("./lib/scaleway-client");
 const { getConfig } = require("./lib/config");
+const { childProcess } = require("./lib/utils");
 const { GetSecrets, SECRET_FORMATS } = require("./get-secrets");
 
 const APP_NAME = "app";
@@ -28,11 +28,13 @@ async function main() {
 
   const env = { ...config, ...process.env, APP_NAME };
 
-  spawn("npm", ["run", "build", "--", "--", "--mode", input.environment], {
-    stdio: "inherit",
-    env,
-    cwd: path.resolve(__dirname, "../.."),
-  });
+  await childProcess(
+    "npm",
+    ["run", "build", "--", "--", "--mode", input.environment],
+    {
+      env,
+    }
+  );
 }
 
 if (require.main === module) {
