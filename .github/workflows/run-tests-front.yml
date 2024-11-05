@@ -7,9 +7,6 @@ on:
       branch_name:
         required: true
         type: string
-  pull_request:
-    branches:
-      - test-mergequeue
   merge_group:
     types:
       - checks_requested
