@@ -2,14 +2,6 @@ name: API - Run Tests
 
 on:
   workflow_dispatch:
-  workflow_call:
-    inputs:
-      branch_name:
-        required: true
-        type: string
-  pull_request:
-    branches:
-      - test-mergequeue
   merge_group:
     types:
       - checks_requested
@@ -18,21 +10,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Determine Ref
-        id: determine-ref
-        run: |
-          if [ "${{ github.event_name }}" == "merge_group" ]; then
-            echo "REF=${{ github.event.merge_group_sha }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" == "workflow_dispatch" ] || [ "${{ github.event_name }}" == "workflow_call" ]; then
-            echo "REF=${{ inputs.branch_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "REF=${{ github.sha }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.determine-ref.outputs.REF }}
+          ref: ${{ github.sha }} # Directly using github.sha based on documentation
 
       - name: Node 18.x
         uses: actions/setup-node@v4
