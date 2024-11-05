@@ -46,6 +46,8 @@ ARG VITE_FRANCE_CONNECT_URL
 ARG VITE_API_ENGAGEMENT_URL
 ARG VITE_API_ENGAGEMENT_SNU_ID
 
+RUN cd packages/lib && npm run build
+RUN cd packages/ds && npm run build
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) \
     npm run build -- -- --mode ${VITE_ENVIRONMENT}
