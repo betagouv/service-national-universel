@@ -7,6 +7,9 @@ on:
       branch_name:
         required: true
         type: string
+  pull_request:
+    branches:
+      - test-mergequeue
   merge_group:
     types:
       - checks_requested
@@ -15,19 +18,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Determine Ref
-        id: determine-ref
-        run: |
-          if [ "${{ github.event_name }}" == "merge_group" ]; then
-            echo "REF=${{ github.event.merge_group_sha }}" >> $GITHUB_OUTPUT
-          else
-            echo "REF=${{ github.sha }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.determine-ref.outputs.REF }}
+          ref: ${{ inputs.branch_name }}
 
       - name: Node 18.x
         uses: actions/setup-node@v4
