@@ -32,7 +32,6 @@ COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 COPY tsconfig.front.json tsconfig.front.json
 
-# secrets
 ARG VITE_ENVIRONMENT
 ARG VITE_RELEASE
 ARG VITE_API_URL
