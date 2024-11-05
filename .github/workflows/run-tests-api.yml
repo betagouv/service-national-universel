@@ -2,6 +2,14 @@ name: API - Run Tests
 
 on:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      branch_name:
+        required: true
+        type: string
+  pull_request:
+    branches:
+      - test-mergequeue
   merge_group:
     types:
       - checks_requested
@@ -13,7 +21,7 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }} # Directly using github.sha based on documentation
+          ref: ${{ inputs.branch_name }}
 
       - name: Node 18.x
         uses: actions/setup-node@v4
