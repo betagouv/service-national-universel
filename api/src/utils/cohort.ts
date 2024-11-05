@@ -1,4 +1,4 @@
-import { YOUNG_STATUS, getRegionForEligibility, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType } from "snu-lib";
+import { YOUNG_STATUS, getRegionForEligibility, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS } from "snu-lib";
 import { YoungModel, CohortModel, InscriptionGoalModel, CohortDocument } from "../models";
 
 type CohortDocumentWithPlaces = CohortDocument<{
@@ -17,7 +17,7 @@ type YoungInfo = Pick<YoungType, "cohort" | "birthdateAt" | "grade" | "status" |
 
 // TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
 export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
-  const cohorts = await CohortModel.find({});
+  const cohorts = await CohortModel.find({ status: COHORT_STATUS.PUBLISHED });
   const region = getRegionForEligibility(young);
   const department = getDepartmentForEligibility(young);
 
@@ -55,7 +55,7 @@ export async function getAllSessions(young: YoungInfo) {
 }
 
 export async function getFilteredSessionsForCLE() {
-  const sessionsCLE = await CohortModel.find({ type: COHORT_TYPE.CLE });
+  const sessionsCLE = await CohortModel.find({ type: COHORT_TYPE.CLE, status: COHORT_STATUS.PUBLISHED });
   let now = Date.now();
   const sessions = sessionsCLE.filter(
     (session) =>
@@ -69,7 +69,7 @@ export async function getFilteredSessionsForCLE() {
 }
 
 async function getPlaces(sessions: CohortDocumentWithPlaces[], region: string): Promise<CohortDocumentWithPlaces[]> {
-  const cohorts = await CohortModel.find({});
+  const cohorts = await CohortModel.find({ status: COHORT_STATUS.PUBLISHED });
   const sessionNames = sessions.map(({ name }) => name);
   const goals = await InscriptionGoalModel.aggregate([{ $match: { region, cohort: { $in: sessionNames } } }, { $group: { _id: "$cohort", total: { $sum: "$max" } } }]);
   const agg = await YoungModel.aggregate([

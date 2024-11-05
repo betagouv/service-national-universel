@@ -1,11 +1,12 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { COHORT_TYPE, CohortType } from "snu-lib";
+import { COHORT_STATUS, COHORT_TYPE, CohortType } from "snu-lib";
 
 function getNewCohortFixture(object: Partial<CohortType> = {}): Partial<CohortType> {
   return {
     snuId: faker.lorem.words(),
     name: faker.lorem.words(),
     dsnjExportDates: {},
+    status: COHORT_STATUS.PUBLISHED,
     type: COHORT_TYPE.VOLONTAIRE,
     isAssignmentAnnouncementsOpenForYoung: faker.datatype.boolean(),
     manualAffectionOpenForAdmin: faker.datatype.boolean(),

@@ -1,17 +1,16 @@
-const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge } = require("snu-lib");
-const { deletePatches } = require("../controllers/patches");
-const { ApplicationModel } = require("../models");
-const { CohortModel } = require("../models");
-const { YoungModel } = require("../models");
-const { ReferentModel } = require("../models");
-const { sendTemplate } = require("../brevo");
-const config = require("config");
-const { getCcOfYoung } = require("../utils");
-const { getTutorName } = require("./mission");
-const { capture } = require("../sentry");
-const { logger } = require("../logger");
+import { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge, YoungType, MissionType, CohortType } from "snu-lib";
+import { deletePatches } from "../controllers/patches";
+import { ApplicationModel } from "../models";
+import { YoungModel } from "../models";
+import { ReferentModel } from "../models";
+import { sendTemplate } from "../brevo";
+import config from "config";
+import { getCcOfYoung } from "../utils";
+import { getTutorName } from "./mission";
+import { capture } from "../sentry";
+import { logger } from "../logger";
 
-const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung = {} }) => {
+export const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung = {} }: { youngId: string; anonymizedYoung: Partial<YoungType> }) => {
   try {
     const applications = await ApplicationModel.find({ youngId });
 
@@ -44,7 +43,7 @@ const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung 
   }
 };
 
-const updateApplicationTutor = async (mission, fromUser = null) => {
+export const updateApplicationTutor = async (mission, fromUser) => {
   try {
     const applications = await ApplicationModel.find({
       missionId: mission._id,
@@ -53,7 +52,10 @@ const updateApplicationTutor = async (mission, fromUser = null) => {
     for (let application of applications) {
       if (application.tutorId !== mission.tutorId) {
         const tutor = await ReferentModel.findById(mission.tutorId);
-        application.set({ tutorId: mission.tutorId, tutorName: getTutorName(tutor) });
+        if (tutor && tutor.firstName && tutor.lastName) {
+          // @ts-ignore
+          application.set({ tutorId: mission.tutorId, tutorName: getTutorName(tutor) });
+        }
         await application.save({ fromUser });
       }
     }
@@ -62,7 +64,7 @@ const updateApplicationTutor = async (mission, fromUser = null) => {
   }
 };
 
-const updateApplicationStatus = async (mission, fromUser = null) => {
+export const updateApplicationStatus = async (mission, fromUser) => {
   try {
     if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status)) {
       return logger.debug(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
@@ -106,6 +108,10 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
         const young = await YoungModel.findById(application.youngId);
         let cc = getCcOfYoung({ template: sendinblueTemplate, young });
 
+        if (!application.youngEmail) {
+          throw new Error(`updateApplicationStatus: youngEmail is missing for young ${application.youngId}`);
+        }
+
         await sendTemplate(sendinblueTemplate, {
           emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
           params: {
@@ -122,13 +128,13 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
   }
 };
 
-const getAuthorizationToApply = async (mission, young) => {
-  let refusalMessages = [];
-  if (isCohortTooOld(young)) {
+export const getAuthorizationToApply = async (mission: MissionType, young: YoungType, cohort: CohortType) => {
+  let refusalMessages: string[] = [];
+
+  if (isCohortTooOld(cohort)) {
     refusalMessages.push("Le délai pour candidater est dépassé.");
   }
 
-  const cohort = await CohortModel.findById(young.cohortId);
   if (!canApplyToPhase2(young, cohort)) {
     refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
   }
@@ -151,6 +157,10 @@ const getAuthorizationToApply = async (mission, young) => {
   }
 
   const isMilitaryPreparation = mission?.isMilitaryPreparation === "true";
+
+  if (!mission.startAt) {
+    throw new Error("getAuthorizationToApply: mission.startAt is missing");
+  }
 
   const today = new Date();
   const missionStartDate = new Date(mission.startAt);
@@ -178,11 +188,4 @@ const getAuthorizationToApply = async (mission, young) => {
   }
 
   return { canApply: refusalMessages.length === 0, message: refusalMessages.join("\n") };
-};
-
-module.exports = {
-  anonymizeApplicationsFromYoungId,
-  updateApplicationTutor,
-  updateApplicationStatus,
-  getAuthorizationToApply,
 };
