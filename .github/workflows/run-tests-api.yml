@@ -7,9 +7,12 @@ on:
       branch_name:
         required: true
         type: string
-  merge_group:
+  pull_request:
     branches:
       - main
+  merge_group:
+    types:
+      - checks_requested
 
 jobs:
   test:
