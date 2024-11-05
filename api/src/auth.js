@@ -33,11 +33,8 @@ const {
 
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
-
 const { getFilteredSessions } = require("./utils/cohort");
-
 const { ClasseModel, EtablissementModel, CohortModel } = require("./models");
-
 const { getFeatureFlagsAvailable } = require("./featureFlag/featureFlagService");
 
 class Auth {
