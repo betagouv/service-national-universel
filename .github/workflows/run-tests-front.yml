@@ -8,8 +8,8 @@ on:
         required: true
         type: string
   merge_group:
-    branches:
-      - main
+    types:
+      - checks_requested
 
 jobs:
   test:
