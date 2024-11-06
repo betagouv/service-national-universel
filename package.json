@@ -7,7 +7,7 @@
     "dev:app": "[[ -e .git/hooks/pre-commit ]] && dotenv -- turbo run dev --filter",
     "build": "turbo run build --filter=$APP_NAME",
     "start": "turbo run start --filter=$APP_NAME",
-    "test": "turbo build --filter='./packages/lib' && turbo run test --filter=api",
+    "test": "turbo run test --filter=api",
     "clean": "turbo run clean"
   },
   "dependencies": {

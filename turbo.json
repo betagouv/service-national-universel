@@ -6,28 +6,24 @@
   "globalEnv": ["DEV", "SCW_*", "RELEASE", "SENTRY_*"],
   "tasks": {
     "build": {
-      "outputs": [".dist/**", "!.dist/cache/**"]
-    },
-    "@snu/ds#build": {
-      "cache": false
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true,
-      "outputs": ["dist/**", "build/**"],
-      "dependsOn": ["@snu/ds#build", "^build"]
-    },
-    "start": {
-      "outputs": [".launch/**", "!.launch/cache/**"]
+      "dependsOn": ["^build"]
     },
     "test": {
-      "cache": false,
-      "persistent": true,
-      "outputs": ["dist/**", "build/**"]
+      "outputs": ["dist/**", "build/**"],
+      "dependsOn": ["^test"]
     },
-    "lint": {},
+    "lint": {
+      "outputs": ["dist/**", "build/**"],
+      "dependsOn": ["^lint"]
+    },
     "clean": {
-      "cache": false
+      "dependsOn": ["^clean"]
     }
   }
 }
