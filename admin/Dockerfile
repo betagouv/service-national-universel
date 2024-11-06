@@ -43,8 +43,6 @@ ARG VITE_SENTRY_SESSION_SAMPLE_RATE
 ARG VITE_SENTRY_TRACING_SAMPLE_RATE
 ARG VITE_SENTRY_ON_ERROR_SAMPLE_RATE
 
-RUN cd packages/lib && npm run build
-RUN cd packages/ds && npm run build
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) \
     npm run build -- -- --mode ${VITE_ENVIRONMENT}
