@@ -49,6 +49,28 @@ function childProcess(command, args, options) {
   });
 }
 
+function childProcessStdin(command, args, input, options) {
+  let proc = spawn(command, args, {
+    stdio: ["pipe", "inherit", "inherit"],
+    cwd: path.resolve(__dirname, "../../.."), // Project root directory
+    ...options,
+  });
+  return new Promise((resolve, reject) => {
+    proc.on("spawn", () => {
+      proc.stdin.write(input);
+      proc.stdin.end();
+    });
+    proc.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`ChildProcess exited with status ${code}`));
+      }
+    });
+    proc.on("error", reject);
+  });
+}
+
 async function genericDeleteAll({
   items,
   name,
@@ -83,4 +105,5 @@ module.exports = {
   genericDeleteAll,
   environmentFromBranch,
   childProcess,
+  childProcessStdin,
 };

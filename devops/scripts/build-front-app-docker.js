@@ -3,7 +3,7 @@ const UserInput = require("./lib/user-input");
 const ScalewayClient = require("./lib/scaleway-client");
 const { GetSecrets, SECRET_FORMATS } = require("./get-secrets");
 const { getConfig } = require("./lib/config");
-const { childProcess } = require("./lib/utils");
+const { childProcess, childProcessStdin } = require("./lib/utils");
 
 const SECRET_KEYS = new Set(["SENTRY_AUTH_TOKEN"]);
 const RELEASE_KEY = "VITE_RELEASE";
@@ -63,6 +63,12 @@ async function main() {
   await childProcess("docker", args, { env });
 
   if (input.push) {
+    await childProcessStdin(
+      "docker",
+      ["login", registry, "-u", "nologin", "--password-stdin"],
+      input.SCW_SECRET_KEY,
+      { env }
+    );
     await childProcess("docker", ["push", image], { env });
   }
 }
