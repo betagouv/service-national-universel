@@ -11,20 +11,24 @@
     },
     "dev": {
       "cache": false,
+      "outputs": ["dist/**", "build/**"],
       "persistent": true,
       "dependsOn": ["^build"]
     },
     "test": {
+      "cache": false,
       "outputs": ["dist/**", "build/**"],
-      "dependsOn": ["^test"]
+      "dependsOn": ["^build"]
     },
     "lint": {
+      "cache": false,
       "outputs": ["dist/**", "build/**"],
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^build"]
     },
     "check-types": {
+      "cache": false,
       "outputs": ["dist/**", "build/**"],
-      "dependsOn": ["^check-types"]
+      "dependsOn": ["^build"]
     },
     "clean": {
       "dependsOn": ["^clean"]
