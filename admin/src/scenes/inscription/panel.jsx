@@ -2,8 +2,9 @@ import Img3 from "../../assets/close_icon.png";
 import Img2 from "../../assets/pencil.svg";
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { formatDateFR } from "snu-lib";
+import { formatDateFR, ROLES } from "snu-lib";
 import Badge from "../../components/Badge";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -24,6 +25,7 @@ export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -87,7 +89,7 @@ export default function InscriptionPanel({ onChange, value }) {
               </div>
             ) : null}
             {value.frenchNationality === "true" ? <div style={{ fontStyle: "italic", fontSize: "0.9rem" }}>🇫🇷 Nationalité française</div> : null}
-            <div style={{ display: "flex", flexWrap: "wrap" }}>
+            <div className="flex flex-wrap justify-around">
               <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
@@ -98,7 +100,7 @@ export default function InscriptionPanel({ onChange, value }) {
                 }}>
                 <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
               </button>
-              <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />
+              {user.role === ROLES.ADMIN && <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />}
             </div>
             {value.status === YOUNG_STATUS.WITHDRAWN && <div className="mt-3">⚠️ Désistement : &quot;{value.withdrawnMessage}&quot;</div>}
           </div>
@@ -118,7 +120,7 @@ export default function InscriptionPanel({ onChange, value }) {
             </Info>
           )}
           <Info title="Pièce d’identité" id={value._id}>
-            {(young?.files.cniFiles || []).map((e, i) => (
+            {(young?.files?.cniFiles || []).map((e, i) => (
               <DownloadButton
                 key={i}
                 source={() => api.get(`/young/${value._id}/documents/cniFiles/${e._id}`)}

@@ -71,12 +71,13 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         </button>
       </div>
       <Input
-        value={manualSchool.fullName}
         label="Saisir le nom de l'établissement"
         nativeInputProps={{
+          value: manualSchool.fullName,
           placeholder: "Ex. Lycée général Carnot, Collège Georges Brassens...",
           onChange: (e) => {
             setManualSchool({ ...manualSchool, fullName: e.target.value });
+            onSelectSchool({ ...school, fullName: e.target.value, country: "FRANCE" });
           },
         }}
         stateRelatedMessage={errors?.manualFullName || corrections?.schoolName}

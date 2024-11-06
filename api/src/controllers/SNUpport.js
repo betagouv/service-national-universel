@@ -1,7 +1,6 @@
 const express = require("express");
 const passport = require("passport");
 const fileUpload = require("express-fileupload");
-const FileType = require("file-type");
 const fs = require("fs");
 const Joi = require("joi");
 const { v4: uuid } = require("uuid");
@@ -13,16 +12,15 @@ const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } = require("../cookie-options
 const { capture } = require("../sentry");
 const SNUpport = require("../SNUpport");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
-const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
-const { sendTemplate } = require("../sendinblue");
-const ReferentObject = require("../models/referent");
-const YoungObject = require("../models/young");
-const ClasseObject = require("../models/cle/classe");
+const config = require("config");
+const { sendTemplate } = require("../brevo");
+const { YoungModel, ClasseModel, ReferentModel } = require("../models");
 const { validateId } = require("../utils/validator");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
 const optionalAuth = require("../middlewares/optionalAuth");
 const scanFile = require("../utils/virusScanner");
+const { getMimeFromFile } = require("../utils/file");
 
 const router = express.Router();
 
@@ -113,7 +111,7 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
 
 router.get("/ticketscount", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const user = await ReferentObject.findById(req.user._id);
+    const user = await ReferentModel.findById(req.user._id);
     let query = {};
     if (user.role === ROLES.REFERENT_DEPARTMENT)
       query = {
@@ -237,14 +235,19 @@ router.post("/ticket/form", async (req, res) => {
   try {
     let author;
 
+    const checkRole = async (role, email, findObject) => {
+      const existing = await findObject.findOne({ email: email.toLowerCase() });
+      return existing ? `${role} exterior` : "unknown";
+    };
+
     if (req.body.role === "young" || req.body.role === "parent") {
       author = req.body.role;
-      const existingYoung = await YoungObject.findOne({ email: req.body.email.toLowerCase() });
-      if (existingYoung) {
-        req.body.role = "young exterior";
-      } else {
-        req.body.role = "unknown";
-      }
+      req.body.role = await checkRole("young", req.body.email, YoungModel);
+    }
+
+    if (req.body.role === "admin" || req.body.role === "admin exterior") {
+      author = req.body.role;
+      req.body.role = await checkRole("admin", req.body.email, ReferentModel);
     }
 
     const obj = {
@@ -317,7 +320,7 @@ router.post("/ticket/form", async (req, res) => {
     };
 
     if (classeId) {
-      const classe = await ClasseObject.findById(classeId);
+      const classe = await ClasseModel.findById(classeId);
       if (!classe) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       body = { ...body, classe };
     }
@@ -441,7 +444,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         currentFile = currentFile[currentFile.length - 1];
       }
       const { name, tempFilePath, mimetype } = currentFile;
-      const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+      const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
       const validTypes = [
         "image/jpeg",
         "image/png",
@@ -461,7 +464,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
 
       const data = fs.readFileSync(tempFilePath);
       const path = getS3Path(name);
-      const encryptedBuffer = encrypt(data, FILE_ENCRYPTION_SECRET_SUPPORT);
+      const encryptedBuffer = encrypt(data, config.FILE_ENCRYPTION_SECRET_SUPPORT);
       const response = await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG);
       responseData.push({ name, url: response.Location, path: response.key });
       fs.unlinkSync(tempFilePath);
@@ -478,7 +481,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
 router.get("/s3file/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const file = await getFile(`message/${req.params.id}`, SUPPORT_BUCKET_CONFIG);
-    const buffer = decrypt(file.Body, FILE_ENCRYPTION_SECRET_SUPPORT);
+    const buffer = decrypt(file.Body, config.FILE_ENCRYPTION_SECRET_SUPPORT);
     return res.status(200).send({ ok: true, data: buffer });
   } catch (error) {
     capture(error);
@@ -493,11 +496,11 @@ const getS3Path = (fileName) => {
 
 const notifyReferent = async (ticket, message) => {
   if (!ticket) return false;
-  let ticketCreator = await YoungObject.findOne({ email: ticket.contactEmail });
+  let ticketCreator = await YoungModel.findOne({ email: ticket.contactEmail });
   if (!ticketCreator) return false;
 
   const department = ticketCreator.department;
-  const departmentReferents = await ReferentObject.find({
+  const departmentReferents = await ReferentModel.find({
     role: ROLES.REFERENT_DEPARTMENT,
     department,
   });
@@ -506,7 +509,7 @@ const notifyReferent = async (ticket, message) => {
     sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: `${referent.email}` }],
       params: {
-        cta: `${ADMIN_URL}/boite-de-reception`,
+        cta: `${config.ADMIN_URL}/boite-de-reception`,
         message,
         from: `${ticketCreator.firstName} ${ticketCreator.lastName}`,
       },

@@ -1,66 +1,21 @@
 const express = require("express");
 const passport = require("passport");
 const Joi = require("joi");
-const fetch = require("node-fetch");
 const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
-const YoungObject = require("../../models/young");
-const CohortObject = require("../../models/cohort");
-const ContractObject = require("../../models/contract");
-const ApplicationObject = require("../../models/application");
-const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFile, getFile } = require("../../utils");
-const { sendTemplate } = require("../../sendinblue");
-const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
-const config = require("../../config");
+const { YoungModel, CohortModel, ContractModel, ApplicationModel } = require("../../models");
+const { ERRORS, isYoung, isReferent, uploadFile, deleteFile, getFile } = require("../../utils");
+const { FILE_KEYS, MILITARY_FILE_KEYS, COHORTS, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const fs = require("fs");
-const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
-const { getHtmlTemplate } = require("../../templates/utils");
 const mime = require("mime-types");
 const scanFile = require("../../utils/virusScanner");
-
-function getMailParams(type, template, young, contract) {
-  if (type === "certificate" && template === "1")
-    return {
-      object: `Attestation de fin de phase 1 de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation de phase 1 du SNU.`,
-    };
-  if (type === "certificate" && template === "2")
-    return {
-      object: `Attestation de fin de phase 2 de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation de phase 2 du SNU.`,
-    };
-  if (type === "certificate" && template === "3")
-    return {
-      object: `Attestation de fin de phase 3 de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation de phase 3 du SNU.`,
-    };
-  if (type === "certificate" && template === "snu")
-    return {
-      object: `Attestation de réalisation du SNU de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation du SNU.`,
-    };
-  if (type === "contract" && template === "2" && contract)
-    return {
-      object: `Contrat de la mission ${contract.missionName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${contract.missionName}.`,
-    };
-  if (type === "convocation" && template === "cohesion") {
-    return {
-      object: `Convocation au séjour de cohésion de ${young.firstName} ${young.lastName}`,
-      message: "Vous trouverez en pièce-jointe de ce mail votre convocation au séjour de cohésion à présenter à votre arrivée au point de rassemblement.",
-    };
-  }
-
-  //todo: add other templates
-  // if (type === "form" && template === "imageRight") return { object: "", message: "" };
-  // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
-}
-
-const TIMEOUT_PDF_SERVICE = 15000;
+const { generatePdfIntoStream } = require("../../utils/pdf-renderer");
+const { getMimeFromFile } = require("../../utils/file");
+const { sendDocumentEmailTask } = require("../../queues/sendMailQueue");
 
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -73,7 +28,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     }
     const { id, type, template } = value;
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only download their own documents.
@@ -81,41 +36,12 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    const applications = await ApplicationModel.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, type, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-    // Create html
-    const html = await getHtmlTemplate(type, template, young);
-    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const getPDF = async () =>
-      await fetch(config.API_PDF_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
-      }).then((response) => {
-        // ! On a retravaillé pour faire passer les tests
-        if (response.status && response.status !== 200) throw new Error("Error with PDF service");
-        res.set({
-          "content-length": response.headers.get("content-length"),
-          "content-disposition": `inline; filename="test.pdf"`,
-          "content-type": "application/pdf",
-          "cache-control": "public, max-age=1",
-        });
-        response.body.pipe(res);
-        if (res.statusCode !== 200) throw new Error("Error with PDF service");
-        response.body.on("error", (e) => {
-          capture(e);
-          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-        });
-      });
-    try {
-      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
-    } catch (e) {
-      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
-      capture(e);
-    }
+    await generatePdfIntoStream(res, { type, template, young });
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -140,7 +66,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     }
     const { id, type, template, fileName, contract_id, switchToCle } = value;
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id).select({ region: 1, department: 1 }); // used by canSendFileByMailToYoung
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only send to them their own documents.
@@ -155,48 +81,13 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     if (type === "contract") {
       if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-      contract = await ContractObject.findById(contract_id);
+      contract = await ContractModel.exists({ _id: contract_id });
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const html = await getHtmlTemplate(type, template, young, contract);
-    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const { object, message } = getMailParams(type, template, young, contract);
+    await sendDocumentEmailTask({ young_id: young._id, contract_id, type, template, fileName, switchToCle });
 
-    const getPDF = async () =>
-      await fetch(config.API_PDF_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
-      }).then((response) => {
-        if (response.status !== 200) throw new Error("Error with PDF service");
-        return response.buffer();
-      });
-
-    let buffer;
-    try {
-      buffer = await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
-    } catch (e) {
-      capture(e);
-      return res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
-    }
-
-    const content = buffer.toString("base64");
-
-    let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
-    let params = { object, message };
-
-    if (switchToCle) {
-      emailTemplate = SENDINBLUE_TEMPLATES.young.PHASE_1_ATTESTATION_SWITCH_CLE;
-    }
-
-    const mail = await sendTemplate(emailTemplate, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      attachment: [{ content, name: fileName }],
-      params,
-      cc: getCcOfYoung({ template: emailTemplate, young }),
-    });
-    res.status(200).send({ ok: true, data: mail });
+    res.status(200).send({ ok: true });
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
@@ -259,7 +150,7 @@ router.post(
 
       // Check permissions
 
-      const young = await YoungObject.findById(id);
+      const young = await YoungModel.findById(id);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
       if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
@@ -274,13 +165,13 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype, size } = currentFile;
-        const filetype = await FileType.fromFile(tempFilePath);
-        const mimeFromMagicNumbers = filetype ? filetype.mime : "application/pdf";
+        const filetype = await getMimeFromFile(tempFilePath);
+        const mimeFromContent = filetype || "application/pdf";
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
-        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
-          capture(`File ${name} of user(${req.user.id})is not a valid type: ${mimetype} ${mimeFromMagicNumbers}`);
+        if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromContent))) {
+          capture(`File ${name} of user(${req.user.id})is not a valid type: ${mimetype} ${mimeFromContent}`);
           fs.unlinkSync(tempFilePath);
-          return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+          return res.status(400).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
         const scanResult = await scanFile(tempFilePath, name, req.user.id);
@@ -295,7 +186,7 @@ router.post(
 
         // Create document
         const newFile = {
-          _id: mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId(),
           name: decodeURIComponent(name),
           size,
           uploadedAt: Date.now(),
@@ -309,7 +200,7 @@ router.post(
 
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
-        const resultingFile = { mimetype: mimeFromMagicNumbers, encoding: "7bit", data: encryptedBuffer };
+        const resultingFile = { mimetype: mimeFromContent, encoding: "7bit", data: encryptedBuffer };
         if (MILITARY_FILE_KEYS.includes(key)) {
           await uploadFile(`app/young/${id}/military-preparation/${key}/${newFile._id}`, resultingFile);
         } else {
@@ -318,12 +209,16 @@ router.post(
         fs.unlinkSync(tempFilePath);
 
         // Add record to young
-
+        if (!young.files?.[key]) {
+          young.files[key] = [];
+        }
         young.files[key].push(newFile);
         if (key === "cniFiles") {
-          const cohort = await CohortObject.findOne({ name: young.cohort });
           young.latestCNIFileExpirationDate = body.expirationDate;
-          young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
+          if (young.cohort !== COHORTS.AVENIR) {
+            const cohort = await CohortModel.findById(young.cohortId);
+            young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
+          }
           young.latestCNIFileCategory = body.category;
         }
       }
@@ -362,7 +257,7 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
 
     // Check permissions
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
@@ -380,7 +275,7 @@ router.delete("/:key/:fileId", passport.authenticate(["young", "referent"], { se
 
     const recordToDelete = young.files[key].id(fileId);
     if (!recordToDelete) return res.status(404).send({ ok: false, code: ERRORS.FILE_NOT_FOUND });
-    recordToDelete.remove();
+    recordToDelete.deleteOne();
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ data: young.files[key], ok: true });
@@ -410,12 +305,12 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
 
     // Check permissions
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    const applications = await ApplicationModel.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
@@ -448,12 +343,12 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     }
     const { id, key, fileId } = value;
 
-    const young = await YoungObject.findById(id);
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
+    const applications = await ApplicationModel.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }

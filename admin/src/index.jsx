@@ -4,6 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import ReduxToastr from "react-redux-toastr";
+import { captureMessage } from "./sentry";
 import "react-redux-toastr/lib/css/react-redux-toastr.min.css";
 import "react-day-picker/dist/style.css";
 
@@ -11,13 +12,19 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, LinearScale } from "char
 ChartJS.register(ArcElement, Tooltip, Legend, LinearScale);
 
 import store from "./redux/store";
+
 import App from "./app.jsx";
+
+window.addEventListener("vite:preloadError", (event) => {
+  captureMessage("Preloading Error", event);
+  window.location.reload(true);
+});
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
       <App />
-      <ReduxToastr timeOut={1500} transitionIn="fadeIn" transitionOut="fadeOut" />
+      <ReduxToastr timeOut={5000} transitionIn="fadeIn" transitionOut="fadeOut" />
     </Provider>
   </React.StrictMode>,
 );

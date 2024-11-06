@@ -24,7 +24,7 @@ export default function GenericError({ title = "Une erreur s’est produite !", 
         </a>{" "}
         ou revenez à l’accueil.
         <br />
-        Si le problème persiste n’hésitezpas à{" "}
+        Si le problème persiste n’hésitez pas à{" "}
         <a href={`${adminURL}/besoin-d-aide?from=${window.location.pathname}`} className="underline">
           nous contacter
         </a>

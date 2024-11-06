@@ -420,7 +420,7 @@ export default function List() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Missions" }]} />
+      <Breadcrumbs items={[{ title: "Engagement" }, { label: "Missions" }]} />
       <div className="mb-8 flex w-full flex-row" style={{ fontFamily: "Marianne" }}>
         <div className="flex w-full flex-1 flex-col px-8">
           <div className="flex items-center justify-between py-8">
@@ -504,8 +504,8 @@ export default function List() {
                   { label: "Nom de la mission (Z > A)", field: "name.keyword", order: "desc" },
                 ]}
                 selectedFilters={selectedFilters}
-                paramData={paramData}
-                setParamData={setParamData}
+                pagination={paramData}
+                onPaginationChange={setParamData}
               />
             </div>
             <div className="mt-2 flex flex-row flex-wrap items-center px-4">

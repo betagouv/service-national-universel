@@ -26,7 +26,7 @@ export default function SimpleNavItem({ sideBarOpen, Icon, title, active, link, 
                   className={`group flex items-center py-[10px] pl-[11px] rounded-lg  h-[52px] cursor-pointer 
                    ${sideBarOpen ? "!pr-2  w-[238px]" : "w-[76px]"} ${active ? "bg-[#0C1035]" : "hover:bg-[#1B1F42]"} `}>
                   <div className={`rounded-md w-[3px] h-[20px]  ${active ? "bg-[#EEEFF5]" : "bg-inherit"}`} />
-                  <Icon className={`ml-[9px]  w-[30px] h-[30px] text-[#EEEFF5]/70 group-hover:text-[#EEEFF5] ${active && "!text-[#EEEFF5]"}`} />
+                  <Icon className={`ml-[9px] w-[30px] h-[30px] text-[#EEEFF5]/70 group-hover:text-[#EEEFF5] stroke-[1.5px] ${active && "!text-[#EEEFF5]"}`} />
                   <p
                     className={`truncate flex-1 pl-[15px] text-base w-full text-left text-[#EEEFF5]/80 group-hover:text-[#EEEFF5] ${sideBarOpen ? "block" : "hidden"} ${
                       active && "!text-[#EEEFF5]"

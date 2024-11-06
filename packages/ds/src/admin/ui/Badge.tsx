@@ -1,4 +1,5 @@
 import React from "react";
+import cx from "classnames";
 
 type TStatus =
   | "none"
@@ -20,6 +21,7 @@ type OwnProps = {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   className?: string;
+  customStyles?: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
@@ -29,16 +31,26 @@ export default function Badge({
   mode = "default",
   leftIcon,
   rightIcon,
+  customStyles,
   className = "",
   onClick,
 }: OwnProps) {
-  const styles = getStyles({ status });
+  const styles = customStyles || getStyles({ status, mode });
 
   if (mode === "editable") {
     return (
       <button
         type="button"
-        className={`flex items-center justify-center w-fit h-8 rounded-3xl px-3 py-1.5 gap-2 border-[1px] text-xs leading-5 font-[500] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${styles} ${className} `}
+        className={cx(
+          "flex items-center justify-center w-fit h-8 rounded-3xl py-1.5 gap-1.5 border-[1px] text-xs leading-5 font-[500] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600",
+          {
+            "px-3": !leftIcon && !rightIcon,
+            "pl-[12px] pr-3 ": !!leftIcon,
+            "pl-3 pr-[12px]": !!rightIcon,
+          },
+          styles,
+          className,
+        )}
         onClick={onClick}
       >
         {leftIcon}
@@ -54,7 +66,11 @@ export default function Badge({
 
   return (
     <div
-      className={`flex items-center justify-center w-fit h-8 rounded-3xl px-3 py-1.5 gap-2 border-[1px] text-xs leading-5 font-[500] ${styles} ${className}`}
+      className={cx(
+        `flex items-center justify-center w-fit h-8 rounded-3xl px-3 py-1.5 gap-2 border-[1px] text-xs leading-5 font-[500]`,
+        styles,
+        className,
+      )}
     >
       {leftIcon}
       {typeof title === "string" ? (
@@ -67,29 +83,55 @@ export default function Badge({
   );
 }
 
-const getStyles = ({ status }: { status: TStatus }) => {
+const getStyles = ({
+  status,
+  mode,
+}: {
+  status: OwnProps["status"];
+  mode: OwnProps["mode"];
+}) => {
   switch (status) {
     case "CANCEL":
-      return "text-rose-500 bg-gray-50 border-gray-200";
+      return cx("text-rose-500 bg-gray-50 border-gray-200", {
+        "hover:border-gray-500": mode === "editable",
+      });
     case "REFUSED":
-      return "text-red-600 bg-red-50 border-red-200";
+      return cx("text-red-600 bg-red-50 border-red-200", {
+        "hover:border-red-500": mode === "editable",
+      });
     case "IN_PROGRESS":
-      return "text-indigo-600 bg-indigo-50 border-indigo-300";
+      return cx("text-indigo-600 bg-indigo-50 border-indigo-300", {
+        "hover:border-indigo-500": mode === "editable",
+      });
     case "WAITING_VALIDATION":
-      return "text-yellow-600 bg-yellow-50 border-yellow-300";
+      return cx("text-amber-600 bg-amber-50 border-amber-300", {
+        "hover:border-amber-500": mode === "editable",
+      });
     case "WAITING_CORRECTION":
-      return "text-orange-600 bg-orange-50 border-orange-300";
+      return cx("text-orange-600 bg-orange-50 border-orange-300", {
+        "hover:border-orange-500": mode === "editable",
+      });
     case "VALIDATED":
-      return "text-green-600 bg-green-50 border-green-300";
+      return cx("text-emerald-600 bg-emerald-50 border-emerald-300", {
+        "hover:border-emerald-500": mode === "editable",
+      });
     case "WAITING_LIST":
-      return "text-cyan-600 bg-cyan-50 border-cyan-300";
+      return cx("text-cyan-600 bg-cyan-50 border-cyan-300", {
+        "hover:border-cyan-500": mode === "editable",
+      });
     case "DRAFT":
-      return "text-white bg-indigo-500 italic border-indigo-500";
+      return cx("text-white bg-indigo-500 italic border-indigo-500", {
+        "hover:border-indigo-500": mode === "editable",
+      });
     case "primary":
-      return "text-blue-600 bg-blue-50 border-blue-300 hover:bg-blue-100";
+      return cx("text-blue-600 bg-blue-50 border-blue-300", {
+        "hover:border-blue-500": mode === "editable",
+      });
     case "secondary":
-      return "text-[#30345B] bg-[#EEEFF5] border-[#B3B5CD]";
+      return cx("text-[#30345B] bg-[#EEEFF5] border-[#B3B5CD]");
     default:
-      return "text-gray-600 bg-gray-50 border-gray-200";
+      return cx("text-gray-600 bg-gray-50 border-gray-300", {
+        "hover:border-gray-500": mode === "editable",
+      });
   }
 };

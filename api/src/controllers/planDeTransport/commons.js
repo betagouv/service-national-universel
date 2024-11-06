@@ -1,4 +1,4 @@
-const SessionPhase1Model = require("../../models/sessionPhase1");
+const { SessionPhase1Model } = require("../../models");
 const mongoose = require("mongoose");
 
 const filteredRegionList = [
@@ -26,7 +26,7 @@ const filteredRegionList = [
 
 async function getCohesionCenterFromSession(sessionId) {
   const result = await SessionPhase1Model.aggregate([
-    { $match: { _id: mongoose.Types.ObjectId(sessionId) } },
+    { $match: { _id: new mongoose.Types.ObjectId(sessionId) } },
     {
       $addFields: { centerId: { $toObjectId: "$cohesionCenterId" } },
     },

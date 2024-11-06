@@ -1,7 +1,7 @@
 const { differenceInDays, startOfDay } = require("date-fns");
 const { capture } = require("../sentry");
-const YoungModel = require("../models/young");
-const { sendTemplate } = require("../sendinblue");
+const { YoungModel } = require("../models");
+const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 

@@ -5,8 +5,12 @@ export const getFilteredDepartment = (setSelectedFilters, selectedFilters, setDe
   if (selectedFilters.academy?.length) {
     setSelectedFilters({ ...selectedFilters, department: selectedFilters?.department?.filter((d) => selectedFilters.academy?.includes(departmentToAcademy[d])) });
     return setDepartmentOptions(
-      selectedFilters.academy?.reduce((previous, current) => {
-        return [...previous, ...(academyToDepartments[current] || []).map((d) => ({ key: d, label: d }))];
+      selectedFilters.academy?.reduce((acc, current) => {
+        let departments = academyToDepartments[current] || [];
+        if (!Array.isArray(departments)) {
+          departments = [departments];
+        }
+        return [...acc, ...departments.map((dep) => ({ key: dep, label: dep }))];
       }, []) || [],
     );
   }

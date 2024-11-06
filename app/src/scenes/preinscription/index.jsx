@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Redirect, Switch, useParams } from "react-router-dom";
+import { Redirect, Switch, useHistory, useLocation, useParams } from "react-router-dom";
 import api from "@/services/api";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
 import { SentryRoute, capture } from "../../sentry";
@@ -9,6 +9,7 @@ import StepNonEligible from "./steps/stepNonEligible";
 import StepSejour from "./steps/stepSejour";
 import StepProfil from "./steps/stepProfil";
 import StepConfirm from "./steps/stepConfirm";
+import StepNoSejour from "../preinscription/steps/stepNoSejour";
 import EmailValidation from "./EmailValidation";
 import Done from "./Done";
 
@@ -17,8 +18,7 @@ import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEP
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import Loader from "@/components/Loader";
 import { toastr } from "react-redux-toastr";
-import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
-import { YOUNG_SOURCE } from "snu-lib/constants";
+import { YOUNG_SOURCE, FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { environment } from "@/config";
 import useAuth from "@/services/useAuth";
 
@@ -28,6 +28,7 @@ function renderStepResponsive(step) {
   if (step === STEPS.SEJOUR) return <StepSejour />;
   if (step === STEPS.PROFIL) return <StepProfil />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
+  if (step === STEPS.NO_SEJOUR) return <StepNoSejour />;
 }
 
 const Step = () => {
@@ -88,8 +89,10 @@ const PreInscriptionPublic = () => {
 };
 
 const PreInscriptionPrivate = () => {
-  const young = useSelector((state) => state.Auth.young);
-  if (!young) return <Redirect to="/preinscription" />;
+  const { young } = useAuth();
+  const { pathname, search } = useLocation();
+  const history = useHistory();
+  if (!young) return history.push(`/auth?redirect=${pathname}${search}`);
   return (
     <Switch>
       <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />;

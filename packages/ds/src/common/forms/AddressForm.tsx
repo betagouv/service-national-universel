@@ -1,5 +1,6 @@
 import React from "react";
 import Input from "../inputs/Input";
+import Hint from "../ui/Hint";
 import Combobox from "../inputs/Combobox";
 import { RiSearchLine } from "react-icons/ri";
 
@@ -19,8 +20,9 @@ export type Address = {
 
 interface proptype {
   label?: string;
-  data: Address;
-  updateData: (data: Address) => void;
+  readOnly?: boolean;
+  data: Partial<Address>;
+  updateData: (data: Partial<Address>) => void;
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   options: Address[];
@@ -28,6 +30,7 @@ interface proptype {
 
 export default function AddressForm({
   label = "Rechercher une adresse",
+  readOnly = false,
   data,
   updateData,
   query,
@@ -54,41 +57,51 @@ export default function AddressForm({
           label="Adresse"
           value={data.address}
           onChange={(value: string) => updateData({ ...data, address: value })}
-          disabled={data?.coordinatesAccuracyLevel === "housenumber"}
+          disabled={
+            readOnly || data?.coordinatesAccuracyLevel === "housenumber"
+          }
           className="col-span-2"
         />
         <Input
           label="Ville"
           value={data.city}
-          disabled
+          disabled={readOnly}
           className="col-span-2 md:col-span-1"
         />
         <Input
           label="Code postal"
           value={data.zip}
-          disabled
+          disabled={readOnly}
           className="col-span-2 md:col-span-1"
         />
-        <button
-          onClick={resetData}
-          className="col-span-2 text-blue-600 hover:text-blue-800 ml-auto py-1 flex gap-2 items-center"
-        >
-          <RiSearchLine />
-          Rechercher une nouvelle adresse
-        </button>
+        {!readOnly && (
+          <button
+            onClick={resetData}
+            className="col-span-2 text-blue-600 hover:text-blue-800 ml-auto py-1 flex gap-2 items-center"
+          >
+            <RiSearchLine />
+            Rechercher une nouvelle adresse
+          </button>
+        )}
       </div>
     );
 
   return (
-    <Combobox
-      label={label}
-      setQuery={setQuery}
-      options={options?.map((o) => ({
-        label: `${o.address ? `${o.address} - ` : ""}${o.zip} ${o.city}`,
-        value: o,
-      }))}
-      value={query}
-      onChange={(option) => updateData(option.value)}
-    />
+    <>
+      <Combobox
+        label={label}
+        setQuery={setQuery}
+        options={options?.map((o) => ({
+          label: `${o.address ? `${o.address} - ` : ""}${o.zip} ${o.city}`,
+          value: o,
+        }))}
+        value={query}
+        onChange={(option) => updateData(option.value)}
+      />
+      <Hint>
+        Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la
+        ville.
+      </Hint>
+    </>
   );
 }

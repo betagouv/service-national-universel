@@ -1,5 +1,5 @@
 import dayjs from "@/utils/dayjs.utils";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -10,7 +10,7 @@ import { setUser as setUserInRedux } from "../../../redux/auth/actions";
 import TabList from "../../../components/views/TabList";
 import plausibleEvent from "../../../services/plausible";
 import Tab from "../../phase0/components/Tab";
-import { ROLES, translate } from "../../../utils";
+import { canSigninAs, ROLES, translate } from "../../../utils";
 import { Badge } from "@snu/ds/admin";
 import { signinAs } from "@/utils/signinAs";
 
@@ -23,13 +23,17 @@ const getSubtitle = (user) => {
 export default function UserHeader({ user, tab, currentUser }) {
   const history = useHistory();
   const dispatch = useDispatch();
+  const [handleImpersonateLoading, setHandleImpersonateLoading] = useState(false);
 
   const handleImpersonate = async () => {
     try {
+      if (handleImpersonateLoading) return;
+      setHandleImpersonateLoading(true);
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", user._id);
       dispatch(setUserInRedux(data));
       history.push("/dashboard");
+      setHandleImpersonateLoading(false);
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
@@ -47,12 +51,14 @@ export default function UserHeader({ user, tab, currentUser }) {
               <span className="text-xs">{getSubtitle(user)}</span>
             </div>
             <div className="flex items-center">
-              {user.structureId ? (
+              {user.structureId && (
                 <Link to={`/structure/${user.structureId}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
                   <PanelActionButton icon="eye" title="Voir la structure" className="m-0 mr-2" />
                 </Link>
-              ) : null}
-              {currentUser.role === ROLES.ADMIN ? <PanelActionButton className="m-0" onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
+              )}
+              {canSigninAs(currentUser, user, "referent") && (
+                <PanelActionButton className="m-0" onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+              )}
             </div>
           </div>
 

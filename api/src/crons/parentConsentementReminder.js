@@ -1,16 +1,20 @@
 const { capture } = require("../sentry");
-const YoungModel = require("../models/young");
-const { sendTemplate } = require("../sendinblue");
+const { YoungModel } = require("../models");
+const { CohortModel } = require("../models");
+const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { APP_URL } = require("../config");
+const config = require("config");
 
 exports.handler = async () => {
   try {
     let countNotice = 0;
-    const now = Date.now();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const cohorts = await CohortModel.find({ name: { $regex: `${currentYear}`, $options: "i" } });
+    const cohortNames = cohorts.map((cohort) => cohort.name);
     const cursor = await YoungModel.find({
-      cohort: /2023/,
+      cohort: { $in: cohortNames },
       status: { $in: ["IN_PROGRESS", "REINSCRIPTION"] },
       parent1AllowSNU: { $exists: false },
       inscriptionDoneDate: { $exists: true, $lt: lessDays(now, 7), $gte: lessDays(now, 8) },
@@ -20,7 +24,7 @@ exports.handler = async () => {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT_REMINDER, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },

@@ -25,7 +25,7 @@ export function Box({ children, className = "" }) {
 
 export function BoxHeader({ children, title, className = "" }) {
   return (
-    <div className={`flex items-center justify-between border-b-[1px] border-b-[##E5E7EB] pb-[24px] ${className}`}>
+    <div className={`flex items-center justify-between ${className}`}>
       <div className="text[#111827] text-[23px] font-bold leading-[28px]">{title ? title : ""}</div>
       <div className="">{children}</div>
     </div>

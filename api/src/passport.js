@@ -1,12 +1,11 @@
 const passport = require("passport");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
-const { secret, APP_URL, ADMIN_URL, KNOWLEDGEBASE_URL } = require("./config");
+const config = require("config");
 const { capture } = require("./sentry");
 const Joi = require("joi");
 
-const Young = require("./models/young");
-const Referent = require("./models/referent");
+const { YoungModel, ReferentModel } = require("./models");
 const { ROLES } = require("snu-lib");
 const { checkJwtSigninVersion } = require("./jwt-options");
 
@@ -16,9 +15,9 @@ function getToken(req) {
   // * On first call after refresh, the token is only in the cookie
   if (!token) {
     const origin = req.get("Origin");
-    if (origin === APP_URL) token = req.cookies.jwt_young;
-    else if (origin === ADMIN_URL) token = req.cookies.jwt_ref;
-    else if (origin === KNOWLEDGEBASE_URL) {
+    if (origin === config.APP_URL) token = req.cookies.jwt_young;
+    else if (origin === config.ADMIN_URL) token = req.cookies.jwt_ref;
+    else if (origin === config.KNOWLEDGEBASE_URL) {
       token = req.cookies.jwt_ref;
       if (!token) token = req.cookies.jwt_young;
     }
@@ -36,25 +35,36 @@ async function validateUser(Model, jwtPayload, done, role) {
 
     if (error) return done(null, false);
     if (!checkJwtSigninVersion(value)) return done(null, false);
-    delete value.__v;
 
-    const user = await Model.findOne(value);
-    if (user && (!role || user.role === role)) return done(null, user);
+    const user = await Model.findById(value._id);
+    if (user) {
+      const passwordMatch = user.passwordChangedAt?.getTime() === value.passwordChangedAt?.getTime();
+      const logoutMatch = user.lastLogoutAt?.getTime() === value.lastLogoutAt?.getTime();
+
+      if (passwordMatch && logoutMatch && (!role || user.role === role)) {
+        return done(null, user);
+      }
+    }
   } catch (error) {
     capture(error);
   }
   return done(null, false);
 }
 
-module.exports = function () {
+function initPassport() {
   const opts = {};
   opts.jwtFromRequest = getToken;
-  opts.secretOrKey = secret;
+  opts.secretOrKey = config.JWT_SECRET;
 
-  passport.use("young", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Young, jwtPayload, done)));
-  passport.use("referent", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done)));
-  passport.use("admin", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done, ROLES.ADMIN)));
-  passport.use("dsnj", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done, ROLES.DSNJ)));
+  passport.use("young", new JwtStrategy(opts, (jwtPayload, done) => validateUser(YoungModel, jwtPayload, done)));
+  passport.use("referent", new JwtStrategy(opts, (jwtPayload, done) => validateUser(ReferentModel, jwtPayload, done)));
+  passport.use("admin", new JwtStrategy(opts, (jwtPayload, done) => validateUser(ReferentModel, jwtPayload, done, ROLES.ADMIN)));
+  passport.use("dsnj", new JwtStrategy(opts, (jwtPayload, done) => validateUser(ReferentModel, jwtPayload, done, ROLES.DSNJ)));
+  passport.use("injep", new JwtStrategy(opts, (jwtPayload, done) => validateUser(ReferentModel, jwtPayload, done, ROLES.INJEP)));
+
+}
+
+module.exports = {
+  initPassport,
+  getToken,
 };
-
-module.exports.getToken = getToken;

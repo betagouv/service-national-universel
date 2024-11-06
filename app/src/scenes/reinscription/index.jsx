@@ -10,29 +10,23 @@ import { useSelector } from "react-redux";
 import StepEligibilite from "../preinscription/steps/stepEligibilite";
 import StepSejour from "../preinscription/steps/stepSejour";
 import StepConfirm from "../preinscription/steps/stepConfirm";
+import StepNoSejour from "../preinscription/steps/stepNoSejour";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { hasAccessToReinscription } from "snu-lib";
 import FutureCohort from "../inscription2023/FutureCohort";
+import { getCohort } from "@/utils/cohorts";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
   if (step === STEPS.SEJOUR) return <StepSejour />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
+  if (step === STEPS.NO_SEJOUR) return <StepNoSejour />;
 }
 
 const Step = () => {
-  const [data, updateValue] = useContext(ReinscriptionContext);
-  const young = useSelector((state) => state.Auth.young);
-  useEffect(() => {
-    updateValue({
-      ...data,
-      birthDate: young.birthdateAt,
-      zip: young.zip,
-      frenchNationality: young.frenchNationality,
-    });
-  }, []);
+  const [data] = useContext(ReinscriptionContext);
 
   const { step } = useParams();
 
@@ -52,10 +46,11 @@ export default function ReInscription() {
   const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
 
-  const fetchInscriptionOpen = async () => {
+  const fetchReInscriptionOpen = async () => {
     try {
-      const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen`);
+      const { ok, data, code } = await api.get(`/cohort-session/isReInscriptionOpen`);
       if (!ok) {
         capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
@@ -68,10 +63,10 @@ export default function ReInscription() {
   };
 
   useEffect(() => {
-    fetchInscriptionOpen();
+    fetchReInscriptionOpen();
   }, []);
 
-  if (!hasAccessToReinscription(young)) return <Redirect to="/" />;
+  if (!hasAccessToReinscription(young, cohort)) return <Redirect to="/" />;
 
   if (isReinscriptionOpenLoading) return <Loader />;
 

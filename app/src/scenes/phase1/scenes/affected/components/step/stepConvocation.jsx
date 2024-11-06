@@ -11,14 +11,20 @@ import { StepCard } from "../StepCard";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import ConvocationModal from "../modals/ConvocationModal";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
+import { STEPS, isStepDone } from "../../utils/steps.utils";
 
-export default function StepConvocation({ center, meetingPoint, departureDate, returnDate, enabled, isDone, stepNumber }) {
+export default function StepConvocation({ data: { center, meetingPoint, departureDate, returnDate } }) {
+  const index = 3;
   const young = useSelector((state) => state.Auth.young);
+  const isEnabled = isStepDone(STEPS.AGREEMENT, young);
+  const isDone = isStepDone(STEPS.CONVOCATION, young);
   const dispatch = useDispatch();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [openConvocation, setOpenConvocation] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const downloadConvocation = async () => {
+    setLoading(true);
     try {
       plausibleEvent("Phase1/telechargement convocation");
       await downloadPDF({
@@ -35,9 +41,11 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
       console.log(e);
       toastr.error("Une erreur est survenue lors de l'édition de votre convocation", e.message);
     }
+    setLoading(false);
   };
 
   const handleMail = async () => {
+    setLoading(true);
     try {
       let template = "cohesion";
       let type = "convocation";
@@ -52,18 +60,19 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
       toastr.error("Erreur lors de l'envoi du document : ", e.message);
       setModal({ isOpen: false, onConfirm: null });
     }
+    setLoading(false);
   };
 
-  if (!enabled) {
+  if (!isEnabled) {
     return (
-      <StepCard state="disabled" stepNumber={3}>
+      <StepCard variant="disabled" index={index}>
         <p className="font-medium text-gray-400">Téléchargez votre convocation</p>
       </StepCard>
     );
   }
 
   return (
-    <StepCard state={isDone ? "done" : "todo"} stepNumber={stepNumber}>
+    <StepCard variant={isDone ? "done" : ""} index={index}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold">Téléchargez votre convocation</p>
@@ -72,11 +81,12 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
         <div className="w-full md:w-auto mt-1 md:mt-0 flex flex-col md:flex-row-reverse gap-2">
           <button
             onClick={downloadConvocation}
-            className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
+            disabled={loading}
+            className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center disabled:bg-gray-100 disabled:cursor-wait ${
               isDone ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}>
             <HiOutlineDownload className="h-5 w-5" />
-            Télécharger
+            {loading ? "Chargement" : "Télécharger"}
           </button>
 
           <button
@@ -107,7 +117,15 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
         title="Envoi de document par mail"
         subTitle={`Vous allez recevoir le lien de téléchargement de votre convocation par mail à l'adresse ${young.email}.`}
       />
-      <ConvocationModal isOpen={openConvocation} setIsOpen={setOpenConvocation} center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+      <ConvocationModal
+        isOpen={openConvocation}
+        setIsOpen={setOpenConvocation}
+        loading={loading}
+        center={center}
+        meetingPoint={meetingPoint}
+        departureDate={departureDate}
+        returnDate={returnDate}
+      />
     </StepCard>
   );
 }

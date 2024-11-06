@@ -8,14 +8,13 @@ const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const { ROLES } = require("snu-lib");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const SessionPhase1Object = require("../../models/sessionPhase1");
+const { LigneBusModel, SessionPhase1Model } = require("../../models");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
     const { user, body } = req;
-    const searchFields = ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "centerCode", "centerCity", "centerRegion"];
+    const searchFields = ["busId", "pointDeRassemblements.region", "pointDeRassemblements.city", "pointDeRassemblements.matricule", "centerCode", "centerCity", "centerRegion"];
     const filterFields = [
       "busId.keyword",
       "cohort.keyword",
@@ -26,6 +25,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "pointDeRassemblements.department.keyword",
       "pointDeRassemblements.city.keyword",
       "pointDeRassemblements.code.keyword",
+      "pointDeRassemblements.matricule.keyword",
       "centerName.keyword",
       "centerRegion.keyword",
       "centerDepartment.keyword",
@@ -38,10 +38,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "delayedBack.keyword",
     ];
     const sortFields = [];
-
     // Authorization
     if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     // Body params validation
     const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -51,10 +49,10 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // A head center can only see bus line rattached to his center.
     if (user.role === ROLES.HEAD_CENTER) {
-      const centers = await SessionPhase1Object.find({ headCenterId: user._id, cohort: queryFilters.cohort[0] });
-      if (!centers.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+      const centers = await SessionPhase1Model.find({ headCenterId: user._id, cohort: queryFilters.cohort[0] });
+      if (!centers.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort: queryFilters.cohort[0] });
-      if (!lignebus.length) return { error: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+      if (!lignebus.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       contextFilters.push({ terms: { _id: lignebus.map((e) => e._id) } });
     }
 
@@ -95,5 +93,4 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
 module.exports = router;

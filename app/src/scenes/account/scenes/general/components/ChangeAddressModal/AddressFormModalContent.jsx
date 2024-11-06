@@ -3,7 +3,7 @@ import Modal from "../../../../../../components/ui/modals/Modal";
 import ButtonPrimary from "../../../../../../components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../../../../components/ui/buttons/ButtonLight";
 import { useDebounce } from "@uidotdev/usehooks";
-import useAddress from "@/services/useAddress";
+import { useAddress } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 
 const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {

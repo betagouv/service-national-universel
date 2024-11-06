@@ -1,6 +1,6 @@
 import Img2 from "../../assets/militaryPrepMobile.png";
 import React from "react";
-import { HiOutlineSearch } from "react-icons/hi";
+import { HiArrowLeft, HiOutlineSearch } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import CheckCircle from "../../assets/icons/CheckCircle";
@@ -19,7 +19,10 @@ export default function HomeMobile() {
       <div className="pl-4">
         <div className="flex justify-between pt-4">
           <div className="flex w-2/3 flex-col">
-            <div className="text-3xl font-bold text-gray-800">Partez en préparation militaire</div>
+            <button onClick={() => history.goBack()} className="flex items-center">
+              <HiArrowLeft className="text-2xl text-gray-500" />
+            </button>
+            <div className="mt-4 text-3xl font-bold text-gray-800">Partez en préparation militaire</div>
             {!readMore ? (
               <div className="mt-4 text-left text-sm text-gray-700">
                 Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence...
@@ -84,7 +87,7 @@ export default function HomeMobile() {
         <div className="text-lg font-semibold leading-6">Vous remplissez les conditions ?</div>
         <div className="text-lg font-semibold leading-6"> N’attendez plus !</div>
         <Link
-          to='/mission?MILITARY_PREPARATION=%5B"true"%5D'
+          to='/mission?MILITARY_PREPARATION="true"'
           onClick={() => plausibleEvent("Phase2/CTA - PM - TrouvezPM")}
           className="group mt-4 flex items-center gap-1 rounded-[10px] border-[1px] bg-blue-600 py-2.5 px-3 hover:border-blue-600 hover:bg-white">
           <HiOutlineSearch className="mr-2 text-[#ffffff] group-hover:text-blue-600" />

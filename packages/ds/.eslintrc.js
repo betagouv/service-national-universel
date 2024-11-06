@@ -6,7 +6,7 @@ module.exports = {
     es2021: true,
   },
   globals: {
-    "JSX": true
+    JSX: true,
   },
   extends: [
     "eslint:recommended",
@@ -17,7 +17,7 @@ module.exports = {
     "prettier",
   ],
   overrides: [],
-  "parser": "@typescript-eslint/parser",
+  parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
@@ -26,13 +26,14 @@ module.exports = {
   rules: {
     "react/prop-types": 0,
     "prettier/prettier": ["warn"],
-    "no-unused-vars": "warn",
+    "no-unused-vars": "off",
     "no-async-promise-executor": "warn",
     "react/no-unescaped-entities": "off",
     "react-hooks/rules-of-hooks": "warn",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
   },
   settings: {
     react: {

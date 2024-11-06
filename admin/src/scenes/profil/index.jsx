@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { VISITOR_SUBROLES } from "snu-lib/roles";
+import { VISITOR_SUBROLES } from "snu-lib";
 import Loader from "../../components/Loader";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { setUser } from "../../redux/auth/actions";

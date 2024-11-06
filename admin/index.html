@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr" class="notranslate" translate="no">
   <head>
     <meta charset="utf-8" />
@@ -21,18 +21,6 @@
       plausible("pageview", { u: redactedUrl });
     </script>
     <script type="module" src="/src/index.jsx"></script>
-    <script>
-      if ("%MODE%" === "staging") {
-        window.Userback = window.Userback || {};
-        Userback.access_token = "%VITE_USERBACK_ACCESS_TOKEN%";
-        (function (d) {
-          var s = d.createElement("script");
-          s.async = true;
-          s.src = "https://static.userback.io/widget/v1.js";
-          (d.head || d.body).appendChild(s);
-        })(document);
-      }
-    </script>
   </head>
 
   <body>

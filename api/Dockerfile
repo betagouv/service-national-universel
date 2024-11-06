@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat
 RUN apk update
 # Set working directory
 WORKDIR /app
-RUN npm install --global turbo
+RUN npm install --global turbo@^2.0.0
 COPY . .
 ENV APP_NAME api
 RUN turbo prune $APP_NAME --docker
@@ -28,15 +28,18 @@ RUN npm install
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
+ARG RELEASE=""
+ENV RELEASE=${RELEASE}
+ARG SENTRY_AUTH_TOKEN=""
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 ENV APP_NAME api
 RUN npm run build
 
 FROM base AS runner
 WORKDIR /app
 
-RUN addgroup --system --gid 1001 expressjs
-RUN adduser --system --uid 1001 expressjs
-USER expressjs
+RUN apk --no-cache add bash mongodb-tools jq curl util-linux rsyslog rsyslog-elasticsearch rsyslog-mmjsonparse
+
 COPY --from=installer /app .
 
 LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel" \
@@ -45,7 +48,14 @@ LABEL org.opencontainers.image.source="https://github.com/betagouv/service-natio
 ENV APP_NAME api
 ENV PORT 8080
 ENV HOST 0.0.0.0
+ARG RELEASE=""
+ENV RELEASE=${RELEASE}
+ENV NODE_CONFIG_DIR=/app/api/config
+
+ENV PATH=/app/node_modules/pm2/bin/:$PATH
 
 EXPOSE $PORT
 
-CMD ["node", "api/src/index.js"]
+RUN pm2 install --docker pm2-slack
+
+CMD ["api/docker_start.sh"]

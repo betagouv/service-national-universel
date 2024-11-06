@@ -1,6 +1,9 @@
-import { YOUNG_SOURCE } from "snu-lib";
+import { FEATURES_NAME, isFeatureEnabled, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { getCohort } from "./cohorts";
+import { environment } from "@/config";
 
 export const INSCRIPTION_STEPS = {
+  EMAIL_WAITING_VALIDATION: "EMAIL_WAITING_VALIDATION",
   COORDONNEES: "COORDONNEES",
   CONSENTEMENTS: "CONSENTEMENTS",
   REPRESENTANTS: "REPRESENTANTS",
@@ -17,12 +20,14 @@ export const PREINSCRIPTION_STEPS = {
   SEJOUR: "SEJOUR",
   PROFIL: "PROFIL",
   CONFIRM: "CONFIRM",
+  NO_SEJOUR: "NO_SEJOUR",
 };
 
 export const REINSCRIPTION_STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
   SEJOUR: "SEJOUR",
   CONFIRM: "CONFIRM",
+  NO_SEJOUR: "NO_SEJOUR",
 };
 
 export const CORRECTION_STEPS = {
@@ -52,12 +57,14 @@ export const PREINSCRIPTION_STEPS_LIST = [
   { name: PREINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
   { name: PREINSCRIPTION_STEPS.PROFIL, url: "profil" },
   { name: PREINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
+  { name: PREINSCRIPTION_STEPS.NO_SEJOUR, url: "no_sejour" },
 ];
 
 export const REINSCRIPTION_STEPS_LIST = [
   { name: REINSCRIPTION_STEPS.ELIGIBILITE, url: "eligibilite" },
   { name: REINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
   { name: REINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
+  { name: REINSCRIPTION_STEPS.NO_SEJOUR, url: "no_sejour" },
 ];
 
 export const CORRECTION_STEPS_LIST = [
@@ -81,7 +88,7 @@ export const getStepUrl = (name, STEP_LIST) => {
 const WAITING_CORRECTION_LINK = [
   {
     field: ["firstName", "lastName", "phone", "email"],
-    redirect: "/inscription2023/correction/profil",
+    redirect: "/inscription/correction/profil",
     step: "profil",
   },
   {
@@ -100,7 +107,7 @@ const WAITING_CORRECTION_LINK = [
       "schoolId",
       "zip",
     ],
-    redirect: "/inscription2023/correction/eligibilite",
+    redirect: "/inscription/correction/eligibilite",
     step: "eligibilite",
   },
   {
@@ -117,7 +124,7 @@ const WAITING_CORRECTION_LINK = [
       "parent2Email",
       "parent2Phone",
     ],
-    redirect: "/inscription2023/correction/representants",
+    redirect: "/inscription/correction/representants",
     step: "representants",
   },
   {
@@ -154,13 +161,14 @@ const WAITING_CORRECTION_LINK = [
       "specificAmenagmentType",
       "reducedMobilityAccess",
       "handicapInSameDepartment",
+      "psc1Info",
     ],
-    redirect: "/inscription2023/correction/coordonnee",
+    redirect: "/inscription/correction/coordonnee",
     step: "coordonnee",
   },
   {
     field: ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"],
-    redirect: "/inscription2023/correction/documents",
+    redirect: "/inscription/correction/documents",
     step: "documents",
   },
 ];
@@ -168,7 +176,7 @@ const WAITING_CORRECTION_LINK = [
 const WAITING_CORRECTION_LINK_CLE = [
   {
     field: ["firstName", "lastName", "frenchNationality", "phone", "email", "birthdateAt", "grade"],
-    redirect: "/inscription2023/correction/profil",
+    redirect: "/inscription/correction/profil",
     step: "profil",
   },
   {
@@ -185,7 +193,7 @@ const WAITING_CORRECTION_LINK_CLE = [
       "parent2Email",
       "parent2Phone",
     ],
-    redirect: "/inscription2023/correction/representants",
+    redirect: "/inscription/correction/representants",
     step: "representants",
   },
   {
@@ -221,8 +229,9 @@ const WAITING_CORRECTION_LINK_CLE = [
       "specificAmenagmentType",
       "reducedMobilityAccess",
       "handicapInSameDepartment",
+      "psc1Info",
     ],
-    redirect: "/inscription2023/correction/coordonnee",
+    redirect: "/inscription/correction/coordonnee",
     step: "coordonnee",
   },
 ];
@@ -235,7 +244,7 @@ export const getCorrectionByStep = (young, step) => {
   const correctionLink = getCorrectionLink(young);
   const keyList = correctionLink.find((link) => link.step === step);
   const corrections = young?.correctionRequests.reduce((acc, curr) => {
-    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field) && curr.cohort === young.cohort) {
+    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field)) {
       acc[curr.field] = curr.message;
     }
     return acc;
@@ -254,3 +263,11 @@ export const redirectToCorrection = (young, field) => {
   const correction = correctionLink.find((correction) => correction.field.includes(field));
   return correction ? correction.redirect : "/";
 };
+
+export function shouldForceRedirectToEmailValidation(user) {
+  const cohort = getCohort(user.cohort);
+  const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
+  const shouldUserValidateEmail = user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
+  const pathname = window.location.pathname;
+  return isEmailValidationEnabled && shouldUserValidateEmail && pathname !== "/preinscription/email-validation";
+}

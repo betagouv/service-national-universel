@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import {
+  canManageMig,
   canViewEmailHistory,
   canViewNotes,
   isCle,
@@ -56,7 +57,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   const history = useHistory();
   const [statusOptions, setStatusOptions] = useState([]);
   const [withdrawn, setWithdrawn] = useState({ reason: "", message: "" });
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (young) {
@@ -66,11 +66,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
-            if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
-              options = [YOUNG_STATUS.WITHDRAWN];
-            } else {
-              options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
-            }
+            options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
             break;
           case YOUNG_STATUS.WITHDRAWN:
             if (user.role === ROLES.ADMIN) {
@@ -85,7 +81,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       //referent can withdraw a young from every status except withdrawn
       if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && young.status !== "WITHDRAWN") options.push(YOUNG_STATUS.WITHDRAWN);
       options = [...new Set(options)];
-
       setStatusOptions(options.map((opt) => ({ value: opt, label: translateInscriptionStatus(opt) })));
     } else {
       setStatusOptions([]);
@@ -162,7 +157,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     } else {
       young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note: values?.note });
     }
-    young.status = status;
+    young.status = status; // FIXME: immutable
     const now = new Date();
     young.lastStatusAt = now.toISOString();
     if (status === "WITHDRAWN" && (values?.withdrawnReason || values?.withdrawnMessage)) {
@@ -259,7 +254,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 </>
               )}
             </Title>
-            <AttestationDownloadButton young={young} />
+            {![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && <AttestationDownloadButton young={young} />}
             {[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && young.status !== YOUNG_STATUS.WITHDRAWN && (
               <>
                 <DsfrButton title="Désister" onClick={() => onSelectStatus(YOUNG_STATUS.WITHDRAWN)} />
@@ -304,11 +299,13 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                   </Tab>
                   {user.role !== ROLES.HEAD_CENTER && (
                     <>
-                      <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
-                        <div className="flex items-center">
-                          Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_2)} />}
-                        </div>
-                      </Tab>
+                      {canManageMig(user) && (
+                        <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+                          <div className="flex items-center">
+                            Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_2)} />}
+                          </div>
+                        </Tab>
+                      )}
                       {[YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED].includes(young.statusPhase3) && (
                         <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
                           <div className="flex items-center">
@@ -362,9 +359,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
 
             {young.status !== YOUNG_STATUS.DELETED && ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
               <div className="my-[15px] flex items-center justify-between">
-                <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
-                  Supprimer
-                </Button>
+                {user.role === ROLES.ADMIN && (
+                  <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
+                    Supprimer
+                  </Button>
+                )}
                 <button
                   onClick={() => {
                     window.open(appURL, "_blank");
@@ -381,7 +380,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       {confirmModal && (
         <ConfirmationModal
           isOpen={true}
-          loading={loading}
           icon={confirmModal.icon}
           title={confirmModal.title}
           message={confirmModal.message}

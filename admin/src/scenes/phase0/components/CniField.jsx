@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import CorrectionRequest from "./CorrectionRequest";
 import PencilAlt from "@/assets/icons/PencilAlt";
 import CorrectedRequest from "./CorrectedRequest";
-import { HiDotsVertical, HiExclamation, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiDotsVertical, HiOutlineInformationCircle, HiInformationCircle } from "react-icons/hi";
 import ReactTooltip from "react-tooltip";
 import { isBefore } from "date-fns";
-import classNames from "classnames";
+import cx from "classnames";
 import { CniModal } from "./CniModal";
 
 export function CniField({
@@ -29,7 +29,6 @@ export function CniField({
   const [mouseIn, setMouseIn] = useState(false);
   const [cniModalOpened, setCniModalOpened] = useState(false);
   const isDatePassed = young.latestCNIFileExpirationDate ? isBefore(new Date(young.latestCNIFileExpirationDate), new Date()) : false;
-
   useEffect(() => {
     setOpened(currentRequest === name);
   }, [currentRequest]);
@@ -73,61 +72,68 @@ export function CniField({
   return (
     <>
       <div
-        className={classNames(
+        className={cx(
           "mb-[15px]",
           "flex",
           "items-center",
-          "justify-between",
           "rounded-[7px]",
-          "p-[30px]",
+          "px-4",
+          "py-6",
           {
-            "bg-amber-50": isDatePassed,
+            "bg-indigo-50": isDatePassed,
             "border-l-8": isDatePassed,
-            "border-amber-500": isDatePassed,
+            "border-indigo-400": isDatePassed,
             "bg-gray-50": !isDatePassed,
           },
           className,
         )}
         onMouseEnter={() => setMouseIn(true)}
         onMouseLeave={() => setMouseIn(false)}>
-        <div className="shrink-0 flex">
-          <UploadedFileIcon />
-          <div className="text-sm leading-5 font-medium">
-            <div className="flex mt-3 ml-2">
+        <div className={cx("flex", "w-full", { "justify-between": !isDatePassed })}>
+          <div className="w-2/10">
+            <UploadedFileIcon />
+          </div>
+          <div className={cx("text-sm", "leading-5", "font-medium", "w-7/10", { flex: !isDatePassed, "items-center": !isDatePassed })}>
+            <div className="flex ml-2">
               <p>Pièce d'identité</p>
               {isDatePassed && (
                 <>
                   <HiOutlineInformationCircle size={20} className="ml-2 text-gray-900" data-tip data-for={"CNI-tooltip"} />
                   <ReactTooltip id={"CNI-tooltip"} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md">
                     <div className={"w-[275px] list-outside !px-1 !py-2 text-left text-xs font-normal text-gray-600 "}>
-                      {"La date de péremption de la CNI est dépassé, pensez à vérifier qu’il n’y ait pas d’erreur de saisie."}
+                      La date de péremption de la CNI est dépassée, pensez à vérifier qu’il n’y ait pas d’erreur de saisie (non bloquant pour la validation du dossier).
                     </div>
                   </ReactTooltip>
                 </>
               )}
             </div>
             {isDatePassed && (
-              <div className="flex ml-2 mt-2">
-                <HiExclamation size={20} className="text-amber-400 mr-2" />
-                <p className="text-amber-800">Date de validité dépassée</p>
+              <div className="flex">
+                <HiInformationCircle size={30} className="text-indigo-500 mr-2" />
+                <p className="text-indigo-700">
+                  Date de validité dépassée (non bloquant pour la validation du dossier).{" "}
+                  <a href=" https://support.snu.gouv.fr/base-de-connaissance/instruction-des-dossiers-par-les-referents" className="underline" target="_blank">
+                    Plus d’infos
+                  </a>
+                </p>
               </div>
             )}
           </div>
-        </div>
-        <div className="flex items-center justify-end gap-2">
-          {mode === "correction" && (
-            <div className={requestButtonClass} onClick={startRequest}>
-              <PencilAlt className={`h-[14px] w-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
-            </div>
-          )}
-          <button
-            className={classNames("rounded-full", "p-2.5", {
-              "bg-amber-100": isDatePassed,
-              "bg-gray-100": !isDatePassed,
-            })}
-            onClick={() => setCniModalOpened(true)}>
-            <HiDotsVertical size={16} className={classNames({ "text-amber-500": isDatePassed, "text-gray-500": !isDatePassed })} />
-          </button>
+          <div className="w-1/10 flex items-center ml-auto">
+            {mode === "correction" && (
+              <div className={requestButtonClass} onClick={startRequest}>
+                <PencilAlt className={`h-[14px] w-[14px]  ${hasValidRequest ? "text-white" : "text-[#F97316]"} group-hover:text-white`} />
+              </div>
+            )}
+            <button
+              className={cx("rounded-full", "p-2.5", {
+                "bg-indigo-100": isDatePassed,
+                "bg-gray-100": !isDatePassed,
+              })}
+              onClick={() => setCniModalOpened(true)}>
+              <HiDotsVertical size={16} className={cx({ "text-indigo-500": isDatePassed, "text-gray-500": !isDatePassed })} />
+            </button>
+          </div>
         </div>
       </div>
       {correctionRequest && correctionRequest.status === "CORRECTED" && (

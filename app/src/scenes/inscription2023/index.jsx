@@ -16,10 +16,10 @@ import MobileCorrectionProfil from "./steps/correction/stepProfil";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
-import { YOUNG_STATUS, inscriptionCreationOpenForYoungs, inscriptionModificationOpenForYoungs } from "snu-lib";
+import { YOUNG_STATUS, inscriptionCreationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
-import { environment, supportURL } from "../../config";
+import { supportURL } from "../../config";
 import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
@@ -47,7 +47,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
   const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
 
   if (!requestedStep && eligibleStep) {
-    return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
+    return <Redirect to={`/inscription/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
   }
 
   const currentStep = requestedStep || STEP_LIST[0].name;
@@ -69,7 +69,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
   }
 
   if (currentStepIndex > updatedEligibleStepIndex) {
-    return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
+    return <Redirect to={`/inscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
   return (
@@ -108,7 +108,6 @@ export default function Index() {
   const cohort = getCohort(young.cohort);
 
   if (!young) return <Redirect to="/preinscription" />;
-
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir") {
     return <FutureCohort />;
   }
@@ -131,18 +130,19 @@ export default function Index() {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  if (!inscriptionCreationOpenForYoungs(cohort) && [YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
+  if (!inscriptionCreationOpenForYoungs(cohort) && !isCLE && [YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
     return <InscriptionClosed young={young} isCLE={isCLE} />;
   }
 
   //si la periode de modification est finie
-  if (!inscriptionModificationOpenForYoungs(cohort) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
-    return <Redirect to={{ pathname: "/" }} />;
+  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
+  if (!isInscriptionModificationOpenForYoungs && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
+    return <InscriptionClosed young={young} isCLE={isCLE} />;
   }
 
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION) {
-    return <SentryRoute path="/inscription2023/correction/:step?/:category?" component={() => <StepCorrection young={young} />} />;
+    return <SentryRoute path="/inscription/correction/:step?/:category?" component={() => <StepCorrection young={young} />} />;
   }
 
-  return <SentryRoute path="/inscription2023/:step?/:category?" component={() => <Step young={young} />} />;
+  return <SentryRoute path="/inscription/:step?/:category?" component={() => <Step young={young} />} />;
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { BigDigits } from "./commons";
 
-export default function ProgressArc({ total, value, legend = null, hilight = null, className = "", mode = "green", strokeWidth = 160 }) {
+export default function ProgressArc({ total, value, legend = "", hilight = 0, className = "", mode = "green", strokeWidth = 160 }) {
   let backColor, valueColor;
   switch (mode) {
     case "red":

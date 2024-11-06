@@ -2,7 +2,6 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Redirect, useHistory, useParams } from "react-router-dom";
-import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import Error from "../../../components/error";
 import { supportURL } from "../../../config";
@@ -12,12 +11,13 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
+import { YOUNG_STATUS, isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib";
 // import Input from "../components/Input";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import useAuth from "@/services/useAuth";
 import { SignupButtons, Checkbox, Input, InputPhone } from "@snu/ds/dsfr";
+import emojiRegex from "emoji-regex";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -141,10 +141,10 @@ export default function StepRepresentants() {
         dispatch(setYoung(responseData));
         if (isCLE) {
           plausibleEvent("CLE/CTA inscription - representants legaux");
-          history.push("/inscription2023/confirm");
+          history.push("/inscription/confirm");
         } else {
           plausibleEvent("Phase0/CTA inscription - representants legaux");
-          history.push("/inscription2023/documents");
+          history.push("/inscription/documents");
         }
       } catch (e) {
         capture(e);
@@ -261,7 +261,7 @@ export default function StepRepresentants() {
         {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
           <SignupButtons onClickNext={onCorrection} onClickPrevious={() => history.push("/")} disabled={loading} />
         ) : (
-          <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
+          <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription/consentement")} disabled={loading} />
         )}
       </DSFRContainer>
     </>
@@ -269,6 +269,20 @@ export default function StepRepresentants() {
 }
 
 const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
+  const handleNameChange = (field) => (value) => {
+    // Expression régulière pour supprimer les caractères invalides
+    const invalidCharRegex = /[^a-zA-ZÀ-ÿ\s'\-^¨éèëâçù]/g;
+    // Expression régulière pour correspondre aux emojis
+    const emojiReg = emojiRegex();
+
+    // Supprimer les caractères invalides
+    let fixedValue = value.replace(invalidCharRegex, "");
+    // Supprimer les emojis
+    fixedValue = fixedValue.replace(emojiReg, "");
+
+    // Mettre à jour l'état avec la valeur nettoyée
+    setData({ ...data, [field]: fixedValue });
+  };
   return (
     <div className="my-4 flex flex-col">
       <div className="pb-2 font-bold text-[18px] text-[#161616]">Représentant légal {i} </div>
@@ -296,7 +310,7 @@ const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
         label="Son prénom"
         nativeInputProps={{
           value: data[`parent${i}FirstName`],
-          onChange: (e) => setData({ ...data, [`parent${i}FirstName`]: e.target.value }),
+          onChange: (e) => handleNameChange(`parent${i}FirstName`)(e.target.value),
         }}
         state={(corrections[`parent${i}FirstName`] || errors[`parent${i}FirstName`]) && "error"}
         stateRelatedMessage={corrections[`parent${i}FirstName`] || errors[`parent${i}FirstName`]}
@@ -305,7 +319,7 @@ const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
         label="Son nom"
         nativeInputProps={{
           value: data[`parent${i}LastName`],
-          onChange: (e) => setData({ ...data, [`parent${i}LastName`]: e.target.value }),
+          onChange: (e) => handleNameChange(`parent${i}LastName`)(e.target.value),
         }}
         state={(corrections[`parent${i}LastName`] || errors[`parent${i}LastName`]) && "error"}
         stateRelatedMessage={corrections[`parent${i}LastName`] || errors[`parent${i}LastName`]}

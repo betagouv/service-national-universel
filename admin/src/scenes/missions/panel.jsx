@@ -4,7 +4,7 @@ import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 
 import { useSelector } from "react-redux";
-import { ROLES } from "snu-lib/roles";
+import { ROLES } from "snu-lib";
 import Badge from "../../components/Badge";
 import Panel, { Details, Info } from "../../components/Panel";
 import PanelActionButton from "../../components/buttons/PanelActionButton";

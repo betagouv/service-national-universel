@@ -14,7 +14,6 @@ import SignupInvite from "./signupInvite";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import Loader from "../../components/Loader";
-import { environment } from "../../config";
 import FooterComponent from "../../components/footer";
 
 export default function AuthIndex() {

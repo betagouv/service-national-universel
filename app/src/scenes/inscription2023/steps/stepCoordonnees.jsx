@@ -12,15 +12,17 @@ import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { supportURL } from "../../../config";
-import { YOUNG_STATUS } from "snu-lib";
+import { getRegionForEligibility, useAddress, YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
+import ReactTooltip from "react-tooltip";
+import { RiInformationFill } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
-import useAddress from "@/services/useAddress";
 import { useDebounce } from "@uidotdev/usehooks";
 import { fr } from "@codegouvfr/react-dsfr";
 import { SignupButtons, BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -42,7 +44,7 @@ const addressFields = ["address", "zip", "city", "cityCode", "region", "departme
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [...birthPlaceFields, ...addressFields, "gender", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
+const commonFields = [...birthPlaceFields, ...addressFields, "gender", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary", "psc1Info"];
 
 const commonRequiredFields = [
   ...birthPlaceFields,
@@ -59,19 +61,20 @@ const commonRequiredFields = [
   "allergies",
   "ppsBeneficiary",
   "paiBeneficiary",
+  "psc1Info",
 ];
 
 const requiredFieldsForeigner = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const requiredMoreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
 const defaultState = {
-  birthCountry: FRANCE,
+  birthCountry: "",
   birthCityZip: "",
   birthCity: "",
-  gender: "female",
+  gender: "",
   phone: "",
   phoneZone: "",
-  livesInFrance: "true",
+  livesInFrance: "",
   address: "",
   zip: "",
   city: "",
@@ -96,16 +99,18 @@ const defaultState = {
   specificAmenagmentType: "",
   reducedMobilityAccess: "",
   handicapInSameDepartment: "",
+  psc1Info: null,
 };
 
 export default function StepCoordonnees() {
-  const [wasBornInFrance, setWasBornInFrance] = useState("true");
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
   const [corrections, setCorrections] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
   const [birthCitySuggestionsOpen, setBirthCitySuggestionsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -114,9 +119,18 @@ export default function StepCoordonnees() {
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
   const { isCLE } = useAuth();
-  const [hasSpecialSituation, setSpecialSituation] = useState(
-    young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true",
-  );
+  const [hasSpecialSituation, setSpecialSituation] = useState(getInitialSpecialSituation());
+  const [wasBornInFrance, setWasBornInFrance] = useState(getInitalWasBornInFrance());
+
+  function getInitialSpecialSituation() {
+    if (!young?.handicap && !young?.allergies && !young?.ppsBeneficiary && !young?.paiBeneficiary) return undefined;
+    return young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true";
+  }
+
+  function getInitalWasBornInFrance() {
+    if (!young?.birthCountry) return undefined;
+    return young.birthCountry === FRANCE ? "true" : "false";
+  }
 
   const {
     birthCountry,
@@ -142,11 +156,12 @@ export default function StepCoordonnees() {
     specificAmenagmentType,
     reducedMobilityAccess,
     handicapInSameDepartment,
+    psc1Info,
   } = data;
 
   const debouncedBirthCity = useDebounce(birthCity, 200);
 
-  const wasBornInFranceBool = wasBornInFrance === "true";
+  const wasBornInFranceBool = data.birthCountry ? wasBornInFrance === "true" : undefined;
   const isFrenchResident = livesInFrance === "true";
 
   const moreInformation = handicap === "true" || ppsBeneficiary === "true" || paiBeneficiary === "true";
@@ -156,21 +171,15 @@ export default function StepCoordonnees() {
       const situationOptions = young.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions;
       setSituationOptions(situationOptions);
 
-      if (young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true") {
-        setSpecialSituation(true);
-      }
-
-      setWasBornInFrance(!young.birthCountry || young.birthCountry === FRANCE ? "true" : "false");
-
       setData({
         ...data,
         schooled: young.schooled || data.schooled,
-        situation: young.situation || data.situation,
+        situation: situationOptions.some((option) => option.value === young.situation) ? young.situation : data.situation,
         birthCountry: young.birthCountry || data.birthCountry,
         birthCity: young.birthCity || data.birthCity,
         birthCityZip: young.birthCityZip || data.birthCityZip,
         gender: young.gender || data.gender,
-        livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
+        livesInFrance: young.foreignCountry ? "false" : young?.department ? "true" : undefined,
         address: young.address || data.address,
         addressVerified: young.addressVerified || data.addressVerified,
         coordinatesAccuracyLevel: young.coordinatesAccuracyLevel || data.coordinatesAccuracyLevel,
@@ -195,6 +204,7 @@ export default function StepCoordonnees() {
         specificAmenagmentType: young.specificAmenagmentType || data.specificAmenagmentType,
         reducedMobilityAccess: young.reducedMobilityAccess || data.reducedMobilityAccess,
         handicapInSameDepartment: young.handicapInSameDepartment || data.handicapInSameDepartment,
+        psc1Info: young.psc1Info || data.psc1Info,
       });
     }
     if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
@@ -237,10 +247,6 @@ export default function StepCoordonnees() {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
-
   const updateWasBornInFrance = (newWasBornInFrance) => {
     if (newWasBornInFrance === "true") {
       setData({ ...data, ...getObjectWithEmptyData(birthPlaceFields), birthCountry: FRANCE });
@@ -278,7 +284,7 @@ export default function StepCoordonnees() {
   const { results: birthCityZipSuggestions } = useAddress({
     query: debouncedBirthCity,
     options: { type: "municipality" },
-    enabled: wasBornInFranceBool && debouncedBirthCity.length > 2,
+    enabled: wasBornInFranceBool === true && debouncedBirthCity.length > 2,
   });
 
   const updateBirthCity = async (value) => {
@@ -317,7 +323,9 @@ export default function StepCoordonnees() {
       requiredFields.push("situation");
     }
 
-    if (hasSpecialSituation === null) {
+    if (!psc1Info || psc1Info === "") errors.psc1Info = "Ce champ est obligatoire";
+
+    if (hasSpecialSituation === undefined) {
       errors.hasSelectedSpecialSituation = "Ce champ est obligatoire";
     }
 
@@ -339,9 +347,25 @@ export default function StepCoordonnees() {
       errors.address = "Veuillez saisir une nouvelle adresse.";
     }
 
+    if (hasSpecialSituation === undefined) {
+      errors.hasSpecialSituation = "Ce champ est obligatoire";
+    }
+
     errors = { ...errors, ...getErrors() };
 
     setErrors(errors);
+
+    // On prend la région de l'école si le volontaire est scolarisé, celle du domicile sinon.
+    const regionForEligibility = getRegionForEligibility({ ...young, ...data });
+
+    if (regionForEligibility === "Occitanie" && young.cohort === "Toussaint 2024") {
+      setModalMessage(
+        "Le séjour d'octobre 2024 est déjà complet pour votre région, nous ne pouvons donc pas prendre en compte votre inscription. Nous avons vos coordonnées, vous serez donc averti en priorité dès l'ouverture des inscriptions pour les séjours 2025",
+      );
+      setShowModal(true);
+      setLoading(false);
+      return;
+    }
 
     if (!Object.keys(errors).length) {
       const updates = {};
@@ -362,7 +386,7 @@ export default function StepCoordonnees() {
         const eventName = isCLE ? "CLE/CTA inscription - profil" : "Phase0/CTA inscription - profil";
         plausibleEvent(eventName);
         dispatch(setYoung(responseData));
-        history.push("/inscription2023/consentement");
+        history.push("/inscription/consentement");
       } catch (e) {
         capture(e);
         toastr.error("Une erreur s'est produite :", translate(e.code));
@@ -443,17 +467,28 @@ export default function StepCoordonnees() {
     <>
       <DSFRContainer
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
-        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
         supportEvent="Phase0/aide inscription - coordonnees">
+        {young.cohort === "Toussaint 2024" && (
+          <div className="flex flex-col text-base w-fit rounded-md px-2 py-1 font-bold bg-[#E8EDFF] text-[#0063CB] px-4 py-2 mb-4">
+            <p className="mb-2 mt-2 font-bold">Attention !</p>
+            <p className="mb-2 text-sm md:text-base">
+              Dans la région Occitanie, compte tenu du nombre très élevé d'inscriptions, nous ne pouvons pas garantir votre participation au séjour d'octobre 2024. Vous serez
+              informé en priorité lors de l'ouverture des inscriptions pour les séjours 2025.
+            </p>
+          </div>
+        )}
         <BooleanRadioButtons
           options={inFranceOrAbroadOptions}
           legend="Je suis né(e)..."
           value={wasBornInFrance}
           onChange={(e) => updateWasBornInFrance(e.target.value)}
           orientation="horizontal"
+          state={(corrections?.birthCountry || errors.birthCountry) && "error"}
+          stateRelatedMessage={corrections?.birthCountry || errors.birthCountry}
         />
 
-        {!wasBornInFranceBool && (
+        {wasBornInFrance === "false" && (
           <SearchableSelect
             label="Pays de naissance"
             value={birthCountry}
@@ -516,7 +551,7 @@ export default function StepCoordonnees() {
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
             options={situationOptions}
             nativeSelectProps={{
-              value: situation,
+              value: situationOptions.some((option) => option.value === situation) ? situation : undefined,
               onChange: (e) => updateData("situation")(e.target.value),
             }}
             state={(corrections?.situation || errors.situation) && "error"}
@@ -537,9 +572,8 @@ export default function StepCoordonnees() {
           state={(corrections?.livesInFrance || errors.livesInFrance) && "error"}
           stateRelatedMessage={corrections?.livesInFrance || errors.livesInFrance}
         />
-        {isFrenchResident ? (
-          <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections} />
-        ) : (
+        {isFrenchResident && <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections} />}
+        {livesInFrance === "false" && (
           <>
             <SearchableSelect
               label="Pays de résidence"
@@ -728,6 +762,7 @@ export default function StepCoordonnees() {
                 />
                 <BooleanRadioButtons
                   legend="Pour le séjour de cohésion, avez-vous besoin d’être affecté(e) dans un centre proche de chez vous pour raison médicale ?"
+                  hintText="Ne cochez cette case qu’en cas de nécessité."
                   value={handicapInSameDepartment}
                   onChange={(e) => updateData("handicapInSameDepartment")(e.target.value)}
                   orientation="horizontal"
@@ -739,8 +774,41 @@ export default function StepCoordonnees() {
             )}
           </>
         )}
+        <hr className="my-2" />
+        <div className="flex mt-4 items-center gap-3 mb-4">
+          <h2 className="m-0 text-lg font-semibold leading-6 align-left">Formation PSC1</h2>
+          <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+            <ul className="text-gray-800">
+              <li> La formation PSC1 permet d'acquérir les gestes de premiers secours pour être capable d'intervenir en cas d'urgence.</li>
+              <li> Avoir validé le PSC1 n'est pas obligatoire pour participer au séjour de cohésion.</li>
+            </ul>
+          </ReactTooltip>
+          <div data-tip data-for="tooltip-nationalite">
+            <RiInformationFill className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover text-[24px] ml-2" />
+          </div>
+        </div>
+        <BooleanRadioButtons
+          legend="Avez-vous validé le PSC1 (Prévention et Secours Civiques de niveau 1) ?"
+          hintText=""
+          value={psc1Info}
+          options={[{ value: "true" }, { value: "false" }]}
+          onChange={(e) => updateData("psc1Info")(e.target.value)}
+          orientation="horizontal"
+          state={(corrections?.psc1Info || errors.psc1Info) && "error"}
+          stateRelatedMessage={errors.psc1Info}
+        />
         <SignupButtons onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />
       </DSFRContainer>
+      <ModalConfirm
+        isOpen={showModal}
+        topTitle="Alerte"
+        title="Séjour complet pour votre région"
+        message={modalMessage}
+        onCancel={() => setShowModal(false)}
+        onConfirm={() => setShowModal(false)}
+        confirmText="Ok"
+        cancelText="Annuler"
+      />
     </>
   );
 }

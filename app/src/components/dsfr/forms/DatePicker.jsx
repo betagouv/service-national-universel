@@ -1,40 +1,64 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import dayjs from "dayjs";
 import Input from "./input";
 
-export default function DatePicker({ value, onChange, disabled = false, state = "default", displayError = false }) {
-  const [day, setDay] = useState(() => (value ? value.getDate() : ""));
-  const [month, setMonth] = useState(() => (value ? value.getMonth() + 1 : ""));
-  const [year, setYear] = useState(() => (value ? value.getFullYear() : ""));
-  const maxYear = new Date().getFullYear();
-  const minYear = 0;
+export default function DatePicker({ initialValue, onChange, setError = (isError) => {}, disabled = false, state = "default", displayError = false, errorText }) {
+  const [day, setDay] = useState(initialValue ? initialValue.getDate() : null);
+  const [month, setMonth] = useState(initialValue ? initialValue.getMonth() + 1 : null);
+  const [year, setYear] = useState(initialValue ? initialValue.getFullYear() : null);
+  const maxYear = 2070;
+  const minYear = 1990;
   const error = state == "error" || displayError;
 
   const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
 
-  useEffect(() => {
-    if (day && month && year) {
-      const dayString = day.toString();
-      const monthString = month.toString();
-      const dateString = `${year}-${monthString.length === 1 ? `0${monthString}` : monthString}-${dayString.length === 1 ? `0${dayString}` : dayString}T00:00:00`;
-      const newDate = new Date(dateString);
-      onChange(newDate);
+  const validateForm = (day, month, year) => {
+    let isValid = true;
+    if (day && (day < 1 || day > 31)) {
+      isValid = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [day, month, year]);
+    if (month && (month < 1 || month > 12)) {
+      isValid = false;
+    }
+    if (year && (year < minYear || year > maxYear)) {
+      isValid = false;
+    }
+    return isValid;
+  };
 
-  useEffect(() => {
-    if (value && !day && !month && !year) {
-      setDay(value.getDate());
-      setMonth(value.getMonth() + 1);
-      setYear(value.getFullYear());
+  const handleChangeDay = (newDay) => {
+    setDay(newDay);
+    if (!validateForm(newDay, month, year)) {
+      setError(true);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+    setError(false);
+    onChange(new Date(year, month - 1, newDay));
+  };
+
+  const handleChangeMonth = (newMonth) => {
+    setMonth(newMonth);
+    if (!validateForm(day, newMonth, year)) {
+      setError(true);
+      return;
+    }
+    setError(false);
+    onChange(new Date(year, newMonth - 1, day));
+  };
+
+  const handleChangeYear = (newYear) => {
+    setYear(newYear);
+    if (!validateForm(day, month, newYear)) {
+      setError(true);
+      return;
+    }
+    setError(false);
+    onChange(new Date(newYear, month - 1, day));
+  };
 
   return (
     <>
-      <div className="mt-2 flex w-full items-start justify-start gap-3 md:gap-8 flex-row">
+      <div className="mt-2 grid grid-cols-3 gap-3 md:gap-8">
         <div className={`flex flex-col items-start mb-2 flex-grow`}>
           <Input
             id="day"
@@ -44,7 +68,7 @@ export default function DatePicker({ value, onChange, disabled = false, state = 
             max="31"
             value={day}
             onKeyDown={blockInvalidChar}
-            onChange={setDay}
+            onChange={handleChangeDay}
             placeholder="Jour"
             hintText="Exemple : 14"
             maxLength="2"
@@ -60,7 +84,7 @@ export default function DatePicker({ value, onChange, disabled = false, state = 
             max="12"
             value={month}
             onKeyDown={blockInvalidChar}
-            onChange={setMonth}
+            onChange={handleChangeMonth}
             placeholder="Mois"
             hintText="Exemple : 12"
             maxLength="2"
@@ -76,7 +100,7 @@ export default function DatePicker({ value, onChange, disabled = false, state = 
             max={maxYear}
             value={year}
             onKeyDown={blockInvalidChar}
-            onChange={setYear}
+            onChange={handleChangeYear}
             placeholder="Année"
             hintText="Exemple : 2004"
             maxLength="4"
@@ -84,7 +108,12 @@ export default function DatePicker({ value, onChange, disabled = false, state = 
           />
         </div>
       </div>
-      {displayError && <div className="h-8">{value && !dayjs(value).isValid() && <span className="text-sm text-red-500">La date n'est pas valide</span>}</div>}
+      {displayError && <div className="h-8">{initialValue && !dayjs(initialValue).isValid() && <span className="text-sm text-red-500">La date n'est pas valide</span>}</div>}
+      {error && (
+        <div className="h-8">
+          <span className="text-sm text-red-500">{errorText}</span>
+        </div>
+      )}
     </>
   );
 }

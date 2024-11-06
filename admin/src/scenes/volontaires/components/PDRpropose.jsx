@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, formatStringDateWithDayTimezoneUTC } from "../../../utils";
+import { translate, formatDateFR, getZonedDate } from "../../../utils";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import RightArrow from "./RightArrow";
@@ -44,13 +44,13 @@ export default function PDRpropose({ young, center, modalAffectations, setModalA
         <p className=" text-gray-600">
           Départ:{" "}
           <span className="text-gray-900">
-            {formatStringDateWithDayTimezoneUTC(pdr.pdr.ligneBus.departuredDate)} {pdr.pdr.ligneToPoint.departureHour}
+            {formatDateFR(getZonedDate(pdr.pdr.ligneBus.departuredDate))} {pdr.pdr.ligneToPoint.departureHour}
           </span>
         </p>
         <p className=" text-gray-600">
           Retour:{" "}
           <span className="text-gray-900">
-            {formatStringDateWithDayTimezoneUTC(pdr.pdr.ligneBus.returnDate)} {pdr.pdr.ligneToPoint.returnHour}
+            {formatDateFR(getZonedDate(pdr.pdr.ligneBus.returnDate))} {pdr.pdr.ligneToPoint.returnHour}
           </span>
         </p>
       </div>

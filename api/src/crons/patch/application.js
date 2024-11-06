@@ -4,10 +4,11 @@ const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
-const ApplicationModel = require("../../models/application");
+const { ApplicationModel } = require("../../models");
 const ApplicationPatchModel = require("./models/applicationPatch");
 
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -16,7 +17,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.applicationPatchScanned = result.applicationPatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const actualApplication = await ApplicationModel.findById(patch.ref.toString());
     if (!actualApplication) return;
     if (patch.ops.length > 0) {
@@ -44,12 +44,12 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualApplication, event, value) {
-  const applicationInfos = await actualApplication.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const applicationInfos = await actualApplication.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let application = rebuildApplication(applicationInfos);
 
   const anonymizedApplication = new ApplicationModel(application).anonymise();
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/application`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/application`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -89,7 +89,7 @@ const rebuildApplication = (applicationInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(ApplicationPatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -107,12 +107,12 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./application').manualHandler('2023-08-17', '2023-08-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(ApplicationPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

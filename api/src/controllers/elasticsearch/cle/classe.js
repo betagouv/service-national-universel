@@ -1,15 +1,16 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib");
+const { ROLES, YOUNG_STATUS, STATUS_CLASSE, FeatureFlagName, canSearchInElasticSearch, SUB_ROLES } = require("snu-lib");
+
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
-const EtablissementModel = require("../../../models/cle/etablissement");
+const { EtablissementModel, CohortModel } = require("../../../models");
 const { serializeReferents } = require("../../../utils/es-serializer");
-const { YOUNG_STATUS } = require("snu-lib");
+const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -19,7 +20,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const filterFields = [
       "cohort.keyword",
       "coloration.keyword",
-      "grade.keyword",
+      "grades.keyword",
       "name.keyword",
       "sector.keyword",
       "status.keyword",
@@ -29,9 +30,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "etablissementId.keyword",
       "department.keyword",
       "region.keyword",
+      "academy.keyword",
+      "schoolYear.keyword",
+      "seatsTaken",
     ];
 
-    const sortFields = ["createdAt", "name.keyword"];
+    const sortFields = ["createdAt", "name.keyword", "seatsTaken"];
 
     // Authorization
     if (!canSearchInElasticSearch(user, "classe")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -61,24 +65,36 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     if (req.params.action === "export") {
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
+      if (req.query?.type === "export-des-classes") {
+        response = await populateWithEtablissementInfo(response);
+        response = await populateWithAllReferentsInfo(response);
+        response = await populateWithYoungsInfo(response);
+      }
 
       if (req.query?.type === "schema-de-repartition") {
-        if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-        response = await populateWithEtablissementInfo(response);
+        if (user.role === ROLES.TRANSPORTER) {
+          const cohort = [...new Set(response.map((item) => item.cohort).filter(Boolean))];
+          if (cohort.length !== 1) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          const IsSchemaDownloadIsTrue = await CohortModel.findOne({ name: cohort });
+          if (!IsSchemaDownloadIsTrue) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+          if (IsSchemaDownloadIsTrue.repartitionSchemaDownloadAvailibility === false && user.role === ROLES.TRANSPORTER) {
+            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+          }
+        }
+
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
         response = await populateWithYoungsInfo(response);
         response = await populateWithLigneInfo(response);
-        response = await populateWithReferentInfo(response, req.params.action);
       }
 
       return res.status(200).send({ ok: true, data: response });
     } else {
       let response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-
       if (req.query?.needRefInfo) {
-        response.body.responses[0].hits.hits = await populateWithReferentInfo(response.body.responses[0].hits.hits, req.params.action);
+        response.body.responses[0].hits.hits = await populateWithReferentClasseInfo(response.body.responses[0].hits.hits);
       }
 
       return res.status(200).send(response.body);
@@ -91,6 +107,11 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
 async function buildClasseContext(user) {
   const contextFilters = [];
+  if (await isFeatureAvailable(FeatureFlagName.CLE_BEFORE_JULY_15)) {
+    if (user.role !== ROLES.ADMIN) {
+      contextFilters.push({ term: { "schoolYear.keyword": "2023-2024" } });
+    }
+  }
 
   if (user.role === ROLES.ADMINISTRATEUR_CLE) {
     const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
@@ -111,24 +132,23 @@ async function buildClasseContext(user) {
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
   }
 
+  if (user.role === ROLES.TRANSPORTER) {
+    contextFilters.push({ bool: { must_not: { term: { "status.keyword": STATUS_CLASSE.WITHDRAWN } } } });
+  }
+
   return { classeContextFilters: contextFilters };
 }
 
-const populateWithReferentInfo = async (classes, action) => {
-  const refIds =
-    action === "search"
-      ? [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))]
-      : [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
+const populateWithReferentClasseInfo = async (classes) => {
+  const refIds = [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))];
 
-  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
+
   const referentsData = serializeReferents(referents);
 
   return classes.map((item) => {
-    if (action === "search") {
-      item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
-    } else {
-      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds.includes(e._id.toString()));
-    }
+    item._source.referents = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+
     return item;
   });
 };
@@ -171,7 +191,7 @@ const populateWithPdrInfo = async (classes) => {
 
 const populateWithYoungsInfo = async (classes) => {
   const classesIds = classes.map((item) => item._id);
-  const students = await allRecords("young", { bool: { must: [{ terms: { classeId: classesIds } }] } });
+  const students = await allRecords("young", { bool: { must: [{ terms: { classeId: classesIds } }] } }, esClient, ["_id", "classeId", "status"]);
 
   //count students by class
   const result = students.reduce((acc, cur) => {
@@ -184,12 +204,45 @@ const populateWithYoungsInfo = async (classes) => {
 
   //populate classes with students count
   return classes.map((item) => {
-    item.studentInProgress = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length;
-    item.studentWaiting = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length;
-    item.studentValidated = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length;
-    item.studentAbandoned = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length;
-    item.studentNotAutorized = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length;
-    item.studentWithdrawn = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length;
+    item.studentInProgress = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length || 0;
+    item.studentWaiting = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length || 0;
+    item.studentValidated = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length || 0;
+    item.studentAbandoned = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length || 0;
+    item.studentNotAutorized = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length || 0;
+    item.studentWithdrawn = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length || 0;
+    return item;
+  });
+};
+
+const populateWithAllReferentsInfo = async (classes) => {
+  const referentEtablissementIds = [...new Set(classes.map((item) => item.etablissement?.referentEtablissementIds).filter(Boolean))];
+
+  const referentClasseIds = [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
+
+  const coordinateurIds = [...new Set(classes.map((item) => item.etablissement?.coordinateurIds).filter(Boolean))];
+
+  const allReferentIds = [...new Set([...referentEtablissementIds, ...referentClasseIds, ...coordinateurIds].flat())];
+
+  const referents = await allRecords("referent", { ids: { values: allReferentIds } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
+
+  const extendedReferents = referents.map((referent) => ({
+    ...referent,
+    state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
+  }));
+
+  const referentsData = serializeReferents(extendedReferents);
+
+  return classes.map((item) => {
+    const referentEtablissementFiltered = referentsData?.filter((e) => item.etablissement?.referentEtablissementIds?.includes(e._id.toString()));
+
+    const referentClasseFiltered = referentsData?.filter((e) => item.referentClasseIds?.includes(e._id.toString()));
+
+    const coordinateursFiltered = referentsData?.filter((e) => item.etablissement?.coordinateurIds?.includes(e._id.toString()));
+
+    item.referentEtablissement = referentEtablissementFiltered;
+    item.referents = referentClasseFiltered;
+    item.coordinateurs = coordinateursFiltered;
+
     return item;
   });
 };

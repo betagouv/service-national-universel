@@ -6,7 +6,7 @@ import { BiCopy } from "react-icons/bi";
 
 export default function Field({
   name,
-  label,
+  label = "",
   value,
   className = "",
   type = "text",

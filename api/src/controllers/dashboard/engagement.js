@@ -5,9 +5,9 @@ const { ERRORS } = require("../../utils");
 const Joi = require("joi");
 const { ROLES, YOUNG_STATUS, MISSION_STATUS } = require("snu-lib");
 const router = express.Router();
-const YoungModel = require("../../models/young");
-const MissionModel = require("../../models/mission");
-const MissionEquivalenceModel = require("../../models/missionEquivalence");
+const { YoungModel } = require("../../models");
+const { MissionModel } = require("../../models");
+const { MissionEquivalenceModel } = require("../../models");
 
 const filtersJoi = Joi.object({
   status: Joi.array().items(Joi.string().valid(...Object.values(YOUNG_STATUS))),
@@ -216,7 +216,6 @@ router.post("/missions-detail", passport.authenticate("referent", { session: fal
       group: Joi.string().valid("domain", "period", "format"),
     }).validate(req.body);
     if (error) {
-      console.log(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
     const { filters, missionFilters, sort, group } = value;
@@ -338,7 +337,6 @@ router.post("/missions-young-preferences", passport.authenticate("referent", { s
       group: Joi.string().valid("project", "geography", "volunteer"),
     }).validate(req.body);
     if (error) {
-      console.log(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
     const { filters, group } = value;

@@ -45,6 +45,7 @@ export default function Edit(props) {
           department: "",
           region: "",
           visibility: "",
+          order: "",
         }
       }
       onSubmit={async (values) => {
@@ -167,6 +168,10 @@ export default function Edit(props) {
                           <ErrorMessage errors={errors} touched={touched} name="region" />
                         </FormGroup>
                       ) : null}
+                      <FormGroup>
+                        <label>Ordre</label>
+                        <Field type="number" value={values.order} onChange={handleChange} name="order" placeholder="1" />
+                      </FormGroup>
                     </Wrapper>
                   </Row>
                 </Col>

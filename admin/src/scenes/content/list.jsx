@@ -3,14 +3,15 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-
 import ProgramCard from "./components/programCard";
 import api from "../../services/api";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { translate, ROLES } from "../../utils";
+import Breadcrumbs from "../../components/Breadcrumbs";
 
-const images = import.meta.globEager("../../assets/programmes-engagement/*");
+// todo - les virer de /assets et utiliser des url d'image normales
+const images = import.meta.glob("../../assets/programmes-engagement/*", { eager: true });
 
 export default function List() {
   const [programs, setPrograms] = useState();
@@ -33,6 +34,8 @@ export default function List() {
   if (!programs) return <Loader />;
   return (
     <>
+      <Breadcrumbs items={[{ title: "Engagement" }, { label: "Associations" }]} />
+
       <Header>
         <div style={{ flex: 1 }}>{getTitle()}</div>
         {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role) ? (

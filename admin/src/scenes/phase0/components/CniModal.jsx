@@ -1,6 +1,5 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { AddButton, DeleteButton } from "./commons";
 import api from "@/services/api";
 import { translate, download } from "snu-lib";
 import { toastr } from "react-redux-toastr";
@@ -11,10 +10,12 @@ import Warning from "@/assets/icons/Warning";
 import { capture } from "@/sentry";
 import Field from "./Field";
 import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
-import { resizeImage } from "../../../services/file.service";
-import Eye from "../../../assets/icons/Eye";
+import { resizeImage } from "@/services/file.service";
+import Eye from "@/assets/icons/Eye";
 import { Spinner } from "reactstrap";
-import Download from "../../../assets/icons/Download";
+import Download from "@/assets/icons/Download";
+import { DeleteButton } from "./commons/DeleteButton";
+import { AddButton } from "./commons/AddButton";
 
 export function CniModal({ young, onClose, mode, blockUpload }) {
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(null);

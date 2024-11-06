@@ -153,12 +153,57 @@
       }
     },
     {
-      "label": "Start Pdf",
-      "command": "npm install && npm run dev",
+      "label": "Open coverage",
+      "command": "open coverage/lcov-report/index.html",
       "type": "shell",
       "problemMatcher": [],
       "options": {
-        "cwd": "./pdf"
+        "cwd": "./api"
+      }
+    },
+    {
+      "label": "Run&Open coverage",
+      "command": "npm run coverage; open coverage/lcov-report/index.html",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./api"
+      }
+    },
+    {
+      "label": "Run local containers",
+      "dependsOn": [
+        "Run container mongo",
+        "Run container ES",
+        "Run container mailcatcher"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Run container ES",
+      "command": "docker-compose -f ./docker-compose.dev.yml up -d elasticsearch && docker-compose -f ./docker-compose.dev.yml logs --tail=10 -f elasticsearch",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./api"
+      }
+    },
+    {
+      "label": "Run container mongo",
+      "command": "docker-compose -f ./docker-compose.dev.yml up -d mongo && docker-compose -f ./docker-compose.dev.yml logs --tail=10 -f mongo",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./api"
+      }
+    },
+    {
+      "label": "Run container mailcatcher",
+      "command": "docker-compose -f ./docker-compose.dev.yml up -d mailcatcher && docker-compose -f ./docker-compose.dev.yml logs --tail=10 -f mailcatcher",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./api"
       }
     }
   ]

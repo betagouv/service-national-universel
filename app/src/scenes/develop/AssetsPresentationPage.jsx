@@ -92,26 +92,6 @@ import Healthsvg_5 from "../../assets/mission-domains/health.svg";
 import Securitysvg_5 from "../../assets/mission-domains/security.svg";
 import Solidaritysvg_5 from "../../assets/mission-domains/solidarity.svg";
 import Sportsvg_5 from "../../assets/mission-domains/sport.svg";
-import Bafajpg_6 from "../../assets/programmes-engagement/bafa.jpg";
-import Benevolejpg_6 from "../../assets/programmes-engagement/benevole.jpg";
-import Brevetfederauxjpg_6 from "../../assets/programmes-engagement/brevet-federaux.jpg";
-import Cecjpg_6 from "../../assets/programmes-engagement/cec.jpg";
-import Corpseuropeensolidaritepng_6 from "../../assets/programmes-engagement/corps-europeen-solidarite.png";
-import Defaultpng_6 from "../../assets/programmes-engagement/default.png";
-import Erasmusjpg_6 from "../../assets/programmes-engagement/erasmus.jpg";
-import Jeveuxaiderjpg_6 from "../../assets/programmes-engagement/je-veux-aider.jpg";
-import Jeunebenevolejpg_6 from "../../assets/programmes-engagement/jeune-benevole.jpg";
-import Juniorsassociationjpg_6 from "../../assets/programmes-engagement/juniors-association.jpg";
-import Planmercredipng_6 from "../../assets/programmes-engagement/plan-mercredi.png";
-import Reservearmeesjpg_6 from "../../assets/programmes-engagement/reserve-armees.jpg";
-import Reserveeducationjpg_6 from "../../assets/programmes-engagement/reserve-education.jpg";
-import Reservegendarmeriejpg_6 from "../../assets/programmes-engagement/reserve-gendarmerie.jpg";
-import Reservepolicejpg_6 from "../../assets/programmes-engagement/reserve-police.jpg";
-import Sapeurpompier2jpg_6 from "../../assets/programmes-engagement/sapeur-pompier-2.jpg";
-import Sapeurpompierjpg_6 from "../../assets/programmes-engagement/sapeur-pompier.jpg";
-import Serviceciviqueinternationaljpg_6 from "../../assets/programmes-engagement/service-civique-international.jpg";
-import Serviceciviquejpg_6 from "../../assets/programmes-engagement/service-civique.jpg";
-import Volontariatsolidariteinternationalejpg_6 from "../../assets/programmes-engagement/volontariat-solidarite-internationale.jpg";
 import Temoignageellyjpg_7 from "../../assets/temoignages/temoignage-elly.jpg";
 import Temoignagejuliepng_7 from "../../assets/temoignages/temoignage-julie.png";
 import Temoignageleilasamuelelisapng_7 from "../../assets/temoignages/temoignage-leila-samuel-elisa.png";
@@ -513,96 +493,6 @@ export default function AssetsPresentationPage() {
               <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="sport.svg">
                 <img src={Sportsvg_5} alt="sport.svg" crossOrigin="anonymous" className="" />
                 <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">sport.svg</div>
-              </div>
-            </div>
-            <div className=""></div>
-          </div>
-          <div className="">
-            <div className="text-3xl font-bold text-[#000000] my-8">programmes-engagement</div>
-            <div className="grid grid-cols-8 gap-4">
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="bafa.jpg">
-                <img src={Bafajpg_6} alt="bafa.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">bafa.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="benevole.jpg">
-                <img src={Benevolejpg_6} alt="benevole.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">benevole.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="brevet-federaux.jpg">
-                <img src={Brevetfederauxjpg_6} alt="brevet-federaux.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">brevet-federaux.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="cec.jpg">
-                <img src={Cecjpg_6} alt="cec.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">cec.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="corps-europeen-solidarite.png">
-                <img src={Corpseuropeensolidaritepng_6} alt="corps-europeen-solidarite.png" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">corps-europeen-solidarite.png</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="default.png">
-                <img src={Defaultpng_6} alt="default.png" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">default.png</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="erasmus.jpg">
-                <img src={Erasmusjpg_6} alt="erasmus.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">erasmus.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="je-veux-aider.jpg">
-                <img src={Jeveuxaiderjpg_6} alt="je-veux-aider.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">je-veux-aider.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="jeune-benevole.jpg">
-                <img src={Jeunebenevolejpg_6} alt="jeune-benevole.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">jeune-benevole.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="juniors-association.jpg">
-                <img src={Juniorsassociationjpg_6} alt="juniors-association.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">juniors-association.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="plan-mercredi.png">
-                <img src={Planmercredipng_6} alt="plan-mercredi.png" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">plan-mercredi.png</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="reserve-armees.jpg">
-                <img src={Reservearmeesjpg_6} alt="reserve-armees.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">reserve-armees.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="reserve-education.jpg">
-                <img src={Reserveeducationjpg_6} alt="reserve-education.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">reserve-education.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="reserve-gendarmerie.jpg">
-                <img src={Reservegendarmeriejpg_6} alt="reserve-gendarmerie.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">reserve-gendarmerie.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="reserve-police.jpg">
-                <img src={Reservepolicejpg_6} alt="reserve-police.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">reserve-police.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="sapeur-pompier-2.jpg">
-                <img src={Sapeurpompier2jpg_6} alt="sapeur-pompier-2.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">sapeur-pompier-2.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="sapeur-pompier.jpg">
-                <img src={Sapeurpompierjpg_6} alt="sapeur-pompier.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">sapeur-pompier.jpg</div>
-              </div>
-              <div
-                className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center"
-                data-name="service-civique-international.jpg">
-                <img src={Serviceciviqueinternationaljpg_6} alt="service-civique-international.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">service-civique-international.jpg</div>
-              </div>
-              <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="service-civique.jpg">
-                <img src={Serviceciviquejpg_6} alt="service-civique.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">service-civique.jpg</div>
-              </div>
-              <div
-                className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center"
-                data-name="volontariat-solidarite-internationale.jpg">
-                <img src={Volontariatsolidariteinternationalejpg_6} alt="volontariat-solidarite-internationale.jpg" crossOrigin="anonymous" className="" />
-                <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">volontariat-solidarite-internationale.jpg</div>
               </div>
             </div>
             <div className=""></div>

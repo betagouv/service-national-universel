@@ -1,6 +1,4 @@
 const mongoose = require("mongoose");
-const mongooseElastic = require("@selego/mongoose-elastic");
-const esClient = require("../../es");
 
 const MODELNAME = "stats-young-center";
 
@@ -63,6 +61,12 @@ const Schema = new mongoose.Schema({
     enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019", "à venir"],
     documentation: {
       description: "Cohorte",
+    },
+  },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
     },
   },
   young_phase: {
@@ -622,8 +626,6 @@ const Schema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
-
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

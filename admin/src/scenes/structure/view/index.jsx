@@ -12,7 +12,7 @@ export default function Index() {
   useDocumentTitle("Structures");
   return (
     <>
-      <Breadcrumbs items={[{ label: "Structures", to: "/structure" }, { label: "Fiche de la structure" }]} />
+      <Breadcrumbs items={[{ title: "Engagement" }, { label: "Structures", to: "/structure" }, { label: "Fiche de la structure" }]} />
       <Switch>
         <SentryRoute path="/structure/:id/missions" component={Missions} />
         <SentryRoute path="/structure/:id/historique" component={HistoricV2} />

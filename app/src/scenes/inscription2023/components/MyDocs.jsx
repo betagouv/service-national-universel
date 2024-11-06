@@ -26,10 +26,10 @@ export default function MyDocs({ category = "" }) {
       <h2 className="my-4 text-xl font-medium text-gray-800">Mes documents en ligne</h2>
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       {files.map((e) => (
-        <div key={e._id} className="my-4 flex w-full justify-between">
+        <div key={e._id} className="flex w-full justify-between">
           <div className="w-2/3">
-            <p className="truncate text-sm text-gray-800">{e.name}</p>
-            <p className="truncate text-xs text-gray-500">
+            <p className="truncate text-sm text-gray-800 mb-0">{e.name}</p>
+            <p className="truncate text-xs text-gray-500 mb-4">
               {translate(e.category)}
               {e.side && ` - ${e.side}`}
             </p>

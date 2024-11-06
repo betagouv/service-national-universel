@@ -20,8 +20,8 @@ export default function FutureCohort() {
             <Clock />
           </div>
           <p className="text-gray-500 text-sm">
-            <strong>Les inscriptions ont été clôturées</strong> pour les sessions du premier semestre 2023. Votre inscription a toutefois été reportée sur un prochain séjour dont
-            les dates vous seront communiquées prochainement.
+            <strong>Les inscriptions ont été clôturées</strong> pour les sessions du premier semestre de l'année en cours. Votre inscription a toutefois été reportée sur un
+            prochain séjour dont les dates vous seront communiquées prochainement.
           </p>
         </div>
         <hr className="my-4" />

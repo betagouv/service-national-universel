@@ -4,7 +4,7 @@ import { Checkbox } from "@snu/ds/dsfr";
 export default function Check({ checked, onChange, className = "", children, error }) {
   return (
     <Checkbox
-      className={`shrink-0 ${className}`}
+      className={`${className}`}
       state={error && "error"}
       stateRelatedMessage={error}
       options={[

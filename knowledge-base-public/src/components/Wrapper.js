@@ -5,7 +5,6 @@ import SeeAsContext from "../contexts/seeAs";
 import { translateRoleBDC } from "../utils/constants";
 import Header from "./Header";
 import Footer from "./Footer";
-import { environment } from "../config";
 
 const Wrapper = ({ home, children }) => {
   const { user: originalUser } = useUser();

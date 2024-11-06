@@ -1,16 +1,18 @@
 import React from "react";
 import ReactLoading from "react-loading";
+import ReactTooltip, { TooltipProps } from "react-tooltip";
 
 type Ttype =
   | "primary"
   | "secondary"
   | "tertiary"
   | "wired"
-  | "change"
-  | "cancel";
+  | "modify"
+  | "cancel"
+  | "danger";
 
 type OwnProps = {
-  title: string;
+  title: React.ReactNode;
   type?: Ttype;
   className?: string;
   leftIcon?: React.ReactNode;
@@ -18,6 +20,9 @@ type OwnProps = {
   disabled?: boolean;
   loading?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  tooltip?: string;
+  tooltipProps?: TooltipProps;
+  tooltipClassName?: string;
 };
 
 export default function Button({
@@ -29,8 +34,12 @@ export default function Button({
   disabled = false,
   loading = false,
   onClick,
+  tooltip,
+  tooltipProps,
+  tooltipClassName,
 }: OwnProps) {
   const styles = getStyles({ type });
+  const tooltipId = `tooltip-${title}`;
 
   return (
     <button
@@ -42,7 +51,29 @@ export default function Button({
       } ${disabled || loading ? styles.disabled : styles.base} ${className}`}
       disabled={disabled || loading}
       onClick={onClick}
+      data-tip
+      data-for={tooltipId}
     >
+      {tooltip && disabled === true && (
+        <ReactTooltip
+          id={tooltipId}
+          type="light"
+          place="top"
+          effect="solid"
+          className="custom-tooltip-radius !opacity-100 !shadow-md "
+          {...(tooltipProps || {})}
+        >
+          <div
+            className={
+              "w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600 " +
+              tooltipClassName
+            }
+          >
+            {tooltip}
+          </div>
+        </ReactTooltip>
+      )}
+
       {loading ? (
         <ReactLoading
           type="spin"
@@ -84,7 +115,7 @@ const getStyles = ({ type }: { type: Ttype }) => {
         disabled: "text-blue-600/60 !border border-blue-600/60",
         loaderColor: "#2563eb",
       };
-    case "change":
+    case "modify":
       return {
         native: "h-8 py-2 !pl-[12px] !gap-1 text-xs",
         base: "text-blue-600 bg-blue-100 hover:bg-blue-200",
@@ -97,6 +128,13 @@ const getStyles = ({ type }: { type: Ttype }) => {
         base: "text-gray-600 bg-gray-100 hover:bg-gray-200",
         disabled: "text-gray-600/60 bg-gray-100/60",
         loaderColor: "#4b5563",
+      };
+    case "danger":
+      return {
+        native: "h-[38px] py-[9px] text-sm",
+        base: "text-white bg-red-600 hover:bg-red-700",
+        disabled: "text-white bg-red-600/60",
+        loaderColor: "#ffffff",
       };
     default:
       return {

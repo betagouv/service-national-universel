@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import AddressDropdown from "./AddressDropdown";
 import { RiSearchLine } from "react-icons/ri";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
-import useAddress from "@/services/useAddress";
+import { useAddress } from "snu-lib";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Input } from "@snu/ds/dsfr";
 

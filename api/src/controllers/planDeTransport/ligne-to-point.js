@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+const { LigneToPointModel } = require("../../models");
+const { PointDeRassemblementModel } = require("../../models");
+const { LigneBusModel } = require("../../models");
+const { PlanTransportModel } = require("../../models");
 const { canViewLigneBus } = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");

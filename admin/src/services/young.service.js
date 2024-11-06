@@ -1,5 +1,4 @@
-import { translate } from "snu-lib";
-import { ERRORS } from "snu-lib/errors";
+import { translate, ERRORS } from "snu-lib";
 import API from "./api";
 
 export const deleteYoungAccount = async (youngId) => {

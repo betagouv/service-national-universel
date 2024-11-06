@@ -30,6 +30,7 @@ export default function UserPanel({ onChange, value }) {
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
+  const [handleImpersonateLoading, setHandleImpersonateLoading] = useState(false);
 
   const missionCount = structure?.missions?.length || 0;
   const placesLeft = structure?.missions?.reduce((acc, e) => acc + e.placesLeft, 0);
@@ -45,10 +46,13 @@ export default function UserPanel({ onChange, value }) {
 
   const handleImpersonate = async () => {
     try {
+      if (handleImpersonateLoading) return;
+      setHandleImpersonateLoading(true);
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", value._id);
       dispatch(setUser(data));
       history.push("/dashboard");
+      setHandleImpersonateLoading(false);
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { Redirect, useHistory, useParams } from "react-router-dom";
@@ -78,7 +79,8 @@ export default function StepEligibilite() {
     { value: "1ereGT", label: "1ère générale et technologique" },
     { value: "TermPro", label: "Terminale professionnelle" },
     { value: "TermGT", label: "Terminale générale et technologique" },
-    { value: "CAP", label: "CAP" },
+    { value: "1ereCAP", label: "CAP 1ère année" },
+    { value: "2ndeCAP", label: "CAP 2ème année" },
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
@@ -104,7 +106,7 @@ export default function StepEligibilite() {
         // Zip du jeune
         // ! Vérifie que ça a la bouille d'un zipcode mais ds les faits, on peut mettre nimp en 5 chiffres
         if (!data?.isAbroad && !(data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
-          errors.zip = "Vous devez sélectionner un code postal";
+          errors.zip = "Vous devez saisir un code postal";
         }
       } else {
         // School
@@ -247,7 +249,7 @@ export default function StepEligibilite() {
           />
           <label className="flex-start mt-2 flex w-full flex-col text-base">
             Date de naissance
-            <DatePicker disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+            <DatePicker disabled={true} initialValue={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
             <ErrorMessage>{error.birthDate}</ErrorMessage>
             <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
           </label>

@@ -1,8 +1,8 @@
 const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
-const sessionPhase1Model = require("../../models/sessionPhase1");
-const YoungModel = require("../../models/young");
+const { SessionPhase1Model } = require("../../models");
+const { YoungModel } = require("../../models");
 const { serializeSessionPhase1 } = require("../../utils/serializer");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
@@ -17,7 +17,7 @@ router.get("/", passport.authenticate(["young"], { session: false, failWithError
     }
     const young = await YoungModel.findById(id);
 
-    const session = await sessionPhase1Model.findById(young.sessionPhase1Id);
+    const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: serializeSessionPhase1(session) });

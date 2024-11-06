@@ -1,7 +1,7 @@
 import { toastr } from "react-redux-toastr";
-import { COHESION_STAY_START } from "snu-lib";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
+import store from "@/redux/store";
 
 export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort, size = 10) => {
   try {
@@ -115,15 +115,13 @@ export function normalizeString(s) {
 }
 
 export const orderCohort = (cohorts) => {
-  for (const cohort of cohorts) {
-    if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, cohort.key)) {
-      cohort.date = COHESION_STAY_START[cohort.key];
-    } else {
-      cohort.date = new Date("01/01/2000");
-    }
-  }
-  cohorts = cohorts.sort((a, b) => new Date(b.date) - new Date(a.date));
-  return cohorts;
+  const cohortList = store.getState().Cohorts;
+  const enhancedCohorts = cohorts.map((cohort) => {
+    const cohortData = cohortList.find((c) => c.name === cohort.key);
+    return { ...cohort, dateStart: cohortData?.dateStart };
+  });
+  const sortedCohorts = enhancedCohorts.sort((a, b) => new Date(b.dateStart) - new Date(a.dateStart));
+  return sortedCohorts;
 };
 
 export const transformExistingField = (data) => {

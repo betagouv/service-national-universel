@@ -84,9 +84,6 @@ export default function ModalSejour({ isOpen, onCancel }) {
               <>
                 <div className="mb-2 font-semibold">Séjours de cohésion disponibles</div>
                 <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-                {grade == GRADES["1ereGT"] && (
-                  <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
-                )}
                 <div className="my-4">
                   {cohorts?.map((e) => (
                     <SessionButton key={e.name} session={e} onSubmit={onSubmit} />

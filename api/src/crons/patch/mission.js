@@ -3,9 +3,10 @@ const fetch = require("node-fetch");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const MissionModel = require("../../models/mission");
+const { MissionModel } = require("../../models");
 const MissionPatchModel = require("./models/missionPatch");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -14,7 +15,6 @@ let result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.missionPatchScanned = result.missionPatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const mission = await MissionModel.findById(patch.ref.toString());
     if (!mission) return;
     if (patch.ops.length > 0) {
@@ -50,12 +50,12 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualMission, event, value) {
-  const missionInfos = await actualMission.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const missionInfos = await actualMission.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let mission = rebuildMission(missionInfos);
 
   const anonymisedMission = new MissionModel(mission).anonymise();
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/mission`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/mission`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -67,7 +67,7 @@ async function createLog(patch, actualMission, event, value) {
     body: JSON.stringify({
       evenement_nom: event,
       evenement_type: "mission",
-      evenement_valeur: value.toString() || "",
+      evenement_valeur: value?.toString() || "",
       mission_id: patch.ref.toString(),
       mission_structureId: actualMission.structureId.toString(),
       mission_status: mission.status || actualMission.status,
@@ -102,7 +102,7 @@ const rebuildMission = (missionInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(MissionPatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -120,12 +120,12 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./mission').manualHandler('2023-08-17', '2023-08-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(MissionPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

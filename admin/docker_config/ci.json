@@ -1,0 +1,9 @@
+{
+  "ENVIRONMENT": "ci",
+  "API_URL": "https://api.ci.beta-snu.dev",
+  "APP_URL": "https://moncompte.ci.beta-snu.dev",
+  "ADMIN_URL": "https://admin.ci.beta-snu.dev",
+  "SUPPORT_URL": "https://support.beta-snu.dev",
+  "MAINTENANCE": "$MAINTENANCE",
+  "RELEASE": "$RELEASE"
+}

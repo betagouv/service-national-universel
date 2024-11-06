@@ -21,10 +21,10 @@ export default function StepDocuments() {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
-  const corrections = young?.correctionRequests
-    ?.filter((correctionRequest) => correctionRequest?.cohort === young?.cohort)
-    ?.filter((e) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
-  const disabledUpload = young?.files.cniFiles.length > 2;
+  const corrections = young?.correctionRequests?.filter(
+    (correction) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(correction.field) && ["SENT", "REMINDED"].includes(correction.status),
+  );
+  const disabledUpload = young?.files?.cniFiles?.length > 2;
 
   const IDs = [
     {
@@ -60,16 +60,18 @@ export default function StepDocuments() {
       return;
     }
     dispatch(setYoung(responseData));
-    history.push("/inscription2023/confirm");
+    history.push("/inscription/confirm");
   }
 
   function handleClick(doc) {
-    plausibleEvent(doc.event);
-    history.push(`televersement/${doc.category}`);
+    if (!disabledUpload) {
+      plausibleEvent(doc.event);
+      history.push(`televersement/${doc.category}`);
+    }
   }
 
   function goBack() {
-    return history.push("/inscription2023/representants");
+    return history.push("/inscription/representants");
   }
 
   const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
@@ -94,7 +96,7 @@ export default function StepDocuments() {
 
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
-        {young.files.cniFiles?.length > 0 && (
+        {young.files?.cniFiles?.length > 0 && (
           <div className="mb-4">
             <MyDocs />
             <hr className="my-2" />
@@ -108,19 +110,20 @@ export default function StepDocuments() {
         <div className="mt-2 text-sm text-gray-800">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         <div className="flex flex-col my-3 gap-3">
           {IDs.map((doc) => (
-            <span
+            <button
               key={doc.category}
-              disabled={disabledUpload}
               onClick={() => handleClick(doc)}
-              className="cursor-pointer hover:bg-[#FAFAFA] disabled:cursor-not-allowed disabled:bg-[#FAFAFA] w-full flex items-center justify-between border p-4 group">
+              className={`cursor-pointer hover:bg-[#FAFAFA] w-full flex items-center justify-between border p-4 group ${
+                disabledUpload ? "cursor-not-allowed bg-[#FAFAFA] text-gray-400" : ""
+              }`}>
               <div className="text-left flex flex-col">
                 <span>{doc.title}</span>
                 {doc.subtitle && <span className="text-sm text-gray-500">{doc.subtitle}</span>}
               </div>
-              <div className="w-10 h-10 bg-blue-france-sun-113 group-hover:bg-blue-france-sun-113-hover group-disabled:bg-gray-400">
+              <div className={`w-10 h-10 ${disabledUpload ? "bg-gray-400" : "bg-blue-france-sun-113 group-hover:bg-blue-france-sun-113-hover"}`}>
                 <RiArrowRightLine className="text-white w-6 h-6 mx-auto my-2" />
               </div>
-            </span>
+            </button>
           ))}
         </div>
         <SignupButtons onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />

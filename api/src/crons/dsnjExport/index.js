@@ -1,7 +1,7 @@
 const { generateYoungsExport, generateCohesionCentersExport, addToSlackRapport, printSlackInfo } = require("./utils");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const CohortModel = require("../../models/cohort");
+const { CohortModel } = require("../../models");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";

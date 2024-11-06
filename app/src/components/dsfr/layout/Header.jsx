@@ -3,29 +3,13 @@ import SNU from "@/assets/logo-snu.png";
 import useAuth from "../../../services/useAuth";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Header as DSFRHeader } from "@codegouvfr/react-dsfr/Header";
-import { supportURL } from "@/config";
+import { appURL, supportURL } from "@/config";
 
 const Header = ({ title }) => {
   const { isCLE, isLoggedIn, loginOrLogout } = useAuth();
   const isInscription = location.pathname.includes("inscription");
 
   const quickAccessItems = [
-    isInscription && {
-      linkProps: {
-        href: "https://www.snu.gouv.fr/",
-        target: "_blank",
-      },
-      text: "Programme",
-      iconId: fr.cx("fr-icon-clipboard-line"),
-    },
-    !isInscription &&
-      isLoggedIn && {
-        linkProps: {
-          href: "/",
-        },
-        text: isCLE ? "Mon compte élève" : "Mon compte volontaire",
-        iconId: fr.cx("ri-account-box-line"),
-      },
     {
       linkProps: {
         href: supportURL,
@@ -43,10 +27,30 @@ const Header = ({ title }) => {
     },
   ];
 
+  if (isInscription) {
+    quickAccessItems.push({
+      linkProps: {
+        href: "https://www.snu.gouv.fr/",
+        target: "_blank",
+      },
+      text: "Programme",
+      iconId: fr.cx("fr-icon-clipboard-line"),
+    });
+  }
+
+  if (!isInscription && isLoggedIn) {
+    quickAccessItems.push({
+      linkProps: {
+        href: appURL,
+      },
+      text: isCLE ? "Mon compte élève" : "Mon compte volontaire",
+      iconId: fr.cx("ri-account-box-line"),
+    });
+  }
+
   return (
     <DSFRHeader
       id="fr-header-header-with-quick-access-items"
-      // className="lg:px-[5rem]"
       brandTop={
         <>
           RÉPUBLIQUE

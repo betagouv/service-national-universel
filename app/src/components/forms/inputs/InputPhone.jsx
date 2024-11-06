@@ -1,5 +1,5 @@
 import React from "react";
-import { isPhoneZoneKnown, PHONE_ZONES } from "snu-lib/phone-number";
+import { isPhoneZoneKnown, PHONE_ZONES } from "snu-lib";
 import Label from "../layout/Label";
 import ErrorMessage from "../ErrorMessage";
 

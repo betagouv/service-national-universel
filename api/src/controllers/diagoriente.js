@@ -2,17 +2,18 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../sentry");
+const config = require("config");
 
 const fetch = require("node-fetch");
 const { ERRORS } = require("../utils");
 
 router.get("/generateUrl", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    let url = process.env.DIAGORIENTE_URL;
+    let url = config.DIAGORIENTE_URL;
     let options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: `{"query":"{ generateUrl(token:\\"${process.env.DIAGORIENTE_TOKEN}\\" ,id:\\"${req.user._id}\\",firstName:\\"${req.user.firstName}\\",lastName:\\"${req.user.lastName}\\") }","variables":null}`,
+      body: `{"query":"{ generateUrl(token:\\"${config.DIAGORIENTE_TOKEN}\\" ,id:\\"${req.user._id}\\",firstName:\\"${req.user.firstName}\\",lastName:\\"${req.user.lastName}\\") }","variables":null}`,
     };
     const response = await fetch(url, options);
     const responseAsJson = await response.json();
@@ -27,11 +28,11 @@ router.get("/generateUrl", passport.authenticate("young", { session: false, fail
 
 router.get("/getCard", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    let url = process.env.DIAGORIENTE_URL;
+    let url = config.DIAGORIENTE_URL;
     let options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: `{"query": "{ getCard(token:\\"${process.env.DIAGORIENTE_TOKEN}\\",id: \\"${req.user._id}\\") { skills{ endDate startDate activities {title} theme { title type activities { title } } } globalCompetences { title value type } }}","variables":{}}`,
+      body: `{"query": "{ getCard(token:\\"${config.DIAGORIENTE_TOKEN}\\",id: \\"${req.user._id}\\") { skills{ endDate startDate activities {title} theme { title type activities { title } } } globalCompetences { title value type } }}","variables":{}}`,
     };
     const response = await fetch(url, options);
     const responseAsJson = await response.json();

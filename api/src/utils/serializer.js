@@ -1,12 +1,7 @@
 const { isYoung } = require(".");
 
 function serializeApplication(application) {
-  return application.toObject({
-    transform: (_doc, ret) => {
-      delete ret.sqlId;
-      return ret;
-    },
-  });
+  return application.toObject();
 }
 
 function serializeBus(bus) {
@@ -16,9 +11,6 @@ function serializeBus(bus) {
 function serializeMission(mission) {
   return mission.toObject({
     transform: (_doc, ret) => {
-      delete ret.sqlId;
-      delete ret.sqlStructureId;
-      delete ret.sqlTutorId;
       delete ret.jvaRawData;
       return ret;
     },
@@ -50,7 +42,6 @@ function serializeSessionPhase1(session, user) {
 function serializeYoung(young, user) {
   return young.toObject({
     transform: (_doc, ret) => {
-      delete ret.sqlId;
       delete ret.password;
       delete ret.passwordChangedAt;
       delete ret.token2FA;
@@ -79,7 +70,6 @@ function serializeYoung(young, user) {
 function serializeReferent(referent) {
   return referent.toObject({
     transform: (_doc, ret) => {
-      delete ret.sqlId;
       delete ret.password;
       delete ret.passwordChangedAt;
       delete ret.token2FA;
@@ -104,9 +94,6 @@ function serializeStructure(structure, user) {
       if (isYoung(user)) {
         return subObject(ret, ["facebook", "instagram", "website", "twitter", "description"]);
       }
-      delete ret.sqlId;
-      delete ret.sqlUserId;
-      delete ret.sqlNetworkId;
       delete ret.jvaRawData;
       return ret;
     },

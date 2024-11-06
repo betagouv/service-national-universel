@@ -4,9 +4,10 @@ const { getAge } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const ClasseModel = require("../../models/cle/classe");
+const { ClasseModel } = require("../../models");
 const ClassePatchModel = require("./models/classePatch");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -15,7 +16,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.ClassePatchScanned = result.classePatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const actualClasse = await ClasseModel.findById(patch.ref.toString());
     if (!actualClasse) return;
     if (patch.ops.length > 0) {
@@ -46,12 +46,12 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualClasse, event, value) {
-  const classeInfos = await actualClasse.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const classeInfos = await actualClasse.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let classe = rebuildClasse(classeInfos);
 
   const age = getAge(classe?.birthdateAt || actualClasse?.birthdateAt);
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/classe`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/classe`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -90,7 +90,7 @@ const rebuildClasse = (classeInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(ClassePatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -108,12 +108,12 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./classe').manualHandler('2023-12-17', '2023-12-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(ClassePatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

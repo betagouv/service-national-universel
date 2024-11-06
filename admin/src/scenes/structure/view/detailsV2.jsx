@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { canCreateStructure, translate } from "snu-lib";
+import { useAddress, canCreateStructure, translate } from "snu-lib";
+import { AddressForm } from "@snu/ds/common";
+import { useDebounce } from "@uidotdev/usehooks";
 import API from "../../../services/api";
 import { ROLES, getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 
@@ -19,6 +21,7 @@ import StructureView from "./wrapperv2";
 
 export default function DetailsView({ ...props }) {
   const [structure, setStructure] = useState(null);
+
   React.useEffect(() => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
@@ -47,6 +50,10 @@ function StructureForm({ structure, setStructure }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [query, setQuery] = useState("");
+
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
 
   const legalStatusOptions = legalStatus.map((e) => ({ label: translate(e), value: e }));
   const structureTypesOptions = data.legalStatus && data.legalStatus !== "OTHER" ? typesStructure[data.legalStatus].map((e) => ({ label: e, value: e })) : [];
@@ -134,32 +141,14 @@ function StructureForm({ structure, setStructure }) {
 
           <div className="space-y-3">
             <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
-            <Field
-              name="address"
-              label="Adresse"
-              value={data.address}
-              handleChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
+            <AddressForm
               readOnly={!isEditing}
-              errors={errors}
+              data={{ address: data.address, zip: data.zip, city: data.city }}
+              updateData={(address) => setData({ ...data, ...address })}
+              query={query}
+              setQuery={setQuery}
+              options={results}
             />
-            <div className="grid grid-cols-2 gap-3">
-              <Field
-                name="zip"
-                label="Code postal"
-                value={data.zip}
-                handleChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
-                readOnly={!isEditing}
-                errors={errors}
-              />
-              <Field
-                name="city"
-                label="Ville"
-                value={data.city}
-                handleChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
-                readOnly={!isEditing}
-                errors={errors}
-              />
-            </div>
             {data.addressVerified && (
               <div className="grid grid-cols-2 gap-3">
                 <Field

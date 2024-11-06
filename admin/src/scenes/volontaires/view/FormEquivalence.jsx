@@ -1,6 +1,5 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import { AiOutlinePlus } from "react-icons/ai";
 import PaperClip from "../../../assets/icons/PaperClip";
 import AddImage from "../../../assets/icons/AddImage";
 import { toastr } from "react-redux-toastr";
@@ -13,15 +12,12 @@ import YoungHeader from "../../phase0/components/YoungHeader";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES, UNSS_TYPE } from "snu-lib";
 import Select from "../../../components/forms/SelectHookForm";
 import InputText from "../../../components/ui/forms/InputTextHookForm";
+import InputNumber from "../../../components/ui/forms/InputNumberHookForm";
 import { useForm, Controller } from "react-hook-form";
-
-const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
-const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
 
 export default function FormEquivalence({ young, onChange }) {
   const [clickStartDate, setClickStartDate] = React.useState(false);
   const [clickEndDate, setClickEndDate] = React.useState(false);
-  const [frequence, setFrequence] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [filesList, setFilesList] = React.useState([]);
   const [uploading, setUploading] = React.useState(false);
@@ -234,38 +230,12 @@ export default function FormEquivalence({ young, onChange }) {
                 </div>
               </div>
 
-              {frequence ? (
-                <>
-                  <div className="mt-2 flex flex-wrap items-stretch gap-2 md:!flex-nowrap">
-                    <InputText register={register} name="frequency.nombre" label="Nombre" validation={{ required: true }} />
-                    <Controller
-                      rules={{ required: true }}
-                      name="frequency.duree"
-                      control={control}
-                      render={({ field: { ref, ...rest } }) => <Select {...rest} options={optionsDuree} label="Durée" />}
-                    />
-                    <Controller
-                      rules={{ required: true }}
-                      name="frequency.frequence"
-                      control={control}
-                      render={({ field: { ref, ...rest } }) => <Select {...rest} options={optionsFrequence} label="Fréquence" />}
-                    />
-                  </div>
-
-                  <button
-                    className="mt-3 text-center text-sm font-normal leading-5 text-indigo-600 hover:underline"
-                    onClick={() => {
-                      setFrequence(false);
-                    }}>
-                    Supprimer la fréquence
-                  </button>
-                </>
-              ) : (
-                <div className="group mt-4 flex cursor-pointer items-center justify-center rounded-lg bg-blue-50 py-3" onClick={() => setFrequence(true)}>
-                  <AiOutlinePlus className="mr-2 h-5 w-5 text-indigo-400 group-hover:scale-110" />
-                  <div className="text-sm font-medium leading-5 text-blue-700 group-hover:underline">Ajouter la fréquence (facultatif)</div>
+              <div className="mt-4 text-xs font-medium leading-4">Combien de temps ?</div>
+              <div className="mt-3 space-y-4">
+                <div className="flex items-stretch gap-2">
+                  <InputNumber register={register} name="missionDuration" label="durée (en heures)" validation={{ required: true }} />
                 </div>
-              )}
+              </div>
             </div>
             <div className="flex basis-1/2 flex-col justify-between pb-2">
               <div className="rounded-xl bg-white p-6">

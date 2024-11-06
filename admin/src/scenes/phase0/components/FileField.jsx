@@ -1,5 +1,4 @@
 import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
-import { DownloadButton, MiniTitle, MoreButton } from "./commons";
 import React, { useEffect, useRef, useState } from "react";
 import { download } from "snu-lib";
 import MiniSwitch from "./MiniSwitch";
@@ -8,6 +7,9 @@ import { toastr } from "react-redux-toastr";
 import Warning from "../../../assets/icons/Warning";
 import ConfirmationModal from "./ConfirmationModal";
 import { capture } from "../../../sentry";
+import { MiniTitle } from "./commons/MiniTitle";
+import { DownloadButton } from "./commons/DownloadButton";
+import { MoreButton } from "./commons/MoreButton";
 
 export function FileField({ young, label, className = "", onChange, mode, statusField, fileType, updateYoung }) {
   const [opened, setOpened] = useState(false);

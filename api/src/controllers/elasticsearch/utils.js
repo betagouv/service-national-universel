@@ -2,7 +2,7 @@ const Joi = require("joi");
 const { ROLES, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { ERRORS, isYoung, isReferent } = require("../../utils");
-const StructureObject = require("../../models/structure");
+const { StructureModel } = require("../../models");
 
 const ES_NO_LIMIT = 10000;
 
@@ -104,8 +104,21 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   for (const key of filterFields) {
     const keyWithoutKeyword = key.replace(".keyword", "");
     if (!queryFilters[keyWithoutKeyword]?.length) continue;
-    hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
-    countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
+    // Special case for seatsTaken
+    if (keyWithoutKeyword === "seatsTaken") {
+      const seatsTakenFilter = queryFilters.seatsTaken;
+      if (seatsTakenFilter.includes(0)) {
+        hitsRequestBody.query.bool.must.push({ term: { seatsTaken: 0 } });
+        countAggsQuery.bool.must.push({ term: { seatsTaken: 0 } });
+      } else if (seatsTakenFilter.includes(1)) {
+        hitsRequestBody.query.bool.must.push({ range: { seatsTaken: { gt: 0 } } });
+        countAggsQuery.bool.must.push({ range: { seatsTaken: { gt: 0 } } });
+      }
+    } else {
+      // Comportement par default pour les autres filtres
+      hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
+      countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
+    }
   }
   // Aggs request body
   const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters, customQueries), size: 0, track_total_hits: true };
@@ -117,7 +130,17 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
 function joiElasticSearch({ filterFields, sortFields = [], body }) {
   const schema = Joi.object({
     filters: Joi.object(
-      ["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string().allow("")).max(200) }), {}),
+      ["searchbar", ...filterFields].reduce((acc, field) => {
+        const fieldWithoutKeyword = field.replace(".keyword", "");
+
+        // For the classe we need to handle the filter seatsTaken which is a number
+        if (fieldWithoutKeyword === "seatsTaken") {
+          return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.number().allow(null)).max(200) };
+        }
+
+        // Default case: filter is a string
+        return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.string().allow("")).max(200) };
+      }, {}),
     ),
     page: Joi.number()
       .integer()
@@ -159,7 +182,7 @@ async function buildMissionContext(user) {
   // A supervisor can only see their structures' missions.
   if (user.role === ROLES.SUPERVISOR) {
     if (!user.structureId) return { missionContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    const data = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
     contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
   }
 
@@ -181,7 +204,7 @@ async function buildApplicationContext(user) {
   // A supervisor can only see their structures' applications.
   if (user.role === ROLES.SUPERVISOR) {
     if (!user.structureId) return { applicationContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    const data = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
     contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
     contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
   }

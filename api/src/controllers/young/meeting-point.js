@@ -5,9 +5,9 @@ const Joi = require("joi");
 const { canEditYoung } = require("snu-lib");
 
 const { capture } = require("../../sentry");
-const YoungModel = require("../../models/young");
-const MeetingPointModel = require("../../models/meetingPoint");
-const BusModel = require("../../models/bus");
+const { YoungModel } = require("../../models");
+const { MeetingPointModel } = require("../../models");
+const { BusModel } = require("../../models");
 const { ERRORS, updatePlacesBus, isYoung, isReferent } = require("../../utils");
 const { serializeMeetingPoint, serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");

@@ -291,7 +291,10 @@ const starify = (value) => {
   return stars;
 };
 
+const STAR_EMAIL = "*******@*******.***";
+
 module.exports = {
+  STAR_EMAIL,
   generateRandomEmail,
   generateRandomName,
   generateAddress,

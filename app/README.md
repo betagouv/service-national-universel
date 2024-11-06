@@ -16,7 +16,11 @@ npm i
 
 Lancer la commande `npm run dev` pour accéder à l'application via l'URL `http://localhost:8081`. Voir le fichier `package.json` pour le détail des commandes.
 
-## Variables d'environnements
+## Variables d'environnements (local)
+
+En local, si vous mettez des variables d'environnement dans un fichier `.env` à la racine du projet "app", elles seront automatiquement injectées dans l'application. (s'inspirer de .env-example)
+
+## Variables d'environnements (docker)
 
 En production, les fichiers statiques générés par l'étape de build sont servis par [nginx](https://nginx.org/en/docs/) (cf [Dockerfile](Dockerfile) & [docker_nginx.conf](docker_nginx.conf))
 
@@ -24,9 +28,8 @@ Une étape de substitution des variables d'environnement est effectuée au runti
 
 Pour ajouter une variable d'environnement, modifier les fichiers suivants :
 
-- [docker_start.sh](docker_start.sh) (substitution de la variable au runtime)
-- [src/config.js](src/config.js) (recuperation de la variable dans la config)
-- [../terraform](les fichiers terraform impactés)
+- Ajouter les variables dans les différents environnements de docker_config, il seront injectés dans [docker_start.sh](docker_start.sh) (substitution de la variable au runtime)
+- [src/config.js](src/config.js) (recuperation de la variable dans la config, une valeur par défaut peut être présente)
 
 Une variable d'environnement existente mais vide ("") sera ignorée
 

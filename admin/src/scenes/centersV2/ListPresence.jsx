@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { COHORTS_BEFORE_JULY_2023, getDepartmentNumber, ROLES, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { COHORTS_WITH_JDM_COUNT, getDepartmentNumber, ROLES, translateInscriptionStatus, translatePhase1, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { Title } from "./components/commons";
 
@@ -143,7 +143,7 @@ export default function ListPresence() {
             <div className="mt-6 mb-2 flex w-full flex-col border-y-[1px] border-gray-100">
               <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
                 <div className="w-[30%] uppercase">Centre</div>
-                {selectedCohorts?.length && selectedCohorts?.every((value) => !COHORTS_BEFORE_JULY_2023.includes(value)) ? null : (
+                {selectedCohorts?.length && selectedCohorts?.every((value) => !COHORTS_WITH_JDM_COUNT.includes(value)) ? null : (
                   <div className="w-[20%] uppercase">présence JDM</div>
                 )}
                 <div className="w-[20%] uppercase">présence à l’arrivée</div>
@@ -169,9 +169,9 @@ const Hit = ({ hit, selectedCohorts, onClick }) => {
         <div className="truncate font-bold leading-6 text-gray-900">{hit.name}</div>
         <div className="text-xs font-normal leading-4 text-gray-500">{`${hit.city || ""} • ${hit.department || ""}`}</div>
       </div>
-      {selectedCohorts.length && selectedCohorts?.every((value) => !COHORTS_BEFORE_JULY_2023.includes(value)) ? null : (
+      {selectedCohorts.length && selectedCohorts?.every((value) => !COHORTS_WITH_JDM_COUNT.includes(value)) ? null : (
         <div className="flex w-[20%] flex-col gap-2">
-          {hit.cohorts?.every((value) => !COHORTS_BEFORE_JULY_2023.includes(value)) ? (
+          {hit.cohorts?.every((value) => !COHORTS_WITH_JDM_COUNT.includes(value)) ? (
             <span className="text-xs font-normal uppercase leading-none text-gray-500">non renseigné</span>
           ) : (
             <>

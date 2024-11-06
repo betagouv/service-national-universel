@@ -43,7 +43,6 @@ export default function UserMenu({ onClose, ticketsInfo }) {
       </div>
       <ul>
         <MenuLink onClose={onClose} to="/account" text="Mon Profil" />
-        {permissionPhase2(user) && <MenuLink onClose={onClose} to="/preferences" text="Mes préférences de mission" />}
         {ticketsInfo.hasMessage == true && <MenuLink onClose={onClose} ticketCount={ticketsInfo.newStatusCount} to="/echanges" text="Mes échanges" />}
         <MenuButton disabled={isLoggingOut} onClick={logout} text="Déconnexion" />
       </ul>

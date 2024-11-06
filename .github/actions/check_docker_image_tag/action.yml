@@ -78,5 +78,9 @@ runs:
             "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?name=${{ inputs.image_tag }}" \
           | jq -r ".total_count"
         )
+        if [[ $tag_exists == "null" ]]
+        then
+            tag_exists=0
+        fi
         echo $tag_exists
         echo "tag_exists=$tag_exists" >> $GITHUB_OUTPUT

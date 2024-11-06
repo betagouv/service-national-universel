@@ -1,6 +1,6 @@
 import Img2 from "../../assets/militaryPrep.png";
 import React from "react";
-import { HiOutlineSearch } from "react-icons/hi";
+import { HiArrowLeft, HiOutlineSearch } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import CheckCircle from "../../assets/icons/CheckCircle";
@@ -19,7 +19,11 @@ export default function HomeDesktop() {
     <div className="flex w-full flex-col bg-gray-100 px-12 pt-8">
       <div className="mb-8 flex flex-col-reverse items-center lg:!flex-row">
         <div className="mr-4 flex flex-col items-center lg:items-start">
-          <div className="text-3xl font-bold text-gray-800">Partez en préparation militaire</div>
+          <button onClick={() => history.goBack()} className="flex items-center">
+            <HiArrowLeft className="text-2xl text-gray-500" />
+          </button>
+
+          <div className="mt-4 text-3xl font-bold text-gray-800">Partez en préparation militaire</div>
           {!readMore ? (
             <div className="mt-4 text-center text-sm text-gray-700 lg:!text-left">
               Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence, des rencontres ? Continuer d’apprendre et rencontrer des jeunes de

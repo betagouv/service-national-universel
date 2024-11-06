@@ -10,7 +10,6 @@ import { MultiLine, Table } from "../../components/list";
 import api from "../../services/api";
 import {
   APPLICATION_STATUS,
-  ES_NO_LIMIT,
   ROLES,
   formatDateFRTimezoneUTC,
   formatLongDateUTC,
@@ -25,9 +24,7 @@ import {
 import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import Panel from "./panel";
 
-import { applicationExportFieldsStructure } from "snu-lib/excelExports";
-
-import { getDepartmentNumber } from "snu-lib";
+import { getDepartmentNumber, applicationExportFieldsStructure } from "snu-lib";
 import CursorClick from "../../assets/icons/CursorClick";
 import ExclamationCircle from "../../assets/icons/ExclamationCircle";
 import SelectAction from "../../components/SelectAction";

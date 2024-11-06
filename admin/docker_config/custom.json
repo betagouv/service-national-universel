@@ -1,0 +1,9 @@
+{
+  "ENVIRONMENT": "custom",
+  "API_URL": "$API_URL",
+  "APP_URL": "$APP_URL",
+  "ADMIN_URL": "$ADMIN_URL",
+  "SUPPORT_URL": "https://support.beta-snu.dev",
+  "MAINTENANCE": "$MAINTENANCE",
+  "RELEASE": "$RELEASE"
+}

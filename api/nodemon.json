@@ -1,0 +1,5 @@
+{
+  "watch": ["./config", "./src", "../packages/lib/dist"],
+  "ext": "js,ts,json",
+  "exec": "tsx ./src/index.js"
+}

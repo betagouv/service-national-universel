@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { getCohortNames, ROLES, academyList, departmentToAcademy, getDepartmentNumber, region2department } from "snu-lib";
+import { ROLES, academyList, departmentToAcademy, getDepartmentNumber, region2department } from "snu-lib";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { BsDownload } from "react-icons/bs";
 import { Title } from "../centersV2/components/commons";
+import { getCohortNameList } from "@/services/cohort.service";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
 
   const [data, setData] = React.useState([]);
   const pageId = "etablissementYoung";
@@ -32,7 +34,7 @@ export default function List() {
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       parentGroup: "Établissement",
     },
-    { title: "Cohorte", name: "cohort", parentGroup: "Volontaire", disabledBaseQuery: true, options: getCohortNames().map((e) => ({ key: e })) },
+    { title: "Cohorte", name: "cohort", parentGroup: "Volontaire", disabledBaseQuery: true, options: getCohortNameList(cohorts).map((e) => ({ key: e })) },
     ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
       ? {
           title: "Académie",

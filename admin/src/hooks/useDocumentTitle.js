@@ -1,14 +1,12 @@
-import React from "react";
+import { useEffect } from "react";
 
 const useDocumentTitle = (title) => {
-  const [t, setTitle] = React.useState(title);
-  React.useEffect(() => {
-    document.title = [t, "Service National Universel"].join(" • ");
+  useEffect(() => {
+    document.title = `${title} • Service National Universel`;
     return () => {
       document.title = "Service National Universel";
     };
-  }, [t]);
-  return setTitle;
+  }, [title]);
 };
 
 export default useDocumentTitle;

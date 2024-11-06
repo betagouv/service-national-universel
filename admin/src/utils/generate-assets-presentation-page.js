@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 // noinspection HtmlUnknownAttribute
 
 const path = require("path");

@@ -7,8 +7,7 @@ const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
-const EtablissementModel = require("../../../models/cle/etablissement");
-const ClasseModel = require("../../../models/cle/classe");
+const { EtablissementModel, ClasseModel } = require("../../../models");
 const { populateYoungExport, populateYoungWithClasse } = require("../populate/populateYoung");
 const { serializeYoungs } = require("../../../utils/es-serializer");
 
@@ -18,11 +17,14 @@ async function buildYoungCleContext(user) {
   if (user.role === ROLES.ADMINISTRATEUR_CLE) {
     const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
     if (!etablissement) return { youngCleContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push({ term: { "etablissementId.keyword": etablissement._id.toString() } });
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id, schoolYear: "2024-2025" });
+    if (!classes) return { youngCleContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    contextFilters.push({ terms: { "classeId.keyword": classes.map((c) => c._id.toString()) } });
   }
 
   if (user.role === ROLES.REFERENT_CLASSE) {
-    const classes = await ClasseModel.find({ referentClasseIds: user._id });
+    const classes = await ClasseModel.find({ referentClasseIds: user._id, schoolYear: "2024-2025" });
+    if (!classes) return { youngCleContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     contextFilters.push({ terms: { "classeId.keyword": classes.map((c) => c._id.toString()) } });
   }
 
@@ -65,9 +67,10 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "youngPhase1Agreement.keyword",
       "classeId.keyword",
       "etablissementId.keyword",
+      "inscriptionStep2023.keyword",
     ];
 
-    const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
+    const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt", "classeId.keyword"];
 
     // Authorization
     if (!canSearchInElasticSearch(user, "youngCle")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

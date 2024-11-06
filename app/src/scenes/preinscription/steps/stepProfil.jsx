@@ -1,5 +1,5 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import Input from "../../../components/dsfr/forms/input";
@@ -9,20 +9,23 @@ import plausibleEvent from "../../../services/plausible";
 import { getPasswordErrorMessage } from "../../../utils";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
-import { PHONE_ZONES, isPhoneNumberWellFormated, FEATURES_NAME, isFeatureEnabled, translate, YOUNG_SOURCE } from "snu-lib";
+import { PHONE_ZONES, isPhoneNumberWellFormated, FEATURES_NAME, isFeatureEnabled, translate, YOUNG_SOURCE, translateGrade } from "snu-lib";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import IconFrance from "@/assets/IconFrance";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
-import { useDispatch } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
 import dayjs from "dayjs";
 import API from "@/services/api";
-import { setYoung } from "@/redux/auth/actions";
 import { capture } from "@/sentry";
 import { RiInformationLine } from "react-icons/ri";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
-import { SignupButtons, InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
+import { SignupButtons, InputPassword, InputPhone, Checkbox, Container } from "@snu/ds/dsfr";
+import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
+import emojiRegex from "emoji-regex";
+import PenSvg from "@/assets/pictograms/pen.svg";
+import { HiArrowRight } from "react-icons/hi";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -30,20 +33,52 @@ export default function StepProfil() {
   const [loading, setLoading] = React.useState(false);
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
-  const dispatch = useDispatch();
+  const { login } = useAuth();
   const parcours = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase();
   const isCLE = parcours === YOUNG_SOURCE.CLE;
   const classeId = new URLSearchParams(window.location.search).get("classeId");
 
+  const optionsScolarite = [
+    { value: "4eme", label: "4ème" },
+    { value: "3eme", label: "3ème" },
+    { value: "2ndePro", label: "2de professionnelle" },
+    { value: "2ndeGT", label: "2de générale et technologique" },
+    { value: "1erePro", label: "1ère professionnelle" },
+    { value: "1ereGT", label: "1ère générale et technologique" },
+    { value: "TermPro", label: "Terminale professionnelle" },
+    { value: "TermGT", label: "Terminale générale et technologique" },
+    { value: "1ereCAP", label: "CAP 1ère année" },
+    { value: "2ndeCAP", label: "CAP 2ème année" },
+    { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
+  ];
+
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
   const trimmedEmail = data?.email?.trim();
   const trimmedEmailConfirm = data?.emailConfirm?.trim();
+
+  const handleNameChange = (field) => (value) => {
+    // Expression régulière pour supprimer les caractères invalides
+    const invalidCharRegex = /[^a-zA-ZÀ-ÿ\s'\-^¨éèëâçù]/g;
+    // Expression régulière pour correspondre aux emojis
+    const emojiReg = emojiRegex();
+
+    // Supprimer les caractères invalides
+    let fixedValue = value.replace(invalidCharRegex, "");
+    // Supprimer les emojis
+    fixedValue = fixedValue.replace(emojiReg, "");
+
+    // Mettre à jour l'état avec la valeur nettoyée
+    setData({ ...data, [field]: fixedValue });
+  };
 
   const validate = () => {
     let errors = {};
 
     if (isCLE && !data?.frenchNationality) {
       errors.frenchNationality = "Ce champ est obligatoire";
+    }
+    if (isCLE && !data?.grade) {
+      errors.grade = "Ce champ est obligatoire";
     }
     if (isCLE && (!data?.birthDate || !validateBirthDate(data?.birthDate))) {
       errors.birthDate = "Vous devez saisir une date de naissance valide";
@@ -52,19 +87,19 @@ export default function StepProfil() {
       errors.phone = PHONE_ZONES[data?.phoneZone]?.errorMessage;
     }
 
-    //Email
+    // Email
     if (trimmedEmail && !validator.isEmail(trimmedEmail)) {
       errors.email = "L'e-mail renseigné est invalide";
     }
-    //Email confirm
+    // Email confirm
     if (trimmedEmail && trimmedEmailConfirm && trimmedEmail !== trimmedEmailConfirm) {
       errors.emailConfirm = "Les emails ne correspondent pas";
     }
-    //Password
+    // Password
     if (data?.password && getPasswordErrorMessage(data?.password)) {
       errors.password = getPasswordErrorMessage(data?.password);
     }
-    //Password confirm
+    // Password confirm
     if (data?.password && data?.confirmPassword && data.password !== data.confirmPassword) {
       errors.confirmPassword = "Les mots de passe ne correspondent pas";
     }
@@ -110,6 +145,7 @@ export default function StepProfil() {
       lastName: data.lastName,
       birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
       frenchNationality: data.frenchNationality,
+      grade: data.grade,
       phone: data.phone,
       phoneZone: data.phoneZone,
       source: YOUNG_SOURCE.CLE,
@@ -118,15 +154,14 @@ export default function StepProfil() {
 
     try {
       setLoading(true);
-      const { code, ok, token, user } = await API.post(`/young/signup`, values);
+      const { code, ok, user } = await API.post(`/young/signup`, values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
       }
       if (user) {
         plausibleEvent("CLE/CTA preinscription - infos persos");
-        if (token) API.setToken(token);
-        dispatch(setYoung(user));
+        await login(user);
         history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
       }
     } catch (e) {
@@ -143,8 +178,7 @@ export default function StepProfil() {
 
   return (
     <>
-      {!isCLE && <ProgressBar />}
-
+      {isCLE ? <LoginMessage /> : <ProgressBar isReinscription={false} />}
       <DSFRContainer
         title="Créez votre compte"
         supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}`}
@@ -153,7 +187,7 @@ export default function StepProfil() {
           <>
             <div className="flex items-center gap-2 mb-3">
               <label htmlFor="nationalite" className="m-0">
-                Je suis de nationalié française
+                Je suis de nationalité française
               </label>
               <IconFrance />
 
@@ -201,6 +235,20 @@ export default function StepProfil() {
             <ErrorMessage>{error?.frenchNationality}</ErrorMessage>
           </>
         )}
+        {isCLE && (
+          <div className="flex w-full flex-col mb-4">
+            <SearchableSelect
+              label="Niveau de scolarité"
+              value={data.grade}
+              options={optionsScolarite}
+              onChange={(value) => {
+                setData({ ...data, grade: value });
+              }}
+              placeholder="Sélectionnez une option"
+            />
+            {error.grade ? <span className="text-sm text-red-500">{error.grade}</span> : null}
+          </div>
+        )}
 
         <div className="space-y-5">
           <Input
@@ -208,19 +256,22 @@ export default function StepProfil() {
             state={error.firstName ? "error" : "default"}
             stateRelatedMessage={error.firstName}
             value={data.firstName}
-            onChange={(e) => setData({ ...data, firstName: e })}
+            onChange={handleNameChange("firstName")}
           />
 
-          <label className="w-full">
-            {isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
-            <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })} />
-            {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
-          </label>
+          <Input
+            label={isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
+            value={data.lastName}
+            onChange={handleNameChange("lastName")}
+            onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })}
+            state={error.lastName ? "error" : "default"}
+            stateRelatedMessage={error.lastName}
+          />
 
           {isCLE && (
             <label className="w-full">
               Date de naissance
-              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} />
+              <DatePicker initialValue={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           )}
@@ -241,17 +292,23 @@ export default function StepProfil() {
             Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte {isCLE ? "élève" : "volontaire"}.
           </p>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <label className="w-full">
-              E-mail
-              <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} type="email" />
-              {error.email ? <span className="text-sm text-red-500">{error.email}</span> : null}
-            </label>
+            <Input
+              label="E-mail"
+              value={data.email}
+              onChange={(e) => setData({ ...data, email: e })}
+              type="email"
+              state={error.email ? "error" : "default"}
+              stateRelatedMessage={error.email}
+            />
 
-            <label className="w-full">
-              Confirmez votre e-mail
-              <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} type="email" />
-              {error.emailConfirm ? <span className="text-sm text-red-500">{error.emailConfirm}</span> : null}
-            </label>
+            <Input
+              label="Confirmez votre e-mail"
+              value={data.emailConfirm}
+              onChange={(e) => setData({ ...data, emailConfirm: e })}
+              type="email"
+              state={error.emailConfirm ? "error" : "default"}
+              stateRelatedMessage={error.emailConfirm}
+            />
 
             <InputPassword
               hintText="Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole."
@@ -290,7 +347,7 @@ export default function StepProfil() {
                   label: (
                     <span className="inline flex-1 text-sm leading-5 text-[#3A3A3A]">
                       J&apos;ai pris connaissance des{" "}
-                      <a href="https://www.snu.gouv.fr/donnees-personnelles" target="_blank" rel="noreferrer">
+                      <a href="https://www.snu.gouv.fr/donnees-personnelles/" target="_blank" rel="noreferrer">
                         modalités de traitement de mes données personnelles.
                       </a>
                     </span>
@@ -315,5 +372,24 @@ export default function StepProfil() {
         />
       </DSFRContainer>
     </>
+  );
+}
+
+function LoginMessage() {
+  return (
+    <Container className="p-6">
+      <div className="flex gap-4 items-center">
+        <div className="md:order-2">
+          <p className="reset font-semibold text-base leading-relaxed">Vous avez déjà créé votre compte mais vous n'avez pas terminé votre inscription&nbsp;?</p>
+          <Link to="/auth" className="text-blue-france-sun-113 leading-relaxed">
+            Finaliser mon inscription
+            <HiArrowRight className="inline-block ml-1" />
+          </Link>
+        </div>
+        <div className="flex-none">
+          <img src={PenSvg} alt="Icone crayon" />
+        </div>
+      </div>
+    </Container>
   );
 }

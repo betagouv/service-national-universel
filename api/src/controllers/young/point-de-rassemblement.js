@@ -5,10 +5,10 @@ const Joi = require("joi");
 const { capture } = require("../../sentry");
 const { ERRORS, isYoung, isReferent, updateSeatsTakenInBusLine } = require("../../utils");
 const { canEditYoung } = require("snu-lib");
-const YoungModel = require("../../models/young");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const { YoungModel } = require("../../models");
+const { LigneBusModel } = require("../../models");
+const { LigneToPointModel } = require("../../models");
+const { PointDeRassemblementModel } = require("../../models");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");
 const { isPDRChoiceOpenForYoung } = require("../../services/pointDeRassemblement.service");
@@ -55,7 +55,7 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
 
     //choosing a meetingPoint
     if (meetingPointId) {
-      const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
+      const meetingPoint = await PointDeRassemblementModel.findOne({ _id: meetingPointId, deletedAt: { $exists: false } });
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       bus = await LigneBusModel.findById(ligneId);
       if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

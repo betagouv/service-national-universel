@@ -1,11 +1,11 @@
 const { capture } = require("../sentry");
 const slack = require("../slack");
-const ApplicationModel = require("../models/application");
-const StructureModel = require("../models/structure");
-const YoungModel = require("../models/young");
+const { ApplicationModel } = require("../models");
+const { StructureModel } = require("../models");
+const { YoungModel } = require("../models");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
-const { APP_URL } = require("../config");
-const { sendTemplate } = require("../sendinblue");
+const config = require("config");
+const { sendTemplate } = require("../brevo");
 const { getCcOfYoung } = require("../utils");
 
 const clean = async () => {
@@ -46,7 +46,7 @@ const notify1Week = async () => {
         emailTo: [{ name: `${application?.youngFirstName} ${application?.youngLastName}`, email: application?.youngEmail }],
         params: {
           missionName: application?.missionName,
-          cta: `${APP_URL}/mission/${application?.missionId}`,
+          cta: `${config.APP_URL}/mission/${application?.missionId}`,
         },
         cc,
       });
@@ -73,7 +73,7 @@ const notify13Days = async () => {
         params: {
           missionName: application?.missionName,
           structureName: structure?.name,
-          cta: `${APP_URL}/mission/${application?.missionId}`,
+          cta: `${config.APP_URL}/mission/${application?.missionId}`,
         },
         cc,
       });

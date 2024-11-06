@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { PHONE_ZONES } from "snu-lib";
 import { setYoung } from "../../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
@@ -215,7 +215,7 @@ const AccountRepresentantsPage = () => {
               />
             </section>
             {/* <Checkbox label="Je renseigne un(e) second(e) représentant(e) légal(e)" onChange={(value) => setHasParent2(value)} value={hasParent2} useCheckedAsValue /> */}
-            <Checkbox label="Je renseigne un(e) second(e) représentant(e) légal(e)" onChange={handleChangeParent2} value={hasParent2} useCheckedAsValue />
+            <Checkbox label="Je renseigne un(e) second(e) représentant(e) légal(e)" onChange={handleChangeParent2} checked={hasParent2} />
             {hasParent2 && (
               <section className="mb-4">
                 <SectionTitle>Représentant légal 2</SectionTitle>

@@ -3,7 +3,7 @@ import DashboardBox from "../../../../components/ui/DashboardBox";
 import { FullDoughnut } from "../../../../components/graphs";
 import Section from "../../../../components/ui/Section";
 import api from "../../../../../../services/api";
-import { translate } from "snu-lib/translation";
+import { translate } from "snu-lib";
 import StatusTable from "../../../../components/ui/StatusTable";
 import { LoadingDoughnut } from "../../../../components/ui/loading";
 import { getNewLink } from "@/utils";

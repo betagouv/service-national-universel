@@ -4,11 +4,11 @@ const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
-const StructureModel = require("../../models/structure");
-const MissionEquivalenceModel = require("../../models/missionEquivalence");
+const { StructureModel, MissionEquivalenceModel } = require("../../models");
 const MissionEquivalencePatchModel = require("./models/missionEquivalencePatch");
 
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -17,7 +17,9 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.missionEquivalencePatchScanned = result.missionEquivalencePatchScanned + 1 || 1;
-    if (count % 100 === 0) console.log(count, "/", total);
+    if (count % 100 === 0) {
+      logger.debug(`${count} / ${total}`);
+    }
     const actualMissionEquivalence = await MissionEquivalenceModel.findById(patch.ref.toString());
     if (!actualMissionEquivalence) return;
     if (patch.ops.length > 0) {
@@ -42,13 +44,13 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualMissionEquivalence, event, value) {
-  const missionEquivalenceInfos = await actualMissionEquivalence.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const missionEquivalenceInfos = await actualMissionEquivalence.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let missionEquivalence = rebuildMissionEquivalence(missionEquivalenceInfos);
   const structure = await StructureModel.findOne({ name: actualMissionEquivalence.structureName });
 
   const anonymisedMissionEquivalence = new MissionEquivalenceModel(missionEquivalence).anonymise();
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/mission-equivalence`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/mission-equivalence`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -89,7 +91,7 @@ const rebuildMissionEquivalence = (missionEquivalenceInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(MissionEquivalencePatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -107,12 +109,12 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./missionEquivalence').manualHandler('2023-08-17', '2023-08-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(MissionEquivalencePatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

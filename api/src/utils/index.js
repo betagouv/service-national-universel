@@ -3,38 +3,27 @@ const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
-const YoungModel = require("../models/young");
-const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
-const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
-const MeetingPointModel = require("../models/meetingPoint");
-const ApplicationModel = require("../models/application");
-const ReferentModel = require("../models/referent");
-const ContractObject = require("../models/contract");
-const SessionPhase1 = require("../models/sessionPhase1");
-const CohortModel = require("../models/cohort");
-const { getDepartureDate } = require("snu-lib");
-const { sendEmail, sendTemplate } = require("../sendinblue");
+const {
+  YoungModel,
+  ReferentModel,
+  ContractModel,
+  PlanTransportModel,
+  LigneBusModel,
+  MeetingPointModel,
+  ApplicationModel,
+  SessionPhase1Model,
+  CohortModel,
+  MissionEquivalenceModel,
+} = require("../models");
+
+const { sendEmail, sendTemplate } = require("../brevo");
 const path = require("path");
 const fs = require("fs");
 const { addDays } = require("date-fns");
-const { APP_URL, ADMIN_URL } = require("../config");
+const config = require("config");
+const { logger } = require("../logger");
 const {
-  CELLAR_ENDPOINT,
-  CELLAR_KEYID,
-  CELLAR_KEYSECRET,
-  BUCKET_NAME,
-  PUBLIC_BUCKET_NAME,
-  ENVIRONMENT,
-  API_ASSOCIATION_CELLAR_ENDPOINT,
-  API_ASSOCIATION_CELLAR_KEYID,
-  API_ASSOCIATION_CELLAR_KEYSECRET,
-  CELLAR_ENDPOINT_SUPPORT,
-  CELLAR_KEYID_SUPPORT,
-  CELLAR_KEYSECRET_SUPPORT,
-  PUBLIC_BUCKET_NAME_SUPPORT,
-  translateFileStatusPhase1,
-} = require("../config");
-const {
+  getDepartureDate,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
   SENDINBLUE_TEMPLATES,
@@ -44,10 +33,12 @@ const {
   ROLES,
   SUB_ROLES,
   EQUIVALENCE_STATUS,
+  ERRORS: LIB_ERRORS,
 } = require("snu-lib");
 const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
 const dayjs = require("dayjs");
+const { getCohortIdsFromCohortName } = require("../cohort/cohortService");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -65,17 +56,17 @@ function getReq(url, cb) {
 }
 
 const SUPPORT_BUCKET_CONFIG = {
-  bucket: PUBLIC_BUCKET_NAME_SUPPORT,
-  endpoint: CELLAR_ENDPOINT_SUPPORT,
-  accessKeyId: CELLAR_KEYID_SUPPORT,
-  secretAccessKey: CELLAR_KEYSECRET_SUPPORT,
+  bucket: config.PUBLIC_BUCKET_NAME_SUPPORT,
+  endpoint: config.CELLAR_ENDPOINT_SUPPORT,
+  accessKeyId: config.CELLAR_KEYID_SUPPORT,
+  secretAccessKey: config.CELLAR_KEYSECRET_SUPPORT,
 };
 
 const DEFAULT_BUCKET_CONFIG = {
-  bucket: BUCKET_NAME,
-  endpoint: CELLAR_ENDPOINT,
-  accessKeyId: CELLAR_KEYID,
-  secretAccessKey: CELLAR_KEYSECRET,
+  bucket: config.BUCKET_NAME,
+  endpoint: config.CELLAR_ENDPOINT,
+  accessKeyId: config.CELLAR_KEYID,
+  secretAccessKey: config.CELLAR_KEYSECRET,
 };
 
 function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
@@ -105,7 +96,7 @@ const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
     const params = { Bucket: bucket, Key: name };
     s3bucket.getObject(params, (err, data) => {
       if (err) {
-        captureMessage(`Error getting file : ${name}`, { extras: { error: err } });
+        captureMessage(`Error getting file : ${name}`, { extra: { error: err } });
         reject(err);
       } else {
         resolve(data);
@@ -116,9 +107,9 @@ const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
 
 function uploadPublicPicture(path, file) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
     const params = {
-      Bucket: PUBLIC_BUCKET_NAME,
+      Bucket: config.PUBLIC_BUCKET_NAME,
       Key: path,
       Body: file.data,
       ContentType: file.mimetype,
@@ -134,8 +125,8 @@ function uploadPublicPicture(path, file) {
 
 function deleteFile(path) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Key: path };
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
+    const params = { Bucket: config.BUCKET_NAME, Key: path };
     s3bucket.deleteObject(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
@@ -145,8 +136,8 @@ function deleteFile(path) {
 
 function listFiles(path) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Prefix: path };
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
+    const params = { Bucket: config.BUCKET_NAME, Prefix: path };
     s3bucket.listObjects(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data.Contents);
@@ -156,8 +147,8 @@ function listFiles(path) {
 
 function deleteFilesByList(filesList) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Delete: { Objects: filesList } };
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
+    const params = { Bucket: config.BUCKET_NAME, Delete: { Objects: filesList } };
     s3bucket.deleteObjects(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
@@ -167,8 +158,8 @@ function deleteFilesByList(filesList) {
 
 function getMetaDataFile(path) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Key: path };
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
+    const params = { Bucket: config.BUCKET_NAME, Key: path };
     s3bucket.headObject(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
@@ -177,18 +168,18 @@ function getMetaDataFile(path) {
 }
 
 function getSignedUrl(path) {
-  const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+  const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
   return s3bucket.getSignedUrl("getObject", {
-    Bucket: BUCKET_NAME,
+    Bucket: config.BUCKET_NAME,
     Key: path,
   });
 }
 
 function getSignedUrlForApiAssociation(path) {
   const s3bucket = new AWS.S3({
-    endpoint: API_ASSOCIATION_CELLAR_ENDPOINT,
-    accessKeyId: API_ASSOCIATION_CELLAR_KEYID,
-    secretAccessKey: API_ASSOCIATION_CELLAR_KEYSECRET,
+    endpoint: config.API_ASSOCIATION_CELLAR_ENDPOINT,
+    accessKeyId: config.API_ASSOCIATION_CELLAR_KEYID,
+    secretAccessKey: config.API_ASSOCIATION_CELLAR_KEYSECRET,
   });
   return s3bucket.getSignedUrl("getObject", {
     Bucket: "association",
@@ -203,7 +194,7 @@ function fileExist(url) {
       return resolve(false);
     }).on("error", (err) => {
       resolve(false);
-      console.log("Error: " + err.message);
+      capture(err);
     });
   });
 }
@@ -226,21 +217,17 @@ function validatePassword(password) {
 }
 
 const updatePlacesCenter = async (center, fromUser) => {
-  // console.log(`update place center ${center?._id} ${center?.name}`);
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
     const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
     const placesLeft = Math.max(0, center.placesTotal - placesTaken);
     if (center.placesLeft !== placesLeft) {
-      console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
+      logger.debug(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
       center.set({ placesLeft });
       await center.save({ fromUser });
-      await center.index();
-    } else {
-      // console.log(`Center ${center.id}: total ${center.placesTotal} left not changed ${center.placesLeft}`);
     }
   } catch (e) {
-    console.log(e);
+    capture(e);
   }
   return center;
 };
@@ -249,7 +236,6 @@ const updatePlacesCenter = async (center, fromUser) => {
 // duplicate of updatePlacesCenter
 // we'll remove the updatePlacesCenter function once the migration is done
 const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
-  // console.log(`update place sessionPhase1 ${sessionPhase1?._id}`);
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
     const placesTaken = youngs.filter(
@@ -257,15 +243,12 @@ const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
     ).length;
     const placesLeft = Math.max(0, sessionPhase1.placesTotal - placesTaken);
     if (sessionPhase1.placesLeft !== placesLeft) {
-      console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
+      logger.debug(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
       sessionPhase1.set({ placesLeft });
       await sessionPhase1.save({ fromUser });
-      await sessionPhase1.index();
-    } else {
-      // console.log(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left not changed ${sessionPhase1.placesLeft}`);
     }
   } catch (e) {
-    console.log(e);
+    capture(e);
   }
   return sessionPhase1;
 };
@@ -285,7 +268,7 @@ const updateCenterDependencies = async (center, fromUser) => {
     referent.set({ cohesionCenterName: center.name });
     await referent.save({ fromUser });
   });
-  const sessions = await SessionPhase1.find({ cohesionCenterId: center._id });
+  const sessions = await SessionPhase1Model.find({ cohesionCenterId: center._id });
   for (let i = 0; i < sessions.length; i++) {
     sessions[i].set({
       department: center.department,
@@ -335,12 +318,13 @@ const deleteCenterDependencies = async (center, fromUser) => {
 };
 
 const updatePlacesBus = async (bus) => {
-  // console.log(`update bus ${bus.id} - ${bus.idExcel}`);
   try {
     const meetingPoints = await MeetingPointModel.find({ busId: bus.id, cohort: bus.cohort });
-    if (!meetingPoints?.length) return console.log("meetingPoints not found");
+    if (!meetingPoints?.length) {
+      logger.warn("meetingPoints not found");
+      return;
+    }
     const idsMeetingPoints = meetingPoints.map((e) => e._id);
-    // console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
     const youngs = await YoungModel.find({
       status: "VALIDATED",
       meetingPointId: {
@@ -352,15 +336,12 @@ const updatePlacesBus = async (bus) => {
     ).length;
     const placesLeft = Math.max(0, bus.capacity - placesTaken);
     if (bus.placesLeft !== placesLeft) {
-      console.log(`Bus ${bus.id}: total ${bus.capacity}, left from ${bus.placesLeft} to ${placesLeft}`);
+      logger.debug(`Bus ${bus.id}: total ${bus.capacity}, left from ${bus.placesLeft} to ${placesLeft}`);
       bus.set({ placesLeft });
       await bus.save();
-      await bus.index();
-    } else {
-      // console.log(`Bus ${bus.id}: total ${bus.capacity}, left not changed ${placesLeft}`);
     }
   } catch (e) {
-    console.log(e);
+    capture(e);
   }
   return bus;
 };
@@ -381,17 +362,14 @@ async function updateSeatsTakenInBusLine(busline) {
     if (busline.youngSeatsTaken !== seatsTaken) {
       busline.set({ youngSeatsTaken: seatsTaken });
       await busline.save();
-      await busline.index();
 
       // Do the same update with planTransport
       const planTransport = await PlanTransportModel.findById(busline._id);
       if (!planTransport) throw new Error("PlanTransport not found");
       planTransport.set({ youngSeatsTaken: seatsTaken, lineFillingRate: planTransport.youngCapacity && Math.floor((seatsTaken / planTransport.youngCapacity) * 100) });
       await planTransport.save();
-      await planTransport.index();
     }
   } catch (e) {
-    console.log(e);
     capture(e);
   }
   return busline;
@@ -412,10 +390,102 @@ const sendAutoCancelMeetingPoint = async (young) => {
       .toString()
       .replace(/{{firstName}}/, sanitizeAll(young.firstName))
       .replace(/{{lastName}}/, sanitizeAll(young.lastName))
-      .replace(/{{cta}}/g, sanitizeAll(`${APP_URL}/auth/login?redirect=phase1`)),
+      .replace(/{{cta}}/g, sanitizeAll(`${config.APP_URL}/auth/login?redirect=phase1`)),
     { cc },
   );
 };
+
+async function updateYoungPhase2StatusAndHours(young, fromUser) {
+  try {
+    // Récupération des applications et équivalences pertinentes
+    const applications = await ApplicationModel.find({ youngId: young._id });
+    const equivalences = await MissionEquivalenceModel.find({
+      youngId: young._id,
+      status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
+    });
+
+    // Calcul des heures effectuées
+    const totalHoursDone =
+      applications.reduce((acc, application) => {
+        if (application.status === "DONE") {
+          return acc + Number(application.missionDuration || 0);
+        }
+        return acc;
+      }, 0) +
+      equivalences.reduce((acc, equivalence) => {
+        if (equivalence.status === "VALIDATED") {
+          return acc + (equivalence.missionDuration || 0);
+        }
+        return acc;
+      }, 0);
+
+    // Calcul des heures estimées
+    const totalHoursEstimated =
+      applications.reduce((acc, application) => {
+        if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
+          return acc + Number(application.missionDuration || 0);
+        }
+        return acc;
+      }, 0) +
+      equivalences.reduce((acc, equivalence) => {
+        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status)) {
+          return acc + (equivalence.missionDuration || 0);
+        }
+        return acc;
+      }, 0);
+
+    // Mise à jour des heures dans le modèle young
+    young.set({
+      phase2NumberHoursDone: String(totalHoursDone),
+      phase2NumberHoursEstimated: String(totalHoursEstimated),
+      statusPhase2UpdatedAt: Date.now(),
+    });
+
+    // Mise à jour du statut de la phase 2
+    const activeApplication = applications.filter((a) => ["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS", "WAITING_VERIFICATION"].includes(a.status));
+    const pendingApplication = applications.filter((a) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(a.status));
+
+    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
+      // Ne pas changer le statut si déjà VALIDATED ou WITHDRAWN
+      young.set({ statusPhase2ValidatedAt: Date.now() });
+      await cancelPendingApplications(pendingApplication, fromUser);
+    } else if (Number(young.phase2NumberHoursDone) >= 84) {
+      // Valider la phase 2 si 84 heures effectuées
+      young.set({
+        statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+        statusPhase2ValidatedAt: Date.now(),
+        "files.militaryPreparationFilesIdentity": [],
+        "files.militaryPreparationFilesCensus": [],
+        "files.militaryPreparationFilesAuthorization": [],
+        "files.militaryPreparationFilesCertificate": [],
+        statusMilitaryPreparationFiles: undefined,
+      });
+      await cancelPendingApplications(pendingApplication, fromUser);
+      let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
+      let cc = getCcOfYoung({ template, young });
+      await sendTemplate(template, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: {
+          cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
+        },
+        cc,
+      });
+    } else if (activeApplication.length) {
+      // Mettre le statut en IN_PROGRESS si une application est active
+      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
+    } else {
+      // Sinon, attendre la réalisation
+      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
+    }
+
+    // Mise à jour des statuts des applications
+    young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
+    // Sauvegarde du modèle young
+    await young.save({ fromUser });
+  } catch (e) {
+    capture(e);
+  }
+}
 
 async function updateYoungPhase2Hours(young, fromUser) {
   try {
@@ -423,23 +493,44 @@ async function updateYoungPhase2Hours(young, fromUser) {
       youngId: young._id,
       status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
     });
-    young.set({
-      phase2NumberHoursDone: String(
-        applications
-          .filter((application) => application.status === "DONE")
-          .map((application) => Number(application.missionDuration || 0))
-          .reduce((acc, current) => acc + current, 0),
-      ),
-      phase2NumberHoursEstimated: String(
-        applications
-          .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
-          .map((application) => Number(application.missionDuration || 0))
-          .reduce((acc, current) => acc + current, 0),
-      ),
+    const equivalences = await MissionEquivalenceModel.find({
+      youngId: young._id,
+      status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
     });
+    const totalHoursDone =
+      applications.reduce((acc, application) => {
+        if (application.status === "DONE") {
+          return acc + Number(application.missionDuration || 0);
+        }
+        return acc;
+      }, 0) +
+      equivalences.reduce((acc, equivalence) => {
+        if (equivalence.status === "VALIDATED") {
+          return acc + (equivalence.missionDuration || 0);
+        }
+        return acc;
+      }, 0);
+    const totalHoursEstimated =
+      applications.reduce((acc, application) => {
+        if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
+          return acc + Number(application.missionDuration || 0);
+        }
+        return acc;
+      }, 0) +
+      equivalences.reduce((acc, equivalence) => {
+        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status)) {
+          return acc + (equivalence.missionDuration || 0);
+        }
+        return acc;
+      }, 0);
+
+    young.set({
+      phase2NumberHoursDone: String(totalHoursDone),
+      phase2NumberHoursEstimated: String(totalHoursEstimated),
+    });
+
     await young.save({ fromUser });
   } catch (e) {
-    console.log(e);
     capture(e);
   }
 }
@@ -464,7 +555,7 @@ const updateStatusPhase2 = async (young, fromUser) => {
 
     if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
       // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
-      young.set({ statusPhase2: young.statusPhase2, statusPhase2ValidatedAt: Date.now() });
+      young.set({ statusPhase2ValidatedAt: Date.now() });
       await cancelPendingApplications(pendingApplication, fromUser);
     } else if (Number(young.phase2NumberHoursDone) >= 84) {
       // We change young status to DONE if he has 84 hours of phase 2 done.
@@ -483,13 +574,13 @@ const updateStatusPhase2 = async (young, fromUser) => {
       await sendTemplate(template, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
-          cta: `${APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
+          cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
         },
         cc,
       });
     } else if (activeApplication.length) {
       // We change young status to IN_PROGRESS if he has an 'active' application.
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
+      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
     } else {
       young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
     }
@@ -499,7 +590,6 @@ const updateStatusPhase2 = async (young, fromUser) => {
 
     await young.save({ fromUser });
   } catch (e) {
-    console.log(e);
     capture(e);
   }
 };
@@ -535,7 +625,7 @@ const checkStatusContract = (contract) => {
 
 const updateYoungStatusPhase2Contract = async (young, fromUser) => {
   try {
-    const contracts = await ContractObject.find({ youngId: young._id });
+    const contracts = await ContractModel.find({ youngId: young._id });
 
     // on récupère toutes les candidatures du volontaire
     const applications = await ApplicationModel.find({ _id: { $in: contracts?.map((c) => c.applicationId) } });
@@ -561,7 +651,6 @@ const updateYoungStatusPhase2Contract = async (young, fromUser) => {
 
     await young.save({ fromUser });
   } catch (e) {
-    console.log(e);
     capture(e);
   }
 };
@@ -607,12 +696,6 @@ function inSevenDays() {
   return Date.now() + 86400000 * 7;
 }
 
-const getBaseUrl = () => {
-  if (ENVIRONMENT === "staging") return "https://api.beta-snu.dev";
-  if (ENVIRONMENT === "production") return "https://api.snu.gouv.fr";
-  return "http://localhost:8080";
-};
-
 const getCcOfYoung = ({ template, young }) => {
   if (!young || !template) return [];
   let cc = [];
@@ -631,7 +714,7 @@ async function notifDepartmentChange(department, template, young, extraParams = 
       params: {
         youngFirstName: young.firstName,
         youngLastName: young.lastName,
-        cta: `${ADMIN_URL}/volontaire/${young._id}`,
+        cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
         ...extraParams,
       },
     });
@@ -646,11 +729,11 @@ async function addingDayToDate(days, dateStart) {
 
     return formattedValidationDate;
   } catch (e) {
-    console.log(e);
+    capture(e);
   }
 }
 
-async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort, user }) {
+async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort = null, user }) {
   let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"];
   let youngCohort = cohort;
   if (!cohort) {
@@ -753,7 +836,6 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
       await young.save({ fromUser: user });
     }
   } catch (e) {
-    console.log(e);
     capture(e);
   }
 }
@@ -791,7 +873,6 @@ async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
     }
     await young.save({ fromUser: user });
   } catch (e) {
-    console.log(e);
     capture(e);
   }
 }
@@ -867,16 +948,16 @@ const updateYoungApplicationFilesType = async (application, user) => {
     await young.save({ fromUser: user });
   } catch (e) {
     capture(e);
-    console.log(e);
   }
 };
 
 const updateHeadCenter = async (headCenterId, user) => {
   const headCenter = await ReferentModel.findById(headCenterId);
   if (!headCenter) return;
-  const sessions = await SessionPhase1.find({ headCenterId }, { cohort: 1 });
+  const sessions = await SessionPhase1Model.find({ headCenterId }, { cohort: 1 });
   const cohorts = new Set(sessions.map((s) => s.cohort));
-  headCenter.set({ cohorts: [...cohorts] });
+  const cohortIds = await getCohortIdsFromCohortName([...cohorts]);
+  headCenter.set({ cohorts: [...cohorts], cohortIds: cohortIds });
   await headCenter.save({ fromUser: user });
 };
 
@@ -887,6 +968,7 @@ const getTransporter = async () => {
   return toReferent;
 };
 
+// TODO: move to snu-lib
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -910,10 +992,10 @@ const ERRORS = {
   LINKED_CLASSES: "LINKED_CLASSES",
   LINKED_ETABLISSEMENT: "LINKED_ETABLISSEMENT",
   LINKED_STRUCTURE: "LINKED_STRUCTURE",
-  PDF_ERROR: "PDF_ERROR",
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",
   INVALID_BODY: "INVALID_BODY",
   INVALID_PARAMS: "INVALID_PARAMS",
+  INVALID_QUERY: "INVALID_QUERY",
   EMAIL_OR_PASSWORD_INVALID: "EMAIL_OR_PASSWORD_INVALID",
   EMAIL_OR_API_KEY_INVALID: "EMAIL_OR_API_KEY_INVALID",
   TOKEN_INVALID: "TOKEN_INVALID",
@@ -928,6 +1010,7 @@ const ERRORS = {
   INVALID_IP: "INVALID_IP",
   ALREADY_EXISTS: "ALREADY_EXISTS",
   YOUNG_NOT_FOUND: "YOUNG_NOT_FOUND",
+  FEATURE_NOT_AVAILABLE: "FEATURE_NOT_AVAILABLE",
 };
 
 const YOUNG_SITUATIONS = {
@@ -975,6 +1058,14 @@ const validateBirthDate = (date) => {
   return true;
 };
 
+const normalizeString = (str) => {
+  return str
+    .normalize("NFD") // Normalise la chaîne de caractères (décompose les accents)
+    .replace(/[\u0300-\u036f]/g, "") // Supprime les diacritiques (accents)
+    .replace(/[-\s._']/g, "") // Supprime les tirets, espaces, points, apostrophes, et underscores
+    .toLowerCase(); // Convertit tout en minuscules
+};
+
 module.exports = {
   timeout,
   uploadFile,
@@ -996,9 +1087,9 @@ module.exports = {
   isYoung,
   isReferent,
   inSevenDays,
-  getBaseUrl,
   updateYoungPhase2Hours,
   updateStatusPhase2,
+  updateYoungPhase2StatusAndHours,
   getSignedUrlForApiAssociation,
   updateYoungStatusPhase2Contract,
   checkStatusContract,
@@ -1010,7 +1101,6 @@ module.exports = {
   STEPS,
   STEPS2023,
   FILE_STATUS_PHASE1,
-  translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
   autoValidationSessionPhase1Young,
@@ -1024,4 +1114,5 @@ module.exports = {
   getMetaDataFile,
   deleteFilesByList,
   validateBirthDate,
+  normalizeString,
 };

@@ -12,7 +12,7 @@ class MyDocument extends Document {
       <Html>
         <Head>
           <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-          <script defer data-domain="support.snu.gouv.fr" src="https://plausible.io/js/script.manual.outbound-links.js"></script>
+          <script defer data-domain="support.snu.gouv.fr" src="https://plausible.io/js/script.outbound-links.js"></script>
         </Head>
         <body>
           <Main />

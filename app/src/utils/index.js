@@ -2,7 +2,9 @@ import PasswordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, REGLEMENT_INTERIEUR_VERSION, isCohortTooOld } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
-import { isCohortDone } from "./cohorts";
+import { getCohort, isCohortDone } from "./cohorts";
+import { toastr } from "react-redux-toastr";
+import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "./navigation";
 
 function addOneDay(date) {
   const newDate = new Date(date);
@@ -80,7 +82,8 @@ export function hasAccessToPhase2(young) {
   if (young.status === YOUNG_STATUS.WITHDRAWN) return false;
   const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
 
-  if (isCohortTooOld(young) && !userIsDoingAMission) {
+  const cohort = getCohort(young.cohort);
+  if (isCohortTooOld(cohort) && !userIsDoingAMission) {
     return false;
   }
   if (wasYoungExcluded(young)) return false;
@@ -182,4 +185,14 @@ export const validateId = (id) => {
 
 export const desktopBreakpoint = 768;
 
-export const shouldDisplayMaintenanceNotice = new Date() < new Date("2024-04-18T23:59:59");
+export function displaySignupToast(user) {
+  const url = window.location.pathname;
+  const shouldDisplaySignupToast =
+    !url.includes("/representants-legaux") &&
+    ((user.status === YOUNG_STATUS.IN_PROGRESS && user.inscriptionStep2023 !== INSCRIPTION_STEPS.EMAIL_WAITING_VALIDATION) ||
+      (user.status === YOUNG_STATUS.REINSCRIPTION && user.reInscriptionStep2023 !== REINSCRIPTION_STEPS.ELIGIBILITE));
+
+  if (shouldDisplaySignupToast) {
+    toastr.success("Connexion réussie", "Vous pouvez reprendre votre inscription là où vous l'avez laissée.", { timeOut: 3 });
+  }
+}

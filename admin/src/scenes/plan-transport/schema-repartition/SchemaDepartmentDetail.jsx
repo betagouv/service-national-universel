@@ -7,7 +7,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { getDepartmentNumber } from "snu-lib";
 
-export default function SchemaDepartmentDetail({ departmentData, cohort, department, className }) {
+export default function SchemaDepartmentDetail({ departmentData, cohortName, department, className }) {
   const [shown, setShown] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,7 +21,7 @@ export default function SchemaDepartmentDetail({ departmentData, cohort, departm
     setLoading(true);
     setError(null);
     try {
-      const result = await api.get(`/schema-de-repartition/department-detail/${department}/${cohort}`);
+      const result = await api.get(`/schema-de-repartition/department-detail/${department}/${cohortName}`);
       if (result.ok) {
         setData(result.data);
       } else {

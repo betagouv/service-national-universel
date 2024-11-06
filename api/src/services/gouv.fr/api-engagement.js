@@ -1,12 +1,15 @@
 // API doc: https://www.notion.so/jeveuxaider/API-x-SNU-MIG-b6fd11bcb6ff485ca1d42ae175af8411?pvs=4
 
 const { APPLICATION_STATUS } = require("snu-lib");
-const config = require("../../config");
+const config = require("config");
+const { capture } = require("../../sentry");
 
-const apiEngagementStatus = {
+const statusMap = {
   [APPLICATION_STATUS.WAITING_VALIDATION]: "PENDING",
   [APPLICATION_STATUS.VALIDATED]: "VALIDATED",
-  [APPLICATION_STATUS.DONE]: "DONE",
+  [APPLICATION_STATUS.DONE]: "CARRIED_OUT",
+  [APPLICATION_STATUS.CANCEL]: "CANCEL",
+  [APPLICATION_STATUS.REFUSED]: "REFUSED",
 };
 
 const apiEngagement = {
@@ -20,10 +23,10 @@ const apiEngagement = {
     try {
       if (config.ENVIRONMENT !== "production") return;
 
-      if (application.status !== APPLICATION_STATUS.WAITING_VALIDATION) return;
+      // When a ref proposes a mission, it does not count as an application creation in API Engagement
+      if (application.status === APPLICATION_STATUS.WAITING_ACCEPTATION) return;
 
       let url = config.API_ENGAGEMENT_URL + "/v2/activity/" + missionId + "/apply?tag=MIG";
-      if (clickId) url += `&clickId=${clickId}`;
 
       const options = {
         method: "POST",
@@ -31,13 +34,14 @@ const apiEngagement = {
       };
 
       const res = await fetch(url, options);
+      if (clickId) url += `&clickId=${clickId}`;
       const { ok, data, code } = await res.json();
 
       if (!ok) throw new Error(code);
 
       return data;
     } catch (e) {
-      console.error("Error while sending tracking data to API Engagement:", e);
+      capture(e, "Error while sending tracking data to API Engagement:");
     }
   },
 
@@ -45,8 +49,7 @@ const apiEngagement = {
     try {
       if (config.ENVIRONMENT !== "production") return;
 
-      // We only track application creation, validation and completion (not cancelation, refusal, etc.)
-      if (!Object.keys(apiEngagementStatus).includes(application.status)) return;
+      if (!Object.keys(statusMap).includes(application.status)) return;
 
       if (!application.apiEngagementId) {
         throw new Error("No API Engagement ID found for application" + application._id);
@@ -60,7 +63,7 @@ const apiEngagement = {
           "X-API-KEY": config.API_ENGAGEMENT_KEY,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: apiEngagementStatus[application.status] }),
+        body: JSON.stringify({ status: statusMap[application.status] }),
       };
 
       const res = await fetch(url, options);
@@ -70,7 +73,7 @@ const apiEngagement = {
 
       return data;
     } catch (e) {
-      console.error("Error while sending tracking data to API Engagement:", e);
+      capture(e);
     }
   },
 };

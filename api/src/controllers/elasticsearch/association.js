@@ -5,19 +5,19 @@ const router = express.Router();
 const { canSearchAssociation } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
-const { API_ENGAGEMENT_URL, API_ENGAGEMENT_KEY } = require("../../config");
+const config = require("config");
 
 const apiEngagement = async ({ path = "/", body }) => {
   try {
     const myHeaders = new fetch.Headers();
-    myHeaders.append("X-API-KEY", API_ENGAGEMENT_KEY);
+    myHeaders.append("X-API-KEY", config.API_ENGAGEMENT_KEY);
     myHeaders.append("Content-Type", "application/json");
     const requestOptions = {
       method: "POST",
       headers: myHeaders,
       body: JSON.stringify(body),
     };
-    const res = await fetch(`${API_ENGAGEMENT_URL}${path}`, requestOptions);
+    const res = await fetch(`${config.API_ENGAGEMENT_URL}${path}`, requestOptions);
     return await res.json();
   } catch (e) {
     capture(e, { extra: { path: path } });

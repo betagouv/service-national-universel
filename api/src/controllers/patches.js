@@ -30,7 +30,7 @@ const deletePatches = async ({ id, model }) => {
   try {
     const { error, value: validatedId } = validateId(id);
     if (error) {
-      console.error(error);
+      capture(error);
     }
     if (error) return { ok: false, code: ERRORS.INVALID_PARAMS, codeError: 400 };
 
@@ -71,7 +71,7 @@ const deletePatches = async ({ id, model }) => {
       });
 
       if (updatedOps.length === 0) {
-        await patch.remove();
+        await patch.deleteOne();
       } else {
         patch.set({ ops: updatedOps });
         if (patch.user !== undefined && patch.user["role"] === undefined) {

@@ -4,9 +4,10 @@ const { isInRuralArea, getAge } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const YoungModel = require("../../models/young");
+const { YoungModel } = require("../../models");
 const YoungPatchModel = require("./models/youngPatch");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
+const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -15,7 +16,6 @@ const result = { event: {} };
 async function processPatch(patch, count, total) {
   try {
     result.youngPatchScanned = result.youngPatchScanned + 1 || 1;
-    // if (count % 100 === 0) console.log(count, "/", total);
     const actualYoung = await YoungModel.findById(patch.ref.toString());
     if (!actualYoung) return;
     if (patch.ops.length > 0) {
@@ -78,14 +78,14 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualYoung, event, value) {
-  const youngInfos = await actualYoung.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const youngInfos = await actualYoung.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let young = rebuildYoung(youngInfos);
 
   const anonymisedYoung = new YoungModel(young).anonymise();
 
   const age = getAge(young?.birthdateAt || actualYoung?.birthdateAt);
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/young`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/young`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -139,7 +139,7 @@ const rebuildYoung = (youngInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(YoungPatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -157,12 +157,12 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./young').manualHandler('2023-08-10', '2023-08-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(YoungPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 
-    console.log(result);
+    logger.info(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };

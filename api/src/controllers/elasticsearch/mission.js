@@ -118,7 +118,7 @@ router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["
     const sortFields = ["createdAt", "placesLeft", "name.keyword"];
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, size, error } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { missionContextFilters, missionContextError } = await buildMissionContext(user);
@@ -151,6 +151,7 @@ router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["
       page,
       sort,
       contextFilters,
+      size,
     });
 
     if (req.params.action === "export") {
@@ -357,13 +358,6 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
 
     if (filters.domains?.length) body.query.bool.must.push({ terms: { "domains.keyword": filters.domains } });
     if (filters.isMilitaryPreparation !== null) body.query.bool.must.push({ term: { "isMilitaryPreparation.keyword": String(filters.isMilitaryPreparation) } });
-    if (filters.isMilitaryPreparation !== null) {
-      console.log("HELLO PED");
-      console.log(filters.isMilitaryPreparation);
-      console.log(String(filters.isMilitaryPreparation));
-      console.log(JSON.stringify(filters));
-    }
-
     if (["DURING_SCHOOL", "DURING_HOLIDAYS"].includes(filters.period)) body.query.bool.must.push({ term: { "period.keyword": filters.period } });
     if (filters.period === "CUSTOM") {
       if (filters.fromDate) body.query.bool.must.push({ range: { startAt: { gte: filters.fromDate } } });

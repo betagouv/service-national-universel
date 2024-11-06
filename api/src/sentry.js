@@ -1,126 +1,115 @@
-const { ExtraErrorData, RewriteFrames } = require("@sentry/integrations");
-const {
-  addGlobalEventProcessor,
-  captureException: sentryCaptureException,
-  captureMessage: sentryCaptureMessage,
-  Integrations: NodeIntegrations,
-  init,
-  Handlers,
-  autoDiscoverNodePerformanceMonitoringIntegrations,
-} = require("@sentry/node");
-const { ProfilingIntegration } = require("@sentry/profiling-node");
+const { captureException: sentryCaptureException, captureMessage: sentryCaptureMessage, init, extraErrorDataIntegration, rewriteFramesIntegration } = require("@sentry/node");
+const { nodeProfilingIntegration } = require("@sentry/profiling-node");
 
-const { RELEASE, ENVIRONMENT, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("./config");
-
-const regex = /[0-9a-fA-F]{24}/g;
-
-const sanitizeTransactionName = (name) => {
-  return name.replace(regex, ":id");
-};
-
-addGlobalEventProcessor((event) => {
-  if (event.type === "transaction") {
-    event.transaction = sanitizeTransactionName(event.transaction);
-  }
-  return event;
-});
+const config = require("config");
+const { logger } = require("./logger");
 
 function initSentry() {
-  init({
-    enabled: Boolean(SENTRY_URL),
-    dsn: SENTRY_URL,
-    environment: "api",
-    release: RELEASE,
-    normalizeDepth: 16,
-    integrations: [
-      new ExtraErrorData({ depth: 16 }),
-      new RewriteFrames({ root: process.cwd() }),
-      new NodeIntegrations.Http({ tracing: true }),
-      new NodeIntegrations.Modules(),
-      new ProfilingIntegration(),
-      ...autoDiscoverNodePerformanceMonitoringIntegrations(),
-    ],
-    tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE) || 0.01,
-    profilesSampleRate: Number(SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
-    ignoreErrors: [
-      /^No error$/,
-      /__show__deepen/,
-      /_avast_submit/,
-      /Access is denied/,
-      /anonymous function: captureException/,
-      /Blocked a frame with origin/,
-      /can't redefine non-configurable property "userAgent"/,
-      /change_ua/,
-      /console is not defined/,
-      /cordova/,
-      /DataCloneError/,
-      /Error: AccessDeny/,
-      /event is not defined/,
-      /feedConf/,
-      /ibFindAllVideos/,
-      /myGloFrameList/,
-      /SecurityError/,
-      /MyIPhoneApp/,
-      /snapchat.com/,
-      /vid_mate_check is not defined/,
-      /win\.document\.body/,
-      /window\._sharedData\.entry_data/,
-      /window\.regainData/,
-      /ztePageScrollModule/,
-    ],
-  });
+  if (config.get("ENABLE_SENTRY")) {
+    init({
+      dsn: "https://584ccb2737f20b13078d0b80b9eeacab@sentry.selego.co/160",
+      environment: config.ENVIRONMENT,
+      release: config.get("RELEASE"),
+      normalizeDepth: 16,
+      integrations: [extraErrorDataIntegration({ depth: 16 }), rewriteFramesIntegration({ root: process.cwd() }), nodeProfilingIntegration()],
+      tracesSampleRate: Number(config.get("SENTRY_TRACING_SAMPLE_RATE")) || 0.01,
+      profilesSampleRate: Number(config.get("SENTRY_PROFILE_SAMPLE_RATE")) || 0.1, // Percent of Transactions profiled
+      ignoreErrors: [
+        /^No error$/,
+        /__show__deepen/,
+        /_avast_submit/,
+        /Access is denied/,
+        /anonymous function: captureException/,
+        /Blocked a frame with origin/,
+        /can't redefine non-configurable property "userAgent"/,
+        /change_ua/,
+        /console is not defined/,
+        /cordova/,
+        /DataCloneError/,
+        /Error: AccessDeny/,
+        /event is not defined/,
+        /feedConf/,
+        /ibFindAllVideos/,
+        /myGloFrameList/,
+        /SecurityError/,
+        /MyIPhoneApp/,
+        /snapchat.com/,
+        /vid_mate_check is not defined/,
+        /win\.document\.body/,
+        /window\._sharedData\.entry_data/,
+        /window\.regainData/,
+        /ztePageScrollModule/,
+      ],
+    });
+  }
 }
 
-function initSentryMiddlewares(app) {
-  if (ENVIRONMENT !== "development") {
-    // Evite le spam sentry en local
-    initSentry();
+function _flattenStack(stack) {
+  // Remove new lines and merge spaces to get 1 line log output
+  return stack.replace(/\n/g, " | ").replace(/\s+/g, " ");
+}
+
+function captureError(err, contexte) {
+  if (err.stack && config.get("ENABLE_FLATTEN_ERROR_LOGS")) {
+    const flattened = _flattenStack(err.stack);
+    logger.error(`capture: ${flattened}`);
+  } else {
+    logger.error(`capture: ${err}`);
   }
 
-  // The request handler must be the first middleware on the app
-  app.use(Handlers.requestHandler());
-
-  // TracingHandler creates a trace for every incoming request
-  app.use(Handlers.tracingHandler());
-
-  return () => {
-    // The error handler must be before any other error middleware and after all controllers
-    app.use(Handlers.errorHandler());
-  };
+  return sentryCaptureException(err, contexte);
 }
 
+// * 09/24 -> Adopting progressively this capture strategy
+// * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples
 function capture(err, contexte) {
-  console.error("capture", err);
   if (!err) {
-    sentryCaptureMessage("Error not defined");
-    return;
+    const msg = "Error not defined (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)";
+    logger.error(`capture: ${msg}`);
+    return sentryCaptureMessage(msg);
   }
 
   if (err instanceof Error) {
-    sentryCaptureException(err, contexte);
+    // Capture the current error and recursively capture any nested causes
+    const eventId = captureError(err, contexte);
+
+    let currentError = err.cause;
+    while (currentError instanceof Error) {
+      const warningMessage =
+        "You should capture error earlier and adding dedicated context to it. This is a fallback, capturing same error a second time is ignored even with different context";
+      captureError(currentError, { ...contexte, contexts: { ...contexte?.contexts, warning: { msg: warningMessage } } });
+      currentError = currentError.cause;
+    }
+
+    return eventId;
   } else if (err.error instanceof Error) {
-    sentryCaptureException(err.error, contexte);
+    return capture(err.error, {
+      ...contexte,
+      contexts: { ...contexte?.contexts, warning: { msg: "Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples" } },
+    }); // Recursively handle the nested error
   } else if (err.message) {
-    sentryCaptureMessage(err.message, contexte);
+    logger.error(`capture: ${err.message} (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)`);
+    return sentryCaptureMessage(err.message, contexte);
   } else {
-    sentryCaptureMessage("Error not defined well", { extra: { error: err, contexte: contexte } });
+    const msg = "Error not defined well (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)";
+    logger.error(`capture: ${msg}`);
+    return sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
 }
-function captureMessage(mess, contexte) {
-  console.error("captureMessage", mess);
-  if (!mess) {
-    sentryCaptureMessage("Message not defined");
-    return;
-  }
 
+function captureMessage(mess, contexte) {
   if (mess) {
-    sentryCaptureMessage(mess, contexte);
+    logger.error(`capture message: ${mess}`);
+    return sentryCaptureMessage(mess, contexte);
+  } else {
+    const msg = "Empty message captured (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)";
+    logger.error(`capture message: ${msg}`);
+    return sentryCaptureMessage(msg);
   }
 }
 
 module.exports = {
   initSentry,
-  initSentryMiddlewares,
   capture,
   captureMessage,
 };

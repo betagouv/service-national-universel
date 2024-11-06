@@ -1,4 +1,5 @@
-const logfmt = require("logfmt");
+const { capture } = require("../sentry");
+const { logger } = require("../logger");
 
 const loggingMiddleware = async (req, res, next) => {
   const startTime = new Date();
@@ -15,13 +16,13 @@ const loggingMiddleware = async (req, res, next) => {
         method: req.method,
         url: req.originalUrl,
         status: res.statusCode,
-        responseTime: `${req.responseTimeMs}ms`,
+        responseTime: req.responseTimeMs,
         ip,
       };
 
       const hasPayload = req.body && Object.keys(req.body).length > 0;
       if (hasPayload) {
-        log.payload = JSON.stringify(req.body);
+        log.payload = req.body;
       }
 
       if (req.user) {
@@ -31,9 +32,9 @@ const loggingMiddleware = async (req, res, next) => {
           log.userRole = req.user?.role;
         }
       }
-      console.log(logfmt.stringify(log));
+      logger.info("api", log);
     } catch (error) {
-      console.error("Error in logging middleware:", error);
+      capture(error);
     }
   });
   next();

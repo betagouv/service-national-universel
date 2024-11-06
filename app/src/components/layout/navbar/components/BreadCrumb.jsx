@@ -12,38 +12,6 @@ export default function Breadcrumbs() {
     if (path.includes("/phase2")) {
       items.push({ label: "Phase 2 - engagements", to: "/phase2" });
     }
-    // Je laisse les commentaires car il peut y avoir un besoin dans le futur
-    // Phase 2 MIG BreadCrumb
-    // if (path.includes("/phase2/mig")) {
-    //   items.push({ label: "Phase 2 - engagements", to: "/phase2" });
-    //   items.push({ label: "Réalisez votre mission d'intérêt général", to: "/phase2/mig" });
-    // }
-    // if (path.includes("/preferences")) {
-    //   items.push({ label: "Phase 2 - engagements", to: "/phase2" });
-    //   items.push({ label: "Réalisez votre mission d'intérêt général", to: "/phase2/mig" });
-    //   items.push({ label: "Mes préférences de missions", to: "/preferences" });
-    // }
-    // if (path.includes("/mission")) {
-    //   items.push({ label: "Phase 2 - engagements", to: "/phase2" });
-    //   items.push({ label: "Réalisez votre mission d'intérêt général", to: "/phase2/mig" });
-    //   items.push({ label: "Trouvez une mission d'intérêt général", to: "/mission" });
-    // }
-    // if (path.includes("/candidature")) {
-    //   items.push({ label: "Phase 2 - engagements", to: "/phase2" });
-    //   items.push({ label: "Réalisez votre mission d'intérêt général", to: "/phase2/mig" });
-    //   items.push({ label: "Mes candidatures", to: "/candidature" });
-    // }
-    // if (path.includes("/phase2/equivalence")) {
-    //   items.push({ label: "Phase 2 - engagements", to: "/phase2" });
-    //   items.push({ label: "Réalisez votre mission d'intérêt général", to: "/phase2/mig" });
-    //   items.push({ label: "Je demande la reconnaissance d'un engagement déjà réalisé", to: "/phase2/equivalence" });
-    // }
-
-    // Phase 2 Other Engagement BreadCrumb
-    if (path.includes("/autres-engagements")) {
-      items.push({ label: "Phase 2 - Engagements", to: "/phase2" });
-      items.push({ label: "Autres Engagements", to: "/autres-engagements" });
-    }
     // if (path.includes("/les-programmes")) {
     //   items.push({ label: "Phase 2 - engagements", to: "/phase2" });
     //   items.push({ label: "Autres Engagements", to: "/autres-engagements" });

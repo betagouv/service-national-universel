@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { MiniTitle } from "./commons";
 import CorrectionRequest from "./CorrectionRequest";
 import Field from "./Field";
 import CorrectedRequest from "./CorrectedRequest";
 import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
+import { MiniTitle } from "./commons/MiniTitle";
 
 export function FieldsGroup({
   name,
@@ -11,7 +11,7 @@ export function FieldsGroup({
   correctionLabel,
   className = "",
   children,
-  noflex,
+  noflex = false,
   mode,
   currentRequest,
   onStartRequest,
