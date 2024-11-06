@@ -6,7 +6,7 @@ on:
       - "app/**"
       - "packages/**"
       - ".github/**" # TODO: remove
-    branches: # TODO: remove
+    branches: # TODO: remove me
       - 3577-app
 
 jobs:
