@@ -54,6 +54,21 @@ class ScalewayClient {
     }
   }
 
+  async _patchOne(url, body) {
+    const resp = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "X-Auth-Token": this.secretKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    const json = await resp.json();
+    if (!resp.ok) {
+      throw new Error("Resource not patched", { cause: json.message });
+    }
+  }
+
   async findProject(name) {
     return this._findOne(
       `${this.endpoint}/account/v3/projects?organization_id=${this.organizationId}&name=${name}`,
@@ -101,8 +116,28 @@ class ScalewayClient {
 
   async findContainerNamespace(name) {
     return this._findOne(
-      `${this.endpoint}/containers/v1beta1/regions/${this.region}/namespaces?name=${name}`,
+      `${this.endpoint}/containers/v1beta1/regions/${this.region}/namespaces?organization_id=${this.organizationId}&name=${name}`,
       "namespaces"
+    );
+  }
+
+  async findContainer(namespaceId, name) {
+    return this._findOne(
+      `${this.endpoint}/containers/v1beta1/regions/${this.region}/containers?namespace_id=${namespaceId}&name=${name}`,
+      "containers"
+    );
+  }
+
+  async getContainer(containerId) {
+    return this._getOne(
+      `${this.endpoint}/containers/v1beta1/regions/${this.region}/containers/${containerId}`
+    );
+  }
+
+  async updateContainer(containerId, body) {
+    return this._patchOne(
+      `${this.endpoint}/containers/v1beta1/regions/${this.region}/containers/${containerId}`,
+      body
     );
   }
 

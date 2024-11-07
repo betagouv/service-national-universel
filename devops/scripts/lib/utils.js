@@ -31,6 +31,16 @@ function parseRegistryEndpoint(endpoint) {
   return { imageEndpoint: parsed[0], tagName: parsed[1] };
 }
 
+function registryEndpoint(registry, tag) {
+  return `${registry}:${tag}`;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 function childProcess(command, args, options) {
   let proc = spawn(command, args, {
     stdio: "inherit",
@@ -99,9 +109,11 @@ async function genericDeleteAll({
 
 module.exports = {
   imageTag,
+  sleep,
   environmentFromContainer,
   environmentFromSecret,
   parseRegistryEndpoint,
+  registryEndpoint,
   genericDeleteAll,
   environmentFromBranch,
   childProcess,

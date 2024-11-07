@@ -1,5 +1,4 @@
 const process = require("node:process");
-const path = require("node:path");
 const UserInput = require("./lib/user-input");
 const ScalewayClient = require("./lib/scaleway-client");
 const { getConfig } = require("./lib/config");

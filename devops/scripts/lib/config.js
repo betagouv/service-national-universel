@@ -10,6 +10,8 @@ function getConfig(env, app) {
   }
 
   return {
+    containerNamespace: `snu-${env}`,
+    containerName: `${env}-${app}`,
     projectName: `snu-${env}`,
     secretName: `${env}-${app}`,
     registry: `rg.fr-par.scw.cloud/snu-${env}/${app}`,

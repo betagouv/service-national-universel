@@ -3,7 +3,11 @@ const UserInput = require("./lib/user-input");
 const ScalewayClient = require("./lib/scaleway-client");
 const { GetSecrets, SECRET_FORMATS } = require("./get-secrets");
 const { getConfig } = require("./lib/config");
-const { childProcess, childProcessStdin } = require("./lib/utils");
+const {
+  childProcess,
+  childProcessStdin,
+  registryEndpoint,
+} = require("./lib/utils");
 
 const SECRET_KEYS = new Set(["SENTRY_AUTH_TOKEN"]);
 const RELEASE_KEY = "VITE_RELEASE";
@@ -38,7 +42,7 @@ async function main() {
   };
   const values = { ...config, ...env }; // override config from env
 
-  const image = `${registry}:${values[RELEASE_KEY]}`;
+  const image = registryEndpoint(registry, values[RELEASE_KEY]);
 
   const args = [
     "build",
