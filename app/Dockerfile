@@ -48,7 +48,7 @@ ARG VITE_API_ENGAGEMENT_SNU_ID
 
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) \
-    npm run build -- -- --mode ${VITE_ENVIRONMENT}
+    npm run build
 
 FROM nginx AS runner
 

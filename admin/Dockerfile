@@ -45,7 +45,7 @@ ARG VITE_SENTRY_ON_ERROR_SAMPLE_RATE
 
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) \
-    npm run build -- -- --mode ${VITE_ENVIRONMENT}
+    npm run build
 
 FROM nginx AS runner
 

@@ -28,15 +28,15 @@ async function main() {
     format: SECRET_FORMATS.ENVFILE,
   }).execute();
 
-  const env = { ...config, ...process.env, APP_NAME: input.application };
+  const env = {
+    ...config,
+    ...process.env,
+    APP_NAME: input.application,
+  };
 
-  await childProcess(
-    "npm",
-    ["run", "build", "--", "--", "--mode", input.environment],
-    {
-      env,
-    }
-  );
+  await childProcess("npm", ["run", "build"], {
+    env,
+  });
 }
 
 if (require.main === module) {

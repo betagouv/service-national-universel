@@ -33,7 +33,9 @@ async function main() {
     format: SECRET_FORMATS.ENVFILE,
   }).execute();
 
-  const env = { ...process.env };
+  const env = {
+    ...process.env,
+  };
   const values = { ...config, ...env }; // override config from env
 
   const image = `${registry}:${values[RELEASE_KEY]}`;

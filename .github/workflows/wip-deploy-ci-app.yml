@@ -34,7 +34,7 @@ jobs:
 
       - name: Install packages
         if: steps.cache-npm.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm install --only=dev
 
       # Typescript check
       - name: Check types
