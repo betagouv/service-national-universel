@@ -52,6 +52,7 @@ jobs:
 
       - name: Get release name
         id: release
+        working-directory: devops/scripts
         run: |
           release=$(node get-image-tag.js ${{ github.event.after }})
           echo "release: $release"
