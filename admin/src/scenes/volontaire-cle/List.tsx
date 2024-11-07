@@ -23,12 +23,27 @@ import ButtonActionGroupConsent from "./consent/ButtonActionGroupConsent";
 import ButtonActionGroupValidation from "./validation/ButtonActionGroupValidation";
 import ButtonActionGroupImageRight from "./imageRight/ButtonActionGroupImageRight";
 import YoungListHeader from "./components/YoungListHeader";
+import InfoMessage from "../dashboardV2/components/ui/InfoMessage";
 
 const pageId = "youngCle-list";
 
 interface YoungDtoWithClasse extends YoungDto {
   classe: ClasseDto;
 }
+
+const AnnonceRefClassMarkdown = {
+  title: "Guide pratique du suivi des inscriptions des élèves",
+  message: `
+**Actions groupées :** vous pouvez mener une action élève par élève (ligne par ligne) ou en masse (cocher les élèves concernés et choisir dans le menu "Actions groupées" l'action à mener).
+
+**Onglet par onglet, retrouvez :**
+
+- Général : tous les élèves de votre classe, quelques soient leurs statuts.
+- Récolte des consentements : tous les élèves qui ont finalisé leur inscription mais qui n'ont pas encore le consentement des représentants légaux.
+- Validation des inscriptions : tous les élèves dont l'inscription et la récolte du consentement sont finalisés mais qui doivent être validés par l'établissement.
+- Récolte des droits à l'image : tous les élèves qui n'ont pas encore renseignés leurs droits à l'image (non bloquant pour la validation d'inscriptions).
+`,
+};
 
 export default function List() {
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
@@ -156,10 +171,16 @@ export default function List() {
     initFilters();
   }, [currentTab]);
 
+  const shouldDisplaySortOption =
+    (currentTab === "consent" && !!studentsCount?.studentsWaitingConsent) ||
+    (currentTab === "validation" && !!studentsCount?.studentsWaitingValidation) ||
+    (currentTab === "image" && !!studentsCount?.studentsWaitingImageRights);
+
   if (!sessionsPhase1 || !bus || !classes) return <Loader />;
 
   return (
     <Page>
+      <InfoMessage title={AnnonceRefClassMarkdown.title} message={AnnonceRefClassMarkdown.message} className="mb-6" />
       <Header
         title="Liste de mes élèves"
         breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes élèves" }]}
@@ -197,47 +218,47 @@ export default function List() {
           />
 
           <Container className="!p-0">
-            <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
-              <>
-                <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
-                  <Filters
-                    pageId={pageId}
-                    route="/elasticsearch/cle/young/search?needClasseInfo=true"
-                    setData={(value) => setYoungList(value)}
-                    filters={filterArray}
-                    searchPlaceholder="Rechercher par mots clés, ville, code postal..."
-                    selectedFilters={selectedFilters}
-                    setSelectedFilters={setSelectedFilters}
-                    paramData={paramData}
-                    setParamData={setParamData}
-                    size={size}
-                    disabled={currentTab !== "general"}
+            <div className="mb-8 flex flex-col rounded-xl py-4">
+              <div className="flex justify-items-center justify-between gap-2 px-4 pt-2">
+                <Filters
+                  pageId={pageId}
+                  route="/elasticsearch/cle/young/search?needClasseInfo=true"
+                  setData={(value) => setYoungList(value)}
+                  filters={filterArray}
+                  searchPlaceholder="Rechercher par mots clés, ville, code postal..."
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                  paramData={paramData}
+                  setParamData={setParamData}
+                  size={size}
+                  disabled={currentTab !== "general"}
+                />
+                {currentTab === "consent" && !!studentsCount?.studentsWaitingConsent && (
+                  <ButtonActionGroupConsent
+                    selectedYoungs={selectedYoungs}
+                    setSelectedYoungs={setSelectedYoungs}
+                    setSelectAll={setSelectAll}
+                    onYoungsChange={() => initFilters()}
                   />
-                  {currentTab === "consent" && !!studentsCount?.studentsWaitingConsent && (
-                    <ButtonActionGroupConsent
-                      selectedYoungs={selectedYoungs}
-                      setSelectedYoungs={setSelectedYoungs}
-                      setSelectAll={setSelectAll}
-                      onYoungsChange={() => initFilters()}
-                    />
-                  )}
-                  {currentTab === "validation" && !!studentsCount?.studentsWaitingValidation && (
-                    <ButtonActionGroupValidation
-                      selectedYoungs={selectedYoungs}
-                      setSelectedYoungs={setSelectedYoungs}
-                      setSelectAll={setSelectAll}
-                      onYoungsChange={() => initFilters()}
-                    />
-                  )}
-                  {currentTab === "image" && !!studentsCount?.studentsWaitingImageRights && (
-                    <ButtonActionGroupImageRight
-                      selectedYoungs={selectedYoungs}
-                      setSelectedYoungs={setSelectedYoungs}
-                      setSelectAll={setSelectAll}
-                      onYoungsChange={() => initFilters()}
-                    />
-                  )}
+                )}
+                {currentTab === "validation" && !!studentsCount?.studentsWaitingValidation && (
+                  <ButtonActionGroupValidation
+                    selectedYoungs={selectedYoungs}
+                    setSelectedYoungs={setSelectedYoungs}
+                    setSelectAll={setSelectAll}
+                    onYoungsChange={() => initFilters()}
+                  />
+                )}
+                {currentTab === "image" && !!studentsCount?.studentsWaitingImageRights && (
+                  <ButtonActionGroupImageRight
+                    selectedYoungs={selectedYoungs}
+                    setSelectedYoungs={setSelectedYoungs}
+                    setSelectAll={setSelectAll}
+                    onYoungsChange={() => initFilters()}
+                  />
+                )}
 
+                {shouldDisplaySortOption ? (
                   <SortOption
                     sortOptions={[
                       { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
@@ -249,8 +270,11 @@ export default function List() {
                     selectedFilters={selectedFilters}
                     pagination={paramData}
                     onPaginationChange={setParamData}
+                    className="mx-0"
                   />
-                </div>
+                ) : null}
+              </div>
+              {currentTab === "general" ? (
                 <div className="mt-2 flex flex-row flex-wrap items-center px-4">
                   <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} disabled={currentTab !== "general"} />
                   <SelectedFilters
@@ -259,72 +283,73 @@ export default function List() {
                     setSelectedFilters={setSelectedFilters}
                     paramData={paramData}
                     setParamData={setParamData}
-                    disabled={currentTab !== "general"}
                   />
                 </div>
-                {currentTab === "consent" && !studentsCount?.studentsWaitingConsent ? (
-                  <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
-                    <HiOutlineClipboardCheck size={64} className="text-gray-400 mb-8" />
-                    <p className="text-base leading-5 text-gray-400">Vous n’avez plus de consentements à la participation à récolter actuellement</p>
-                  </div>
-                ) : currentTab === "validation" && !studentsCount?.studentsWaitingValidation ? (
-                  <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
-                    <HiOutlineClipboardCheck size={64} className="text-gray-400 mb-8" />
-                    <p className="text-base leading-5 text-gray-400">Vous n’avez plus d'inscription à valider actuellement</p>
-                  </div>
-                ) : currentTab === "image" && !studentsCount?.studentsWaitingImageRights ? (
-                  <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
-                    <HiOutlineClipboardCheck size={64} className="text-gray-400 mb-8" />
-                    <p className="text-base leading-5 text-gray-400">Vous n’avez plus de droits à l'image à récolter actuellement</p>
-                  </div>
-                ) : (
-                  <ResultTable
-                    paramData={paramData}
-                    setParamData={setParamData}
-                    currentEntryOnPage={youngList?.length}
-                    size={size}
-                    setSize={setSize}
-                    render={
-                      <table className="mt-6 mb-2 flex w-full flex-col divide-y table-auto divide-gray-100 border-gray-100">
-                        <thead>
-                          <YoungListHeader
-                            currentTab={currentTab}
-                            selectAll={selectAll}
-                            onSelectAllChange={setSelectAll}
-                            selectedYoungs={selectedYoungs}
-                            onSelectedYoungsChange={setSelectedYoungs}
-                            youngList={youngList}
-                          />
-                        </thead>
-                        <tbody>
-                          {youngList.map((young: YoungDto & { classe: ClasseDto }) => (
-                            <Fragment key={young._id}>
-                              {currentTab === "general" && <YoungRowGeneral young={young} />}
-                              {currentTab === "consent" && (
-                                <YoungRowConsent young={young} selectedYoungs={selectedYoungs} onYoungSelected={setSelectedYoungs} onChange={() => initFilters()} />
-                              )}
-                              {currentTab === "validation" && (
-                                <YoungRowValidation young={young} selectedYoungs={selectedYoungs} onYoungSelected={setSelectedYoungs} onChange={() => initFilters()} />
-                              )}
-                              {currentTab === "image" && (
-                                <YoungRowImageRight young={young} selectedYoungs={selectedYoungs} onYoungSelected={setSelectedYoungs} onChange={() => initFilters()} />
-                              )}
-                            </Fragment>
-                          ))}
-                          <YoungListHeader
-                            currentTab={currentTab}
-                            selectAll={selectAll}
-                            onSelectAllChange={setSelectAll}
-                            selectedYoungs={selectedYoungs}
-                            onSelectedYoungsChange={setSelectedYoungs}
-                            youngList={youngList}
-                          />
-                        </tbody>
-                      </table>
-                    }
-                  />
-                )}
-              </>
+              ) : null}
+              {currentTab === "consent" && !studentsCount?.studentsWaitingConsent ? (
+                <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
+                  <HiOutlineClipboardCheck size={64} className="text-gray-400 mb-8" strokeWidth={1.5} />
+                  <p className="text-base leading-5 text-gray-400">Vous n’avez plus de consentements à la participation à récolter actuellement</p>
+                </div>
+              ) : currentTab === "validation" && !studentsCount?.studentsWaitingValidation ? (
+                <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
+                  <HiOutlineClipboardCheck size={64} className="text-gray-400 mb-8" strokeWidth={1.5} />
+                  <p className="text-base leading-5 text-gray-400">Vous n’avez plus d'inscription à valider actuellement</p>
+                </div>
+              ) : currentTab === "image" && !studentsCount?.studentsWaitingImageRights ? (
+                <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
+                  <HiOutlineClipboardCheck size={64} className="text-gray-400 mb-8" strokeWidth={1.5} />
+                  <p className="text-base leading-5 text-gray-400">Vous n’avez plus de droits à l'image à récolter actuellement</p>
+                </div>
+              ) : (
+                <ResultTable
+                  paramData={paramData}
+                  setParamData={setParamData}
+                  currentEntryOnPage={youngList?.length}
+                  size={size}
+                  setSize={setSize}
+                  render={
+                    <table className="mt-6 mb-2 flex w-full flex-col divide-y table-auto divide-gray-200">
+                      <thead>
+                        <YoungListHeader
+                          currentTab={currentTab}
+                          selectAll={selectAll}
+                          onSelectAllChange={setSelectAll}
+                          selectedYoungs={selectedYoungs}
+                          onSelectedYoungsChange={setSelectedYoungs}
+                          youngList={youngList}
+                        />
+                      </thead>
+                      <tbody>
+                        {youngList.map((young: YoungDto & { classe: ClasseDto }) => (
+                          <Fragment key={young._id}>
+                            {currentTab === "general" && <YoungRowGeneral young={young} />}
+                            {currentTab === "consent" && (
+                              <YoungRowConsent young={young} selectedYoungs={selectedYoungs} onYoungSelected={setSelectedYoungs} onChange={() => initFilters()} />
+                            )}
+                            {currentTab === "validation" && (
+                              <YoungRowValidation young={young} selectedYoungs={selectedYoungs} onYoungSelected={setSelectedYoungs} onChange={() => initFilters()} />
+                            )}
+                            {currentTab === "image" && (
+                              <YoungRowImageRight young={young} selectedYoungs={selectedYoungs} onYoungSelected={setSelectedYoungs} onChange={() => initFilters()} />
+                            )}
+                          </Fragment>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <YoungListHeader
+                          currentTab={currentTab}
+                          selectAll={selectAll}
+                          onSelectAllChange={setSelectAll}
+                          selectedYoungs={selectedYoungs}
+                          onSelectedYoungsChange={setSelectedYoungs}
+                          youngList={youngList}
+                        />
+                      </tfoot>
+                    </table>
+                  }
+                />
+              )}
             </div>
           </Container>
         </>
