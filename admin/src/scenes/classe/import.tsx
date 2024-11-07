@@ -61,7 +61,7 @@ export default function Import({ onFileVerified }: Props) {
     setIsUploading(true);
     setImportErrors(null);
     try {
-      const res = await api.uploadFiles(`/plan-de-transport/import/${cohort}`, [file]);
+      const res = await api.uploadFiles(`/cle/classe/import/classe-import`, [file]);
       if (res.code === "FILE_CORRUPTED") {
         setUploadError("Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support.");
       } else if (!res.ok) {

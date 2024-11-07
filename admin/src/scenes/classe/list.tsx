@@ -10,7 +10,7 @@ import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/compo
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { Button, Container, Header, Page } from "@snu/ds/admin";
-import { ROLES, translateStatusClasse, translate, EtablissementType, ClasseType } from "snu-lib";
+import { ROLES, translateStatusClasse, translate, EtablissementType, ClasseType, isSuperAdmin } from "snu-lib";
 import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
 
 import { getCohortGroups } from "@/services/cohort.service";
@@ -145,7 +145,7 @@ export default function List() {
               tooltip="Vous devez selectionner une cohort pour pouvoir exporter le SR"
             />
           ),
-          user.role === ROLES.ADMIN && (
+          isSuperAdmin(user) && (
             <Link to="/classes/import">
               <Button title="Mettre à jour" className="mr-2" loading={exportLoading} />
             </Link>
