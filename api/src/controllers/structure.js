@@ -1,4 +1,5 @@
 const express = require("express");
+const Joi = require("joi");
 const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../sentry");
@@ -17,14 +18,16 @@ const {
   isSupervisor,
   isAdmin,
   SENDINBLUE_TEMPLATES,
-  canViewPatchesHistory,
 } = require("snu-lib");
 const patches = require("./patches");
 const { sendTemplate } = require("../brevo");
-const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
+const { validateId, validateStructure, validateStructureManager, idSchema } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
 const { serializeMissions, serializeReferents } = require("../utils/es-serializer");
 const { allRecords } = require("../es/utils");
+const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
+const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");
+const { authMiddleware } = require("../middlewares/authMiddleware");
 
 const setAndSave = async (data, keys, fromUser) => {
   data.set({ ...keys });
@@ -203,28 +206,32 @@ router.get("/:id/mission", passport.authenticate("referent", { session: false, f
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
+router.get(
+  "/:id/patches",
+  authMiddleware("referent"),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+  ],
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const structure = await StructureModel.findById(id);
+      if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const structurePatches = await patches.get(req, StructureModel);
+      if (!structurePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      return res.status(200).send({ ok: true, data: structurePatches });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).send({ ok: false, code: error.message });
     }
-
-    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const structure = await StructureModel.findById(id);
-    if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const structurePatches = await patches.get(req, StructureModel);
-    if (!structurePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    return res.status(200).send({ ok: true, data: structurePatches });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: error.message });
-  }
-});
+  },
+);
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {

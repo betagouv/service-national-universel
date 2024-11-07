@@ -29,7 +29,6 @@ import {
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
   ReferentType,
-  canViewPatchesHistory,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../../sentry";
@@ -80,7 +79,6 @@ import { accessControlMiddleware } from "../../middlewares/accessControlMiddlewa
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { isCohortInscriptionOpen } from "../../cohort/cohortService";
-import { isEmpty } from "bullmq";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -638,38 +636,41 @@ router.put("/:id/verify", async (req: UserRequest, res) => {
   }
 });
 
-router.get("/:id/patches", async (req: UserRequest, res) => {
-  try {
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
+router.get(
+  "/:id/patches",
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+  ],
+  async (req: UserRequest, res) => {
+    try {
+      const id = req.params.id;
 
-    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const classe = await ClasseModel.findById(id);
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const classe = await ClasseModel.findById(id);
-    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      let classePatches = await patches.get(req, ClasseModel);
+      if (!classePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    let classePatches = await patches.get(req, ClasseModel);
-    if (!classePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const pathsToIgnore = ["/seatsTaken", "/cohortId", "/uniqueKey", "/uniqueId", "/comments", "/trimester", "/metadata", "/id", "/updatedAt", "/referents"];
-    classePatches.forEach((patch) => {
-      patch.ops = patch.ops.filter((op) => !pathsToIgnore.includes(op.path));
-      patch.ops.forEach((op) => {
-        if (op.path === "/status") {
-          op.path = "/classeStatus";
-        }
+      const pathsToIgnore = ["/seatsTaken", "/cohortId", "/uniqueKey", "/uniqueId", "/comments", "/trimester", "/metadata", "/id", "/updatedAt", "/referents"];
+      classePatches.forEach((patch) => {
+        patch.ops = patch.ops.filter((op) => !pathsToIgnore.includes(op.path));
+        patch.ops.forEach((op) => {
+          if (op.path === "/status") {
+            op.path = "/classeStatus";
+          }
+        });
       });
-    });
-    classePatches = classePatches.filter((patch) => patch.ops.length > 0);
+      classePatches = classePatches.filter((patch) => patch.ops.length > 0);
 
-    return res.status(200).send({ ok: true, data: classePatches });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: error.message });
-  }
-});
+      return res.status(200).send({ ok: true, data: classePatches });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
 
 export default router;

@@ -12,7 +12,7 @@ import { translate } from "snu-lib";
 import ClasseHeader from "../header/ClasseHeader";
 import { ClasseYoungPatchesType } from "../components/types";
 import HistoryRow from "../components/HistoryRow";
-import { getValueOptions, getUserOptions, getYoungOptions } from "../utils";
+import { getValueOptions, getUserOptions, getYoungOptions, NormalizeYoungName } from "../utils";
 
 export default function Inscriptions(props) {
   const [classe, setClasse] = useState(props.classe);
@@ -75,18 +75,8 @@ export default function Inscriptions(props) {
     let filteredPatches = patches;
     if (youngFilter !== "") {
       filteredPatches = filteredPatches.filter((patch) => {
-        const fullName = `${patch.young.firstName} ${patch.young.lastName}`
-          .trim()
-          .replace(/[.,\s]/g, "")
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase();
-        const filter = youngFilter
-          .trim()
-          .replace(/[.,\s]/g, "")
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase();
+        const fullName = NormalizeYoungName(`${patch.young.firstName} ${patch.young.lastName}`);
+        const filter = NormalizeYoungName(youngFilter);
 
         return fullName.includes(filter);
       });

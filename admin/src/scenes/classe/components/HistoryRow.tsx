@@ -1,9 +1,13 @@
 import React from "react";
 import { HiArrowRight } from "react-icons/hi";
+import { useSelector } from "react-redux";
+import cx from "classnames";
 
-import { formatLongDateFR, translateAction } from "snu-lib";
+import { formatLongDateFR, translateAction, ROLES } from "snu-lib";
 import { translateHistory, translateModelFields } from "@/utils";
 import UserCard from "@/components/UserCard";
+import { AuthState } from "@/redux/auth/reducer";
+
 import { ClasseYoungPatchesType, ClassePatchesType } from "./types";
 
 interface ClasseProps {
@@ -16,18 +20,21 @@ interface YoungProps {
   patch: ClasseYoungPatchesType;
 }
 
-type Props = ClasseProps | YoungProps;
+type HistoryRowProps = ClasseProps | YoungProps;
 
-export default function HistoryRow({ patch, type }: Props) {
-  function getLink(patch) {
-    if (patch.young) return `/volontaire/${patch.ref}`;
-    return "";
-  }
+export default function HistoryRow({ patch, type }: HistoryRowProps) {
+  const user = useSelector((state: AuthState) => state.Auth.user);
 
   if (type === "young" && patch.user) {
     if (!patch.user.role) {
       if (patch.user.email) patch.user.role = "Volontaire";
     }
+  }
+
+  function getLink(patch) {
+    if (patch.oldStudent && [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) return "";
+    if (patch.young) return `/volontaire/${patch.ref}`;
+    return "";
   }
 
   return (
@@ -43,8 +50,18 @@ export default function HistoryRow({ patch, type }: Props) {
                 </p>
               </>
             ) : (
-              <a href={getLink(patch)} target="_blank" rel="noreferrer" className="group flex w-full flex-col hover:cursor-pointer">
-                <p className="truncate hover:overflow-visible text-gray-900 font-[700] text-base leading-5 hover:text-blue-600">
+              <a
+                href={getLink(patch)}
+                target="_blank"
+                rel="noreferrer"
+                className={cx("group flex w-full flex-col", {
+                  "hover:cursor-pointer": getLink(patch) !== "",
+                  "hover:text-inherit hover:cursor-default": getLink(patch) === "",
+                })}>
+                <p
+                  className={cx("truncate-x text-gray-900 font-[700] text-base leading-5", {
+                    "hover:text-blue-600": getLink(patch) !== "",
+                  })}>
                   {patch.young.firstName} {patch.young.lastName}
                 </p>
                 <p className="text-gray-500 text-xs leading-5 font-medium">

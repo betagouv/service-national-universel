@@ -33,7 +33,7 @@ import {
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
-import { validateYoung, validateId, validatePhase1Document } from "../../utils/validator";
+import { validateYoung, validateId, validatePhase1Document, idSchema } from "../../utils/validator";
 import patches from "../patches";
 import { serializeYoung, serializeApplication } from "../../utils/serializer";
 import {
@@ -57,7 +57,6 @@ import {
   ReferentType,
   getDepartmentForEligibility,
   FUNCTIONAL_ERRORS,
-  canViewPatchesHistory,
   CohortDto,
 } from "snu-lib";
 import { getFilteredSessions } from "../../utils/cohort";
@@ -69,6 +68,9 @@ import scanFile from "../../utils/virusScanner";
 import emailsEmitter from "../../emails";
 import { UserRequest } from "../request";
 import { FileTypeResult } from "file-type";
+import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
+import { authMiddleware } from "../../middlewares/authMiddleware";
+import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
@@ -406,27 +408,31 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
+router.get(
+  "/:id/patches",
+  authMiddleware("referent"),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE]),
+  ],
+  async (req: UserRequest, res) => {
+    try {
+      const { id } = req.params;
+
+      const young = await YoungModel.findById(id);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const youngPatches = await patches.get(req, YoungModel);
+      if (!youngPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      return res.status(200).send({ ok: true, data: youngPatches });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const young = await YoungModel.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const youngPatches = await patches.get(req, YoungModel);
-    if (!youngPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data: youngPatches });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {

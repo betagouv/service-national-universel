@@ -460,3 +460,12 @@ export function getYoungOptions(patches) {
   const uniqueYoungOptions: SelectOption[] = Array.from(new Map(youngOptions.map((item) => [item.value, item])).values());
   return uniqueYoungOptions;
 }
+
+export function NormalizeYoungName(name: string) {
+  return name
+    .trim()
+    .replace(/[.,\s]/g, "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}

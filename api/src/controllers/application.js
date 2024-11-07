@@ -12,7 +12,7 @@ const { YoungModel, CohortModel, ReferentModel, ApplicationModel, ContractModel,
 const { decrypt, encrypt } = require("../cryptoUtils");
 
 const { sendTemplate } = require("../brevo");
-const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
+const { validateUpdateApplication, validateNewApplication, validateId, idSchema } = require("../utils/validator");
 const config = require("config");
 const {
   ROLES,
@@ -24,7 +24,6 @@ const {
   translateAddFilePhase2,
   translateAddFilesPhase2,
   APPLICATION_STATUS,
-  canViewPatchesHistory,
 } = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
 const {
@@ -44,6 +43,9 @@ const scanFile = require("../utils/virusScanner");
 const { getAuthorizationToApply } = require("../services/application");
 const { apiEngagement } = require("../services/gouv.fr/api-engagement");
 const { getMimeFromBuffer, getMimeFromFile } = require("../utils/file");
+const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
+const { authMiddleware } = require("../middlewares/authMiddleware");
+const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
@@ -840,27 +842,31 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
+router.get(
+  "/:id/patches",
+  authMiddleware("referent"),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+  ],
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const application = await ApplicationModel.findById(id);
+      if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const applicationPatches = await patches.get(req, ApplicationModel);
+      if (!applicationPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      return res.status(200).send({ ok: true, data: applicationPatches });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).send({ ok: false, code: error.message });
     }
-
-    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const application = await ApplicationModel.findById(id);
-    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const applicationPatches = await patches.get(req, ApplicationModel);
-    if (!applicationPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    return res.status(200).send({ ok: true, data: applicationPatches });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: error.message });
-  }
-});
+  },
+);
 
 module.exports = router;
