@@ -21,7 +21,7 @@ router.get("/", async (_req: RouteRequest<CohortGroupRoutes["Get"]>, res: RouteR
 });
 
 router.post(
-  "/create",
+  "/",
   requestValidatorMiddleware({
     body: Joi.object({
       name: Joi.string().required(),
@@ -45,7 +45,7 @@ router.post(
 );
 
 router.put(
-  "/update",
+  "/",
   requestValidatorMiddleware({
     params: Joi.object({
       id: Joi.string().required(),
@@ -74,7 +74,7 @@ router.put(
 );
 
 router.delete(
-  "/delete",
+  "/",
   requestValidatorMiddleware({
     params: Joi.object({
       id: Joi.string().required(),

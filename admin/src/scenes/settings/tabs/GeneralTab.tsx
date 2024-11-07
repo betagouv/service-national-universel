@@ -1,11 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 
 import { isAfter } from "date-fns";
 import { BiLoaderAlt } from "react-icons/bi";
 import { MdInfoOutline } from "react-icons/md";
 import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
-import { COHORT_STATUS, COHORT_TYPE, CohortDto, CohortGroupType } from "snu-lib";
+import { COHORT_STATUS, COHORT_TYPE, CohortDto } from "snu-lib";
 
 import api from "@/services/api";
 
@@ -19,18 +19,17 @@ import InputText from "@/components/ui/forms/InputText";
 import InputTextarea from "@/components/ui/forms/InputTextarea";
 import NumberInput from "@/components/ui/forms/NumberInput";
 import CreatableSelect from "react-select/creatable";
-import Field from "@/components/ui/forms/Field";
 
 import { CleSettings } from "../components/CleSettings";
 import { InformationsConvoyage } from "../components/InformationsConvoyage";
 import { ManualInscriptionSettings } from "../phase0/ManualInscriptionSettings";
 import { Select } from "@snu/ds/admin";
-import { queryClient } from "@/services/react-query";
 import useCohortGroups from "../lib/useCohortGroups";
+import useCreateCohortGroup from "../lib/useCreateCohortGroup";
 
 // Define the interface for GeneralTab props
 interface GeneralTabProps {
-  cohort?: CohortDto;
+  cohort: CohortDto;
   onCohortChange: React.Dispatch<React.SetStateAction<CohortDto>>;
   readOnly: boolean;
   getCohort: () => void;
@@ -41,9 +40,6 @@ interface GeneralTabProps {
 // Use the interface for the props object
 export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort, isLoading, onLoadingChange }: GeneralTabProps) {
   const [error, setError] = useState<{ [key: string]: string }>({});
-  const [newCohortGroup, setNewCohortGroup] = useState({ name: "" });
-  const [creationCohortGroup, setCreationCohortGroup] = useState(false);
-  const cohortGroupSelectRef = useRef(null);
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(cohort?.reInscriptionStartDate || cohort?.reInscriptionEndDate);
 
   const statusOptions = [
@@ -53,25 +49,14 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
 
   const { isLoading: isCohortGroupLoading, data: cohortGroups } = useCohortGroups();
   const cohortGroupOptions = cohortGroups?.map((group) => ({ value: group._id, label: group.name }));
+  const { mutate } = useCreateCohortGroup(cohort);
 
-  const createCohortGroup = async () => {
+  const createCohortGroup = async (newCohortGroupName: string) => {
     if (!cohort) return;
-    try {
-      const cohortYear = new Date(cohort.dateStart).getFullYear();
-      const { data: createdGroup } = await api.post("/cohort-group/create", {
-        name: newCohortGroup.name,
-        type: cohort?.type,
-        year: cohortYear,
-      });
-      // Mettez à jour l'état avec le nouveau groupe créé
-      queryClient.setQueryData(["cohortGroups"], (old: CohortGroupType[]) => [...old, createdGroup]);
-
-      onCohortChange({ ...cohort, cohortGroupId: createdGroup._id });
-      setCreationCohortGroup(false);
-      setNewCohortGroup({ name: "" });
-    } catch (error) {
-      console.error("Erreur lors de la création du groupe de cohortes :", error);
-    }
+    if (!window.confirm(`Voulez-vous créer le groupe de cohorte ${newCohortGroupName} ?`)) return;
+    mutate(newCohortGroupName, {
+      onSuccess: (data) => onCohortChange({ ...cohort, cohortGroupId: data._id }),
+    });
   };
 
   const onSubmit = async () => {
@@ -110,10 +95,6 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
       onLoadingChange(false);
     }
   };
-
-  if (!cohort) {
-    return null;
-  }
 
   return (
     <div className="flex w-full flex-col gap-8">
@@ -175,7 +156,6 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
 
                   <div>
                     <CreatableSelect
-                      ref={cohortGroupSelectRef}
                       options={cohortGroupOptions}
                       value={cohortGroupOptions?.find((o) => o.value === cohort.cohortGroupId)}
                       isDisabled={isLoading || isCohortGroupLoading || readOnly}
@@ -185,7 +165,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                         }
                       }}
                       formatCreateLabel={(input) => `Créer un nouveau groupe de cohortes : ${input}`}
-                      onCreateOption={() => setCreationCohortGroup(true)}
+                      onCreateOption={createCohortGroup}
                       placeholder="Sélectionnez un groupe de cohorte"
                       isValidNewOption={() => true}
                       styles={{
@@ -196,24 +176,6 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                         }),
                       }}
                     />
-
-                    {creationCohortGroup && (
-                      <div className="mt-4">
-                        <div className="text-lg font-medium text-gray-900">Créer un groupe de cohortes</div>
-                        <Field
-                          label="Nom du groupe"
-                          name="name"
-                          onChange={(cohortGroup) => setNewCohortGroup({ ...newCohortGroup, name: cohortGroup })}
-                          value={newCohortGroup.name}
-                          placeholder="Entrez le nom du groupe"
-                        />
-                        <div className="flex w-full justify-end mt-4">
-                          <div className="inline-block cursor-pointer rounded bg-blue-600 py-2.5 px-4 text-sm font-medium text-white" onClick={createCohortGroup}>
-                            Créer le groupe
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
