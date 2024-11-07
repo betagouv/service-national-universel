@@ -12,7 +12,7 @@ export const getCertificateTemplate = (young: YoungDto) => {
   if (young.cohort === "Octobre 2023 - NC" && young.source !== "CLE") {
     return "convocation/convocation_template_base_NC.png";
   }
-  return "convocation/convocation_template_base_2024_V2.png";
+  return "convocation/convocation_template_base_2024_V3.png";
 };
 
 export const isLocalTransport = (young: YoungDto) => {
