@@ -6,14 +6,13 @@ import { accessControlMiddleware } from "../middlewares/accessControlMiddleware"
 import { CohortGroupModel } from "../models/cohortGroup";
 import Joi from "joi";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
-import { getCohortGroupsWithDateStart } from "./cohortGroupService";
 import { CohortModel } from "../models";
+
 const router = express.Router();
 
-router.get("/", async (_req: RouteRequest<CohortGroupRoutes["GetCohortGroupRoute"]>, res: RouteResponse<CohortGroupRoutes["GetCohortGroupRoute"]>) => {
+router.get("/", async (_req: RouteRequest<CohortGroupRoutes["Get"]>, res: RouteResponse<CohortGroupRoutes["Get"]>) => {
   try {
-    const data = await CohortGroupModel.find();
-    // const data = await getCohortGroupsWithDateStart();
+    const data = await CohortGroupModel.find().sort({ year: 1, name: 1 });
     return res.json({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -32,7 +31,7 @@ router.post(
   }),
 
   // accessControlMiddleware([ROLES.ADMIN]),
-  async (req: RouteRequest<CohortGroupRoutes["PostCohortGroupRoute"]>, res: RouteResponse<CohortGroupRoutes["PostCohortGroupRoute"]>) => {
+  async (req: RouteRequest<CohortGroupRoutes["Post"]>, res: RouteResponse<CohortGroupRoutes["Post"]>) => {
     try {
       const { name, type, year } = req.body;
       const data = new CohortGroupModel({ name, type, year });
@@ -56,7 +55,7 @@ router.put(
     }),
   }),
   accessControlMiddleware([ROLES.ADMIN]),
-  async (req: RouteRequest<CohortGroupRoutes["PutCohortGroupRoute"]>, res: RouteResponse<CohortGroupRoutes["PutCohortGroupRoute"]>) => {
+  async (req: RouteRequest<CohortGroupRoutes["Put"]>, res: RouteResponse<CohortGroupRoutes["Put"]>) => {
     try {
       const { id } = req.params;
       const { name, type, year } = req.body;
@@ -82,7 +81,7 @@ router.delete(
     }),
   }),
   accessControlMiddleware([ROLES.ADMIN]),
-  async (req: RouteRequest<CohortGroupRoutes["DeleteCohortGroupRoute"]>, res: RouteResponse<CohortGroupRoutes["DeleteCohortGroupRoute"]>) => {
+  async (req: RouteRequest<CohortGroupRoutes["Delete"]>, res: RouteResponse<CohortGroupRoutes["Delete"]>) => {
     try {
       const { id } = req.params;
       const data = await CohortGroupModel.findById(id);

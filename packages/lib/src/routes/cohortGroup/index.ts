@@ -30,8 +30,8 @@ interface DeleteCohortGroupRoute extends BasicRoute {
 }
 
 export type CohortGroupRoutes = {
-  GetCohortGroupRoute: GetCohortGroupRoute;
-  PostCohortGroupRoute: PostCohortGroupRoute;
-  PutCohortGroupRoute: PutCohortGroupRoute;
-  DeleteCohortGroupRoute: DeleteCohortGroupRoute;
+  Get: GetCohortGroupRoute;
+  Post: PostCohortGroupRoute;
+  Put: PutCohortGroupRoute;
+  Delete: DeleteCohortGroupRoute;
 };
