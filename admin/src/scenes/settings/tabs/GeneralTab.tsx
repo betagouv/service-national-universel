@@ -51,10 +51,9 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
   const cohortGroupOptions = cohortGroups?.map((group) => ({ value: group._id, label: group.name }));
   const { mutate } = useCreateCohortGroup(cohort);
 
-  const createCohortGroup = async (newCohortGroupName: string) => {
-    if (!cohort) return;
-    if (!window.confirm(`Voulez-vous créer le groupe de cohorte ${newCohortGroupName} ?`)) return;
-    mutate(newCohortGroupName, {
+  const createCohortGroup = async (name: string) => {
+    if (!window.confirm(`Voulez-vous créer le groupe de cohorte ${name} ?`)) return;
+    mutate(name, {
       onSuccess: (data) => onCohortChange({ ...cohort, cohortGroupId: data._id }),
     });
   };
@@ -164,10 +163,9 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                           onCohortChange({ ...cohort, cohortGroupId: selected.value });
                         }
                       }}
-                      formatCreateLabel={(input) => `Créer un nouveau groupe de cohortes : ${input}`}
+                      formatCreateLabel={(input) => `Créer le groupe "${input}"`}
                       onCreateOption={createCohortGroup}
                       placeholder="Sélectionnez un groupe de cohorte"
-                      isValidNewOption={() => true}
                       styles={{
                         control: (base) => ({
                           ...base,
