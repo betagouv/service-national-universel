@@ -114,7 +114,37 @@ const departmentLookUp = {
 
 const departmentList = Object.values(departmentLookUp);
 
-const getDepartmentNumber = (depNum: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === depNum);
+function normalizeString(str) {
+  return str
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/-/g, " ")
+    .replace(/'/g, "")
+    .replace(/\s+/g, " ")
+    .trim(); 
+}
+
+const departmentNameMapping = {};
+for (const key in departmentLookUp) {
+  const deptName = departmentLookUp[key];
+  const normalizedDeptName = normalizeString(deptName);
+  departmentNameMapping[normalizedDeptName] = deptName;
+}
+
+function normalizeDepartmentName(deptName) {
+  if (typeof deptName !== "string") {
+    return deptName;
+  }
+  const normalizedDeptName = normalizeString(deptName);
+  if (departmentNameMapping[normalizedDeptName]) {
+    return departmentNameMapping[normalizedDeptName];
+  } else {
+    return deptName;
+  }
+}
+
+const getDepartmentNumber = (depNum: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === normalizeDepartmentName(depNum));
 
 const getDepartmentByZip = (zip?: string) => {
   if (!zip) return;
@@ -392,6 +422,7 @@ const isFromNouvelleCaledonie = (young: YoungType) => {
 
 export {
   departmentLookUp,
+  normalizeDepartmentName,
   departmentList,
   getDepartmentNumber,
   regionList,
@@ -410,6 +441,7 @@ export {
 };
 export default {
   departmentLookUp,
+  normalizeDepartmentName,
   departmentList,
   getDepartmentNumber,
   regionList,
