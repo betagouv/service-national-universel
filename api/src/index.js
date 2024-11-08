@@ -10,7 +10,7 @@ initSentry();
 // - node-config : to determine the config file used in ./config
 // - jest : unit test (NODE_ENV == "test")
 const environment = config.util.getEnv("NODE_ENV");
-logger.info(`ENVIRONMENT: ${environment}`);
+logger.info(`NODE_ENV: ${environment}`);
 
 require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
