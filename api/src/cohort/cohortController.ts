@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
 
-import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone } from "snu-lib";
+import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone, COHORT_STATUS } from "snu-lib";
 
 import { CohortModel, ClasseModel, YoungModel, SessionPhase1Model } from "../models";
 import ClasseStateManager from "../cle/classe/stateManager";
@@ -204,6 +204,17 @@ router.get("/:cohort", passport.authenticate(["referent", "young"], { session: f
     }
     const cohort = await CohortModel.findOne({ name: value.cohort });
     return res.status(200).send({ ok: true, data: cohort });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/public", async (_req: UserRequest, res: Response) => {
+  try {
+    let cohorts = await CohortModel.find({ status: COHORT_STATUS.PUBLISHED }, { name: 1, type: 1, dateStart: 1, dateEnd: 1 });
+    for (const cohort of cohorts) delete cohort._id;
+    return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
