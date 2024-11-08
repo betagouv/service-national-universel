@@ -7,7 +7,6 @@ import { REFERENT_MONGOOSE_ENTITY, ReferentDocument } from "src/admin/infra/iam/
 import { setupAdminTest } from "../setUpAdminTest";
 import { createReferent } from "./ReferentHelper";
 import { ClsService } from "nestjs-cls";
-import { id } from "date-fns/locale";
 
 describe("ReferentGateway", () => {
     let referentGateway: ReferentGateway;

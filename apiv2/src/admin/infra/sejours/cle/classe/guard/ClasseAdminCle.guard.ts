@@ -20,7 +20,7 @@ export class ClasseAdminCleGuard implements CanActivate {
         const request = context.switchToHttp().getRequest<CustomRequest>();
         request.classe = await this.classeGuardService.findClasse(request);
 
-        // TODO : handle request.user mapping
+        // TODO : request.user mapping
         if (isSuperAdmin({ role: request.user.role, subRole: request.user.sousRole })) {
             return true;
         }

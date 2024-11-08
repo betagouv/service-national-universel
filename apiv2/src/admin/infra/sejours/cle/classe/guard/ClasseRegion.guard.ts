@@ -1,12 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, Logger } from "@nestjs/common";
 import { ClasseGuardService } from "./ClasseGuard.service";
 
-// Attention aux query mutltiples via Mongoose si utilisation de plusieurs guards
-// Solutions
-// Cache de même cycle de vie qu'une requête
-// attacher les données de la classe au contexte de la requête : OK
-// Factory de guards
-
 @Injectable()
 export class ClasseRegionGuard implements CanActivate {
     constructor(

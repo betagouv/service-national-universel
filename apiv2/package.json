@@ -3,6 +3,10 @@
     "version": "0.0.1",
     "description": "",
     "author": "",
+    "engines": {
+        "node": "^18.20",
+        "npm": "^10.5"
+    },
     "scripts": {
         "build": "nest build",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

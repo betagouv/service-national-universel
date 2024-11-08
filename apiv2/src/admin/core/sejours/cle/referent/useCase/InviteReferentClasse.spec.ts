@@ -71,7 +71,6 @@ describe("InviterReferentClasse", () => {
     });
 
     it("should call notificationGateway.sendEmail template INSCRIPTION", async () => {
-        // Arrange
         const referentId = "referent-id";
         const classeId = "classe-id";
         const invitationType = InvitationType.INSCRIPTION;
