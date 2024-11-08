@@ -1,3 +1,5 @@
+import { ClasseType } from "snu-lib";
+
 const translateFieldStructure = (f) => {
   switch (f) {
     case "name":
@@ -712,8 +714,15 @@ const translateFieldContract = (f) => {
   }
 };
 
-export const translateFieldClasse = (f) => {
-  switch (f) {
+type ClasseField = ClasseType & {
+  "grades/0": string;
+  "grades/1": string;
+  "grades/2": string;
+  classeStatus: string;
+};
+
+export const translateFieldClasse = (field: keyof ClasseField) => {
+  switch (field) {
     case "etablissementId":
       return "ID de l'établissement";
     case "referentClasseIds":
@@ -765,7 +774,7 @@ export const translateFieldClasse = (f) => {
     case "createdAt":
       return "Créé(e) le";
     default:
-      return f;
+      return field;
   }
 };
 

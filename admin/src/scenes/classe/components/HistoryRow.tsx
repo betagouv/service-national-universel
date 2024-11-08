@@ -24,7 +24,6 @@ type HistoryRowProps = ClasseProps | YoungProps;
 
 export default function HistoryRow({ patch, type }: HistoryRowProps) {
   const user = useSelector((state: AuthState) => state.Auth.user);
-
   if (type === "young" && patch.user) {
     if (!patch.user.role) {
       if (patch.user.email) patch.user.role = "Volontaire";
