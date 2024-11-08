@@ -6,7 +6,7 @@ import { SentryRoute } from "../../sentry";
 import Create from "./create";
 import List from "./list";
 import View from "./view";
-import Import from "./import";
+import Import from "./Import";
 import { toastr } from "react-redux-toastr";
 import NotFound from "@/components/layout/NotFound";
 
