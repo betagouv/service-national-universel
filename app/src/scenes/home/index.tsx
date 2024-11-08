@@ -62,7 +62,7 @@ export default function Home() {
   }
 
   // Je peux me réinscrire :
-  if (isReinscriptionOpen && hasAccessToReinscription(young)) {
+  if (isReinscriptionOpen && hasAccessToReinscription(young, cohort)) {
     return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
   }
   // Je n'ai pas validé ma phase 1 et la réinscription n'est pas ouverte (je peux changer de séjour):
