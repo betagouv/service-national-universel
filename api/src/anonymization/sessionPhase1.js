@@ -47,7 +47,6 @@ function anonymize(itemToAnonymize) {
   ];
   const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);
 
-function anonymize(item) {
   if (!["VALIDATED", "WAITING_VALIDATION"].includes(item.status)) item.status = "WAITING_VALIDATION";
   item.team &&
     (item.team = item.team.map((member) => {
