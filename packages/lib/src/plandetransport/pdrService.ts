@@ -1,4 +1,4 @@
-import { PointDeRassemblementType } from "src";
+import { PointDeRassemblementType } from "../mongoSchema";
 
 export const getParticularitesAcces = (pdr: PointDeRassemblementType, cohortName?: string) => {
   if (!cohortName || !!pdr.matricule) {
