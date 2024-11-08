@@ -5,6 +5,12 @@ export type Eligibility = {
   bornBefore?: Date | null;
 };
 
+export type CohortGroup = {
+  name: string,
+  year: number,
+  type: string,
+}
+
 export type CohortDto = {
   _id?: string;
   snuId: string;
@@ -13,6 +19,7 @@ export type CohortDto = {
   type: string;
   dateStart: Date;
   cohortGroupId: string;
+  cohortGroup?: CohortGroup;
   dateEnd: Date;
   inscriptionStartDate: Date;
   inscriptionEndDate: Date;

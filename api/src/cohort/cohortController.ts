@@ -183,7 +183,10 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     }
     let query: any = {};
     if (value.type) query.type = value.type;
-    const cohorts = await CohortModel.find(query);
+    const cohorts = await CohortModel.find(query).populate({
+      path: "cohortGroup",
+      options: { select: { name: 1, type: 1, year: 1 } },
+    });
     return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
@@ -202,7 +205,10 @@ router.get("/:cohort", passport.authenticate(["referent", "young"], { session: f
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const cohort = await CohortModel.findOne({ name: value.cohort });
+    const cohort = await CohortModel.findOne({ name: value.cohort }).populate({
+      path: "cohortGroup",
+      options: { select: { cohortGroupId: 1, name: 1, type: 1, year: 1 } },
+    });
     return res.status(200).send({ ok: true, data: cohort });
   } catch (error) {
     capture(error);
