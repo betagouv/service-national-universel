@@ -51,7 +51,7 @@ const SiteMap = ({ items }) => {
 
               <li>
                 <a href="https://snu.gouv.fr" rel="noopener noreferrer" target="_blank" className="text-gray-600 underline underline-offset-2 hover:text-blue-800">
-                  Retour sur le site du SNU
+                  Découvrez le site du SNU
                 </a>
               </li>
               <li>

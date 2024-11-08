@@ -1,7 +1,16 @@
 import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { ROLES, canCreateOrUpdateCohesionCenter, formatLongDateFR, getDepartmentNumber, translate, translateDomainCenter, translateTypologieCenter } from "snu-lib";
+import {
+  ROLES,
+  canCreateOrUpdateCohesionCenter,
+  formatLongDateFR,
+  getDepartmentNumber,
+  normalizeDepartmentName,
+  translate,
+  translateDomainCenter,
+  translateTypologieCenter,
+} from "snu-lib";
 import Calendar from "../../assets/icons/Calendar";
 import Menu from "../../assets/icons/Menu";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -35,7 +44,7 @@ export default function List() {
 
   return (
     <div className="mb-8">
-      <Breadcrumbs items={[{ label: "Centres" }]} />
+      <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres" }]} />
       <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
       <div className="flex flex-row">
         <div className="flex w-full flex-1 flex-col px-8">
@@ -86,8 +95,9 @@ const ListSession = ({ firstSession }) => {
       name: "department",
       missingLabel: "Non renseignée",
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
-      translate: (e) => getDepartmentNumber(e) + " - " + e,
+      translate: (e) => getDepartmentNumber(e) + " - " + normalizeDepartmentName(e),
     },
+    { title: "Email fiche sanitaire", name: "sanitaryContactEmailExist", missingLabel: "", transformData: transformExistingField, translate },
     { title: "Places restantes", name: "placesLeft", missingLabel: "Non renseignée" },
     { title: "Emploi du temps", name: "hasTimeSchedule", missingLabel: "Non renseignée", translate: translate },
     { title: "Projet Pédagogique", name: "hasPedagoProject", missingLabel: "Non renseignée", translate: translate },
@@ -137,7 +147,7 @@ const ListSession = ({ firstSession }) => {
                   const data = item._source;
                   const center = data.cohesionCenter;
                   const headCenter = data.headCenter;
-
+                  const hasSanitaryContactEmail = Boolean(data?.sanitaryContactEmail).toString();
                   return {
                     "Id centre": center?._id?.toString(),
                     "Code du centre": center?.code2022,
@@ -160,6 +170,8 @@ const ListSession = ({ firstSession }) => {
                     Département: center?.department,
                     Académie: center?.academy,
                     Région: center?.region,
+                    "Réception fiche sanitaire": translate(hasSanitaryContactEmail),
+                    "Email fiche sanitaire": data.sanitaryContactEmail,
                     "Prénom du chef de centre": headCenter?.firstName || "",
                     "Nom du chef de centre": headCenter?.lastName || "",
                     "Email du chef de centre": headCenter?.email || "",

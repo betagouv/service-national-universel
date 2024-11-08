@@ -26,7 +26,6 @@ const sync = async (result) => {
     } else {
       m.set({ ...t });
       await m.save();
-      await m.index();
     }
   }
   return result.data.length === SIZE;

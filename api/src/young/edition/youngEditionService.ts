@@ -5,7 +5,7 @@ import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { ClasseModel } from "../../models";
 
-function generateConsentChanges(value, young) {
+export function generateConsentChanges(value, young) {
   const changes = {};
 
   const setIfTrue = (condition, field, value) => {
@@ -14,19 +14,32 @@ function generateConsentChanges(value, young) {
     }
   };
 
-  setIfTrue(value.consent, "status", YOUNG_STATUS.WAITING_VALIDATION);
-  setIfTrue(value.consent && young.inscriptionStep2023 === "WAITING_CONSENT", "inscriptionStep2023", "DONE");
-  setIfTrue(value.consent && young.reinscriptionStep2023 === "WAITING_CONSENT", "reinscriptionStep2023", "DONE");
-  setIfTrue(value.consent, "parentAllowSNU", "true");
+  setIfTrue(value.consent === true, "status", YOUNG_STATUS.WAITING_VALIDATION);
+  setIfTrue(value.consent === false, "status", YOUNG_STATUS.NOT_AUTORISED);
+  setIfTrue(value.consent === true && young.inscriptionStep2023 === "WAITING_CONSENT", "inscriptionStep2023", "DONE");
+  setIfTrue(value.consent === true && young.reinscriptionStep2023 === "WAITING_CONSENT", "reinscriptionStep2023", "DONE");
+  setIfTrue(value.consent === true, "parentAllowSNU", "true");
+  setIfTrue(value.consent === false, "parentAllowSNU", "false");
+
+  setIfTrue(value.imageRights === true, "imageRight", "true");
+  setIfTrue(value.imageRights === false, "imageRight", "false");
 
   //Parent 1
-  setIfTrue(value.consent, "parent1AllowSNU", "true");
-  setIfTrue(value.consent, "parent1ValidationDate", new Date());
-  setIfTrue(value.imageRights, "parent1AllowImageRights", "true");
+  setIfTrue(value.consent === true, "parent1AllowSNU", "true");
+  setIfTrue(value.consent === false, "parent1AllowSNU", false);
+  //dans tous les cas, on met à jour la date de validation
+  setIfTrue(value.consent !== undefined, "parent1ValidationDate", new Date());
+
+  setIfTrue(value.imageRights === true, "parent1AllowImageRights", "true");
+  setIfTrue(value.imageRights === false, "parent1AllowImageRights", "false");
   //Parent 2
-  setIfTrue(young.parent2Status && value.consent, "parent2AllowSNU", "true");
-  setIfTrue(young.parent2Status && value.imageRights, "parent2AllowImageRights", "true");
-  setIfTrue(young.parent2Status && value.imageRights, "parent2ValidationDate", new Date());
+  setIfTrue(young.parent2Status && value.consent === true, "parent2AllowSNU", "true");
+  setIfTrue(young.parent2Status && value.consent === false, "parent2AllowSNU", "false");
+  //dans tous les cas, on met à jour la date de validation
+  setIfTrue(young.parent2Status && value.consent !== undefined, "parent2ValidationDate", new Date());
+
+  setIfTrue(young.parent2Status && value.imageRights === true, "parent2AllowImageRights", "true");
+  setIfTrue(young.parent2Status && value.imageRights === false, "parent2AllowImageRights", "false");
 
   return changes;
 }

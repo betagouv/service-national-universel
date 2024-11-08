@@ -4,7 +4,7 @@ import passport from "passport";
 import mongoose from "mongoose";
 // @ts-ignore
 import emailsEmitter from "../../emails";
-import { ERRORS, ROLES } from "snu-lib";
+import { ERRORS, ROLES, SUB_ROLE_GOD } from "snu-lib";
 import { dbClose, dbConnect } from "../helpers/db";
 import getAppHelper from "../helpers/app";
 import { createClasse } from "../helpers/classe";
@@ -13,7 +13,7 @@ import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import { createReferentHelper } from "../helpers/referent";
 import getNewReferentFixture from "../fixtures/referent";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 jest.spyOn(emailsEmitter, "emit").mockImplementation(() => {});
@@ -23,7 +23,7 @@ beforeEach(async () => {
   await EtablissementModel.deleteMany({});
   await ReferentModel.deleteMany({});
   passport.user.role = ROLES.ADMIN;
-  passport.user.subRole = "god";
+  passport.user.subRole = SUB_ROLE_GOD;
   newReferent = {
     firstName: "New",
     lastName: "Referent",
@@ -154,7 +154,7 @@ describe("PUT /update-referents-by-csv", () => {
 
   it("should return 400 when the CSV file is invalid", async () => {
     passport.user.role = ROLES.ADMIN;
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
     const res = await request(getAppHelper()).put("/cle/classes/update-referents-by-csv").attach("file", Buffer.from("invalid csv data"), "invalid.csv");
     expect(res.status).toBe(400);
     expect(res.body.code).toBe(ERRORS.INVALID_BODY);
@@ -162,7 +162,7 @@ describe("PUT /update-referents-by-csv", () => {
 
   it("should return 200 and update referents when the CSV file is valid", async () => {
     passport.user.role = ROLES.ADMIN;
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
     const classe = await createClasse(createFixtureClasse());
     const newReferent = { firstName: "New", lastName: "Referent", email: "new.referent@example.com" };
     const csvData = `classeId,firstName,lastName,email\n${classe._id.toString()},${newReferent.firstName},${newReferent.lastName},${newReferent.email}`;

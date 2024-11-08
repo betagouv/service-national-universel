@@ -4,7 +4,8 @@ import { setYoung } from "../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { logoutYoung } from "./young.service";
 import { YOUNG_SOURCE } from "snu-lib";
-import API from "./api";
+import { cohortsInit } from "@/utils/cohorts";
+import { displaySignupToast } from "@/utils";
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -14,7 +15,6 @@ export const useAuth = () => {
   const logout = async ({ redirect } = { redirect: true }) => {
     await logoutYoung();
     dispatch(setYoung(null));
-    API.setToken(null);
     if (redirect) {
       toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
       return history.push("/auth");
@@ -22,8 +22,10 @@ export const useAuth = () => {
     return true;
   };
 
-  const login = () => {
-    history.push("/auth");
+  const login = async (user) => {
+    dispatch(setYoung(user));
+    await cohortsInit();
+    displaySignupToast(user);
   };
 
   const isLoggedIn = !!young;

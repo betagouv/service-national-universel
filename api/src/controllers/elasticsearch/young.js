@@ -3,7 +3,6 @@ const express = require("express");
 const Joi = require("joi");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch, YOUNG_STATUS_PHASE1, ES_NO_LIMIT, youngExportFields } = require("snu-lib");
-const datesub = require("date-fns/sub");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
@@ -14,6 +13,7 @@ const { serializeApplications, serializeYoungs, serializeMissions, serializeStru
 const { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel, MissionModel } = require("../../models");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
 const { populateYoungExport } = require("./populate/populateYoung");
+const { addMonths } = require("date-fns");
 
 function getYoungsFilters(user) {
   return [
@@ -64,6 +64,7 @@ function getYoungsFilters(user) {
     "classeId.keyword",
     "etablissementId.keyword",
     "psc1Info.keyword",
+    "frenchNationality.keyword",
   ].filter(Boolean);
 }
 
@@ -86,7 +87,7 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
       { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } },
       { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
     );
-    const visibleCohorts = await getCohortNamesEndAfter(datesub(new Date(), { months: 3 }));
+    const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
     if (visibleCohorts.length > 0) {
       contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
     } else {
@@ -367,7 +368,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     if (user.role === ROLES.HEAD_CENTER) {
       const sessionsPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
       if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const visibleCohorts = await getCohortNamesEndAfter(datesub(new Date(), { months: 3 }));
+      const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
       if (visibleCohorts.length > 0) {
         contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
       } else {
@@ -379,7 +380,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       }
     }
     if (user.role === ROLES.REFERENT_REGION) {
-      const centers = await CohesionCenterModel.find({ region: user.region });
+      const centers = await CohesionCenterModel.find({ region: user.region, deletedAt: { $exists: false } });
       const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -387,7 +388,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     }
 
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      const centers = await CohesionCenterModel.find({ department: user.department });
+      const centers = await CohesionCenterModel.find({ department: user.department, deletedAt: { $exists: false } });
       const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -643,7 +644,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
     if (user.role === ROLES.HEAD_CENTER) {
       const sessionsPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
       if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const visibleCohorts = await getCohortNamesEndAfter(datesub(new Date(), { months: 3 }));
+      const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
       if (visibleCohorts.length > 0) {
         contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
       } else {

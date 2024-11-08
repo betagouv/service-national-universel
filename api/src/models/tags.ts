@@ -1,24 +1,13 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
+import { InterfaceExtended, TagsSchema } from "snu-lib";
+
+import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
+
 const MODELNAME = "snutag";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved, InterfaceExtended } from "./types";
-
-const schema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-
-  type: {
-    type: String,
-    enum: ["modification_bus"],
-  },
-
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
+const schema = new Schema(TagsSchema);
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
   if (user) {
@@ -44,7 +33,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-export type TagsType = InterfaceExtended<InferSchemaType<typeof schema>>;
+type TagsType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type TagsDocument<T = {}> = DocumentExtended<TagsType & T>;
 type SchemaExtended = TagsDocument & UserExtension;
 

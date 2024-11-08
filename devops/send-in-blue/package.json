@@ -1,0 +1,33 @@
+{
+  "name": "send-in-blue",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js --fix",
+    "lint:report": "eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sentry/integrations": "^7.64.0",
+    "@sentry/node": "^7.61.0",
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.3.1",
+    "express": "^4.19.2",
+    "joi": "^17.9.2",
+    "mongoose": "^7.8.2",
+    "netmask": "^2.0.2",
+    "nodemon": "^3.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.1"
+  }
+}

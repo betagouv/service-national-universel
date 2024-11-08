@@ -1,14 +1,14 @@
 import dayjs from "dayjs";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { getDepartmentNumber, translateCniExpired, translateYoungSource } from "snu-lib";
+import { canInviteYoung, getDepartmentNumber, translateCniExpired, translateYoungSource } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -43,13 +43,19 @@ export default function Inscription() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
   const [size, setSize] = useState(10);
+  const [invitationState, setInvitationState] = useState({
+    canInvite: false,
+    isLoading: true,
+  });
+
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
       try {
         const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
           filters: {},
-          exportFields: ["name", "uniqueKeyAndId"],
+          exportFields: ["name", "uniqueKeyAndId", "cohort"],
         });
         const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
           filters: {},
@@ -64,7 +70,82 @@ export default function Inscription() {
     })();
   }, []);
 
+  const baseInscriptionPath = useMemo(() => {
+    const hasFilterSelectedOneClass = selectedFilters?.classeId?.filter?.length === 1;
+    const selectedClassId = selectedFilters?.classeId?.filter[0];
+
+    if (!hasFilterSelectedOneClass) {
+      return "/volontaire/create";
+    }
+
+    const classe = classes?.find((c) => c._id === selectedClassId);
+
+    if (!classe) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe");
+      throw new Error("Failed to fetch class");
+    }
+
+    return `/volontaire/create?classeId=${selectedClassId}`;
+  }, [classes, selectedFilters?.classeId?.filter]);
+
+  const fetchCohortAndResolveInscriptionPath = useCallback(async () => {
+    if (!baseInscriptionPath.includes("classeId")) {
+      return baseInscriptionPath;
+    }
+
+    const selectedClassId = selectedFilters?.classeId?.filter[0];
+    const classe = classes?.find((c) => c._id === selectedClassId);
+
+    try {
+      const { ok, data: cohort } = await api.get(`/cohort/${classe.cohort}`);
+      if (!ok) {
+        throw new Error("Failed to fetch cohort");
+      }
+
+      if (!canInviteYoung(user, cohort)) {
+        return null;
+      }
+
+      return baseInscriptionPath;
+    } catch (error) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
+      throw new Error("Failed to fetch cohort");
+    }
+  }, [baseInscriptionPath, classes, selectedFilters?.classeId?.filter, user]);
+
+  useEffect(() => {
+    const checkCanInvite = async () => {
+      setInvitationState((prev) => ({ ...prev, isLoading: true }));
+
+      if (!baseInscriptionPath.includes("classeId")) {
+        setInvitationState({
+          canInvite: true,
+          isLoading: false,
+        });
+        return;
+      }
+
+      const resultFetchCohortPath = await fetchCohortAndResolveInscriptionPath();
+      setInvitationState({
+        canInvite: !!resultFetchCohortPath,
+        isLoading: false,
+      });
+    };
+
+    checkCanInvite();
+  }, [baseInscriptionPath, fetchCohortAndResolveInscriptionPath]);
+
   if (!classes || !etablissements) return <Loader />;
+
+  const handleClickInscription = async (event) => {
+    event.preventDefault();
+    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
+
+    const inscriptionPath = await fetchCohortAndResolveInscriptionPath();
+    if (inscriptionPath) {
+      history.push(inscriptionPath);
+    }
+  };
 
   const filterArray = [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
@@ -237,14 +318,15 @@ export default function Inscription() {
         <div className="flex items-center justify-between py-8">
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
-            <Link
-              to={selectedFilters?.classeId?.filter?.length === 1 ? `/volontaire/create?classeId=${selectedFilters?.classeId?.filter[0]}` : "/volontaire/create"}
-              onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}
-              className="ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out">
-              <AiOutlinePlus className="text-white h-4 w-4 group-hover:!text-blue-600" />
-
-              <p>{selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}</p>
-            </Link>
+            {!invitationState.isLoading && invitationState.canInvite ? (
+              <Link
+                to={baseInscriptionPath}
+                onClick={handleClickInscription}
+                className="w-full ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out">
+                <AiOutlinePlus className="h-4 w-4 group-hover:!text-blue-600" />
+                <p>{selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}</p>
+              </Link>
+            ) : null}
             <ExportComponent
               title="Exporter les inscriptions"
               exportTitle="Volontaires"

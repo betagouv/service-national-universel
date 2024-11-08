@@ -11,7 +11,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     // Configuration
     const { user, body } = req;
-    const searchFields = ["name", "address", "region", "department", "code", "city", "zip"];
+    const searchFields = ["name", "address", "particularitesAcces", "region", "department", "code", "city", "zip", "matricule"];
     const filterFields = ["cohorts.keyword", "region.keyword", "department.keyword"];
     const sortFields = [];
 
@@ -19,7 +19,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     // Context filters
-    let contextFilters = [];
+    let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }, { exists: { field: "matricule" } }];
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });

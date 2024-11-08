@@ -47,10 +47,7 @@ function anonymize(itemToAnonymize) {
   ];
   const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);
 
-  item.zipCentre && (item.zipCentre = starify(item.zipCentre));
-  item.codeCentre && (item.codeCentre = starify(item.codeCentre));
-  item.nameCentre && (item.nameCentre = starify(item.nameCentre));
-  item.cityCentre && (item.cityCentre = starify(item.cityCentre));
+function anonymize(item) {
   if (!["VALIDATED", "WAITING_VALIDATION"].includes(item.status)) item.status = "WAITING_VALIDATION";
   item.team &&
     (item.team = item.team.map((member) => {

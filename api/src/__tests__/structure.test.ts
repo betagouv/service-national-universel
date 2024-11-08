@@ -1,5 +1,5 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewStructureFixture from "./fixtures/structure";
 import { createStructureHelper, getStructureByIdHelper, notExistingStructureId, expectStructureToEqual, deleteStructureByIdHelper } from "./helpers/structure";
@@ -16,6 +16,7 @@ jest.mock("../brevo", () => ({
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Structure", () => {
   describe("POST /structure", () => {
@@ -124,11 +125,10 @@ describe("Structure", () => {
       const structure = await createStructureHelper(getNewStructureFixture());
       structure.name = "MY NEW NAME";
       await structure.save();
-      const passport = require("passport");
-      passport.user.role = ROLES.RESPONSIBLE;
-      const res = await request(getAppHelper()).get(`/structure/${structure._id}/patches`).send();
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .get(`/structure/${structure._id}/patches`)
+        .send();
       expect(res.status).toBe(403);
-      passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if structure found with patches", async () => {
       const structure = await createStructureHelper(getNewStructureFixture());

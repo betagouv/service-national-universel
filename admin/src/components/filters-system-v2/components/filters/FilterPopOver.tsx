@@ -9,10 +9,6 @@ import cx from "classnames";
 
 // file used to show the popover for the all the possible values of a filter
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
-
 type FilterPopOverProps = {
   filter: RowFilter;
   intermediateFilter?: IIntermediateFilter;
@@ -25,6 +21,24 @@ type FilterPopOverProps = {
 };
 
 export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, intermediateFilter }: FilterPopOverProps) {
+  const [optionFilter, setOptionFilter] = React.useState(data);
+
+  React.useEffect(() => {
+    if (!data) return;
+    let temp = data;
+    if (filter?.reduce) {
+      temp = filter.reduce(temp);
+    }
+    if (filter?.filter) {
+      temp = temp.filter(filter.filter);
+    }
+    if (filter?.sort) {
+      // @ts-ignore
+      temp = filter.sort(temp);
+    }
+    setOptionFilter(temp);
+  }, [data, filter, selectedFilters]);
+
   return (
     <Popover>
       <Popover.Button
@@ -50,7 +64,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
         filter={filter}
         selectedFilters={selectedFilters}
         setSelectedFilters={setSelectedFilters}
-        data={data}
+        data={optionFilter}
         setParamData={setParamData}
         intermediateFilter={intermediateFilter}
       />
@@ -82,12 +96,17 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const ref: React.MutableRefObject<any> = React.useRef(null);
   React.useEffect(() => {
     if (!data) return;
-    const temp = data;
+    let temp = data;
+
     if (filter?.filter) {
-      temp.filter(filter.filter);
+      temp = temp.filter(filter.filter);
     }
     if (filter?.sort) {
-      filter.sort(temp);
+      // @ts-ignore
+      temp = filter.sort(temp);
+    }
+    if (filter?.reduce) {
+      temp = filter.reduce(temp);
     }
 
     const naIndex = data.findIndex((item) => item?.key === "N/A");
@@ -102,9 +121,8 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
         data[emptyIndex].key = "N/A";
       }
     }
-
     setOptionsVisible(temp);
-  }, [data, filter]);
+  }, [data, filter, selectedFilters]);
 
   React.useEffect(() => {
     // normalize search

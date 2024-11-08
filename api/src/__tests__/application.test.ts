@@ -4,14 +4,14 @@ import getNewMissionFixture from "./fixtures/mission";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
 import getNewCohortFixture from "./fixtures/cohort";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { createApplication, notExistingApplicationId } from "./helpers/application";
 import { dbConnect, dbClose } from "./helpers/db";
 import { notExisitingMissionId, createMissionHelper, getMissionByIdHelper } from "./helpers/mission";
 import { createReferentHelper } from "./helpers/referent";
 import { notExistingYoungId, createYoungHelper, getYoungByIdHelper } from "./helpers/young";
 import { createCohortHelper } from "./helpers/cohort";
-import { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 jest.setTimeout(60_000);
 
@@ -20,11 +20,13 @@ jest.mock("../brevo", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Application", () => {
   describe("POST /application", () => {
+    beforeEach(resetAppAuth);
     it("should return 404 when young is not found", async () => {
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -40,34 +42,37 @@ describe("Application", () => {
         .send({ ...application, youngId: young._id, missionId: notExisitingMissionId });
       expect(res.status).toBe(404);
     });
-    it("should only allow young to apply for themselves", async () => {
-      const lastYear = new Date().getFullYear() - 1;
+    it("should allow young to apply for themselves", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
-      const secondYoung = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
+
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
 
       // Successful application
-      let res = await request(getAppHelper())
+      let res = await request(getAppHelper(young))
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(200);
       expect(res.body.data.youngId).toBe(young._id.toString());
+    });
+    it("should not allow young to apply for others", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const secondYoung = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = getNewApplicationFixture();
 
       // Failed application
-      res = await request(getAppHelper())
+      const res = await request(getAppHelper(young))
         .post("/application")
         .send({ ...application, youngId: secondYoung._id, missionId: mission._id });
       expect(res.status).toBe(400);
-
-      passport.user = previous;
     });
     it("should create an application when priority is given", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -90,7 +95,8 @@ describe("Application", () => {
       expect(res.body.data.youngId).toBe(young._id.toString());
     });
     it("should update young status", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -103,7 +109,8 @@ describe("Application", () => {
       expect([...updatedYoung!.phase2ApplicationStatus]).toStrictEqual(["WAITING_VALIDATION"]);
     });
     it("should update mission places left status", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 100, placesTotal: 100 });
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -118,45 +125,32 @@ describe("Application", () => {
       const year = new Date().getFullYear();
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, birthdateAt: new Date(`${year - 12}-01-01T00:00:00.000Z`) }));
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper(young))
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(403);
-      passport.user = previous;
     });
-    it("should return 403 when cohort is too old", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "2019" }));
+    it("should return 403 when cohort is archived", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.ARCHIVED }));
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper(young))
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(403);
-      passport.user = previous;
     });
     it("should return 403 when young has not finished phase1", async () => {
-      const year = new Date().getFullYear();
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION }));
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper())
+      const res = await request(getAppHelper(young))
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(403);
-      passport.user = previous;
     });
   });
 
@@ -172,9 +166,6 @@ describe("Application", () => {
     it("should only allow young to update for themselves", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const secondYoung = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
       const secondApplication = await createApplication({ ...getNewApplicationFixture(), youngId: secondYoung._id, missionId: mission._id });
@@ -184,14 +175,12 @@ describe("Application", () => {
       expect(res.status).toBe(200);
 
       // Failed update (not allowed)
-      res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: secondApplication._id.toString() });
+      res = await request(getAppHelper(young)).put("/application").send({ priority: "1", status: "DONE", _id: secondApplication._id.toString() });
       expect(res.status).toBe(403);
 
       // Failed update (wrong young id)
-      res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
+      res = await request(getAppHelper(young)).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
       expect(res.status).toBe(400);
-
-      passport.user = previous;
     });
 
     it("should update young phase2NumberHoursEstimated and phase2NumberHoursDone", async () => {
@@ -226,9 +215,8 @@ describe("Application", () => {
       expect(res.body.data.status).toBe("WAITING_VALIDATION");
     });
     it("should be only accessible by referent", async () => {
-      const passport = require("passport");
       await request(getAppHelper()).put(`/application/${notExistingApplicationId}`).send();
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+      expect(require("passport").lastTypeCalledOnAuthenticate).toEqual("referent");
     });
   });
 
@@ -281,19 +269,13 @@ describe("Application", () => {
       const secondYoung = await createYoungHelper(getNewYoungFixture());
       const secondApplication = await createApplication({ ...getNewApplicationFixture(), youngId: secondYoung._id, missionId: mission._id });
 
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-
       // Successful request
-      let res = await request(getAppHelper()).post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
+      let res = await request(getAppHelper(young)).post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
       expect(res.status).toBe(200);
 
       // Failed request (not allowed)
-      res = await request(getAppHelper()).post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
+      res = await request(getAppHelper(young)).post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
       expect(res.status).toBe(403);
-
-      passport.user = previous;
     });
   });
 });

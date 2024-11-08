@@ -48,6 +48,18 @@ describe("accessControlMiddleware", () => {
     expect(res.send).not.toHaveBeenCalled();
   });
 
+  it("should call next if user is a super admin for [] passed into middleware", () => {
+    (isSuperAdmin as jest.Mock).mockReturnValue(true);
+
+    const middleware = accessControlMiddleware([]);
+
+    middleware(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.send).not.toHaveBeenCalled();
+  });
+
   it("should return 403 if user role is not allowed", () => {
     req.user.role = ROLES.VISITOR;
 
@@ -64,6 +76,18 @@ describe("accessControlMiddleware", () => {
     req.user.role = ROLES.VISITOR;
 
     const middleware = accessControlMiddleware([ROLES.ADMIN]);
+
+    middleware(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.send).toHaveBeenCalledWith({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  });
+
+  it("should return 403 for [] passed into middleware when not super admin", () => {
+    req.user.role = ROLES.ADMIN;
+
+    const middleware = accessControlMiddleware([]);
 
     middleware(req, res, next);
 

@@ -1,0 +1,19 @@
+diff --git a/node_modules/mongoose-patch-history/lib/index.js b/node_modules/mongoose-patch-history/lib/index.js
+index 8587330..3bab347 100644
+--- a/node_modules/mongoose-patch-history/lib/index.js
++++ b/node_modules/mongoose-patch-history/lib/index.js
+@@ -99,13 +99,7 @@ exports.default = function (schema, opts) {
+   // when a document is removed and `removePatches` is not set to false ,
+   // all patch documents from the associated patch collection are also removed
+   function deletePatches(document) {
+-    var ref = document._id;
+-
+-    return document.patches.find({ ref: document._id }).then(function (patches) {
+-      return (0, _bluebird.join)(patches.map(function (patch) {
+-        return patch.remove();
+-      }));
+-    });
++    return document.patches.deleteMany({ ref: document._id });
+   }
+ 
+   schema.pre('remove', function (next) {

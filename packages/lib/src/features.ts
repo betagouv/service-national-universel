@@ -7,6 +7,7 @@ const FEATURES_NAME = {
   FORCE_REDIRECT: "forceRedirect",
   EMAIL_VALIDATION: "emailValidation",
   DEVELOPERS_MODE: "developersMode",
+  API_ENG_TRACKING: "apiEngagementTracking",
 };
 
 // If the environment is not defined then the feature is enabled
@@ -24,6 +25,12 @@ const features = {
   [FEATURES_NAME.DEVELOPERS_MODE]: {
     production: [],
     // Allow developers mode in staging and development
+  },
+  [FEATURES_NAME.API_ENG_TRACKING]: {
+    // production: [],
+    staging: [],
+    // custom: [],
+    ci: [],
   },
 };
 

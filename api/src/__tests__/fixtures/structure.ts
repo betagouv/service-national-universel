@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { StructureType } from "../../models";
+import { departmentList, regionList, StructureType } from "snu-lib";
 
 function getNewStructureFixture(): Partial<StructureType> {
   return {
@@ -22,8 +22,8 @@ function getNewStructureFixture(): Partial<StructureType> {
     address: faker.location.streetAddress(),
     zip: faker.location.zipCode(),
     city: faker.location.city(),
-    department: faker.location.state(),
-    region: faker.location.state(),
+    department: faker.helpers.arrayElement(departmentList),
+    region: faker.helpers.arrayElement(regionList),
     country: faker.location.country(),
     location: {
       lat: Number(faker.location.latitude()),

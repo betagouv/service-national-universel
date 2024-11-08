@@ -9,7 +9,7 @@ describe("readCSVBuffer", () => {
       { classe: "2-cl", cohort: "2-co" },
     ];
 
-    const result = await readCSVBuffer(csvBuffer, true);
+    const result = await readCSVBuffer(csvBuffer);
     expect(result).toEqual(expectedResult);
   });
 
@@ -20,12 +20,12 @@ describe("readCSVBuffer", () => {
       ["2-cl", "2-co"],
     ];
 
-    const result = await readCSVBuffer(csvBuffer, false);
+    const result = await readCSVBuffer(csvBuffer, { headers: false });
     expect(result).toEqual(expectedResult);
   });
   it("should reject on parsing failures", async () => {
     const badCsvBuffer = Buffer.from("header\nJohn,Twenty,55");
-    const result = readCSVBuffer(badCsvBuffer, true);
+    const result = readCSVBuffer(badCsvBuffer);
     await expect(result).rejects.toThrow(ERRORS.CANNOT_PARSE_CSV);
   });
 });

@@ -1,3 +1,5 @@
+import { YoungType } from "./mongoSchema";
+
 const departmentLookUp = {
   "01": "Ain",
   "02": "Aisne",
@@ -112,9 +114,39 @@ const departmentLookUp = {
 
 const departmentList = Object.values(departmentLookUp);
 
-const getDepartmentNumber = (d) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === d);
+function normalizeString(str) {
+  return str
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/-/g, " ")
+    .replace(/'/g, "")
+    .replace(/\s+/g, " ")
+    .trim(); 
+}
 
-const getDepartmentByZip = (zip) => {
+const departmentNameMapping = {};
+for (const key in departmentLookUp) {
+  const deptName = departmentLookUp[key];
+  const normalizedDeptName = normalizeString(deptName);
+  departmentNameMapping[normalizedDeptName] = deptName;
+}
+
+function normalizeDepartmentName(deptName) {
+  if (typeof deptName !== "string") {
+    return deptName;
+  }
+  const normalizedDeptName = normalizeString(deptName);
+  if (departmentNameMapping[normalizedDeptName]) {
+    return departmentNameMapping[normalizedDeptName];
+  } else {
+    return deptName;
+  }
+}
+
+const getDepartmentNumber = (depNum: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === normalizeDepartmentName(depNum));
+
+const getDepartmentByZip = (zip?: string) => {
   if (!zip) return;
   if (zip.length !== 5) return;
 
@@ -127,7 +159,7 @@ const getDepartmentByZip = (zip) => {
   return departmentLookUp[departmentCode];
 };
 
-const getRegionByZip = (zip) => {
+const getRegionByZip = (zip?: string) => {
   if (!zip) return;
   if (zip.length !== 5) return;
 
@@ -340,26 +372,25 @@ const region2zone = {
   Etranger: "Etranger",
 };
 
-const getRegionForEligibility = (young) => {
+const getRegionForEligibility = (young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "schoolCountry" | "zip">) => {
   let region = young.schooled === "true" ? young.schoolRegion : young.region;
   if (!region) {
-    let dep = young?.schoolDepartment || young?.department || getDepartmentByZip(young?.zip);
-    if (dep && (!isNaN(dep) || ["2A", "2B", "02A", "02B"].includes(dep))) {
-      if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
-      else dep = departmentLookUp[dep];
-    }
+    const dep = getDepartmentForEligibility(young);
     region = department2region[dep] || getRegionByZip(young?.zip);
   }
   if (!region) region = "Etranger";
   return region;
 };
 
-const getDepartmentForEligibility = (young) => {
+const getDepartmentForEligibility = (
+  young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "schoolCountry" | "zip"> & { _id?: YoungType["_id"] },
+) => {
   let dep;
-  if (young._id && young.schooled === "true") dep = young.schoolDepartment;
+  const schoolDepartment = !young?.schoolCountry || young.schoolCountry === "FRANCE" ? young?.schoolDepartment : null;
+  if (young._id && young.schooled === "true") dep = schoolDepartment;
   if (young._id && young.schooled === "false") dep = young.department;
 
-  if (!dep) dep = young?.schoolDepartment || young?.department || getDepartmentByZip(young?.zip);
+  if (!dep) dep = schoolDepartment || young?.department || getDepartmentByZip(young?.zip);
   if (dep && (!isNaN(dep) || ["2A", "2B", "02A", "02B"].includes(dep))) {
     if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
     else dep = departmentLookUp[dep];
@@ -368,29 +399,30 @@ const getDepartmentForEligibility = (young) => {
   return dep;
 };
 
-const isFromMetropole = (young) => {
+const isFromMetropole = (young: YoungType) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "A" || region2zone[region] === "B" || region2zone[region] === "C";
 };
 
-const isFromDOMTOM = (young) => {
+const isFromDOMTOM = (young: YoungType) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "DOM";
 };
 
-const isFromFrenchPolynesia = (young) => {
+const isFromFrenchPolynesia = (young: YoungType) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "PF";
 };
 
 // attention avant l'utilisation : depuis juillet 2023 WF est aussi attaché à la zone + region NC sur la plateforme (avant c'était region WF et zone DOM)
-const isFromNouvelleCaledonie = (young) => {
+const isFromNouvelleCaledonie = (young: YoungType) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "NC";
 };
 
 export {
   departmentLookUp,
+  normalizeDepartmentName,
   departmentList,
   getDepartmentNumber,
   regionList,
@@ -409,6 +441,7 @@ export {
 };
 export default {
   departmentLookUp,
+  normalizeDepartmentName,
   departmentList,
   getDepartmentNumber,
   regionList,
