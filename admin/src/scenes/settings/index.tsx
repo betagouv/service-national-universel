@@ -28,7 +28,7 @@ export default function Settings() {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [currentTab, setCurrentTab] = useState<"general" | "eligibility">("general");
-  const [cohort, setCohort] = useState<CohortDto | object>({});
+  const [cohort, setCohort] = useState<CohortDto>();
   const [isLoading, setIsLoading] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -58,6 +58,8 @@ export default function Settings() {
     setIsLoading(true);
     getCohort();
   }, [currentCohortName]);
+
+  if (!cohort) return null;
 
   if (user.role !== ROLES.ADMIN) {
     return (
