@@ -22,12 +22,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const cohortObj = await CohortModel.findOne({ name: value.cohort });
-    if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // Check if the young has access to reinscription
-    if (!hasAccessToReinscription(young, cohortObj)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     // Validate request body
     const { error, value } = Joi.object({
       schooled: Joi.string().trim().required(),
@@ -52,6 +46,12 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    const cohortObj = await CohortModel.findOne({ name: value.cohort });
+    if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Check if the young has access to reinscription
+    if (!hasAccessToReinscription(young, cohortObj)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // complete values
     value.status = YOUNG_STATUS.REINSCRIPTION;
