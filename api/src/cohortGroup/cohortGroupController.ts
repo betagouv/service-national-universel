@@ -22,15 +22,16 @@ router.get("/", async (_req: RouteRequest<CohortGroupRoutes["Get"]>, res: RouteR
 
 router.post(
   "/",
-  requestValidatorMiddleware({
-    body: Joi.object({
-      name: Joi.string().required(),
-      type: Joi.string().valid(...COHORT_TYPE_LIST),
-      year: Joi.number(),
+  [
+    requestValidatorMiddleware({
+      body: Joi.object({
+        name: Joi.string().required(),
+        type: Joi.string().valid(...COHORT_TYPE_LIST),
+        year: Joi.number(),
+      }),
     }),
-  }),
-
-  // accessControlMiddleware([ROLES.ADMIN]),
+    accessControlMiddleware([ROLES.ADMIN]),
+  ],
   async (req: RouteRequest<CohortGroupRoutes["Post"]>, res: RouteResponse<CohortGroupRoutes["Post"]>) => {
     try {
       const { name, type, year } = req.body;
@@ -45,16 +46,20 @@ router.post(
 );
 
 router.put(
-  "/",
-  requestValidatorMiddleware({
-    params: Joi.object({
-      id: Joi.string().required(),
+  "/:id",
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({
+        id: Joi.string().required(),
+      }),
+      body: Joi.object({
+        name: Joi.string().required(),
+        type: Joi.string().valid(...COHORT_TYPE_LIST),
+        year: Joi.number(),
+      }),
     }),
-    body: Joi.object({
-      name: Joi.string().required(),
-    }),
-  }),
-  accessControlMiddleware([ROLES.ADMIN]),
+    accessControlMiddleware([ROLES.ADMIN]),
+  ],
   async (req: RouteRequest<CohortGroupRoutes["Put"]>, res: RouteResponse<CohortGroupRoutes["Put"]>) => {
     try {
       const { id } = req.params;
@@ -67,6 +72,7 @@ router.put(
       await data.save({ fromUser: req.user });
       return res.json({ ok: true, data });
     } catch (error) {
+      console.log("🚀 ~ error:", error);
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
@@ -74,7 +80,7 @@ router.put(
 );
 
 router.delete(
-  "/",
+  "/:id",
   requestValidatorMiddleware({
     params: Joi.object({
       id: Joi.string().required(),
