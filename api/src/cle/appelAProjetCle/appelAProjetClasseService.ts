@@ -1,6 +1,6 @@
-import { ClasseSchoolYear, ReferentCreatedBy, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+import { ClasseSchoolYear, ReferentCreatedBy, STATUS_CLASSE, STATUS_PHASE1_CLASSE, ClasseType, EtablissementType } from "snu-lib";
 
-import { ClasseModel, ClasseType, EtablissementType } from "../../models";
+import { ClasseModel } from "../../models";
 
 import { buildUniqueClasseId, buildUniqueClasseKey, findClasseByUniqueKeyAndUniqueId } from "../classe/classeService";
 

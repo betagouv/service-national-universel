@@ -19,7 +19,7 @@ const { serializeYoung } = require("../utils/serializer");
 
 const { ERRORS } = require("../utils");
 
-const { validateFirstName, validateString } = require("../utils/validator");
+const { validateFirstName, validateString, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../brevo");
 const config = require("config");
 
@@ -112,11 +112,16 @@ router.post("/data-verification", tokenParentValidMiddleware, async (req, res) =
 
 router.post("/accept-ri", tokenParentValidMiddleware, async (req, res) => {
   try {
-    const young = await YoungModel.findById(req.body._id);
+    const { error, value: id } = validateId(req.body._id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
-    await young.save({ fromUser: req.user });
+    await young.save({ fromUser: { firstName: `Parent of young : ${id}` } });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {

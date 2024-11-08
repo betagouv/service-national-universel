@@ -3,6 +3,7 @@ import { getCohort } from "./cohorts";
 import { environment } from "@/config";
 
 export const INSCRIPTION_STEPS = {
+  EMAIL_WAITING_VALIDATION: "EMAIL_WAITING_VALIDATION",
   COORDONNEES: "COORDONNEES",
   CONSENTEMENTS: "CONSENTEMENTS",
   REPRESENTANTS: "REPRESENTANTS",
@@ -160,6 +161,7 @@ const WAITING_CORRECTION_LINK = [
       "specificAmenagmentType",
       "reducedMobilityAccess",
       "handicapInSameDepartment",
+      "psc1Info",
     ],
     redirect: "/inscription/correction/coordonnee",
     step: "coordonnee",
@@ -227,6 +229,7 @@ const WAITING_CORRECTION_LINK_CLE = [
       "specificAmenagmentType",
       "reducedMobilityAccess",
       "handicapInSameDepartment",
+      "psc1Info",
     ],
     redirect: "/inscription/correction/coordonnee",
     step: "coordonnee",

@@ -153,4 +153,4 @@ function generateBatchDroitImage(outStream, youngs) {
   timer.done({ message: "RENDERING", level: "debug" });
 }
 
-module.exports = { generateDroitImage, generateBatchDroitImage };
+export { generateDroitImage, generateBatchDroitImage };

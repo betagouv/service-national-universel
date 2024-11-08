@@ -5,41 +5,41 @@ import * as FileSaver from "file-saver";
 export async function fetchPrograms() {
   const res = await fetch(`${apiURL}/program/public/engagements`);
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.message);
+  if (!ok) throw error;
   return data;
 }
 
 export async function fetchProgram(id) {
   const res = await fetch(`${apiURL}/program/public/engagement/${id}`);
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.message);
+  if (!ok) throw error;
   return data;
 }
 
 export async function fetchApplications(youngId) {
   const res = await fetch(`${apiURL}/young/${youngId}/application`, {
-    headers: { Authorization: `JWT ${API.getToken()}` },
+    credentials: "include",
   });
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.message);
+  if (!ok) throw error;
   return data.map((e) => ({ ...e, engagementType: "mig" }));
 }
 
 export async function fetchEquivalences(youngId) {
   const res = await fetch(`${apiURL}/young/${youngId}/phase2/equivalences`, {
-    headers: { Authorization: `JWT ${API.getToken()}` },
+    credentials: "include",
   });
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.message);
+  if (!ok) throw error;
   return data.map((e) => ({ ...e, engagementType: "equivalence" }));
 }
 
 export async function fetchEquivalence(youngId, id) {
   const res = await fetch(`${apiURL}/young/${youngId}/phase2/equivalence/${id}`, {
-    headers: { Authorization: `JWT ${API.getToken()}` },
+    credentials: "include",
   });
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.message);
+  if (!ok) throw error;
   return data;
 }
 
@@ -50,8 +50,9 @@ export async function fetchEquivalenceFile(youngId, fileName) {
 
 export async function fetchAttestation(youngId, template, sendEmail) {
   const res = await fetch(`${apiURL}/young/${youngId}/documents/certificate/${template}${sendEmail ? "/send-email" : ""}`, {
-    headers: { "Content-Type": "application/json", Authorization: `JWT ${API.getToken()}` },
+    headers: { "Content-Type": "application/json" },
     method: "POST",
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Erreur lors du téléchargement de l'attestation");
   if (sendEmail) return;
@@ -62,10 +63,11 @@ export async function fetchAttestation(youngId, template, sendEmail) {
 export async function fetchMissionsFromApiEngagement(filters, page, size, sort) {
   const res = await fetch(`${apiURL}/elasticsearch/missionapi/search`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `JWT ${API.getToken()}` },
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ filters, page, size, sort }),
   });
   const { ok, data, error } = await res.json();
-  if (!ok) throw new Error(error.message);
+  if (!ok) throw error;
   return data;
 }

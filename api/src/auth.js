@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Joi = require("joi");
+const { getDb } = require("./mongo");
 
 const { capture, captureMessage } = require("./sentry");
 const config = require("config");
@@ -15,7 +16,7 @@ const {
   checkJwtTrustTokenVersion,
 } = require("./jwt-options");
 const { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString, YOUNG_STATUS } = require("./utils");
 const {
   SENDINBLUE_TEMPLATES,
   PHONE_ZONES_NAMES_ARR,
@@ -29,9 +30,11 @@ const {
   isAdminCle,
   isReferentClasse,
 } = require("snu-lib");
+
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
+
 const { ClasseModel, EtablissementModel, CohortModel } = require("./models");
 const { getFeatureFlagsAvailable } = require("./featureFlag/featureFlagService");
 
@@ -48,6 +51,25 @@ class Auth {
     } else {
       await this.signupVolontaire(req, res);
     }
+  }
+
+  async countDocumentsInView(normalizedFirstName, normalizedLastName, birthdateAt) {
+    const countResult = await getDb()
+      .collection("normalizeName")
+      .aggregate([
+        {
+          $match: {
+            normalizedFirstName: normalizedFirstName,
+            normalizedLastName: normalizedLastName,
+            birthdateAt: birthdateAt,
+          },
+        },
+        {
+          $count: "count",
+        },
+      ])
+      .toArray();
+    return countResult.length > 0 ? countResult[0].count : 0;
   }
 
   async signupVolontaire(req, res) {
@@ -110,13 +132,15 @@ class Auth {
       } = value;
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-      const formatedDate = birthdateAt;
+      const formatedDate = new Date(birthdateAt);
       formatedDate.setUTCHours(11, 0, 0);
+
       if (!validateBirthDate(formatedDate)) return res.status(400).send({ ok: false, user: null, code: ERRORS.INVALID_PARAMS });
+      const normalizedFirstName = normalizeString(firstName);
+      const normalizedLastName = normalizeString(lastName);
 
-      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
-      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-
+      const count = await this.countDocumentsInView(normalizedFirstName, normalizedLastName, formatedDate);
+      if (count > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
       if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
       const session = sessions.find(({ name }) => name === value.cohort);
@@ -128,7 +152,7 @@ class Auth {
 
       const cohortModel = await CohortModel.findOne({ name: cohort });
 
-      const user = await this.model.create({
+      const user = new this.model({
         email,
         phone,
         phoneZone,
@@ -158,6 +182,14 @@ class Auth {
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
       });
 
+      await user.save({
+        fromUser: {
+          _id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      });
       if (isEmailValidationEnabled) {
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
           emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
@@ -228,19 +260,25 @@ class Auth {
 
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-      const formatedDate = birthdateAt;
+      const formatedDate = new Date(birthdateAt);
       formatedDate.setUTCHours(11, 0, 0);
-      if (!validateBirthDate(formatedDate)) return res.status(400).send({ ok: false, user: null, code: ERRORS.INVALID_PARAMS });
+      const normalizedFirstName = normalizeString(firstName);
+      const normalizedLastName = normalizeString(lastName);
 
-      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
-      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      const count = await this.countDocumentsInView(normalizedFirstName, normalizedLastName, formatedDate);
+      if (count > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
       const classe = await ClasseModel.findOne({ _id: classeId });
       if (!classe) {
         return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
 
-      const countOfUsersInClass = await this.model.countDocuments({ classeId, deletedAt: { $exists: false } });
+      const countOfUsersInClass = await this.model.countDocuments({
+        classeId,
+        deletedAt: { $exists: false },
+        status: YOUNG_STATUS.VALIDATED,
+      });
+      logger.info(`Auth / signup - youngs : ${countOfUsersInClass} in class ${classeId}`);
       if (countOfUsersInClass >= classe.totalSeats) {
         return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
@@ -294,7 +332,15 @@ class Auth {
         cohortId: cohort?._id,
       };
 
-      const user = await this.model.create(userData);
+      const user = new this.model(userData);
+      await user.save({
+        fromUser: {
+          _id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      });
       if (!user) {
         throw new Error("Error while creating user");
       }
@@ -348,6 +394,7 @@ class Auth {
       if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
 
       const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
+
       if (!match) {
         const loginAttempts = (user.loginAttempts || 0) + 1;
 

@@ -8,21 +8,25 @@ export default function Header({ home, withSeeAs }) {
 
   return (
     <header className="flex items-center justify-between gap-4 bg-[#32257F] p-4 print:hidden">
-      <Link href="/" className="flex items-center gap-4">
-        <div className="flex-none">
-          <img className="h-14 w-14" src="/assets/logo-snu.png" alt="Logo du SNU" />
-        </div>
+      <div className="flex items-center gap-4">
+        <Link href="https://www.snu.gouv.fr/" className="flex items-center gap-4">
+          <div className="flex-none">
+            <img className="h-14 w-14" src="/assets/logo-snu.png" alt="Logo du SNU" />
+          </div>
 
-        <p className="hidden text-sm font-medium uppercase leading-tight tracking-wide text-white md:block">
-          service
-          <br />
-          national
-          <br />
-          universel
-        </p>
+          <p className="hidden text-sm font-medium uppercase leading-tight tracking-wide text-white md:block">
+            service
+            <br />
+            national
+            <br />
+            universel
+          </p>
+        </Link>
 
-        <p className={`font-bold text-white md:ml-6 ${withSeeAs ? "" : "md:block hidden"}`}>Base de connaissance</p>
-      </Link>
+        <Link href="/" className={`font-bold text-white md:ml-6 ${withSeeAs ? "" : "md:block hidden"}`}>
+          Retour à la page d’accueil
+        </Link>
+      </div>
 
       <div className="flex items-center gap-4">
         {!home && (

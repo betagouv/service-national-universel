@@ -14,6 +14,17 @@ const populateWithReferentInfo = async ({ etablissements, isExport }) => {
   });
 };
 
+const populateWithCoordinatorInfo = async ({ etablissements, isExport }) => {
+  const refIds = [...new Set(etablissements.map((item) => (isExport ? item.coordinateurIds : item._source.coordinateurIds)).filter(Boolean))];
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
+  const referentsData = serializeReferents(referents);
+  return etablissements.map((item) => {
+    if (isExport) item.coordinateurs = referentsData?.filter((e) => item.coordinateurIds.includes(e._id.toString()));
+    else item._source.coordinateurs = referentsData?.filter((e) => item._source.coordinateurIds.includes(e._id.toString()));
+    return item;
+  });
+};
+
 //maybe refacto this
 const populateEtablissementWithNumber = async ({ etablissements, index }) => {
   const etablissementIds = [...new Set(etablissements.map((item) => item._id.toString()).filter((e) => e))];
@@ -47,5 +58,6 @@ const populateEtablissementWithNumber = async ({ etablissements, index }) => {
 
 module.exports = {
   populateWithReferentInfo,
+  populateWithCoordinatorInfo,
   populateEtablissementWithNumber,
 };

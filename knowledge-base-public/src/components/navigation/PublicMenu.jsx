@@ -34,7 +34,7 @@ export default function PublicMenu() {
                     <ul>
                       <li>
                         <a href="https://www.snu.gouv.fr" className="flex items-center justify-between p-4 text-sm font-medium">
-                          Retour sur le site du SNU
+                          Découvrez le site du SNU
                           <HiOutlineExternalLink className="text-xl text-gray-400" />
                         </a>
                       </li>
@@ -71,7 +71,7 @@ export default function PublicMenu() {
         <ul className="flex items-center justify-end gap-6">
           <li>
             <a href="https://www.snu.gouv.fr" className="rounded-md px-2.5 py-2 text-sm font-medium text-white transition-colors hover:bg-black hover:bg-opacity-20">
-              Retour sur le site du SNU
+              Découvrez le site du SNU
             </a>
           </li>
 

@@ -11,7 +11,7 @@ const config = require("config");
 const { logger } = require("../logger");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
-const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
+const { updateYoungPhase2StatusAndHours, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
 const Joi = require("joi");
 const patches = require("./patches");
 const { generatePdfIntoStream } = require("../utils/pdf-renderer");
@@ -248,8 +248,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     const young = await YoungModel.findById(contract.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateYoungStatusPhase2Contract(young, req.user);
-    await updateYoungPhase2Hours(young, req.user);
-    await updateStatusPhase2(young, req.user);
+    await updateYoungPhase2StatusAndHours(young, req.user);
 
     return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {

@@ -30,7 +30,7 @@ RUN npm install
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
-COPY front.tsconfig.json front.tsconfig.json
+COPY tsconfig.front.json tsconfig.front.json
 
 ARG RELEASE=""
 ENV RELEASE=${RELEASE}

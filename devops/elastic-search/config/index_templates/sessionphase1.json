@@ -1,0 +1,82 @@
+{
+  "index_patterns": ["sessionphase1"],
+  "template": {
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "default_pipeline": "sessionphase1"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "headCenterId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "pedagoProjectFiles": {
+          "type": "nested"
+        },
+        "createdAt": {
+          "type": "date"
+        },
+        "cohesionCenterId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "waitingList": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "__v": {
+          "type": "long"
+        },
+        "timeScheduleFiles": {
+          "type": "nested"
+        },
+        "cohort": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "placesTotal": {
+          "type": "long"
+        },
+        "placesLeft": {
+          "type": "long"
+        },
+        "status": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "updatedAt": {
+          "type": "date"
+        }
+      }
+    }
+  },
+  "composed_of": []
+}

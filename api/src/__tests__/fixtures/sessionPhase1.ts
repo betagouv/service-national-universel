@@ -1,4 +1,6 @@
-import { SessionPhase1Type } from "../../models";
+import { Types } from "mongoose";
+const { ObjectId } = Types;
+import { SessionPhase1Type } from "snu-lib";
 
 function getNewSessionPhase1Fixture(object: Partial<SessionPhase1Type> = {}): Partial<SessionPhase1Type> {
   const placesLeft = 15;
@@ -8,7 +10,7 @@ function getNewSessionPhase1Fixture(object: Partial<SessionPhase1Type> = {}): Pa
     placesTotal: placesLeft,
     placesLeft: placesLeft,
     status: "VALIDATED",
-    cohortId: "1",
+    cohortId: new ObjectId().toString(),
     ...object,
   };
 }

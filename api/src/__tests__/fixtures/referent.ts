@@ -1,7 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { ROLES } from "snu-lib";
-import { ReferentType } from "../../models";
+import { ROLES, ReferentType, regionList } from "snu-lib";
 
 export function getNewReferentFixture(object: Partial<ReferentType> = {}): Partial<ReferentType> {
   return {
@@ -9,7 +8,7 @@ export function getNewReferentFixture(object: Partial<ReferentType> = {}): Parti
     lastName: faker.person.lastName(),
     email: faker.internet.email().toLowerCase(),
     password: faker.internet.password(),
-    region: faker.location.state(),
+    region: faker.helpers.arrayElement(regionList),
     department: [faker.location.state()],
     phone: faker.phone.number(),
     mobile: faker.phone.number(),
@@ -32,7 +31,7 @@ export function getReinscriptionSignupReferentFixture(object = {}) {
 export function getNewSignupReferentFixture(object = {}) {
   return {
     email: faker.internet.email().toLowerCase(),
-    region: faker.location.state(),
+    region: faker.helpers.arrayElement(regionList),
     department: [faker.location.state()],
     mobile: faker.phone.number(),
     role: ROLES.ADMIN,

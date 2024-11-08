@@ -10,7 +10,7 @@ import { isFeatureAvailable } from "../../../featureFlag/featureFlagService";
 import { importClasseCohort } from "./classeImportService";
 import Joi from "joi";
 import { capture } from "../../../sentry";
-import { ClasseCohortImportBody, ClasseCohortImportKey } from "./classeCohortImport";
+import { ClasseCohortImportBody, ClasseCohortImportKey, ClasseImportType } from "./classeCohortImport";
 import { generateCSVStream, getHeaders } from "../../../services/fileService";
 
 const router = express.Router();
@@ -25,6 +25,9 @@ router.post("/classe-cohort", passport.authenticate("referent", { session: false
     classeCohortImportKey: Joi.string()
       .valid(...Object.values(ClasseCohortImportKey))
       .required(),
+    importType: Joi.string()
+      .valid(...Object.values(ClasseImportType))
+      .required(),
   }).validate(req.body, { stripUnknown: true });
   if (error) {
     capture(error);
@@ -36,7 +39,7 @@ router.post("/classe-cohort", passport.authenticate("referent", { session: false
   }
 
   try {
-    const importedClasseCohort = await importClasseCohort(value.filePath, value.classeCohortImportKey);
+    const importedClasseCohort = await importClasseCohort(value.filePath, value.classeCohortImportKey, value.importType);
     const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
 
     const headers = getHeaders(importedClasseCohort);

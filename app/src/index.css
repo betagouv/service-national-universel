@@ -135,6 +135,12 @@ a:hover {
   text-decoration: none;
 }
 
+.reset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
 /* .image-input {
   height: 100px;
   min-width: 150px;

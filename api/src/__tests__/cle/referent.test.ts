@@ -2,7 +2,7 @@ import request from "supertest";
 import passport from "passport";
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { ClasseSchoolYear, InvitationType, ROLES, STATUS_CLASSE, SUB_ROLES, UserDto } from "snu-lib";
+import { ClasseSchoolYear, InvitationType, ROLES, STATUS_CLASSE, SUB_ROLE_GOD, SUB_ROLES, UserDto } from "snu-lib";
 
 import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import {
@@ -30,10 +30,10 @@ jest.mock("../../brevo", () => ({
 
 const user = {} as UserDto;
 
-describe("Cle Referent", () => {
-  beforeAll(dbConnect);
-  afterAll(dbClose);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
+afterAll(dbClose);
 
+describe("Cle Referent", () => {
   beforeEach(async () => {
     await ReferentModel.deleteMany();
     await EtablissementModel.deleteMany();
@@ -338,8 +338,6 @@ describe("Cle Referent", () => {
 });
 
 describe("POST /cle/referent/send-invitation-chef-etablissement", () => {
-  beforeAll(dbConnect);
-  afterAll(dbClose);
   beforeEach(async () => {
     jest.clearAllMocks();
     // @ts-ignore
@@ -358,7 +356,7 @@ describe("POST /cle/referent/send-invitation-chef-etablissement", () => {
     // @ts-ignore
     passport.user.role = ROLES.ADMIN;
     // @ts-ignore
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
 
     const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();
 
@@ -374,8 +372,6 @@ describe("POST /cle/referent/send-invitation-chef-etablissement", () => {
 });
 
 describe("POST /cle/referent/send-invitation-referent-classe", () => {
-  beforeAll(dbConnect);
-  afterAll(dbClose);
   beforeEach(async () => {
     jest.clearAllMocks();
     // @ts-ignore
@@ -399,7 +395,7 @@ describe("POST /cle/referent/send-invitation-referent-classe", () => {
     // @ts-ignore
     passport.user.role = ROLES.ADMIN;
     // @ts-ignore
-    passport.user.subRole = "god";
+    passport.user.subRole = SUB_ROLE_GOD;
 
     const res = await request(getAppHelper()).post("/cle/referent/send-invitation-referent-classe-verifiee").send();
 
@@ -415,8 +411,6 @@ describe("POST /cle/referent/send-invitation-referent-classe", () => {
 });
 
 describe("POST /cle/referent/invite-coordonnateur", () => {
-  beforeAll(dbConnect);
-  afterAll(dbClose);
   it("should return 200 OK when invite is successful (chef etablissement)", async () => {
     const referent = await createReferentHelper(getNewSignupReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
     await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referent._id] }));

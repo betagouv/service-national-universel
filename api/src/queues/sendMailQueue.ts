@@ -6,6 +6,7 @@ import { logAddedTask, logStartedTask, logSucceedTask, logFailedTask } from "./t
 
 const MAIL_QUEUE = `${config.get("TASK_QUEUE_PREFIX")}_send_mail`;
 const SEND_DOCUMENT_EMAIL = "send_document_mail";
+const CONCURRENCY = 5;
 
 let queue: Queue | null = null;
 let worker: Worker | null = null;
@@ -17,6 +18,12 @@ export function initQueue(connection) {
       backoff: {
         type: "exponential",
         delay: 2000,
+      },
+      removeOnComplete: {
+        age: 7 * 24 * 3600, // 1 week
+      },
+      removeOnFail: {
+        age: 30 * 24 * 3600, // 1 month
       },
     },
     connection,
@@ -43,7 +50,7 @@ export function initWorker(connection) {
         }
       }
     },
-    { connection },
+    { connection, concurrency: CONCURRENCY },
   );
   worker.on("completed", (job) => {
     logSucceedTask(job);

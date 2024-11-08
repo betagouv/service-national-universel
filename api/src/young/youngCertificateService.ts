@@ -1,15 +1,5 @@
-import {
-  CohesionCenterModel,
-  SessionPhase1Model,
-  CohortModel,
-  LigneBusModel,
-  LigneToPointModel,
-  PointDeRassemblementModel,
-  DepartmentServiceModel,
-  CohesionCenterType,
-  PointDeRassemblementType,
-} from "../models";
-import { YoungDto } from "snu-lib";
+import { CohesionCenterModel, SessionPhase1Model, CohortModel, LigneBusModel, LigneToPointModel, PointDeRassemblementModel, DepartmentServiceModel } from "../models";
+import { YoungDto, PointDeRassemblementType, CohesionCenterType } from "snu-lib";
 
 export const getMeetingAddress = (young: YoungDto, meetingPoint: PointDeRassemblementType, center: CohesionCenterType) => {
   if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;

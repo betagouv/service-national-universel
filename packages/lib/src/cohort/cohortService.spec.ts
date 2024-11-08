@@ -1,5 +1,5 @@
 import { canUpdateCenter, canUpdateCohort } from "./cohortService";
-import { CohortDto, ReferentDto } from "../dto";
+import { CohortDto, ReferentDto, UserDto } from "../dto";
 import { ROLES } from "../roles";
 
 let from;
@@ -142,7 +142,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.REFERENT_REGION,
-    } as ReferentDto;
+    } as UserDto;
 
     // Act
     const result = canUpdateCenter(cohort, user);
@@ -164,7 +164,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.REFERENT_REGION,
-    } as ReferentDto;
+    } as UserDto;
 
     // Act
     const result = canUpdateCenter(cohort, user);
@@ -186,7 +186,7 @@ describe("cohortService", () => {
     } as CohortDto;
     const user = {
       role: ROLES.REFERENT_DEPARTMENT,
-    } as ReferentDto;
+    } as UserDto;
 
     // Act
     const result = canUpdateCenter(cohort, user);

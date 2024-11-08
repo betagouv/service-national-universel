@@ -14,7 +14,9 @@ export const VitePluginWatchPackages = async (config) => {
       });
     },
     async handleHotUpdate({ file, server }) {
-      server.ws.send({ type: "full-reload" });
+      if (externalFiles.includes(file)) {
+        server.ws.send({ type: "full-reload" });
+      }
     },
   };
 };

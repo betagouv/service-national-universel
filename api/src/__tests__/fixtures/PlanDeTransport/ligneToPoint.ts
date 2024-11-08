@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { LigneToPointType } from "../../../models";
+import { LigneToPointType } from "snu-lib";
 
 function getNewLigneToPointFixture(): Partial<LigneToPointType> {
   return {

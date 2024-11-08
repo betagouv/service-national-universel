@@ -10,8 +10,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  prod_directory: ./terraform/environments/production
-  staging_directory: ./terraform/environments/production/staging
+  prod_directory: ./devops/terraform/environments/production
+  staging_directory: ./devops/terraform/environments/production/staging
   production_branch: "production"
 
 jobs:
@@ -84,11 +84,24 @@ jobs:
       matrix:
         app:
           [
-            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
-            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
-            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+            {
+              name: api,
+              path: api,
+              tag: "${{needs.prepare.outputs.api_image_tag}}",
+            },
+            {
+              name: app,
+              path: app,
+              tag: "${{needs.prepare.outputs.app_image_tag}}",
+            },
+            {
+              name: admin,
+              path: admin,
+              tag: "${{needs.prepare.outputs.admin_image_tag}}",
+            },
             {
               name: antivirus,
+              path: devops/antivirus,
               tag: "${{needs.prepare.outputs.antivirus_image_tag}}",
             },
           ]
@@ -115,7 +128,7 @@ jobs:
           password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
           registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
           image_name: ${{ matrix.app.name }}
-          dockerfile_path: ${{ matrix.app.name }}/Dockerfile
+          dockerfile_path: ${{ matrix.app.path }}/Dockerfile
           image_tag: ${{ matrix.app.tag }}
           image_tag_stable: hotfix
           sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}

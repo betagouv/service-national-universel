@@ -8,7 +8,7 @@ interface File {
   side?: string;
 }
 
-interface CorrectionRequest {
+export interface CorrectionRequest {
   moderatorId?: string;
   cohort?: string;
   field?: string;
@@ -54,6 +54,7 @@ export interface YoungDto {
   gender?: string;
   birthdateAt?: Date;
   cohort?: string;
+  cohortId?: string;
   originalCohort?: string;
   cohortChangeReason?: string;
   cohortDetailedChangeReason?: string;
@@ -83,6 +84,9 @@ export interface YoungDto {
   inscriptionCorrectionMessage?: string;
   inscriptionRefusedMessage?: string;
   classeId?: string;
+  classe?: {
+    name: string;
+  };
   etablissementId?: string;
   source?: string;
   sessionPhase1Id?: string;

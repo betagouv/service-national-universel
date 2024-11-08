@@ -1,13 +1,13 @@
 import request from "supertest";
 import fetch from "node-fetch";
 import getAppHelper from "../helpers/app";
-import { ROLES, InvitationType } from "snu-lib";
+import { ROLES, InvitationType, SUB_ROLE_GOD } from "snu-lib";
 import { getMockAppelAProjetDto } from "../fixtures/cle/appelAProjet";
 import * as apiEducationModule from "../../services/gouv.fr/api-education";
 import passport from "passport";
 import { dbConnect, dbClose } from "../helpers/db";
 import { getEtablissementsFromAnnuaire } from "../fixtures/providers/annuaireEtablissement";
-import { ClasseDocument, ClasseModel, EtablissementDocument, EtablissementModel, ReferentDocument, ReferentModel } from "../../models";
+import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import * as featureServiceModule from "../../featureFlag/featureFlagService";
 
 jest.mock("../../utils", () => ({
@@ -15,7 +15,7 @@ jest.mock("../../utils", () => ({
   uploadFile: () => Promise.resolve(),
 }));
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 beforeEach(async () => {
   // @ts-ignore
@@ -44,7 +44,7 @@ describe("Appel A Projet Controller", () => {
   describe("POST /cle/appel-a-projet/simulate", () => {
     it("should return 200 OK with appelAProjet data for super admin", async () => {
       // @ts-ignore
-      passport.user.subRole = "god";
+      passport.user.subRole = SUB_ROLE_GOD;
 
       const response1 = Promise.resolve({
         json: () => {
@@ -79,7 +79,7 @@ describe("Appel A Projet Controller", () => {
 
     it("should return a zip file", async () => {
       // @ts-ignore
-      passport.user.subRole = "god";
+      passport.user.subRole = SUB_ROLE_GOD;
       const response = Promise.resolve({
         json: () => {
           return getMockAppelAProjetDto(false);
@@ -99,7 +99,7 @@ describe("Appel A Projet Controller", () => {
 
     it("should DS be called a maximum of 50 times", async () => {
       // @ts-ignore
-      passport.user.subRole = "god";
+      passport.user.subRole = SUB_ROLE_GOD;
 
       const response1 = Promise.resolve({
         json: () => {
@@ -121,7 +121,7 @@ describe("Appel A Projet Controller", () => {
       const etablissementBeforeSync = await EtablissementModel.findOne({ uai: "UAI_42" });
       expect(etablissementBeforeSync).toBeNull();
       // @ts-ignore
-      passport.user.subRole = "god";
+      passport.user.subRole = SUB_ROLE_GOD;
       const responseAppelAProjetMock = Promise.resolve({
         json: () => {
           return getMockAppelAProjetDto(false);
@@ -165,7 +165,7 @@ describe("Appel A Projet Controller", () => {
       await EtablissementModel.create(mockEtablissement);
 
       // @ts-ignore
-      passport.user.subRole = "god";
+      passport.user.subRole = SUB_ROLE_GOD;
       const responseAppelAProjetMock = Promise.resolve({
         json: () => {
           return getMockAppelAProjetDto(false);
@@ -215,7 +215,7 @@ describe("Appel A Projet Controller", () => {
       await ReferentModel.create(mockReferent);
 
       // @ts-ignore
-      passport.user.subRole = "god";
+      passport.user.subRole = SUB_ROLE_GOD;
       const responseAppelAProjetMock = Promise.resolve({
         json: () => {
           return getMockAppelAProjetDto(false);
@@ -265,7 +265,7 @@ describe("Appel A Projet Controller", () => {
       const referent = await ReferentModel.create(mockReferent);
 
       // @ts-ignore
-      passport.user.subRole = "god";
+      passport.user.subRole = SUB_ROLE_GOD;
       const responseAppelAProjetMock = Promise.resolve({
         json: () => {
           return getMockAppelAProjetDto(false);
@@ -284,7 +284,7 @@ describe("Appel A Projet Controller", () => {
 
     it("should not change invitationType if run twice", async () => {
       // @ts-ignore
-      passport.user.subRole = "god";
+      passport.user.subRole = SUB_ROLE_GOD;
       const responseAppelAProjetMock = Promise.resolve({
         json: () => {
           return getMockAppelAProjetDto(false);

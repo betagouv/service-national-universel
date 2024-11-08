@@ -77,7 +77,7 @@ function capture(err, contexte) {
     while (currentError instanceof Error) {
       const warningMessage =
         "You should capture error earlier and adding dedicated context to it. This is a fallback, capturing same error a second time is ignored even with different context";
-      captureError(currentError, { ...contexte, contexts: { ...contexte.contexts, warning: { msg: warningMessage } } });
+      captureError(currentError, { ...contexte, contexts: { ...contexte?.contexts, warning: { msg: warningMessage } } });
       currentError = currentError.cause;
     }
 
@@ -85,7 +85,7 @@ function capture(err, contexte) {
   } else if (err.error instanceof Error) {
     return capture(err.error, {
       ...contexte,
-      contexts: { ...contexte.contexts, warning: { msg: "Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples" } },
+      contexts: { ...contexte?.contexts, warning: { msg: "Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples" } },
     }); // Recursively handle the nested error
   } else if (err.message) {
     logger.error(`capture: ${err.message} (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)`);

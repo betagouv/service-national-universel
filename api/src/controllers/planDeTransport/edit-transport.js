@@ -12,6 +12,7 @@ const { CohesionCenterModel } = require("../../models");
 const { YoungModel } = require("../../models");
 
 const { ERRORS, updateSeatsTakenInBusLine } = require("../../utils");
+const { validateYoung } = require("../../utils/validator");
 
 router.post("/youngs/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -35,7 +36,7 @@ router.post("/youngs/", passport.authenticate("referent", { session: false, fail
 router.post("/meetingPoints", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
-    let meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: [...req.body] } });
+    let meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: [...req.body] }, deletedAt: { $exists: false } });
     if (!meetingPoints || !meetingPoints.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     res.status(200).send({ ok: true, data: meetingPoints });
   } catch (error) {
@@ -47,6 +48,15 @@ router.post("/meetingPoints", passport.authenticate("referent", { session: false
 router.post("/saveYoungs", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+
+    const schema = Joi.object({
+      busFrom: Joi.string().required(),
+      busTo: Joi.string().required(),
+      data: Joi.array().items(Joi.object()).required(),
+    });
+    const { error } = schema.validate(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
     const youngs = req.body.data;
     const ids = youngs.map((e) => e._id);
     const busFrom = await LigneBusModel.findById(req.body.busFrom);

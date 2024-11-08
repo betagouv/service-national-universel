@@ -1022,11 +1022,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!schema) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (value.centerId && typeof value.centerId === "string") {
-      value.centerId = mongoose.Types.ObjectId(value.centerId);
+      value.centerId = new mongoose.Types.ObjectId(value.centerId);
     }
     if (value.gatheringPlaces) {
       value.gatheringPlaces = value.gatheringPlaces.map((gp) => {
-        return typeof gp === "string" ? mongoose.Types.ObjectId(gp) : gp;
+        return typeof gp === "string" ? new mongoose.Types.ObjectId(gp) : gp;
       });
     }
 

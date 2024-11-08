@@ -2,16 +2,16 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import { HiUsers } from "react-icons/hi";
 
-import { ClasseDto, translateStatusClasse } from "snu-lib";
+import { ClasseType, translateStatusClasse } from "snu-lib";
 import { Badge } from "@snu/ds/admin";
 
 import { statusClassForBadge } from "../utils";
 
-interface Props {
-  classe: ClasseDto;
+interface ClasseProps extends ClasseType {
+  referentClasse: { firstName: string; lastName: string }[];
 }
 
-export default function ClasseRow({ classe }: Props) {
+export default function ClasseRow(classe: ClasseProps) {
   const history = useHistory();
   return (
     <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={() => history.push(`/classes/${classe._id}`)}>

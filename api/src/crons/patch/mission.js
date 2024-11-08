@@ -50,7 +50,7 @@ async function processPatch(patch, count, total) {
 }
 
 async function createLog(patch, actualMission, event, value) {
-  const missionInfos = await actualMission.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
+  const missionInfos = await actualMission.patches.find({ ref: new ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let mission = rebuildMission(missionInfos);
 
   const anonymisedMission = new MissionModel(mission).anonymise();
@@ -67,7 +67,7 @@ async function createLog(patch, actualMission, event, value) {
     body: JSON.stringify({
       evenement_nom: event,
       evenement_type: "mission",
-      evenement_valeur: value.toString() || "",
+      evenement_valeur: value?.toString() || "",
       mission_id: patch.ref.toString(),
       mission_structureId: actualMission.structureId.toString(),
       mission_status: mission.status || actualMission.status,

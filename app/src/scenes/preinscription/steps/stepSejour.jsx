@@ -4,7 +4,6 @@ import { Link, useHistory } from "react-router-dom";
 import { getCohortPeriod, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import Alert from "../../../components/dsfr/ui/Alert";
 import { supportURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
@@ -16,7 +15,7 @@ import { SignupButtons, Notice } from "@snu/ds/dsfr";
 export default function StepSejour() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
   const [route, context, bdcURI] = isLoggedIn
-    ? ["/reinscription/", ReinscriptionContext, "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    ? ["/reinscription/", ReinscriptionContext, "jetais-inscrit-en-2023-2024-comment-me-reinscrire-en-2024-2025"]
     : ["/preinscription/", PreInscriptionContext, "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const history = useHistory();
   const [data] = React.useContext(context);

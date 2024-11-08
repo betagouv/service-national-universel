@@ -32,8 +32,7 @@ const {
   isYoung,
   isReferent,
   getCcOfYoung,
-  updateYoungPhase2Hours,
-  updateStatusPhase2,
+  updateYoungPhase2StatusAndHours,
   getFile,
   updateYoungStatusPhase2Contract,
   getReferentManagerPhase2,
@@ -166,8 +165,11 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const young = await YoungModel.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const cohort = await CohortModel.findById(young.cohortId);
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     if (isYoung(req.user)) {
-      const { canApply, message } = await getAuthorizationToApply(mission, young);
+      const { canApply, message } = await getAuthorizationToApply(mission, young, cohort);
       if (!canApply) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
       }
@@ -217,8 +219,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     value.contractStatus = "DRAFT";
     const data = await ApplicationModel.create(value);
-    await updateYoungPhase2Hours(young, req.user);
-    await updateStatusPhase2(young, req.user);
+    await updateYoungPhase2StatusAndHours(young, req.user);
     await updateMission(data, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
 
@@ -255,7 +256,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
     }
 
     // Transform ids to ObjectId
-    value.ids = value.ids.map((id) => ObjectId(id));
+    value.ids = value.ids.map((id) => new ObjectId(id));
 
     const pipeline = [
       { $match: { _id: { $in: value.ids } } },
@@ -309,8 +310,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
         await apiEngagement.update(application);
       }
 
-      await updateYoungPhase2Hours(young, req.user);
-      await updateStatusPhase2(young, req.user);
+      await updateYoungPhase2StatusAndHours(young, req.user);
       await updateYoungStatusPhase2Contract(young, req.user);
       await updateMission(application, req.user);
     });
@@ -378,8 +378,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
     await application.save({ fromUser: req.user });
 
-    await updateYoungPhase2Hours(young, req.user);
-    await updateStatusPhase2(young, req.user);
+    await updateYoungPhase2StatusAndHours(young, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
     await updateMission(application, req.user);
 

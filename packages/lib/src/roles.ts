@@ -1,8 +1,8 @@
-import { ReferentDto, UserDto } from "./dto";
+import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
-import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, STATUS_CLASSE } from "./constants/constants";
-import { ClasseType } from "./mongoSchema";
+import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
+import { PointDeRassemblementType, ReferentType, SessionPhase1Type, YoungType } from "./mongoSchema";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -16,6 +16,7 @@ const ROLES = {
   HEAD_CENTER: "head_center",
   VISITOR: "visitor",
   DSNJ: "dsnj",
+  INJEP: "injep",
   TRANSPORTER: "transporter",
   ADMINISTRATEUR_CLE: "administrateur_cle",
   REFERENT_CLASSE: "referent_classe",
@@ -32,6 +33,8 @@ const SUB_ROLES = {
   coordinateur_cle: "coordinateur_cle",
   none: "",
 };
+
+export const SUB_ROLE_GOD = "god";
 
 const SUPPORT_ROLES = {
   admin: "Modérateur",
@@ -102,7 +105,7 @@ const sameGeography = (actor, target) => {
   }
 };
 
-const referentInSameGeography = (actor, target) => isReferent(actor) && sameGeography(actor, target);
+const referentInSameGeography = (actor, target) => isReferentRegDep(actor) && sameGeography(actor, target);
 
 function canInviteUser(actorRole, targetRole) {
   // Admins can invite any user
@@ -348,7 +351,7 @@ function canCreateOrUpdateCohesionCenter(actor) {
 function canCreateEvent(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
-function canCreateOrUpdateSessionPhase1(actor, target) {
+function canCreateOrUpdateSessionPhase1(actor: UserDto, target?: SessionPhase1Type | null) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferent = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
   const isHeadCenter = actor.role === ROLES.HEAD_CENTER && target && actor._id.toString() === target.headCenterId;
@@ -471,35 +474,40 @@ function canSendPlanDeTransport(user) {
   return [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.TRANSPORTER].includes(user.role);
 }
 
-function isAdmin(user) {
+interface UserRoles {
+  role?: ReferentType["role"];
+  subRole?: ReferentType["subRole"];
+}
+
+function isAdmin(user: UserRoles) {
   return ROLES.ADMIN === user.role;
 }
 
-function isReferent(user) {
-  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
+function isReferentRegDep(user: UserRoles) {
+  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role || "");
 }
 
-function isSupervisor(user) {
+function isSupervisor(user: UserRoles) {
   return ROLES.SUPERVISOR === user.role;
 }
 
-function isReferentOrAdmin(user) {
-  return isAdmin(user) || isReferent(user);
+function isReferentOrAdmin(user: UserRoles) {
+  return isAdmin(user) || isReferentRegDep(user);
 }
 
-function isAdminCle(user) {
+function isAdminCle(user: UserRoles) {
   return user?.role === ROLES.ADMINISTRATEUR_CLE;
 }
 
-function isChefEtablissement(user) {
+function isChefEtablissement(user: UserRoles) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.referent_etablissement;
 }
 
-function isCoordinateurEtablissement(user) {
+function isCoordinateurEtablissement(user: UserRoles) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.coordinateur_cle;
 }
 
-function isReferentClasse(user) {
+function isReferentClasse(user: UserRoles) {
   return user?.role === ROLES.REFERENT_CLASSE;
 }
 
@@ -516,16 +524,24 @@ const canEditPresenceYoung = (actor) => {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 };
 
-const canSigninAs = (actor, target, source) => {
-  if (isAdmin(actor)) return true;
-  if (!isReferent(actor)) return false;
+const canSigninAs = (
+  actor: Pick<UserDto, "role" | "department" | "region">,
+  target: Pick<ReferentType, "role" | "subRole" | "department" | "region"> | Pick<YoungType, "department" | "region">,
+  source: "referent" | "young",
+) => {
+  if (isAdmin(actor)) return source === "young" || (target as ReferentType).subRole !== SUB_ROLE_GOD;
+  if (!isReferentRegDep(actor)) return false;
 
   if (source === "referent") {
+    // ReferentType
+    const targetReferent = target as Pick<ReferentType, "role" | "subRole" | "department" | "region">;
     const allowedTargetRoles = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];
-    if (!allowedTargetRoles.includes(target.role)) return false;
-    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.some((d) => target.department.includes(d))) return true;
+    if (!allowedTargetRoles.includes(targetReferent.role!)) return false;
+    if (actor.role === ROLES.REFERENT_DEPARTMENT && (actor.department as string[]).some((d) => targetReferent.department.includes(d))) return true;
   } else {
-    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department)) return true;
+    // YoungType
+    const targetYoung = target as Pick<YoungType, "department" | "region">;
+    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(targetYoung.department!)) return true;
   }
   if (actor.role === ROLES.REFERENT_REGION && actor.region === target.region) return true;
   return false;
@@ -542,7 +558,7 @@ function canSearchAssociation(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-function canViewCohesionCenter(actor) {
+function canViewCohesionCenter(actor: UserDto) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(
     actor.role,
   );
@@ -556,7 +572,7 @@ function canViewMeetingPoints(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER].includes(actor.role);
 }
 
-function canUpdateMeetingPoint(actor, meetingPoint = null) {
+function canUpdateMeetingPoint(actor, meetingPoint: PointDeRassemblementType | null = null) {
   if (isAdmin(actor)) return true;
   if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     if (!meetingPoint) return true;
@@ -666,8 +682,23 @@ function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: stri
   }
 }
 
-function canInviteYoung(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
+function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
+    if (!cohort) return false;
+
+    switch (actor.role) {
+      case ROLES.ADMIN:
+        return true;
+      case ROLES.REFERENT_DEPARTMENT:
+        return cohort.inscriptionOpenForReferentDepartment === true;
+      case ROLES.REFERENT_REGION:
+        return cohort.inscriptionOpenForReferentRegion === true;
+      case ROLES.REFERENT_CLASSE:
+        return cohort.inscriptionOpenForReferentClasse === true;
+      case ROLES.ADMINISTRATEUR_CLE:
+        return cohort.inscriptionOpenForAdministrateurCle === true;
+      default:
+        return false;
+    }
 }
 
 function canSendTemplateToYoung(actor, young) {
@@ -907,7 +938,7 @@ function canCreateTags(actor) {
 }
 
 function isSuperAdmin(actor) {
-  return [ROLES.ADMIN].includes(actor.role) && actor.subRole === "god";
+  return [ROLES.ADMIN].includes(actor.role) && actor.subRole === SUB_ROLE_GOD;
 }
 
 function canCheckIfRefExist(actor) {
@@ -993,21 +1024,18 @@ function canAllowSNU(actor) {
 }
 
 function canEditEstimatedSeats(actor) {
-  if (actor.role === ROLES.ADMIN) return true;
+  if (isAdmin(actor)) return true;
   const now = new Date();
   const limitDateEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS);
   return actor.role === ROLES.ADMINISTRATEUR_CLE && now <= limitDateEstimatedSeats;
 }
 
 function canEditTotalSeats(actor) {
-  if (actor.role === ROLES.ADMIN) {
+  if (isAdmin(actor)) return true;
+  if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role)) {
     const now = new Date();
     const limitDateTotalSeat = new Date(LIMIT_DATE_TOTAL_SEATS);
-    if (now <= limitDateTotalSeat) {
-      return false;
-    } else {
-      return true;
-    }
+    return now <= limitDateTotalSeat;
   }
   const limitDatesEstimatedSeats = new Date(LIMIT_DATE_ESTIMATED_SEATS).toISOString();
   const limitDatesTotalSeats = new Date(LIMIT_DATE_TOTAL_SEATS).toISOString();
@@ -1030,12 +1058,22 @@ function canCreateEtablissement(user: UserDto) {
 }
 
 //CLE
-function canValidateMultipleYoungsInClass(actor: UserDto, classe: ClasseType) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+function canValidateMultipleYoungsInClass(actor: UserDto) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
-function canValidateYoungInClass(actor: UserDto, classe: ClasseType) {
-  if (isAdmin(actor)) return true;
-  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) && classe.status === STATUS_CLASSE.OPEN;
+
+const phaseStatusOptionsByRole = {
+  0: { DEFAULT: [] },
+  1: {
+    [ROLES.ADMIN]: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
+    DEFAULT: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
+  },
+  2: { DEFAULT: [YOUNG_STATUS_PHASE2.WAITING_REALISATION, YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.VALIDATED] },
+  3: { DEFAULT: [YOUNG_STATUS_PHASE3.WAITING_REALISATION, YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED] },
+};
+
+function getPhaseStatusOptions(actor: UserDto, phase: number) {
+  return phaseStatusOptionsByRole[phase][actor.role] || phaseStatusOptionsByRole[phase].DEFAULT || [];
 }
 
 export {
@@ -1192,5 +1230,5 @@ export {
   canUpdateReferentClasse,
   canCreateEtablissement,
   canValidateMultipleYoungsInClass,
-  canValidateYoungInClass,
+  getPhaseStatusOptions,
 };

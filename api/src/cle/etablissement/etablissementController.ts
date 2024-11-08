@@ -14,12 +14,14 @@ import {
   isChefEtablissement,
   isReferentOrAdmin,
   SENDINBLUE_TEMPLATES,
+  ClasseSchoolYear,
+  EtablissementType,
 } from "snu-lib";
 import { ReferentDto } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
-import { ClasseModel, EtablissementModel, ReferentModel, EtablissementType } from "../../models";
+import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
 import { idSchema } from "../../utils/validator";
 import { sendTemplate } from "../../brevo";
@@ -38,9 +40,10 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
     const query = {};
     let valueField: any = { $in: [req.user._id] };
     if (req.user.role === ROLES.REFERENT_CLASSE) {
-      const classe = await ClasseModel.findOne({ referentClasseIds: { $in: req.user._id } });
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      valueField = classe.etablissementId;
+      const classes = await ClasseModel.find({ referentClasseIds: { $in: req.user._id } });
+      if (!classes || classes.length === 0) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const lastClasse = classes.find((classe) => classe.schoolYear === ClasseSchoolYear.YEAR_2024_2025) || classes[0];
+      valueField = lastClasse.etablissementId;
     }
     query[searchField] = valueField;
     const etablissement = await EtablissementModel.findOne(query)?.lean();
@@ -194,18 +197,20 @@ router.delete("/:id/referents", passport.authenticate("referent", { session: fal
     for (const referent of referents) {
       // si il est aussi référent de classe
       const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
+      const email = referent.email;
       if (classe) {
         referent.set({
           role: ROLES.REFERENT_CLASSE,
           subRole: SUB_ROLES.none,
         });
       } else {
-        referent.set({ deletedAt: new Date() });
+        const newEmail = `deleted-${referent.id}-${referent.email}`;
+        referent.set({ deletedAt: new Date(), email: newEmail });
       }
       await referent.save({ fromUser: req.user });
       const toName = `${referent.firstName}  ${referent.lastName}`;
       await sendTemplate(SENDINBLUE_TEMPLATES.CLE.COORIDNIATEUR_REMOVED_ETABLISSEMENT, {
-        emailTo: [{ email: referent.email, name: toName }],
+        emailTo: [{ email, name: toName }],
         params: {
           toName,
         },

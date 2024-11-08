@@ -5,7 +5,7 @@ import cx from "classnames";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 
-import { FEATURES_NAME, ROLES, isFeatureEnabled } from "snu-lib";
+import { FEATURES_NAME, ROLES, SUB_ROLE_GOD, isFeatureEnabled } from "snu-lib";
 
 import api from "@/services/api";
 import useDevice from "@/hooks/useDevice";
@@ -133,6 +133,9 @@ const SideBar = ({ sessionsList }) => {
   const ExportDsnj = () => (
     <SimpleNavItem sideBarOpen={open} Icon={ClipboardIcon} title="Export DSNJ" link="/dsnj-export" active={path === "dsnj-export"} setCurrentOpen={setDropDownOpen} />
   );
+  const ExportInjep = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={ClipboardIcon} title="Export INJEP" link="/injep-export" active={path === "injep-export"} setCurrentOpen={setDropDownOpen} />
+  );
   const Structure = () => (
     <SimpleNavItem
       sideBarOpen={open}
@@ -229,9 +232,12 @@ const SideBar = ({ sessionsList }) => {
   );
 
   //Components to display depending on user role
-  const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs, Dev];
+  const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs];
   const adminItems = [Dashboard, Volontaire, Inscriptions, SejoursAdmin, Engagement, Utilisateurs];
-  isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) && adminItems.push(Dev);
+  if (isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment)) {
+    godItems.push(Dev);
+    adminItems.push(Dev);
+  }
   const refItems = [Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
   const headCenterItems = [Dashboard, VolontaireHeadCenter, CentresHeadCenter, PlanDeTransport, Contenus, Utilisateurs];
   const transporteurItems = [Point, Centre, Schema, PlanDeTransport];
@@ -239,6 +245,7 @@ const SideBar = ({ sessionsList }) => {
   const supervisorItems = [Dashboard, Candidature, Network, StructureSupervisor, Missions, Utilisateurs];
   const visitorItems = [Dashboard];
   const dsnjItems = [ExportDsnj];
+  const injepItems = [ExportInjep];
   const institutionItems = [Institution, Classe, VolontaireCle, Contact];
 
   const getItems = () => {
@@ -247,7 +254,7 @@ const SideBar = ({ sessionsList }) => {
       case ROLES.REFERENT_REGION:
         return refItems;
       case ROLES.ADMIN:
-        return user.subRole === "god" ? godItems : adminItems;
+        return user.subRole === SUB_ROLE_GOD ? godItems : adminItems;
       case ROLES.HEAD_CENTER:
         return headCenterItems;
       case ROLES.TRANSPORTER:
@@ -260,6 +267,8 @@ const SideBar = ({ sessionsList }) => {
         return visitorItems;
       case ROLES.DSNJ:
         return dsnjItems;
+      case ROLES.INJEP:
+        return injepItems;
       case ROLES.ADMINISTRATEUR_CLE:
       case ROLES.REFERENT_CLASSE:
         return institutionItems;

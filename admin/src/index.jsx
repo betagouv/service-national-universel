@@ -12,6 +12,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, LinearScale } from "char
 ChartJS.register(ArcElement, Tooltip, Legend, LinearScale);
 
 import store from "./redux/store";
+
 import App from "./app.jsx";
 
 window.addEventListener("vite:preloadError", (event) => {
@@ -23,7 +24,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
       <App />
-      <ReduxToastr timeOut={1500} transitionIn="fadeIn" transitionOut="fadeOut" />
+      <ReduxToastr timeOut={5000} transitionIn="fadeIn" transitionOut="fadeOut" />
     </Provider>
   </React.StrictMode>,
 );

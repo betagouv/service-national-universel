@@ -17,7 +17,7 @@
 
 import express, { Response } from "express";
 import Joi from "joi";
-import { YoungModel, LigneBusModel, SessionPhase1Model, CohortModel, ApplicationModel, YoungType } from "../../models";
+import { YoungModel, LigneBusModel, SessionPhase1Model, CohortModel, ApplicationModel } from "../../models";
 import { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } from "../../utils";
 import { capture } from "../../sentry";
 import { validateFirstName } from "../../utils/validator";
@@ -34,6 +34,8 @@ import {
   YOUNG_STATUS,
   canEditYoung,
   canAllowSNU,
+  YoungType,
+  getPhaseStatusOptions,
 } from "snu-lib";
 import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
@@ -289,6 +291,14 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     if (error) {
       logger.debug("joi error: ", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    for (const [key, val] of Object.entries(value)) {
+      const phaseNumber = parseInt(key.replace("statusPhase", ""));
+      const authorizedStatuses = getPhaseStatusOptions(req.user, phaseNumber);
+      if (!authorizedStatuses.includes(val)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
     }
 
     // --- get young

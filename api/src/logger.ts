@@ -9,10 +9,17 @@ const LEVELS = {
   debug: 4,
 };
 
+function _format() {
+  if (config.ENVIRONMENT === "development") {
+    return format.combine(format.simple(), format.colorize({ all: true }));
+  }
+  return format.simple();
+}
+
 export const logger = createLogger({
   levels: LEVELS,
   level: config.get("LOG_LEVEL"),
-  format: config.ENVIRONMENT === "development" ? format.cli() : format.simple(),
+  format: _format(),
   transports: [
     new transports.Console({
       forceConsole: true,

@@ -60,7 +60,7 @@ export default function StepDocuments() {
       return;
     }
     dispatch(setYoung(responseData));
-    history.push("/inscription2023/confirm");
+    history.push("/inscription/confirm");
   }
 
   function handleClick(doc) {
@@ -71,7 +71,7 @@ export default function StepDocuments() {
   }
 
   function goBack() {
-    return history.push("/inscription2023/representants");
+    return history.push("/inscription/representants");
   }
 
   const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;

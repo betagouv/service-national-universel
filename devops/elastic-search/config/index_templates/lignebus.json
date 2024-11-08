@@ -1,0 +1,120 @@
+{
+  "index_patterns": ["lignebus"],
+  "template": {
+    "settings": {
+      "index": {
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "busId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "meetingPointsIds": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "centerId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "km": {
+          "type": "long"
+        },
+        "travelTime": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "departuredDate": {
+          "type": "date"
+        },
+        "youngSeatsTaken": {
+          "type": "long"
+        },
+        "cohort": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "followerCapacity": {
+          "type": "long"
+        },
+        "lunchBreak": {
+          "type": "boolean"
+        },
+        "sessionId": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "centerDepartureTime": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "createdAt": {
+          "type": "date"
+        },
+        "returnDate": {
+          "type": "date"
+        },
+        "youngCapacity": {
+          "type": "long"
+        },
+        "totalCapacity": {
+          "type": "long"
+        },
+        "centerArrivalTime": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          }
+        },
+        "lunchBreakReturn": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "date"
+        }
+      }
+    }
+  },
+  "composed_of": []
+}

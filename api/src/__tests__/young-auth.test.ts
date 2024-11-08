@@ -1,5 +1,5 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
+import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper, getYoungByIdHelper } from "./helpers/young";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -7,6 +7,9 @@ import { fakerFR as faker } from "@faker-js/faker";
 import crypto from "crypto";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
+import { createFixtureClasse } from "./fixtures/classe";
+import { ClasseModel } from "../models";
+import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 
 const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
@@ -17,6 +20,7 @@ jest.mock("../brevo", () => ({
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+afterEach(resetAppAuth);
 
 describe("Young Auth", () => {
   let res;
@@ -159,32 +163,45 @@ describe("Young Auth", () => {
       });
       expect(res.status).toBe(409);
     });
+
+    it("should return 409 when the number of users in the class exceeds the total seats", async () => {
+      const fixture = getNewYoungFixture();
+      const email = fixture.email?.toLowerCase();
+      const classe = await ClasseModel.create({ ...createFixtureClasse(), totalSeats: 1 });
+      await createYoungHelper({ ...fixture, email, classeId: classe._id, status: YOUNG_STATUS.VALIDATED });
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: "newuser@example.com",
+        phone: fixture.phone,
+        phoneZone: fixture.phoneZone,
+        firstName: "new",
+        lastName: "user",
+        password: VALID_PASSWORD,
+        birthdateAt: fixture.birthdateAt,
+        grade: fixture.grade,
+        frenchNationality: fixture.frenchNationality,
+        classeId: classe._id,
+        source: YOUNG_SOURCE.CLE,
+      });
+      expect(res.status).toBe(409);
+    });
   });
   describe("POST /young/logout", () => {
     it("should return 200", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), password: VALID_PASSWORD });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      const res = await request(getAppHelper()).post("/young/logout");
+      const res = await request(getAppHelper(young)).post("/young/logout");
       expect(res.status).toBe(200);
-      passport.user = previous;
     });
   });
 
   describe("GET /young/signin_token", () => {
     it("should return 200", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      passport.user.set = jest.fn();
-      passport.user.save = jest.fn();
-      const res = await request(getAppHelper()).get("/young/signin_token").set("Cookie", ["jwt_young=blah"]);
+      young.set = jest.fn();
+      young.save = jest.fn();
+      const res = await request(getAppHelper(young)).get("/young/signin_token").set("Cookie", ["jwt_young=blah"]);
       expect(res.status).toBe(200);
-      expect(passport.user.set).toHaveBeenCalled();
-      expect(passport.user.save).toHaveBeenCalled();
-      passport.user = previous;
+      expect(young.set).toHaveBeenCalled();
+      expect(young.save).toHaveBeenCalled();
     });
   });
 
@@ -210,44 +227,32 @@ describe("Young Auth", () => {
 
     it("should return 401 when new password is identical as last password", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), password: VALID_PASSWORD });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      res = await request(getAppHelper()).post("/young/reset_password").send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+
+      res = await request(getAppHelper(young)).post("/young/reset_password").send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(401);
-      passport.user = previous;
     });
 
     it("should return return 401 when original password does not match", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), password: "foo" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      res = await request(getAppHelper()).post("/young/reset_password").send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+
+      res = await request(getAppHelper(young)).post("/young/reset_password").send({ password: "bar", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(401);
-      passport.user = previous;
     });
 
     it("should return return 422 when verifyPassword !== newPassword", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), password: "foo" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      res = await request(getAppHelper())
+
+      res = await request(getAppHelper(young))
         .post("/young/reset_password")
         .send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD + "HOP" });
       expect(res.status).toBe(422);
-      passport.user = previous;
     });
 
     it("should return return 200 when password is changed", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), password: "foo" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-      res = await request(getAppHelper()).post("/young/reset_password").send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+
+      res = await request(getAppHelper(young)).post("/young/reset_password").send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
       expect(res.status).toBe(200);
-      passport.user = previous;
     });
   });
 

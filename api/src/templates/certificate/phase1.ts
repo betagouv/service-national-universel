@@ -88,7 +88,7 @@ function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter)
     .text(`${COHESION_CENTER_NAME} ${COHESION_CENTER_LOCATION},`)
     .text("validant la ", { continued: true })
     .font(FONT_BOLD)
-    .text("phase 1", { continued: true })
+    .text("phase de cohésion", { continued: true })
     .font(FONT)
     .text(" du Service National Universel.");
   doc.y += 12;
@@ -117,4 +117,4 @@ function generateBatchCertifPhase1(outStream, youngs, session, cohort, cohesionC
   timer.done({ message: "RENDERING", level: "debug" });
 }
 
-module.exports = { generateCertifPhase1, generateBatchCertifPhase1 };
+export { generateCertifPhase1, generateBatchCertifPhase1 };

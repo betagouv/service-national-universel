@@ -4,14 +4,14 @@ import crypto from "crypto";
 import config from "config";
 const { logger } = require("../../logger");
 
-import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ClasseSchoolYear, STATUS_CLASSE } from "snu-lib";
+import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ReferentType, EtablissementType, ClasseSchoolYear, STATUS_CLASSE } from "snu-lib";
 
 import { ERRORS } from "../../utils";
 import { sendTemplate } from "../../brevo";
 import { inSevenDays } from "../../utils";
 import { capture } from "../../sentry";
 
-import { EtablissementModel, ReferentModel, ReferentType, ReferentDocument, ClasseModel, EtablissementType } from "../../models";
+import { EtablissementModel, ReferentModel, ReferentDocument, ClasseModel } from "../../models";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";
 import { UserDto } from "snu-lib";
 import { findReferentsClasseToSendInvitationByClasseStatus } from "../../cle/referent/referentRepository";
@@ -34,6 +34,11 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
     // Return if already exists
     if (referent._id) return referent;
 
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
+    const refClasseIds = classes.map((c) => c.referentClasseIds).flat();
+    const referentClasse = await ReferentModel.findOne({ email: referent.email, role: ROLES.REFERENT_CLASSE, _id: { $in: refClasseIds } });
+    if (referentClasse) return referentClasse;
+
     // Create referent
     if (!referent.email || !referent.firstName || !referent.lastName) throw new Error("Missing referent email or firstName or lastName");
     const invitationToken = crypto.randomBytes(20).toString("hex");
@@ -53,6 +58,22 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
     capture(error);
     return null;
   }
+};
+
+export const inviteReferentClasseAsCoordinator = async (
+  referent: Pick<ReferentType, "firstName" | "lastName" | "email">,
+  { from }: { from: UserDto | null },
+  etablissement: EtablissementType,
+) => {
+  // Send invite
+  const fromName = `${from?.firstName || null} ${from?.lastName || null}`;
+  const toName = `${referent.firstName} ${referent.lastName}`;
+  const name_school = `${etablissement.name}`;
+
+  return await sendTemplate(SENDINBLUE_TEMPLATES.CLE.REFERENT_CLASSE_ADDED_AS_COORDINATOR, {
+    emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+    params: { fromName, toName, name_school },
+  });
 };
 
 export const inviteReferent = async (
@@ -221,12 +242,15 @@ export async function deleteOldReferentClasse(user: UserDto) {
     }
     logger.debug(`Referent - deleteOldReferentClasse(): deleting ${referentClasse?._id} - ${referentClasse?.email}`);
     referentClasse.set({ deletedAt: new Date() });
+    const unAnonimizedEmail = referentClasse.email;
+    const anonimizedEmail = `deleted-${referentClasse._id}-${referentClasse.email}`;
+    referentClasse.set({ deletedAt: new Date(), email: anonimizedEmail });
     referentClasse.save({ fromUser: user });
     const mailResponse = await sendTemplate(SENDINBLUE_TEMPLATES.CLE.SUPPRESSION_ANCIEN_REFERENT_CLASSE_TEMPLATE, {
-      emailTo: [{ name: `${referentClasse.firstName} ${referentClasse.lastName}`, email: referentClasse.email }],
+      emailTo: [{ name: `${referentClasse.firstName} ${referentClasse.lastName}`, email: unAnonimizedEmail }],
       params: {},
     });
-    deletedReferents.push({ id: referentClasse._id, email: referentClasse.email, mailSent: mailResponse });
+    deletedReferents.push({ id: referentClasse._id, email: unAnonimizedEmail, mailSent: mailResponse });
   }
 
   return deletedReferents;

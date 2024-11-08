@@ -7,7 +7,7 @@ import React, { useEffect, useState, lazy, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
+import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD } from "snu-lib";
 import * as Sentry from "@sentry/react";
 
 import { queryClient } from "./services/react-query";
@@ -22,6 +22,7 @@ const Content = lazy(() => import("./scenes/content"));
 const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
 const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
 const DSNJExport = lazy(() => import("./scenes/dsnj-export"));
+const INJEPExport = lazy(() => import("./scenes/injep-export"));
 const EditTransport = lazy(() => import("./scenes/edit-transport"));
 const Goal = lazy(() => import("./scenes/goal"));
 const Inscription = lazy(() => import("./scenes/inscription"));
@@ -53,26 +54,26 @@ const DashboardHeadCenterV2 = lazy(() => import("./scenes/dashboardV2/head-cente
 const DashboardV2 = lazy(() => import("./scenes/dashboardV2/moderator-ref"));
 const DashboardResponsibleV2 = lazy(() => import("./scenes/dashboardV2/responsible"));
 const DashboardVisitorV2 = lazy(() => import("./scenes/dashboardV2/visitor"));
+const Team = lazy(() => import("./scenes/team"));
 
 import Loader from "./components/Loader";
-const Footer = lazy(() => import("./components/footer"));
+import Footer from "./components/footer";
 
 import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
 import { ROLES, ROLES_LIST } from "./utils";
 
-const ModalCGU = lazy(() => import("./components/modals/ModalCGU"));
+import ModalCGU from "./components/modals/ModalCGU";
 import "./index.css";
-const Team = lazy(() => import("./scenes/team"));
 
 import { getCohorts } from "./services/cohort.service";
-const RestorePreviousSignin = lazy(() => import("./components/RestorePreviousSignin"));
+import RestorePreviousSignin from "./components/RestorePreviousSignin";
 import useRefreshToken from "./hooks/useRefreshToken";
 
-const SideBar = lazy(() => import("./components/drawer/SideBar"));
-const ApplicationError = lazy(() => import("./components/layout/ApplicationError"));
-const NotFound = lazy(() => import("./components/layout/NotFound"));
+import SideBar from "./components/drawer/SideBar";
+import ApplicationError from "./components/layout/ApplicationError";
+import NotFound from "./components/layout/NotFound";
 import { getDefaultSession } from "./utils/session";
 import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
 
@@ -240,8 +241,9 @@ const Home = () => {
                   <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
                   <RestrictedRoute path="/equipe" component={Team} />
                   <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
+                  <RestrictedRoute path="/injep-export" component={INJEPExport} />
                   {/* Plan de transport */}
-                  {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
+                  {user?.role === "admin" && user?.subRole === SUB_ROLE_GOD ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
                   {/* Table de répartition */}
                   <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
                   {/* Ligne de bus */}
@@ -291,7 +293,8 @@ const Home = () => {
 };
 
 const limitedAccess = {
-  [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
+  [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil", "/besoin-d-aide"], default: "/dsnj-export" },
+  [ROLES.INJEP]: { authorised: ["/injep-export", "/profil", "/besoin-d-aide"], default: "/injep-export" },
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {

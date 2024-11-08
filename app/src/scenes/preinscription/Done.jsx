@@ -37,18 +37,18 @@ export default function Done() {
           <>
             <hr className="mt-4" />
             <h2 className="text-lg font-semibold">Préparez le document suivant :</h2>
-            <div className="flex py-2 gap-3 mb-2">
+            <div className="flex py-2 gap-3 mb-4">
               <div className="flex-none">
                 <RiAttachmentFill className="text-2xl pt-1 text-blue-france-sun-113" aria-label="Icône trombone" />
               </div>
               <div className="space-y-2">
-                <p>Pièce d&apos;identité</p>
+                <p className="mb-0">Pièce d&apos;identité</p>
                 <p className="text-xs text-gray-500">Carte Nationale d’Identité ou Passeport</p>
               </div>
             </div>
           </>
         )}
-        <div className="bg-white fixed md:absolute flex md:flex-col w-full md:w-fit z-10 bottom-20 left-0 md:left-80 shadow-ninaInverted md:shadow-none justify-center pt-3 md:py-0 md:items-end gap-2">
+        <div className="bg-white fixed md:absolute flex md:flex-col w-full md:w-fit z-50 bottom-14 left-0 md:left-80 shadow-ninaInverted md:shadow-none justify-center pt-3 md:py-0 md:items-end gap-2">
           <p className="font-caveat text-xl text-gray-400 font-semibold">Participez au séjour de cohésion</p>
           <img src={GrayArrow} alt="Flèche" className="md:w-10 rotate-90 md:rotate-0 -scale-y-100 md:scale-100" />
         </div>

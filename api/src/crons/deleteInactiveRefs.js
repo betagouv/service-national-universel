@@ -28,7 +28,7 @@ exports.handler = async () => {
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.DELETE_ACCOUNT_NOTIFICATION_2, { emailTo });
       }
       if (diffDays(lastLogin, sixMonthsAgo) >= 14) {
-        await ref.remove();
+        await ref.deleteOne();
         slack.info({ title: "Referent deleted", text: `Ref ${ref.email} has been deleted` });
       }
     });

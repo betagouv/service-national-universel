@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { HiHome, HiPlus } from "react-icons/hi";
+import { HiPlus } from "react-icons/hi";
 import { Link, useHistory } from "react-router-dom";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
@@ -10,8 +10,9 @@ import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { getDepartmentNumber, translate, YoungDto, isAdmin } from "snu-lib";
 import { capture } from "@/sentry";
-import dayjs from "@/utils/dayjs.utils";
 import api from "@/services/api";
+
+import { exportExcelSheet, EtablissementExport } from "./utils";
 
 export default function List() {
   const [youngs, setYoungs] = useState<YoungDto[]>([]);
@@ -42,7 +43,8 @@ export default function List() {
           return { ...e, [key]: (value as any).filter };
         }, {}),
       });
-      const result = await exportExcelSheet({ data: res.data });
+      const etablissements: EtablissementExport[] = res.data;
+      const result = await exportExcelSheet(etablissements);
       const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
       FileSaver.saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" }), result.fileName);
     } catch (error) {
@@ -64,11 +66,7 @@ export default function List() {
 
   return (
     <Page>
-      <Header
-        title="Liste des établissements"
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Établissements" }]}
-        actions={getActionsList()}
-      />
+      <Header title="Établissements" breadcrumb={[{ title: "Séjours" }, { title: "Établissements" }]} actions={getActionsList()} />
       <Container className="!p-0">
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
           <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
@@ -175,31 +173,3 @@ const Hit = ({ hit }) => {
     </tr>
   );
 };
-
-function exportExcelSheet({ data: etablissements }) {
-  const sheetData = etablissements.map((e) => ({
-    id: e._id.toString(),
-    name: e.name,
-    uai: e.uai,
-    address: `${e.address} ${e.zip} ${e.city}`,
-    type: e.type.join(", "),
-    referentEtablissement: e.referentEtablissement.length ? e.referentEtablissement[0].fullName : "(Non renseigné)",
-    phone: e.referentEtablissement.length ? e.referentEtablissement[0].phone : "(Non renseigné)",
-    email: e.referentEtablissement.length ? e.referentEtablissement[0].email : "(Non renseigné)",
-    nb_classe: e.nb_classe,
-    nb_young: e.nb_young,
-    updatedAt: dayjs(e.updatedAt).format("DD/MM/YYYY HH:mm"),
-    createdAt: dayjs(e.createdAt).format("DD/MM/YYYY HH:mm"),
-  }));
-  const headers = ["ID", "Nom", "UAI", "Adresse", "Type", "Chef d'établissement", "Tél", "Email", "Nb de classes", "Nb d'élèves", "Dernière modification", "Date de création"];
-
-  const sheet = XLSX.utils.json_to_sheet(sheetData);
-  XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
-
-  // --- create workbook
-  const workbook = XLSX.utils.book_new();
-  // ⚠️ Becareful, sheet name length is limited to 31 characters
-  XLSX.utils.book_append_sheet(workbook, sheet, "Liste des établissements");
-  const fileName = "etablissements.xlsx";
-  return { workbook, fileName };
-}

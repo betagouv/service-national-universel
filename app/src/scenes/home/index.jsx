@@ -61,7 +61,7 @@ export default function Home() {
 
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
-    if (reinscriptionOpen && hasAccessToReinscription(young)) {
+    if (reinscriptionOpen && hasAccessToReinscription(young, cohort)) {
       return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
     }
 
@@ -81,7 +81,7 @@ export default function Home() {
     const hasCompletedPhase2 = [YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(young.statusPhase2);
     const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
 
-    if (isCohortTooOld(young) && !hasCompletedPhase2 && !hasMission) {
+    if (isCohortTooOld(cohort) && !hasCompletedPhase2 && !hasMission) {
       return <DelaiDepasse />;
     }
 

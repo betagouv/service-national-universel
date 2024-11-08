@@ -4,7 +4,7 @@ import { ERRORS, UserDto } from "snu-lib";
 
 export interface UpdatedReferentReport {
   updatedReferentClasse?: UpdateReferentClasse;
-  idClasse?: string;
+  classeId?: string;
   previousReferent?: UpdateReferentClasse;
   error?: string;
 }
@@ -13,17 +13,17 @@ export type UpdatedReferentsReport = UpdatedReferentReport[];
 
 export async function updateReferentsForMultipleClasses(
   referentsClassesToUpdate: (UpdateReferentClasse & {
-    idClasse: string;
+    classeId: string;
   })[],
   user: UserDto,
 ) {
   const updatedReferentsReport: UpdatedReferentsReport = [];
   for (const referentClasse of referentsClassesToUpdate) {
-    const { idClasse, ...referent } = referentClasse;
+    const { classeId, ...referent } = referentClasse;
     const updatedReferentReport: UpdatedReferentReport = {
-      idClasse,
+      classeId,
     };
-    const classe = await ClasseModel.findById(idClasse);
+    const classe = await ClasseModel.findById(classeId);
     if (!classe) {
       updatedReferentReport.error = ERRORS.CLASSE_NOT_FOUND;
       updatedReferentsReport.push(updatedReferentReport);
@@ -39,7 +39,7 @@ export async function updateReferentsForMultipleClasses(
       };
     }
 
-    const updatedClasse = await updateReferentByClasseId(idClasse, referent, user);
+    const updatedClasse = await updateReferentByClasseId(classeId, referent, user);
     const newReferentClasse = await ReferentModel.findById(updatedClasse?.referentClasseIds?.[0]);
     updatedReferentReport.updatedReferentClasse = {
       email: newReferentClasse?.email || "",

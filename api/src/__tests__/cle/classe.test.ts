@@ -1,14 +1,13 @@
 import request from "supertest";
-import passport from "passport";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 import emailsEmitter from "../../emails";
-import snuLib, { FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
+import snuLib, { FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, SUB_ROLE_GOD } from "snu-lib";
 import { ROLES, SUB_ROLES, STATUS_CLASSE, SENDINBLUE_TEMPLATES, CLE_COLORATION, TYPE_CLASSE, ERRORS, ClasseCertificateKeys } from "snu-lib";
 import * as classeService from "../../cle/classe/classeService";
 import { dbConnect, dbClose } from "../helpers/db";
 import { mockEsClient } from "../helpers/es";
-import getAppHelper from "../helpers/app";
+import getAppHelper, { resetAppAuth } from "../helpers/app";
 import * as featureService from "../../featureFlag/featureFlagService";
 
 // classe
@@ -33,8 +32,14 @@ import { createCohortHelper } from "../helpers/cohort";
 import { getNewReferentFixture, getNewSignupReferentFixture } from "../fixtures/referent";
 import { createReferentHelper } from "../helpers/referent";
 
-beforeAll(dbConnect);
+beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
+beforeEach(async () => {
+  await ClasseModel.deleteMany({});
+  await EtablissementModel.deleteMany({});
+  await ReferentModel.deleteMany({});
+});
+afterEach(resetAppAuth);
 
 mockEsClient({
   classe: [{ _id: "classeId", etablissementIds: ["etabId"], referentClasseIds: ["referentId"] }],
@@ -52,13 +57,8 @@ class MockDate extends Date {
   }
 }
 
-beforeEach(async () => {
-  await ClasseModel.deleteMany({});
-  await EtablissementModel.deleteMany({});
-  await ReferentModel.deleteMany({});
-});
-
 describe("GET /cle/classe/:id", () => {
+  afterEach(resetAppAuth);
   it("should return 400 when id is invalid", async () => {
     const res = await request(getAppHelper()).get("/cle/classe/invalidId");
     expect(res.status).toBe(400);
@@ -67,13 +67,10 @@ describe("GET /cle/classe/:id", () => {
   it("should return 403 when user cannot update classes", async () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
+
     const withDetails = true;
-    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE })).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 400 when query params are invalid", async () => {
@@ -113,20 +110,21 @@ describe("GET /cle/classe/:id", () => {
 });
 
 describe("GET /cle/classe/public/:id", () => {
+  afterEach(resetAppAuth);
   it("should return 400 when id is invalid", async () => {
-    const res = await request(getAppHelper()).get("/cle/classe/invalidId");
+    const res = await request(getAppHelper()).get("/cle/classe/public/invalidId");
     expect(res.status).toBe(400);
   });
 
   it("should return 400 when query params are invalid", async () => {
     const classeId = new ObjectId();
-    const res = await request(getAppHelper()).get(`/cle/classe/${classeId}?withDetails=invalid`);
+    const res = await request(getAppHelper()).get(`/cle/classe/public/${classeId}?withDetails=invalid`);
     expect(res.status).toBe(400);
   });
 
   it("should return 404 when class is not found", async () => {
     const nonExistingId = "104a49ba503555e4d8853003";
-    const res = await request(getAppHelper()).delete(`/cle/classe/${nonExistingId}`).query({ type: "delete" }).send();
+    const res = await request(getAppHelper()).delete(`/cle/classe/public/${nonExistingId}`).query({ type: "delete" }).send();
     expect(res.status).toBe(404);
   });
 
@@ -134,7 +132,7 @@ describe("GET /cle/classe/public/:id", () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
     const withDetails = false;
-    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
+    const res = await request(getAppHelper()).get(`/cle/classe/public/${validId}?withDetails=${withDetails}`);
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveProperty("_id", validId.toString());
     expect(res.body.data).not.toHaveProperty("etablissement");
@@ -145,7 +143,7 @@ describe("GET /cle/classe/public/:id", () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
     const withDetails = true;
-    const res = await request(getAppHelper()).get(`/cle/classe/${validId}?withDetails=${withDetails}`);
+    const res = await request(getAppHelper()).get(`/cle/classe/public/${validId}?withDetails=${withDetails}`);
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveProperty("_id", validId.toString());
     expect(res.body.data).toHaveProperty("etablissement");
@@ -168,22 +166,20 @@ describe("DELETE /cle/classe/:id", () => {
 
   it("should return 403 when type is withdraw and user cannot withdraw classes", async () => {
     const classeId = new ObjectId();
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
-    const res = await request(getAppHelper()).delete(`/cle/classe/${classeId}`).query({ type: "withdraw" }).send();
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      .delete(`/cle/classe/${classeId}`)
+      .query({ type: "withdraw" })
+      .send();
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 403 when type is delete and user cannot delete classes", async () => {
     const classeId = new ObjectId();
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
-    const res = await request(getAppHelper()).delete(`/cle/classe/${classeId}`).query({ type: "delete" }).send();
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      .delete(`/cle/classe/${classeId}`)
+      .query({ type: "delete" })
+      .send();
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 404 when class is not found", async () => {
@@ -222,17 +218,13 @@ describe("PUT /cle/classe/:id", () => {
   it("should return 403 when user cannot update classes", async () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
-    const res = await request(getAppHelper())
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
         name: "New Class",
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 404 when class is not found", async () => {
@@ -250,39 +242,28 @@ describe("PUT /cle/classe/:id", () => {
   it("should return 403 when REFERENT_CLASSE tries to update a class they don't manage", async () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.REFERENT_CLASSE;
-    // @ts-ignore
-    passport.user._id = new ObjectId();
-    const res = await request(getAppHelper())
+
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE, _id: new ObjectId().toString() }))
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
         name: "New Class",
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 404 when the associated etablissement does not exist", async () => {
     const userId = new ObjectId();
     const classe = createFixtureClasse({ etablissementId: new ObjectId().toString() });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
-    // @ts-ignore
-    passport.user._id = userId;
     jest.spyOn(EtablissementModel, "findById").mockResolvedValueOnce(null);
-    const res = await request(getAppHelper())
+    const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE, _id: userId.toString() }))
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
         name: "Updated Class",
       });
     expect(res.status).toBe(404);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 403 when ADMINISTRATEUR_CLE is both referent and coordinateur", async () => {
@@ -291,41 +272,30 @@ describe("PUT /cle/classe/:id", () => {
     const etablissementId = (await createEtablissement(etablissement))._id;
     const classe = createFixtureClasse({ etablissementId: etablissementId });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    const previous = passport.user._id;
-    // @ts-ignore
-    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
-    // @ts-ignore
-    passport.user._id = userId;
     jest.spyOn(EtablissementModel, "findById").mockResolvedValueOnce(etablissement);
-    const res = await request(getAppHelper())
+    const res = await request(getAppHelper({ _id: userId.toString(), role: ROLES.ADMINISTRATEUR_CLE }))
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
         name: "Updated Class",
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
-    // @ts-ignore
-    passport.user._id = previous;
   });
 
   it("should return 404 when user try to change cohort that doesn't exist", async () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
+    const cohortId = new ObjectId().toString();
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: "New Cohort",
+        cohortId: cohortId,
       });
     expect(res.status).toBe(404);
   });
 
   it("should return 403 when user cannot update the cohort", async () => {
-    // @ts-ignore
-    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
     const cohort = await createCohortHelper(getNewCohortFixture({ name: "CLE juin 2024" }));
     const userId = new ObjectId().toString();
     const etablissement = createFixtureEtablissement({ referentEtablissementIds: [userId] });
@@ -333,15 +303,13 @@ describe("PUT /cle/classe/:id", () => {
     const classe = createFixtureClasse({ etablissementId: etablissementId });
     const validId = (await createClasse(classe))._id;
     jest.spyOn(EtablissementModel, "findById").mockResolvedValueOnce(etablissement);
-    const res = await request(getAppHelper())
+    const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 403 when changing cohort is not allowed because young has validate his Phase1", async () => {
@@ -355,7 +323,7 @@ describe("PUT /cle/classe/:id", () => {
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
 
     expect(res.status).toBe(403);
@@ -364,17 +332,13 @@ describe("PUT /cle/classe/:id", () => {
   it("should return 403 when user can't edit estimatedSeats", async () => {
     const classe = createFixtureClasse({ estimatedSeats: 5 });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
-    const res = await request(getAppHelper())
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
         estimatedSeats: 10,
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should send mail if value.estimatedSeats > classe.estimatedSeats", async () => {
@@ -416,17 +380,13 @@ describe("PUT /cle/classe/:id", () => {
   it("should return 403 when user can't edit totalSeats", async () => {
     const classe = createFixtureClasse({ totalSeats: 5 });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
-    const res = await request(getAppHelper())
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
         totalSeats: 10,
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 400 when totalSeats > estimatedSeats", async () => {
@@ -451,7 +411,7 @@ describe("PUT /cle/classe/:id", () => {
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
 
     expect(res.status).toBe(403);
@@ -476,14 +436,14 @@ describe("PUT /cle/classe/:id", () => {
     const cohort = await createCohortHelper(getNewCohortFixture({ name: "CLE juin 2024" }));
     const classe = createFixtureClasse({});
     const validId = (await createClasse(classe))._id;
-    const young = getNewYoungFixture({ classeId: validId, cohort: "CLE mai 2024" });
+    const young = getNewYoungFixture({ classeId: validId, cohortId: cohort._id });
     await createYoungHelper(young);
 
     const res = await request(getAppHelper())
       .put(`/cle/classe/${validId}`)
       .send({
         ...classe,
-        cohort: cohort.name,
+        cohortId: cohort._id,
       });
     expect(res.status).toBe(200);
     expect(res.body.data.name).toBe(classe.name);
@@ -513,16 +473,12 @@ describe("PUT /cle/classe/:id/verify", () => {
   it("should return 403 when user cannot verify classes", async () => {
     const classe = createFixtureClasse();
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
-    const res = await request(getAppHelper())
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
       .put(`/cle/classe/${validId}/verify`)
       .send({
         ...classe,
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 404 when class is not found", async () => {
@@ -551,21 +507,20 @@ describe("PUT /cle/classe/:id/verify", () => {
     const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE })))._id;
     const classe = createFixtureClasse({ etablissementId: new ObjectId().toString(), referentClasseIds: [referentId] });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
-    // @ts-ignore
-    passport.user.subRole = SUB_ROLES.referent_etablissement;
-    // @ts-ignore
-    passport.user._id = new ObjectId();
+
     jest.spyOn(EtablissementModel, "findById").mockResolvedValueOnce(null);
-    const res = await request(getAppHelper())
+    const res = await request(
+      getAppHelper({
+        role: ROLES.ADMINISTRATEUR_CLE,
+        subRole: SUB_ROLES.referent_etablissement,
+        _id: new ObjectId().toString(),
+      }),
+    )
       .put(`/cle/classe/${validId}/verify`)
       .send({
         ...classe,
       });
     expect(res.status).toBe(404);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 403 when REFERENT_ETABLISSEMENT tries to verify a class they don't manage", async () => {
@@ -573,66 +528,41 @@ describe("PUT /cle/classe/:id/verify", () => {
     const etablissementId = (await createEtablissement(createFixtureEtablissement()))._id;
     const classe = createFixtureClasse({ etablissementId: etablissementId, referentClasseIds: [referentId] });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.ADMINISTRATEUR_CLE;
-    // @ts-ignore
-    const previous = passport.user.subRole;
-    // @ts-ignore
-    passport.user.subRole = SUB_ROLES.referent_etablissement;
-    const res = await request(getAppHelper())
+    const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
       .put(`/cle/classe/${validId}/verify`)
       .send({
         ...classe,
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
-    // @ts-ignore
-    passport.user.subRole = previous;
   });
 
   it("should return 403 when REFERENT_DEPARTMENT tries to verify a class they don't manage", async () => {
     const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE })))._id;
     const classe = createFixtureClasse({ referentClasseIds: [referentId], department: "Nord" });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.REFERENT_DEPARTMENT;
-    // @ts-ignore
-    const previous = passport.user.department;
-    // @ts-ignore
-    passport.user.department = ["Loire"];
-    const res = await request(getAppHelper())
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_DEPARTMENT, department: ["Loire"] }))
       .put(`/cle/classe/${validId}/verify`)
       .send({
         ...classe,
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
-    // @ts-ignore
-    passport.user.department = previous;
   });
 
   it("should return 403 when REFERENT_REGION tries to verify a class they don't manage", async () => {
     const referentId = (await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE })))._id;
     const classe = createFixtureClasse({ referentClasseIds: [referentId], region: "Normandie" });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.REFERENT_REGION;
-    // @ts-ignore
-    const previous = passport.user.region;
-    // @ts-ignore
-    passport.user.region = "Bretagne";
-    const res = await request(getAppHelper())
+    const res = await request(
+      getAppHelper({
+        role: ROLES.REFERENT_REGION,
+        region: "Bretagne",
+      }),
+    )
       .put(`/cle/classe/${validId}/verify`)
       .send({
         ...classe,
       });
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
-    // @ts-ignore
-    passport.user.region = previous;
   });
 
   it("should return 200 when class is updated successfully", async () => {
@@ -658,13 +588,9 @@ describe("GET /:id/notifyRef", () => {
   });
 
   it("should return 403 when user cannot notify admin", async () => {
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
     const classeId = new ObjectId();
-    const res = await request(getAppHelper()).get(`/cle/classe/${classeId}/notifyRef`);
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE })).get(`/cle/classe/${classeId}/notifyRef`);
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 404 when class is not found", async () => {
@@ -677,28 +603,27 @@ describe("GET /:id/notifyRef", () => {
     const etablissementId = (await createEtablissement(createFixtureEtablissement()))._id;
     const classe = createFixtureClasse({ etablissementId: etablissementId, region: "Normandie" });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.REFERENT_REGION;
-    // @ts-ignore
-    passport.user.region = "Bretagne";
-    const res = await request(getAppHelper()).get(`/cle/classe/${validId}/notifyRef`);
+
+    const res = await request(
+      getAppHelper({
+        role: ROLES.REFERENT_REGION,
+        region: "Bretagne",
+      }),
+    ).get(`/cle/classe/${validId}/notifyRef`);
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 403 when REFERENT_DEPARTMENT tries to notify a class they don't manage", async () => {
     const etablissementId = (await createEtablissement(createFixtureEtablissement()))._id;
     const classe = createFixtureClasse({ etablissementId: etablissementId, department: "Nord" });
     const validId = (await createClasse(classe))._id;
-    // @ts-ignore
-    passport.user.role = ROLES.REFERENT_DEPARTMENT;
-    // @ts-ignore
-    passport.user.department = ["Loire"];
-    const res = await request(getAppHelper()).get(`/cle/classe/${validId}/notifyRef`);
+    const res = await request(
+      getAppHelper({
+        role: ROLES.REFERENT_DEPARTMENT,
+        department: ["Loire"],
+      }),
+    ).get(`/cle/classe/${validId}/notifyRef`);
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
 
   it("should return 200 when referents are notified successfully", async () => {
@@ -713,11 +638,6 @@ describe("GET /:id/notifyRef", () => {
 });
 
 describe("POST /cle/classe", () => {
-  beforeEach(async () => {
-    await ClasseModel.deleteMany({});
-    await EtablissementModel.deleteMany({});
-    await ReferentModel.deleteMany({});
-  });
   const validBody = {
     etablissementId: new ObjectId(),
     coloration: CLE_COLORATION.ENVIRONMENT,
@@ -777,9 +697,10 @@ describe("POST /cle/classe", () => {
   it("should return 404 if the cohort is not found", async () => {
     jest.spyOn(featureService, "isFeatureAvailable").mockResolvedValueOnce(true);
     const etablissement = await createEtablissement(createFixtureEtablissement());
+    const cohortId = new ObjectId().toString();
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/cle/classe")
-      .send({ ...validBody, cohort: "invalidCohort", etablissementId: etablissement._id.toString() });
+      .send({ ...validBody, cohortId: cohortId, etablissementId: etablissement._id.toString() });
 
     expect(response.status).toBe(404);
     expect(response.body.message).toBe("Cohort not found.");
@@ -790,7 +711,7 @@ describe("POST /cle/classe", () => {
     const cohort = await createCohortHelper(getNewCohortFixture());
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/cle/classe")
-      .send({ ...validBody, cohort: cohort.name, etablissementId: etablissement._id.toString() });
+      .send({ ...validBody, cohortId: cohort._id, etablissementId: etablissement._id.toString() });
 
     expect(response.status).toBe(400);
   });
@@ -801,7 +722,7 @@ describe("POST /cle/classe", () => {
     const cohort = await createCohortHelper(getNewCohortFixture());
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/cle/classe")
-      .send({ ...validBody, cohort: cohort.name, etablissementId: etablissement._id.toString() });
+      .send({ ...validBody, cohortId: cohort._id, etablissementId: etablissement._id.toString() });
 
     expect(response.status).toBe(200);
     const classe = await ClasseModel.findById(response.body.data._id).lean();
@@ -836,12 +757,10 @@ describe("POST /cle/classe", () => {
 
 describe("POST /elasticsearch/cle/classe/export", () => {
   it("should return 403 when user is not admin", async () => {
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
-    const res = await request(getAppHelper()).post("/elasticsearch/cle/classe/export").send();
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      .post("/elasticsearch/cle/classe/export")
+      .send();
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
   it("should return 200 when export is successful", async () => {
     const res = await request(getAppHelper())
@@ -854,12 +773,10 @@ describe("POST /elasticsearch/cle/classe/export", () => {
 
 describe("POST /elasticsearch/cle/etablissement/export", () => {
   it("should return 403 when user is not admin", async () => {
-    // @ts-ignore
-    passport.user.role = ROLES.RESPONSIBLE;
-    const res = await request(getAppHelper()).post("/elasticsearch/cle/etablissement/export").send();
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      .post("/elasticsearch/cle/etablissement/export")
+      .send();
     expect(res.status).toBe(403);
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
   });
   it("should return 200 when export is successful", async () => {
     const res = await request(getAppHelper())
@@ -934,15 +851,15 @@ describe("PUT /cle/classe/:id/referent", () => {
   it("should create a new referent if classe is not CREATED for super admin", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
     const classe = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
-    passport.user.role = ROLES.ADMIN;
-    passport.user.subrole = "god";
     const newReferentDetails = {
       firstName: "John",
       lastName: "Doe",
       email: "john.doe@example.com",
     };
 
-    const res = await request(getAppHelper()).put(`/cle/classe/${classe._id}/referent`).send(newReferentDetails); // sending new referent data
+    const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: SUB_ROLE_GOD }))
+      .put(`/cle/classe/${classe._id}/referent`)
+      .send(newReferentDetails); // sending new referent data
     const updatedReferent: ReferentDocument = (await ReferentModel.findOne({ email: newReferentDetails.email }))!;
 
     expect(updatedReferent).toBeTruthy();
@@ -951,12 +868,11 @@ describe("PUT /cle/classe/:id/referent", () => {
     expect(updatedReferent.email).toBe(newReferentDetails.email);
     expect(updatedReferent.metadata.isFirstInvitationPending).toBe(true);
     expect(res.status).toBe(200);
-    passport.user.subrole = "";
   });
 
   it("should throw an error if role not referent nor admin cle", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
-    const referent2 = await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.VISITOR }));
+    await createReferentHelper(getNewReferentFixture({ email: "b@b.com", role: ROLES.VISITOR }));
     const classe1 = await createClasse(createFixtureClasse({ referentClasseIds: [referent?._id] }));
 
     const newReferentDetails = {
@@ -975,17 +891,18 @@ describe("PUT /cle/classe/:id/referent", () => {
   it("should return 403 if the user is not authorized to update the referent classe", async () => {
     const referent = await createReferentHelper(getNewReferentFixture({ email: "a@a.com", role: ROLES.REFERENT_CLASSE }));
     const classe = await createClasse(createFixtureClasse({ status: STATUS_CLASSE.CREATED, referentClasseIds: [referent?._id] }));
-    passport.user.role = ROLES.REFERENT_CLASSE; // Assuming this role is not authorized to update the referent classe
     const newReferentDetails = {
       firstName: "John",
       lastName: "Doe",
       email: "john.doe@example.com",
     };
-    const res = await request(getAppHelper()).put(`/cle/classe/${classe._id}/referent`).send(newReferentDetails); // sending new referent data
+    // Assuming this role is not authorized to update the referent classe
+    const res = await request(getAppHelper({ role: ROLES.REFERENT_CLASSE }))
+      .put(`/cle/classe/${classe._id}/referent`)
+      .send(newReferentDetails); // sending new referent data
     expect(res.ok).toBe(false);
     expect(res.text).toContain(ERRORS.OPERATION_UNAUTHORIZED);
     expect(res.status).toBe(403);
-    passport.user.role = ROLES.ADMIN; // Resetting the role for other tests
   });
 });
 
@@ -1009,17 +926,11 @@ describe("POST /:id/certificate/:key", () => {
 
   it("should return 403 when the user is not authorized to download certificates", async () => {
     const validId = new ObjectId();
-    // @ts-ignore
-    const previousUser = passport.user;
     const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.DSNJ }));
-    // @ts-ignore
-    passport.user = referent;
-    const res = await request(getAppHelper()).post(`/cle/classe/${validId}/certificate/${ClasseCertificateKeys.CONVOCATION}`);
+    const res = await request(getAppHelper(referent)).post(`/cle/classe/${validId}/certificate/${ClasseCertificateKeys.CONVOCATION}`);
     expect(res.status).toBe(403);
     expect(res.body.ok).toBe(false);
     expect(res.body.code).toBe(ERRORS.OPERATION_NOT_ALLOWED);
-    // @ts-ignore
-    passport.user = previousUser;
   });
 
   it("should return 404 when class is not found", async () => {

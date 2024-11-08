@@ -132,13 +132,13 @@ function ConsentementForm({ young, token, step, parentId, cohort, classe }) {
 
     // --- address
     let validAddress = validate("address", "empty", validator.isEmpty(data.address, { ignore_whitespace: true }));
-    if (validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }))) {
-      validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
-    }
+    validAddress = validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }));
     validAddress = validate("city", "empty", validator.isEmpty(data.city, { ignore_whitespace: true })) && validAddress;
 
     if (data.livesInFrance === ABROAD) {
       validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true })) && validAddress;
+    } else {
+      validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
     }
 
     if (!validAddress) {
@@ -339,7 +339,7 @@ function ConsentementForm({ young, token, step, parentId, cohort, classe }) {
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
                       <div className="block">
                         Reconnais avoir pris connaissance du&nbsp;
-                        <a href={CDN_BASE_URL + "/file/SNU-reglement-interieur-2024.pdf"} target="blank" className="" onClick={(e) => e.stopPropagation()}>
+                        <a href={CDN_BASE_URL + "/file/SNU-reglement-interieur.pdf"} target="blank" className="" onClick={(e) => e.stopPropagation()}>
                           Règlement Intérieur du séjour de cohésion
                         </a>
                         .
@@ -347,7 +347,7 @@ function ConsentementForm({ young, token, step, parentId, cohort, classe }) {
                     </Check>
                     <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
                       <div className="block">
-                        Accepte la collecte et le traitement des données personnelles de&nbsp;<b>{youngFullname}</b> dans le cadre d’une mission d’intérêt public
+                        Accepte la collecte et le traitement des données personnelles de&nbsp;<b>{youngFullname}</b> dans le cadre d’une mission d’intérêt public.
                       </div>
                     </Check>
                   </div>
