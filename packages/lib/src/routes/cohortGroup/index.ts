@@ -1,5 +1,5 @@
-import { CohortGroupType } from "../../mongoSchema/cohortGroup";
-import { BasicRoute, RouteResponseBody } from "../";
+import { CohortGroupType } from "../../mongoSchema";
+import { BasicRoute, RouteResponseBody } from "..";
 
 interface PostCohortGroupRoute extends BasicRoute {
   method: "POST";
