@@ -191,6 +191,17 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
   }
 });
 
+router.get("/public", async (_req: UserRequest, res: Response) => {
+  try {
+    let cohorts = await CohortModel.find({}, { name: 1, type: 1, status: 1, dateStart: 1, dateEnd: 1 }).lean();
+    for (let cohort of cohorts) delete cohort._id;
+    return res.status(200).send({ ok: true, data: cohorts });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/:cohort", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
@@ -204,17 +215,6 @@ router.get("/:cohort", passport.authenticate(["referent", "young"], { session: f
     }
     const cohort = await CohortModel.findOne({ name: value.cohort });
     return res.status(200).send({ ok: true, data: cohort });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-router.get("/public", async (_req: UserRequest, res: Response) => {
-  try {
-    let cohorts = await CohortModel.find({ status: COHORT_STATUS.PUBLISHED }, { name: 1, type: 1, dateStart: 1, dateEnd: 1 });
-    for (const cohort of cohorts) delete cohort._id;
-    return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
