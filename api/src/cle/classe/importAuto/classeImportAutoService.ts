@@ -125,6 +125,7 @@ export const updateClasse = async (classeToUpdateMapped: ClasseMapped): Promise<
     error.push(`Error finding session: ${sessionError.message}`);
   }
 
-  //await classe.save({ fromUser: { firstName: `UPDATE_CLASSE_COHORT_${timestamp}` } });
+  await classe.save({ fromUser: { firstName: `UPDATE_CLASSE_COHORT_${timestamp}` } });
+  logger.info(`classeImportService - Classe ${classe._id} updated`);
   return { updatedClasse: classe, updatedFields, error };
 };
