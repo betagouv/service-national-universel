@@ -18,6 +18,7 @@ export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<Up
     inscriptionOpenForReferentDepartment: Joi.boolean().default(false),
     inscriptionOpenForAdministrateurCle: Joi.boolean().default(false),
     cohortGroupId: Joi.string().allow(null),
+    cohortGroup: cohortGroupSchema,
     // --
     inscriptionModificationEndDate: Joi.date(),
     instructionEndDate: Joi.date().required(),
@@ -112,6 +113,12 @@ const PostEligibilityRouteSchema = {
     zip: Joi.string().allow("", null),
   }),
 };
+
+const cohortGroupSchema = Joi.object({
+  name: Joi.string().required(),
+  type: Joi.string().valid("VOLONTAIRE", "CLE").required(),
+  year: Joi.number().required(),
+});
 
 export const CohortsRoutesSchema = {
   PostEligibility: PostEligibilityRouteSchema,
