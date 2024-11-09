@@ -181,7 +181,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    let query: any = {};
+    let query: { type?: string } = {};
     if (value.type) query.type = value.type;
     const cohorts = await CohortModel.find(query).populate({
       path: "cohortGroup",

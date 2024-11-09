@@ -7,6 +7,7 @@ import { CohortGroupModel } from "../models/cohortGroup";
 import Joi from "joi";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { CohortModel } from "../models";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
@@ -19,6 +20,8 @@ router.get("/", async (_req: RouteRequest<CohortGroupRoutes["Get"]>, res: RouteR
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.use(authMiddleware("referent"));
 
 router.post(
   "/",
@@ -63,16 +66,14 @@ router.put(
   async (req: RouteRequest<CohortGroupRoutes["Put"]>, res: RouteResponse<CohortGroupRoutes["Put"]>) => {
     try {
       const { id } = req.params;
-      const { name, type, year } = req.body;
       const data = await CohortGroupModel.findById(id);
       if (!data) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
-      data.set({ name, type, year });
+      data.set({ ...data, ...req.body });
       await data.save({ fromUser: req.user });
       return res.json({ ok: true, data });
     } catch (error) {
-      console.log("🚀 ~ error:", error);
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
@@ -81,12 +82,14 @@ router.put(
 
 router.delete(
   "/:id",
-  requestValidatorMiddleware({
-    params: Joi.object({
-      id: Joi.string().required(),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({
+        id: Joi.string().required(),
+      }),
     }),
-  }),
-  accessControlMiddleware([ROLES.ADMIN]),
+    accessControlMiddleware([ROLES.ADMIN]),
+  ],
   async (req: RouteRequest<CohortGroupRoutes["Delete"]>, res: RouteResponse<CohortGroupRoutes["Delete"]>) => {
     try {
       const { id } = req.params;
@@ -94,7 +97,7 @@ router.delete(
       if (!data) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
-      const exists = await CohortModel.exists({ groupId: id });
+      const exists = await CohortModel.exists({ cohortGroupId: id });
       if (exists) {
         return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }

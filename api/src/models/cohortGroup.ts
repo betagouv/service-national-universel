@@ -33,7 +33,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-export type CohortGroupDocument<T = {}> = DocumentExtended<CohortGroupType & T>;
+export type CohortGroupDocument<T = {}> = DocumentExtended<CohortGroupType & { cohortGroup?: CohortGroupDocument } & T>;
 type SchemaExtended = CohortGroupDocument & UserExtension;
 
 export const CohortGroupModel = mongoose.model<CohortGroupDocument>(MODELNAME, schema);

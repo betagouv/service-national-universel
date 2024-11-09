@@ -2,12 +2,12 @@ import request from "supertest";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { dbClose, dbConnect } from "./helpers/db";
 import { CohortGroupModel, CohortModel } from "../models";
-import { COHORT_TYPE, ROLES } from "snu-lib";
-import passport from "passport";
+import { COHORT_TYPE } from "snu-lib";
+import getNewCohortFixture from "./fixtures/cohort";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
-// afterEach(resetAppAuth);
+afterEach(resetAppAuth);
 
 jest.mock("passport");
 
@@ -40,7 +40,6 @@ describe("CohortGroup Routes", () => {
   describe("PUT /cohort-group/:id", () => {
     it("should update an existing cohort group", async () => {
       const cohortGroup = await CohortGroupModel.create({ name: "Group D", type: COHORT_TYPE.VOLONTAIRE, year: 2023 });
-      passport.user.role = ROLES.ADMIN;
       const response = await request(getAppHelper()).put(`/cohort-group/${cohortGroup._id}`).send({ name: "Group D Updated", type: COHORT_TYPE.CLE, year: 2024 });
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
@@ -60,7 +59,7 @@ describe("CohortGroup Routes", () => {
 
     it("should return 400 if the cohort group has linked cohorts", async () => {
       const cohortGroup = await CohortGroupModel.create({ name: "Group F", type: COHORT_TYPE.VOLONTAIRE, year: 2026 });
-      await CohortModel.create({ name: "Cohort 1", groupId: cohortGroup._id });
+      await CohortModel.create(getNewCohortFixture({ cohortGroupId: cohortGroup._id }));
       const response = await request(getAppHelper()).delete(`/cohort-group/${cohortGroup._id}`);
       expect(response.status).toBe(400);
       expect(response.body.ok).toBe(false);
