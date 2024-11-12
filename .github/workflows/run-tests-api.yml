@@ -37,6 +37,7 @@ jobs:
         id: cache-npm
         with:
           path: |
+            apiv2/node_modules
             node_modules
             api/node_modules
             app/node_modules
