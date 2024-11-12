@@ -8,7 +8,7 @@ const { GetSecrets, SECRET_FORMATS } = require("./get-secrets");
 async function main() {
   const input = new UserInput(`Build application`)
     .arg("environment", "Environment (ci, staging, production)")
-    .arg("application", "Frontend application (app, admin)")
+    .arg("application", "Application (api, app, admin)")
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .validate();

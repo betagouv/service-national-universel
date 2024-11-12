@@ -12,7 +12,7 @@ const {
 async function main() {
   const input = new UserInput(`Build application docker image`)
     .arg("environment", "Environment (ci, staging, production)")
-    .arg("application", "Application (app, admin)")
+    .arg("application", "Application (api, app, admin)")
     .optBool("push", "Push image on registry", {
       default: false,
     })
