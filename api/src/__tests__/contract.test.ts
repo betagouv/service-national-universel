@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { Types } from "mongoose";
 import request from "supertest";
 
-import { YoungType } from "snu-lib";
+import { YoungType, ROLES } from "snu-lib";
 
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -295,5 +295,43 @@ describe("Structure", () => {
       const resDownload = await request(getAppHelper(young)).post(`/contract/${contract._id}/download`).send();
       expect(resDownload.status).toBe(200);
     });
+  });
+});
+
+describe("GET /contract/:id/patches", () => {
+  it("should return 404 if contract not found", async () => {
+    const contractId = new ObjectId();
+    const res = await request(getAppHelper()).get(`/contract/${contractId}/patches`).send();
+    expect(res.statusCode).toEqual(404);
+  });
+  it("should return 403 if not admin", async () => {
+    const contract = await createContractHelper(getNewContractFixture());
+    contract.youngFirstName = "MY NEW NAME";
+    await contract.save();
+
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      .get(`/contract/${contract._id}/patches`)
+      .send();
+    expect(res.status).toBe(403);
+  });
+  it("should return 200 if contract found with patches", async () => {
+    const contract = await createContractHelper(getNewContractFixture());
+    contract.youngFirstName = "MY NEW NAME";
+    await contract.save();
+    const res = await request(getAppHelper()).get(`/contract/${contract._id}/patches`).send();
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/youngFirstName", value: "MY NEW NAME" })]),
+        }),
+      ]),
+    );
+  });
+  it("should be only accessible by referents", async () => {
+    const passport = require("passport");
+    const contractId = new ObjectId();
+    await request(getAppHelper()).get(`/contract/${contractId}/patches`).send();
+    expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
   });
 });

@@ -11,7 +11,10 @@ import { notExisitingMissionId, createMissionHelper, getMissionByIdHelper } from
 import { createReferentHelper } from "./helpers/referent";
 import { notExistingYoungId, createYoungHelper, getYoungByIdHelper } from "./helpers/young";
 import { createCohortHelper } from "./helpers/cohort";
-import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { Types } from "mongoose";
+const { ObjectId } = Types;
+import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, ROLES } from "snu-lib";
+
 
 jest.setTimeout(60_000);
 
@@ -277,5 +280,43 @@ describe("Application", () => {
       res = await request(getAppHelper(young)).post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
       expect(res.status).toBe(403);
     });
+  });
+});
+
+describe("GET /application/:id/patches", () => {
+  it("should return 404 if application not found", async () => {
+    const applicationId = new ObjectId();
+    const res = await request(getAppHelper()).get(`/application/${applicationId}/patches`).send();
+    expect(res.statusCode).toEqual(404);
+  });
+  it("should return 403 if not admin", async () => {
+    const application = await createApplication(getNewApplicationFixture());
+    application.missionName = "MY NEW NAME";
+    await application.save();
+
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      .get(`/application/${application._id}/patches`)
+      .send();
+    expect(res.status).toBe(403);
+  });
+  it("should return 200 if application found with patches", async () => {
+    const application = await createApplication(getNewApplicationFixture());
+    application.missionName = "MY NEW NAME";
+    await application.save();
+    const res = await request(getAppHelper()).get(`/application/${application._id}/patches`).send();
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/missionName", value: "MY NEW NAME" })]),
+        }),
+      ]),
+    );
+  });
+  it("should be only accessible by referents", async () => {
+    const passport = require("passport");
+    const applicationId = new ObjectId();
+    await request(getAppHelper()).get(`/application/${applicationId}/patches`).send();
+    expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
   });
 });
