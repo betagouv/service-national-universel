@@ -67,16 +67,17 @@ export default function List() {
       missingLabel: "Non renseignée",
       translate: translate,
     },
-
-    ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)
-      ? {
-          title: "Cohorte",
-          name: "cohorts",
-          missingLabel: "Non renseignée",
-          translate: translate,
-        }
-      : null,
-  ].filter(Boolean);
+    ...(![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)
+      ? [
+          {
+            title: "Cohorte",
+            name: "cohorts",
+            missingLabel: "Non renseignée",
+            translate: translate,
+          },
+        ]
+      : []),
+  ];
 
   useEffect(() => {
     (async () => {

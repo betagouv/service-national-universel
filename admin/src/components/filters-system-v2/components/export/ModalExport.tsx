@@ -1,14 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { translate, translateField, translateIndexes } from "snu-lib";
+import { translate, translateField } from "snu-lib";
 import ExportFieldCard from "../../../ExportFieldCard";
 import ModalTailwind from "../../../modals/ModalTailwind";
 import plausibleEvent from "../../../../services/plausible";
-import { capitalizeFirstLetter } from "../../../../utils";
 import ExportComponent from "./ExportComponent";
+import { Filter } from "../Filters";
 
-export default function ModalExport({ isOpen, setIsOpen, route, transform, exportFields, exportTitle = "", totalHits = false, selectedFilters }) {
+interface ExportField {
+  id: string;
+  title: string;
+  desc: string[];
+  fields: string[];
+}
+
+interface ModalExportProps {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  route: string;
+  transform: (data: any, value: any) => void;
+  exportFields: ExportField[];
+  exportTitle?: string;
+  totalHits?: boolean;
+  selectedFilters: { [key: string]: Filter };
+}
+
+export default function ModalExport({ isOpen, setIsOpen, route, transform, exportFields, exportTitle, totalHits, selectedFilters }: ModalExportProps) {
   const [selectedFields, setSelectedFields] = useState(exportFields?.map((e) => e.id));
-  const fieldsToExport = [].concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
+  const fieldsToExport = ([] as string[]).concat(...exportFields.filter((e) => selectedFields.includes(e.id)).map((e) => e.fields));
   const [hasFilter, setHasFilter] = useState(false);
 
   useEffect(() => {
@@ -24,8 +42,8 @@ export default function ModalExport({ isOpen, setIsOpen, route, transform, expor
             <p className="text-center text-sm text-gray-400">Rappel des filtres appliqués</p>
             <p className="text-center text-sm text-gray-600">
               {Object.keys(selectedFilters)
-                .filter((e) => selectedFilters[e]?.filter?.length && selectedFilters[e]?.filter[0] !== "")
-                .map((e) => `${translateField(e)} : ${translate(selectedFilters[e]?.filter)}`)
+                .filter((e) => selectedFilters?.[e]?.filter?.length && selectedFilters?.[e]?.filter?.[0] !== "")
+                .map((e) => `${translateField(e)} : ${translate(selectedFilters?.[e]?.filter)}`)
                 .join(" • ")}
             </p>
           </div>
@@ -34,6 +52,7 @@ export default function ModalExport({ isOpen, setIsOpen, route, transform, expor
         <div className="flex justify-between">
           <p className="text-left">Sélectionnez pour choisir des sous-catégories</p>
           <div className="flex flex-row-reverse gap-2">
+            {/* @ts-expect-error FIXME */}
             {selectedFields == "" ? (
               <div className="cursor-pointer text-blue-600 hover:text-blue-400" onClick={() => setSelectedFields(exportFields.map((e) => e.id))}>
                 Tout sélectionner
@@ -66,6 +85,7 @@ export default function ModalExport({ isOpen, setIsOpen, route, transform, expor
             exportTitle={exportTitle}
             route={route}
             transform={(data) => transform(data, selectedFields)}
+            // @ts-expect-error jsx component
             fieldsToExport={fieldsToExport}
             selectedFilters={selectedFilters}
             setIsOpen={setIsOpen}
