@@ -2,7 +2,7 @@ import React from "react";
 import ReactLoading from "react-loading";
 import styled from "styled-components";
 
-export default function Loader({ type = "spin", size = "3rem", color = "#5245cc", className = "", containerClassName = "" }) {
+export default function Loader({ type = "spin", size = "3rem", color = "#2563eb", className = "", containerClassName = "" }) {
   return (
     <Container className={containerClassName}>
       <ReactLoading type={type} color={color} width={size} height={size} className={className} />

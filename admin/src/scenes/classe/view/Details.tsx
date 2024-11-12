@@ -1,33 +1,29 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import { toastr } from "react-redux-toastr";
 
-import { Page, Header, Badge } from "@snu/ds/admin";
+import { Page } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, YOUNG_STATUS, STATUS_CLASSE, translateStatusClasse, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS, ClassesRoutes, canInviteYoung } from "snu-lib";
-import { appURL } from "@/config";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
 import Loader from "@/components/Loader";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
-import { ClasseService } from "@/services/classeService";
-import { TStatus } from "@/types";
 
-import { getRights, statusClassForBadge } from "./utils";
-import GeneralInfos from "./components/GeneralInfos";
-import ReferentInfos from "./components/ReferentInfos";
-import SejourInfos from "./components/SejourInfos";
-import StatsInfos from "./components/StatsInfos";
-import ModaleCohort from "./components/modaleCohort";
-import { InfoBus, Rights } from "./components/types";
-import { getHeaderActionList } from "./header";
+import { getRights } from "../utils";
+import GeneralInfos from "../components/GeneralInfos";
+import ReferentInfos from "../components/ReferentInfos";
+import SejourInfos from "../components/SejourInfos";
+import StatsInfos from "../components/StatsInfos";
+import ModaleCohort from "../components/modaleCohort";
+import ClasseHeader from "../header/ClasseHeader";
+import { InfoBus, Rights } from "../components/types";
 
-export default function View() {
-  const [classe, setClasse] = useState<ClassesRoutes["GetOne"]["response"]["data"]>();
-  const [url, setUrl] = useState("");
-  const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
+export default function Details(props) {
+  const [classe, setClasse] = useState(props.classe);
+  const studentStatus = props.studentStatus;
   const [showModaleCohort, setShowModaleCohort] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
@@ -48,8 +44,6 @@ export default function View() {
 
   const getClasse = async () => {
     try {
-      const classe = await ClasseService.getOne(id);
-      setClasse(classe);
       setOldClasseCohort(classe.cohort);
       if (classe?.ligneId) {
         //Bus
@@ -68,29 +62,9 @@ export default function View() {
           returnHour: meetingPoint?.returnHour,
         });
       }
-
-      //Logical stuff
-      setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
-      if (!([STATUS_CLASSE.CREATED, STATUS_CLASSE.VERIFIED] as string[]).includes(classe.status)) {
-        getStudents(classe._id);
-      }
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(e.message));
-    }
-  };
-
-  const getStudents = async (id) => {
-    try {
-      const { ok, code, data: response } = await api.get(`/cle/young/by-classe-stats/${id}`);
-
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération des élèves", translate(code));
-      }
-      setStudentStatus(response);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des élèves", e);
     }
   };
 
@@ -224,28 +198,11 @@ export default function View() {
     setErrors({});
   };
 
-  const canPerformManualInscriptionActions = useMemo(() => {
-    return canInviteYoung(user, cohort ?? null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.role, cohort]);
-
   if (!classe) return <Loader />;
 
   return (
     <Page>
-      <Header
-        title={classe.name || "Informations nécessaires"}
-        titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status) as TStatus} />}
-        breadcrumb={[
-          { title: "Séjours" },
-          {
-            title: "Classes",
-            to: "/classes",
-          },
-          { title: "Fiche de la classe" },
-        ]}
-        actions={getHeaderActionList({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus, canPerformManualInscriptionActions })}
-      />
+      <ClasseHeader classe={classe} setClasse={setClasse} isLoading={isLoading} setIsLoading={setIsLoading} studentStatus={studentStatus} page={"Fiche de la classe"} />
       <GeneralInfos
         classe={classe}
         setClasse={setClasse}
