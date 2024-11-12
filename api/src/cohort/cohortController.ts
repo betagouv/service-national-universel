@@ -218,7 +218,7 @@ router.get("/:cohort", passport.authenticate(["referent", "young"], { session: f
     }
     const cohort = await CohortModel.findOne({ name: value.cohort }).populate({
       path: "cohortGroup",
-      options: { select: { cohortGroupId: 1, name: 1, type: 1, year: 1 } },
+      options: { select: { name: 1, type: 1, year: 1 } },
     });
     return res.status(200).send({ ok: true, data: cohort });
   } catch (error) {
