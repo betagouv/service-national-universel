@@ -1,5 +1,5 @@
 import * as crypto from "crypto";
-import * as config from "./config";
+import { config } from "./config";
 
 const ALGO = "aes-256-ctr";
 

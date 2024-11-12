@@ -51,7 +51,9 @@ ENV ENVIRONMENT=${ENVIRONMENT}
 ENV RELEASE=${RELEASE}
 
 RUN pm2 --no-daemon install --docker pm2-slack
-RUN pm2 set "pm2-slack:slack_url" "${PM2_SLACK_URL}"
+RUN --mount=type=secret,id=PM2_SLACK_URL \
+      PM2_SLACK_URL=$(cat /run/secrets/PM2_SLACK_URL) \
+      pm2 set "pm2-slack:slack_url" "${PM2_SLACK_URL}"
 RUN pm2 set "pm2-slack:servername" "PM2-ERROR-API"
 RUN pm2 set "pm2-slack:error" "false"
 

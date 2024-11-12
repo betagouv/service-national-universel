@@ -6,7 +6,7 @@ const { childProcess } = require("./lib/utils");
 const { GetSecrets, SECRET_FORMATS } = require("./get-secrets");
 
 async function main() {
-  const input = new UserInput(`Build application MonCompte`)
+  const input = new UserInput(`Build application`)
     .arg("environment", "Environment (ci, staging, production)")
     .arg("application", "Frontend application (app, admin)")
     .env("SCW_SECRET_KEY", "Scaleway secret key")
@@ -20,7 +20,7 @@ async function main() {
   const config = new Config(input.environment, input.application);
   const secrets = await new GetSecrets(scaleway, {
     projectName: config.projectName(),
-    secretName: config.secretName(),
+    secretName: config.buildSecretName(),
     format: SECRET_FORMATS.ENVFILE,
   }).execute();
 

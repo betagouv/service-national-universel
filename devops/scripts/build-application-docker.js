@@ -9,11 +9,8 @@ const {
   registryEndpoint,
 } = require("./lib/utils");
 
-const SECRET_KEYS = new Set(["SENTRY_AUTH_TOKEN"]);
-const RELEASE_KEY = "VITE_RELEASE";
-
 async function main() {
-  const input = new UserInput(`Build application MonCompte`)
+  const input = new UserInput(`Build application docker image`)
     .arg("environment", "Environment (ci, staging, production)")
     .arg("application", "Application (app, admin)")
     .optBool("push", "Push image on registry", {
@@ -30,7 +27,7 @@ async function main() {
   const config = new Config(input.environment, input.application);
   const secrets = await new GetSecrets(scaleway, {
     projectName: config.projectName(),
-    secretName: config.secretName(),
+    secretName: config.buildSecretName(),
     format: SECRET_FORMATS.ENVFILE,
   }).execute();
 
@@ -39,7 +36,10 @@ async function main() {
   };
   const values = { ...secrets, ...env }; // override secrets from env
 
-  const image = registryEndpoint(config.registry(), values[RELEASE_KEY]);
+  const image = registryEndpoint(
+    config.registry(),
+    values[config.releaseKey()]
+  );
 
   const args = [
     "build",
@@ -53,7 +53,7 @@ async function main() {
   ];
   for (const key in secrets) {
     const value = values[key];
-    if (SECRET_KEYS.has(key)) {
+    if (config.mountSecretKeys().includes(key)) {
       args.push("--secret");
       args.push(`id=${key}`);
       env[key] = value;
