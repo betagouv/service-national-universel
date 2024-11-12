@@ -1,0 +1,23 @@
+{
+  "jest.shell": "/bin/zsh",
+  "jest.virtualFolders": [
+    {
+      "name": "snu-api-v2",
+      "rootPath": "apiv2",
+      "jestCommandLine": "source ~/.zshrc && nvm use && npm run test --",
+      "runMode": "on-demand"
+    },
+    {
+      "name": "snu-api-v1",
+      "rootPath": "api",
+      "jestCommandLine": "source ~/.zshrc && nvm use && npm run test --",
+      "runMode": "on-demand"
+    },
+    {
+      "name": "snu-lib",
+      "rootPath": "packages/lib",
+      "jestCommandLine": "source ~/.zshrc && nvm use && npm run test --",
+      "runMode": "watch"
+    }
+  ]
+}

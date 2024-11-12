@@ -26,6 +26,7 @@
     "app",
     "admin",
     "api",
+    "apiv2",
     "devops/analytics",
     "devops/antivirus"
   ],
