@@ -771,6 +771,7 @@ router.post("/france-connect/user-info", async (req: UserRequest, res) => {
 
     const redisClient = getRedisClient();
     storedState = await redisClient.get(`franceConnectState:${value.state}`);
+    // @ts-ignore
     storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
 
     if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {
