@@ -1,69 +1,58 @@
-function envStr(source: object, key: string, fallback: string | undefined) {
-  const v = source[key];
-  if (v === undefined) {
+function envStr(value: any, fallback?: string) {
+  if (value === undefined) {
     if (fallback === undefined) {
-      console.error(`Environment variable ${key} is not defined`);
-      return undefined;
+      throw new Error("undefined value");
     } else {
       return fallback;
     }
   }
-  return v;
+  return value;
 }
 
-function envBool(source: object, key: string, fallback: boolean | undefined) {
-  const v = source[key];
-  if (v === undefined) {
+function envBool(value: any, fallback?: boolean) {
+  if (value === undefined) {
     if (fallback === undefined) {
-      console.error(`Environment variable ${key} is not defined`);
-      return undefined;
+      throw new Error("undefined value");
     } else {
       return fallback;
     }
   }
-  if (v === "true") {
+  if (value === "true") {
     return true;
-  } else if (v === "false") {
+  } else if (value === "false") {
     return false;
   }
-  console.error(`Environment variable ${key} is not a valid boolean (true|false)`);
-  return undefined;
+  throw new Error("invalid boolean value");
 }
 
-function envFloat(source: object, key: string, fallback: number | undefined) {
-  let v = source[key];
-  if (v === undefined) {
+function envFloat(value: any, fallback?: number) {
+  if (value === undefined) {
     if (fallback === undefined) {
-      console.error(`Environment variable ${key} is not defined`);
-      return undefined;
+      throw new Error("undefined value");
     } else {
       return fallback;
     }
   }
-  v = parseFloat(v);
-  if (isNaN(v)) {
-    console.error(`Environment variable ${key} is not a valid float`);
-    return undefined;
+  const floatValue = parseFloat(value);
+  if (isNaN(floatValue)) {
+    throw new Error("invalid float value");
   }
-  return v;
+  return floatValue;
 }
 
-function envInt(source: object, key: string, fallback: number | undefined) {
-  let v = source[key];
-  if (v === undefined) {
+function envInt(value: any, fallback?: number) {
+  if (value === undefined) {
     if (fallback === undefined) {
-      console.error(`Environment variable ${key} is not defined`);
-      return undefined;
+      throw new Error("undefined value");
     } else {
       return fallback;
     }
   }
-  v = parseInt(v);
-  if (isNaN(v)) {
-    console.error(`Environment variable ${key} is not a valid integer`);
-    return undefined;
+  const intValue = parseInt(value);
+  if (isNaN(intValue)) {
+    throw new Error("invalid integer value");
   }
-  return v;
+  return intValue;
 }
 
 export { envStr, envInt, envFloat, envBool };
