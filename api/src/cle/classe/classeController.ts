@@ -52,7 +52,7 @@ import {
 
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
-
+import patches from "../../controllers/patches";
 import { ClassesRoutesSchema } from "./classeValidator";
 import {
   buildUniqueClasseId,
@@ -635,5 +635,42 @@ router.put("/:id/verify", async (req: UserRequest, res) => {
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.get(
+  "/:id/patches",
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+  ],
+  async (req: UserRequest, res) => {
+    try {
+      const id = req.params.id;
+
+      const classe = await ClasseModel.findById(id);
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let classePatches = await patches.get(req, ClasseModel);
+      if (!classePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const pathsToIgnore = ["/seatsTaken", "/cohortId", "/uniqueKey", "/uniqueId", "/comments", "/trimester", "/metadata", "/id", "/updatedAt", "/referents"];
+      classePatches.forEach((patch) => {
+        patch.ops = patch.ops.filter((op) => !pathsToIgnore.includes(op.path));
+        patch.ops.forEach((op) => {
+          if (op.path === "/status") {
+            op.path = "/classeStatus";
+          }
+        });
+      });
+      classePatches = classePatches.filter((patch) => patch.ops.length > 0);
+
+      return res.status(200).send({ ok: true, data: classePatches });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
 
 export default router;

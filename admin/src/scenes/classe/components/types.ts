@@ -20,3 +20,30 @@ export type InfoBus = {
   returnDate: string;
   returnHour: string;
 };
+
+type ClasseUpdateOperation = {
+  op: "add" | "remove" | "replace";
+  path: string;
+  value?: string;
+  originalValue?: string;
+};
+
+export type ClassePatchesType = {
+  _id: string;
+  ops: ClasseUpdateOperation[];
+  modelName: "classe";
+  ref: string;
+  date: string;
+  user?: { firstName: string; lastName?: string };
+};
+
+export type ClasseYoungPatchesType = {
+  _id: string;
+  ops: ClasseUpdateOperation[];
+  modelName: "young";
+  ref: string;
+  date: string;
+  user?: { firstName: string; lastName?: string; role?: string; email?: string };
+  young: { firstName: string; lastName: string };
+  oldStudent?: boolean;
+};

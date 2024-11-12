@@ -1149,6 +1149,10 @@ const translateStatusClasse = (status) => {
       return "Inscription Ouverte";
     case "CLOSED":
       return "Inscription Fermée";
+    case "DRAFT":
+      return "Brouillon";
+    case "INSCRIPTION_IN_PROGRESS":
+      return "Inscription en cours";
     default:
       return status;
   }

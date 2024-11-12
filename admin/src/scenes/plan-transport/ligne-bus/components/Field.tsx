@@ -3,7 +3,18 @@ import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
 import { copyToClipboard } from "../../../../utils";
 
-export default function Field({ onChange, value, label, disabled = false, error, readOnly = false, copy, placeholder }) {
+interface FieldProps {
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  value?: string;
+  label: string;
+  disabled?: boolean;
+  error?: string;
+  readOnly?: boolean;
+  copy?: boolean;
+  placeholder?: string;
+}
+
+export default function Field({ onChange, value, label, disabled = false, error, readOnly = false, copy, placeholder }: FieldProps) {
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
