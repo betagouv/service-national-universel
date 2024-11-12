@@ -33,7 +33,7 @@ import {
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
-import { validateYoung, validateId, validatePhase1Document } from "../../utils/validator";
+import { validateYoung, validateId, validatePhase1Document, idSchema } from "../../utils/validator";
 import patches from "../patches";
 import { serializeYoung, serializeApplication } from "../../utils/serializer";
 import {
@@ -68,6 +68,9 @@ import scanFile from "../../utils/virusScanner";
 import emailsEmitter from "../../emails";
 import { UserRequest } from "../request";
 import { FileTypeResult } from "file-type";
+import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
+import { authMiddleware } from "../../middlewares/authMiddleware";
+import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
@@ -405,7 +408,31 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => await patches.get(req, res, YoungModel));
+router.get(
+  "/:id/patches",
+  authMiddleware("referent"),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE]),
+  ],
+  async (req: UserRequest, res) => {
+    try {
+      const { id } = req.params;
+
+      const young = await YoungModel.findById(id);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const youngPatches = await patches.get(req, YoungModel);
+      if (!youngPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      return res.status(200).send({ ok: true, data: youngPatches });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 
 router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
@@ -744,6 +771,7 @@ router.post("/france-connect/user-info", async (req: UserRequest, res) => {
 
     const redisClient = getRedisClient();
     storedState = await redisClient.get(`franceConnectState:${value.state}`);
+    // @ts-ignore
     storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
 
     if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {

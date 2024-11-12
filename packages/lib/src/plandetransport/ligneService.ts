@@ -1,7 +1,7 @@
-import { CohortDto } from "../dto";
+import { CohortDto, UserDto } from "../dto";
 import { ROLES } from "../roles";
 
-export const isTeamLeaderOrSupervisorEditable = (actor, cohort: CohortDto) => {
+export const isTeamLeaderOrSupervisorEditable = (actor: Pick<UserDto, "role">, cohort?: Pick<CohortDto, "busEditionOpenForTransporter" | "informationsConvoyage"> | null) => {
   switch (actor?.role) {
     case ROLES.ADMIN:
       return true;

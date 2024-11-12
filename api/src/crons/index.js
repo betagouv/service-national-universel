@@ -28,7 +28,9 @@ const clotureMissionReminder = require("./clotureInscriptionReminder");
 const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
 const mongoMonitoring = require("./mongoMonitoring");
 const classesStatusUpdate = require("./classesStatusUpdate");
+const monitorCertificats = require("./monitorCertificats");
 const checkCoherence = require("./checkCoherence");
+
 
 // doubt ? -> https://crontab.guru/
 
@@ -74,6 +76,7 @@ const everyHours = (x) => `0 */${x} * * *`;
 // clotureMissionReminder.handler() : tous les jours à 14h02
 // mongoMonitoring.handler() : toutes les 5 minutes
 // classesStatusUpdate.handler() : toutes les heures à la 2ème minute
+// monitorCertificats.handler() : 1er jour de chaque mois à 3h00
 
 function cron(name, crontab, handlers) {
   return { name, crontab, handlers: handlers instanceof Array ? handlers : [handlers] };
@@ -110,6 +113,7 @@ const CRONS = [
   cron("syncContactSupport", "15 1 * * *", syncContactSupport.handler),
   cron("mongoMonitoring", "*/5 * * * *", mongoMonitoring.handler),
   cron("classesStatusUpdate", "2 */1 * * *", classesStatusUpdate.handler),
+  cron("monitorCertificats", "0 3 1 * *", monitorCertificats.handler),
   cron("checkCoherence", "30 7,12,16 * * *", checkCoherence.handler),
 ];
 

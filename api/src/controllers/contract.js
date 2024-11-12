@@ -9,12 +9,15 @@ const { ERRORS, isYoung, isReferent } = require("../utils");
 const { sendTemplate } = require("../brevo");
 const config = require("config");
 const { logger } = require("../logger");
-const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
+const { validateId, validateContract, validateOptionalId, idSchema } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2StatusAndHours, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
 const Joi = require("joi");
 const patches = require("./patches");
 const { generatePdfIntoStream } = require("../utils/pdf-renderer");
+const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
+const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");
+const { authMiddleware } = require("../middlewares/authMiddleware");
 
 async function createContract(data, fromUser) {
   const { sendMessage } = data;
@@ -327,7 +330,32 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ContractModel));
+router.get(
+  "/:id/patches",
+  authMiddleware("referent"),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+  ],
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const contract = await ContractModel.findById(id);
+      if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const contractPatches = await patches.get(req, ContractModel);
+      if (!contractPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      return res.status(200).send({ ok: true, data: contractPatches });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
 
 // Get a contract by its token.
 router.get("/token/:token", async (req, res) => {
