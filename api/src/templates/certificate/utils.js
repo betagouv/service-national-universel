@@ -1,5 +1,5 @@
 const path = require("path");
-const config = require("config");
+const { config } = require("../../config");
 const PDFDocument = require("pdfkit");
 const { MINISTRES } = require("snu-lib");
 

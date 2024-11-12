@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { addDays } from "date-fns";
 import crypto from "crypto";
-import config from "config";
+import { config } from "../../config";
 const { logger } = require("../../logger");
 
 import { ROLES, SUB_ROLES, SENDINBLUE_TEMPLATES, InvitationType, ReferentType, EtablissementType, ClasseSchoolYear, STATUS_CLASSE } from "snu-lib";

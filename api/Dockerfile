@@ -41,7 +41,6 @@ LABEL org.opencontainers.image.source="https://github.com/betagouv/service-natio
       org.opencontainers.image.description="This image provides a consistent and reproducible environment for the backend, ensuring it deploys faster and runs the same way regardless of the deployment environment."
 
 
-ENV NODE_CONFIG_DIR=/app/api/config
 ENV PATH=/app/node_modules/pm2/bin/:$PATH
 
 ARG ENVIRONMENT

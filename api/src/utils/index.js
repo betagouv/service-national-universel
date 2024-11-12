@@ -20,7 +20,7 @@ const { sendEmail, sendTemplate } = require("../brevo");
 const path = require("path");
 const fs = require("fs");
 const { addDays } = require("date-fns");
-const config = require("config");
+const { config } = require("../config");
 const { logger } = require("../logger");
 const {
   getDepartureDate,

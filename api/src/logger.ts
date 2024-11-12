@@ -1,4 +1,4 @@
-import config from "config";
+import { config } from "./config";
 import { createLogger, transports, format } from "winston";
 
 const LEVELS = {
@@ -18,7 +18,7 @@ function _format() {
 
 export const logger = createLogger({
   levels: LEVELS,
-  level: config.get("LOG_LEVEL"),
+  level: config.LOG_LEVEL,
   format: _format(),
   transports: [
     new transports.Console({

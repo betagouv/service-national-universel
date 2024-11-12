@@ -1,7 +1,7 @@
 // Keep this configuration to allow using the migrate-mongo command line (in package.json)
 const { migrateMongoConfiguration } = require("./src/migration");
 const { initDB } = require("./src/mongo");
-const config = require("config");
+const { config } = require("./src/config");
 
 // This IIFE is needed to allow using mongoose into down script as it will be called from CLI
 if (config.ENVIRONMENT === "development") {

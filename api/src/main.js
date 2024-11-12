@@ -12,7 +12,7 @@ const requestIp = require("request-ip"); // Import request-ip package
 const express = require("express");
 const { createTerminus } = require("@godaddy/terminus");
 
-const config = require("config");
+const { config } = require("./config");
 const { logger } = require("./logger");
 
 const { capture } = require("./sentry");
@@ -37,12 +37,12 @@ async function runTasks() {
 
   const app = express();
 
-  if (config.get("TASK_MONITOR_ENABLE_AUTH")) {
+  if (config.TASK_MONITOR_ENABLE_AUTH) {
     app.use(
       basicAuth({
         challenge: true,
         users: {
-          [config.get("TASK_MONITOR_USER")]: config.get("TASK_MONITOR_SECRET"),
+          [config.TASK_MONITOR_USER]: config.TASK_MONITOR_SECRET,
         },
       }),
     );

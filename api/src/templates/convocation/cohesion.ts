@@ -1,5 +1,5 @@
 import path from "path";
-import config from "config";
+import { config } from "../../config";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { withPipeStream } from "../utils";

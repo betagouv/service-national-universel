@@ -22,7 +22,7 @@ const {
   COHORTS,
 } = require("snu-lib");
 const { sendTemplate } = require("./../../brevo");
-const config = require("config");
+const { config } = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
 

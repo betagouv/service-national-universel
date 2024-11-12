@@ -11,7 +11,7 @@ import fileUpload from "express-fileupload";
 
 import { decrypt, encrypt } from "../../cryptoUtils";
 import { getRedisClient } from "../../redis";
-import config from "config";
+import { config } from "../../config";
 import { logger } from "../../logger";
 import { capture, captureMessage } from "../../sentry";
 import { ReferentModel, YoungModel, ApplicationModel, MissionModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel } from "../../models";

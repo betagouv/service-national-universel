@@ -6,7 +6,7 @@ const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const { ClasseModel } = require("../../models");
 const ClassePatchModel = require("./models/classePatch");
-const config = require("config");
+const { config } = require("../../config");
 const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 

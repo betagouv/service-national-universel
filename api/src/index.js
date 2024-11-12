@@ -1,4 +1,4 @@
-const config = require("config");
+import { config } from "./config";
 const { logger } = require("./logger");
 
 // Require this first!
@@ -6,11 +6,7 @@ const { initSentry } = require("./sentry");
 
 initSentry();
 
-// NODE_ENV environment variable (default "development") is used by :
-// - node-config : to determine the config file used in ./config
-// - jest : unit test (NODE_ENV == "test")
-const environment = config.util.getEnv("NODE_ENV");
-logger.info(`NODE_ENV: ${environment}`);
+logger.info(`ENVIRONMENT: ${config["ENVIRONMENT"]}`);
 
 require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
@@ -30,7 +26,7 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 const { runTasks, runAPI } = require("./main");
-if (process.env.RUN_TASKS === "true") {
+if (config.RUN_TASKS) {
   runTasks();
 } else {
   runAPI();

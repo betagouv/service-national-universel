@@ -15,7 +15,7 @@ const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, c
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../brevo");
-const config = require("config");
+const { config } = require("../config");
 const { getNearestLocation } = require("../services/gouv.fr/api-adresse");
 const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
 const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");

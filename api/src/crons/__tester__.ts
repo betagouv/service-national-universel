@@ -1,10 +1,7 @@
 // To test run:
 // ts-node ./src/crons/__tester__.ts patch/young
 
-// uncomment when running in local
-// process.env["NODE_CONFIG_DIR"] = "<RELATIVE PATH>/service-national-universel/api/config/";
-
-import config from "config";
+import { config } from "../config";
 import { initDB } from "../mongo";
 
 // You need to run in local apps and target the right database (Prod usually)

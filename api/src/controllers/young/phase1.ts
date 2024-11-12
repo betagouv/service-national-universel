@@ -21,7 +21,7 @@ import {
   FUNCTIONAL_ERRORS,
   DepartmentServiceType,
 } from "snu-lib";
-import config from "config";
+import { config } from "../../config";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { YoungModel, SessionPhase1Model, CohesionCenterModel, PointDeRassemblementModel, LigneBusModel, CohortModel, ReferentModel, DepartmentServiceModel } from "../../models";

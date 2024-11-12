@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import querystring from "querystring";
 import { capture, captureMessage } from "./sentry";
-import config from "config";
+import { config } from "./config";
 import { logger } from "./logger";
 import { AreasModel } from "./models";
 

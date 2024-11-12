@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import Joi from "joi";
 import crypto from "crypto";
-import config from "config";
+import { config } from "../../config";
 
 import { SENDINBLUE_TEMPLATES, ROLES, InvitationType, isReferentClasse, isCoordinateurEtablissement, isChefEtablissement } from "snu-lib";
 

@@ -29,6 +29,7 @@ module.exports = {
     "import/extensions": ["warn"],
     "react-hooks/exhaustive-deps": "warn",
     "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
   },
   settings: {
     react: {

@@ -1,5 +1,5 @@
 // virusScanner.js
-const config = require("config");
+const { config } = require("../config");
 const { capture, captureMessage } = require("../sentry");
 const fetch = require("node-fetch");
 const FormData = require("form-data");
@@ -30,7 +30,7 @@ async function getAccessToken(endpoint, apiKey) {
 }
 
 async function scanFile(tempFilePath, name, userId = "anonymous") {
-  if (!config.get("ENABLE_ANTIVIRUS")) {
+  if (!config.ENABLE_ANTIVIRUS) {
     return { infected: false };
   }
 
