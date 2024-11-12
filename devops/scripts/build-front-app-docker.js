@@ -2,7 +2,7 @@ const process = require("node:process");
 const UserInput = require("./lib/user-input");
 const ScalewayClient = require("./lib/scaleway-client");
 const { GetSecrets, SECRET_FORMATS } = require("./get-secrets");
-const { getConfig } = require("./lib/config");
+const { Config } = require("./lib/config");
 const {
   childProcess,
   childProcessStdin,
@@ -27,22 +27,19 @@ async function main() {
     input.SCW_SECRET_KEY,
     input.SCW_ORGANIZATION_ID
   );
-  const { projectName, secretName, registry } = getConfig(
-    input.environment,
-    input.application
-  );
-  const config = await new GetSecrets(scaleway, {
-    projectName: projectName,
-    secretName: secretName,
+  const config = new Config(input.environment, input.application);
+  const secrets = await new GetSecrets(scaleway, {
+    projectName: config.projectName(),
+    secretName: config.secretName(),
     format: SECRET_FORMATS.ENVFILE,
   }).execute();
 
   const env = {
     ...process.env,
   };
-  const values = { ...config, ...env }; // override config from env
+  const values = { ...secrets, ...env }; // override secrets from env
 
-  const image = registryEndpoint(registry, values[RELEASE_KEY]);
+  const image = registryEndpoint(config.registry(), values[RELEASE_KEY]);
 
   const args = [
     "build",
@@ -54,7 +51,7 @@ async function main() {
     `${input.application}/Dockerfile`,
     ".",
   ];
-  for (const key in config) {
+  for (const key in secrets) {
     const value = values[key];
     if (SECRET_KEYS.has(key)) {
       args.push("--secret");
@@ -71,7 +68,7 @@ async function main() {
   if (input.push) {
     await childProcessStdin(
       "docker",
-      ["login", registry, "-u", "nologin", "--password-stdin"],
+      ["login", config.registry(), "-u", "nologin", "--password-stdin"],
       input.SCW_SECRET_KEY,
       { env }
     );

@@ -1,6 +1,6 @@
 const UserInput = require("./lib/user-input");
 const ScalewayClient = require("./lib/scaleway-client");
-const { getConfig } = require("./lib/config");
+const { Config } = require("./lib/config");
 const { registryEndpoint, sleep } = require("./lib/utils");
 
 const POLL_INTERVAL_MS = 5000;
@@ -29,15 +29,18 @@ async function main() {
     input.SCW_SECRET_KEY,
     input.SCW_ORGANIZATION_ID
   );
-  const { containerNamespace, containerName, registry } = getConfig(
-    input.environment,
-    input.application
+  const config = new Config(input.environment, input.application);
+
+  const namespace = await scaleway.findContainerNamespace(
+    config.containerNamespace()
   );
-  const namespace = await scaleway.findContainerNamespace(containerNamespace);
-  const container = await scaleway.findContainer(namespace.id, containerName);
+  const container = await scaleway.findContainer(
+    namespace.id,
+    config.containerName()
+  );
 
   await scaleway.updateContainer(container.id, {
-    registry_image: registryEndpoint(registry, input.release),
+    registry_image: registryEndpoint(config.registry(), input.release),
   });
 
   await waitUntilSuccess(scaleway, container.id);

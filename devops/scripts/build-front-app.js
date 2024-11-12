@@ -1,7 +1,7 @@
 const process = require("node:process");
 const UserInput = require("./lib/user-input");
 const ScalewayClient = require("./lib/scaleway-client");
-const { getConfig } = require("./lib/config");
+const { Config } = require("./lib/config");
 const { childProcess } = require("./lib/utils");
 const { GetSecrets, SECRET_FORMATS } = require("./get-secrets");
 
@@ -17,18 +17,15 @@ async function main() {
     input.SCW_SECRET_KEY,
     input.SCW_ORGANIZATION_ID
   );
-  const { projectName, secretName } = getConfig(
-    input.environment,
-    input.application
-  );
-  const config = await new GetSecrets(scaleway, {
-    projectName: projectName,
-    secretName: secretName,
+  const config = new Config(input.environment, input.application);
+  const secrets = await new GetSecrets(scaleway, {
+    projectName: config.projectName(),
+    secretName: config.secretName(),
     format: SECRET_FORMATS.ENVFILE,
   }).execute();
 
   const env = {
-    ...config,
+    ...secrets,
     ...process.env,
     APP_NAME: input.application,
   };

@@ -1,23 +1,39 @@
 const ENVS = new Set(["ci", "staging", "production"]);
-const APPS = new Set(["app", "admin"]);
+const APPS = new Set(["app", "admin", "api"]);
 
-function getConfig(env, app) {
-  if (!ENVS.has(env)) {
-    throw new Error(`Unknown environment: ${env}`);
-  }
-  if (!APPS.has(app)) {
-    throw new Error(`Unknown application: ${app}`);
+class Config {
+  constructor(environment, application) {
+    if (!ENVS.has(environment)) {
+      throw new Error(`Unknown environment: ${environment}`);
+    }
+    if (!APPS.has(application)) {
+      throw new Error(`Unknown application: ${application}`);
+    }
+    this.env = environment;
+    this.app = application;
   }
 
-  return {
-    containerNamespace: `snu-${env}`,
-    containerName: `${env}-${app}`,
-    projectName: `snu-${env}`,
-    secretName: `${env}-${app}`,
-    registry: `rg.fr-par.scw.cloud/snu-${env}/${app}`,
-  };
+  containerName() {
+    return `${this.env}-${this.app}`;
+  }
+
+  containerNamespace() {
+    return `snu-${this.env}`;
+  }
+
+  projectName() {
+    return `snu-${this.env}`;
+  }
+
+  secretName() {
+    return `${this.env}-${this.app}`;
+  }
+
+  registry() {
+    return `rg.fr-par.scw.cloud/snu-${this.env}/${this.app}`;
+  }
 }
 
 module.exports = {
-  getConfig,
+  Config,
 };
