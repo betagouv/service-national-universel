@@ -139,6 +139,7 @@ describe("updateClasse", () => {
   let mockSession: any;
   let mockCohesionCenter: any;
   let mockPDR: any;
+  let mockUpdateYoungsCohorts: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -149,6 +150,8 @@ describe("updateClasse", () => {
       save: jest.fn(),
       cohortId: "oldCohortId",
     };
+
+    mockUpdateYoungsCohorts = jest.spyOn(classeImportService, "updateYoungsCohorts").mockResolvedValue();
 
     mockCohort = { _id: "newCohortId", name: "New Cohort" };
     mockSession = { _id: "mockSessionId" };
@@ -226,8 +229,24 @@ describe("updateClasse", () => {
     expect(result.error).toEqual([]);
   });
 
-  it("should add errors if session or cohesion center is not found", async () => {
+  it("should add errors if session is not found", async () => {
     SessionPhase1Model.findOne = jest.fn().mockResolvedValue(null);
+
+    const classeToUpdateMapped: ClasseMapped = {
+      classeId: "mockClasseId",
+      cohortCode: "newCohortCode",
+      classeTotalSeats: 30,
+      sessionCode: "session123",
+      centerCode: "center456",
+    };
+
+    const result = await updateClasse(classeToUpdateMapped);
+
+    expect(result.error).toEqual([ERRORS.SESSION_NOT_FOUND]);
+    expect(result.updatedFields).toEqual(expect.arrayContaining(["cohortId", "cohort", "totalSeats", "status"]));
+  });
+
+  it("should add errors if cohesion center is not found", async () => {
     CohesionCenterModel.findOne = jest.fn().mockResolvedValue(null);
 
     const classeToUpdateMapped: ClasseMapped = {
@@ -240,7 +259,8 @@ describe("updateClasse", () => {
 
     const result = await updateClasse(classeToUpdateMapped);
 
-    expect(result.error).toEqual([ERRORS.SESSION_NOT_FOUND, ERRORS.COHESION_CENTER_NOT_FOUND]);
+    expect(result.error).toEqual([ERRORS.COHESION_CENTER_NOT_FOUND]);
+    expect(result.updatedFields).toEqual(expect.arrayContaining(["cohortId", "cohort", "totalSeats", "status", "sessionId"]));
   });
 
   it("should handle missing PDR and add error if PDR is not found", async () => {
