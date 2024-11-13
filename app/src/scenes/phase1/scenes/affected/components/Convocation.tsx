@@ -6,16 +6,21 @@ import dayjs from "dayjs";
 import { supportURL } from "../../../../../config";
 import api from "../../../../../services/api";
 import { translate } from "../../../../../utils";
-import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner } from "snu-lib";
+import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner, getParticularitesAcces, DepartmentServiceType } from "snu-lib";
 import useAuth from "@/services/useAuth";
 
 import Loader from "../../../../../components/Loader";
 import { Hero, Content } from "../../../../../components/Content";
 
 export default function Convocation({ center, meetingPoint, departureDate, returnDate }) {
-  const { young, isCLE } = useAuth();
   const history = useHistory();
-  const [service, setService] = useState();
+  const { young, isCLE } = useAuth();
+
+  const [service, setService] = useState<DepartmentServiceType>();
+
+  useEffect(() => {
+    if (young?.department && !service) getService();
+  }, [young]);
 
   const getService = async () => {
     const { data, code, ok } = await api.get(`/department-service/${young.department}`);
@@ -23,14 +28,10 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
     setService(data);
   };
 
-  useEffect(() => {
-    if (young?.department && !service) getService();
-  }, [young]);
-
   const getMeetingAddress = () => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
-    const complement = meetingPoint?.complementAddress.find((c) => c.cohort === young.cohort);
-    const complementText = complement?.complement ? ", " + complement.complement : "";
+    const complement = getParticularitesAcces(meetingPoint, young.cohort);
+    const complementText = complement ? ", " + complement : "";
     return meetingPoint.name + ", " + meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city + complementText;
   };
 
@@ -203,4 +204,3 @@ const Sign = styled.div`
   font-weight: 500;
   margin: 1rem;
 `;
-

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { PointDeRassemblementType, ROLES, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
+import { PointDeRassemblementType, ROLES, canCreateMeetingPoint, getDepartmentNumber, getParticularitesAcces } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
 import ExternalLink from "../../assets/icons/ExternalLink";
 import Menu from "../../assets/icons/Menu";
@@ -336,7 +336,8 @@ const ListSessions = ({ user, defaultCohortName }) => {
                   Cohort: selectedCohort,
                   Nom: item.name,
                   Adresse: item.address,
-                  "Complément d'adresse": item?.complementAddress.find((e) => e.cohort === selectedCohort)?.complement || "",
+                  // TODO: à supprimer lorsque le PDR sera dissocié de la session
+                  "Complément d'adresse": getParticularitesAcces(item, selectedCohort) || "",
                   Ville: item.city,
                   "Code postal": item.zip,
                   Département: item.department,
