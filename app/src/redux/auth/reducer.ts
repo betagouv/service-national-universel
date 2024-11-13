@@ -1,4 +1,13 @@
+import { YoungType } from "snu-lib";
+
 import { authActions } from "./actions";
+
+export type AuthState = {
+  // TODO: use API route response
+  Auth: {
+    young: YoungType;
+  };
+};
 
 const initState = {
   young: null,
