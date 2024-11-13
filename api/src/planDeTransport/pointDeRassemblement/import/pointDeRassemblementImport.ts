@@ -20,14 +20,30 @@ export interface PointDeRassemblementCSV {
   "Région académique": string;
   Académie: string;
   Département: string;
+  "ID temporaire PDR": string;
+  UAI: string;
   "Numéro d'ordre": string;
   "Date  début validité de l'enregistrement": string;
-  "ID temporaire PDR": string;
+  "Point de Rassemblement : Date de création": string;
+  "Point de Rassemblement : Date de dernière modification": string;
 }
 
 export type PointDeRassemblementImportMapped = Pick<
   PointDeRassemblementType,
-  "name" | "address" | "city" | "zip" | "department" | "region" | "academie" | "particularitesAcces" | "matricule"
+  | "name"
+  | "address"
+  | "city"
+  | "zip"
+  | "department"
+  | "region"
+  | "academie"
+  | "particularitesAcces"
+  | "matricule"
+  | "uai"
+  | "numeroOrdre"
+  | "dateCreation"
+  | "dateDebutValidite"
+  | "dateDerniereModification"
 > & {
   complementAddress: string;
 };
