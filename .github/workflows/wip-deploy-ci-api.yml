@@ -40,15 +40,19 @@ jobs:
         if: steps.cache-npm.outputs.cache-hit != 'true'
         run: npm ci
 
+      - name: Build lib
+        working-directory: packages/lib
+        run: npm run build
+
       # Typescript check
       - name: Check types
-        continue-on-error: false
+        working-directory: api
         run: npm run check-types
 
       # ESLint check
-      # - name: Lint code
-      #   continue-on-error: false
-      #   run: npm run lint
+      - name: Lint code
+        working-directory: api
+        run: npm run lint
 
       - name: Start MongoDB 7.0
         uses: supercharge/mongodb-github-action@v1.10.0

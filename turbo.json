@@ -17,18 +17,15 @@
     },
     "test": {
       "cache": false,
-      "outputs": ["dist/**", "build/**"],
-      "dependsOn": ["^build"]
+      "outputs": ["dist/**", "build/**"]
     },
     "lint": {
       "cache": false,
-      "outputs": ["dist/**", "build/**"],
-      "dependsOn": ["^build"]
+      "outputs": ["dist/**", "build/**"]
     },
     "check-types": {
       "cache": false,
-      "outputs": ["dist/**", "build/**"],
-      "dependsOn": ["^build"]
+      "outputs": ["dist/**", "build/**"]
     },
     "clean": {
       "cache": false,

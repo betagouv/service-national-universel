@@ -40,13 +40,23 @@ jobs:
         if: steps.cache-npm.outputs.cache-hit != 'true'
         run: npm ci
 
+      - name: Build lib
+        working-directory: packages/lib
+        run: npm run build
+
+      - name: Build ds
+        working-directory: packages/ds
+        run: npm run build
+
       # Typescript check
       - name: Check types
+        working-directory: admin
         continue-on-error: false
         run: npm run check-types
 
       # ESLint check
       - name: Lint code
+        working-directory: admin
         continue-on-error: false
         run: npm run lint
 
