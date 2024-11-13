@@ -1,11 +1,11 @@
 import { CohesionCenterModel, SessionPhase1Model, CohortModel, LigneBusModel, LigneToPointModel, PointDeRassemblementModel, DepartmentServiceModel } from "../models";
-import { YoungDto, PointDeRassemblementType, CohesionCenterType } from "snu-lib";
+import { YoungDto, PointDeRassemblementType, CohesionCenterType, getParticularitesAcces } from "snu-lib";
 
-export const getMeetingAddress = (young: YoungDto, meetingPoint: PointDeRassemblementType, center: CohesionCenterType) => {
-  if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
-  const complement = meetingPoint?.complementAddress.find((c) => c.cohort === young.cohort);
-  const complementText = complement?.complement ? ", " + complement.complement : "";
-  return meetingPoint.name + ", " + meetingPoint.address + " " + meetingPoint.zip + " " + meetingPoint.city + complementText;
+export const getMeetingAddress = (young: YoungDto, pdr: PointDeRassemblementType, centre: CohesionCenterType) => {
+  if (young.deplacementPhase1Autonomous === "true" || !pdr) return `${centre.address} ${centre.zip} ${centre.city}`;
+  const complement = getParticularitesAcces(pdr, young.cohort);
+  const complementText = complement ? ", " + complement : "";
+  return `${pdr.name}, ${pdr.address} ${pdr.zip} ${pdr.city}${complementText}`;
 };
 
 export const getCertificateTemplate = (young: YoungDto) => {
