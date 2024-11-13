@@ -15,12 +15,13 @@ const staticConfig = {
   FONT_ROOTDIR: `${__dirname}/assets/fonts`,
 };
 
-// NODE_ENV environment variable (default "development") is used by :
+// NODE_ENV environment variable is used by :
 // - jest : unit test (NODE_ENV == "test")
+const defaultEnv = process.env.NODE_ENV === "test" ? "test" : "development";
 
 export const config = {
   ...staticConfig,
-  ENVIRONMENT: _env(envStr, "ENVIRONMENT", "development"),
+  ENVIRONMENT: _env(envStr, "ENVIRONMENT", defaultEnv),
   RELEASE: _env(envStr, "RELEASE", "development"),
   PORT: _env(envInt, "PORT", 8080),
   RUN_CRONS: _env(envBool, "RUN_CRONS", false),
