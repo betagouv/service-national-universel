@@ -749,7 +749,7 @@ function canViewDepartmentService(actor) {
 function canAssignManually(actor, young, cohort) {
   if (!cohort) return false;
   return (
-    (actor.role === ROLES.ADMIN && (actor.subRole === SUB_ROLE_GOD || cohort.manualAffectionOpenForAdmin)) ||
+    (actor.role === ROLES.ADMIN && (isSuperAdmin(actor) || cohort.manualAffectionOpenForAdmin)) ||
     (actor.role === ROLES.REFERENT_REGION && actor.region === young.region && cohort.manualAffectionOpenForReferentRegion) ||
     (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department) && cohort.manualAffectionOpenForReferentDepartment)
   );
