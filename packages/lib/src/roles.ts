@@ -683,22 +683,22 @@ function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: stri
 }
 
 function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
-    if (!cohort) return false;
+  if (!cohort) return false;
 
-    switch (actor.role) {
-      case ROLES.ADMIN:
-        return true;
-      case ROLES.REFERENT_DEPARTMENT:
-        return cohort.inscriptionOpenForReferentDepartment === true;
-      case ROLES.REFERENT_REGION:
-        return cohort.inscriptionOpenForReferentRegion === true;
-      case ROLES.REFERENT_CLASSE:
-        return cohort.inscriptionOpenForReferentClasse === true;
-      case ROLES.ADMINISTRATEUR_CLE:
-        return cohort.inscriptionOpenForAdministrateurCle === true;
-      default:
-        return false;
-    }
+  switch (actor.role) {
+    case ROLES.ADMIN:
+      return true;
+    case ROLES.REFERENT_DEPARTMENT:
+      return cohort.inscriptionOpenForReferentDepartment === true;
+    case ROLES.REFERENT_REGION:
+      return cohort.inscriptionOpenForReferentRegion === true;
+    case ROLES.REFERENT_CLASSE:
+      return cohort.inscriptionOpenForReferentClasse === true;
+    case ROLES.ADMINISTRATEUR_CLE:
+      return cohort.inscriptionOpenForAdministrateurCle === true;
+    default:
+      return false;
+  }
 }
 
 function canSendTemplateToYoung(actor, young) {
@@ -749,7 +749,7 @@ function canViewDepartmentService(actor) {
 function canAssignManually(actor, young, cohort) {
   if (!cohort) return false;
   return (
-    (actor.role === ROLES.ADMIN && cohort.manualAffectionOpenForAdmin) ||
+    (actor.role === ROLES.ADMIN && (actor.subRole === SUB_ROLE_GOD || cohort.manualAffectionOpenForAdmin)) ||
     (actor.role === ROLES.REFERENT_REGION && actor.region === young.region && cohort.manualAffectionOpenForReferentRegion) ||
     (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department) && cohort.manualAffectionOpenForReferentDepartment)
   );
