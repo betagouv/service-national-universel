@@ -19,6 +19,5 @@
       "jestCommandLine": "source ~/.zshrc && nvm use && npm run test --",
       "runMode": "watch"
     }
-  ],
-  "typescript.tsdk": "node_modules/typescript/lib"
+  ]
 }
