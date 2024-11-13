@@ -66,7 +66,7 @@ export default function Import() {
         window.URL.revokeObjectURL(url);
       }
     } catch (err) {
-      setUploadError("Une erreur est survenue. Nous n'avons pu enregistrer le fichier. Veuillez réessayer dans quelques instants.");
+      setUploadError("La requête étant trop longue, nous vous avons envoyé un mail avec le fichier de résultat.");
     }
     setIsUploading(false);
   }

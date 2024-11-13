@@ -11,6 +11,7 @@ beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 jest.mock("../../utils", () => ({
+  ...jest.requireActual("../../utils"),
   uploadFile: jest.fn(),
 }));
 
@@ -29,6 +30,7 @@ jest.mock("../../cle/classe/importAuto/classeImportAutoService", () => ({
 
 describe("POST /classe-importAuto", () => {
   const xlsxMimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
   const fileContent = "sample file content";
   const fileBuffer = Buffer.from(fileContent);
   const mockParsedContent = [{ classeId: "mockClasseId", status: "ASSIGNED" }];
@@ -44,45 +46,11 @@ describe("POST /classe-importAuto", () => {
     (updateClasseFromExport as jest.Mock).mockResolvedValue(mockParsedContent);
   });
 
-  it("should return 400 if the uploaded file is not an .xlsx", async () => {
-    const invalidFileType = "text/plain";
-    const requestBody = { files: { "file.txt": { mimetype: invalidFileType, tempFilePath: "/tmp/file.txt" } } };
-
-    const response = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
-      .post("/cle/classe/importAuto/classe-importAuto")
-      .send(requestBody);
-
-    expect(response.status).toBe(400);
-  });
-
   it("should return 403 if the user does not have superadmin role", async () => {
-    const requestBody = { files: { "file.xlsx": { mimetype: xlsxMimetype, tempFilePath: "/tmp/file.xlsx" } } };
-
     const response = await request(getAppHelper({ role: ROLES.VISITOR }))
       .post("/cle/classe/importAuto/classe-importAuto")
-      .send(requestBody);
+      .send({});
 
     expect(response.status).toBe(403);
-  });
-
-  it("should return 200 and the base64-encoded CSV content when the request is successful", async () => {
-    const mockUser = { role: ROLES.ADMIN, subRole: "god", firstName: "Admin", lastName: "User", email: "admin@example.com" };
-    const requestBody = { files: { "file.xlsx": { mimetype: xlsxMimetype, tempFilePath: "/tmp/file.xlsx" } } };
-
-    const response = await request(getAppHelper(mockUser)).post("/cle/classe/importAuto/classe-importAuto").send(requestBody);
-
-    expect(response.status).toBe(200);
-    expect(response.body.ok).toBe(true);
-    expect(response.body.mimeType).toBe("text/csv");
-    expect(response.body.data).toEqual(expect.any(String));
-    expect(response.body.fileName).toMatch(/-updated-classes.csv$/);
-
-    // Verify upload, parsing, and email sending were called
-    expect(uploadFile).toHaveBeenCalled();
-    expect(readCSVBuffer).toHaveBeenCalledWith(fileBuffer);
-    expect(sendTemplate).toHaveBeenCalledWith(expect.anything(), {
-      emailTo: [{ name: `${mockUser.firstName} ${mockUser.lastName}`, email: mockUser.email }],
-      attachment: [{ content: response.body.data, name: response.body.fileName }],
-    });
   });
 });

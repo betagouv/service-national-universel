@@ -24,9 +24,7 @@ router.post(
   [accessControlMiddleware([])],
   fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req: UserRequest, res) => {
-    console.log("LAAAAA");
     if (!isSuperAdmin(req.user)) {
-      console.log("error ADMIN");
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -39,10 +37,8 @@ router.post(
 
       const file: UploadedFile = files[0];
       if (file.mimetype !== xlsxMimetype) {
-        console.log("error mimetype");
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
-      console.log("ICIII");
       const filePath = file.tempFilePath;
       const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
 
