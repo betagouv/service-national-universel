@@ -5,7 +5,7 @@ on:
     paths:
       - "admin/**"
       - "packages/**"
-      - ".github/**" # TODO: remove
+      - ".github/workflows/wip-deploy-ci-admin.yml" # TODO: remove
     branches: # TODO: remove me
       - 3577-app
 

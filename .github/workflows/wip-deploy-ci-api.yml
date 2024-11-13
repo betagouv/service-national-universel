@@ -5,7 +5,7 @@ on:
     paths:
       - "api/**"
       - "packages/**"
-      - ".github/**" # TODO: remove
+      - ".github/workflows/wip-deploy-ci-api.yml" # TODO: remove
     branches: # TODO: remove me
       - 3577-app
 
@@ -14,44 +14,58 @@ env:
   APP_NAME: api
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Use Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "18.20"
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.20"
 
-  #     - uses: actions/cache@v4
-  #       id: cache-npm
-  #       with:
-  #         path: |
-  #           node_modules
-  #           api/node_modules
-  #           packages/ds/node_modules
-  #           packages/lib/node_modules
-  #         key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-nodemodules-
+      - uses: actions/cache@v4
+        id: cache-npm
+        with:
+          path: |
+            node_modules
+            api/node_modules
+            packages/ds/node_modules
+            packages/lib/node_modules
+          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nodemodules-
 
-  #     - name: Install packages
-  #       if: steps.cache-npm.outputs.cache-hit != 'true'
-  #       run: npm ci
+      - name: Install packages
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        run: npm ci
 
-  #     # Typescript check
-  #     - name: Check types
-  #       continue-on-error: false
-  #       run: npm run check-types
+      # Typescript check
+      - name: Check types
+        continue-on-error: false
+        run: npm run check-types
 
-  #     # ESLint check
-  #     - name: Lint code
-  #       continue-on-error: false
-  #       run: npm run lint
+      # ESLint check
+      # - name: Lint code
+      #   continue-on-error: false
+      #   run: npm run lint
+
+      - name: Start MongoDB 7.0
+        uses: supercharge/mongodb-github-action@v1.10.0
+        with:
+          mongodb-version: "7.0"
+
+      - name: Test and Send coverage
+        uses: paambaati/codeclimate-action@v9.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          CI: true
+        with:
+          workingDirectory: api
+          coverageCommand: npm run coverage
 
   deploy:
-    # needs: [test]
+    needs: [test]
     runs-on: ubuntu-latest
     outputs:
       release: ${{ steps.release.outputs.release }}
