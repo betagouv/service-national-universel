@@ -1,4 +1,5 @@
 import { academyList, departmentList, regionList } from "snu-lib";
+const { parse: parseDate } = require("date-fns");
 import { logger } from "../../../logger";
 import { PointDeRassemblementCSV, PointDeRassemblementImportMapped } from "./pointDeRassemblementImport";
 
@@ -16,6 +17,11 @@ export const mapPointDeRassemblements = (rawPdrs: PointDeRassemblementCSV[]): Po
       region: mapRegion(rawPdr["Région académique"]),
       academie: mapAcademy(rawPdr["Académie"]),
       matricule: rawPdr["Matricule du point de rassemblement"],
+      uai: rawPdr["UAI"],
+      numeroOrdre: rawPdr["Numéro d'ordre"],
+      dateCreation: parseDate(rawPdr["Point de Rassemblement : Date de création"], "dd/MM/yyyy", new Date()),
+      dateDebutValidite: parseDate(rawPdr["Date  début validité de l'enregistrement"], "dd/MM/yyyy", new Date()),
+      dateDerniereModification: parseDate(rawPdr["Point de Rassemblement : Date de dernière modification"], "dd/MM/yyyy", new Date()),
       // code: rawPdr["Matricule du point de rassemblement"],
     };
     if (!rawPdrWithoutId.name) {
