@@ -173,7 +173,7 @@ const sync = async (result) => {
         zip: mission.postalCode,
         address: mission.address,
         city: mission.city,
-        department: mission.department,
+        department: mission.departmentName,
         region: mission.region,
         country: "France",
         location: mission.location,
