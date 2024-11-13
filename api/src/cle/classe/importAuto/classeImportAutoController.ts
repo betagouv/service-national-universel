@@ -3,12 +3,12 @@ import fileUpload from "express-fileupload";
 import { UploadedFile } from "express-fileupload";
 import fs from "fs";
 
-import { isSuperAdmin, ROLES } from "snu-lib";
+import { isSuperAdmin, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { sendTemplate } from "../../../brevo";
 import { ERRORS, uploadFile } from "../../../utils";
 import { UserRequest } from "../../../controllers/request";
-import { readCSVBuffer } from "../../../services/fileService";
 import { capture } from "../../../sentry";
-import { generateCSVStream, getHeaders, streamToBuffer, XLSXToCSVBuffer } from "../../../services/fileService";
+import { readCSVBuffer, generateCSVStream, getHeaders, streamToBuffer, XLSXToCSVBuffer } from "../../../services/fileService";
 import { accessControlMiddleware } from "../../../middlewares/accessControlMiddleware";
 import { authMiddleware } from "../../../middlewares/authMiddleware";
 
@@ -21,14 +21,17 @@ const xlsxMimetype = "application/vnd.openxmlformats-officedocument.spreadsheetm
 
 router.post(
   "/classe-importAuto",
-  [accessControlMiddleware([ROLES.ADMIN])],
+  [accessControlMiddleware([])],
   fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req: UserRequest, res) => {
+    console.log("LAAAAA");
     if (!isSuperAdmin(req.user)) {
+      console.log("error ADMIN");
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     try {
+      const user = req.user;
       const files = Object.values(req.files || {});
       if (files.length === 0) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -36,9 +39,10 @@ router.post(
 
       const file: UploadedFile = files[0];
       if (file.mimetype !== xlsxMimetype) {
+        console.log("error mimetype");
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
-
+      console.log("ICIII");
       const filePath = file.tempFilePath;
       const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
 
@@ -56,7 +60,8 @@ router.post(
 
       const headers = getHeaders(importedClasseCohort);
       const csvDataReponse = generateCSVStream(importedClasseCohort, headers);
-      uploadFile(`file/appelAProjet/import/import-classe/import-${timestamp}/${timestamp}-updated-classes.csv`, {
+      const responseFileName = `${timestamp}-updated-classes.csv`;
+      uploadFile(`file/appelAProjet/import/import-classe/import-${timestamp}/${responseFileName}`, {
         data: csvDataReponse,
         encoding: "",
         mimetype: "text/csv",
@@ -64,10 +69,17 @@ router.post(
 
       const csvBufferResponse = Buffer.from(await streamToBuffer(csvDataReponse));
 
+      const contentData = csvBufferResponse.toString("base64");
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.IMPORT_DES_CLASSES, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email! }],
+        attachment: [{ content: contentData, name: responseFileName }],
+      });
+
       return res.status(200).send({
-        data: csvBufferResponse.toString("base64"),
+        data: contentData,
         mimeType: "text/csv",
-        fileName: `${timestamp}-updated-classes.csv`,
+        fileName: responseFileName,
         ok: true,
       });
     } catch (error) {

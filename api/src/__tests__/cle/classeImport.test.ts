@@ -107,7 +107,6 @@ ${classe3?._id},""
         importType: ClasseImportType.FIRST_CLASSE_COHORT,
       },
     ];
-    console.log(response.body);
     expect(response.body.ok).toBe(true);
     expect(response.body.data).toEqual(expectedResponse);
   });
