@@ -29,7 +29,6 @@ jest.mock("../../cle/classe/importAuto/classeImportAutoService", () => ({
 
 describe("POST /classe-importAuto", () => {
   const xlsxMimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-  const requestPath = "/cle/classe/import/classe-importAuto";
   const fileContent = "sample file content";
   const fileBuffer = Buffer.from(fileContent);
   const mockParsedContent = [{ classeId: "mockClasseId", status: "ASSIGNED" }];
