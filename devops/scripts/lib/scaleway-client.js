@@ -1,3 +1,10 @@
+const METHOD = {
+  PATCH: "PATCH",
+  PUT: "PUT",
+  CREATE: "CREATE",
+  DELETE: "delete",
+};
+
 class ScalewayClient {
   endpoint = "https://api.scaleway.com";
   region = "fr-par";
@@ -45,18 +52,18 @@ class ScalewayClient {
 
   async _deleteOne(url) {
     const resp = await fetch(url, {
-      method: "delete",
+      method: METHOD.DELETE,
       headers: { "X-Auth-Token": this.secretKey },
     });
     const json = await resp.json();
     if (!resp.ok) {
-      throw new Error("Resource not deleted", { cause: json.message });
+      throw new Error("delete resource failed", { cause: json.message });
     }
   }
 
-  async _patchOne(url, body) {
+  async _updateOne(method, url, body) {
     const resp = await fetch(url, {
-      method: "PATCH",
+      method: method,
       headers: {
         "X-Auth-Token": this.secretKey,
         "Content-Type": "application/json",
@@ -65,7 +72,7 @@ class ScalewayClient {
     });
     const json = await resp.json();
     if (!resp.ok) {
-      throw new Error("Resource not patched", { cause: json.message });
+      throw new Error(`${method} resource failed`, { cause: json.message });
     }
   }
 
@@ -121,6 +128,14 @@ class ScalewayClient {
     );
   }
 
+  async createContainerNamespace(name) {
+    return this._updateOne(
+      METHOD.CREATE,
+      `${this.endpoint}/containers/v1beta1/regions/${this.region}/namespaces`,
+      body
+    );
+  }
+
   async findContainer(namespaceId, name) {
     return this._findOne(
       `${this.endpoint}/containers/v1beta1/regions/${this.region}/containers?namespace_id=${namespaceId}&name=${name}`,
@@ -135,7 +150,8 @@ class ScalewayClient {
   }
 
   async updateContainer(containerId, body) {
-    return this._patchOne(
+    return this._updateOne(
+      METHOD.PATCH,
       `${this.endpoint}/containers/v1beta1/regions/${this.region}/containers/${containerId}`,
       body
     );
