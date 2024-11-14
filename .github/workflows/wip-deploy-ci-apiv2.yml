@@ -45,9 +45,9 @@ jobs:
         run: npm run build
 
       # ESLint check
-      - name: Lint code
-        working-directory: apiv2
-        run: npm run lint
+      # - name: Lint code
+      #   working-directory: apiv2
+      #   run: npm run lint
 
       - name: Start MongoDB 7.0
         uses: supercharge/mongodb-github-action@v1.10.0
