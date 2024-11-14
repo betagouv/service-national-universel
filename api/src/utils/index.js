@@ -780,9 +780,7 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
       }
     }
     if (initialState !== young.statusPhase1) {
-      console.log("🚀 ~ file: index.js:839 ~ updateStatusPhase1 ~ initialState:", initialState);
-      console.log("🚀 ~ file: index.js:839 ~ updateStatusPhase1 ~ young.statusPhase1:", young.statusPhase1);
-      // await young.save({ fromUser: user });
+      await young.save({ fromUser: user });
       return true;
     }
   } catch (e) {

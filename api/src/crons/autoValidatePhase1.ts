@@ -9,7 +9,6 @@ import { getDepartureDate } from "snu-lib";
 export const handler = async (): Promise<void> => {
   try {
     const now = new Date().toISOString();
-    console.log("🚀 ~ file: autoValidatePhase1.ts:11 ~ handler ~ now:", now);
 
     const onGoingCohorts = await CohortModel.find({
       $and: [{ dateStart: { $lte: now } }, { dateEnd: { $gte: now } }],
@@ -49,6 +48,7 @@ export const handler = async (): Promise<void> => {
     }
   } catch (e) {
     capture(e);
+    slack.error({ title: "CheckCoherence", text: JSON.stringify(e) });
     throw e;
   }
 };

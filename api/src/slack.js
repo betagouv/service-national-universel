@@ -2,7 +2,7 @@ const fetch = require("node-fetch");
 
 const config = require("config");
 const { logger } = require("./logger");
-const { capture } = require("./sentry");
+const { capture, captureMessage } = require("./sentry");
 
 const STATUS_PREFIX = {
   error: "❌",
@@ -16,7 +16,7 @@ const STATUS_COLOR = {
 };
 
 const postMessage = async ({ title, text, author_name, color }) => {
-  if (!config.SLACK_BOT_TOKEN || !config.SLACK_BOT_CHANNEL) return capture("NO SLACK CREDENTIALS");
+  if (!config.SLACK_BOT_TOKEN || !config.SLACK_BOT_CHANNEL) return captureMessage("NO SLACK CREDENTIALS");
   const payload = {
     channel: config.SLACK_BOT_CHANNEL,
     attachments: [
