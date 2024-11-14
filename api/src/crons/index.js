@@ -30,7 +30,7 @@ const mongoMonitoring = require("./mongoMonitoring");
 const classesStatusUpdate = require("./classesStatusUpdate");
 const monitorCertificats = require("./monitorCertificats");
 const checkCoherence = require("./checkCoherence");
-
+const autoValidatePhase1 = require("./autoValidatePhase1");
 
 // doubt ? -> https://crontab.guru/
 
@@ -115,6 +115,7 @@ const CRONS = [
   cron("classesStatusUpdate", "2 */1 * * *", classesStatusUpdate.handler),
   cron("monitorCertificats", "0 3 1 * *", monitorCertificats.handler),
   cron("checkCoherence", "30 7,12,16 * * *", checkCoherence.handler),
+  cron("autoValidatePhase1", "20 1 * * *", autoValidatePhase1.handler),
 ];
 
 module.exports = CRONS;

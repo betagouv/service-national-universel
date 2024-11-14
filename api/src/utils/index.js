@@ -722,83 +722,32 @@ async function notifDepartmentChange(department, template, young, extraParams = 
 }
 
 async function addingDayToDate(days, dateStart) {
-  try {
-    const startDate = new Date(dateStart);
-    const newDate = addDays(startDate, days);
-    const formattedValidationDate = newDate.toISOString();
+  const startDate = new Date(dateStart);
+  const newDate = addDays(startDate, days);
+  const formattedValidationDate = newDate.toISOString();
 
-    return formattedValidationDate;
-  } catch (e) {
-    capture(e);
-  }
+  return formattedValidationDate;
 }
 
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort = null, user }) {
-  let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"];
+  let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023"];
   let youngCohort = cohort;
   if (!cohort) {
     youngCohort = await CohortModel.findOne({ name: young.cohort });
   }
-  const {
-    daysToValidate: daysToValidate,
-    validationDate: dateDeValidation,
-    validationDateForTerminaleGrade: dateDeValidationTerminale,
-    dateStart: dateStartcohort,
-  } = await getCohortDateInfo(sessionPhase1.cohort);
+
+  // ! Freeze validation for legacy cohort
+  if (cohortWithOldRules.includes(young.cohort) || cohortWithOldRules.includes(youngCohort.name)) return;
+
+  const { daysToValidate: daysToValidate, dateStart: dateStartCohort } = await getCohortDateInfo(sessionPhase1.cohort);
 
   // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
   const bus = await LigneBusModel.findById(young.ligneId);
   const dateStart = getDepartureDate(young, sessionPhase1, youngCohort, { bus });
-  const isTerminale = young?.grade === "Terminale";
-  // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
-  const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
   const validationDateWithDays = await addingDayToDate(daysToValidate, dateStart);
 
-  if (young.cohort === "Juin 2023") {
-    await updateStatusPhase1WithSpecificCase(young, validationDate, user);
-  } else if (cohortWithOldRules.includes(young.cohort)) {
-    await updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user);
-  } else {
-    await updateStatusPhase1(young, validationDateWithDays, user);
-  }
-  return { dateStart, daysToValidate, validationDateWithDays, dateStartcohort };
-}
-
-async function updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user) {
-  try {
-    const now = new Date();
-    // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
-    const isValidationDatePassed = now >= validationDate;
-    // Cette constante nous permet de vérifier si un jeune était présent au début du séjour et à la JDM (basé sur son grade)
-    const isCohesionStayValid = young.cohesionStayPresence === "true" && (young.presenceJDM === "true" || isTerminale);
-    // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
-    const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
-
-    // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
-    if (isValidationDatePassed) {
-      if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
-        if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else {
-          young.set({ statusPhase1: "DONE" });
-        }
-      } else {
-        // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
-        if (["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)) {
-          young.set({ statusPhase1: "DONE" });
-        } else if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else if (young.cohesionStayPresence === "true" && !young.presenceJDM) {
-          young.set({ statusPhase1: "AFFECTED" });
-        } else {
-          young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
-        }
-      }
-    }
-    await young.save({ fromUser: user });
-  } catch (e) {
-    capture(e);
-  }
+  await updateStatusPhase1(young, validationDateWithDays, user);
+  return { dateStart, daysToValidate, validationDateWithDays, dateStartCohort };
 }
 
 async function updateStatusPhase1(young, validationDateWithDays, user) {
@@ -811,6 +760,7 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
     const isValidationDatePassed = now >= validationDate;
     // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
+    // ! Si null, on considère que le statut de pointage n'est pas encore connu (présent/absent)
     const isCohesionStayValid = young.cohesionStayPresence === "true";
     // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
     const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt >= validationDate);
@@ -825,53 +775,19 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
       } else {
         // Sinon on ne valide pas sa phase 1.
         // Inclut les jeunes avec départs séjour motifs avant le 8ème jour de présence
-        if (!young.cohesionStayPresence) {
-          young.set({ statusPhase1: "AFFECTED" });
-        } else {
+        if (young.cohesionStayPresence === "false") {
           young.set({ statusPhase1: "NOT_DONE" });
+        } else {
+          young.set({ statusPhase1: "AFFECTED" });
         }
       }
     }
     if (initialState !== young.statusPhase1) {
-      await young.save({ fromUser: user });
+      console.log("🚀 ~ file: index.js:839 ~ updateStatusPhase1 ~ initialState:", initialState);
+      console.log("🚀 ~ file: index.js:839 ~ updateStatusPhase1 ~ young.statusPhase1:", young.statusPhase1);
+      // await young.save({ fromUser: user });
+      return true;
     }
-  } catch (e) {
-    capture(e);
-  }
-}
-
-async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
-  try {
-    const now = new Date();
-    // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
-    const isValidationDatePassed = now >= validationDate;
-    // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
-    const isCohesionStayValid = young.cohesionStayPresence === "true";
-    // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
-    const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt > validationDate);
-
-    // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
-    if (isValidationDatePassed) {
-      if (isValidationDatePassed && isCohesionStayValid && isDepartureDateValid) {
-        if (young?.departSejourMotif && ["Exclusion"].includes(young.departSejourMotif)) {
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else {
-          young.set({ statusPhase1: "DONE" });
-        }
-      } else {
-        // Sinon on ne valide pas sa phase 1. Exception : si le jeune a un cas de force majeur ou si urgence sanitaire, on valide sa phase 1
-        if (["Cas de force majeure pour le volontaire", "Annulation du séjour ou mesure d’éviction sanitaire"].includes(young?.departSejourMotif)) {
-          young.set({ statusPhase1: "DONE" });
-        } else if (young?.departSejourMotif && ["Exclusion", "Autre"].includes(young.departSejourMotif)) {
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else if (young.cohesionStayPresence !== "false") {
-          young.set({ statusPhase1: "AFFECTED" });
-        } else {
-          young.set({ statusPhase1: "NOT_DONE", presenceJDM: "false" });
-        }
-      }
-    }
-    await young.save({ fromUser: user });
   } catch (e) {
     capture(e);
   }
@@ -1080,6 +996,7 @@ module.exports = {
   updateCenterDependencies,
   deleteCenterDependencies,
   updatePlacesBus,
+  updateStatusPhase1,
   updateSeatsTakenInBusLine,
   sendAutoCancelMeetingPoint,
   listFiles,
