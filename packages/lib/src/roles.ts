@@ -483,6 +483,14 @@ function isAdmin(user: UserRoles) {
   return ROLES.ADMIN === user.role;
 }
 
+function isReferentReg(user: UserRoles) {
+  return ROLES.REFERENT_REGION === user.role;
+}
+
+function isReferentDep(user: UserRoles) {
+  return ROLES.REFERENT_DEPARTMENT === user.role;
+}
+
 function isReferentRegDep(user: UserRoles) {
   return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role || "");
 }
@@ -683,22 +691,22 @@ function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: stri
 }
 
 function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
-    if (!cohort) return false;
+  if (!cohort) return false;
 
-    switch (actor.role) {
-      case ROLES.ADMIN:
-        return true;
-      case ROLES.REFERENT_DEPARTMENT:
-        return cohort.inscriptionOpenForReferentDepartment === true;
-      case ROLES.REFERENT_REGION:
-        return cohort.inscriptionOpenForReferentRegion === true;
-      case ROLES.REFERENT_CLASSE:
-        return cohort.inscriptionOpenForReferentClasse === true;
-      case ROLES.ADMINISTRATEUR_CLE:
-        return cohort.inscriptionOpenForAdministrateurCle === true;
-      default:
-        return false;
-    }
+  switch (actor.role) {
+    case ROLES.ADMIN:
+      return true;
+    case ROLES.REFERENT_DEPARTMENT:
+      return cohort.inscriptionOpenForReferentDepartment === true;
+    case ROLES.REFERENT_REGION:
+      return cohort.inscriptionOpenForReferentRegion === true;
+    case ROLES.REFERENT_CLASSE:
+      return cohort.inscriptionOpenForReferentClasse === true;
+    case ROLES.ADMINISTRATEUR_CLE:
+      return cohort.inscriptionOpenForAdministrateurCle === true;
+    default:
+      return false;
+  }
 }
 
 function canSendTemplateToYoung(actor, young) {
@@ -1193,6 +1201,8 @@ export {
   canCreateTags,
   isSuperAdmin,
   isAdmin,
+  isReferentReg,
+  isReferentDep,
   isAdminCle,
   isChefEtablissement,
   isCoordinateurEtablissement,
