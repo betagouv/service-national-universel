@@ -1,5 +1,5 @@
 const ENVS = ["ci", "staging", "production"];
-const APPS = ["app", "admin", "api"];
+const APPS = ["app", "admin", "api", "apiv2"];
 
 const FRONTEND_APPS = ["app", "admin"];
 
