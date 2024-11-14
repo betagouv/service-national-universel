@@ -43,7 +43,7 @@ export default function Index({ ...props }) {
       ? "correction"
       : "readonly";
     const cohort = cohorts.find(({ _id, name }) => _id === young?.cohortId || name === young?.cohort);
-    if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && new Date() > new Date(cohort?.instructionEndDate || "")) {
+    if (!isAdmin(user) && !isReferentRegion(user) && cohort.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate)) {
       mode = "readonly";
     }
 
