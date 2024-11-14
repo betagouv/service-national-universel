@@ -729,15 +729,12 @@ async function addingDayToDate(days, dateStart) {
   return formattedValidationDate;
 }
 
-async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort = null, user }) {
+async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
   let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023"];
-  let youngCohort = cohort;
-  if (!cohort) {
-    youngCohort = await CohortModel.findOne({ name: young.cohort });
-  }
+  const youngCohort = await CohortModel.findOne({ name: young.cohort });
 
   // ! Freeze validation for legacy cohort
-  if (cohortWithOldRules.includes(young.cohort) || cohortWithOldRules.includes(youngCohort.name)) return;
+  if (cohortWithOldRules.includes(youngCohort.name)) return;
 
   const { daysToValidate: daysToValidate, dateStart: dateStartCohort } = await getCohortDateInfo(sessionPhase1.cohort);
 
@@ -762,7 +759,7 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
     // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
     // ! Si null, on considère que le statut de pointage n'est pas encore connu (présent/absent)
     const isCohesionStayValid = young.cohesionStayPresence === "true";
-    // Cette constante nour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
+    // Cette constante pour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
     const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt >= validationDate);
     // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
     if (isValidationDatePassed) {

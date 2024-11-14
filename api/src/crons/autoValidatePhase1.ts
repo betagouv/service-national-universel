@@ -18,20 +18,20 @@ export const handler = async (): Promise<void> => {
     if (!onGoingCohorts.length) return;
 
     for (const cohort of onGoingCohorts) {
-      let daysToValidate = cohort.daysToValidate;
-      if (!daysToValidate) {
-        console.warn(`Cohort ${cohort.name} has no daysToValidate`);
-        daysToValidate = 8;
-      }
-      if (differenceInDays(now, cohort.dateStart) !== cohort.daysToValidate) continue;
-
-      const youngs = await YoungModel.find({ cohortId: cohort._id });
+      const youngs = await YoungModel.find({ cohortId: cohort._id, status: "VALIDATED", statusPhase1: "AFFECTED" });
 
       let nbYoungs = 0;
-      for await (const young of youngs) {
+      for (const young of youngs) {
         const bus = await LigneBusModel.findById(young.ligneId);
         const sessionPhase1 = await CohortModel.findById(young.sessionPhase1Id);
         const dateStart = getDepartureDate(young, sessionPhase1, cohort, { bus });
+
+        let daysToValidate = cohort.daysToValidate;
+        if (!daysToValidate) {
+          console.warn(`Cohort ${cohort.name} has no daysToValidate`);
+          daysToValidate = 8;
+        }
+        if (differenceInDays(now, dateStart) !== cohort.daysToValidate) continue;
 
         const validationDateWithDays = addDays(new Date(dateStart), cohort.daysToValidate).toISOString();
         const modified = await updateStatusPhase1(young, validationDateWithDays, {
