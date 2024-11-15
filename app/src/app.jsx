@@ -14,12 +14,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, Link, Router, Switch, useLocation, Route } from "react-router-dom";
+import { Redirect, Link, Router, Switch, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { setYoung } from "./redux/auth/actions";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import { maintenance } from "./config";
-import api from "./services/api";
+import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
 import { shouldForceRedirectToEmailValidation } from "./utils/navigation";
 import useAuth from "./services/useAuth";
@@ -45,6 +45,7 @@ const RepresentantsLegaux = lazy(() => import("./scenes/representants-legaux"));
 const Thanks = lazy(() => import("./scenes/contact/Thanks"));
 const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 
+initApi();
 startReactDsfr({ defaultColorScheme: "light", Link });
 
 function App() {
@@ -53,7 +54,7 @@ function App() {
   const young = useSelector((state) => state.Auth.young);
   const { login } = useAuth();
 
-  async function getUser() {
+  async function fetchData() {
     try {
       const { ok, user } = await api.checkToken();
 
@@ -75,7 +76,7 @@ function App() {
   }
 
   useEffect(() => {
-    getUser();
+    fetchData();
   }, []);
 
   if (loading) return <PageLoader />;
@@ -97,7 +98,7 @@ function App() {
               <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
               <SentryRoute path="/noneligible" component={NonEligible} />
               <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-              <Route path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+              <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
               <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
               <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
               <SentryRoute path="/besoin-d-aide" component={Contact} />
