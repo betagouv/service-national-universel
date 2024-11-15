@@ -2,11 +2,11 @@ import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Inject, Logger } from "@nestjs/common";
 import { Job } from "bullmq";
 import { ReferentModel } from "src/admin/core/iam/Referent.model";
-import { ContactType, QueueType } from "../Notification";
+import { ContactType, NotificationQueueType } from "../Notification";
 import { ContactProvider } from "./Contact.provider";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 
-@Processor(QueueType.CONTACT)
+@Processor(NotificationQueueType.CONTACT)
 export class ContactConsumer extends WorkerHost {
     constructor(
         private logger: Logger,

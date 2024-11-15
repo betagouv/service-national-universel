@@ -1,4 +1,4 @@
-export enum QueueType {
+export enum NotificationQueueType {
     EMAIL = "email",
     CONTACT = "contact",
 }

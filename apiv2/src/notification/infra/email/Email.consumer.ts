@@ -3,10 +3,10 @@ import { Inject, Logger } from "@nestjs/common";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 import { Job } from "bullmq";
 import { EmailParams, EmailTemplate } from "../../core/Notification";
-import { QueueType } from "../Notification";
+import { NotificationQueueType } from "../Notification";
 import { EmailProvider } from "./Email.provider";
 
-@Processor(QueueType.EMAIL)
+@Processor(NotificationQueueType.EMAIL)
 export class EmailConsumer extends WorkerHost {
     constructor(
         private logger: Logger,

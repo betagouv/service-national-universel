@@ -6,7 +6,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { Logger, MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
-import { QueueType } from "@notification/infra/Notification";
+import { NotificationQueueType } from "@notification/infra/Notification";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
 import { NotificationModule } from "@notification/Notification.module";
 import { ClsMiddleware, ClsModule } from "nestjs-cls";
@@ -33,10 +33,10 @@ import { useCaseProvider as useCaseProviders } from "./infra/sejours/cle/initPro
         JwtAuthModule,
         NotificationModule,
         BullModule.registerQueue({
-            name: QueueType.EMAIL,
+            name: NotificationQueueType.EMAIL,
         }),
         BullModule.registerQueue({
-            name: QueueType.CONTACT,
+            name: NotificationQueueType.CONTACT,
         }),
     ],
     controllers: [ClasseController, AuthController],

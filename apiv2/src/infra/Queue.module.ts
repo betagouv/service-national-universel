@@ -2,7 +2,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
-import { QueueType } from "@notification/infra/Notification";
+import { NotificationQueueType } from "@notification/infra/Notification";
 
 @Module({
     imports: [
@@ -16,10 +16,10 @@ import { QueueType } from "@notification/infra/Notification";
             }),
         }),
         BullModule.registerQueue({
-            name: QueueType.EMAIL,
+            name: NotificationQueueType.EMAIL,
         }),
         BullModule.registerQueue({
-            name: QueueType.CONTACT,
+            name: NotificationQueueType.CONTACT,
         }),
     ],
     exports: [BullModule],
