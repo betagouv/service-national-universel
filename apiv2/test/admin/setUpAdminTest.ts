@@ -4,9 +4,12 @@ import { Logger } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
-import { QueueName } from "@shared/infra/Queue";
-import { NotificationModule } from "@notification/Notification.module";
 import { ClsModule } from "nestjs-cls";
+
+import { QueueName } from "@shared/infra/Queue";
+
+import { NotificationModule } from "@notification/Notification.module";
+import { QueueModule } from "@infra/Queue.module";
 import { SigninReferent } from "@admin/core/iam/useCase/SigninReferent";
 import { ClasseService } from "@admin/core/sejours/cle/classe/Classe.service";
 import { AuthController } from "@admin/infra/iam/api/Auth.controller";
@@ -18,9 +21,16 @@ import { classeMongoProviders } from "@admin/infra/sejours/cle/classe/provider/C
 import { etablissementMongoProviders } from "@admin/infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
 import { gatewayProviders } from "@admin/infra/sejours/cle/initProvider/gateway";
 import { guardProviders } from "@admin/infra/sejours/cle/initProvider/guard";
-import { useCaseProvider } from "@admin/infra/sejours/cle/initProvider/useCase";
+import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
+import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { testDatabaseProviders } from "../testDatabaseProvider";
-import { QueueModule } from "@infra/Queue.module";
+import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS.service";
+import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
+import { jeuneMongoProviders } from "@admin/infra/sejours/jeune/provider/JeuneMongo.provider";
+import { centreMongoProviders } from "@admin/infra/sejours/phase1/centre/provider/CentreMongo.provider";
+import { LigneDeBusMongoProviders } from "@admin/infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
+import { pointDeRassemblementMongoProviders } from "@admin/infra/sejours/phase1/pointDeRassemblement/provider/PointDeRassemblementMongo.provider";
+import { sejourMongoProviders } from "@admin/infra/sejours/phase1/sejour/provider/SejourMongo.provider";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -45,19 +55,26 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             }),
             QueueModule,
         ],
-        controllers: [ClasseController, AuthController],
+        controllers: [ClasseController, AffectationController, AuthController],
         providers: [
             ClasseService,
+            SimulationAffectationHTSService,
             ...gatewayProviders,
             ...classeMongoProviders,
             ...referentMongoProviders,
             ...etablissementMongoProviders,
+            ...jeuneMongoProviders,
+            ...centreMongoProviders,
+            ...LigneDeBusMongoProviders,
+            ...pointDeRassemblementMongoProviders,
+            ...sejourMongoProviders,
             testDatabaseProviders(setupOptions.newContainer),
             Logger,
             ...guardProviders,
             SigninReferent,
             { provide: AuthProvider, useClass: JwtTokenService },
-            ...useCaseProvider,
+            ...phase1UseCaseProviders,
+            ...cleUseCaseProviders,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))

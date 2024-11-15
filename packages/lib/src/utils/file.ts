@@ -1,4 +1,7 @@
-function download(file, fileName) {
+import { parse, ParserOptionsArgs } from "@fast-csv/parse";
+import { ERRORS } from "../constants/errors";
+
+export function download(file, fileName) {
   // @ts-expect-error msSaveOrOpenBlob exists
   if (window.navigator.msSaveOrOpenBlob) {
     // IE11 & Edge
@@ -19,7 +22,7 @@ function download(file, fileName) {
  * @param [File]
  * @returns FormData
  **/
-function createFormDataForFileUpload(arr: any[], properties) {
+export function createFormDataForFileUpload(arr: any[], properties) {
   let files: any[] = [];
   if (Array.isArray(arr)) files = arr.filter((e) => typeof e === "object");
   else files = [arr];
@@ -40,4 +43,22 @@ function createFormDataForFileUpload(arr: any[], properties) {
   return formData;
 }
 
-export { download, createFormDataForFileUpload };
+export function readCSVBuffer<T>(buffer: Buffer, options: ParserOptionsArgs = { headers: true }): Promise<T[]> {
+  return new Promise((resolve, reject) => {
+    const content: T[] = [];
+
+    const stream = parse(options)
+      .on("error", (error) => {
+        console.log(error);
+        reject(new Error(ERRORS.CANNOT_PARSE_CSV));
+      })
+      .on("data", (row) => {
+        content.push(row);
+      })
+      .on("end", () => {
+        resolve(content);
+      });
+    stream.write(buffer);
+    stream.end();
+  });
+}

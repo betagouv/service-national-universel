@@ -23,11 +23,21 @@ import { referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provi
 import { ClasseController } from "./infra/sejours/cle/classe/api/Classe.controller";
 import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
-import { gatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
+import { gatewayProviders as cleGatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
+import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phase1/initProvider/gateway";
+import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
-import { useCaseProvider as useCaseProviders } from "./infra/sejours/cle/initProvider/useCase";
+import { useCaseProvider as cleUseCaseProviders } from "src/admin/infra/sejours/cle/initProvider/useCase";
+import { useCaseProvider as phase1UseCaseProviders } from "src/admin/infra/sejours/phase1/initProvider/useCase";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
+import { AffectationController } from "./infra/sejours/phase1/affectation/api/Affectation.controller";
+import { SimulationAffectationHTSService } from "./core/sejours/phase1/affectation/SimulationAffectationHTS.service";
+import { jeuneMongoProviders } from "./infra/sejours/jeune/provider/JeuneMongo.provider";
+import { centreMongoProviders } from "./infra/sejours/phase1/centre/provider/CentreMongo.provider";
+import { LigneDeBusMongoProviders } from "./infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
+import { pointDeRassemblementMongoProviders } from "./infra/sejours/phase1/pointDeRassemblement/provider/PointDeRassemblementMongo.provider";
+import { sejourMongoProviders } from "./infra/sejours/phase1/sejour/provider/SejourMongo.provider";
 
 @Module({
     imports: [
@@ -39,13 +49,19 @@ import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
         QueueModule,
         TaskModule,
     ],
-    controllers: [ClasseController, AuthController, AdminTaskController],
+    controllers: [ClasseController, AffectationController, AuthController, AdminTaskController],
     providers: [
         ClasseService,
+        SimulationAffectationHTSService,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,
         ...referentMongoProviders,
         ...etablissementMongoProviders,
+        ...jeuneMongoProviders,
+        ...centreMongoProviders,
+        ...LigneDeBusMongoProviders,
+        ...pointDeRassemblementMongoProviders,
+        ...sejourMongoProviders,
         ...guardProviders,
         ...taskMongoProviders,
         Logger,
@@ -53,8 +69,11 @@ import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },
-        ...useCaseProviders,
-        ...gatewayProviders,
+        ...cleUseCaseProviders,
+        ...phase1UseCaseProviders,
+        ...cleGatewayProviders,
+        ...phase1GatewayProviders,
+        ...jeuneGatewayProviders,
     ],
 })
 export class AdminModule {
