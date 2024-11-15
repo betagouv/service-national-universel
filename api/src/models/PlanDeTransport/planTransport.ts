@@ -3,7 +3,7 @@ import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import mongooseElastic from "@selego/mongoose-elastic";
 
-import { InterfaceExtended, ModificationBusSchema, PlanTransportPointDeRassemblementEnrichedSchema, PlanTransportSchema } from "snu-lib";
+import { InterfaceExtended, ModificationBusSchema, PlanTransportPointDeRassemblementEnrichedSchema, PlanTransportSchema, TRANSPORT_MODES_LIST } from "snu-lib";
 
 import esClient from "../../es";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
@@ -61,3 +61,4 @@ export type PlanTransportDocument<T = {}> = DocumentExtended<PlanTransportType &
 type SchemaExtended = PlanTransportDocument & UserExtension;
 
 export const PlanTransportModel = mongoose.model<PlanTransportDocument>(MODELNAME, schema);
+export type PlanTransportModesType = (typeof TRANSPORT_MODES_LIST)[number];

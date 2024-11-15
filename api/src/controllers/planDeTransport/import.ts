@@ -1,40 +1,98 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const { capture } = require("../../sentry");
-const { ERRORS } = require("../../utils");
-const Joi = require("joi");
-const { canSendPlanDeTransport, MIME_TYPES, COHORT_TYPE } = require("snu-lib");
-const fs = require("fs");
-const { parse: parseDate } = require("date-fns");
-const fileUpload = require("express-fileupload");
-const { CohesionCenterModel } = require("../../models");
-const { PointDeRassemblementModel } = require("../../models");
-const { ImportPlanTransportModel } = require("../../models");
-const { LigneBusModel } = require("../../models");
-const { SessionPhase1Model } = require("../../models");
-const { LigneToPointModel } = require("../../models");
-const { PlanTransportModel } = require("../../models");
-const { ClasseModel } = require("../../models");
-const { CohortModel } = require("../../models");
-const scanFile = require("../../utils/virusScanner");
-const { getMimeFromFile } = require("../../utils/file");
-const { validateId } = require("../../utils/validator");
+import express, { Request, Response } from "express";
+import { Router } from "express";
+import passport from "passport";
+import { capture } from "../../sentry";
+import { ERRORS } from "../../utils";
+import Joi from "joi";
+import { canSendPlanDeTransport, MIME_TYPES, COHORT_TYPE, TRANSPORT_MODES, TRANSPORT_CONVOCATION_SUBTRACT_MINUTES_DEFAULT, TRANSPORT_CONVOCATION_SUBTRACT_MINUTES } from "snu-lib";
+import fs from "fs";
+import { parse as parseDate } from "date-fns";
+import fileUpload, { UploadedFile } from "express-fileupload";
+import {
+  CohesionCenterModel,
+  PointDeRassemblementModel,
+  ImportPlanTransportModel,
+  LigneBusModel,
+  SessionPhase1Model,
+  LigneToPointModel,
+  PlanTransportModel,
+  ClasseModel,
+  CohortModel,
+  type PlanTransportModesType,
+} from "../../models";
 
-const { validatePdtFile, computeImportSummary } = require("../../planDeTransport/planDeTransport/import/pdtImportService");
-const { formatTime } = require("../../planDeTransport/planDeTransport/import/pdtImportUtils");
-const { startSession, withTransaction, endSession } = require("../../mongo");
+const scanFile = require("../../utils/virusScanner");
+import { getMimeFromFile } from "../../utils/file";
+import { validateId } from "../../utils/validator";
+import { validatePdtFile, computeImportSummary } from "../../planDeTransport/planDeTransport/import/pdtImportService";
+import { formatTime } from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
+import { startSession, withTransaction, endSession } from "../../mongo";
+
+interface User {
+  id: string;
+  // Add other user properties as needed
+}
+
+interface AuthenticatedRequest extends Request {
+  user: User;
+}
+
+interface ImportPlanTransportLine {
+  [key: string]: string | string[] | undefined;
+  "NUMERO DE LIGNE": string;
+  "DATE DE TRANSPORT ALLER": string;
+  "DATE DE TRANSPORT RETOUR": string;
+  "ID CENTRE": string;
+  "HEURE D'ARRIVEE AU CENTRE": string;
+  "HEURE DE DÉPART DU CENTRE": string;
+  "TOTAL ACCOMPAGNATEURS": string;
+  "CAPACITÉ VOLONTAIRE TOTALE": string;
+  "CAPACITE TOTALE LIGNE": string;
+  "PAUSE DÉJEUNER ALLER"?: string;
+  "PAUSE DÉJEUNER RETOUR"?: string;
+  "TEMPS DE ROUTE": string;
+  "ID CLASSE"?: string;
+  "LIGNES FUSIONNÉES"?: string;
+}
+
+interface StepPoint {
+  type: string;
+  address: string;
+  departureHour: string;
+  returnHour: string;
+  transportType: string;
+}
+
+interface LineToPoint {
+  lineId: string;
+  meetingPointId: string;
+  transportType: string;
+  busArrivalHour: string;
+  departureHour: string;
+  meetingHour: string;
+  returnHour: string;
+  stepPoints: StepPoint[];
+}
+
+interface CustomRequestWithFiles extends AuthenticatedRequest {
+  files?: {
+    [fieldname: string]: UploadedFile | UploadedFile[];
+  };
+}
+
+const router: Router = express.Router();
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
 router.post(
   "/:cohortName",
   passport.authenticate("referent", { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
-  async (req, res) => {
+  async (req: CustomRequestWithFiles, res: Response) => {
     try {
       const { error, value } = Joi.object({
         cohortName: Joi.string().required(),
       }).validate(req.params, { stripUnknown: true });
+
       if (error) {
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -53,7 +111,8 @@ router.post(
       const { name, tempFilePath, mimetype } = file;
       const filetype = await getMimeFromFile(tempFilePath);
       const mimeFromMagicNumbers = filetype || MIME_TYPES.EXCEL;
-      const validTypes = [MIME_TYPES.EXCEL];
+      const validTypes: string[] = [MIME_TYPES.EXCEL];
+
       if (!validTypes.includes(mimetype) && !validTypes.includes(mimeFromMagicNumbers)) {
         fs.unlinkSync(tempFilePath);
         return res.status(400).send({ ok: false, code: ERRORS.UNSUPPORTED_TYPE });
@@ -70,17 +129,15 @@ router.post(
       }
 
       const isCle = cohort.type === COHORT_TYPE.CLE;
-      const { lines, errors, ok, code } = await validatePdtFile(tempFilePath, cohort.name, isCle);
+      const { lines = [], errors, ok, code } = await validatePdtFile(tempFilePath, cohort.name, isCle);
       if (!ok) {
         return res.status(400).send({ ok: false, code: code || ERRORS.INVALID_BODY, errors });
       }
 
       const { centerCount, classeCount, pdrCount, maxPdrOnLine } = computeImportSummary(lines);
 
-      // Save import plan
       const { _id } = await ImportPlanTransportModel.create({ cohort: cohort.name, lines });
 
-      // Send response (summary)
       res.status(200).send({
         ok: true,
         data: { _id, busLineCount: lines.length, centerCount, classeCount, pdrCount, maxPdrOnLine, cohort },
@@ -93,7 +150,7 @@ router.post(
 );
 
 // Importe un plan de transport vérifié et enregistré dans importplandetransport.
-router.post("/:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("//:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req: AuthenticatedRequest, res: Response) => {
   const transaction = await startSession();
   try {
     const { error, value: importId } = validateId(req.params.importId);
@@ -111,33 +168,41 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
 
-      const lines = importData.lines;
+      const lines = importData.lines as ImportPlanTransportLine[];
       const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
 
-      // Vérification des lignes existantes (ne sont modifié que les nouvelles)
-      const newLines = [];
-      const promises = [];
-      for (const line of importData.lines) {
-        promises.push(LigneBusModel.findOne({ cohort: importData.cohort, busId: line["NUMERO DE LIGNE"] }));
-      }
-      const oldLines = await Promise.all(promises);
-      for (let i = 0; i < oldLines.length; i++) {
-        // oldLines[i] est null quand la ligne de bus n'existe pas encore dans le pdt
-        if (!oldLines[i]) {
-          newLines.push(importData.lines[i]);
-        }
-      }
+      // Vérification des lignes existantes
+      const newLines: ImportPlanTransportLine[] = [];
+      const promises = lines.map((line) =>
+        LigneBusModel.findOne({
+          cohort: importData.cohort,
+          busId: line["NUMERO DE LIGNE"],
+        }),
+      );
 
-      // import des nouvelles lignes
+      const oldLines = await Promise.all(promises);
+      lines.forEach((line, i) => {
+        if (!oldLines[i]) {
+          newLines.push(line);
+        }
+      });
+
+      // Import des nouvelles lignes
       for (const line of newLines) {
-        const pdrIds = [];
+        const pdrIds: string[] = [];
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-          if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
-            pdrIds.push(line[`ID PDR ${pdrNumber}`]);
+          const pdrKey = `ID PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
+          const pdrValue = line[pdrKey]?.toString().toLowerCase();
+          if (line[pdrKey] && !["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
+            pdrIds.push(line[pdrKey] as string);
           }
         }
 
-        const session = await SessionPhase1Model.findOne({ cohort: importData.cohort, cohesionCenterId: line["ID CENTRE"] });
+        const session = await SessionPhase1Model.findOne({
+          cohort: importData.cohort,
+          cohesionCenterId: line["ID CENTRE"],
+        });
+
         const busLineData = {
           cohort: importData.cohort,
           busId: line["NUMERO DE LIGNE"],
@@ -151,13 +216,14 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           totalCapacity: line["CAPACITE TOTALE LIGNE"],
           youngSeatsTaken: 0,
           lunchBreak: (line["PAUSE DÉJEUNER ALLER"] || "").toLowerCase() === "oui",
-          lunchBreakReturn: line["PAUSE DÉJEUNER RETOUR" || ""].toLowerCase() === "oui",
+          lunchBreakReturn: (line["PAUSE DÉJEUNER RETOUR"] || "").toLowerCase() === "oui",
           travelTime: formatTime(line["TEMPS DE ROUTE"]),
           sessionId: session?._id.toString(),
           meetingPointsIds: pdrIds,
-          classeId: line["ID CLASSE"] ? line["ID CLASSE"] : undefined,
+          classeId: line["ID CLASSE"],
           mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"].split(",") : [],
         };
+
         const newBusLine = new LigneBusModel(busLineData);
         const busLine = await newBusLine.save({ session: transaction });
 
@@ -170,44 +236,50 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           }
         }
 
-        const lineToPointWithCorrespondance = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc, pdrNumber) => {
-          if (pdrNumber > 1 && !line[`ID PDR ${pdrNumber}`]) return acc;
-          if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`].toLowerCase())) {
+        const lineToPointWithCorrespondance: LineToPoint[] = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc: LineToPoint[], pdrNumber) => {
+          const pdrKey = `ID PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
+          const pdrValue = line[pdrKey]?.toString().toLowerCase();
+
+          if (pdrNumber > 1 && !line[pdrKey]) return acc;
+
+          if (!["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
             acc.push({
               lineId: busLine._id.toString(),
-              meetingPointId: line[`ID PDR ${pdrNumber}`],
-              transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
-              busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`]),
-              departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]),
-              meetingHour: getPDRMeetingHour(formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`])),
-              returnHour: formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`]),
+              meetingPointId: line[pdrKey] as string,
+              transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+              busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`] as string),
+              departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
+              meetingHour: getPDRMeetingHour(
+                formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
+                line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() as PlanTransportModesType,
+              ),
+              returnHour: formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`] as string),
               stepPoints: [],
             });
           } else {
-            if (line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance") {
-              // Special case: when correspondance is not aller or retour
-              // We create 2 step points (aller and retour).
+            if (pdrValue === "correspondance") {
               acc[acc.length - 1].stepPoints.push({
                 type: "aller",
-                address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
-                departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]),
+                address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
+                departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
                 returnHour: "",
-                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
+                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
               });
               acc[acc.length - 1].stepPoints.push({
                 type: "retour",
-                address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
+                address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
                 departureHour: "",
-                returnHour: formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`]),
-                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
+                returnHour: formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`] as string),
+                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
               });
             } else {
+              const isAller = pdrValue === "correspondance aller";
               acc[acc.length - 1].stepPoints.push({
-                type: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "aller" : "retour",
-                address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
-                departureHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]) : "",
-                returnHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "" : formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`]),
-                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
+                type: isAller ? "aller" : "retour",
+                address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
+                departureHour: isAller ? formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string) : "",
+                returnHour: isAller ? "" : formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`] as string),
+                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
               });
             }
           }
@@ -219,11 +291,11 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           await newLineToPoint.save({ session: transaction });
         }
 
-        // * Update slave PlanTransport
+        // Update slave PlanTransport
         const center = await CohesionCenterModel.findById(busLine.centerId);
-        let pointDeRassemblements = [];
-        for (let i = 0, n = lineToPointWithCorrespondance.length; i < n; ++i) {
-          const ltp = lineToPointWithCorrespondance[i];
+        const pointDeRassemblements: unknown[] = [];
+
+        for (const ltp of lineToPointWithCorrespondance) {
           const pdr = await PointDeRassemblementModel.findById(ltp.meetingPointId);
           if (pdr) {
             pointDeRassemblements.push({
@@ -237,9 +309,15 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             });
           }
         }
+
         if (busLine.classeId) {
           const classe = await ClasseModel.findById(busLine.classeId);
-          if (!classe) return res.status(404).send({ ok: false, code: `La classe (ID: ${busLine.classeId}) n'existe pas. Vérifiez les données.` });
+          if (!classe) {
+            return res.status(404).send({
+              ok: false,
+              code: `La classe (ID: ${busLine.classeId}) n'existe pas. Vérifiez les données.`,
+            });
+          }
           classe.set({ ligneId: busLine._id });
           await classe.save({ session: transaction });
         }
@@ -250,8 +328,16 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               _id: busLine._id,
               cohort: busLine.cohort,
               busId: busLine.busId,
-              departureString: busLine.departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
-              returnString: busLine.returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+              departureString: busLine.departuredDate.toLocaleDateString("fr-FR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              }),
+              returnString: busLine.returnDate.toLocaleDateString("fr-FR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              }),
               youngCapacity: busLine.youngCapacity,
               totalCapacity: busLine.totalCapacity,
               lineFillingRate: 0,
@@ -269,37 +355,35 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               centerArrivalTime: busLine.centerArrivalTime,
               centerDepartureTime: busLine.centerDepartureTime,
               pointDeRassemblements,
-              classeId: busLine.classeId ? busLine.classeId : undefined,
+              classeId: busLine.classeId,
             },
           ],
           { session: transaction },
         );
-        // * End update slave PlanTransport
       }
 
       res.status(200).send({ ok: true, data: lines.length });
     });
   } catch (error) {
     capture(error);
-
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   } finally {
     await endSession(transaction);
   }
 });
 
-// Remove 30 mins to departure hour
-function getPDRMeetingHour(departureHour) {
+function getPDRMeetingHour(departureHour: string, transportType: PlanTransportModesType = TRANSPORT_MODES.BUS): string {
   const [hour, minute] = departureHour.split(":");
+
   const date = new Date();
-  date.setHours(hour);
-  date.setMinutes(minute);
+  date.setHours(parseInt(hour));
+  date.setMinutes(parseInt(minute));
   date.setSeconds(0);
   date.setMilliseconds(0);
-  date.setMinutes(date.getMinutes() - 30); // Subtract 30 minutes
+  date.setMinutes(date.getMinutes() - (TRANSPORT_CONVOCATION_SUBTRACT_MINUTES[transportType] ?? TRANSPORT_CONVOCATION_SUBTRACT_MINUTES_DEFAULT));
   let meetingHour = date.toTimeString().split(" ")[0];
   meetingHour = meetingHour.substring(0, meetingHour.length - 3);
   return meetingHour;
 }
 
-module.exports = router;
+export default router;

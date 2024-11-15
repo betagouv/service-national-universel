@@ -33,7 +33,7 @@ export { ImportPlanTransportModel, ImportPlanTransportDocument } from "./PlanDeT
 export { LigneBusModel, LigneBusDocument } from "./PlanDeTransport/ligneBus";
 export { LigneToPointModel, LigneToPointDocument } from "./PlanDeTransport/ligneToPoint";
 export { ModificationBusModel, ModificationBusDocument } from "./PlanDeTransport/modificationBus";
-export { PlanTransportModel, PlanTransportDocument } from "./PlanDeTransport/planTransport";
+export { PlanTransportModel, PlanTransportDocument, PlanTransportModesType } from "./PlanDeTransport/planTransport";
 export { PointDeRassemblementModel, PointDeRassemblementDocument } from "./PlanDeTransport/pointDeRassemblement";
 export { SchemaDeRepartitionModel, SchemaDeRepartitionDocument } from "./PlanDeTransport/schemaDeRepartition";
 export { TableDeRepartitionModel, TableDeRepartitionDocument } from "./PlanDeTransport/tableDeRepartition";
