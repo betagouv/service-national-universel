@@ -69,8 +69,9 @@ function App() {
       }
     } catch (e) {
       console.log(e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   useEffect(() => {

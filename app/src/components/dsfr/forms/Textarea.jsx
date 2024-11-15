@@ -1,7 +1,7 @@
 import React from "react";
 import ErrorMessage from "./ErrorMessage";
 
-export default function Textarea({ label, value, onChange, rows = 5, error = "", correction = "" }) {
+export default function Textarea({ label, value, onChange, rows = 5, error = "", correction = "", ...rest }) {
   return (
     <div className="my-6 text-[#161616]">
       <label className={`w-full my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>
@@ -15,6 +15,7 @@ export default function Textarea({ label, value, onChange, rows = 5, error = "",
           value={value}
           onChange={onChange}
           rows={rows}
+          {...rest}
         />
       </label>
       <ErrorMessage>{error}</ErrorMessage>
