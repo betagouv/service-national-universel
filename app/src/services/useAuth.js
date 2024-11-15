@@ -12,13 +12,13 @@ export const useAuth = () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
 
-  const logout = async () => {
+  const logout = async ({ redirect } = { redirect: true }) => {
     await logoutYoung();
     dispatch(setYoung(null));
-    toastr.info("Vous avez bien été déconnecté.", "");
-    // if (redirect) {
-    //   return history.push("/auth");
-    // }
+    if (redirect) {
+      toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+      return history.push("/auth");
+    }
     return true;
   };
 

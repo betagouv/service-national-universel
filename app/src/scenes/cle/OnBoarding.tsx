@@ -33,7 +33,7 @@ const OnBoarding = () => {
   const params = new URLSearchParams(window.location.search);
   const id = params.get("id") || "";
   const { isError, isPending, data: classe } = useClass(id);
-  if (isLoggedIn && !isCLE) logout();
+  if (isLoggedIn && !isCLE) logout({ redirect: false });
   if (isLoggedIn && isCLE) return <Redirect to="/inscription" />;
   if (isPending) return <Loader />;
   if (isError)
