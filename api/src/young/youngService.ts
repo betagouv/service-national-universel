@@ -1,13 +1,27 @@
 import { format } from "date-fns";
 
-import { ERRORS, FUNCTIONAL_ERRORS, UserDto, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto, YoungType } from "snu-lib";
+import {
+  ERRORS,
+  FUNCTIONAL_ERRORS,
+  getDepartmentForEligibility,
+  isAdmin,
+  UserDto,
+  YOUNG_PHASE,
+  YOUNG_SOURCE,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+  YoungDto,
+  YoungType,
+} from "snu-lib";
 
-import { YoungDocument, YoungModel } from "../models";
+import { ClasseModel, CohortModel, LigneBusModel, SessionPhase1Model, YoungDocument, YoungModel } from "../models";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 import { isLocalTransport } from "./youngCertificateService";
 import { logger } from "../logger";
+import { getCompletionObjectifs } from "../services/inscription-goal";
+import { updatePlacesSessionPhase1, updateSeatsTakenInBusLine } from "../utils";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
   const validatedYoungsWithSession = getValidatedYoungsWithSession(youngs);
@@ -168,4 +182,59 @@ export const mightAddInProgressStatus = async (young: YoungDocument, user: UserD
     await young.save({ fromUser: user });
     logger.info(`YoungService - mightAddInProgressStatus(), Status set to IN_PROGRESS for YoungId:${young.id}`);
   }
+};
+
+export const validateYoungPhase1 = async (young: YoungDocument, user: UserDto): Promise<YoungType> => {
+  //From put("/young/:id"
+  // first part
+  const cohort = await CohortModel.findById(young.cohortId);
+  if (!cohort) {
+    throw new Error(ERRORS.COHORT_NOT_FOUND);
+  }
+  // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
+  const departement = getDepartmentForEligibility(young);
+  const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+  if (completionObjectif.isAtteint) {
+    throw new Error(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED);
+    // remove this
+    // return res.status(400).send({
+    //   ok: false,
+    //   code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
+    // });
+  }
+
+  // second part
+  if (young.source === YOUNG_SOURCE.CLE) {
+    const classe = await ClasseModel.findById(young.classeId);
+    if (!classe) {
+      throw new Error(ERRORS.CLASSE_NOT_FOUND);
+    }
+    const now = new Date();
+    const isInsctructionOpen = now < cohort.instructionEndDate;
+    const remainingPlaces = classe.totalSeats - classe.seatsTaken;
+    if (remainingPlaces <= 0) {
+      throw new Error(ERRORS.OPERATION_NOT_ALLOWED);
+    }
+    if (!isInsctructionOpen && !isAdmin(user)) {
+      throw new Error(ERRORS.OPERATION_NOT_ALLOWED);
+    }
+  } else {
+    const now = new Date();
+    const isInsctructionOpen = now < cohort.instructionEndDate;
+    if (!isInsctructionOpen && !isAdmin(user)) {
+      throw new Error(ERRORS.OPERATION_NOT_ALLOWED);
+    }
+  }
+
+  //update places in cohesionCenter
+  if (young.sessionPhase1Id) {
+    const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+    if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, user);
+  }
+  //update places in bus
+  if (young.ligneId) {
+    const bus = await LigneBusModel.findById(young.ligneId);
+    if (bus) await updateSeatsTakenInBusLine(bus);
+  }
+  return young;
 };

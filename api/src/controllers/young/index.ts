@@ -71,6 +71,7 @@ import { FileTypeResult } from "file-type";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
+import { validateYoungPhase1 } from "../../young/youngService";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
@@ -292,6 +293,9 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 
     young.set({ status: YOUNG_STATUS.WAITING_VALIDATION });
     await young.save({ fromUser: req.user });
+
+    // TODO : call validateYoungPhase1 from youngService
+    await validateYoungPhase1(young, req.user);
 
     const toName = `${young.firstName} ${young.lastName}`;
     const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}&utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
