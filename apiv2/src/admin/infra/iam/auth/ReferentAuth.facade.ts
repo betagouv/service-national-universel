@@ -6,7 +6,6 @@ import { AuthProvider } from "./Auth.provider";
 import * as bcrypt from "bcrypt";
 import { ReferentMapper } from "../repository/mongo/Referent.mapper";
 import { TechnicalException, TechnicalExceptionType } from "@shared/infra/TechnicalException";
-import { error } from "console";
 
 @Injectable()
 export class ReferentAuthFacade implements ReferentAuthGateway {
