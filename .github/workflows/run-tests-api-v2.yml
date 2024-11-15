@@ -39,7 +39,7 @@ jobs:
             admin/node_modules
             packages/ds/node_modules
             packages/lib/node_modules
-          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json', '.nvmrc') }}
           restore-keys: |
             ${{ runner.os }}-nodemodules-
 
@@ -51,6 +51,6 @@ jobs:
         working-directory: packages/lib
         run: npm run build
 
-      - name: Run tests 
+      - name: Run tests
         working-directory: apiv2
         run: npm test
