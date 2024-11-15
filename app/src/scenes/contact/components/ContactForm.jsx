@@ -4,8 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
-import { categories, getQuestions, roleOptions } from "../contact.service";
-import useAuth from "@/services/useAuth";
+import { categories, roleOptions } from "../contact.service";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
@@ -14,7 +13,6 @@ import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
 export default function ContactForm({ category, question, parcours }) {
-  const { young } = useAuth();
   const history = useHistory();
   const { files, addFiles, deleteFile, error } = useFileUpload();
 
@@ -24,11 +22,9 @@ export default function ContactForm({ category, question, parcours }) {
 
   const disabled = () => {
     if (loading) return true;
-    if (!role || !category || !question || !message) return true;
+    if (!role || !category || !question?.label || !message) return true;
     return false;
   };
-
-  const questions = getQuestions(category, "young", young.source);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,12 +43,12 @@ export default function ContactForm({ category, question, parcours }) {
 
       const response = await API.post("/SNUpport/ticket", {
         message,
-        subject: `${categories.find((e) => e.value === category)?.label} - ${questions.find((e) => e.value === question)?.label}`,
-        fromPage: new URLSearchParams(window.location.search).get("from "),
+        subject: `${categories.find((e) => e.value === category)?.label} - ${question.label}`,
+        fromPage: new URLSearchParams(window.location.search).get("from"),
         parcours,
         subjectStep0: role,
         subjectStep1: category,
-        subjectStep2: question,
+        subjectStep2: question.value,
         files: uploadedFiles,
       });
       if (!response.ok) {

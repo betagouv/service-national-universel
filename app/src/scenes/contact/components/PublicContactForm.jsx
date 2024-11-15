@@ -69,7 +69,7 @@ export default function PublicContactForm({ category, question, parcours }) {
         role,
         parcours,
         subjectStep1: category,
-        subjectStep2: question.label,
+        subjectStep2: question.value,
         region: department2region[department],
         fromPage: new URLSearchParams(window.location.search).get("from "),
         files: uploadedFiles,
