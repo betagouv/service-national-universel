@@ -33,14 +33,14 @@ async function main() {
 
   const project = await this.scaleway.findProject(config.projectName());
 
-  const namespace = await scaleway.findContainerNamespace(
-    project.id,
-    config.containerNamespace()
-  );
-  const container = await scaleway.findContainer(
-    namespace.id,
-    config.containerName()
-  );
+  const namespace = await scaleway.findOne(RESOURCE.CONTAINER_NAMESPACE, {
+    project_id: project.id,
+    name: config.containerNamespace(),
+  });
+  const container = await scaleway.findOne(RESOURCE.CONTAINER, {
+    namespace_id: namespace.id,
+    name: config.containerName(),
+  });
 
   await scaleway.patch(RESOURCE.CONTAINER, container.id, {
     registry_image: registryEndpoint(config.registry(), input.release),

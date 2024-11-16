@@ -5,27 +5,63 @@ const METHOD = {
   DELETE: "delete",
 };
 
-class Container {
+class Project {
+  listName = "projects";
+  pathParams = [];
+
   endpoint(params) {
-    return `${params.domain}/containers/v1beta1/regions/${params.region}/containers`;
+    return `/account/v3/${this.listName}`;
+  }
+}
+
+class RegistryNamespace {
+  listName = "namespaces";
+  pathParams = ["region"];
+
+  endpoint(params) {
+    return `/registry/v1/regions/${params.region}/${this.listName}`;
+  }
+}
+
+class Image {
+  listName = "images";
+  pathParams = ["region"];
+
+  endpoint(params) {
+    return `/registry/v1/regions/${params.region}/${this.listName}`;
+  }
+}
+
+class Container {
+  listName = "containers";
+  pathParams = ["region"];
+
+  endpoint(params) {
+    return `/containers/v1beta1/regions/${params.region}/${this.listName}`;
   }
 }
 
 class ContainerNamespace {
+  listName = "namespaces";
+  pathParams = ["region"];
+
   endpoint(params) {
-    return `${params.domain}/containers/v1beta1/regions/${params.region}/namespaces`;
+    return `/containers/v1beta1/regions/${params.region}/${this.listName}`;
   }
 }
 
 class Secret {
+  listName = "secrets";
+  pathParams = ["region"];
+
   endpoint(params) {
-    return `${params.domain}/secret-manager/v1beta1/regions/${params.region}/secrets`;
+    return `/secret-manager/v1beta1/regions/${params.region}/${this.listName}`;
   }
 }
 
 class ImageTag {
   endpoint(params) {
-    return `${params.domain}/registry/v1/regions/${params.region}/tags`;
+    return `/registry/v1/regions/${params.region}/tags`;
   }
 }
 
@@ -33,7 +69,10 @@ const RESOURCE = {
   CONTAINER: new Container(),
   CONTAINER_NAMESPACE: new ContainerNamespace(),
   SECRET: new Secret(),
+  IMAGE: new Image(),
   IMAGE_TAG: new ImageTag(),
+  PROJECT: new Project(),
+  REGISTRY_NAMESPACE: new RegistryNamespace(),
 };
 
 class ScalewayClient {
@@ -47,37 +86,60 @@ class ScalewayClient {
 
   pathParams = {
     region: this.region,
-    domain: this.domain,
   };
 
   async get(resource, id) {
-    const endpoint = resource.endpoint(this.pathParams);
-    return this._getOne(METHOD.GET, `${endpoint}/${id}`);
+    const endpoint = resource.endpoint({ region: this.region });
+    return this._getOne(METHOD.GET, `${this.domain}${endpoint}/${id}`);
   }
 
   async delete(resource, id) {
-    const endpoint = resource.endpoint(this.pathParams);
-    return this._getOne(METHOD.DELETE, `${endpoint}/${id}`);
+    const endpoint = resource.endpoint({ region: this.region });
+    return this._getOne(METHOD.DELETE, `${this.domain}${endpoint}/${id}`);
   }
 
   async create(resource, body) {
-    const endpoint = resource.endpoint(this.pathParams);
-    return this._updateOne(METHOD.CREATE, endpoint, body);
+    const endpoint = resource.endpoint({ region: this.region });
+    return this._updateOne(METHOD.CREATE, `${this.domain}${endpoint}`, body);
   }
 
   async patch(resource, id, body) {
-    const endpoint = resource.endpoint(this.pathParams);
-    return this._updateOne(METHOD.PATCH, `${endpoint}/${id}`, body);
+    const endpoint = resource.endpoint({ region: this.region });
+    return this._updateOne(
+      METHOD.PATCH,
+      `${this.domain}${endpoint}/${id}`,
+      body
+    );
   }
 
-  async findOne(type, params) {
-    const resource = this._resource(type);
-    return this._findOne(`${resource.endpoint}/${id}`, resource.listName);
+  _querystring(excludeKeys, params) {
+    let s = "";
+    for (const key in params) {
+      if (!excludeKeys.includes(key)) {
+        s += `&${key}=${params[key]}`;
+      }
+    }
+    return s.replace("&", "?");
   }
 
-  async findAll(type, params) {
-    const resource = this._resource(type);
-    return this._findAll(`${resource.endpoint}/${id}`, resource.listName);
+  async findOne(resource, params) {
+    let _params = { region: this.region, ...params };
+    const endpoint = resource.endpoint(_params);
+    const querystring = this._querystring(resource.pathParams, _params);
+    return this._findOne(
+      `${this.domain}${endpoint}${querystring}`,
+      resource.listName
+    );
+  }
+
+  async findAll(resource, params) {
+    let _params = { region: this.region, ...params };
+    const endpoint = resource.endpoint(_params);
+    const querystring = this._querystring(resource.pathParams, _params);
+    return this._findAll(
+      `${this.domain}${endpoint}${querystring}`,
+      resource.listName
+    );
   }
 
   async _getOne(method, url) {
@@ -134,58 +196,16 @@ class ScalewayClient {
   }
 
   async findProject(name) {
-    return this._findOne(
-      `${this.domain}/account/v3/projects?organization_id=${this.organizationId}&name=${name}`,
-      "projects"
-    );
-  }
-
-  async findSecrets(projectId) {
-    return this._findAll(
-      `${this.domain}/secret-manager/v1beta1/regions/${this.region}/secrets?project_id=${projectId}&page_size=100`,
-      "secrets"
-    );
+    return this.findOne(RESOURCE.PROJECT, {
+      organization_id: this.organizationId,
+      name: name,
+    });
   }
 
   async findSecretVersion(projectId, name, revision) {
     return this._getOne(
       METHOD.GET,
       `${this.domain}/secret-manager/v1beta1/regions/${this.region}/secrets-by-path/versions/${revision}/access?project_id=${projectId}&secret_name=${name}`
-    );
-  }
-
-  async findRegistry(projectId, name) {
-    return this._findOne(
-      `${this.domain}/registry/v1/regions/${this.region}/namespaces?project_id=${projectId}&name=${name}`,
-      "namespaces"
-    );
-  }
-
-  async findContainerNamespace(projectId, name) {
-    return this._findOne(
-      `${this.domain}/containers/v1beta1/regions/${this.region}/namespaces?project_id=${projectId}&name=${name}`,
-      "namespaces"
-    );
-  }
-
-  async findContainer(namespaceId, name) {
-    return this._findOne(
-      `${this.domain}/containers/v1beta1/regions/${this.region}/containers?namespace_id=${namespaceId}&name=${name}`,
-      "containers"
-    );
-  }
-
-  async findContainers(namespaceId) {
-    return this._findAll(
-      `${this.domain}/containers/v1beta1/regions/${this.region}/containers?namespace_id=${namespaceId}&page_size=100`,
-      "containers"
-    );
-  }
-
-  async findImages(registryId) {
-    return this._findAll(
-      `${this.domain}/registry/v1/regions/${this.region}/images?namespace_id=${registryId}`,
-      "images"
     );
   }
 

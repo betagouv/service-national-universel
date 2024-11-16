@@ -58,19 +58,27 @@ class CleanCI {
 
   async execute() {
     const project = await this.scaleway.findProject(this.projectName);
-    const registry = await this.scaleway.findRegistry(
-      project.id,
-      this.projectName
-    );
-    const images = await this.scaleway.findImages(registry.id);
+    const registry = await this.scaleway.findOne(RESOURCE.REGISTRY_NAMESPACE, {
+      project_id: project.id,
+      name: this.projectName,
+    });
+    const images = await this.scaleway.findAll(RESOURCE.IMAGE, {
+      namespace_id: registry.id,
+    });
 
     const deletedTags = await this._deleteImageTags(images);
 
-    const namespace = await this.scaleway.findContainerNamespace(
-      project.id,
-      this.namespaceName
+    const namespace = await this.scaleway.findOne(
+      RESOURCE.CONTAINER_NAMESPACE,
+      {
+        project_id: project.id,
+        name: this.namespaceName,
+      }
     );
-    const containers = await this.scaleway.findContainers(namespace.id);
+    const containers = await this.scaleway.findAll(RESOURCE.CONTAINER, {
+      namespace_id: namespace.id,
+      page_size: 100,
+    });
     const endpoints = buildEndpointIndex(registry.endpoint, images);
 
     const environments = await this._getDeletableEnvironments(

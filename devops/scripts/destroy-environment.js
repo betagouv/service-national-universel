@@ -18,7 +18,10 @@ class DestroyEnvironments {
   }
 
   async _deleteSecrets(projectId) {
-    const secrets = await this.scaleway.findSecrets(projectId);
+    const secrets = await this.scaleway.findAll(RESOURCE.SECRET, {
+      project_id: projectId,
+      page_size: 100,
+    });
     const deletableSecrets = secrets.filter((i) =>
       this.environments.has(environmentFromSecret(i.name))
     );
@@ -54,12 +57,16 @@ class DestroyEnvironments {
 
     const namespace =
       this.namespace ??
-      (await this.scaleway.findContainerNamespace(
-        project.id,
-        this.namespaceName
-      ));
+      (await this.scaleway.findOne(RESOURCE.CONTAINER_NAMESPACE, {
+        project_id: project.id,
+        name: this.namespaceName,
+      }));
     const containers =
-      this.containers ?? (await this.scaleway.findContainers(namespace.id));
+      this.containers ??
+      (await this.scaleway.findAll(RESOURCE.CONTAINER, {
+        namespace_id: namespace.id,
+        page_size: 100,
+      }));
 
     await this._deleteContainers(containers);
     await this._deleteSecrets(project.id);
