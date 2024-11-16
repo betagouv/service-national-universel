@@ -4,7 +4,7 @@ const {
   genericDeleteAll,
 } = require("./lib/utils");
 const UserInput = require("./lib/user-input");
-const ScalewayClient = require("./lib/scaleway-client");
+const { ScalewayClient } = require("./lib/scaleway-client");
 
 class DestroyEnvironments {
   constructor(scalewayClient, options = {}) {

@@ -5,7 +5,7 @@ const {
   genericDeleteAll,
 } = require("./lib/utils");
 const UserInput = require("./lib/user-input");
-const ScalewayClient = require("./lib/scaleway-client");
+const { ScalewayClient } = require("./lib/scaleway-client");
 const GithubClient = require("./lib/github-client");
 const DestroyEnvironments = require("./destroy-environment");
 

@@ -1,5 +1,5 @@
 const UserInput = require("./lib/user-input");
-const ScalewayClient = require("./lib/scaleway-client");
+const { ScalewayClient } = require("./lib/scaleway-client");
 const { Config } = require("./lib/config");
 const { registryEndpoint, sleep } = require("./lib/utils");
 

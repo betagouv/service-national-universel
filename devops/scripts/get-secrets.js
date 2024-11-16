@@ -1,6 +1,6 @@
 const process = require("node:process");
 const UserInput = require("./lib/user-input");
-const ScalewayClient = require("./lib/scaleway-client");
+const { ScalewayClient } = require("./lib/scaleway-client");
 const { format } = require("node:path");
 
 const SECRET_FORMATS = {
