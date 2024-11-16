@@ -50,14 +50,19 @@ class DestroyEnvironments {
     console.log("Trying to delete these environments: ");
     this.environments.forEach((i) => console.log(" - " + i));
 
+    const project = await this.scaleway.findProject("snu-ci");
+
     const namespace =
       this.namespace ??
-      (await this.scaleway.findContainerNamespace(this.namespaceName));
+      (await this.scaleway.findContainerNamespace(
+        project.id,
+        this.namespaceName
+      ));
     const containers =
       this.containers ?? (await this.scaleway.findContainers(namespace.id));
 
     await this._deleteContainers(containers);
-    await this._deleteSecrets(namespace.project_id);
+    await this._deleteSecrets(project.id);
   }
 }
 

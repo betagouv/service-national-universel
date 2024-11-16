@@ -154,16 +154,16 @@ class ScalewayClient {
     );
   }
 
-  async findRegistry(name) {
+  async findRegistry(projectId, name) {
     return this._findOne(
-      `${this.domain}/registry/v1/regions/${this.region}/namespaces?name=${name}`,
+      `${this.domain}/registry/v1/regions/${this.region}/namespaces?project_id=${projectId}&name=${name}`,
       "namespaces"
     );
   }
 
-  async findContainerNamespace(name) {
+  async findContainerNamespace(projectId, name) {
     return this._findOne(
-      `${this.domain}/containers/v1beta1/regions/${this.region}/namespaces?organization_id=${this.organizationId}&name=${name}`,
+      `${this.domain}/containers/v1beta1/regions/${this.region}/namespaces?project_id=${projectId}&name=${name}`,
       "namespaces"
     );
   }

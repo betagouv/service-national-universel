@@ -23,7 +23,7 @@ class CleanCI {
     this.scaleway = scalewayClient;
     this.github = githubClient;
     this.applyChanges = options.applyChanges;
-    this.registryName = options.registryName;
+    this.projectName = options.projectName;
     this.namespaceName = options.namespaceName;
 
     const lifetimeDays = options.lifetime;
@@ -57,12 +57,17 @@ class CleanCI {
   }
 
   async execute() {
-    const registry = await this.scaleway.findRegistry(this.registryName);
+    const project = await this.scaleway.findProject(this.projectName);
+    const registry = await this.scaleway.findRegistry(
+      project.id,
+      this.projectName
+    );
     const images = await this.scaleway.findImages(registry.id);
 
     const deletedTags = await this._deleteImageTags(images);
 
     const namespace = await this.scaleway.findContainerNamespace(
+      project.id,
       this.namespaceName
     );
     const containers = await this.scaleway.findContainers(namespace.id);
@@ -131,7 +136,7 @@ function main() {
   - Image Tags not updated since <lifetime> days
   - Containers using an image tag that does not exists anymore`
   )
-    .arg("registry-name", "Name of the docker image registry")
+    .arg("project-name", "Project name")
     .arg("namespace-name", "Container's namespace")
     .optInt(
       "lifetime",

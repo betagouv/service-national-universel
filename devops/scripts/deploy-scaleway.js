@@ -31,7 +31,10 @@ async function main() {
   );
   const config = new Config(input.environment, input.application);
 
+  const project = await this.scaleway.findProject(config.projectName());
+
   const namespace = await scaleway.findContainerNamespace(
+    project.id,
     config.containerNamespace()
   );
   const container = await scaleway.findContainer(
