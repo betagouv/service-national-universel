@@ -6,73 +6,82 @@ const METHOD = {
 };
 
 class Project {
-  listName = "projects";
-  pathParams = [];
+  static listName = "projects";
+  static pathParams = [];
 
   endpoint(params) {
-    return `/account/v3/${this.listName}`;
+    return `/account/v3/projects`;
   }
 }
 
 class RegistryNamespace {
-  listName = "namespaces";
-  pathParams = ["region"];
+  static listName = "namespaces";
+  static pathParams = ["region"];
 
   endpoint(params) {
-    return `/registry/v1/regions/${params.region}/${this.listName}`;
+    return `/registry/v1/regions/${params.region}/namespaces`;
   }
 }
 
 class Image {
-  listName = "images";
-  pathParams = ["region"];
+  static listName = "images";
+  static pathParams = ["region"];
 
-  endpoint(params) {
-    return `/registry/v1/regions/${params.region}/${this.listName}`;
+  static endpoint(params) {
+    return `/registry/v1/regions/${params.region}/images`;
   }
+
+  static Tag = class {
+    static listName = "tags";
+    static pathParams = ["region", "image_id"];
+
+    static endpoint(params) {
+      return `/registry/v1/regions/${params.region}/images/${params.image_id}/tags`;
+    }
+  };
 }
 
 class Container {
-  listName = "containers";
-  pathParams = ["region"];
+  static listName = "containers";
+  static pathParams = ["region"];
 
-  endpoint(params) {
-    return `/containers/v1beta1/regions/${params.region}/${this.listName}`;
+  static endpoint(params) {
+    return `/containers/v1beta1/regions/${params.region}/containers`;
   }
 }
 
 class ContainerNamespace {
-  listName = "namespaces";
-  pathParams = ["region"];
+  static listName = "namespaces";
+  static pathParams = ["region"];
 
-  endpoint(params) {
-    return `/containers/v1beta1/regions/${params.region}/${this.listName}`;
+  static endpoint(params) {
+    return `/containers/v1beta1/regions/${params.region}/namespaces`;
   }
 }
 
 class Secret {
-  listName = "secrets";
-  pathParams = ["region"];
+  static listName = "secrets";
+  static pathParams = ["region"];
 
-  endpoint(params) {
-    return `/secret-manager/v1beta1/regions/${params.region}/${this.listName}`;
+  static endpoint(params) {
+    return `/secret-manager/v1beta1/regions/${params.region}/secrets`;
   }
 }
 
 class ImageTag {
-  endpoint(params) {
+  static endpoint(params) {
     return `/registry/v1/regions/${params.region}/tags`;
   }
 }
 
 const RESOURCE = {
-  CONTAINER: new Container(),
-  CONTAINER_NAMESPACE: new ContainerNamespace(),
-  SECRET: new Secret(),
-  IMAGE: new Image(),
-  IMAGE_TAG: new ImageTag(),
-  PROJECT: new Project(),
-  REGISTRY_NAMESPACE: new RegistryNamespace(),
+  Container,
+  ContainerNamespace,
+  Secret,
+  Image,
+  ImageTag,
+  Project,
+  RegistryNamespace,
 };
 
 class ScalewayClient {
@@ -185,6 +194,7 @@ class ScalewayClient {
   }
 
   async _findAll(url, listName) {
+    console.log(url);
     const resp = await fetch(url, {
       headers: { "X-Auth-Token": this.secretKey },
     });
@@ -196,35 +206,17 @@ class ScalewayClient {
   }
 
   async findProject(name) {
-    return this.findOne(RESOURCE.PROJECT, {
+    return this.findOne(RESOURCE.Project, {
       organization_id: this.organizationId,
       name: name,
     });
   }
 
-  async findSecretVersion(projectId, name, revision) {
-    return this._getOne(
+  async getSecrets(projectId, name, revision) {
+    const secret = await this._getOne(
       METHOD.GET,
       `${this.domain}/secret-manager/v1beta1/regions/${this.region}/secrets-by-path/versions/${revision}/access?project_id=${projectId}&secret_name=${name}`
     );
-  }
-
-  async findImageTags(imageId) {
-    return this._findAll(
-      `${this.domain}/registry/v1/regions/${this.region}/images/${imageId}/tags?order_by=created_at_asc&page_size=100`,
-      "tags"
-    );
-  }
-
-  async findImageTagsByName(imageId, name) {
-    return this._findAll(
-      `${this.domain}/registry/v1/regions/${this.region}/images/${imageId}/tags?name=${name}`,
-      "tags"
-    );
-  }
-
-  async getSecrets(projectId, name, revision) {
-    const secret = await this.findSecretVersion(projectId, name, revision);
     const decodedData = Buffer.from(secret.data, "base64").toString("utf8");
 
     return decodedData;

@@ -9,7 +9,7 @@ async function waitUntilSuccess(scaleway, containerId) {
   let container;
   do {
     await sleep(POLL_INTERVAL_MS);
-    container = await scaleway.get(RESOURCE.CONTAINER, containerId);
+    container = await scaleway.get(RESOURCE.Container, containerId);
     if (container.status === "error") {
       throw new Error(container.error_message);
     }
@@ -33,16 +33,16 @@ async function main() {
 
   const project = await this.scaleway.findProject(config.projectName());
 
-  const namespace = await scaleway.findOne(RESOURCE.CONTAINER_NAMESPACE, {
+  const namespace = await scaleway.findOne(RESOURCE.ContainerNamespace, {
     project_id: project.id,
     name: config.containerNamespace(),
   });
-  const container = await scaleway.findOne(RESOURCE.CONTAINER, {
+  const container = await scaleway.findOne(RESOURCE.Container, {
     namespace_id: namespace.id,
     name: config.containerName(),
   });
 
-  await scaleway.patch(RESOURCE.CONTAINER, container.id, {
+  await scaleway.patch(RESOURCE.Container, container.id, {
     registry_image: registryEndpoint(config.registry(), input.release),
   });
 

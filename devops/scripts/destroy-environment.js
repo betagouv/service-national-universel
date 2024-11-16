@@ -18,7 +18,7 @@ class DestroyEnvironments {
   }
 
   async _deleteSecrets(projectId) {
-    const secrets = await this.scaleway.findAll(RESOURCE.SECRET, {
+    const secrets = await this.scaleway.findAll(RESOURCE.Secret, {
       project_id: projectId,
       page_size: 100,
     });
@@ -29,7 +29,7 @@ class DestroyEnvironments {
       name: "secrets",
       items: deletableSecrets,
       logItemCb: (i) => console.log(i.id, i.name),
-      deleteItemCb: (i) => this.scaleway.delete(RESOURCE.SECRET, i.id),
+      deleteItemCb: (i) => this.scaleway.delete(RESOURCE.Secret, i.id),
       getIdCb: (i) => i.id,
       applyChanges: this.applyChanges,
     });
@@ -43,7 +43,7 @@ class DestroyEnvironments {
       name: "containers",
       items: deletableContainers,
       logItemCb: (i) => console.log(i.id, i.name, i.registry_image),
-      deleteItemCb: (i) => this.scaleway.delete(RESOURCE.CONTAINER, i.id),
+      deleteItemCb: (i) => this.scaleway.delete(RESOURCE.Container, i.id),
       getIdCb: (i) => i.id,
       applyChanges: this.applyChanges,
     });
@@ -57,13 +57,13 @@ class DestroyEnvironments {
 
     const namespace =
       this.namespace ??
-      (await this.scaleway.findOne(RESOURCE.CONTAINER_NAMESPACE, {
+      (await this.scaleway.findOne(RESOURCE.ContainerNamespace, {
         project_id: project.id,
         name: this.namespaceName,
       }));
     const containers =
       this.containers ??
-      (await this.scaleway.findAll(RESOURCE.CONTAINER, {
+      (await this.scaleway.findAll(RESOURCE.Container, {
         namespace_id: namespace.id,
         page_size: 100,
       }));

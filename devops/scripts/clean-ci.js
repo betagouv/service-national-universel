@@ -36,7 +36,11 @@ class CleanCI {
     let deletedItems = [];
 
     for (const image of images) {
-      let tags = await this.scaleway.findImageTags(image.id);
+      let tags = await this.scaleway.findAll(RESOURCE.Image.Tag, {
+        image_id: image.id,
+        order_by: "created_at_asc",
+        page_size: 100,
+      });
       tags = tags.filter(
         (t) =>
           t.name !== "latest" &&
@@ -47,7 +51,7 @@ class CleanCI {
         name: `${image.name} image tags`,
         items: tags,
         logItemCb: (i) => console.log(i.id, i.name),
-        deleteItemCb: (i) => this.scaleway.delete(RESOURCE.IMAGE_TAG, i.id),
+        deleteItemCb: (i) => this.scaleway.delete(RESOURCE.ImageTag, i.id),
         getIdCb: (i) => i.name,
         applyChanges: this.applyChanges,
       });
@@ -58,24 +62,21 @@ class CleanCI {
 
   async execute() {
     const project = await this.scaleway.findProject(this.projectName);
-    const registry = await this.scaleway.findOne(RESOURCE.REGISTRY_NAMESPACE, {
+    const registry = await this.scaleway.findOne(RESOURCE.RegistryNamespace, {
       project_id: project.id,
       name: this.projectName,
     });
-    const images = await this.scaleway.findAll(RESOURCE.IMAGE, {
+    const images = await this.scaleway.findAll(RESOURCE.Image, {
       namespace_id: registry.id,
     });
 
     const deletedTags = await this._deleteImageTags(images);
 
-    const namespace = await this.scaleway.findOne(
-      RESOURCE.CONTAINER_NAMESPACE,
-      {
-        project_id: project.id,
-        name: this.namespaceName,
-      }
-    );
-    const containers = await this.scaleway.findAll(RESOURCE.CONTAINER, {
+    const namespace = await this.scaleway.findOne(RESOURCE.ContainerNamespace, {
+      project_id: project.id,
+      name: this.namespaceName,
+    });
+    const containers = await this.scaleway.findAll(RESOURCE.Container, {
       namespace_id: namespace.id,
       page_size: 100,
     });
@@ -128,7 +129,10 @@ class CleanCI {
       }
       const imageId = endpoints[imageEndpoint];
       if (imageId && tagName) {
-        const tags = await this.scaleway.findImageTagsByName(imageId, tagName);
+        const tags = await this.scaleway.findAll(RESOURCE.Image.Tag, {
+          image_id: imageId,
+          name: tagName,
+        });
         if (!tags.length) {
           environments.push(envName);
         }
