@@ -1,7 +1,9 @@
+const { querystring, includeKeys, excludeKeys } = require("./utils");
+
 const METHOD = {
   GET: "GET",
   PATCH: "PATCH",
-  CREATE: "CREATE",
+  POST: "POST",
   DELETE: "delete",
 };
 
@@ -9,7 +11,7 @@ class Project {
   static listName = "projects";
   static pathParams = [];
 
-  endpoint(params) {
+  static endpoint(params) {
     return `/account/v3/projects`;
   }
 }
@@ -18,7 +20,7 @@ class RegistryNamespace {
   static listName = "namespaces";
   static pathParams = ["region"];
 
-  endpoint(params) {
+  static endpoint(params) {
     return `/registry/v1/regions/${params.region}/namespaces`;
   }
 }
@@ -44,6 +46,7 @@ class Image {
 class Container {
   static listName = "containers";
   static pathParams = ["region"];
+  static naturalKey = ["namespace_id", "name"];
 
   static endpoint(params) {
     return `/containers/v1beta1/regions/${params.region}/containers`;
@@ -53,6 +56,7 @@ class Container {
 class ContainerNamespace {
   static listName = "namespaces";
   static pathParams = ["region"];
+  static naturalKey = ["project_id", "name"];
 
   static endpoint(params) {
     return `/containers/v1beta1/regions/${params.region}/namespaces`;
@@ -93,10 +97,6 @@ class ScalewayClient {
     this.organizationId = organizationId;
   }
 
-  pathParams = {
-    region: this.region,
-  };
-
   async get(resource, id) {
     const endpoint = resource.endpoint({ region: this.region });
     return this._getOne(METHOD.GET, `${this.domain}${endpoint}/${id}`);
@@ -109,7 +109,7 @@ class ScalewayClient {
 
   async create(resource, body) {
     const endpoint = resource.endpoint({ region: this.region });
-    return this._updateOne(METHOD.CREATE, `${this.domain}${endpoint}`, body);
+    return this._updateOne(METHOD.POST, `${this.domain}${endpoint}`, body);
   }
 
   async patch(resource, id, body) {
@@ -121,34 +121,44 @@ class ScalewayClient {
     );
   }
 
-  _querystring(excludeKeys, params) {
-    let s = "";
-    for (const key in params) {
-      if (!excludeKeys.includes(key)) {
-        s += `&${key}=${params[key]}`;
-      }
-    }
-    return s.replace("&", "?");
-  }
-
   async findOne(resource, params) {
-    let _params = { region: this.region, ...params };
-    const endpoint = resource.endpoint(_params);
-    const querystring = this._querystring(resource.pathParams, _params);
-    return this._findOne(
-      `${this.domain}${endpoint}${querystring}`,
+    const endpoint = resource.endpoint({ region: this.region, ...params });
+    const query = querystring(excludeKeys(params, resource.pathParams));
+    const items = await this._find(
+      `${this.domain}${endpoint}${query}`,
       resource.listName
     );
+    switch (items.length) {
+      case 0:
+        throw new Error("Resource not found");
+      case 1:
+        return items[0];
+      default:
+        throw new Error("Multiple resources found");
+    }
+  }
+
+  async findOrCreate(resource, params) {
+    const endpoint = resource.endpoint({ region: this.region, ...params });
+    const query = querystring(includeKeys(params, resource.naturalKey));
+    const items = await this._find(
+      `${this.domain}${endpoint}${query}`,
+      resource.listName
+    );
+    switch (items.length) {
+      case 0:
+        return this.create(resource, params);
+      case 1:
+        return items[0];
+      default:
+        throw new Error("Multiple resources found");
+    }
   }
 
   async findAll(resource, params) {
-    let _params = { region: this.region, ...params };
-    const endpoint = resource.endpoint(_params);
-    const querystring = this._querystring(resource.pathParams, _params);
-    return this._findAll(
-      `${this.domain}${endpoint}${querystring}`,
-      resource.listName
-    );
+    const endpoint = resource.endpoint({ region: this.region, ...params });
+    const query = querystring(excludeKeys(params, resource.pathParams));
+    return this._find(`${this.domain}${endpoint}${query}`, resource.listName);
   }
 
   async _getOne(method, url) {
@@ -179,22 +189,7 @@ class ScalewayClient {
     throw new Error(`${method} resource failed`, { cause: json.message });
   }
 
-  async _findOne(url, listName) {
-    const resp = await fetch(url, {
-      headers: { "X-Auth-Token": this.secretKey },
-    });
-    const json = await resp.json();
-    if (resp.ok) {
-      if (json.total_count == 1) {
-        return json[listName][0];
-      }
-      throw new Error("Resource not found");
-    }
-    throw new Error("Resource not found", { cause: json.message });
-  }
-
-  async _findAll(url, listName) {
-    console.log(url);
+  async _find(url, listName) {
     const resp = await fetch(url, {
       headers: { "X-Auth-Token": this.secretKey },
     });

@@ -35,6 +35,34 @@ function registryEndpoint(registry, tag) {
   return `${registry}:${tag}`;
 }
 
+function querystring(object) {
+  let s = "";
+  for (const key in object) {
+    s += `&${key}=${object[key]}`;
+  }
+  return s.replace("&", "?");
+}
+
+function includeKeys(object, keys) {
+  const result = { ...object };
+  for (const key in result) {
+    if (!keys.includes(key)) {
+      delete result[key];
+    }
+  }
+  return result;
+}
+
+function excludeKeys(object, keys) {
+  const result = { ...object };
+  for (const key in result) {
+    if (keys.includes(key)) {
+      delete result[key];
+    }
+  }
+  return result;
+}
+
 function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -114,6 +142,9 @@ module.exports = {
   environmentFromSecret,
   parseRegistryEndpoint,
   registryEndpoint,
+  querystring,
+  includeKeys,
+  excludeKeys,
   genericDeleteAll,
   environmentFromBranch,
   childProcess,
