@@ -5,7 +5,7 @@ const {
   genericDeleteAll,
 } = require("./lib/utils");
 const UserInput = require("./lib/user-input");
-const { ScalewayClient } = require("./lib/scaleway-client");
+const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const GithubClient = require("./lib/github-client");
 const DestroyEnvironments = require("./destroy-environment");
 
@@ -47,7 +47,7 @@ class CleanCI {
         name: `${image.name} image tags`,
         items: tags,
         logItemCb: (i) => console.log(i.id, i.name),
-        deleteItemCb: (i) => this.scaleway.deleteImageTag(i.id),
+        deleteItemCb: (i) => this.scaleway.delete(RESOURCE.IMAGE_TAG, i.id),
         getIdCb: (i) => i.name,
         applyChanges: this.applyChanges,
       });

@@ -4,7 +4,7 @@ const {
   genericDeleteAll,
 } = require("./lib/utils");
 const UserInput = require("./lib/user-input");
-const { ScalewayClient } = require("./lib/scaleway-client");
+const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 
 class DestroyEnvironments {
   constructor(scalewayClient, options = {}) {
@@ -26,7 +26,7 @@ class DestroyEnvironments {
       name: "secrets",
       items: deletableSecrets,
       logItemCb: (i) => console.log(i.id, i.name),
-      deleteItemCb: (i) => this.scaleway.deleteSecret(i.id),
+      deleteItemCb: (i) => this.scaleway.delete(RESOURCE.SECRET, i.id),
       getIdCb: (i) => i.id,
       applyChanges: this.applyChanges,
     });
@@ -40,7 +40,7 @@ class DestroyEnvironments {
       name: "containers",
       items: deletableContainers,
       logItemCb: (i) => console.log(i.id, i.name, i.registry_image),
-      deleteItemCb: (i) => this.scaleway.deleteContainer(i.id),
+      deleteItemCb: (i) => this.scaleway.delete(RESOURCE.CONTAINER, i.id),
       getIdCb: (i) => i.id,
       applyChanges: this.applyChanges,
     });

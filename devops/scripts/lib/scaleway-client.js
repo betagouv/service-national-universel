@@ -5,11 +5,35 @@ const METHOD = {
   DELETE: "delete",
 };
 
-const DOMAIN = "https://api.scaleway.com";
-const REGION = "fr-par";
+class Container {
+  endpoint(params) {
+    return `${params.domain}/containers/v1beta1/regions/${params.region}/containers`;
+  }
+}
+
+class ContainerNamespace {
+  endpoint(params) {
+    return `${params.domain}/containers/v1beta1/regions/${params.region}/namespaces`;
+  }
+}
+
+class Secret {
+  endpoint(params) {
+    return `${params.domain}/secret-manager/v1beta1/regions/${params.region}/secrets`;
+  }
+}
+
+class ImageTag {
+  endpoint(params) {
+    return `${params.domain}/registry/v1/regions/${params.region}/tags`;
+  }
+}
 
 const RESOURCE = {
-  CONTAINER: "CONTAINER",
+  CONTAINER: new Container(),
+  CONTAINER_NAMESPACE: new ContainerNamespace(),
+  SECRET: new Secret(),
+  IMAGE_TAG: new ImageTag(),
 };
 
 class ScalewayClient {
@@ -21,36 +45,39 @@ class ScalewayClient {
     this.organizationId = organizationId;
   }
 
-  _resource(type) {
-    switch (type) {
-      case RESOURCE.CONTAINER:
-        return {
-          listName: "containers",
-          endpoint: `${this.domain}/containers/v1beta1/regions/${this.region}/containers`,
-        };
-      default:
-        throw new Error(`Invalid resource type: ${type}`);
-    }
+  pathParams = {
+    region: this.region,
+    domain: this.domain,
+  };
+
+  async get(resource, id) {
+    const endpoint = resource.endpoint(this.pathParams);
+    return this._getOne(METHOD.GET, `${endpoint}/${id}`);
   }
 
-  async get(type, id) {
-    const resource = this._resource(type);
-    return this._getOne(METHOD.GET, `${resource.endpoint}/${id}`);
+  async delete(resource, id) {
+    const endpoint = resource.endpoint(this.pathParams);
+    return this._getOne(METHOD.DELETE, `${endpoint}/${id}`);
   }
 
-  async delete(type, id) {
-    const resource = this._resource(type);
-    return this._getOne(METHOD.DELETE, `${resource.endpoint}/${id}`);
+  async create(resource, body) {
+    const endpoint = resource.endpoint(this.pathParams);
+    return this._updateOne(METHOD.CREATE, endpoint, body);
   }
 
-  async create(type, body) {
-    const resource = this._resource(type);
-    return this._updateOne(METHOD.CREATE, resource.endpoint, body);
+  async patch(resource, id, body) {
+    const endpoint = resource.endpoint(this.pathParams);
+    return this._updateOne(METHOD.PATCH, `${endpoint}/${id}`, body);
   }
 
-  async patch(type, id, body) {
+  async findOne(type, params) {
     const resource = this._resource(type);
-    return this._updateOne(METHOD.PATCH, `${resource.endpoint}/${id}`, body);
+    return this._findOne(`${resource.endpoint}/${id}`, resource.listName);
+  }
+
+  async findAll(type, params) {
+    const resource = this._resource(type);
+    return this._findAll(`${resource.endpoint}/${id}`, resource.listName);
   }
 
   async _getOne(method, url) {
@@ -120,31 +147,10 @@ class ScalewayClient {
     );
   }
 
-  async deleteSecret(secretId) {
-    return this._getOne(
-      METHOD.DELETE,
-      `${this.domain}/containers/v1beta1/regions/${this.region}/secrets/${secretId}`
-    );
-  }
-
   async findSecretVersion(projectId, name, revision) {
     return this._getOne(
       METHOD.GET,
       `${this.domain}/secret-manager/v1beta1/regions/${this.region}/secrets-by-path/versions/${revision}/access?project_id=${projectId}&secret_name=${name}`
-    );
-  }
-
-  async deleteImageTag(tagId) {
-    return this._getOne(
-      METHOD.DELETE,
-      `${this.domain}/registry/v1/regions/${this.region}/tags/${tagId}`
-    );
-  }
-
-  async deleteContainer(containerId) {
-    return this._getOne(
-      METHOD.DELETE,
-      `${this.domain}/containers/v1beta1/regions/${this.region}/containers/${containerId}`
     );
   }
 
@@ -162,33 +168,10 @@ class ScalewayClient {
     );
   }
 
-  async createContainerNamespace(name) {
-    return this._updateOne(
-      METHOD.CREATE,
-      `${this.domain}/containers/v1beta1/regions/${this.region}/namespaces`,
-      body
-    );
-  }
-
   async findContainer(namespaceId, name) {
     return this._findOne(
       `${this.domain}/containers/v1beta1/regions/${this.region}/containers?namespace_id=${namespaceId}&name=${name}`,
       "containers"
-    );
-  }
-
-  async getContainer(containerId) {
-    return this._getOne(
-      METHOD.GET,
-      `${this.domain}/containers/v1beta1/regions/${this.region}/containers/${containerId}`
-    );
-  }
-
-  async updateContainer(containerId, body) {
-    return this._updateOne(
-      METHOD.PATCH,
-      `${this.domain}/containers/v1beta1/regions/${this.region}/containers/${containerId}`,
-      body
     );
   }
 

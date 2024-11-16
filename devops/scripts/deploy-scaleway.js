@@ -1,5 +1,5 @@
 const UserInput = require("./lib/user-input");
-const { ScalewayClient } = require("./lib/scaleway-client");
+const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { Config } = require("./lib/config");
 const { registryEndpoint, sleep } = require("./lib/utils");
 
@@ -9,7 +9,7 @@ async function waitUntilSuccess(scaleway, containerId) {
   let container;
   do {
     await sleep(POLL_INTERVAL_MS);
-    container = await scaleway.getContainer(containerId);
+    container = await scaleway.get(RESOURCE.CONTAINER, containerId);
     if (container.status === "error") {
       throw new Error(container.error_message);
     }
@@ -39,7 +39,7 @@ async function main() {
     config.containerName()
   );
 
-  await scaleway.updateContainer(container.id, {
+  await scaleway.patch(RESOURCE.CONTAINER, container.id, {
     registry_image: registryEndpoint(config.registry(), input.release),
   });
 
