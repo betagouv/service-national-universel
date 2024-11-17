@@ -1,20 +1,7 @@
 const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
-const { Config } = require("./lib/config");
-const { registryEndpoint, sleep } = require("./lib/utils");
-
-const POLL_INTERVAL_MS = 5000;
-
-async function waitUntilSuccess(scaleway, containerId) {
-  let container;
-  do {
-    await sleep(POLL_INTERVAL_MS);
-    container = await scaleway.get(RESOURCE.Container, containerId);
-    if (container.status === "error") {
-      throw new Error(container.error_message);
-    }
-  } while (container.status === "pending");
-}
+const { AppConfig } = require("./lib/config");
+const { registryEndpoint } = require("./lib/utils");
 
 async function main() {
   const input = new UserInput(`Build application MonCompte`)
@@ -29,15 +16,15 @@ async function main() {
     input.SCW_SECRET_KEY,
     input.SCW_ORGANIZATION_ID
   );
-  const config = new Config(input.environment, input.application);
+  const config = new AppConfig(input.environment, input.application);
 
   const project = await this.scaleway.findProject(config.projectName());
 
-  const namespace = await scaleway.findOne(RESOURCE.ContainerNamespace, {
+  const namespace = await scaleway.findOrThrow(RESOURCE.ContainerNamespace, {
     project_id: project.id,
     name: config.containerNamespace(),
   });
-  const container = await scaleway.findOne(RESOURCE.Container, {
+  const container = await scaleway.findOrThrow(RESOURCE.Container, {
     namespace_id: namespace.id,
     name: config.containerName(),
   });
@@ -46,7 +33,7 @@ async function main() {
     registry_image: registryEndpoint(config.registry(), input.release),
   });
 
-  await waitUntilSuccess(scaleway, container.id);
+  await scaleway.waitUntilSuccess(RESOURCE.Container, container.id);
 }
 
 if (require.main === module) {

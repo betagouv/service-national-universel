@@ -1,4 +1,4 @@
-const { querystring, includeKeys, excludeKeys } = require("./utils");
+const { querystring, excludeKeys, sleep, parseEnvFile } = require("./utils");
 
 const METHOD = {
   GET: "GET",
@@ -46,7 +46,6 @@ class Image {
 class Container {
   static listName = "containers";
   static pathParams = ["region"];
-  static naturalKey = ["namespace_id", "name"];
 
   static endpoint(params) {
     return `/containers/v1beta1/regions/${params.region}/containers`;
@@ -56,7 +55,6 @@ class Container {
 class ContainerNamespace {
   static listName = "namespaces";
   static pathParams = ["region"];
-  static naturalKey = ["project_id", "name"];
 
   static endpoint(params) {
     return `/containers/v1beta1/regions/${params.region}/namespaces`;
@@ -91,6 +89,7 @@ const RESOURCE = {
 class ScalewayClient {
   domain = "https://api.scaleway.com";
   region = "fr-par";
+  poll_interval_ms = 5000;
 
   constructor(secretKey, organizationId) {
     this.secretKey = secretKey;
@@ -121,7 +120,15 @@ class ScalewayClient {
     );
   }
 
-  async findOne(resource, params) {
+  async action(resource, id, action) {
+    const endpoint = resource.endpoint({ region: this.region });
+    return this._getOne(
+      METHOD.POST,
+      `${this.domain}${endpoint}/${id}/${action}`
+    );
+  }
+
+  async find(resource, params) {
     const endpoint = resource.endpoint({ region: this.region, ...params });
     const query = querystring(excludeKeys(params, resource.pathParams));
     const items = await this._find(
@@ -130,7 +137,7 @@ class ScalewayClient {
     );
     switch (items.length) {
       case 0:
-        throw new Error("Resource not found");
+        return null;
       case 1:
         return items[0];
       default:
@@ -138,21 +145,12 @@ class ScalewayClient {
     }
   }
 
-  async findOrCreate(resource, params) {
-    const endpoint = resource.endpoint({ region: this.region, ...params });
-    const query = querystring(includeKeys(params, resource.naturalKey));
-    const items = await this._find(
-      `${this.domain}${endpoint}${query}`,
-      resource.listName
-    );
-    switch (items.length) {
-      case 0:
-        return this.create(resource, params);
-      case 1:
-        return items[0];
-      default:
-        throw new Error("Multiple resources found");
+  async findOrThrow(resource, params) {
+    const item = await this.find(resource, params);
+    if (item === null) {
+      throw new Error("Resource not found");
     }
+    return item;
   }
 
   async findAll(resource, params) {
@@ -200,8 +198,19 @@ class ScalewayClient {
     throw new Error("Resource not found", { cause: json.message });
   }
 
+  async waitUntilSuccess(resource, id) {
+    let item;
+    do {
+      await sleep(this.poll_interval_ms);
+      item = await this.get(resource, id);
+      if (item.status === "error") {
+        throw new Error(item.error_message);
+      }
+    } while (item.status !== "ready");
+  }
+
   async findProject(name) {
-    return this.findOne(RESOURCE.Project, {
+    return this.findOrThrow(RESOURCE.Project, {
       organization_id: this.organizationId,
       name: name,
     });
@@ -214,7 +223,7 @@ class ScalewayClient {
     );
     const decodedData = Buffer.from(secret.data, "base64").toString("utf8");
 
-    return decodedData;
+    return parseEnvFile(decodedData);
   }
 }
 

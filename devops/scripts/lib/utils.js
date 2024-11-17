@@ -69,6 +69,21 @@ function sleep(ms) {
   });
 }
 
+function parseEnvFile(data) {
+  const keys = {};
+  for (const line of data.split("\n")) {
+    const index = line.indexOf("=");
+    if (index > 0) {
+      const key = line.substring(0, index);
+      const value = line.substring(index + 1).replace(/^"|"$/g, "");
+      if (value) {
+        keys[key] = value;
+      }
+    }
+  }
+  return keys;
+}
+
 function childProcess(command, args, options) {
   let proc = spawn(command, args, {
     stdio: "inherit",
@@ -149,4 +164,5 @@ module.exports = {
   environmentFromBranch,
   childProcess,
   childProcessStdin,
+  parseEnvFile,
 };

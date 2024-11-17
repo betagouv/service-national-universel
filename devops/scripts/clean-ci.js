@@ -18,6 +18,73 @@ function buildEndpointIndex(registryEndpoint, images) {
   return index;
 }
 
+class DestroyEnvironments {
+  constructor(scalewayClient, options = {}) {
+    this.scaleway = scalewayClient;
+    this.applyChanges = options.applyChanges;
+    this.namespaceName = options.namespaceName;
+    this.environments = new Set(options.environments);
+
+    this.namespace = options.namespace;
+    this.containers = options.containers;
+  }
+
+  async _deleteSecrets(projectId) {
+    const secrets = await this.scaleway.findAll(RESOURCE.Secret, {
+      project_id: projectId,
+      page_size: 100,
+    });
+    const deletableSecrets = secrets.filter((i) =>
+      this.environments.has(environmentFromSecret(i.name))
+    );
+    await genericDeleteAll({
+      name: "secrets",
+      items: deletableSecrets,
+      logItemCb: (i) => console.log(i.id, i.name),
+      deleteItemCb: (i) => this.scaleway.delete(RESOURCE.Secret, i.id),
+      getIdCb: (i) => i.id,
+      applyChanges: this.applyChanges,
+    });
+  }
+
+  async _deleteContainers(containers) {
+    const deletableContainers = containers.filter((i) =>
+      this.environments.has(environmentFromContainer(i.name))
+    );
+    return await genericDeleteAll({
+      name: "containers",
+      items: deletableContainers,
+      logItemCb: (i) => console.log(i.id, i.name, i.registry_image),
+      deleteItemCb: (i) => this.scaleway.delete(RESOURCE.Container, i.id),
+      getIdCb: (i) => i.id,
+      applyChanges: this.applyChanges,
+    });
+  }
+
+  async execute() {
+    console.log("Trying to delete these environments: ");
+    this.environments.forEach((i) => console.log(" - " + i));
+
+    const project = await this.scaleway.findProject("snu-ci");
+
+    const namespace =
+      this.namespace ??
+      (await this.scaleway.findOrThrow(RESOURCE.ContainerNamespace, {
+        project_id: project.id,
+        name: this.namespaceName,
+      }));
+    const containers =
+      this.containers ??
+      (await this.scaleway.findAll(RESOURCE.Container, {
+        namespace_id: namespace.id,
+        page_size: 100,
+      }));
+
+    await this._deleteContainers(containers);
+    await this._deleteSecrets(project.id);
+  }
+}
+
 class CleanCI {
   constructor(scalewayClient, githubClient, options = {}) {
     this.scaleway = scalewayClient;
@@ -62,20 +129,26 @@ class CleanCI {
 
   async execute() {
     const project = await this.scaleway.findProject(this.projectName);
-    const registry = await this.scaleway.findOne(RESOURCE.RegistryNamespace, {
-      project_id: project.id,
-      name: this.projectName,
-    });
+    const registry = await this.scaleway.findOrThrow(
+      RESOURCE.RegistryNamespace,
+      {
+        project_id: project.id,
+        name: this.projectName,
+      }
+    );
     const images = await this.scaleway.findAll(RESOURCE.Image, {
       namespace_id: registry.id,
     });
 
     const deletedTags = await this._deleteImageTags(images);
 
-    const namespace = await this.scaleway.findOne(RESOURCE.ContainerNamespace, {
-      project_id: project.id,
-      name: this.namespaceName,
-    });
+    const namespace = await this.scaleway.findOrThrow(
+      RESOURCE.ContainerNamespace,
+      {
+        project_id: project.id,
+        name: this.namespaceName,
+      }
+    );
     const containers = await this.scaleway.findAll(RESOURCE.Container, {
       namespace_id: namespace.id,
       page_size: 100,

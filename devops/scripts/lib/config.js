@@ -1,4 +1,6 @@
-const ENVS = ["ci", "staging", "production"];
+const { readFile } = require("node:fs/promises");
+const { resolve } = require("node:path");
+
 const APPS = ["app", "admin", "api", "apiv2"];
 
 const FRONTEND_APPS = ["app", "admin"];
@@ -22,15 +24,31 @@ function mountSecretKeys(app) {
       return ["PM2_SLACK_URL"];
   }
 }
-class Config {
-  constructor(environment, application) {
-    if (!ENVS.includes(environment)) {
-      throw new Error(`Unknown environment: ${environment}`);
+
+class EnvConfig {
+  constructor(environment) {
+    this.env = environment;
+  }
+  containerNamespace() {
+    return `snu-${this.env}`;
+  }
+
+  projectName() {
+    switch (this.env) {
+      case "staging":
+      case "production":
+        return `snu-production`;
+      default:
+        return `snu-ci`;
     }
+  }
+}
+class AppConfig extends EnvConfig {
+  constructor(environment, application) {
+    super(environment);
     if (!APPS.includes(application)) {
       throw new Error(`Unknown application: ${application}`);
     }
-    this.env = environment;
     this.app = application;
   }
 
@@ -38,27 +56,55 @@ class Config {
     return `${this.env}-${this.app}`;
   }
 
-  containerNamespace() {
-    return `snu-${this.env}`;
-  }
-
-  projectName() {
-    return `snu-${this.env}`;
+  async containerOptions() {
+    let filename;
+    switch (this.env) {
+      case "staging":
+      case "production":
+      case "ci":
+        filename = this.env;
+        break;
+      default:
+        filename = "custom";
+    }
+    const filePath = resolve(
+      `${__dirname}/../../config/${this.app}/${filename}.json`
+    );
+    const contents = await readFile(filePath, { encoding: "utf8" });
+    return JSON.parse(contents);
   }
 
   runSecretName() {
     if (FRONTEND_APPS.includes(this.app)) {
-      throw new Error("No runtime configuration for frontend applications");
+      return "";
     }
-    return `${this.env}-${this.app}-run`;
+    switch (this.env) {
+      case "staging":
+      case "production":
+        return `${this.env}-${this.app}-run`;
+      default:
+        return `ci-${this.app}-run`;
+    }
   }
 
   buildSecretName() {
-    return `${this.env}-${this.app}-build`;
+    switch (this.env) {
+      case "staging":
+      case "production":
+        return `${this.env}-${this.app}-build`;
+      default:
+        return `ci-${this.app}-build`;
+    }
   }
 
   registry() {
-    return `rg.fr-par.scw.cloud/snu-${this.env}/${this.app}`;
+    switch (this.env) {
+      case "staging":
+      case "production":
+        return `rg.fr-par.scw.cloud/snu-${this.env}/${this.app}`;
+      default:
+        return `rg.fr-par.scw.cloud/snu-ci/${this.app}`;
+    }
   }
 
   releaseKey() {
@@ -71,5 +117,6 @@ class Config {
 }
 
 module.exports = {
-  Config,
+  EnvConfig,
+  AppConfig,
 };
