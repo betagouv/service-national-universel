@@ -22,7 +22,7 @@ jobs:
       - name: Get environment name
         id: env_name
         run: |
-          env_name=$(node get-environment-name.js ${{ github.event.ref }})
+          env_name=$(node get-environment-name.js ${{ github.ref_name }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 

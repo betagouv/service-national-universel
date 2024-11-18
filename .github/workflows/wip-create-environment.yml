@@ -3,9 +3,9 @@ name: Create environment
 on:
   create:
   workflow_dispatch:
-  push:
-    branches: # TODO: remove me
-      - 3577-app
+  # push:
+  #   branches: # TODO: remove me
+  #     - 3577-app
 
 defaults:
   run:
