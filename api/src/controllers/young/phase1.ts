@@ -17,7 +17,7 @@ import {
   YOUNG_STATUS_PHASE1,
   REFERENT_DEPARTMENT_SUBROLE,
   getDepartmentByZip,
-  getDepartmentForEligibility,
+  getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
   DepartmentServiceType,
 } from "snu-lib";
@@ -88,8 +88,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
 
     // update youngs infos
     if (young.status === "WAITING_LIST") {
-      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
-      const departement = getDepartmentForEligibility(young);
+      const departement = getDepartmentForInscriptionGoal(young);
       const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({

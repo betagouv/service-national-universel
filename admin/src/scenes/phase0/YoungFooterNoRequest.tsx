@@ -3,7 +3,7 @@ import { isBefore } from "date-fns";
 import { toastr } from "react-redux-toastr";
 import { HiInformationCircle } from "react-icons/hi";
 
-import { YOUNG_STATUS, YOUNG_SOURCE, YoungDto, getDepartmentForEligibility, translate, InscriptionGoalsRoutes } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_SOURCE, YoungDto, getDepartmentForInscriptionGoal, translate } from "snu-lib";
 
 import { capture } from "@/sentry";
 import api from "@/services/api";
@@ -38,9 +38,7 @@ export function YoungFooterNoRequest({ processing, young, onProcess, footerClass
       const isDatePassed = young.latestCNIFileExpirationDate ? isBefore(new Date(young.latestCNIFileExpirationDate), new Date()) : false;
       let isGoalReached, isLCavailable;
       if (young.source !== YOUNG_SOURCE.CLE) {
-        // on vérifie la completion des objectifs pour la région (en fonction du département)
-        // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
-        const departement = getDepartmentForEligibility(young);
+        const departement = getDepartmentForInscriptionGoal(young);
         const tauxRemplissage = await InscriptionGoalService.getTauxRemplissage({ cohort: young.cohort!, department: departement });
         isGoalReached = tauxRemplissage >= 1;
         // on vérifie qu'il n'y pas de jeunes en LC
