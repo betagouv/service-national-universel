@@ -83,12 +83,12 @@ class CreateEnvironment {
       },
     });
 
-    await this.scaleway.action(RESOURCE.Container, container.id, "deploy");
+    // await this.scaleway.action(RESOURCE.Container, container.id, "deploy");
 
-    container = await this.scaleway.waitUntilSuccess(
-      RESOURCE.Container,
-      container.id
-    );
+    // container = await this.scaleway.waitUntilSuccess(
+    //   RESOURCE.Container,
+    //   container.id
+    // );
 
     return container;
   }
