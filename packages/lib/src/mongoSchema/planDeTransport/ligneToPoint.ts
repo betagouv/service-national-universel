@@ -1,6 +1,6 @@
 import { Schema, InferSchemaType } from "mongoose";
 import { InterfaceExtended } from "..";
-import { TRANSPORT_MODES } from "src/constants/constants";
+import { TRANSPORT_MODES } from "../../constants/constants";
 
 export const LigneToPointSchema = {
   lineId: {

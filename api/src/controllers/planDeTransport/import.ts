@@ -18,6 +18,7 @@ import {
   PlanTransportModel,
   ClasseModel,
   CohortModel,
+  type ReferentDocument,
   type PlanTransportModesType,
 } from "../../models";
 
@@ -27,15 +28,6 @@ import { validateId } from "../../utils/validator";
 import { validatePdtFile, computeImportSummary } from "../../planDeTransport/planDeTransport/import/pdtImportService";
 import { formatTime } from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
 import { startSession, withTransaction, endSession } from "../../mongo";
-
-interface User {
-  id: string;
-  // Add other user properties as needed
-}
-
-interface AuthenticatedRequest extends Request {
-  user: User;
-}
 
 interface ImportPlanTransportLine {
   [key: string]: string | string[] | undefined;
@@ -74,7 +66,8 @@ interface LineToPoint {
   stepPoints: StepPoint[];
 }
 
-interface CustomRequestWithFiles extends AuthenticatedRequest {
+interface CustomRequestWithFiles extends Request {
+  user: Partial<ReferentDocument>;
   files?: {
     [fieldname: string]: UploadedFile | UploadedFile[];
   };
@@ -150,7 +143,7 @@ router.post(
 );
 
 // Importe un plan de transport vérifié et enregistré dans importplandetransport.
-router.post("//:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req: AuthenticatedRequest, res: Response) => {
+router.post("/:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req: CustomRequestWithFiles, res: Response) => {
   const transaction = await startSession();
   try {
     const { error, value: importId } = validateId(req.params.importId);
