@@ -7,7 +7,7 @@ on:
       - "packages/**"
       - ".github/workflows/wip-deploy-ci-apiv2.yml" # TODO: remove
     branches: # TODO: remove me
-      - 3577-app
+      - 3577-app-disable
 
 env:
   ENVIRONMENT: ci
