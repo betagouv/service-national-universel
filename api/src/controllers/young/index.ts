@@ -55,7 +55,7 @@ import {
   translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
   ReferentType,
-  getDepartmentForEligibility,
+  getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
   CohortDto,
 } from "snu-lib";
@@ -276,8 +276,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     }
 
     if (obj.source !== YOUNG_SOURCE.CLE && value.status === YOUNG_STATUS.VALIDATED) {
-      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
-      const departement = getDepartmentForEligibility(obj);
+      const departement = getDepartmentForInscriptionGoal(obj);
       const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
@@ -771,6 +770,7 @@ router.post("/france-connect/user-info", async (req: UserRequest, res) => {
 
     const redisClient = getRedisClient();
     storedState = await redisClient.get(`franceConnectState:${value.state}`);
+    // @ts-ignore
     storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
 
     if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {

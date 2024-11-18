@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { department2region, translate } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
-import { categories, departmentOptions, getClasseIdFromLink, roleOptions } from "../contact.service";
+import { categories, departmentOptions, getClasseIdFromLink, getClasseMessage, roleOptions } from "../contact.service";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
@@ -35,13 +35,12 @@ export default function PublicContactForm({ category, question, parcours }) {
 
   const { isPending, isError, data: classe } = useClass(classeId);
 
-  const classeString = `J'ai un compte volontaire et je souhaite m'inscrire au SNU dans le cadre de ma classe engagée : ${classe?.name}, établissement : ${classe?.etablissement?.name}.`;
-  const [message, setMessage] = useState(classe?.name && classe?.etablissement ? classeString : "");
+  const [message, setMessage] = useState("");
 
   const disabled = () => {
     if (loading) return true;
     if (!role || !category || !question.label || !firstName || !lastName || !email || !department) return true;
-    if (!message) return true;
+    if (!classeId && !message) return true;
     return false;
   };
 
@@ -61,7 +60,7 @@ export default function PublicContactForm({ category, question, parcours }) {
       }
 
       const response = await API.post("/SNUpport/ticket/form", {
-        message,
+        message: classe ? getClasseMessage(classe) : message,
         subject: `${categories.find((e) => e.value === category)?.label} - ${question.label}`,
         firstName,
         lastName,
@@ -70,7 +69,7 @@ export default function PublicContactForm({ category, question, parcours }) {
         role,
         parcours,
         subjectStep1: category,
-        subjectStep2: question.label,
+        subjectStep2: question.value,
         region: department2region[department],
         fromPage: new URLSearchParams(window.location.search).get("from "),
         files: uploadedFiles,
@@ -123,13 +122,13 @@ export default function PublicContactForm({ category, question, parcours }) {
 
       <label className="w-full my-8">
         E-mail du volontaire
-        <Input label="Votre email" type="email" value={email} onChange={setEmail} name="email" autocomplete="on" required />
+        <Input type="email" value={email} onChange={setEmail} name="email" autocomplete="on" required />
       </label>
 
       <br />
       <SearchableSelect label="Département" options={departmentOptions} value={department} onChange={setDepartment} required />
 
-      <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
+      <Textarea label="Votre message" value={classe ? getClasseMessage(classe) : message} onChange={(e) => setMessage(e.target.value)} readOnly={!!classeId} />
       <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       <ErrorMessage error={error} />
       <hr />

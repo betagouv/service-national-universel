@@ -104,7 +104,7 @@ import {
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
   YoungType,
-  getDepartmentForEligibility,
+  getDepartmentForInscriptionGoal,
   isAdmin,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
@@ -557,8 +557,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
     ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
-      const departement = getDepartmentForEligibility(young);
+      const departement = getDepartmentForInscriptionGoal(young);
       const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
