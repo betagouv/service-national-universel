@@ -1,13 +1,12 @@
-import { Global, Logger, MiddlewareConsumer, Module } from "@nestjs/common";
-import configuration from "./config/configuration";
+import { Logger, MiddlewareConsumer, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { SentryModule } from "@sentry/nestjs/setup";
+import configuration from "./config/configuration";
 
+import { QueueModule } from "@infra/Queue.module";
 import { AdminModule } from "./admin/Admin.module";
-import { LoggerRequestMiddleware } from "./shared/infra/LoggerRequest.middleware";
 import { CorrelationIdMiddleware } from "./shared/infra/CorrelationId.middleware.js";
-import { SharedModule } from "./shared/Shared.module";
-import { TaskModule } from "./task/Task.module";
+import { LoggerRequestMiddleware } from "./shared/infra/LoggerRequest.middleware";
 
 @Module({
     imports: [
@@ -16,6 +15,7 @@ import { TaskModule } from "./task/Task.module";
         }),
         SentryModule.forRoot(),
         AdminModule,
+        QueueModule,
     ],
     controllers: [],
     providers: [Logger],

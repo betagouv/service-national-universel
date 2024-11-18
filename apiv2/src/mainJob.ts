@@ -1,13 +1,11 @@
 import "./instrument"; // first
 
-import { NestFactory } from "@nestjs/core";
-import { NotificationJobModule } from "./notification/NotificationJob.module";
 import { Logger } from "@nestjs/common";
-import { AdminJobModule } from "./admin/AdminJob.module";
+import { NestFactory } from "@nestjs/core";
+import { MainJobModule } from "./MainJob.module";
 
 async function bootstrap() {
-    await NestFactory.createApplicationContext(NotificationJobModule);
-    await NestFactory.createApplicationContext(AdminJobModule);
+    await NestFactory.createApplicationContext(MainJobModule);
     Logger.log(`Job started`, "bootstrap mainJob");
     // TODO: handle logs error here ?
     //     process.on("uncaughtException", (error) => {

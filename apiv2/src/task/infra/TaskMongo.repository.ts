@@ -47,7 +47,6 @@ export class TaskRepository implements TaskGateway {
     }
 
     async toSuccess(id: string): Promise<TaskModel> {
-        // TODO: check if task exists and is in progress
         const updatedTask = await this.taskMongooseEntity.findByIdAndUpdate(
             id,
             { status: TaskStatus.COMPLETED },

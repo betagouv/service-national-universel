@@ -29,25 +29,10 @@ import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { QueueType } from "@shared/infra/Queue";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
+import { QueueModule } from "@infra/Queue.module";
 
 @Module({
-    imports: [
-        ClsModule.forRoot({}),
-        ConfigModule,
-        DatabaseModule, //TO REMOVE ?
-        JwtAuthModule,
-        NotificationModule,
-        BullModule.registerQueue({
-            name: NotificationQueueType.EMAIL,
-        }),
-        BullModule.registerQueue({
-            name: NotificationQueueType.CONTACT,
-        }),
-        BullModule.registerQueue({
-            name: QueueType.ADMIN_TASK,
-        }),
-        TaskModule,
-    ],
+    imports: [ClsModule.forRoot({}), DatabaseModule, JwtAuthModule, NotificationModule, QueueModule, TaskModule],
     controllers: [ClasseController, AuthController, AdminTaskController],
     providers: [
         ClasseService,
