@@ -48,7 +48,7 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          echo ${{ github.event.compare }}
+          echo ${{ github.event.head_commit }}
 
           env_name=$(node get-environment-name.js ${{ steps.check.outputs.branch_name }})
           echo "env_name: $env_name"
