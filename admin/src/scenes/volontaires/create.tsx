@@ -19,7 +19,7 @@ import {
   PHONE_ZONES,
   YOUNG_SOURCE,
   getSchoolYear,
-  getDepartmentForEligibility,
+  getDepartmentForInscriptionGoal,
   CohortType,
   EtablissementDto,
 } from "snu-lib";
@@ -422,8 +422,7 @@ export default function Create() {
       sendData();
     } else {
       // on vérifie la completion des objectifs pour le département
-      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
-      const departement = getDepartmentForEligibility(values);
+      const departement = getDepartmentForInscriptionGoal(values);
       const res = await api.get(`/inscription-goal/${values.cohort}/department/${departement}`);
       if (!res.ok) {
         toastr.error("Séjour non disponible: ", translate(res.code));
