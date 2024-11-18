@@ -5,18 +5,21 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const { logger } = require("../logger");
-const { MissionModel, ApplicationModel, StructureModel, ReferentModel } = require("../models");
+const { MissionModel, ApplicationModel, StructureModel, ReferentModel, CohortModel } = require("../models");
 // eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung } = require("../utils/index");
 const { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } = require("../services/application");
 const { getTutorName } = require("../services/mission");
-const { validateId, validateMission } = require("../utils/validator");
+const { validateId, validateMission, idSchema } = require("../utils/validator");
 const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../brevo");
 const config = require("config");
 const { getNearestLocation } = require("../services/gouv.fr/api-adresse");
+const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
+const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");
+const { authMiddleware } = require("../middlewares/authMiddleware");
 
 //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
 const fixDate = (dateString) => {
@@ -296,13 +299,15 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     // Add application for young.
     if (isYoung(req.user)) {
       const application = await ApplicationModel.findOne({ missionId: checkedId, youngId: req.user._id });
+      const cohort = await CohortModel.findById(req.user.cohortId);
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({
         ok: true,
         data: {
           ...serializeMission(mission),
           tutor: missionTutor,
           application: application ? serializeApplication(application) : null,
-          ...(await getAuthorizationToApply(mission, req.user)),
+          ...(await getAuthorizationToApply(mission, req.user, cohort)),
         },
       });
     }
@@ -313,7 +318,32 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, MissionModel));
+router.get(
+  "/:id/patches",
+  authMiddleware("referent"),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+  ],
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const mission = await MissionModel.findById(id);
+      if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const missionPatches = await patches.get(req, MissionModel);
+      if (!missionPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      return res.status(200).send({ ok: true, data: missionPatches });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
 
 router.get("/:id/application", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

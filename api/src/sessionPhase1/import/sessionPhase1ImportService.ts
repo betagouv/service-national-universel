@@ -5,7 +5,7 @@ import { readCSVBuffer } from "../../services/fileService";
 import { getFile } from "../../utils";
 import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./sessionPhase1Import";
 import { mapSessionCohesionCentersForSept2024 } from "./sessionPhase1ImportMapper";
-
+import { normalizeDepartmentName } from "snu-lib";
 export interface SessionCohesionCenterImportReport {
   sessionId?: string;
   sessionFormule?: string;
@@ -96,7 +96,7 @@ const createSession = async (
     cohort: foundCohort.name,
     placesTotal: sessionCenter.sessionPlaces,
     placesLeft: sessionCenter.sessionPlaces,
-    department: foundCenter.department,
+    department: normalizeDepartmentName(foundCenter.department),
     region: foundCenter.region,
     codeCentre: foundCenter.matricule,
     nameCentre: foundCenter.name,

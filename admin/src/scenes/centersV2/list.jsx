@@ -1,7 +1,16 @@
 import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { ROLES, canCreateOrUpdateCohesionCenter, formatLongDateFR, getDepartmentNumber, translate, translateDomainCenter, translateTypologieCenter } from "snu-lib";
+import {
+  ROLES,
+  canCreateOrUpdateCohesionCenter,
+  formatLongDateFR,
+  getDepartmentNumber,
+  normalizeDepartmentName,
+  translate,
+  translateDomainCenter,
+  translateTypologieCenter,
+} from "snu-lib";
 import Calendar from "../../assets/icons/Calendar";
 import Menu from "../../assets/icons/Menu";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -86,7 +95,7 @@ const ListSession = ({ firstSession }) => {
       name: "department",
       missingLabel: "Non renseignée",
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
-      translate: (e) => getDepartmentNumber(e) + " - " + e,
+      translate: (e) => getDepartmentNumber(e) + " - " + normalizeDepartmentName(e),
     },
     { title: "Email fiche sanitaire", name: "sanitaryContactEmailExist", missingLabel: "", transformData: transformExistingField, translate },
     { title: "Places restantes", name: "placesLeft", missingLabel: "Non renseignée" },

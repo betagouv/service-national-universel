@@ -114,7 +114,37 @@ const departmentLookUp = {
 
 const departmentList = Object.values(departmentLookUp);
 
-const getDepartmentNumber = (depNum: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === depNum);
+function normalizeString(str) {
+  return str
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/-/g, " ")
+    .replace(/'/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const departmentNameMapping = {};
+for (const key in departmentLookUp) {
+  const deptName = departmentLookUp[key];
+  const normalizedDeptName = normalizeString(deptName);
+  departmentNameMapping[normalizedDeptName] = deptName;
+}
+
+function normalizeDepartmentName(deptName) {
+  if (typeof deptName !== "string") {
+    return deptName;
+  }
+  const normalizedDeptName = normalizeString(deptName);
+  if (departmentNameMapping[normalizedDeptName]) {
+    return departmentNameMapping[normalizedDeptName];
+  } else {
+    return deptName;
+  }
+}
+
+const getDepartmentNumber = (depNum: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === normalizeDepartmentName(depNum));
 
 const getDepartmentByZip = (zip?: string) => {
   if (!zip) return;
@@ -369,6 +399,18 @@ const getDepartmentForEligibility = (
   return dep;
 };
 
+export const getDepartmentForInscriptionGoal = (
+  young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "schoolCountry" | "zip"> & { _id?: YoungType["_id"] },
+) => {
+  let dep = young?.department || getDepartmentByZip(young?.zip);
+  if (dep && (!isNaN(dep) || ["2A", "2B", "02A", "02B"].includes(dep))) {
+    if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
+    else dep = departmentLookUp[dep];
+  }
+  if (!dep) dep = "Etranger";
+  return dep;
+};
+
 const isFromMetropole = (young: YoungType) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "A" || region2zone[region] === "B" || region2zone[region] === "C";
@@ -392,6 +434,7 @@ const isFromNouvelleCaledonie = (young: YoungType) => {
 
 export {
   departmentLookUp,
+  normalizeDepartmentName,
   departmentList,
   getDepartmentNumber,
   regionList,
@@ -410,6 +453,7 @@ export {
 };
 export default {
   departmentLookUp,
+  normalizeDepartmentName,
   departmentList,
   getDepartmentNumber,
   regionList,

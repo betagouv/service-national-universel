@@ -11,7 +11,10 @@ import { notExisitingMissionId, createMissionHelper, getMissionByIdHelper } from
 import { createReferentHelper } from "./helpers/referent";
 import { notExistingYoungId, createYoungHelper, getYoungByIdHelper } from "./helpers/young";
 import { createCohortHelper } from "./helpers/cohort";
-import { SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { Types } from "mongoose";
+const { ObjectId } = Types;
+import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, ROLES } from "snu-lib";
+
 
 jest.setTimeout(60_000);
 
@@ -71,7 +74,8 @@ describe("Application", () => {
       expect(res.status).toBe(400);
     });
     it("should create an application when priority is given", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -94,7 +98,8 @@ describe("Application", () => {
       expect(res.body.data.youngId).toBe(young._id.toString());
     });
     it("should update young status", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -107,7 +112,8 @@ describe("Application", () => {
       expect([...updatedYoung!.phase2ApplicationStatus]).toStrictEqual(["WAITING_VALIDATION"]);
     });
     it("should update mission places left status", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 100, placesTotal: 100 });
       const application = getNewApplicationFixture();
       const res = await request(getAppHelper())
@@ -129,8 +135,8 @@ describe("Application", () => {
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(403);
     });
-    it("should return 403 when cohort is too old", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "2019" }));
+    it("should return 403 when cohort is archived", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.ARCHIVED }));
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
@@ -274,5 +280,43 @@ describe("Application", () => {
       res = await request(getAppHelper(young)).post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
       expect(res.status).toBe(403);
     });
+  });
+});
+
+describe("GET /application/:id/patches", () => {
+  it("should return 404 if application not found", async () => {
+    const applicationId = new ObjectId();
+    const res = await request(getAppHelper()).get(`/application/${applicationId}/patches`).send();
+    expect(res.statusCode).toEqual(404);
+  });
+  it("should return 403 if not admin", async () => {
+    const application = await createApplication(getNewApplicationFixture());
+    application.missionName = "MY NEW NAME";
+    await application.save();
+
+    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      .get(`/application/${application._id}/patches`)
+      .send();
+    expect(res.status).toBe(403);
+  });
+  it("should return 200 if application found with patches", async () => {
+    const application = await createApplication(getNewApplicationFixture());
+    application.missionName = "MY NEW NAME";
+    await application.save();
+    const res = await request(getAppHelper()).get(`/application/${application._id}/patches`).send();
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/missionName", value: "MY NEW NAME" })]),
+        }),
+      ]),
+    );
+  });
+  it("should be only accessible by referents", async () => {
+    const passport = require("passport");
+    const applicationId = new ObjectId();
+    await request(getAppHelper()).get(`/application/${applicationId}/patches`).send();
+    expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
   });
 });

@@ -318,3 +318,7 @@ export function getClasseIdFromLink(link) {
     return undefined;
   }
 }
+
+export function getClasseMessage(classe) {
+  return `J'ai un compte volontaire et je souhaite m'inscrire au SNU dans le cadre de ma classe engagée : ${classe.name} (${classe.uniqueKeyAndId}), établissement : ${classe.etablissement?.name}.`;
+}

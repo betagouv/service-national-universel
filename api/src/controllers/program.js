@@ -35,7 +35,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const data = await ProgramModel.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     data.set(obj);
-    await data.save();
+    await data.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

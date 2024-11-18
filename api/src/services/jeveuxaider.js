@@ -54,7 +54,7 @@ router.get("/signin", async (req, res) => {
     // si l'utilisateur existe, on le connecte, et on le redirige vers la plateforme admin SNU
     if (user) {
       user.set({ lastLoginAt: Date.now() });
-      await user.save();
+      await user.save({ fromUser: user });
 
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
