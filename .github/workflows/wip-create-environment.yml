@@ -26,7 +26,7 @@ jobs:
         id: env_name
         # TODO : replace with ${{ github.event.ref }}
         run: |
-          env_name=$(node get-environment-name.js ${{ GITHUB_REF }})
+          env_name=$(node get-environment-name.js ${{ github.ref_name }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
