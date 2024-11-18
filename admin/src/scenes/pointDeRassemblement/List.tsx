@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { PointDeRassemblementType, ROLES, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
+import { PointDeRassemblementType, ROLES, canCreateMeetingPoint, getDepartmentNumber, getParticularitesAcces } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
-import Calendar from "../../assets/icons/Calendar";
 import ExternalLink from "../../assets/icons/ExternalLink";
 import Menu from "../../assets/icons/Menu";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -21,6 +20,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@snu/ds/admin";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
 
 export default function List() {
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -103,7 +103,7 @@ const ListPoints = ({ user }) => {
   const pageId = "pdrList";
   const [paramData, setParamData] = React.useState({ page: 0 });
   const [size, setSize] = useState(10);
-  const filterArray = [
+  const filterArray: Filter[] = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
@@ -235,11 +235,11 @@ const Hit = ({ hit }) => {
 
 const ListSessions = ({ user, defaultCohortName }) => {
   const [data, setData] = React.useState<PointDeRassemblementType[]>([]);
-  const [selectedFilters, setSelectedFilters] = React.useState({ cohorts: { filter: [defaultCohortName] } });
+  const [selectedFilters, setSelectedFilters] = React.useState<{ [key: string]: Filter }>({ cohorts: { filter: [defaultCohortName] } });
   const pageId = "pdrListSession";
   const [paramData, setParamData] = React.useState({ page: 0 });
   const [size, setSize] = useState(10);
-  const filterArray = [
+  const filterArray: Filter[] = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [defaultCohortName], allowEmpty: false, sort: (e) => orderCohort(e) },
     {
       title: "Région",
@@ -336,7 +336,8 @@ const ListSessions = ({ user, defaultCohortName }) => {
                   Cohort: selectedCohort,
                   Nom: item.name,
                   Adresse: item.address,
-                  "Complément d'adresse": item?.complementAddress.find((e) => e.cohort === selectedCohort)?.complement || "",
+                  // TODO: à supprimer lorsque le PDR sera dissocié de la session
+                  "Complément d'adresse": getParticularitesAcces(item, selectedCohort) || "",
                   Ville: item.city,
                   "Code postal": item.zip,
                   Département: item.department,

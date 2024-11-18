@@ -20,7 +20,7 @@ const getGoalAndComputeFillingRates = async ({ department, values }) => {
       if (inscriptionGoal.max) {
         const fillingRate = ((values[inscriptionGoal.cohort] || 0) / (inscriptionGoal.max || 0)) * 100;
         inscriptionGoal.set({ fillingRate });
-        await inscriptionGoal.save();
+        await inscriptionGoal.save({ fromUser: { firstName: "Cron computeGoalsInscription" } });
       }
     });
   }

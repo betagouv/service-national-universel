@@ -1,6 +1,40 @@
 const { generateAddress, generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
 
-function anonymize(item) {
+function anonymize(itemToAnonymize) {
+  const whitelist = [
+    "_id.$oid",
+    "contacts",
+    "contacts.cohort",
+    "contacts.cohortId",
+    "contacts.contactName",
+    "contacts.contactPhone",
+    "contacts.contactMail",
+    "department",
+    "region",
+    "directionName",
+    "serviceName",
+    "serviceNumber",
+    "address",
+    "complementAddress",
+    "zip",
+    "city",
+    "description",
+    "contactName",
+    "contactPhone",
+    "contactMail",
+    "representantEtat",
+    "representantEtat.firstName",
+    "representantEtat.lastName",
+    "representantEtat.mobile",
+    "representantEtat.email",
+    "representantEtat.role",
+    "createdAt",
+    "updatedAt",
+    "__v",
+  ];
+  const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);
+
   item.email && (item.email = generateRandomEmail());
   item.contactPhone && (item.contactPhone = generateNewPhoneNumber());
   item.address && (item.address = generateAddress());

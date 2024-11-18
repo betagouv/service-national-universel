@@ -1,6 +1,54 @@
 const { generateAddress, generateRandomName, starify, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
 
-function anonymize(item) {
+function anonymize(itemToAnonymize) {
+  const whitelist = [
+    "_id.$oid",
+    "name",
+    "siret",
+    "description",
+    "website",
+    "facebook",
+    "twitter",
+    "instagram",
+    "status",
+    "isNetwork",
+    "networkId",
+    "networkName",
+    "legalStatus",
+    "types",
+    "sousType",
+    "associationTypes",
+    "structurePubliqueType",
+    "structurePubliqueEtatType",
+    "structurePriveeType",
+    "address",
+    "zip",
+    "city",
+    "department",
+    "region",
+    "country",
+    "location",
+    "location.lon",
+    "location.lat",
+    "addressVerified",
+    "state",
+    "isMilitaryPreparation",
+    "isJvaStructure",
+    "jvaStructureId",
+    "jvaRawData",
+    "structureManager",
+    "structureManager.firstName",
+    "structureManager.lastName",
+    "structureManager.mobile",
+    "structureManager.email",
+    "structureManager.role",
+    "createdAt",
+    "updatedAt",
+    "__v",
+  ];
+  const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);
+
   item.name && (item.name = generateRandomName().toUpperCase());
   item.siret && (item.siret = starify(item.siret));
   item.address && (item.address = generateAddress());
@@ -14,6 +62,7 @@ function anonymize(item) {
   item.structureManager?.lastName && (item.structureManager.lastName = generateRandomName());
   item.structureManager?.mobile && (item.structureManager.mobile = generateNewPhoneNumber());
   item.structureManager?.email && (item.structureManager.email = generateRandomEmail());
+
   return item;
 }
 

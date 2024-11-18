@@ -16,6 +16,7 @@ import { orderCohort } from "../../components/filters-system-v2/components/filte
 import { getCohortGroups } from "@/services/cohort.service";
 import ClasseRow from "./list/ClasseRow";
 import { exportExcelSheet, ClasseExport } from "./utils";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
 
 interface ClasseProps extends ClasseType {
   referentClasse: { firstName: string; lastName: string }[];
@@ -78,20 +79,23 @@ export default function List() {
 
   if (!isClasses || !etablissements) return null;
 
-  const filterArray = [
+  const filterArray: Filter[] = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
-    [ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && {
-      title: "Établissement",
-      name: "etablissementId",
-      missingLabel: "Non renseigné",
-      translate: (item) => {
-        if (item === "N/A" || !etablissements.length) return item;
-        const res = etablissements.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.name;
-      },
-    },
-
+    ...([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)
+      ? [
+          {
+            title: "Établissement",
+            name: "etablissementId",
+            missingLabel: "Non renseigné",
+            translate: (item) => {
+              if (item === "N/A" || !etablissements.length) return item;
+              const res = etablissements.find((option) => option._id.toString() === item);
+              if (!res) return "N/A - Supprimé";
+              return res?.name;
+            },
+          },
+        ]
+      : []),
     { title: "Numéro d'identification", name: "uniqueKeyAndId", missingLabel: "Non renseigné" },
     { title: "Statut", name: "status", missingLabel: "Non renseigné", translate: translateStatusClasse },
     { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné", translate },
@@ -120,7 +124,7 @@ export default function List() {
         ];
       },
     },
-  ].filter(Boolean);
+  ];
 
   if (!isClasses) return null;
   const isCohortSelected = selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0;
