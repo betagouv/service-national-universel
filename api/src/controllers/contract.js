@@ -258,7 +258,6 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateYoungStatusPhase2Contract(young, req.user);
     await updateYoungPhase2StatusAndHours(young, req.user);
-    console.log("DATA2", data.missionObjective);
 
     return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {
