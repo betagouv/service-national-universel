@@ -18,14 +18,12 @@ import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 import InputText from "@/components/ui/forms/InputText";
 import InputTextarea from "@/components/ui/forms/InputTextarea";
 import NumberInput from "@/components/ui/forms/NumberInput";
-import CreatableSelect from "react-select/creatable";
 
 import { CleSettings } from "../components/CleSettings";
 import { InformationsConvoyage } from "../components/InformationsConvoyage";
 import { ManualInscriptionSettings } from "../phase0/ManualInscriptionSettings";
 import { Select } from "@snu/ds/admin";
-import useCohortGroups from "../lib/useCohortGroups";
-import useCreateCohortGroup from "../lib/useCreateCohortGroup";
+import CohortGroupSelector from "../components/CohortGroupSelector";
 
 // Define the interface for GeneralTab props
 interface GeneralTabProps {
@@ -46,17 +44,6 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
     { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
     { value: COHORT_STATUS.ARCHIVED, label: "Archivée" },
   ];
-
-  const { isLoading: isCohortGroupLoading, data: cohortGroups } = useCohortGroups();
-  const cohortGroupOptions = cohortGroups?.map((group) => ({ value: group._id, label: group.name }));
-  const { mutate } = useCreateCohortGroup(cohort);
-
-  const createCohortGroup = async (name: string) => {
-    if (!window.confirm(`Voulez-vous créer le groupe de cohorte ${name} ?`)) return;
-    mutate(name, {
-      onSuccess: (data) => onCohortChange({ ...cohort, cohortGroupId: data._id }),
-    });
-  };
 
   const onSubmit = async () => {
     try {
@@ -146,35 +133,13 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                     <MdInfoOutline data-tip data-for="statut" className="h-5 w-5 cursor-pointer text-gray-400" />
                     <ReactTooltip id="statut" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                       <ul className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                        <li>Permet de rattacher une cohorte à un groupement de cohorte pour que les jeunes puissent facilement changer de séjour.</li>
-                        <li className="mt-2">Le jeunes n'auront pas besoin de se réinscirent pour accèder aux cohortes appartenant aux mêmes groupe de cohorte</li>
-                        <li className="mt-2">Permet aussi aux jeunes d'être sûr de mettre à jour leurs informations lors de la reinscription</li>
+                        <li>Permet de rattacher une cohorte à un groupe afin d'orienter les volontaires lors des changements de séjour.</li>
+                        <li className="mt-2">Pour changer de séjour dans un même groupe de cohorte, pas besoin de réinscription.</li>
+                        <li className="mt-2">Pour changer vers un séjour du groupe suivant, réinscription obligatoire.</li>
                       </ul>
                     </ReactTooltip>
                   </div>
-
-                  <div>
-                    <CreatableSelect
-                      options={cohortGroupOptions}
-                      value={cohortGroupOptions?.find((o) => o.value === cohort.cohortGroupId)}
-                      isDisabled={isLoading || isCohortGroupLoading || readOnly}
-                      onChange={(selected) => {
-                        if (selected) {
-                          onCohortChange({ ...cohort, cohortGroupId: selected.value });
-                        }
-                      }}
-                      formatCreateLabel={(input) => `Créer le groupe "${input}"`}
-                      onCreateOption={createCohortGroup}
-                      placeholder="Sélectionnez un groupe de cohorte"
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          padding: "10px",
-                          minHeight: "40px",
-                        }),
-                      }}
-                    />
-                  </div>
+                  <CohortGroupSelector cohort={cohort} setCohort={onCohortChange} readOnly={readOnly} />
                 </div>
               </div>
               <div className="flex flex-col gap-3">

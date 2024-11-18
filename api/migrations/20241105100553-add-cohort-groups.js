@@ -1,4 +1,5 @@
-import { CohortGroupModel, CohortModel } from "../../../../src/models";
+import { logger } from "../src/logger";
+import { CohortGroupModel, CohortModel } from "../src/models";
 import { COHORT_TYPE } from "snu-lib";
 
 const pipeline = [
@@ -27,41 +28,64 @@ const pipeline = [
 
 const fromUser = { firstName: "Migration ajout des groupes de cohortes" };
 
+function formatGroupName(type, year) {
+  return `${type === COHORT_TYPE.VOLONTAIRE ? "HTS" : "CLE"} ${year}`;
+}
+
 module.exports = {
   async up() {
     try {
+      const groups = await CohortModel.aggregate(pipeline);
+
+      if (!groups.length) {
+        logger.info("No group to migrate");
+        return;
+      }
+
+      logger.info(`Groupes de cohorte à créer : ${groups.length} + groupe de réserve.`);
+
       const reserveGroup = new CohortGroupModel({ name: "Réserve" });
       await reserveGroup.save({ fromUser });
 
-      const groups = await CohortModel.aggregate(pipeline);
+      const groupMap = new Map();
 
-      for (const group of groups) {
-        const type = group.type;
-        const year = group.year;
-        const name = `${type === COHORT_TYPE.VOLONTAIRE ? "HTS" : "CLE"} ${year}`;
+      const groupInserts = groups.map((group) => {
+        const { type, year } = group;
+        const name = formatGroupName(type, year);
         const newGroup = new CohortGroupModel({ type, year, name });
-        await newGroup.save({ fromUser });
+        groupMap.set(name, newGroup._id);
+        return newGroup.save({ fromUser });
+      });
 
-        for (const doc of group.documents) {
-          if (!doc._id) continue;
-          const cohort = await CohortModel.findById(doc._id);
-          if (!cohort) throw new Error(`Cohort not found: ${doc._id}`);
+      const insertedGroups = await Promise.all(groupInserts);
+      logger.info(`Insertion des nouveaux groupes terminée. Nombre de groupes insérés: ${insertedGroups.length}`);
 
-          if (cohort.name === "à venir") {
-            cohort.set({ cohortGroupId: reserveGroup._id });
-          } else {
-            cohort.set({ cohortGroupId: newGroup._id });
-          }
-          await cohort.save({ fromUser });
+      const cohorts = await CohortModel.find();
+
+      const cohortUpdates = cohorts.map((cohort) => {
+        const groupName = formatGroupName(cohort.type, new Date(cohort.dateStart).getFullYear());
+        const groupId = cohort.name === "à venir" ? reserveGroup._id : groupMap.get(groupName);
+        if (!groupId) {
+          throw new Error(`Group not found: ${groupName}`);
         }
-      }
+        return cohort.set({ cohortGroupId: groupId }).save({ fromUser });
+      });
+
+      const updatedCohorts = await Promise.all(cohortUpdates);
+      logger.info(`Mise à jour des cohortes terminée avec succès. Nombre de cohortes mises à jour: ${updatedCohorts.length}`);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
+      throw error;
     }
   },
 
   async down() {
-    await CohortGroupModel.deleteMany({});
-    await CohortModel.updateMany({ cohortGroupId: { $exists: true } }, { $unset: { cohortGroupId: "" } });
+    try {
+      await CohortModel.updateMany({ cohortGroupId: { $exists: true } }, { $unset: { cohortGroupId: "" } });
+      await CohortGroupModel.deleteMany({});
+    } catch (error) {
+      logger.error(error);
+      throw error;
+    }
   },
 };
