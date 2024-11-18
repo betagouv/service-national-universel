@@ -1,12 +1,9 @@
-import { InjectQueue } from "@nestjs/bullmq";
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { Model } from "mongoose";
+import { TaskStatus } from "snu-lib";
 import { TaskGateway } from "src/task/core/Task.gateway";
 import { CreateTaskModel, TaskModel } from "src/task/core/Task.model";
-import { Queue } from "bullmq";
-import { Model } from "mongoose";
-import { TaskName, TaskStatus } from "snu-lib";
-import { QueueType } from "../../shared/infra/Queue";
 import { TaskMapper } from "./Task.mapper";
 import { TASK_MONGOOSE_ENTITY, TaskDocument } from "./TaskMongo.provider";
 

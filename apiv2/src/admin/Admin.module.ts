@@ -30,6 +30,7 @@ import { QueueType } from "@shared/infra/Queue";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
 import { QueueModule } from "@infra/Queue.module";
+import { TaskGateway } from "@task/core/Task.gateway";
 
 @Module({
     imports: [ClsModule.forRoot({}), DatabaseModule, JwtAuthModule, NotificationModule, QueueModule, TaskModule],
@@ -46,7 +47,7 @@ import { QueueModule } from "@infra/Queue.module";
         SigninReferent,
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
-        AdminTaskRepository,
+        { provide: TaskGateway, useClass: AdminTaskRepository },
         ...useCaseProviders,
         ...gatewayProviders,
     ],

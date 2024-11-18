@@ -154,11 +154,12 @@ En cours:
         ```
 
 - [ ] Gestion des tâches asynchrones
-    - [ ] Collection
-    - [ ] Queue
-    - [ ] Consumer
-    - [ ] Producer
-    - [ ] Module admin dédié
+    - [x] Collection
+    - [x] Queue
+    - [x] Consumer
+    - [x] Producer
+    - [x] Module job admin dédié
+    - [x] Module task dédié
 
 
 
