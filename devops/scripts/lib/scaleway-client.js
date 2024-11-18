@@ -207,6 +207,7 @@ class ScalewayClient {
         throw new Error(item.error_message);
       }
     } while (item.status !== "ready");
+    return item;
   }
 
   async findProject(name) {

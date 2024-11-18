@@ -3,6 +3,50 @@ const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { EnvConfig, AppConfig } = require("./lib/config");
 
+// TODO: REMOVE after migration
+function tempCustomEnvVariables(namespace, env, app, scwSecretKey) {
+  switch (env) {
+    case "staging":
+    case "production":
+    case "ci":
+      return {};
+  }
+
+  const domain_prefix = namespace.registry_endpoint.replace(
+    "rg.fr-par.scw.cloud/funcscw",
+    ""
+  );
+
+  const urls = {
+    ADMIN_URL: `https://${domain_prefix}-${env}-admin.functions.fnc.fr-par.scw.cloud`,
+    API_URL: `https://${domain_prefix}-${env}-api.functions.fnc.fr-par.scw.cloud`,
+    APP_URL: `https://${domain_prefix}-${env}-app.functions.fnc.fr-par.scw.cloud`,
+  };
+
+  switch (app) {
+    case "app":
+      return {
+        ...urls,
+        ENVIRONMENT: "custom",
+        NGINX_HOSTNAME: urls.APP_URL.replace("https://", ""),
+      };
+    case "admin":
+      return {
+        ...urls,
+        ENVIRONMENT: "custom",
+        NGINX_HOSTNAME: urls.ADMIN_URL.replace("https://", ""),
+      };
+    case "api":
+      return {
+        ...urls,
+        NODE_ENV: "custom",
+        SECRET_NAME: "snu-ci",
+        SCW_SECRET_KEY: scwSecretKey,
+      };
+  }
+  return {};
+}
+
 class CreateEnvironment {
   constructor(scalewayClient, options = {}) {
     this.scaleway = scalewayClient;
@@ -23,17 +67,28 @@ class CreateEnvironment {
     }
 
     const options = await config.containerOptions();
-    const container = await this.scaleway.create(RESOURCE.Container, {
+    let container = await this.scaleway.create(RESOURCE.Container, {
       ...options,
       name: config.containerName(),
       namespace_id: namespace.id,
       registry_image: registryEndpoint(config.registry(), "latest"),
-      environment_variables: secrets,
+      environment_variables: {
+        ...secrets,
+        ...tempCustomEnvVariables(
+          namespace,
+          this.environmentName,
+          application,
+          this.scaleway.secretKey
+        ),
+      },
     });
 
     await this.scaleway.action(RESOURCE.Container, container.id, "deploy");
 
-    await this.scaleway.waitUntilSuccess(RESOURCE.Container, container.id);
+    container = await this.scaleway.waitUntilSuccess(
+      RESOURCE.Container,
+      container.id
+    );
 
     return container;
   }
@@ -57,7 +112,7 @@ class CreateEnvironment {
 
     namespace = await this.scaleway.create(RESOURCE.ContainerNamespace, key);
 
-    await this.scaleway.waitUntilSuccess(
+    namespace = await this.scaleway.waitUntilSuccess(
       RESOURCE.ContainerNamespace,
       namespace.id
     );
