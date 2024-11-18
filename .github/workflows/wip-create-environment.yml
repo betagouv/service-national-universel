@@ -6,9 +6,9 @@ on:
     branches: # TODO: remove me
       - 3577-app
 
-defaults:
-  run:
-    working-directory: devops/scripts
+# defaults:
+#   run:
+#     working-directory: devops/scripts
 
 jobs:
   prepare:
