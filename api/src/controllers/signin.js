@@ -63,7 +63,7 @@ router.get("/token", async (req, res) => {
     if (user) {
       if (passwordChangedAt?.getTime() === user.passwordChangedAt?.getTime() && lastLogoutAt?.getTime() === user.lastLogoutAt?.getTime()) {
         user.set({ lastActivityAt: Date.now() });
-        await user.save();
+        await user.save({ fromUser: req.user });
         return res.status(200).send({ ok: true, user: { ...serializeYoung(user, user), allowedRole: "young" } });
       }
     }
@@ -73,7 +73,7 @@ router.get("/token", async (req, res) => {
     if (user) {
       if (passwordChangedAt?.getTime() === user.passwordChangedAt?.getTime() && lastLogoutAt?.getTime() === user.lastLogoutAt?.getTime()) {
         user.set({ lastActivityAt: Date.now() });
-        await user.save();
+        await user.save({ fromUser: req.user });
         return res.status(200).send({ ok: true, user: { ...serializeReferent(user, user), allowedRole: allowedRole(user) } });
       }
     }

@@ -23,6 +23,7 @@ export const useAuth = () => {
   };
 
   const login = async (user) => {
+    if (!user) return history.push("/auth");
     dispatch(setYoung(user));
     await cohortsInit();
     displaySignupToast(user);

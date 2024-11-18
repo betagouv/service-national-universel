@@ -72,7 +72,7 @@ router.put("/request-confirmation-email", async (req: UserRequest, res: Response
 
     const token2FA = await crypto.randomInt(1000000);
     referent.set({ emailWaitingValidation: value.email, token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
-    await referent.save();
+    await referent.save({ fromUser: req.user });
 
     let cta = `${config.ADMIN_URL}/creer-mon-compte/code?token=${value.invitationToken}&code=${token2FA}`;
     if (referent.lastLoginAt) {
@@ -124,7 +124,7 @@ router.post("/confirm-email", async (req: UserRequest, res: Response) => {
       token2FAExpires: null,
       attempts2FA: 0,
     });
-    await referent.save();
+    await referent.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeReferent(referent) });
   } catch (error) {
@@ -214,7 +214,7 @@ router.post("/", async (req: UserRequest, res: Response) => {
       phone: value.phone,
       phoneZone: value.phoneZone,
     });
-    await referent.save();
+    await referent.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeReferent(referent) });
   } catch (error) {

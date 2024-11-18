@@ -2,20 +2,25 @@ import React from "react";
 import { FiMail } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import { Modal } from "reactstrap";
-import Calendar from "../../../../assets/calendar";
-import ChevronDown from "../../../../assets/icons/ChevronDown";
-import Download from "../../../../assets/icons/Download";
-import api from "../../../../services/api";
-import downloadPDF from "../../../../utils/download-pdf";
-import { toastr } from "react-redux-toastr";
-import { getReturnDate, getReturnHour, translate } from "snu-lib";
-import { capture } from "../../../../sentry";
 import dayjs from "dayjs";
+import { toastr } from "react-redux-toastr";
+
+import { getParticularitesAcces, getReturnDate, getReturnHour, translate } from "snu-lib";
+
+import api from "@/services/api";
+import { capture } from "@/sentry";
+import { AuthState } from "@/redux/auth/reducer";
+import downloadPDF from "@/utils/download-pdf";
+
+import Calendar from "@/assets/calendar";
+import ChevronDown from "@/assets/icons/ChevronDown";
+import Download from "@/assets/icons/Download";
 
 export default function InfoConvocation({ isOpen, onCancel, title, meetingPoint, session, center, cohort }) {
-  const young = useSelector((state) => state.Auth.young) || {};
+  const young = useSelector((state: AuthState) => state.Auth.young) || {};
+
   const [selectOpen, setSelectOpen] = React.useState(false);
-  const refSelect = React.useRef(null);
+  const refSelect = React.useRef<HTMLDivElement>(null);
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
   const returnHour = getReturnHour(meetingPoint);
   const [loadingConvocation, setLoadingConvocation] = React.useState(false);
@@ -64,11 +69,11 @@ export default function InfoConvocation({ isOpen, onCancel, title, meetingPoint,
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint?.address) {
       return [center?.name, center?.address, center?.zip, center?.city, center?.department, center?.region].filter((e) => e).join(", ");
     } else {
-      let address = [meetingPoint.address];
+      const address = [meetingPoint.address];
 
-      let complement = meetingPoint.complementAddress ? meetingPoint.complementAddress.find((c) => c.cohort === young.cohort) : null;
-      if (complement && complement.complement) {
-        complement = complement.complement.trim();
+      let complement = getParticularitesAcces(meetingPoint, young.cohort) || null;
+      if (complement) {
+        complement = complement.trim();
         if (complement.length === 0) {
           complement = null;
         }

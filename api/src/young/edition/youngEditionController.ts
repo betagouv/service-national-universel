@@ -153,7 +153,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 
     const updatePromises = applications.map((application) => {
       application.set({ youngCity: value.city, youngDepartment: value.department });
-      return application.save();
+      return application.save({ fromUser: req.user });
     });
 
     await Promise.all(updatePromises);
@@ -623,7 +623,7 @@ router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", {
     if (parentId === 2) {
       young.set({ parent2AllowImageRightsReset: "true" });
     }
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     // --- send notification
     await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
@@ -667,7 +667,7 @@ router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { se
     young.set({ parentAllowSNU: undefined, parent1AllowSNU: undefined, status: YOUNG_STATUS.IN_PROGRESS, parent1ValidationDate: undefined });
     // FIXME: parent2Id: legacy
     // if (young.parent2Id) young.set({ parent2AllowSnu: undefined, parent2ValidationDate: undefined });
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     // --- send notification
     // parent 1

@@ -48,6 +48,17 @@ const Home = ({ fallback }) => {
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" key="og:image:alt" content="Service National Universel | Base de connaissance" />
         <meta property="og:type" content="article" />
+        {process.env.ENVIRONMENT === "production" && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function (i, s, o, g, r, a, m) {
+                i["ApiEngagementObject"] = r; (i[r] = i[r] || function () { (i[r].q = i[r].q || []).push(arguments); }), (i[r].l = 1 * new Date()); 
+                (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]); a.async = 1; a.src = g; m.parentNode.insertBefore(a, m);
+              })(window, document, "script", "https://app.api-engagement.beta.gouv.fr/jstag.js", "apieng");
+              apieng("config", "60574864aee4bd176f26a540");`,
+            }}
+          />
+        )}
       </Head>
       {isLoading ? <KnowledgeBasePublicHome isLoading /> : <PublicHome key={restriction} />}
     </SWRConfig>

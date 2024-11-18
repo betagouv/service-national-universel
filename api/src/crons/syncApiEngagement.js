@@ -25,7 +25,7 @@ const sync = async (result) => {
       await MissionAPIModel.create(t);
     } else {
       m.set({ ...t });
-      await m.save();
+      await m.save({ fromUser: { firstName: "Cron syncApiEngagement" } });
     }
   }
   return result.data.length === SIZE;

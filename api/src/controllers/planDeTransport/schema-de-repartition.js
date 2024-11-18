@@ -1031,7 +1031,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     schema.set(value);
-    await schema.save();
+    await schema.save({ fromUser: req.user });
 
     const IsSchemaDownloadIsTrue = await CohortModel.find({ name: schema.cohort, dateEnd: { $gt: new Date().getTime() } }, [
       "name",
