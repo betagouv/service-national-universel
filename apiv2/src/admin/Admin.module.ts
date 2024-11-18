@@ -24,6 +24,11 @@ import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/p
 import { gatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
 import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
 import { useCaseProvider as useCaseProviders } from "./infra/sejours/cle/initProvider/useCase";
+import { TaskModule } from "@task/Task.module";
+import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
+import { QueueType } from "@shared/infra/Queue";
+import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
+import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
 
 @Module({
     imports: [
@@ -38,8 +43,12 @@ import { useCaseProvider as useCaseProviders } from "./infra/sejours/cle/initPro
         BullModule.registerQueue({
             name: NotificationQueueType.CONTACT,
         }),
+        BullModule.registerQueue({
+            name: QueueType.ADMIN_TASK,
+        }),
+        TaskModule,
     ],
-    controllers: [ClasseController, AuthController],
+    controllers: [ClasseController, AuthController, AdminTaskController],
     providers: [
         ClasseService,
         { provide: AuthProvider, useClass: JwtTokenService },
@@ -47,10 +56,12 @@ import { useCaseProvider as useCaseProviders } from "./infra/sejours/cle/initPro
         ...referentMongoProviders,
         ...etablissementMongoProviders,
         ...guardProviders,
+        ...taskMongoProviders,
         Logger,
         SigninReferent,
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
+        AdminTaskRepository,
         ...useCaseProviders,
         ...gatewayProviders,
     ],

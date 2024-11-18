@@ -13,7 +13,7 @@ TaskSchemaRef.pre("save", function (next) {
     next();
 });
 
-export const classeMongoProviders = [
+export const taskMongoProviders = [
     {
         provide: TASK_MONGOOSE_ENTITY,
         useFactory: (connection: Connection) => connection.model(TaskName, TaskSchemaRef),

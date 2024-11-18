@@ -7,6 +7,7 @@ import { AdminModule } from "./admin/Admin.module";
 import { LoggerRequestMiddleware } from "./shared/infra/LoggerRequest.middleware";
 import { CorrelationIdMiddleware } from "./shared/infra/CorrelationId.middleware.js";
 import { SharedModule } from "./shared/Shared.module";
+import { TaskModule } from "./task/Task.module";
 
 @Module({
     imports: [

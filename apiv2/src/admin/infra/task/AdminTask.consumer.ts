@@ -1,34 +1,37 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
-import { Inject, Logger } from "@nestjs/common";
+import { Logger } from "@nestjs/common";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
+import { QueueType, TaskQueue } from "@shared/infra/Queue";
 import { Job } from "bullmq";
 import { TaskName } from "snu-lib";
-import { QueueType, TaskQueue } from "../Queue";
+import { AdminTaskRepository } from "./AdminTaskMongo.repository";
 
-@Processor(QueueType.TASK)
-export class TaskConsumer extends WorkerHost {
+@Processor(QueueType.ADMIN_TASK)
+export class AdminTaskConsumer extends WorkerHost {
     constructor(
         private logger: Logger,
-        // @Inject(TaskProvider) private readonly taskProvider: TaskProvider,
+        private adminTaskRepository: AdminTaskRepository,
     ) {
         super();
     }
+    // TODO call async usecase task
     async process(job: Job<TaskQueue, any, TaskName>): Promise<ConsumerResponse> {
-        this.logger.log(`Processing task "${job.name}" with data ${JSON.stringify(job.data)}`, TaskConsumer.name);
+        this.logger.log(`Processing task "${job.name}" with data ${JSON.stringify(job.data)}`, AdminTaskConsumer.name);
+        await this.adminTaskRepository.toSuccess(job.data.id);
         return ConsumerResponse.SUCCESS;
         // return this.taskProvider
         //     .execute(job.name, job.data)
         //     .then(() => {
         //         this.logger.log(
         //             `Task "${job.name}" processed successfully with data ${JSON.stringify(job.data)}`,
-        //             TaskConsumer.name,
+        //             AdminTaskConsumer.name,
         //         );
         //         return ConsumerResponse.SUCCESS;
         //     })
         //     .catch((error) => {
         //         this.logger.error(
         //             `Error processing task "${job.name}" - ${error.message} - ${error.stack}`,
-        //             TaskConsumer.name,
+        //             AdminTaskConsumer.name,
         //         );
         //         throw error;
         //     });
