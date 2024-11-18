@@ -1,6 +1,6 @@
-import { logger } from "../src/logger";
-import { CohortGroupModel, CohortModel } from "../src/models";
-import { COHORT_TYPE } from "snu-lib";
+const { logger } = require("../src/logger");
+const { CohortGroupModel, CohortModel } = require("../src/models");
+const { COHORT_TYPE } = require("snu-lib");
 
 const pipeline = [
   {
