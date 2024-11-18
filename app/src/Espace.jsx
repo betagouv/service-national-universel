@@ -26,7 +26,8 @@ import ModalRI from "./components/modals/ModalRI";
 
 const Account = lazy(() => import("./scenes/account"));
 const AutresEngagements = lazy(() => import("./scenes/phase3/home/waitingRealisation"));
-const ChangeSejour = lazy(() => import("./scenes/phase1/changeSejour"));
+// const ChangeSejour = lazy(() => import("./scenes/phase1/changeSejour"));
+const ChangeSejour = lazy(() => import("./scenes/phase1/changeSejourV2"));
 const Candidature = lazy(() => import("./scenes/candidature"));
 const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
 const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
