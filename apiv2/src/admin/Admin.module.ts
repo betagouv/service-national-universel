@@ -1,14 +1,15 @@
 import { DatabaseModule } from "@infra/Database.module"; // TO REMOVE ?
 import { JwtAuthModule } from "@infra/JwtAuth.module";
-import { ConfigModule } from "@nestjs/config";
 // import { databaseProviders } from "@infra/Database.provider"; // TO REMOVE ?
-import { BullModule } from "@nestjs/bullmq";
+import { QueueModule } from "@infra/Queue.module";
 import { Logger, MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
-import { NotificationQueueType } from "@notification/infra/Notification";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
 import { NotificationModule } from "@notification/Notification.module";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
+import { TaskModule } from "@task/Task.module";
 import { ClsMiddleware, ClsModule } from "nestjs-cls";
 import { SigninReferent } from "./core/iam/useCase/SigninReferent";
 import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
@@ -24,13 +25,8 @@ import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/p
 import { gatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
 import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
 import { useCaseProvider as useCaseProviders } from "./infra/sejours/cle/initProvider/useCase";
-import { TaskModule } from "@task/Task.module";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
-import { QueueType } from "@shared/infra/Queue";
-import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
-import { QueueModule } from "@infra/Queue.module";
-import { TaskGateway } from "@task/core/Task.gateway";
 
 @Module({
     imports: [ClsModule.forRoot({}), DatabaseModule, JwtAuthModule, NotificationModule, QueueModule, TaskModule],

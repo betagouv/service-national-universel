@@ -4,7 +4,7 @@ import { Logger } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
-import { NotificationQueueType } from "@notification/infra/Notification";
+import { QueueName } from "@shared/infra/Queue";
 import { NotificationModule } from "@notification/Notification.module";
 import { ClsModule } from "nestjs-cls";
 import { SigninReferent } from "src/admin/core/iam/useCase/SigninReferent";
@@ -58,9 +58,9 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...useCaseProvider,
         ],
     })
-        .overrideProvider(getQueueToken(NotificationQueueType.EMAIL))
+        .overrideProvider(getQueueToken(QueueName.EMAIL))
         .useValue(mockQueue)
-        .overrideProvider(getQueueToken(NotificationQueueType.CONTACT))
+        .overrideProvider(getQueueToken(QueueName.CONTACT))
         .useValue(mockQueue)
         .compile();
 

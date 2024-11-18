@@ -1,12 +1,12 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
-import { QueueType, TaskQueue } from "@shared/infra/Queue";
+import { QueueName, TaskQueue } from "@shared/infra/Queue";
 import { Job } from "bullmq";
 import { TaskName } from "snu-lib";
 import { AdminTaskRepository } from "./AdminTaskMongo.repository";
 
-@Processor(QueueType.ADMIN_TASK)
+@Processor(QueueName.ADMIN_TASK)
 export class AdminTaskConsumer extends WorkerHost {
     constructor(
         private logger: Logger,

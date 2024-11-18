@@ -1,6 +1,8 @@
 import { TaskModel } from "src/task/core/Task.model";
 
-export enum QueueType {
+export enum QueueName {
+    EMAIL = "email",
+    CONTACT = "contact",
     ADMIN_TASK = "admin-task",
 }
 

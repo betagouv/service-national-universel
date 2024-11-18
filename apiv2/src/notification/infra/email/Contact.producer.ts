@@ -3,10 +3,11 @@ import { Inject } from "@nestjs/common";
 import { Queue } from "bullmq";
 import { ReferentModel } from "src/admin/core/iam/Referent.model";
 import { ContactGateway } from "src/admin/infra/iam/Contact.gateway";
-import { ContactType, NotificationQueueType } from "../Notification";
+import { ContactType } from "../Notification";
+import { QueueName } from "@shared/infra/Queue";
 
 export class ContactProducer implements ContactGateway {
-    constructor(@InjectQueue(NotificationQueueType.CONTACT) private contactQueue: Queue) {}
+    constructor(@InjectQueue(QueueName.CONTACT) private contactQueue: Queue) {}
     async syncReferent(referent: ReferentModel): Promise<void> {
         await this.contactQueue.add(ContactType.REFERENT, [referent]);
     }
