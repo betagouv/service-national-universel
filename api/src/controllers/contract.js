@@ -237,6 +237,12 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
       }
     }
 
+    for (let key in data) {
+      if (typeof data[key] === "string") {
+        data[key] = data[key].replace(/>/g, "");
+      }
+    }
+
     // Create or update contract.
     const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
     // Update the application.

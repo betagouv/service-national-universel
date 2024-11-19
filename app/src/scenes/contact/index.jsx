@@ -131,8 +131,8 @@ export default function Contact() {
               </Button>
             )}
 
-            {shouldShowForm && isLoggedIn && <ContactForm category={category} question={question} parcours={parcours} />}
-            {shouldShowForm && !isLoggedIn && <PublicContactForm category={category} question={question} parcours={parcours} />}
+            {shouldShowForm && isLoggedIn && <ContactForm category={category} question={questionObject} parcours={parcours} />}
+            {shouldShowForm && !isLoggedIn && <PublicContactForm category={category} question={questionObject} parcours={parcours} />}
           </>
         )}
       </DSFRContainer>

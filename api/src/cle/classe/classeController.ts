@@ -274,7 +274,7 @@ router.post(
 
       if (!etablissement.schoolYears.includes(ClasseSchoolYear.YEAR_2024_2025)) {
         etablissement.set({ schoolYears: [...etablissement.schoolYears, ClasseSchoolYear.YEAR_2024_2025] });
-        await etablissement.save();
+        await etablissement.save({ fromUser: req.user });
       }
 
       if (!payload.referent?._id) {

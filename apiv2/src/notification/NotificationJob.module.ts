@@ -15,4 +15,8 @@ import { contactFactory, emailFactory } from "./infra/email/brevo/EmailContact.f
     ],
     providers: [Logger, EmailConsumer, ContactConsumer, emailFactory, contactFactory],
 })
-export class NotificationJobModule {}
+export class NotificationJobModule {
+    constructor(private logger: Logger) {
+        this.logger.log("NotificationJobModule has started", "NotificationJobModule");
+    }
+}
