@@ -356,7 +356,6 @@ const returnSelect = (cohort, selectedFilters, user) => {
                 loadingButton: `text-sm text-gray-700`,
               }}
               transform={async (data) => {
-                console.log(data);
                 let all = data;
                 // Get the length of the longest array of PDRs
                 const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
