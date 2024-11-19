@@ -104,11 +104,9 @@ jobs:
   test:
     needs: prepare
     runs-on: ubuntu-latest
+    strategy:
       matrix:
-        app:
-          [
-            { name: api },
-          ]
+        app: [{ name: api }]
     steps:
       - uses: actions/checkout@v4
         with:
