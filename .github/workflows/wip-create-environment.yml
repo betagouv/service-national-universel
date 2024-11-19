@@ -114,6 +114,7 @@ jobs:
 
       - name: Run tests
         uses: jenseng/dynamic-uses@v1
+        with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
           # if: steps.check.outputs.tag_exists == 0
           with:
