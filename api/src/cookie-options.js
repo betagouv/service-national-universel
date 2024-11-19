@@ -9,18 +9,17 @@ const COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS = JWT_TRUST_TOKEN_MONCOMPTE_MA
 //!COOKIE need to be in milliseconds
 
 function cookieOptions(maxAge) {
-  if (config.ENVIRONMENT === "custom") {
-    return { maxAge, httpOnly: true, secure: true, sameSite: "None" };
-  }
-  if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "ci") {
-    // Because we need a valid subdomain (does not work with cleverapps.io).
-    return { maxAge, httpOnly: true, secure: true, domain: ".beta-snu.dev", sameSite: "Lax" };
-  }
-  if (config.ENVIRONMENT === "production") {
-    return { maxAge, httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
-  }
-  // Fallback - config.ENVIRONMENT === "development"
-  return { maxAge, httpOnly: true, secure: false, domain: "localhost", sameSite: "Lax" };
+  switch (config.ENVIRONMENT) {
+    case 'test':
+    case "development":
+      return { maxAge, httpOnly: true, secure: false, domain: "localhost", sameSite: "Lax" };
+    case "staging":
+    case "ci":
+      return { maxAge, httpOnly: true, secure: true, domain: ".beta-snu.dev", sameSite: "Lax" };
+    case "production":
+      return { maxAge, httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
+    default: //env custom
+      return { maxAge, httpOnly: true, secure: true, sameSite: "None" };
 }
 
 module.exports = {
