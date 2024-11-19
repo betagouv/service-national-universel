@@ -27,7 +27,7 @@ import ModalRI from "./components/modals/ModalRI";
 const Account = lazy(() => import("./scenes/account"));
 const AutresEngagements = lazy(() => import("./scenes/phase3/home/waitingRealisation"));
 // const ChangeSejour = lazy(() => import("./scenes/phase1/changeSejour"));
-const ChangeSejour = lazy(() => import("./scenes/phase1/changeSejourV2"));
+const ChangeSejour = lazy(() => import("./scenes/changeSejour"));
 const Candidature = lazy(() => import("./scenes/candidature"));
 const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
 const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
@@ -106,7 +106,7 @@ const Espace = () => {
           {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
           {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
-          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={ChangeSejour} /> : null}
+          <SentryRoute path="/changer-de-sejour" component={ChangeSejour} />
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <Redirect to="/" />
         </Switch>
