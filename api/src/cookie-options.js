@@ -10,7 +10,7 @@ const COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS = JWT_TRUST_TOKEN_MONCOMPTE_MA
 
 function cookieOptions(maxAge) {
   switch (config.ENVIRONMENT) {
-    case 'test':
+    case "test":
     case "development":
       return { maxAge, httpOnly: true, secure: false, domain: "localhost", sameSite: "Lax" };
     case "staging":
@@ -20,6 +20,7 @@ function cookieOptions(maxAge) {
       return { maxAge, httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
     default: //env custom
       return { maxAge, httpOnly: true, secure: true, sameSite: "None" };
+  }
 }
 
 module.exports = {
