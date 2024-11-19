@@ -76,6 +76,9 @@ async function main() {
     `${input.application}/Dockerfile`,
     ".",
   ];
+  const env = {
+    ...process.env,
+  };
   for (const key in secrets) {
     const value = values[key];
     if (config.mountSecretKeys().includes(key)) {
