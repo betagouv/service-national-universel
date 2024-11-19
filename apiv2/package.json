@@ -25,6 +25,7 @@
         "clean": "rm -fr node_modules .turbo"
     },
     "dependencies": {
+        "@casl/ability": "^6.7.2",
         "@getbrevo/brevo": "^2.2.0",
         "@nestjs/bullmq": "^10.2.1",
         "@nestjs/common": "^10.0.0",

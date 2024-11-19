@@ -5,6 +5,7 @@ import configuration from "./config/configuration";
 
 import { QueueModule } from "@infra/Queue.module";
 import { AdminModule } from "./admin/Admin.module";
+import { CaslModule } from "./casl/Casl.module";
 import { CorrelationIdMiddleware } from "./shared/infra/CorrelationId.middleware.js";
 import { LoggerRequestMiddleware } from "./shared/infra/LoggerRequest.middleware";
 
@@ -16,6 +17,7 @@ import { LoggerRequestMiddleware } from "./shared/infra/LoggerRequest.middleware
         SentryModule.forRoot(),
         AdminModule,
         QueueModule,
+        CaslModule,
     ],
     controllers: [],
     providers: [Logger],
