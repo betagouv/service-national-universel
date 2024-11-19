@@ -37,7 +37,7 @@ async function main() {
     ),
   });
 
-  await scaleway.waitUntilSuccess(RESOURCE.Container, container.id);
+  await scaleway.waitUntilStatus(RESOURCE.Container, container.id, ["ready"]);
 }
 
 if (require.main === module) {

@@ -198,7 +198,7 @@ class ScalewayClient {
     throw new Error("Resource not found", { cause: json.message });
   }
 
-  async waitUntilSuccess(resource, id) {
+  async waitUntilStatus(resource, id, statuses) {
     let item;
     do {
       await sleep(this.poll_interval_ms);
@@ -206,7 +206,7 @@ class ScalewayClient {
       if (item.status === "error") {
         throw new Error(item.error_message);
       }
-    } while (item.status !== "ready");
+    } while (!statuses.includes(item.status));
     return item;
   }
 
