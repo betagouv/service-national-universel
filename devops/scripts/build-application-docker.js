@@ -80,7 +80,7 @@ async function main() {
   const env = {
     ...process.env,
   };
-  for (const key in secrets) {
+  for (const key in values) {
     const value = values[key];
     if (config.mountSecretKeys().includes(key)) {
       args.push("--secret");
