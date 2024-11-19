@@ -89,26 +89,55 @@ jobs:
   #   with:
   #     branch_name: ${{ needs.prepare.outputs.branch_name }}
   #   secrets: inherit
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
 
-  #     - name: Use Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "18.20"
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    env:
+      SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+    strategy:
+      matrix:
+        app:
+          [
+            {
+              name: api,
+              env:
+                {
+                  RELEASE: "${{needs.prepare.outputs.api_image_tag}}",
+                  ENVIRONMENT: "${{ steps.prepare.outputs.env_name }}",
+                },
+            },
+            {
+              name: app,
+              env:
+                {
+                  VITE_RELEASE: "${{needs.prepare.outputs.app_image_tag}}",
+                  VITE_ENVIRONMENT: "${{ steps.prepare.outputs.env_name }}",
+                },
+            },
+            {
+              name: admin,
+              env:
+                {
+                  VITE_RELEASE: "${{needs.prepare.outputs.admin_image_tag}}",
+                  VITE_ENVIRONMENT: "${{ steps.prepare.outputs.env_name }}",
+                },
+            },
+          ]
 
-  #     - name: Get environment name
-  #       id: env_name
-  #       # TODO : replace with ${{ github.event.ref }}
-  #       run: |
-  #         env_name=$(node get-environment-name.js ${{ github.ref_name }})
-  #         echo "env_name: $env_name"
-  #         echo "env_name=$env_name" >> $GITHUB_OUTPUT
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.branch_name }}
 
-  #     - name: Create environment
-  #       env:
-  #         SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-  #         SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-  #       run: node create-environment.js ${{ steps.env_name.outputs.env_name }}
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.20"
+
+      - name: Build image environment
+        working-directory: devops/scripts
+        env: ${{matrix.app.env}}
+        run: |
+          node build-application-docker.js --push ${{ steps.prepare.outputs.env_name }} ${{matrix.app.name}}
