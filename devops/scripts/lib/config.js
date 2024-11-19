@@ -30,14 +30,7 @@ class EnvConfig {
     this.env = environment;
   }
   containerNamespace() {
-    switch (this.env) {
-      case "staging":
-      case "production":
-      case "ci":
-        return `snu-${this.env}`;
-      default:
-        return this.env;
-    }
+    return `snu-${this.env}`;
   }
 
   projectName() {
