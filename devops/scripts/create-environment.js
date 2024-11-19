@@ -71,7 +71,6 @@ class CreateEnvironment {
       ...options,
       name: config.containerName(),
       namespace_id: namespace.id,
-      registry_image: registryEndpoint(config.registry(), "latest"),
       environment_variables: {
         ...secrets,
         ...tempCustomEnvVariables(

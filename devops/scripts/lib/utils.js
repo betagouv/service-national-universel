@@ -31,8 +31,8 @@ function parseRegistryEndpoint(endpoint) {
   return { imageEndpoint: parsed[0], tagName: parsed[1] };
 }
 
-function registryEndpoint(registry, tag) {
-  return `${registry}:${tag}`;
+function registryEndpoint(registry, image, tag) {
+  return `${registry}/${image}:${tag}`;
 }
 
 function querystring(object) {

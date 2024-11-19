@@ -4,7 +4,7 @@ const { AppConfig } = require("./lib/config");
 const { registryEndpoint } = require("./lib/utils");
 
 async function main() {
-  const input = new UserInput(`Build application MonCompte`)
+  const input = new UserInput(`Deploy application on Scaleway`)
     .arg("environment", "Environment (ci, staging, production)")
     .arg("application", "Application (app, admin)")
     .arg("release", "Release")
@@ -30,7 +30,11 @@ async function main() {
   });
 
   await scaleway.patch(RESOURCE.Container, container.id, {
-    registry_image: registryEndpoint(config.registry(), input.release),
+    registry_image: registryEndpoint(
+      namespace.registry_endpoint,
+      config.containerName(),
+      input.release
+    ),
   });
 
   await scaleway.waitUntilSuccess(RESOURCE.Container, container.id);

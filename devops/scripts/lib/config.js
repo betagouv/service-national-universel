@@ -97,16 +97,6 @@ class AppConfig extends EnvConfig {
     }
   }
 
-  registry() {
-    switch (this.env) {
-      case "staging":
-      case "production":
-        return `rg.fr-par.scw.cloud/snu-${this.env}/${this.app}`;
-      default:
-        return `rg.fr-par.scw.cloud/snu-ci/${this.app}`;
-    }
-  }
-
   releaseKey() {
     return releaseKey(this.app);
   }
