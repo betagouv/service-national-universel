@@ -30,7 +30,14 @@ class EnvConfig {
     this.env = environment;
   }
   containerNamespace() {
-    return `snu-${this.env}`;
+    switch (this.env) {
+      case "staging":
+      case "production":
+      case "ci":
+        return `snu-${this.env}`;
+      default:
+        return this.env;
+    }
   }
 
   projectName() {
@@ -53,7 +60,18 @@ class AppConfig extends EnvConfig {
   }
 
   containerName() {
-    return `${this.env}-${this.app}`;
+    switch (this.env) {
+      case "staging":
+      case "production":
+      case "ci":
+        return `${this.env}-${this.app}`;
+      default:
+        return this.app;
+    }
+  }
+
+  imageName() {
+    return this.app;
   }
 
   async containerOptions() {

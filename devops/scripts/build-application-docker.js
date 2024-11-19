@@ -43,7 +43,7 @@ async function main() {
   });
   const image = registryEndpoint(
     namespace.registry_endpoint,
-    config.containerName(),
+    config.imageName(),
     values[config.releaseKey()]
   );
 

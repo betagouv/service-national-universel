@@ -32,7 +32,7 @@ async function main() {
   await scaleway.patch(RESOURCE.Container, container.id, {
     registry_image: registryEndpoint(
       namespace.registry_endpoint,
-      config.containerName(),
+      config.imageName(),
       input.release
     ),
   });
