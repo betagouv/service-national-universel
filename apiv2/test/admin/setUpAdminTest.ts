@@ -20,6 +20,7 @@ import { gatewayProviders } from "src/admin/infra/sejours/cle/initProvider/gatew
 import { guardProviders } from "src/admin/infra/sejours/cle/initProvider/guard";
 import { useCaseProvider } from "src/admin/infra/sejours/cle/initProvider/useCase";
 import { testDatabaseProviders } from "../testDatabaseProvider";
+import { QueueModule } from "@infra/Queue.module";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -42,6 +43,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
                 secret: "your-secret-key",
                 signOptions: { expiresIn: "1h" },
             }),
+            QueueModule,
         ],
         controllers: [ClasseController, AuthController],
         providers: [
@@ -61,6 +63,8 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         .overrideProvider(getQueueToken(QueueName.EMAIL))
         .useValue(mockQueue)
         .overrideProvider(getQueueToken(QueueName.CONTACT))
+        .useValue(mockQueue)
+        .overrideProvider(getQueueToken(QueueName.ADMIN_TASK))
         .useValue(mockQueue)
         .compile();
 
