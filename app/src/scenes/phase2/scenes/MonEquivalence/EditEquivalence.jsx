@@ -221,8 +221,8 @@ export default function EditEquivalence() {
   return (
     <Container
       title={mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}
-      backLink={data?._id ? `/phase2/equivalence/${data._id}` : "/phase2"}>
-      <div className="max-w-2xl mx-auto px-[1rem]">
+      backlink={data?._id ? `/phase2/equivalence/${data._id}` : "/phase2"}>
+      <div className="max-w-2xl mx-auto">
         <div className="rounded-lg border-[1px] border-blue-400 bg-blue-50">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />

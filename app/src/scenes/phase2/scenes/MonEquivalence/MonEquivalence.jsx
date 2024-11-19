@@ -39,8 +39,8 @@ export default function Equivalence() {
   const title = data.type === "Autre" ? data.desc : data.type;
 
   return (
-    <Container title={title} subtitle="Engagement ajouté" action={action} backLink="/phase2/mes-engagements">
-      <div className="mt-[2rem] md:mt-0 max-w-3xl mx-auto px-[1rem] pb-[6rem]">
+    <Container title={title} subtitle="Engagement ajouté" action={action} backlink="/phase2/mes-engagements">
+      <div className="mt-[2rem] md:mt-0 max-w-3xl mx-auto pb-[6rem]">
         <h2 className="text-2xl md:text-3xl font-bold m-0">Statut</h2>
         <div className="mt-4 px-4 py-3 border rounded-xl w-full">
           <EngagementStatusBadge status={data.status} />

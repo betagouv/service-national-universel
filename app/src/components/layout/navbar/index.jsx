@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import useDevice from "../../../hooks/useDeviceWithResize";
-import API from "../../../services/api";
-import { capture } from "../../../sentry";
 import { supportURL } from "@/config";
 
 import Close from "./assets/Close";
@@ -12,26 +10,11 @@ import Logo from "./components/Logo";
 import NavigationMenu from "./components/NavigationMenu";
 import UserCard from "./components/UserCard";
 import UserMenu from "./components/UserMenu";
+import useTickets from "./useTickets";
 
 export default function Navbar() {
   const device = useDevice();
-  const [ticketsInfo, setTicketsInfo] = useState({});
-  useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        const { ok, data } = await API.get(`/SNUpport/ticketsInfo`);
-        if (!ok) {
-          console.log("API response not OK");
-          return setTicketsInfo([]);
-        }
-        const { hasMessage, newStatusCount } = data;
-        setTicketsInfo({ hasMessage, newStatusCount });
-      } catch (error) {
-        capture(error);
-      }
-    };
-    fetchTickets();
-  }, []);
+  const ticketsInfo = useTickets();
 
   if (device === "mobile") {
     return <MobileNavbar ticketsInfo={ticketsInfo} />;
@@ -64,7 +47,7 @@ function MobileNavbar({ ticketsInfo }) {
   }
 
   return (
-    <header ref={ref} className="z-20 grid h-16 w-full grid-cols-3 items-center bg-[#212B44] text-sm text-[#D2DAEF]">
+    <header ref={ref} className="z-40 grid h-16 w-full grid-cols-3 items-center bg-[#212B44] text-sm text-[#D2DAEF]">
       <button onClick={() => openDrawer(NavigationMenu)} className="h-16 w-16 p-3">
         <Hamburger className="text-[#828EAC]" />
       </button>
