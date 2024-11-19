@@ -55,7 +55,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
 
   const getApplications = async () => {
     if (!young) return;
-    const { ok, data, code } = await api.get(`/young/${young._id}/application`);
+    const { ok, data, code } = await api.get(`/young/${young._id}/application?isMilitaryPreparation=true`);
     if (!ok) {
       capture(new Error(code));
       return toastr.error("Oups, une erreur est survenue", code);

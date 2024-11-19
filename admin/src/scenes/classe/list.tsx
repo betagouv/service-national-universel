@@ -10,12 +10,13 @@ import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/compo
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { Button, Container, Header, Page } from "@snu/ds/admin";
-import { ROLES, translateStatusClasse, translate, EtablissementType, ClasseType } from "snu-lib";
+import { ROLES, translateStatusClasse, translate, EtablissementType, ClasseType, isSuperAdmin } from "snu-lib";
 import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
 
 import { getCohortGroups } from "@/services/cohort.service";
 import ClasseRow from "./list/ClasseRow";
 import { exportExcelSheet, ClasseExport } from "./utils";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
 
 interface ClasseProps extends ClasseType {
   referentClasse: { firstName: string; lastName: string }[];
@@ -78,20 +79,23 @@ export default function List() {
 
   if (!isClasses || !etablissements) return null;
 
-  const filterArray = [
+  const filterArray: Filter[] = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
-    [ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && {
-      title: "Établissement",
-      name: "etablissementId",
-      missingLabel: "Non renseigné",
-      translate: (item) => {
-        if (item === "N/A" || !etablissements.length) return item;
-        const res = etablissements.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.name;
-      },
-    },
-
+    ...([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)
+      ? [
+          {
+            title: "Établissement",
+            name: "etablissementId",
+            missingLabel: "Non renseigné",
+            translate: (item) => {
+              if (item === "N/A" || !etablissements.length) return item;
+              const res = etablissements.find((option) => option._id.toString() === item);
+              if (!res) return "N/A - Supprimé";
+              return res?.name;
+            },
+          },
+        ]
+      : []),
     { title: "Numéro d'identification", name: "uniqueKeyAndId", missingLabel: "Non renseigné" },
     { title: "Statut", name: "status", missingLabel: "Non renseigné", translate: translateStatusClasse },
     { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné", translate },
@@ -120,7 +124,7 @@ export default function List() {
         ];
       },
     },
-  ].filter(Boolean);
+  ];
 
   if (!isClasses) return null;
   const isCohortSelected = selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0;
@@ -138,11 +142,17 @@ export default function List() {
           [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
             <Button
               title="Exporter le SR"
+              className="mr-2"
               onClick={() => exportData({ type: "schema-de-repartition" })}
               loading={exportLoading}
               disabled={!isCohortSelected}
               tooltip="Vous devez selectionner une cohort pour pouvoir exporter le SR"
             />
+          ),
+          isSuperAdmin(user) && (
+            <Link to="/classes/import">
+              <Button title="Mettre à jour" className="mr-2" loading={exportLoading} />
+            </Link>
           ),
         ].filter(Boolean)}
       />

@@ -12,7 +12,6 @@ import {
   canViewMeetingPointId,
   isPdrEditionOpen,
   PointDeRassemblementType,
-  departmentToAcademy,
 } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 // @ts-ignore
@@ -479,6 +478,7 @@ export default function View(props) {
                   <Field
                     label="Complément d’adresse"
                     onChange={(e) => handleChangeComplement(e.target.value)}
+                    // TODO: champ à supprimer une fois le PDR  dissocié de la cohort
                     value={pdr.complementAddress.find((c) => c.cohort === currentCohort)?.complement || ""}
                     readOnly={!editSession}
                   />

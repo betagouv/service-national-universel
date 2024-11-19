@@ -8,6 +8,7 @@ export * from "./cle/classe";
 export * from "./cle/etablissement";
 export * from "./cohesionCenter";
 export * from "./cohort";
+export * from "./cohortGroup";
 export * from "./contract";
 export * from "./departmentService";
 export * from "./email";

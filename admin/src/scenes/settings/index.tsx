@@ -59,6 +59,8 @@ export default function Settings() {
     getCohort();
   }, [currentCohortName]);
 
+  if (!cohort) return null;
+
   if (user.role !== ROLES.ADMIN) {
     return (
       <div className="h-100 m-6 flex flex-col items-center justify-center">

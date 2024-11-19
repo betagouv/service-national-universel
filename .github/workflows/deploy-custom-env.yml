@@ -134,6 +134,7 @@ jobs:
           image_name: ${{matrix.app.name}}
           dockerfile_path: ${{matrix.app.path}}/Dockerfile
           image_tag: ${{matrix.app.tag}}
+          image_tag_stable: "custom-latest"
           sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
   deploy:

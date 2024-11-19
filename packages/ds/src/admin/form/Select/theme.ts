@@ -23,17 +23,17 @@ export default function useReactSelectTheme({
     control: (styles, state) => ({
       ...styles,
       cursor: "pointer",
-      boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      boxShadow: "0 0 0 0 rgb(0 0 0 / 0.05)",
       backgroundColor: disabled ? "#F9FAFB" : "white",
       border: cx({
         "1px solid #EF4444": error,
-        "1px solid #3B82F6": !error && isActive,
+        "2px solid #3B82F6": !error && isActive,
         "1px solid #E5E7EB": !error && !isActive,
       }),
       "&:hover": {
         border: cx({
           "1px solid #EF4444": error,
-          "1px solid #3B82F6": !error && isActive,
+          "2px solid #3B82F6": !error && isActive,
           "1px solid #E5E7EB": !error && !isActive,
         }),
       },
@@ -71,7 +71,7 @@ export default function useReactSelectTheme({
     },
     input: (styles) => ({
       ...styles,
-      height: size === "sm" ? 24 : 46,
+      height: size === "sm" ? 24 : size === "md" ? 29 : 46,
       cursor: "pointer",
       padding: paddingStyle,
     }),

@@ -24,6 +24,13 @@ const schema = new Schema({
   },
 });
 
+schema.virtual("cohortGroup", {
+  ref: "cohortGroup",
+  localField: "cohortGroupId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 schema.virtual("fromUser").set<SchemaExtended>(function (fromUser: UserSaved) {
   if (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
@@ -83,6 +90,9 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
+
+schema.set("toObject", { virtuals: true });
+schema.set("toJSON", { virtuals: true });
 
 export type CohortDocument<T = {}> = DocumentExtended<CohortType & T>;
 type SchemaExtended = CohortDocument & UserExtension;
