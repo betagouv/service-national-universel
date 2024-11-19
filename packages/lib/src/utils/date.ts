@@ -136,6 +136,7 @@ const formatDateForPostGre = (date) => {
 };
 
 const getZonedDate = (date, timeZone = "Europe/Paris") => {
+  console.log("date", date);
   const zonedDate = toZonedTime(date, timeZone);
   return zonedDate;
 };
