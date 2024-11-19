@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import useDevice from "../../../hooks/useDeviceWithResize";
+import useTickets from "./useTickets";
 import { supportURL } from "@/config";
 
 import Close from "./assets/Close";
@@ -10,7 +11,6 @@ import Logo from "./components/Logo";
 import NavigationMenu from "./components/NavigationMenu";
 import UserCard from "./components/UserCard";
 import UserMenu from "./components/UserMenu";
-import useTickets from "./useTickets";
 
 export default function Navbar() {
   const device = useDevice();
