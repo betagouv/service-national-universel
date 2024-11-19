@@ -98,6 +98,7 @@ jobs:
   #   secrets: inherit
 
   build:
+    if: ${{matrix.app.name}} == "api"
     needs: prepare
     runs-on: ubuntu-latest
     env:
