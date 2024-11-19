@@ -144,3 +144,36 @@ jobs:
         env: ${{matrix.app.env}}
         run: |
           node build-application-docker.js --push ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}}
+
+  deploy:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ needs.prepare.outputs.env_name }}
+      cancel-in-progress: false
+    strategy:
+      matrix:
+        app:
+          [
+            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+          ]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.branch_name }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.20"
+
+      - name: Build image environment
+        working-directory: devops/scripts
+        env:
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+        run: |
+          node deploy-scaleway.js ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}

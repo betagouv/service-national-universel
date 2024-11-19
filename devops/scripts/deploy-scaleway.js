@@ -29,12 +29,21 @@ async function main() {
     name: config.containerName(),
   });
 
+  const imageUrl = registryEndpoint(
+    namespace.registry_endpoint,
+    config.imageName(),
+    input.release
+  );
+
+  if (container.registry_image === imageUrl) {
+    console.log(`${imageUrl} is already deployed on ${container.name}`);
+    return;
+  }
+
+  console.log(`Deploying ${imageUrl} on ${container.name}`);
+
   await scaleway.patch(RESOURCE.Container, container.id, {
-    registry_image: registryEndpoint(
-      namespace.registry_endpoint,
-      config.imageName(),
-      input.release
-    ),
+    registry_image: imageUrl,
   });
 
   await scaleway.waitUntilStatus(RESOURCE.Container, container.id, ["ready"]);
