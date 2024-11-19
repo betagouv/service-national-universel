@@ -40,7 +40,7 @@ async function main() {
   const imageEndpoint = registryEndpoint(
     namespace.registry_endpoint,
     config.imageName(),
-    tag
+    input.tag
   );
 
   const image = await scaleway.find(RESOURCE.Image, {
@@ -50,7 +50,7 @@ async function main() {
   if (image) {
     const imageTag = await scaleway.find(RESOURCE.Image.Tag, {
       image_id: image.id,
-      name: tag,
+      name: input.tag,
     });
 
     if (imageTag) {
@@ -63,7 +63,7 @@ async function main() {
 
   const values = {
     ...secrets,
-    ...config.buildEnvVariables(namespace.registry_endpoint, tag),
+    ...config.buildEnvVariables(namespace.registry_endpoint, input.tag),
   };
 
   const args = [
