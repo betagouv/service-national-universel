@@ -6,9 +6,9 @@ on:
     branches: # TODO: remove me
       - 3577-app
 
-# defaults:
-#   run:
-#     working-directory: devops/scripts
+defaults:
+  run:
+    working-directory: devops/scripts
 
 jobs:
   prepare:
@@ -48,8 +48,6 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          echo ${{ github.event.head_commit }}
-
           env_name=$(node get-environment-name.js ${{ steps.check.outputs.branch_name }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
@@ -65,6 +63,10 @@ jobs:
           app_image_tag=$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
+
+      - name: Create environment
+        run: |
+          node create-environment.js ${{ steps.prepare.outputs.env_name }}
 
   # run_tests_api:
   #   needs: prepare
