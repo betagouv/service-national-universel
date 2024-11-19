@@ -6,10 +6,6 @@ on:
     branches: # TODO: remove me
       - 3577-app
 
-defaults:
-  run:
-    working-directory: devops/scripts
-
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -47,6 +43,7 @@ jobs:
 
       - name: Prepare
         id: prepare
+        working-directory: devops/scripts
         run: |
           env_name=$(node get-environment-name.js ${{ steps.check.outputs.branch_name }})
           echo "env_name: $env_name"
@@ -65,6 +62,7 @@ jobs:
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
       - name: Create environment
+        working-directory: devops/scripts
         run: |
           node create-environment.js ${{ steps.prepare.outputs.env_name }}
 
