@@ -49,6 +49,41 @@ export const PointDeRassemblementSchema = {
     },
   },
 
+  uai: {
+    type: String,
+    documentation: {
+      description: "UAI du point de rassemblement",
+    },
+  },
+
+  numeroOrdre: {
+    type: String,
+    documentation: {
+      description: "Numéro d'ordre du point de rassemblement",
+    },
+  },
+
+  dateCreation: {
+    type: Date,
+    documentation: {
+      description: "Date de création du point de rassemblement",
+    },
+  },
+
+  dateDebutValidite: {
+    type: Date,
+    documentation: {
+      description: "Date de début de validité du point de rassemblement",
+    },
+  },
+
+  dateDerniereModification: {
+    type: Date,
+    documentation: {
+      description: "Date de dernière modification du point de rassemblement",
+    },
+  },
+
   // LEGACY
   complementAddress: {
     type: [
