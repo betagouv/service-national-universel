@@ -4,7 +4,7 @@ const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { EnvConfig, AppConfig } = require("./lib/config");
 
 // TODO: REMOVE after migration
-function tempCustomEnvVariables(namespace, env, app, scwSecretKey) {
+function tempCustomEnvVariables(namespace, env, app) {
   switch (env) {
     case "staging":
     case "production":
@@ -27,21 +27,17 @@ function tempCustomEnvVariables(namespace, env, app, scwSecretKey) {
     case "app":
       return {
         ...urls,
-        ENVIRONMENT: "custom",
         NGINX_HOSTNAME: urls.APP_URL.replace("https://", ""),
       };
     case "admin":
       return {
         ...urls,
-        ENVIRONMENT: "custom",
         NGINX_HOSTNAME: urls.ADMIN_URL.replace("https://", ""),
       };
     case "api":
       return {
         ...urls,
-        NODE_ENV: "custom",
         SECRET_NAME: "snu-ci",
-        SCW_SECRET_KEY: scwSecretKey,
       };
   }
   return {};
@@ -53,10 +49,8 @@ class CreateEnvironment {
     this.environmentName = options.environmentName;
   }
 
-  async _createContainer(namespace, application) {
-    const config = new AppConfig(this.environmentName, application);
+  async createContainer(namespace, config, key) {
     let secrets = {};
-
     const secretName = config.runSecretName();
     if (secretName) {
       secrets = await this.scaleway.getSecrets(
@@ -69,17 +63,16 @@ class CreateEnvironment {
     const options = await config.containerOptions();
     let container = await this.scaleway.create(RESOURCE.Container, {
       ...options,
-      name: config.containerName(),
-      namespace_id: namespace.id,
       environment_variables: {
         ...secrets,
         ...tempCustomEnvVariables(
           namespace,
           this.environmentName,
-          application,
+          config.app,
           this.scaleway.secretKey
         ),
       },
+      ...key,
     });
 
     // await this.scaleway.action(RESOURCE.Container, container.id, "deploy");
@@ -93,6 +86,40 @@ class CreateEnvironment {
     return container;
   }
 
+  async findOrCreateContainer(namespace, application) {
+    const config = new AppConfig(this.environmentName, application);
+
+    const key = {
+      name: config.containerName(),
+      namespace_id: namespace.id,
+    };
+    let container = await this.scaleway.find(RESOURCE.Container, key);
+    if (container) {
+      console.log(`Container ${key.name} already existing`);
+    } else {
+      console.log(`Creating container ${key.name}`);
+      container = await this.createContainer(namespace, config, key);
+    }
+    return container;
+  }
+
+  async findOrCreateNamespace(key) {
+    let namespace = await this.scaleway.find(RESOURCE.ContainerNamespace, key);
+    if (namespace) {
+      console.log(`Namespace ${key.name} already existing`);
+    } else {
+      console.log(`Creating namespace ${key.name}`);
+      namespace = await this.scaleway.create(RESOURCE.ContainerNamespace, key);
+
+      namespace = await this.scaleway.waitUntilStatus(
+        RESOURCE.ContainerNamespace,
+        namespace.id,
+        ["ready"]
+      );
+    }
+    return namespace;
+  }
+
   async execute() {
     console.log(`Creating environment ${this.environmentName} `);
 
@@ -100,27 +127,14 @@ class CreateEnvironment {
 
     const project = await this.scaleway.findProject(config.projectName());
 
-    const key = {
+    const namespace = await this.findOrCreateNamespace({
       project_id: project.id,
       name: config.containerNamespace(),
-    };
-    let namespace = await this.scaleway.find(RESOURCE.ContainerNamespace, key);
-    if (namespace) {
-      console.log(`Namespace ${namespace.name} already existing.`);
-      return;
-    }
-
-    namespace = await this.scaleway.create(RESOURCE.ContainerNamespace, key);
-
-    namespace = await this.scaleway.waitUntilStatus(
-      RESOURCE.ContainerNamespace,
-      namespace.id,
-      ["ready"]
-    );
+    });
 
     await Promise.all(
       ["api", "app", "admin"].map((app) =>
-        this._createContainer(namespace, app)
+        this.findOrCreateContainer(namespace, app)
       )
     );
   }
