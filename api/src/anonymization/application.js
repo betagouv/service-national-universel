@@ -1,6 +1,46 @@
 const { starify } = require("../utils/anonymise");
+const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
 
-function anonymize(item) {
+function anonymize(itemToAnonymize) {
+  const whitelist = [
+    "_id.$oid",
+    "apiEngagementId",
+    "youngId",
+    "youngFirstName",
+    "youngLastName",
+    "youngEmail",
+    "youngBirthdateAt",
+    "youngCity",
+    "youngDepartment",
+    "youngCohort",
+    "cohortId",
+    "missionId",
+    "isJvaMission",
+    "missionName",
+    "missionDepartment",
+    "missionRegion",
+    "missionDuration",
+    "structureId",
+    "tutorId",
+    "contractId",
+    "contractStatus",
+    "tutorName",
+    "priority",
+    "hidden",
+    "status",
+    "statusComment",
+    "contractAvenantFiles",
+    "justificatifsFiles",
+    "feedBackExperienceFiles",
+    "othersFiles",
+    "filesType",
+    "createdAt",
+    "updatedAt",
+    "__v",
+  ];
+
+  const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);
+
   item.youngEmail && (item.youngEmail = "*****@*******.***");
   item.youngFirstName && (item.youngFirstName = starify(item.youngFirstName));
   item.youngLastName && (item.youngLastName = starify(item.youngLastName));

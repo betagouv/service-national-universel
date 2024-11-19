@@ -104,7 +104,7 @@ import {
   canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
   YoungType,
-  getDepartmentForEligibility,
+  getDepartmentForInscriptionGoal,
   isAdmin,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
@@ -115,6 +115,9 @@ import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToL
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
+import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
+import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -554,8 +557,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
     ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
-      const departement = getDepartmentForEligibility(young);
+      const departement = getDepartmentForInscriptionGoal(young);
       const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
@@ -1362,7 +1364,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
     let applications: any[] = [];
     for (let application of applicationsFromDb) {
       const structure = await StructureModel.findById(application.structureId);
-      applications.push({ ...application._doc, structure: structure ? serializeStructure(structure, req.user) : null });
+      applications.push({ ...application.toObject(), structure: structure ? serializeStructure(structure, req.user) : null });
     }
 
     let etablissement: EtablissementDocument | null = null;
@@ -1384,8 +1386,28 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
 
 router.get(
   "/:id/patches",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req: UserRequest, res: Response) => await patches.get(req, res, ReferentModel),
+  authMiddleware("referent"),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+  ],
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const referent = await ReferentModel.findById(id);
+      if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const referentPatches = await patches.get(req, ReferentModel);
+      if (!referentPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      return res.status(200).send({ ok: true, data: referentPatches });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
 );
 
 async function populateReferent(ref) {

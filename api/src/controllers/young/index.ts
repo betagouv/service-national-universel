@@ -14,7 +14,7 @@ import { getRedisClient } from "../../redis";
 import config from "config";
 import { logger } from "../../logger";
 import { capture, captureMessage } from "../../sentry";
-import { ReferentModel, YoungModel, ApplicationModel, MissionModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel } from "../../models";
+import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel, ApplicationDocument } from "../../models";
 import AuthObject from "../../auth";
 import {
   uploadFile,
@@ -33,7 +33,7 @@ import {
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
-import { validateYoung, validateId, validatePhase1Document } from "../../utils/validator";
+import { validateYoung, validateId, validatePhase1Document, idSchema } from "../../utils/validator";
 import patches from "../patches";
 import { serializeYoung, serializeApplication } from "../../utils/serializer";
 import {
@@ -55,9 +55,11 @@ import {
   translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
   ReferentType,
-  getDepartmentForEligibility,
+  getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
   CohortDto,
+  MissionType,
+  ContractType,
 } from "snu-lib";
 import { getFilteredSessions } from "../../utils/cohort";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
@@ -68,6 +70,9 @@ import scanFile from "../../utils/virusScanner";
 import emailsEmitter from "../../emails";
 import { UserRequest } from "../request";
 import { FileTypeResult } from "file-type";
+import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
+import { authMiddleware } from "../../middlewares/authMiddleware";
+import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
@@ -273,8 +278,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     }
 
     if (obj.source !== YOUNG_SOURCE.CLE && value.status === YOUNG_STATUS.VALIDATED) {
-      // schoolDepartment pour les scolarisés et HZR sinon department pour les non scolarisés
-      const departement = getDepartmentForEligibility(obj);
+      const departement = getDepartmentForInscriptionGoal(obj);
       const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
@@ -405,7 +409,31 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => await patches.get(req, res, YoungModel));
+router.get(
+  "/:id/patches",
+  authMiddleware("referent"),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE]),
+  ],
+  async (req: UserRequest, res) => {
+    try {
+      const { id } = req.params;
+
+      const young = await YoungModel.findById(id);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const youngPatches = await patches.get(req, YoungModel);
+      if (!youngPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      return res.status(200).send({ ok: true, data: youngPatches });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 
 router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
@@ -654,18 +682,26 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    let data = await ApplicationModel.find({ youngId: id });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    for (let i = 0; i < data.length; i++) {
-      const application = data[i];
-      const mission = await MissionModel.findById(application.missionId);
-      let tutor: ReferentType | null = null;
-      if (mission?.tutorId) tutor = await ReferentModel.findById(mission.tutorId);
-      if (mission?.tutorId && !application.tutorId) application.tutorId = mission.tutorId;
-      if (mission?.structureId && !application.structureId) application.structureId = mission.structureId;
-      data[i] = { ...serializeApplication(application), mission, tutor };
+    const { error: queryError, value: isMilitaryPreparation } = Joi.boolean().validate(req.query.isMilitaryPreparation);
+    if (queryError) {
+      capture(queryError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    const query: any = { youngId: id };
+    if (isMilitaryPreparation !== undefined) {
+      query.isMilitaryPreparation = isMilitaryPreparation;
+    }
+
+    type PopulatedApplication = ApplicationDocument & { mission: MissionType; tutor: ReferentType; contract: ContractType };
+    let data: PopulatedApplication[] = await ApplicationModel.find(query).populate("mission").populate("contract").populate("tutor");
+
+    for (let application of data) {
+      if (application.mission?.tutorId && !application.tutorId) application.tutorId = application.mission.tutorId;
+      if (application.mission?.structureId && !application.structureId) application.structureId = application.mission.structureId;
+      application = { ...serializeApplication(application), mission: application.mission, tutor: application.tutor, contract: application.contract };
+    }
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -744,6 +780,7 @@ router.post("/france-connect/user-info", async (req: UserRequest, res) => {
 
     const redisClient = getRedisClient();
     storedState = await redisClient.get(`franceConnectState:${value.state}`);
+    // @ts-ignore
     storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
 
     if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {

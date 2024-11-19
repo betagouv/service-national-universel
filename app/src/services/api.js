@@ -252,6 +252,24 @@ class api {
       }
     });
   }
+
+  logout() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`${apiURL}/young/logout`, {
+          mode: "cors",
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json", ...this.headers },
+        });
+        const res = await response.json();
+        resolve(res);
+      } catch (e) {
+        capture(e, { extra: { path: "/young/logout" } });
+        reject(e);
+      }
+    });
+  }
 }
 
 function initApi() {

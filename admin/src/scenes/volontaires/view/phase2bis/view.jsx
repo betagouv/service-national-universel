@@ -7,22 +7,19 @@ import { ROLES, applicationExportFields, formatDateFRTimezoneUTC, formatLongDate
 import Menu from "../../../../assets/icons/Menu";
 import Pencil from "../../../../assets/icons/Pencil";
 import { Box, BoxTitle } from "../../../../components/box";
-import DownloadAttestationButton from "../../../../components/buttons/DownloadAttestationButton";
-import MailAttestationButton from "../../../../components/buttons/MailAttestationButton";
 import { ModalExport } from "../../../../components/filters-system-v2";
 import SelectStatus from "../../../../components/selectStatus";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
-import { ENABLE_PM, ES_NO_LIMIT, YOUNG_PHASE, YOUNG_STATUS_PHASE2, translate } from "../../../../utils";
+import { YOUNG_PHASE, YOUNG_STATUS_PHASE2, translate } from "../../../../utils";
 import YoungHeader from "../../../phase0/components/YoungHeader";
-import CardEquivalence from "../../components/Equivalence";
 import Toolbox from "../../components/Toolbox";
-import Phase2militaryPrepartionV2 from "../phase2MilitaryPreparationV2";
+import Phase2MilitaryPreparation from "../phase2MilitaryPreparationV2";
 import ApplicationList2 from "./applicationList2";
 import Preferences from "./preferences";
+import EquivalenceList from "./EquivalenceList";
 
 export default function Phase2({ young, onChange }) {
-  const [equivalences, setEquivalences] = React.useState([]);
   const [blocOpened, setBlocOpened] = useState("missions");
   const [editPreference, setEditPreference] = useState(false);
   const [savePreference, setSavePreference] = useState(false);
@@ -33,48 +30,25 @@ export default function Phase2({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
 
   const [dataPreference, setDataPreference] = React.useState({
-    professionnalProject: "",
-    professionnalProjectPrecision: "",
-    engaged: "",
-    desiredLocation: "",
-    engagedDescription: "",
-    domains: [],
-    missionFormat: "",
-    mobilityTransport: [],
-    period: "",
-    mobilityTransportOther: "",
-    mobilityNearHome: "false",
-    mobilityNearSchool: "false",
-    mobilityNearRelative: "false",
-    mobilityNearRelativeName: "",
-    mobilityNearRelativeAddress: "",
-    mobilityNearRelativeZip: "",
-    mobilityNearRelativeCity: "",
-    periodRanking: [],
+    professionnalProject: young?.professionnalProject || "",
+    professionnalProjectPrecision: young?.professionnalProjectPrecision || "",
+    engaged: young?.engaged || "false",
+    desiredLocation: young?.desiredLocation || "",
+    engagedDescription: young?.engagedDescription || "",
+    domains: young?.domains ? [...young.domains] : [],
+    missionFormat: young?.missionFormat || "",
+    mobilityTransport: young?.mobilityTransport ? [...young.mobilityTransport] : [],
+    period: young?.period || "",
+    mobilityTransportOther: young?.mobilityTransportOther || "",
+    mobilityNearHome: young?.mobilityNearHome || "false",
+    mobilityNearSchool: young?.mobilityNearSchool || "false",
+    mobilityNearRelative: young?.mobilityNearRelative || "false",
+    mobilityNearRelativeName: young?.mobilityNearRelativeName || "",
+    mobilityNearRelativeAddress: young?.mobilityNearRelativeAddress || "",
+    mobilityNearRelativeZip: young?.mobilityNearRelativeZip || "",
+    mobilityNearRelativeCity: young?.mobilityNearRelativeCity || "",
+    periodRanking: young?.periodRanking ? [...young.periodRanking] : [],
   });
-
-  React.useEffect(() => {
-    setDataPreference({
-      professionnalProject: young?.professionnalProject || "",
-      professionnalProjectPrecision: young?.professionnalProjectPrecision || "",
-      engaged: young?.engaged || "false",
-      desiredLocation: young?.desiredLocation || "",
-      engagedDescription: young?.engagedDescription || "",
-      domains: young?.domains ? [...young.domains] : [],
-      missionFormat: young?.missionFormat || "",
-      mobilityTransport: young?.mobilityTransport ? [...young.mobilityTransport] : [],
-      period: young?.period || "",
-      mobilityTransportOther: young?.mobilityTransportOther || "",
-      mobilityNearHome: young?.mobilityNearHome || "false",
-      mobilityNearSchool: young?.mobilityNearSchool || "false",
-      mobilityNearRelative: young?.mobilityNearRelative || "false",
-      mobilityNearRelativeName: young?.mobilityNearRelativeName || "",
-      mobilityNearRelativeAddress: young?.mobilityNearRelativeAddress || "",
-      mobilityNearRelativeZip: young?.mobilityNearRelativeZip || "",
-      mobilityNearRelativeCity: young?.mobilityNearRelativeCity || "",
-      periodRanking: young?.periodRanking ? [...young.periodRanking] : [],
-    });
-  }, [young, editPreference]);
 
   const onSubmit = async () => {
     try {
@@ -281,13 +255,6 @@ export default function Phase2({ young, onChange }) {
     });
   }
 
-  React.useEffect(() => {
-    (async () => {
-      const { ok, data } = await api.get(`/young/${young._id.toString()}/phase2/equivalences`);
-      if (ok) return setEquivalences(data);
-    })();
-  }, [young]);
-
   function getExportFields() {
     if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
       return applicationExportFields.filter((e) => !["choices", "identity", "contact", "address", "location"].includes(e.id));
@@ -345,10 +312,8 @@ export default function Phase2({ young, onChange }) {
             </Col>
           </Row>
         </Box>
-        {ENABLE_PM ? <Phase2militaryPrepartionV2 young={young} /> : null}
-        {equivalences.map((equivalence, index) => (
-          <CardEquivalence key={index} equivalence={equivalence} young={young} />
-        ))}
+        <Phase2MilitaryPreparation young={young} />
+        <EquivalenceList young={young} />
 
         <Toolbox young={young} />
         <Box>

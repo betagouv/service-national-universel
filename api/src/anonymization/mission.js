@@ -1,6 +1,60 @@
 const { generateAddress, generateRandomName, starify } = require("../utils/anonymise");
+const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
 
-function anonymize(item) {
+function anonymize(itemToAnonymize) {
+  const whitelist = [
+    "_id.$oid",
+    "name",
+    "domains",
+    "mainDomain",
+    "startAt",
+    "endAt",
+    "duration",
+    "format",
+    "frequence",
+    "period",
+    "subPeriod",
+    "placesTotal",
+    "placesLeft",
+    "pendingApplications",
+    "actions",
+    "description",
+    "justifications",
+    "contraintes",
+    "structureId",
+    "structureName",
+    "status",
+    "visibility",
+    "statusComment",
+    "hebergement",
+    "hebergementPayant",
+    "tutorId",
+    "tutorName",
+    "address",
+    "zip",
+    "city",
+    "department",
+    "region",
+    "country",
+    "location",
+    "location.lat",
+    "location.lon",
+    "addressVerified",
+    "remote",
+    "isMilitaryPreparation",
+    "createdAt",
+    "updatedAt",
+    "lastSyncAt",
+    "isJvaMission",
+    "jvaMissionId",
+    "apiEngagementId",
+    "jvaRawData",
+    "applicationStatus",
+    "placesStatus",
+    "__v",
+  ];
+  const item = anonymizeNonDeclaredFields(itemToAnonymize, whitelist);
+
   item.name && (item.name = `Mission ${generateRandomName()}`);
   item.description && (item.description = starify(item.description));
   item.address && (item.address = generateAddress());
@@ -12,6 +66,7 @@ function anonymize(item) {
   item.contraintes && (item.contraintes = starify(item.contraintes));
   item.frequence && (item.frequence = starify(item.frequence));
   item.jvaRawData && (item.jvaRawData = undefined);
+
   return item;
 }
 

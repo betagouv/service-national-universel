@@ -13,6 +13,7 @@ import { capture } from "@/sentry";
 import api from "@/services/api";
 
 import { exportExcelSheet, EtablissementExport } from "./utils";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
 
 export default function List() {
   const [youngs, setYoungs] = useState<YoungDto[]>([]);
@@ -23,7 +24,7 @@ export default function List() {
     page: 0,
   });
   const [size, setSize] = useState(10);
-  const filterArray = [
+  const filterArray: Filter[] = [
     { title: "Nom", name: "name", missingLabel: "Non renseigné" },
     { title: "UAI", name: "uai", missingLabel: "Non renseigné" },
     { title: "Département", name: "department", missingLabel: "Non renseigné", translate: (e) => getDepartmentNumber(e) + " - " + e },

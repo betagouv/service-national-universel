@@ -1,14 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { LigneBusModel } = require("../../models");
-const { LigneToPointModel } = require("../../models");
-const { PlanTransportModel } = require("../../models");
-const { PointDeRassemblementModel } = require("../../models");
-const { CohesionCenterModel } = require("../../models");
-const { SchemaDeRepartitionModel } = require("../../models");
-const { ReferentModel } = require("../../models");
-const { CohortModel } = require("../../models");
+const Joi = require("joi");
+const { ObjectId } = require("mongoose").Types;
+const mongoose = require("mongoose");
+const config = require("config");
+
 const {
   canViewLigneBus,
   canEditLigneBusTeam,
@@ -26,13 +23,22 @@ const {
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
 } = require("snu-lib");
-const { ERRORS } = require("../../utils");
+
+const {
+  LigneBusModel,
+  LigneToPointModel,
+  PlanTransportModel,
+  PointDeRassemblementModel,
+  CohesionCenterModel,
+  SchemaDeRepartitionModel,
+  ReferentModel,
+  CohortModel,
+} = require("../../models");
+
 const { capture } = require("../../sentry");
-const Joi = require("joi");
-const { ObjectId } = require("mongoose").Types;
-const mongoose = require("mongoose");
 const { sendTemplate } = require("../../brevo");
-const config = require("config");
+const { ERRORS } = require("../../utils");
+const { validateId } = require("../../utils/validator");
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés
@@ -557,14 +563,10 @@ router.get("/:id/ligne-to-points", passport.authenticate("referent", { session: 
 
 router.get("/:id/data-for-check", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-    }).validate(req.params);
+    const { error, value: id } = validateId(req.params.id);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const { id } = value;
 
     const ligneBus = await LigneBusModel.findById(id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -586,6 +588,8 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
                     { $eq: ["$sessionPhase1Id", ligneBus.sessionId] },
                     { $eq: ["$ligneId", ligneBus._id.toString()] },
                     { $eq: ["$meetingPointId", "$$meetingPoint"] },
+                    { $ne: ["$cohesionStayPresence", "false"] },
+                    { $ne: ["$departInform", "true"] },
                   ],
                 },
               },

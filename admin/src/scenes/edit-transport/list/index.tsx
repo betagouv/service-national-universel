@@ -139,7 +139,6 @@ const ReactiveList = ({ cohort }) => {
       <div className="flex items-center justify-between bg-white px-4 pt-2">
         <div className="flex items-center justify-center gap-2">
           <Filters
-            // @ts-expect-error update Filters types
             defaultUrlParam={`cohort=${cohort}`}
             pageId={pageId}
             route="/elasticsearch/lignebus/search"

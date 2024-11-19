@@ -4,6 +4,7 @@ import patchHistory from "mongoose-patch-history";
 import mongooseElastic from "@selego/mongoose-elastic";
 import esClient from "../es";
 import anonymize from "../anonymization/application";
+import { MissionModel, ReferentModel, ContractModel } from ".";
 
 import { ApplicationSchema, InterfaceExtended } from "snu-lib";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
@@ -19,6 +20,20 @@ schema.virtual("mission", {
   justOne: true,
 });
 
+schema.virtual("contract", {
+  ref: "contract",
+  localField: "contractId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+schema.virtual("tutor", {
+  ref: "referent",
+  localField: "tutorId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 schema.methods.anonymise = function () {
   return anonymize(this);
 };
@@ -29,6 +44,9 @@ schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
     this._user = { _id, role, department, region, email, firstName, lastName, model };
   }
 });
+
+schema.set("toObject", { virtuals: true });
+schema.set("toJSON", { virtuals: true });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   this.user = params?.fromUser;
