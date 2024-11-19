@@ -117,9 +117,7 @@ jobs:
         with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
           # if: steps.check.outputs.tag_exists == 0
-          with:
-            branch_name: ${{ needs.prepare.outputs.branch_name }}
-            CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          with: '{"branch_name": "${{ needs.prepare.outputs.branch_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
   build:
     needs: prepare
