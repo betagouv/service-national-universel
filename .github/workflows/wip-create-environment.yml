@@ -6,6 +6,10 @@ on:
     branches: # TODO: remove me
       - 3577-app
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -139,7 +143,7 @@ jobs:
         with:
           node-version: "18.20"
 
-      - name: Build image environment
+      - name: Build image
         working-directory: devops/scripts
         env: ${{matrix.app.env}}
         run: |
@@ -148,9 +152,6 @@ jobs:
   deploy:
     needs: [prepare, build]
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ needs.prepare.outputs.env_name }}
-      cancel-in-progress: false
     strategy:
       matrix:
         app:
@@ -170,7 +171,7 @@ jobs:
         with:
           node-version: "18.20"
 
-      - name: Build image environment
+      - name: Deploy image on Scaleway
         working-directory: devops/scripts
         env:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
