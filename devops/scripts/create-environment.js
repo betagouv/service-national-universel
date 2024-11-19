@@ -1,47 +1,8 @@
-const { registryEndpoint } = require("./lib/utils");
 const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { EnvConfig, AppConfig } = require("./lib/config");
 
 // TODO: REMOVE after migration
-function tempCustomEnvVariables(namespace, env, app) {
-  switch (env) {
-    case "staging":
-    case "production":
-    case "ci":
-      return {};
-  }
-
-  const domain_prefix = namespace.registry_endpoint.replace(
-    "rg.fr-par.scw.cloud/funcscw",
-    ""
-  );
-
-  const urls = {
-    ADMIN_URL: `https://${domain_prefix}-${env}-admin.functions.fnc.fr-par.scw.cloud`,
-    API_URL: `https://${domain_prefix}-${env}-api.functions.fnc.fr-par.scw.cloud`,
-    APP_URL: `https://${domain_prefix}-${env}-app.functions.fnc.fr-par.scw.cloud`,
-  };
-
-  switch (app) {
-    case "app":
-      return {
-        ...urls,
-        NGINX_HOSTNAME: urls.APP_URL.replace("https://", ""),
-      };
-    case "admin":
-      return {
-        ...urls,
-        NGINX_HOSTNAME: urls.ADMIN_URL.replace("https://", ""),
-      };
-    case "api":
-      return {
-        ...urls,
-        SECRET_NAME: "snu-ci",
-      };
-  }
-  return {};
-}
 
 class CreateEnvironment {
   constructor(scalewayClient, options = {}) {
@@ -65,17 +26,10 @@ class CreateEnvironment {
       ...options,
       environment_variables: {
         ...secrets,
-        ...tempCustomEnvVariables(
-          namespace,
-          this.environmentName,
-          config.app,
-          this.scaleway.secretKey
-        ),
+        ...config.runEnvVariables(namespace.registry_endpoint),
       },
       ...key,
     });
-
-    // await this.scaleway.action(RESOURCE.Container, container.id, "deploy");
 
     container = await this.scaleway.waitUntilStatus(
       RESOURCE.Container,

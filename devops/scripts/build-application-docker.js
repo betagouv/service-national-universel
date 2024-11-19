@@ -1,4 +1,3 @@
-const process = require("node:process");
 const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { GetSecrets } = require("./get-secrets");
@@ -13,6 +12,7 @@ async function main() {
   const input = new UserInput(`Build application docker image`)
     .arg("environment", "Environment (ci, staging, production)")
     .arg("application", "Application (api, apiv2, app, admin)")
+    .arg("tag", "Image tag (commit sha)")
     .optBool("push", "Push image on registry", {
       default: false,
     })
@@ -31,16 +31,6 @@ async function main() {
     project: project,
     secretName: config.buildSecretName(),
   }).execute();
-
-  const env = {
-    ...process.env,
-  };
-  const values = { ...secrets, ...env }; // override secrets from env
-  const tag = values[config.releaseKey()];
-
-  if (!tag) {
-    throw new Error("Image tag not specified in environment");
-  }
 
   const namespace = await scaleway.findOrThrow(RESOURCE.ContainerNamespace, {
     project_id: project.id,
@@ -70,6 +60,11 @@ async function main() {
   }
 
   console.log(`Building image ${imageEndpoint}`);
+
+  const values = {
+    ...secrets,
+    ...config.buildEnvVariables(namespace.registry_endpoint, tag),
+  };
 
   const args = [
     "build",

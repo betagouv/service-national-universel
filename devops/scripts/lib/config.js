@@ -5,16 +5,6 @@ const APPS = ["app", "admin", "api", "apiv2"];
 
 const FRONTEND_APPS = ["app", "admin"];
 
-function releaseKey(app) {
-  switch (app) {
-    case "app":
-    case "admin":
-      return "VITE_RELEASE";
-    default:
-      return "RELEASE";
-  }
-}
-
 function mountSecretKeys(app) {
   switch (app) {
     case "app":
@@ -23,6 +13,19 @@ function mountSecretKeys(app) {
     default:
       return ["PM2_SLACK_URL"];
   }
+}
+
+function applicationUrls(registryEndpoint) {
+  const domain_prefix = registryEndpoint.replace(
+    "rg.fr-par.scw.cloud/funcscw",
+    ""
+  );
+
+  return {
+    admin: `https://${domain_prefix}-admin.functions.fnc.fr-par.scw.cloud`,
+    api: `https://${domain_prefix}-api.functions.fnc.fr-par.scw.cloud`,
+    app: `https://${domain_prefix}-app.functions.fnc.fr-par.scw.cloud`,
+  };
 }
 
 class EnvConfig {
@@ -108,12 +111,59 @@ class AppConfig extends EnvConfig {
     }
   }
 
-  releaseKey() {
-    return releaseKey(this.app);
-  }
-
   mountSecretKeys() {
     return mountSecretKeys(this.app);
+  }
+
+  buildEnvVariables(registryEndpoint, release) {
+    const vars = {
+      RELEASE: release,
+      ENVIRONMENT: this.env,
+    };
+    switch (this.env) {
+      case "staging":
+      case "production":
+      case "ci":
+        return vars;
+    }
+
+    const urls = applicationUrls(registryEndpoint);
+
+    switch (this.app) {
+      case "app":
+      case "admin":
+        return {
+          ...vars,
+          VITE_APP_URL: urls.app,
+          VITE_API_URL: urls.api,
+          VITE_ADMIN_URL: urls.admin,
+          NGINX_HOSTNAME: urls[this.app].replace("https://", ""),
+        };
+      default:
+        return vars;
+    }
+  }
+
+  runEnvVariables(registryEndpoint) {
+    switch (this.env) {
+      case "staging":
+      case "production":
+      case "ci":
+        return {};
+    }
+
+    const urls = applicationUrls(registryEndpoint);
+
+    switch (this.app) {
+      case "api":
+        return {
+          APP_URL: urls.app,
+          API_URL: urls.api,
+          ADMIN_URL: urls.admin,
+        };
+      default:
+        return {};
+    }
   }
 }
 
