@@ -36,23 +36,47 @@ async function main() {
     ...process.env,
   };
   const values = { ...secrets, ...env }; // override secrets from env
+  const tag = values[config.releaseKey()];
+
+  if (!tag) {
+    throw new Error("Image tag not specified in environment");
+  }
 
   const namespace = await scaleway.findOrThrow(RESOURCE.ContainerNamespace, {
     project_id: project.id,
     name: config.containerNamespace(),
   });
-  const image = registryEndpoint(
+
+  const imageEndpoint = registryEndpoint(
     namespace.registry_endpoint,
     config.imageName(),
-    values[config.releaseKey()]
+    tag
   );
+
+  const image = await scaleway.find(RESOURCE.Image, {
+    namespace_id: namespace.registry_namespace_id,
+    name: config.imageName(),
+  });
+  if (image) {
+    const imageTag = await scaleway.find(RESOURCE.Image.Tag, {
+      image_id: image.id,
+      name: tag,
+    });
+
+    if (imageTag) {
+      console.log(`Image ${imageEndpoint} already exists`);
+      return;
+    }
+  }
+
+  console.log(`Building image ${imageEndpoint}`);
 
   const args = [
     "build",
     "--label",
     `created_at=${new Date().toISOString()}`,
     "-t",
-    image,
+    imageEndpoint,
     "-f",
     `${input.application}/Dockerfile`,
     ".",
@@ -84,7 +108,7 @@ async function main() {
       input.SCW_SECRET_KEY,
       { env }
     );
-    await childProcess("docker", ["push", image], { env });
+    await childProcess("docker", ["push", imageEndpoint], { env });
   }
 }
 
