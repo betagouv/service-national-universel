@@ -1,6 +1,6 @@
 const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
-const { EnvConfig, AppConfig } = require("./lib/config");
+const { EnvConfig, AppConfig, APPLICATIONS } = require("./lib/config");
 
 // TODO: REMOVE after migration
 
@@ -87,9 +87,7 @@ class CreateEnvironment {
     });
 
     await Promise.all(
-      ["api", "app", "admin"].map((app) =>
-        this.findOrCreateContainer(namespace, app)
-      )
+      APPLICATIONS.map((app) => this.findOrCreateContainer(namespace, app))
     );
   }
 }

@@ -1,7 +1,7 @@
 const { readFile } = require("node:fs/promises");
 const { resolve } = require("node:path");
 
-const APPS = ["app", "admin", "api", "apiv2"];
+const APPLICATIONS = ["app", "admin", "api", "apiv2"];
 
 const FRONTEND_APPS = ["app", "admin"];
 
@@ -50,7 +50,7 @@ class EnvConfig {
 class AppConfig extends EnvConfig {
   constructor(environment, application) {
     super(environment);
-    if (!APPS.includes(application)) {
+    if (!APPLICATIONS.includes(application)) {
       throw new Error(`Unknown application: ${application}`);
     }
     this.app = application;
@@ -171,4 +171,5 @@ class AppConfig extends EnvConfig {
 module.exports = {
   EnvConfig,
   AppConfig,
+  APPLICATIONS,
 };
