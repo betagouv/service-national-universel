@@ -24,6 +24,7 @@ function applicationUrls(registryEndpoint) {
   return {
     admin: `https://${domain_prefix}-admin.functions.fnc.fr-par.scw.cloud`,
     api: `https://${domain_prefix}-api.functions.fnc.fr-par.scw.cloud`,
+    apiv2: `https://${domain_prefix}-apiv2.functions.fnc.fr-par.scw.cloud`,
     app: `https://${domain_prefix}-app.functions.fnc.fr-par.scw.cloud`,
   };
 }

@@ -17,6 +17,7 @@ jobs:
       branch_name: ${{ steps.check.outputs.branch_name }}
       env_name: ${{ steps.env_name.outputs.env_name }}
       api_image_tag: ${{ steps.tags.outputs.api_image_tag }}
+      apiv2_image_tag: ${{ steps.tags.outputs.apiv2_image_tag }}
       admin_image_tag: ${{ steps.tags.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.tags.outputs.app_image_tag }}
 
@@ -56,9 +57,13 @@ jobs:
       - name: Get image tags
         id: tags
         run: |
-          api_image_tag=$(git log --max-count=1 --oneline -- api packages package-lock.json | cut -d " " -f 1)
+          api_image_tag=$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)
           echo "api_image_tag: $api_image_tag"
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
+
+          apiv2_image_tag=$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)
+          echo "apiv2_image_tag: $apiv2_image_tag"
+          echo "apiv2_image_tag=$apiv2_image_tag" >> $GITHUB_OUTPUT
 
           admin_image_tag=$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)
           echo "admin_image_tag: $admin_image_tag"
@@ -105,6 +110,7 @@ jobs:
         app:
           [
             { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+            { name: apiv2, tag: "${{needs.prepare.outputs.apiv2_image_tag}}" },
             { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
             { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
           ]
@@ -135,6 +141,7 @@ jobs:
         app:
           [
             { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+            { name: apiv2, tag: "${{needs.prepare.outputs.apiv2_image_tag}}" },
             { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
             { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
           ]
