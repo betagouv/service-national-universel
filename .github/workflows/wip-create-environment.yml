@@ -112,12 +112,13 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
 
-      - name: Docker Build & Publish
-        uses: ./.github/actions/run-tests-${{matrix.app.name}}
-        # if: steps.check.outputs.tag_exists == 0
-        with:
-          branch_name: ${{ needs.prepare.outputs.branch_name }}
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      - name: Run tests
+        uses: jenseng/dynamic-uses@v1
+          uses: ./.github/actions/run-tests-${{matrix.app.name}}
+          # if: steps.check.outputs.tag_exists == 0
+          with:
+            branch_name: ${{ needs.prepare.outputs.branch_name }}
+            CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
   build:
     needs: prepare
