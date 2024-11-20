@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - production
       - 3577-app # TODO: REMOVE
 
 concurrency:
@@ -12,7 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CI_ENV_NAME: ci
+  STAGING_ENV_NAME: staging
+  PROD_ENV_NAME: production
 
 jobs:
   prepare:
@@ -74,7 +75,7 @@ jobs:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
           with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
-  build:
+  build_staging:
     needs: [prepare, test]
     runs-on: ubuntu-latest
     strategy:
@@ -95,12 +96,12 @@ jobs:
         working-directory: devops/scripts
         env:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
         run: |
-          node build-application-docker.js --push ${{ env.CI_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+          node build-application-docker.js --push ${{ env.STAGING_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
 
-  deploy:
-    needs: [prepare, build]
+  deploy_staging:
+    needs: [prepare, build_staging]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -120,6 +121,58 @@ jobs:
       #   working-directory: devops/scripts
       #   env:
       #     SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-      #     SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+      #     SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
       #   run: |
-      #     node deploy-scaleway.js ${{ env.CI_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+      #     node deploy-scaleway.js ${{ env.STAGING_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+
+  build_production:
+    needs: [prepare, test]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.20"
+
+      - name: Build image
+        working-directory: devops/scripts
+        env:
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+        run: |
+          node build-application-docker.js --push ${{ env.PROD_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+
+  deploy_production_scaleway:
+    environment: ${{ env.PROD_ENV_NAME }}
+    if: ${{ vars.DEPLOY_ON_SCALEWAY == 'true' }}
+    needs: [prepare, deploy_staging, build_production]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.20"
+
+      # - name: Deploy image on Scaleway
+      #   working-directory: devops/scripts
+      #   env:
+      #     SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+      #     SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+      #   run: |
+      #     node deploy-scaleway.js ${{ env.PROD_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
