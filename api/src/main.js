@@ -90,7 +90,6 @@ async function runAPI() {
   }
 
   await Promise.all([initDB(), initRedisClient()]);
-  await runMigrations();
 
   /*
     Download all certificate templates when instance is starting,
@@ -258,6 +257,8 @@ async function runAPI() {
   createTerminus(server, options);
 
   server.listen(config.PORT, () => logger.debug(`Listening on port ${config.PORT}`));
+
+  await runMigrations();
 }
 
 module.exports = {
