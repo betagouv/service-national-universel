@@ -38,6 +38,9 @@ jobs:
       - name: Get registry
         id: registry
         working-directory: devops/scripts
+        env:
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
         run: |
           staging_registry=$(node get-environment-registry.js ${{ env.STAGING_ENV_NAME }})
           echo "staging_registry: $staging_registry"
