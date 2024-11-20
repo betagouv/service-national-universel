@@ -22,14 +22,14 @@ function getAllPaths(obj, parentPath = "", seen = new Set()) {
 
   seen.add(obj);
 
-  for (let key in obj) {
+  for (let key of Object.keys(obj)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
     if (obj[key] instanceof Date) {
       paths.push(currentPath);
       continue;
     }
     if (typeof obj[key] === "object" && obj[key] !== null && !Array.isArray(obj[key])) {
-      paths = paths.concat(getAllPaths(obj[key], currentPath));
+      paths = paths.concat(getAllPaths(obj[key], currentPath, seen));
     } else {
       paths.push(currentPath);
     }
