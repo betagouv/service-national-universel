@@ -22,7 +22,7 @@ export function injectRoutes(app) {
   app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
   app.use("/mission", require("./controllers/mission"));
-  app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
+  app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import").default);
   app.use("/point-de-rassemblement", require("./planDeTransport/pointDeRassemblement").default);
   app.use("/program", require("./controllers/program"));
   app.use("/referent", require("./referent/referentController").default);

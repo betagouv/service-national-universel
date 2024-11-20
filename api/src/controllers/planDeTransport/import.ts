@@ -1,5 +1,4 @@
-import express, { Request, Response } from "express";
-import { Router } from "express";
+import express, { Response } from "express";
 import passport from "passport";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
@@ -7,7 +6,7 @@ import Joi from "joi";
 import { canSendPlanDeTransport, MIME_TYPES, COHORT_TYPE, TRANSPORT_MODES, TRANSPORT_CONVOCATION_SUBTRACT_MINUTES_DEFAULT, TRANSPORT_CONVOCATION_SUBTRACT_MINUTES } from "snu-lib";
 import fs from "fs";
 import { parse as parseDate } from "date-fns";
-import fileUpload, { UploadedFile } from "express-fileupload";
+import fileUpload from "express-fileupload";
 import {
   CohesionCenterModel,
   PointDeRassemblementModel,
@@ -18,7 +17,6 @@ import {
   PlanTransportModel,
   ClasseModel,
   CohortModel,
-  type ReferentDocument,
   type PlanTransportModesType,
 } from "../../models";
 
@@ -28,6 +26,7 @@ import { validateId } from "../../utils/validator";
 import { validatePdtFile, computeImportSummary } from "../../planDeTransport/planDeTransport/import/pdtImportService";
 import { formatTime } from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
 import { startSession, withTransaction, endSession } from "../../mongo";
+import { UserRequest } from "../request";
 
 interface ImportPlanTransportLine {
   [key: string]: string | string[] | undefined;
@@ -66,21 +65,14 @@ interface LineToPoint {
   stepPoints: StepPoint[];
 }
 
-interface CustomRequestWithFiles extends Request {
-  user: Partial<ReferentDocument>;
-  files?: {
-    [fieldname: string]: UploadedFile | UploadedFile[];
-  };
-}
-
-const router: Router = express.Router();
+const router = express.Router();
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
 router.post(
   "/:cohortName",
   passport.authenticate("referent", { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
-  async (req: CustomRequestWithFiles, res: Response) => {
+  async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
         cohortName: Joi.string().required(),
@@ -101,7 +93,7 @@ router.post(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      const { name, tempFilePath, mimetype } = file;
+      const { name, tempFilePath, mimetype } = file as any;
       const filetype = await getMimeFromFile(tempFilePath);
       const mimeFromMagicNumbers = filetype || MIME_TYPES.EXCEL;
       const validTypes: string[] = [MIME_TYPES.EXCEL];
@@ -111,7 +103,7 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.UNSUPPORTED_TYPE });
       }
 
-      const scanResult = await scanFile(tempFilePath, name, req.user.id);
+      const scanResult = await scanFile(tempFilePath, name, req.user._id);
       if (scanResult.infected) {
         return res.status(400).send({ ok: false, code: ERRORS.FILE_INFECTED });
       }
@@ -143,7 +135,7 @@ router.post(
 );
 
 // Importe un plan de transport vérifié et enregistré dans importplandetransport.
-router.post("/:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req: CustomRequestWithFiles, res: Response) => {
+router.post("/:importId/execute", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   const transaction = await startSession();
   try {
     const { error, value: importId } = validateId(req.params.importId);
