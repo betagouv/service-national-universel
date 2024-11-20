@@ -930,7 +930,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   </ReactTooltip>
                 </div>
                 {/* @ts-ignore */}
-                <NumberInput days={cohort.daysToValidate ?? 8} label={"Nombre de jour pour validation"} onChange={(e) => onCohortChange({ ...cohort, daysToValidate: e })} />
+                <NumberInput days={cohort.daysToValidate} label={"Nombre de jour pour validation"} onChange={(e) => onCohortChange({ ...cohort, daysToValidate: e })} />
               </div>
             </div>
           </div>

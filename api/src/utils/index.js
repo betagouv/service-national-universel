@@ -738,7 +738,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
     daysToValidate: daysToValidate,
     validationDate: dateDeValidation,
     validationDateForTerminaleGrade: dateDeValidationTerminale,
-    dateStart: dateStartcohort,
+    dateStart: dateStartCohort,
   } = await getCohortDateInfo(sessionPhase1.cohort);
 
   // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
@@ -756,7 +756,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   } else {
     await updateStatusPhase1(young, validationDateWithDays, user);
   }
-  return { dateStart, daysToValidate, validationDateWithDays, dateStartcohort };
+  return { dateStart, daysToValidate, validationDateWithDays, dateStartCohort };
 }
 
 async function updateStatusPhase1(young, validationDateWithDays, user) {
