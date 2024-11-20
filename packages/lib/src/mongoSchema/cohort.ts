@@ -329,6 +329,7 @@ export const CohortSchema = {
     documentation: {
       description: "Nombre de jours nécessaire pour valider le séjour",
     },
+    default: 8,
   },
 
   daysToValidateForTerminalGrade: {
