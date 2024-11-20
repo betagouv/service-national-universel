@@ -18,6 +18,36 @@ services:
     ports:
       - "1025:1025"
       - "1080:1080"
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
+    networks:
+      - redis
+  redis-ui:
+    image: redis/redisinsight
+    container_name: redis-ui
+    ports:
+      - "5540:5540"
+    networks:
+      - redis
+  bullboard:
+    container_name: bullboard
+    image: venatum/bull-board:1.5
+    restart: always
+    ports:
+      - 3001:3000
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - redis
+
+networks:
+  redis:
+    driver: bridge
 
 volumes:
   mongodb_data:
