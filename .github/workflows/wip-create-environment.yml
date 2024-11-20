@@ -121,9 +121,9 @@ jobs:
 
       - name: Run tests
         uses: jenseng/dynamic-uses@v1
+        if: ${{matrix.app.run_test}}
         with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          if: ${{matrix.app.run_test}}
           with: '{"branch_name": "${{ needs.prepare.outputs.branch_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
   build:
