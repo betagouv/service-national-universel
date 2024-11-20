@@ -1,33 +1,28 @@
-import React, { useState } from "react";
-import { BiHandicap } from "react-icons/bi";
-// @ts-expect-error lib non ts
-import { useDebounce } from "@uidotdev/usehooks";
+import React from "react";
 import ReactTooltip from "react-tooltip";
 import { HiOutlineInformationCircle } from "react-icons/hi";
+import cx from "classnames";
 
-import { Badge, InputText } from "@snu/ds/admin";
+import { Badge } from "@snu/ds/admin";
 import Loader from "@/components/Loader";
-import { useAddress, CohesionCenterType, translate } from "snu-lib";
-import { AddressForm } from "@snu/ds/common";
+import { CohesionCenterType, translate, translateTypologieCenter, translateDomainCenter, formatNameAndAddress } from "snu-lib";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 import { Title } from "../components/commons";
-import Toggle from "../components/Toggle";
 
-export default function Details({ center }) {
-  const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 300);
-  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
-  const [data, setData] = useState<CohesionCenterType>({ ...center, pmr: center?.pmr ? center.pmr : "false" });
+export default function Details({ center }: { center: CohesionCenterType }) {
+  if (center.pmr === "") {
+    center.pmr = "false";
+  }
   useDocumentTitle(`Fiche du centre - ${center?.name}`);
 
-  if (!data) return <Loader />;
-  console.log(data);
+  if (!center) return <Loader />;
+
   return (
     <div className="m-8 flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <Title>{data.name}</Title>
-        {data?.deletedAt && <Badge title="Archivé" status="WAITING_CORRECTION" />}
+        <Title>{center.name}</Title>
+        {center?.deletedAt && <Badge title="Archivé" status="WAITING_CORRECTION" />}
       </div>
       <div className="flex flex-col gap-8 rounded-lg bg-white px-8 pt-8 pb-12">
         <div className="flex items-center justify-between">
@@ -40,71 +35,81 @@ export default function Details({ center }) {
             </ReactTooltip>
           </div>
         </div>
-        <div className="flex">
+        <div className="flex text-sm leading-5 font-normal text-gray-900">
           <div className="flex w-[45%] flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <div>Désignations</div>
-              <div className="flex flex-col gap-2 bg-gray-50">
+            <div className="flex flex-col gap-4">
+              <div className="font-bold ">Désignations</div>
+              <div className="flex flex-col gap-1 bg-gray-50 pl-3 py-2">
                 <p>
-                  Nom du Centre : <span>{data.name}</span>
+                  <span className="text-gray-500 mr-2">Nom du Centre : </span>
+                  {center.name && formatNameAndAddress(center.name)}
                 </p>
                 <p>
-                  Code : <span>{data.matricule}</span>
+                  <span className="text-gray-500 mr-2">Matricule : </span>
+                  {center.matricule}
                 </p>
                 <p>
-                  Désignation : <span>{data.centerDesignation}</span>
+                  <span className="text-gray-500 mr-2">Désignation : </span>
+                  {center.centerDesignation && formatNameAndAddress(center.centerDesignation)}
                 </p>
                 <p>
-                  Typologie : <span>{data.typology}</span>
+                  <span className="text-gray-500 mr-2">Typologie : </span>
+                  {translateTypologieCenter(center.typology)}
                 </p>
                 <p>
-                  Domaine : <span>{data.domain}</span>
+                  <span className="text-gray-500 mr-2">Domaine : </span>
+                  {translateDomainCenter(center.domain)}
                 </p>
               </div>
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex">
-                <div>Capacité maximale d'accueil</div>
-                <HiOutlineInformationCircle data-tip="" data-for="tooltip-capacite" className="ml-2 mt-0.5" size={20} />
+                <div className="font-bold">Capacité maximale d'accueil</div>
+                <HiOutlineInformationCircle data-tip="" data-for="tooltip-capacite" className="ml-2 mt-0.5 text-gray-400" size={20} />
                 <ReactTooltip id="tooltip-capacite" className="bg-white shadow-xl" arrowColor="white" disable={false} place="top">
-                  <div className="text-gray-700 text-xs font-[400] w-[260px] text-center">Les modifications se font uniquement dans le module de répartition SI SNU.</div>
+                  <div className="text-gray-700 text-xs font-[400] w-[260px] text-center mb-1">Les modifications se font uniquement dans le module de répartition SI SNU.</div>
                 </ReactTooltip>
               </div>
-              <div className="bg-gray-50">{data.placesTotal}</div>
+              <p className="flex items-center pl-3 bg-gray-50 h-10">{center.placesTotal}</p>
             </div>
             <div className="flex flex-col gap-1">
-              <div>Capacité maximale d'accueil</div>
-              <div className="bg-gray-50">{translate(data.pmr)}</div>
+              <p className="font-bold">Accessibilité PMR</p>
+              <p className="flex items-center pl-3 bg-gray-50 h-10">{translate(center.pmr)}</p>
             </div>
           </div>
           <div className="flex w-[10%] items-center justify-center">
             <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
           </div>
           <div className="flex w-[45%] flex-col  justify-between">
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <div>Gestionnaire ou propriétaire</div>
-                <div className="bg-gray-50">{data.complement && data.complement !== "" ? data.complement : "Non renseigné"}</div>
+                <div className="font-bold">Gestionnaire ou propriétaire</div>
+                <p
+                  className={cx("flex items-center pl-3 bg-gray-50 h-10 ", {
+                    "text-gray-500 italic": !center.complement || center.complement === "",
+                  })}>
+                  {center.complement && center.complement !== "" ? center.complement : "Non renseigné"}
+                </p>
               </div>
-              <div className="flex flex-col gap-1">
-                <div>Adresse</div>
-                <div className="flex flex-col gap-2 bg-gray-50">
-                  <p>{data.address}</p>
+              <div className="flex flex-col gap-4">
+                <div className="font-bold">Adresse</div>
+                <div className="flex flex-col gap-1 bg-gray-50 pl-3 py-2">
+                  <p>{center.address && formatNameAndAddress(center.address)}</p>
+                  <p>{center.zip + " " + (center.city && formatNameAndAddress(center.city))}</p>
+                </div>
+                <div className="flex flex-col gap-1 bg-gray-50 pl-3 py-2">
                   <p>
-                    {data.zip}
-                    {data.city}
+                    <span className="text-gray-500 mr-2">Département : </span>
+                    {center.department}
                   </p>
-                  <div className="flex flex-col gap-2 bg-gray-50">
-                    <p>
-                      Département : <span>{data.department}</span>
-                    </p>
-                    <p>
-                      Région : <span>{data.region}</span>
-                    </p>
-                    <p>
-                      Académie : <span>{data.academy}</span>
-                    </p>
-                  </div>
+                  <p>
+                    <span className="text-gray-500 mr-2">Région : </span>
+                    {center.region}
+                  </p>
+                  <p>
+                    <span className="text-gray-500 mr-2">Académie : </span>
+                    {center.academy}
+                  </p>
                 </div>
               </div>
             </div>
