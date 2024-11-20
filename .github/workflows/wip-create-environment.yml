@@ -16,15 +16,8 @@ jobs:
     outputs:
       branch_name: ${{ steps.check.outputs.branch_name }}
       env_name: ${{ steps.env_name.outputs.env_name }}
-      api_image_tag: ${{ steps.tags.outputs.api_image_tag }}
-      apiv2_image_tag: ${{ steps.tags.outputs.apiv2_image_tag }}
-      admin_image_tag: ${{ steps.tags.outputs.admin_image_tag }}
-      app_image_tag: ${{ steps.tags.outputs.app_image_tag }}
-      api_run_test: ${{ steps.test.outputs.api_run_test }}
-      apiv2_run_test: ${{ steps.test.outputs.apiv2_run_test }}
-      lib_run_test: ${{ steps.test.outputs.lib_run_test }}
-      app_run_test: ${{ steps.test.outputs.app_run_test }}
-      admin_run_test: ${{ steps.test.outputs.admin_run_test }}
+      build_matrix: ${{ steps.tags.outputs.tags }}
+      test_matrix: ${{ steps.tests.outputs.tests }}
 
     steps:
       - name: Check branch name
@@ -62,67 +55,36 @@ jobs:
       - name: Get image tags
         id: tags
         run: |
-          api_image_tag=$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)
-          echo "api_image_tag: $api_image_tag"
-          echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
+          echo "[]" \
+          | jq  '. + [{name:"api", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"apiv2", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"app", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > tags.json
 
-          apiv2_image_tag=$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)
-          echo "apiv2_image_tag: $apiv2_image_tag"
-          echo "apiv2_image_tag=$apiv2_image_tag" >> $GITHUB_OUTPUT
-
-          admin_image_tag=$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)
-          echo "admin_image_tag: $admin_image_tag"
-          echo "admin_image_tag=$admin_image_tag" >> $GITHUB_OUTPUT
-
-          app_image_tag=$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)
-          echo "app_image_tag: $app_image_tag"
-          echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
+          cat tags.json
+          echo "tags=$(cat tags.json)" >> $GITHUB_OUTPUT
 
       - name: Get test configuration
-        id: test
+        id: tests
         run: |
           git switch main
 
-          api_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- api packages/lib package-lock.json)
-          echo "api_run_test: $api_run_test"
-          echo "api_run_test=$api_run_test" >> $GITHUB_OUTPUT
+          echo "[]" \
+          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- api packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- app packages package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- admin packages package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- packages package-lock.json | cut -d " " -f 1)" > tests.json
 
-          apiv2_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- apiv2 packages/lib package-lock.json)
-          echo "apiv2_run_test: $apiv2_run_test"
-          echo "apiv2_run_test=$apiv2_run_test" >> $GITHUB_OUTPUT
-
-          lib_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- packages package-lock.json)
-          echo "lib_run_test: $lib_run_test"
-          echo "lib_run_test=$lib_run_test" >> $GITHUB_OUTPUT
-
-          app_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- app packages package-lock.json)
-          echo "app_run_test: $app_run_test"
-          echo "app_run_test=$app_run_test" >> $GITHUB_OUTPUT
-
-          admin_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- admin packages package-lock.json)
-          echo "admin_run_test: $admin_run_test"
-          echo "admin_run_test=$admin_run_test" >> $GITHUB_OUTPUT
+          cat tests.json
+          echo "tests=$(cat tests.json)" >> $GITHUB_OUTPUT
 
   test:
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app:
-          [
-            {
-              name: api,
-              run_test: "${{ needs.prepare.outputs.api_run_test }}",
-            },
-            {
-              name: apiv2,
-              run_test: "${{ needs.prepare.outputs.apiv2_run_test }}",
-            },
-            {
-              name: lib,
-              run_test: "${{ needs.prepare.outputs.lib_run_test }}",
-            },
-          ]
+        app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -161,13 +123,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app:
-          [
-            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
-            { name: apiv2, tag: "${{needs.prepare.outputs.apiv2_image_tag}}" },
-            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
-            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
-          ]
+        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -192,13 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app:
-          [
-            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
-            { name: apiv2, tag: "${{needs.prepare.outputs.apiv2_image_tag}}" },
-            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
-            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
-          ]
+        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
 
     steps:
       - uses: actions/checkout@v4
