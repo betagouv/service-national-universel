@@ -12,8 +12,16 @@ function setNestedValue(obj, path, value) {
 }
 
 // Génère tous les chemins de propriétés possibles dans un objet, y compris les objets imbriqués
-function getAllPaths(obj, parentPath = "") {
+function getAllPaths(obj, parentPath = "", seen = new Set()) {
   let paths = [];
+
+  // Eviter les boucles infinies
+  if (seen.has(obj)) {
+    return paths;
+  }
+
+  seen.add(obj);
+
   for (let key in obj) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
     if (obj[key] instanceof Date) {
