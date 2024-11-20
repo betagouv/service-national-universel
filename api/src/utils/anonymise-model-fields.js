@@ -70,6 +70,8 @@ function anonymizeNonDeclaredFields(item, whitelist) {
           setNestedValue(item, path, new Date());
         } else if (typeof value === "string") {
           setNestedValue(item, path, "");
+        } else if (typeof value === "number") {
+          setNestedValue(item, path, 0);
         } else {
           setNestedValue(item, path, null);
         }
