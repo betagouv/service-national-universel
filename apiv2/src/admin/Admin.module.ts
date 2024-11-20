@@ -27,17 +27,20 @@ import { gatewayProviders as cleGatewayProviders } from "./infra/sejours/cle/ini
 import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phase1/initProvider/gateway";
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
-import { useCaseProvider as cleUseCaseProviders } from "src/admin/infra/sejours/cle/initProvider/useCase";
-import { useCaseProvider as phase1UseCaseProviders } from "src/admin/infra/sejours/phase1/initProvider/useCase";
+import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
+import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
 import { AffectationController } from "./infra/sejours/phase1/affectation/api/Affectation.controller";
 import { SimulationAffectationHTSService } from "./core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { jeuneMongoProviders } from "./infra/sejours/jeune/provider/JeuneMongo.provider";
 import { centreMongoProviders } from "./infra/sejours/phase1/centre/provider/CentreMongo.provider";
-import { LigneDeBusMongoProviders } from "./infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
+import { ligneDeBusMongoProviders } from "./infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
 import { pointDeRassemblementMongoProviders } from "./infra/sejours/phase1/pointDeRassemblement/provider/PointDeRassemblementMongo.provider";
 import { sejourMongoProviders } from "./infra/sejours/phase1/sejour/provider/SejourMongo.provider";
+import { sessionMongoProviders } from "./infra/sejours/phase1/session/provider/SessionMongo.provider";
+import { FileGateway } from "@shared/core/File.gateway";
+import { FileProvider } from "@shared/infra/File.provider";
 
 @Module({
     imports: [
@@ -59,13 +62,15 @@ import { sejourMongoProviders } from "./infra/sejours/phase1/sejour/provider/Sej
         ...etablissementMongoProviders,
         ...jeuneMongoProviders,
         ...centreMongoProviders,
-        ...LigneDeBusMongoProviders,
+        ...ligneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
         ...sejourMongoProviders,
+        ...sessionMongoProviders,
         ...guardProviders,
         ...taskMongoProviders,
         Logger,
         SigninReferent,
+        { provide: FileGateway, useClass: FileProvider },
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },

@@ -4,8 +4,8 @@ import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { CENTRE_MONGOOSE_ENTITY, CentreDocument } from "../../provider/CentreMongo.provider";
 import { CentreMapper } from "../Centre.mapper";
-import { CentreModel } from "src/admin/core/sejours/phase1/centre/Centre.model";
-import { CentreGateway } from "src/admin/core/sejours/phase1/centre/Centre.gateway";
+import { CentreModel } from "@admin/core/sejours/phase1/centre/Centre.model";
+import { CentreGateway } from "@admin/core/sejours/phase1/centre/Centre.gateway";
 
 @Injectable()
 export class CentreRepository implements CentreGateway {

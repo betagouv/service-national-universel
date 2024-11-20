@@ -5,5 +5,4 @@ dist/**/*
 .idea
 **.js
 .env
-**.csv
 **.xlsx*

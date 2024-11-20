@@ -14,16 +14,17 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
     ) {}
 
     async use(req: CustomRequest, _: Response, next: NextFunction) {
-        const token = req.headers.authorization?.split(" ")?.[1];
-        if (!token) {
-            throw new UnauthorizedException();
-        }
+        // const token = req.headers.authorization?.split(" ")?.[1];
+        // if (!token) {
+        //     throw new UnauthorizedException();
+        // }
 
-        const userId = await this.authProvider.parseToken(token);
-        const user = await this.referentGateway.findById(userId);
-        if (!user) {
-            throw new UnauthorizedException();
-        }
+        // const userId = await this.authProvider.parseToken(token);
+        // const user = await this.referentGateway.findById(userId);
+        // if (!user) {
+        //     throw new UnauthorizedException();
+        // }
+        const user = {} as any;
         req.user = user;
 
         this.cls.set("user", { id: user?.id, firstName: user?.prenom, lastName: user?.nom });

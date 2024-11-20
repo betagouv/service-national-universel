@@ -2,9 +2,9 @@ import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
-import { LigneDeBusGateway } from "src/admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
+import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
 import { LIGNEDEBUS_MONGOOSE_ENTITY, LigneDeBusDocument } from "../../provider/LigneDeBusMongo.provider";
-import { LigneDeBusModel } from "src/admin/core/sejours/phase1/ligneDeBus/LigneDeBus.model";
+import { LigneDeBusModel } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.model";
 import { LigneDeBusMapper } from "../LigneDeBus.mapper";
 
 @Injectable()

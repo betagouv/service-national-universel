@@ -28,8 +28,23 @@ export class JeuneRepository implements JeuneGateway {
         return JeuneMapper.toModel(jeune);
     }
 
-    async findBySessionIdAndStatusForDepartementMetropole(sessionId: string, status: string): Promise<JeuneModel[]> {
-        const jeunes = await this.jeuneMongooseEntity.find({ cohortId: sessionId, status });
+    async findBySessionIdStatusNiveauScolairesAndDepartements(
+        sessionId: string,
+        status: string,
+        niveauScolaires: string[],
+        departements: string[],
+    ): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({
+            cohortId: sessionId,
+            status,
+            grade: { $in: niveauScolaires },
+            department: { $in: departements },
+        });
+        return JeuneMapper.toModels(jeunes);
+    }
+
+    async findBySessionId(sessionId: string): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({ cohortId: sessionId });
         return JeuneMapper.toModels(jeunes);
     }
 

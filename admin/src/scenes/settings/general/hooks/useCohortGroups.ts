@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getCohortGroups } from "./cohortGroupRepository";
+import { getCohortGroups } from "../../../../services/cohortGroupService";
 
 export default function useCohortGroups() {
   return useQuery({

@@ -195,6 +195,24 @@ const regionList = [
 // Attention : Polynésie française et Nouvelle-Calédonie ne sont pas des DROMS mais des cas à part.
 const regionsListDROMS = ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Terres australes et antarctiques françaises"];
 
+export const RegionsHorsMetropole = [
+  "Mayotte",
+  "Wallis-et-Futuna",
+  "Saint-Martin",
+  "Polynésie française",
+  "La Réunion",
+  "Saint-Pierre-et-Miquelon",
+  "Guyane",
+  "Nouvelle-Calédonie",
+  "Guadeloupe",
+  "Martinique",
+  "Corse",
+  "Haute-Corse",
+  "Corse-du-Sud",
+];
+
+export const RegionsMetropole = regionList.filter((region) => !RegionsHorsMetropole.includes(region));
+
 const department2region = {
   Ain: "Auvergne-Rhône-Alpes",
   Aisne: "Hauts-de-France",

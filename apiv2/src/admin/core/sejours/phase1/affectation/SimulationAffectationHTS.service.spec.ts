@@ -2,19 +2,24 @@ import { Test, TestingModule } from "@nestjs/testing";
 
 import { YOUNG_STATUS_PHASE1 } from "snu-lib";
 
-import { JeuneAffectationModel, SimulationAffectationHTSService } from "./SimulationAffectationHTS.service";
+import {
+    DistributionJeunesParDepartement,
+    JeuneAffectationModel,
+    SimulationAffectationHTSService,
+} from "./SimulationAffectationHTS.service";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { SejourModel } from "../sejour/Sejour.model";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { CentreModel } from "../centre/Centre.model";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
+import { Logger } from "@nestjs/common";
 
 describe("SimulationAffectationHTSService", () => {
     let simulationAffectationHTSService: SimulationAffectationHTSService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [SimulationAffectationHTSService],
+            providers: [SimulationAffectationHTSService, Logger],
         }).compile();
 
         simulationAffectationHTSService = module.get<SimulationAffectationHTSService>(SimulationAffectationHTSService);
@@ -23,22 +28,22 @@ describe("SimulationAffectationHTSService", () => {
     describe("computeRatioRepartition", () => {
         it("should compute the ratio of repartition correctly", () => {
             const jeunes = [
-                { genre: "male", qpv: "oui", handicap: "non" },
-                { genre: "female", qpv: "non", handicap: "oui" },
-                { genre: "male", qpv: "oui", handicap: "oui" },
-                { genre: "female", qpv: "non", handicap: "non" },
-                { genre: "female", qpv: "", handicap: "" },
+                { genre: "male", qpv: "oui", psh: "non" },
+                { genre: "female", qpv: "non", psh: "oui" },
+                { genre: "male", qpv: "oui", psh: "oui" },
+                { genre: "female", qpv: "non", psh: "non" },
+                { genre: "female", qpv: "", psh: "" },
             ] as JeuneModel[];
 
             const result = simulationAffectationHTSService.computeRatioRepartition(jeunes);
 
-            expect(result).toEqual([0.4, 0.4, 0.4]);
+            expect(result).toEqual({ male: 0.4, qvp: 0.4, psh: 0.4 });
         });
 
         it("should use default ratios if no young people are provided", () => {
             const result = simulationAffectationHTSService.computeRatioRepartition([]);
 
-            expect(result).toEqual([0.5, 0.3, 0.1]);
+            expect(result).toEqual({ male: 0.5, qvp: 0.3, psh: 0.1 });
         });
     });
 
@@ -51,18 +56,18 @@ describe("SimulationAffectationHTSService", () => {
             ] as SejourModel[];
 
             const jeunesList = [
-                { centreId: "1", statusPhase1: "AFFECTED", genre: "male", qpv: "oui", handicap: "non" },
-                { centreId: "1", statusPhase1: "AFFECTED", genre: "female", qpv: "non", handicap: "oui" },
-                { centreId: "2", statusPhase1: "AFFECTED", genre: "male", qpv: "oui", handicap: "oui" },
-                { centreId: "3", statusPhase1: "AFFECTED", genre: "female", qpv: "non", handicap: "non" },
+                { centreId: "1", statusPhase1: "AFFECTED", genre: "male", qpv: "oui", psh: "non" },
+                { centreId: "1", statusPhase1: "AFFECTED", genre: "female", qpv: "non", psh: "oui" },
+                { centreId: "2", statusPhase1: "AFFECTED", genre: "male", qpv: "oui", psh: "oui" },
+                { centreId: "3", statusPhase1: "AFFECTED", genre: "female", qpv: "non", psh: "non" },
             ] as JeuneModel[];
 
             const result = simulationAffectationHTSService.calculTauxRepartitionParCentre(sejourList, jeunesList);
 
             expect(result).toEqual([
-                [0.5, 0.5, 0.5],
-                [1.0, 1.0, 1.0],
-                [0.0, 0.0, 0.0],
+                { male: 0.5, qvp: 0.5, psh: 0.5 },
+                { male: 1.0, qvp: 1.0, psh: 1.0 },
+                { male: 0.0, qvp: 0.0, psh: 0.0 },
             ]);
         });
     });
@@ -91,15 +96,15 @@ describe("SimulationAffectationHTSService", () => {
         });
     });
 
-    describe("randomAffectation", () => {
+    describe("affectationAleatoireDesJeunes", () => {
         it("should return random affected youngs, sejourList, and lignebuses", () => {
-            const distributionJeunes = {
-                idJeunes: [["1", "2"], ["3"]],
-                Department: ["dep1", "dep2"],
-                Lignes: [["ligne1", "ligne2"], ["ligne3"]],
-                idCentres: [["center1", "center2"], ["center3"]],
-                PlacesParLignes: [[10, 5], [7]],
-            };
+            const distributionJeunesDepartement = {
+                departementList: ["dep1", "dep2"],
+                jeuneIdListParDepartement: [["1", "2"], ["3"]],
+                ligneIdListParDepartement: [["ligne1", "ligne2"], ["ligne3"]],
+                centreIdListParLigne: [["center1", "center2"], ["center3"]],
+                placesDisponiblesParLigne: [[10, 5], [7]],
+            } as DistributionJeunesParDepartement;
             const jeuneList = [
                 { id: "1", statusPhase1: "NOT_AFFECTED", departement: "dep1" },
                 { id: "2", statusPhase1: "NOT_AFFECTED", departement: "dep1" },
@@ -113,21 +118,17 @@ describe("SimulationAffectationHTSService", () => {
                 { centreId: "center3", placesRestantes: 5 },
             ] as SejourModel[];
             const ligneDeBusList = [
-                { id: "ligne1", placesOccupeesJeunes: 0, centreId: "center1" },
-                { id: "ligne2", placesOccupeesJeunes: 0, centreId: "center2" },
-                { id: "ligne3", placesOccupeesJeunes: 0, centreId: "center3" },
+                { id: "ligne1", placesOccupeesJeunes: 0, centreId: "center1", pointDeRassemblementIds: ["meeting1"] },
+                { id: "ligne2", placesOccupeesJeunes: 0, centreId: "center2", pointDeRassemblementIds: ["meeting2"] },
+                { id: "ligne3", placesOccupeesJeunes: 0, centreId: "center3", pointDeRassemblementIds: ["meeting3"] },
             ] as LigneDeBusModel[];
-            const indexes = {
-                meeting_points_index: { ligne1: ["meeting1"], ligne2: ["meeting2"], ligne3: ["meeting3"] },
-            };
 
             const { randomJeuneList, randomSejourList, randomLigneDeBusList } =
-                simulationAffectationHTSService.randomAffectation(
-                    distributionJeunes,
+                simulationAffectationHTSService.affectationAleatoireDesJeunes(
+                    distributionJeunesDepartement,
                     jeuneList,
                     sejourList,
                     ligneDeBusList,
-                    indexes,
                 );
 
             expect(randomJeuneList.filter((young) => young.statusPhase1 === "AFFECTED").length).toBeLessThanOrEqual(7);
@@ -239,18 +240,19 @@ describe("SimulationAffectationHTSService", () => {
             ] as LigneDeBusModel[];
 
             const result = simulationAffectationHTSService.calculDistributionAffectations(
-                jeunesList as any,
-                pdrList as any,
-                ligneDeBusList as any,
+                jeunesList,
+                pdrList,
+                ligneDeBusList,
+                [],
             );
 
             expect(result).toEqual({
-                Department: ["75", "92"],
-                idCentres: [["center1"], ["center2"]],
-                Lignes: [["ligne1"], ["ligne2"]],
-                PlacesParLignes: [[40], [40]],
-                idJeunes: [["1"], ["2"]],
-            });
+                departementList: ["75", "92"],
+                centreIdListParLigne: [["center1"], ["center2"]],
+                ligneIdListParDepartement: [["ligne1"], ["ligne2"]],
+                placesDisponiblesParLigne: [[40], [40]],
+                jeuneIdListParDepartement: [["1"], ["2"]],
+            } as DistributionJeunesParDepartement);
         });
     });
 
@@ -318,20 +320,28 @@ describe("SimulationAffectationHTSService", () => {
         });
     });
 
-    describe("computeCost", () => {
+    describe("calculCoutSimulation", () => {
         it("should return a number", () => {
-            const result = simulationAffectationHTSService.computeCost([], [], []);
+            const result = simulationAffectationHTSService.calculCoutSimulation([], [], { male: 0, qvp: 0, psh: 0 });
             expect(result).toBe(NaN);
         });
 
         it("should return 0 with specific input values", () => {
-            const result = simulationAffectationHTSService.computeCost([[0.5, 0.5]], [0.8, 0.8], [0.7, 0.7]);
+            const result = simulationAffectationHTSService.calculCoutSimulation(
+                [{ male: 0.5, qvp: 0.5, psh: 0 }],
+                [0.8, 0.8],
+                {
+                    male: 0.7,
+                    qvp: 0.7,
+                    psh: 0,
+                },
+            );
             expect(result).toBeGreaterThan(0);
             expect(result).toBeLessThan(1);
         });
     });
 
-    describe("isRemainingSeatSafe", () => {
+    describe("isPlacesRestantesCoherentes", () => {
         it("should return false if there are lines with negative remaining seats", () => {
             const ligneDeBusList = [
                 { capaciteJeunes: 50, placesOccupeesJeunes: 51 },
@@ -339,7 +349,7 @@ describe("SimulationAffectationHTSService", () => {
             ] as LigneDeBusModel[];
             const sejourList = [];
 
-            expect(simulationAffectationHTSService.isRemainingSeatSafe(ligneDeBusList, sejourList)).toBe(false);
+            expect(simulationAffectationHTSService.isPlacesRestantesCoherentes(ligneDeBusList, sejourList)).toBe(false);
         });
 
         it("should return false if there are centers with negative remaining places", () => {
@@ -350,7 +360,7 @@ describe("SimulationAffectationHTSService", () => {
                 { placesRestantes: 150 },
             ] as SejourModel[];
 
-            expect(simulationAffectationHTSService.isRemainingSeatSafe(ligneDeBusList, sejourList)).toBe(false);
+            expect(simulationAffectationHTSService.isPlacesRestantesCoherentes(ligneDeBusList, sejourList)).toBe(false);
         });
 
         it("should return true if there are no lines or centers with negative remaining seats/places", () => {
@@ -364,7 +374,7 @@ describe("SimulationAffectationHTSService", () => {
                 { placesRestantes: 150 },
             ] as SejourModel[];
 
-            expect(simulationAffectationHTSService.isRemainingSeatSafe(ligneDeBusList, sejourList)).toBe(true);
+            expect(simulationAffectationHTSService.isPlacesRestantesCoherentes(ligneDeBusList, sejourList)).toBe(true);
         });
     });
 
@@ -442,7 +452,7 @@ describe("SimulationAffectationHTSService", () => {
             const jeunesAvantAffectationList = jeunesList.slice(1);
             const jeuneIntraDepartementList = jeunesList.slice(0, 1);
 
-            const result = simulationAffectationHTSService.computeRapport(
+            const result = simulationAffectationHTSService.calculRapportAffectation(
                 jeunesList,
                 sejourList,
                 ligneDeBusList,
@@ -451,7 +461,7 @@ describe("SimulationAffectationHTSService", () => {
                 jeunesAvantAffectationList,
                 jeuneIntraDepartementList,
                 {
-                    selectedCost: [],
+                    selectedCost: 1e3,
                     tauxRepartitionCentreList: [],
                     centreIdList: [],
                     tauxRemplissageCentreList: [],

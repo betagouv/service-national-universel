@@ -1,4 +1,4 @@
-import { CreateTaskModel, TaskModel } from "src/task/core/Task.model";
+import { CreateTaskModel, TaskModel } from "@task/core/Task.model";
 import { TaskType } from "snu-lib";
 import { TaskDocument } from "./TaskMongo.provider";
 import { TaskQueue } from "../../shared/infra/Queue";

@@ -19,7 +19,9 @@ import { referentMongoProviders } from "@admin/infra/iam/provider/ReferentMongo.
 import { ClasseController } from "@admin/infra/sejours/cle/classe/api/Classe.controller";
 import { classeMongoProviders } from "@admin/infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { etablissementMongoProviders } from "@admin/infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
-import { gatewayProviders } from "@admin/infra/sejours/cle/initProvider/gateway";
+import { gatewayProviders as cleGatewayProviders } from "@admin/infra/sejours/cle/initProvider/gateway";
+import { gatewayProviders as sejourGatewayProviders } from "@admin/infra/sejours/phase1/initProvider/gateway";
+import { gatewayProviders as jeuneGatewayProviders } from "@admin/infra/sejours/jeune/initProvider/gateway";
 import { guardProviders } from "@admin/infra/sejours/cle/initProvider/guard";
 import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
 import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
@@ -28,9 +30,15 @@ import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affe
 import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
 import { jeuneMongoProviders } from "@admin/infra/sejours/jeune/provider/JeuneMongo.provider";
 import { centreMongoProviders } from "@admin/infra/sejours/phase1/centre/provider/CentreMongo.provider";
-import { LigneDeBusMongoProviders } from "@admin/infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
+import { ligneDeBusMongoProviders } from "@admin/infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
 import { pointDeRassemblementMongoProviders } from "@admin/infra/sejours/phase1/pointDeRassemblement/provider/PointDeRassemblementMongo.provider";
 import { sejourMongoProviders } from "@admin/infra/sejours/phase1/sejour/provider/SejourMongo.provider";
+import { sessionMongoProviders } from "@admin/infra/sejours/phase1/session/provider/SessionMongo.provider";
+import { FileProvider } from "@shared/infra/File.provider";
+import { FileGateway } from "@shared/core/File.gateway";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository";
+import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -59,20 +67,26 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         providers: [
             ClasseService,
             SimulationAffectationHTSService,
-            ...gatewayProviders,
+            ...cleGatewayProviders,
+            ...sejourGatewayProviders,
+            ...jeuneGatewayProviders,
             ...classeMongoProviders,
             ...referentMongoProviders,
             ...etablissementMongoProviders,
             ...jeuneMongoProviders,
             ...centreMongoProviders,
-            ...LigneDeBusMongoProviders,
+            ...ligneDeBusMongoProviders,
             ...pointDeRassemblementMongoProviders,
             ...sejourMongoProviders,
+            ...sessionMongoProviders,
+            ...taskMongoProviders,
             testDatabaseProviders(setupOptions.newContainer),
             Logger,
             ...guardProviders,
             SigninReferent,
+            { provide: FileGateway, useClass: FileProvider },
             { provide: AuthProvider, useClass: JwtTokenService },
+            { provide: TaskGateway, useClass: AdminTaskRepository },
             ...phase1UseCaseProviders,
             ...cleUseCaseProviders,
         ],

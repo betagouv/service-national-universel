@@ -2,14 +2,18 @@ export type JeuneModel = {
     id: string;
     statusPhase1: string;
     centreId?: string;
-    handicapInSameDepartment?: string;
+    handicapMemeDepartment?: string;
     genre?: string;
     qpv?: string;
-    handicap?: string;
+    psh?: string;
     departement?: string;
     region?: string;
     pointDeRassemblementId?: string;
     ligneDeBusId?: string;
+    sessionId?: string;
+    sessionNom?: string;
+    prenom?: string;
+    nom?: string;
     // mandatory
     cniFiles: any;
     highSkilledActivityProofFiles: any;

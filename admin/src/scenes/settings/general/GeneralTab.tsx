@@ -20,11 +20,11 @@ import InputText from "@/components/ui/forms/InputText";
 import InputTextarea from "@/components/ui/forms/InputTextarea";
 import NumberInput from "@/components/ui/forms/NumberInput";
 
-import { CleSettings } from "../components/CleSettings";
-import { InformationsConvoyage } from "../components/InformationsConvoyage";
-import { ManualInscriptionSettings } from "../phase0/ManualInscriptionSettings";
+import { CleSettings } from "./components/CleSettings";
+import { InformationsConvoyage } from "./components/InformationsConvoyage";
+import { ManualInscriptionSettings } from "./phase0/ManualInscriptionSettings";
 import { Select } from "@snu/ds/admin";
-import CohortGroupSelector from "../components/CohortGroupSelector";
+import CohortGroupSelector from "./components/CohortGroupSelector";
 
 // Define the interface for GeneralTab props
 interface GeneralTabProps {

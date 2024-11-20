@@ -2,8 +2,6 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { JeuneService } from "./Jeune.service";
 import { JeuneGateway } from "./Jeune.gateway";
 
-import { JeuneRepository } from "src/admin/infra/sejours/jeune/repository/mongo/JeuneMongo.repository";
-
 describe("Jeune.service", () => {
     let service: JeuneService;
 
@@ -13,7 +11,9 @@ describe("Jeune.service", () => {
                 JeuneService,
                 {
                     provide: JeuneGateway,
-                    useValue: JeuneRepository,
+                    useValue: {
+                        findAll: jest.fn(),
+                    },
                 },
             ],
         }).compile();

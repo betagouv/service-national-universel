@@ -1,7 +1,7 @@
 import React from "react";
 import CreatableSelect from "react-select/creatable";
-import useCreateCohortGroup from "../lib/useCreateCohortGroup";
-import useCohortGroups from "../lib/useCohortGroups";
+import useCreateCohortGroup from "../hooks/useCreateCohortGroup";
+import useCohortGroups from "../hooks/useCohortGroups";
 import { CohortDto } from "snu-lib";
 
 type propType = {

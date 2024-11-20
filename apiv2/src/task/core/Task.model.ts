@@ -4,7 +4,7 @@ export type TaskModel = {
     id: string;
     name: TaskName;
     libelle?: string;
-    startDate: Date;
+    startDate?: Date;
     endDate?: Date;
     status: TaskStatus;
     metadata?: any;

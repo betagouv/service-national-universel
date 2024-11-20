@@ -1,7 +1,7 @@
 import { queryClient } from "@/services/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { CohortDto, CohortGroupType } from "snu-lib";
-import { createCohortGroup } from "./cohortGroupRepository";
+import { createCohortGroup } from "../../../../services/cohortGroupService";
 import { toastr } from "react-redux-toastr";
 
 export default function useCreateCohortGroup(cohort: CohortDto) {

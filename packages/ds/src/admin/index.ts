@@ -23,6 +23,7 @@ import Button from "./ui/Button";
 import DropdownButton from "./ui/DropdownButton";
 import Modal from "./ui/Modal";
 import ModalConfirmation from "./ui/ModalConfirmation";
+export { default as Collapsable } from "./ui/Collapsable";
 
 export {
   // Form

@@ -1,4 +1,4 @@
-import { CentreModel } from "src/admin/core/sejours/phase1/centre/Centre.model";
+import { CentreModel } from "@admin/core/sejours/phase1/centre/Centre.model";
 import { CentreDocument } from "../provider/CentreMongo.provider";
 import { CohesionCenterType } from "snu-lib";
 

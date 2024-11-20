@@ -1,5 +1,5 @@
 import { SessionPhase1Type } from "snu-lib";
-import { SejourModel } from "src/admin/core/sejours/phase1/sejour/Sejour.model";
+import { SejourModel } from "@admin/core/sejours/phase1/sejour/Sejour.model";
 import { SejourDocument } from "../provider/SejourMongo.provider";
 
 export class SejourMapper {
@@ -12,14 +12,24 @@ export class SejourMapper {
             id: sejourDocument._id.toString(),
             placesRestantes: sejourDocument.placesLeft,
             placesTotal: sejourDocument.placesTotal,
-            centreId: sejourDocument.cohesionCenterId,
             equipe: sejourDocument.team,
-            listeAttente: sejourDocument,
-            projetPedagogiqueFiles: sejourDocument.pedagoProjectFiles,
-            emploiDuTempsFiles: sejourDocument.timeScheduleFiles,
+            listeAttente: sejourDocument.waitingList,
+            chefDeCentreReferentId: sejourDocument.headCenterId,
+            centreId: sejourDocument.cohesionCenterId,
+            centreVille: sejourDocument.cityCentre,
+            centreCodePostal: sejourDocument.zipCentre,
+            sessionName: sejourDocument.cohort,
+            sessionId: sejourDocument.cohortId,
+            // mandatory
+            projetPedagogiqueFiles: sejourDocument.pedagoProjectFiles as any,
+            emploiDuTempsFiles: sejourDocument.timeScheduleFiles as any,
             status: sejourDocument.status,
             hasTimeSchedule: sejourDocument.hasTimeSchedule,
             hasPedagoProject: sejourDocument.hasPedagoProject,
+            region: sejourDocument.region,
+            departement: sejourDocument.department,
+            centreCode: sejourDocument.codeCentre,
+            centreNom: sejourDocument.nameCentre,
         };
     }
 
@@ -29,8 +39,8 @@ export class SejourMapper {
             placesLeft: sejourModel.placesRestantes,
             placesTotal: sejourModel.placesTotal,
             cohesionCenterId: sejourModel.centreId,
-            timeScheduleFiles: sejourModel.emploiDuTempsFiles,
-            pedagoProjectFiles: sejourModel.projetPedagogiqueFiles,
+            timeScheduleFiles: sejourModel.emploiDuTempsFiles as any,
+            pedagoProjectFiles: sejourModel.projetPedagogiqueFiles as any,
             team: sejourModel.equipe,
             waitingList: sejourModel.listeAttente,
             status: sejourModel.status,

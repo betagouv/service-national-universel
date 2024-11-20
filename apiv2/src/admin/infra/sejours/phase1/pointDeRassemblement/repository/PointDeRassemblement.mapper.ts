@@ -1,7 +1,8 @@
-import { PointDeRassemblementType, YoungType } from "snu-lib";
+import { PointDeRassemblementType } from "snu-lib";
+
+import { PointDeRassemblementModel } from "@admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.model";
 
 import { PointDeRassemblementDocument } from "../provider/PointDeRassemblementMongo.provider";
-import { PointDeRassemblementModel } from "src/admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.model";
 
 export class PointDeRassemblementMapper {
     static toModels(pdrDocuments: PointDeRassemblementDocument[]): PointDeRassemblementModel[] {

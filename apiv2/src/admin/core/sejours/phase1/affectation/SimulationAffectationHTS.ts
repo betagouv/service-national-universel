@@ -1,6 +1,6 @@
-import { Inject } from "@nestjs/common";
+import { Inject, Logger } from "@nestjs/common";
 
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { RegionsHorsMetropole, YOUNG_STATUS, YOUNG_STATUS_PHASE1, GRADES } from "snu-lib";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -12,6 +12,7 @@ import {
     RapportData,
     SimulationAffectationHTSService,
 } from "./SimulationAffectationHTS.service";
+
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
@@ -19,6 +20,7 @@ import { SejourModel } from "../sejour/Sejour.model";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { CentreGateway } from "../centre/Centre.gateway";
 import { JeuneModel } from "../../jeune/Jeune.model";
+import { SessionGateway } from "../session/Session.gateway";
 
 const NB_MAX_ITERATION = 10;
 
@@ -34,16 +36,35 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
     constructor(
         @Inject(SimulationAffectationHTSService)
         private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
+        @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
         @Inject(PointDeRassemblementGateway) private readonly pointDeRassemblementGateway: PointDeRassemblementGateway,
         @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
         @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
+        private readonly logger: Logger,
     ) {}
-    async execute({ sessionId }: { sessionId: string }): Promise<SimulationAffectationHTSResult> {
-        /***
-         * Chargement des données associés à la session
-         ***/
+    async execute({
+        sessionId,
+        departements,
+        niveauScolaires,
+        changementDepartements,
+    }: {
+        sessionId: string;
+        departements: string[];
+        niveauScolaires: Array<keyof typeof GRADES>;
+        changementDepartements: { origine: string; destination: string }[];
+    }): Promise<SimulationAffectationHTSResult> {
+        if (departements.some((departement) => RegionsHorsMetropole.includes(departement))) {
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_DEPARTEMENT_HORS_METROPOLE);
+        }
+
+        const session = await this.sessionGateway.findById(sessionId);
+        if (!session) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+
+        // Chargement des données associés à la session
         const ligneDeBusList = await this.ligneDeBusGateway.findBySessionId(sessionId);
         if (ligneDeBusList.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
@@ -60,9 +81,11 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         if (centreList.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
-        const allJeunes = await this.jeuneGateway.findBySessionIdAndStatusForDepartementMetropole(
+        const allJeunes = await this.jeuneGateway.findBySessionIdStatusNiveauScolairesAndDepartements(
             sessionId,
             YOUNG_STATUS.VALIDATED,
+            niveauScolaires,
+            departements,
         );
         if (allJeunes.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
@@ -72,7 +95,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         const { jeunesList, jeuneIntraDepartementList } = allJeunes.reduce(
             (acc, jeune) => {
                 if (
-                    jeune.handicapInSameDepartment === "oui" &&
+                    ["oui", "true"].includes(jeune.handicapMemeDepartment!) &&
                     jeune.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION
                 ) {
                     acc.jeuneIntraDepartementList.push(jeune);
@@ -84,7 +107,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             { jeunesList: [] as JeuneModel[], jeuneIntraDepartementList: [] as JeuneModel[] },
         );
 
-        // On calcul les taux de repartition (garcon/fille, qpv+/qpv-, psh+/psh-) -> voir methode computeRepartitionCohort dans costFunction.py (computeRepartitionCohort)
+        // On calcul les taux de repartition (garcon/fille, qpv+/qpv-, psh+/psh-)
         const ratioRepartition = this.simulationAffectationHTSService.computeRatioRepartition(jeunesList);
 
         // on recupere les jeunes que l on va devoir affecter
@@ -92,52 +115,41 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             ({ statusPhase1 }) => statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
         );
 
-        /***
-         * Calcul des affectations
-         ***/
-        const distributionJeunes = this.simulationAffectationHTSService.calculDistributionAffectations(
+        // on sépare pour chaque departement : les jeunes / pdr / lignes de bus / centre
+        const distributionJeunesDepartement = this.simulationAffectationHTSService.calculDistributionAffectations(
             jeuneAttenteAffectationList,
             pdrList,
             ligneDeBusList,
+            changementDepartements,
         );
 
-        let indexes: {
-            meeting_points_index: {
-                [key: string]: string[];
-            };
-        } = {
-            meeting_points_index: ligneDeBusList.reduce((acc, ligneDeBus) => {
-                acc[ligneDeBus.id] = ligneDeBus.pointDeRassemblementIds;
-                return acc;
-            }, {}),
-        };
-
         const results: Omit<SimulationAffectationHTSResult, "rapportData"> = {
+            jeuneList: [],
+            sejourList: [],
+            ligneDeBusList: [],
             analytics: {
-                selectedCost: [],
+                selectedCost: 1e3,
                 tauxRepartitionCentreList: [],
                 centreIdList: [],
                 tauxRemplissageCentreList: [],
                 tauxOccupationLignesParCentreList: [],
                 iterationCostList: [],
             },
-            jeuneList: [],
-            sejourList: [],
-            ligneDeBusList: [],
         };
 
-        let validCostList = [1e3]; // infini
+        const coutSimulationList = [1e3]; // infini
         for (let currentIterationNumber = 0; currentIterationNumber < NB_MAX_ITERATION; currentIterationNumber++) {
-            console.log("Iteration : ", currentIterationNumber + 1, " sur ", NB_MAX_ITERATION);
+            this.logger.log(`Iteration : ${currentIterationNumber + 1} sur ${NB_MAX_ITERATION}`);
 
-            // coeur du traitement
+            /***
+             * Calcul des affectations
+             ***/
             const { randomJeuneList, randomSejourList, randomLigneDeBusList } =
-                await this.simulationAffectationHTSService.randomAffectation(
-                    distributionJeunes,
+                await this.simulationAffectationHTSService.affectationAleatoireDesJeunes(
+                    distributionJeunesDepartement,
                     jeunesList,
                     sejoursList,
                     ligneDeBusList,
-                    indexes,
                 );
 
             const tauxRepartitionCentres = this.simulationAffectationHTSService.calculTauxRepartitionParCentre(
@@ -154,55 +166,40 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 randomLigneDeBusList,
             );
 
-            const currentCost = this.simulationAffectationHTSService.computeCost(
+            const coutSimulation = this.simulationAffectationHTSService.calculCoutSimulation(
                 tauxRepartitionCentres,
                 tauxRemplissageCentres,
                 ratioRepartition,
             );
 
-            results.analytics.iterationCostList.push(currentCost);
+            results.analytics.iterationCostList.push(coutSimulation);
 
-            const isSafe = this.simulationAffectationHTSService.isRemainingSeatSafe(
+            const isCoherent = this.simulationAffectationHTSService.isPlacesRestantesCoherentes(
                 randomLigneDeBusList,
                 randomSejourList,
             );
 
             // si la nouvelle simulation a un meilleur cout que la précedente, on la garde
-            if (isSafe && currentCost < validCostList[validCostList.length - 1]) {
-                console.log("Better simulation found", currentCost);
-                validCostList.push(currentCost);
-                results.analytics.selectedCost = [currentCost];
-                results.analytics.centreIdList = centreIdTmp;
+            if (isCoherent && coutSimulation < coutSimulationList[coutSimulationList.length - 1]) {
+                this.logger.log(`Better simulation found ${coutSimulation}`);
+                coutSimulationList.push(coutSimulation);
 
-                // analytics (graphics)
-                results.analytics.tauxRepartitionCentreList = tauxRepartitionCentres;
-                results.analytics.tauxRemplissageCentreList = tauxRemplissageCentres;
-                results.analytics.tauxOccupationLignesParCentreList = tauxOccupationLignesParCentreList;
-
+                // résultats de l'affectation
                 results.jeuneList = JSON.parse(JSON.stringify(randomJeuneList));
                 results.sejourList = JSON.parse(JSON.stringify(randomSejourList));
                 results.ligneDeBusList = JSON.parse(JSON.stringify(randomLigneDeBusList));
+
+                // statistiques (graphics)
+                results.analytics.selectedCost = coutSimulation;
+                results.analytics.centreIdList = centreIdTmp;
+                results.analytics.tauxRepartitionCentreList = tauxRepartitionCentres;
+                results.analytics.tauxRemplissageCentreList = tauxRemplissageCentres;
+                results.analytics.tauxOccupationLignesParCentreList = tauxOccupationLignesParCentreList;
             }
         }
 
-        ///
-        // Calcul des résultats
-        ///
-        // const results: Omit<SimulationAffectationHTSResult, "rapportData"> = {
-        //     analytics: {
-        //         selectedCost: validCostList.slice(1),
-        //         validTauxRepartitionCentreList,
-        //         centreIdList,
-        //         validTauxRemplissageCentreList,
-        //         validTauxOccupationLignesParCentreList,
-        //         iterationCostList,
-        //     },
-        //     jeuneList: resulatJeunesList,
-        //     sejourList: resultatSejourList,
-        //     ligneDeBusList: resultatLigneDeBusList,
-        // };
-
-        const rapportData = this.simulationAffectationHTSService.computeRapport(
+        // Calcul des données pour le rapport excel
+        const rapportData = this.simulationAffectationHTSService.calculRapportAffectation(
             results.jeuneList,
             results.sejourList,
             results.ligneDeBusList,

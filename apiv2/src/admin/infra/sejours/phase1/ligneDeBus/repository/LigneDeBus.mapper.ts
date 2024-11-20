@@ -1,4 +1,4 @@
-import { LigneDeBusModel } from "src/admin/core/sejours/phase1/ligneDeBus/LigneDeBus.model";
+import { LigneDeBusModel } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.model";
 import { LigneDeBusDocument } from "../provider/LigneDeBusMongo.provider";
 import { LigneBusType } from "snu-lib";
 

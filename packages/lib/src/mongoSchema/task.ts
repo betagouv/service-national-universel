@@ -15,7 +15,6 @@ export const TaskSchema = {
 
   startDate: {
     type: Date,
-    required: true,
   },
 
   endDate: {

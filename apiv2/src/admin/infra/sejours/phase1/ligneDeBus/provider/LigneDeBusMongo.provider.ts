@@ -1,14 +1,20 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-
 import patchHistory from "mongoose-patch-history";
-import { LigneBusSchema, LigneBusType } from "snu-lib";
+
+import { LigneBusSchema, LigneBusTeamSchema, LigneBusType } from "snu-lib";
 
 export type LigneDeBusDocument = HydratedDocument<LigneBusType>;
-export const LigneDeBusName = "ligneBus";
+export const LigneDeBusName = "lignebuses";
 export const LIGNEDEBUS_MONGOOSE_ENTITY = "LIGNEDEBUS_MONGOOSE_ENTITY";
 
-const LigneDeBusSchemaRef = new mongoose.Schema(LigneBusSchema);
+const LigneDeBusSchemaRef = new mongoose.Schema({
+    ...LigneBusSchema,
+    team: {
+        ...LigneBusSchema.team,
+        type: [new mongoose.Schema(LigneBusTeamSchema)],
+    },
+});
 
 LigneDeBusSchemaRef.pre("save", function (next, params) {
     //@ts-ignore
@@ -29,7 +35,7 @@ LigneDeBusSchemaRef.plugin(patchHistory, {
     excludes: ["/updatedAt"],
 });
 
-export const LigneDeBusMongoProviders = [
+export const ligneDeBusMongoProviders = [
     {
         provide: LIGNEDEBUS_MONGOOSE_ENTITY,
         useFactory: (connection: Connection) => connection.model(LigneDeBusName, LigneDeBusSchemaRef),
