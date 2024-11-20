@@ -94,6 +94,8 @@ jobs:
       )
     needs: prepare
     runs-on: ubuntu-latest
+    outputs:
+      registry: ${{ steps.registry.outputs.registry }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -105,12 +107,17 @@ jobs:
           node-version: "18.20"
 
       - name: Create environment
+        id: registry
         working-directory: devops/scripts
         env:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
         run: |
           node create-environment.js ${{ needs.prepare.outputs.env_name }}
+
+          registry=$(node get-environment-registry.js ${{ needs.prepare.outputs.env_name }})
+          echo "registry: $registry"
+          echo "registry=$registry" >> $GITHUB_OUTPUT
 
       # TODO: create PR comment with env urls
 
@@ -126,6 +133,13 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
+      - name: Login to Docker Container Registry
+        uses: docker/login-action@v2
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+          registry: ${{ needs.create_environment.outputs.registry }}
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -137,7 +151,11 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
         run: |
-          node build-application-docker.js --push ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
+          node build-application-docker.js ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
+
+      - name: Push image
+        run: |
+          docker push ${{ needs.create_environment.outputs.registry }}/${{matrix.app.name}}:${{matrix.app.tag}}
 
   deploy:
     needs: [prepare, build]

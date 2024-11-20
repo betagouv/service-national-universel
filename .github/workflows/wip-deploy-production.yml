@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - production
-      - 3577-app # TODO: REMOVE
+      - 3577-app # TODO : remove
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -19,6 +19,8 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
+      staging_registry: ${{ steps.registry.outputs.staging_registry }}
+      prod_registry: ${{ steps.registry.outputs.prod_registry }}
       build_matrix: ${{ steps.build.outputs.tags }}
       test_matrix: ${{ steps.test.outputs.tests }}
 
@@ -33,14 +35,26 @@ jobs:
         with:
           node-version: "18.20"
 
+      - name: Get registry
+        id: registry
+        working-directory: devops/scripts
+        run: |
+          staging_registry=$(node get-environment-registry.js ${{ env.STAGING_ENV_NAME }})
+          echo "staging_registry: $staging_registry"
+          echo "staging_registry=$staging_registry" >> $GITHUB_OUTPUT
+
+          prod_registry=$(node get-environment-registry.js ${{ env.PROD_ENV_NAME }})
+          echo "prod_registry: $prod_registry"
+          echo "prod_registry=$prod_registry" >> $GITHUB_OUTPUT
+
       - name: Get build configuration
         id: build
         run: |
           echo "[]" \
-          | jq  '. + [{name:"api", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"apiv2", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"app", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > tags.json
+          | jq  '. + [{name:"api", remote: "CLEVER_CLOUD_GIT_REMOTE_API_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"apiv2", remote: "CLEVER_CLOUD_GIT_REMOTE_APIV2_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"app", remote: "CLEVER_CLOUD_GIT_REMOTE_APP_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"admin", remote: "CLEVER_CLOUD_GIT_REMOTE_ADMIN_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > tags.json
 
           cat tags.json
           echo "tags=$(jq -c < tags.json)" >> $GITHUB_OUTPUT
@@ -110,6 +124,13 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
+      - name: Login to Docker Container Registry
+        uses: docker/login-action@v2
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+          registry: ${{ needs.prepare.outputs.staging_registry }}
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -121,7 +142,11 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
         run: |
-          node build-application-docker.js --push ${{ env.STAGING_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+          node build-application-docker.js ${{ env.STAGING_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+
+      - name: Push image
+        run: |
+          docker push ${{ needs.prepare.outputs.staging_registry }}/${{matrix.app.name}}:${{matrix.app.tag}}
 
   deploy_staging:
     needs: [prepare, build_staging]
@@ -160,6 +185,13 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
+      - name: Login to Docker Container Registry
+        uses: docker/login-action@v2
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+          registry: ${{ needs.prepare.outputs.prod_registry }}
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -171,7 +203,11 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
         run: |
-          node build-application-docker.js --push ${{ env.PROD_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+          node build-application-docker.js ${{ env.PROD_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+
+      - name: Push image
+        run: |
+          docker push ${{ needs.prepare.outputs.prod_registry }}/${{matrix.app.name}}:${{matrix.app.tag}}
 
   deploy_production_scaleway:
     environment: production
@@ -199,3 +235,40 @@ jobs:
       #     SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
       #   run: |
       #     node deploy-scaleway.js ${{ env.PROD_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+
+  deploy_production_clever_cloud:
+    environment: production
+    if: ${{ vars.DEPLOY_ON_CC == 'true' }}
+    needs: [prepare, deploy_staging, build_production]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
+
+    steps:
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          sudo chmod 600 ~/.ssh/id_ed25519
+          echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          chmod go-rwx ~/.ssh/id_ed25519
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Push
+        env:
+          CLEVER_CLOUD_GIT_REMOTE: ${{ secrets[matrix.app.remote] }}
+        run: |
+          mkdir docker
+          cd docker
+          image_tag=${{ needs.prepare.outputs.prod_registry }}/${{ matrix.app.name }}:${{ matrix.app.tag }}
+          echo "FROM $image_tag" > Dockerfile
+          git init
+          git config user.email "github.deployer@gmail.com"
+          git config user.name "Github Deployer"
+          git remote add cloud "$CLEVER_CLOUD_GIT_REMOTE"
+          git add -A
+          git commit -m "For deploy"
+          # git push -f -u cloud master
