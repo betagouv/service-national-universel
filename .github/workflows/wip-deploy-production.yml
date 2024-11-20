@@ -1,4 +1,4 @@
-name: Test and deploy CI
+name: Test and deploy Production
 
 on:
   workflow_dispatch:
@@ -151,7 +151,7 @@ jobs:
           node build-application-docker.js --push ${{ env.PROD_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
 
   deploy_production_scaleway:
-    environment: ${{ env.PROD_ENV_NAME }}
+    environment: production
     if: ${{ vars.DEPLOY_ON_SCALEWAY == 'true' }}
     needs: [prepare, deploy_staging, build_production]
     runs-on: ubuntu-latest
