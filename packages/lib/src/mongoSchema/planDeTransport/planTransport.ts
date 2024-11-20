@@ -3,7 +3,7 @@ import { InterfaceExtended } from "..";
 
 import { PointDeRassemblementSchema } from "./pointDeRassemblement";
 import { ModificationBusSchema } from "./modificationBus";
-import { TRANSPORT_MODES } from "../../constants/constants";
+import { TRANSPORT_MODES } from "../../domains";
 
 export const PlanTransportPointDeRassemblementEnrichedSchema = {
   // * ES ne save pas le champ _id si il est contenu dans un array, obligé de corriger le plugin ElasticMongoose ou de dupliquer l'id
