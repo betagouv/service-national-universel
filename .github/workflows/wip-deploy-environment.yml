@@ -151,11 +151,7 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
         run: |
-          node build-application-docker.js ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
-
-      - name: Push image
-        run: |
-          docker push ${{ needs.create_environment.outputs.registry }}/${{matrix.app.name}}:${{matrix.app.tag}}
+          node build-application-docker.js --push ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
 
   deploy:
     needs: [prepare, build]

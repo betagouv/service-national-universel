@@ -17,6 +17,9 @@ async function main() {
     .optBool("push", "Push image on registry", {
       default: false,
     })
+    .optBool("login", "Login on registry", {
+      default: false,
+    })
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .validate();
@@ -94,7 +97,7 @@ async function main() {
 
   await childProcess("docker", args, { env });
 
-  if (input.push) {
+  if (input.login) {
     await childProcessStdin(
       "docker",
       [
@@ -107,6 +110,8 @@ async function main() {
       input.SCW_SECRET_KEY,
       { env }
     );
+  }
+  if (input.push) {
     await childProcess("docker", ["push", imageEndpoint], { env });
   }
 }
