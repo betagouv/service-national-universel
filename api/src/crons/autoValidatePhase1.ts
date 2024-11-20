@@ -17,7 +17,7 @@ export const handler = async (): Promise<void> => {
     if (!onGoingCohorts.length) return;
 
     for (const cohort of onGoingCohorts) {
-      const youngs = await YoungModel.find({ cohortId: cohort._id, status: "VALIDATED", statusPhase1: "AFFECTED" });
+      const youngs = await YoungModel.find({ cohortId: cohort._id, status: YOUNG_STATUS.VALIDATED, statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED });
 
       let nbYoungs = 0;
       for (const young of youngs) {
