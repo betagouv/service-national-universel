@@ -1,6 +1,6 @@
-import { capture } from "../sentry";
+const { capture } = require("../sentry");
 
-export async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
+async function updateStatusPhase1WithSpecificCase(young, validationDate, user) {
   try {
     const now = new Date();
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
@@ -37,7 +37,7 @@ export async function updateStatusPhase1WithSpecificCase(young, validationDate, 
   }
 }
 
-export async function updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user) {
+async function updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user) {
   try {
     const now = new Date();
     // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
@@ -73,3 +73,8 @@ export async function updateStatusPhase1WithOldRules(young, validationDate, isTe
     capture(e);
   }
 }
+
+module.exports = {
+  updateStatusPhase1WithSpecificCase,
+  updateStatusPhase1WithOldRules,
+};
