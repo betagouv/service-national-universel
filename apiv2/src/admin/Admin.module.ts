@@ -1,14 +1,15 @@
 import { DatabaseModule } from "@infra/Database.module"; // TO REMOVE ?
 import { JwtAuthModule } from "@infra/JwtAuth.module";
-import { ConfigModule } from "@nestjs/config";
 // import { databaseProviders } from "@infra/Database.provider"; // TO REMOVE ?
-import { BullModule } from "@nestjs/bullmq";
+import { QueueModule } from "@infra/Queue.module";
 import { Logger, MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
-import { QueueType } from "@notification/infra/Notification";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
 import { NotificationModule } from "@notification/Notification.module";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
+import { TaskModule } from "@task/Task.module";
 import { ClsMiddleware, ClsModule } from "nestjs-cls";
 import { SigninReferent } from "./core/iam/useCase/SigninReferent";
 import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
@@ -24,22 +25,12 @@ import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/p
 import { gatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
 import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
 import { useCaseProvider as useCaseProviders } from "./infra/sejours/cle/initProvider/useCase";
+import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
+import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
 
 @Module({
-    imports: [
-        ClsModule.forRoot({}),
-        ConfigModule,
-        DatabaseModule, //TO REMOVE ?
-        JwtAuthModule,
-        NotificationModule,
-        BullModule.registerQueue({
-            name: QueueType.EMAIL,
-        }),
-        BullModule.registerQueue({
-            name: QueueType.CONTACT,
-        }),
-    ],
-    controllers: [ClasseController, AuthController],
+    imports: [ClsModule.forRoot({}), DatabaseModule, JwtAuthModule, NotificationModule, QueueModule, TaskModule],
+    controllers: [ClasseController, AuthController, AdminTaskController],
     providers: [
         ClasseService,
         { provide: AuthProvider, useClass: JwtTokenService },
@@ -47,10 +38,12 @@ import { useCaseProvider as useCaseProviders } from "./infra/sejours/cle/initPro
         ...referentMongoProviders,
         ...etablissementMongoProviders,
         ...guardProviders,
+        ...taskMongoProviders,
         Logger,
         SigninReferent,
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
+        { provide: TaskGateway, useClass: AdminTaskRepository },
         ...useCaseProviders,
         ...gatewayProviders,
     ],

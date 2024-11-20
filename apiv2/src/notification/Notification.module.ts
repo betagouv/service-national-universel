@@ -9,7 +9,7 @@ import { ContactProducer } from "./infra/email/Contact.producer";
 import { NotificationProducer } from "./infra/Notification.producer";
 
 @Module({
-    imports: [QueueModule, SharedModule],
+    imports: [SharedModule],
     providers: [
         {
             provide: NotificationGateway,

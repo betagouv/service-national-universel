@@ -541,7 +541,7 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.applications).toEqual([
         {
-          ...application.toObject(),
+          ...JSON.parse(JSON.stringify(application.toObject())),
           structure: {
             ...structure.toObject(),
             _id: structure._id.toString(),

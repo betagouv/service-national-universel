@@ -1364,7 +1364,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
     let applications: any[] = [];
     for (let application of applicationsFromDb) {
       const structure = await StructureModel.findById(application.structureId);
-      applications.push({ ...application._doc, structure: structure ? serializeStructure(structure, req.user) : null });
+      applications.push({ ...application.toObject(), structure: structure ? serializeStructure(structure, req.user) : null });
     }
 
     let etablissement: EtablissementDocument | null = null;

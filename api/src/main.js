@@ -85,6 +85,7 @@ async function runAPI() {
     logger.info(`APP_URL ${config.APP_URL}`);
     logger.info(`ADMIN_URL ${config.ADMIN_URL}`);
     logger.info(`SUPPORT_URL ${config.SUPPORT_URL}`);
+    logger.info(`SUPPORT_FRONT_URL ${config.SUPPORT_FRONT_URL}`);
     logger.info(`KNOWLEDGEBASE_URL ${config.KNOWLEDGEBASE_URL}`);
     logger.info(`ANALYTICS_URL ${config.API_ANALYTICS_ENDPOINT}`);
   }
@@ -129,7 +130,7 @@ async function runAPI() {
     res.status(statusCode).json(output);
   }
 
-  const origin = [config.APP_URL, config.ADMIN_URL, config.SUPPORT_URL, config.KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
+  const origin = [config.APP_URL, config.ADMIN_URL, config.SUPPORT_URL, config.SUPPORT_FRONT_URL, config.KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
 
   app.use(
     cors({
