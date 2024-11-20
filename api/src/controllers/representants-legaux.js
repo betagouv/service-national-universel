@@ -120,7 +120,7 @@ router.post("/accept-ri", tokenParentValidMiddleware, async (req, res) => {
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
+    young.set({ parent1ValidationDate: new Date() });
     await young.save({ fromUser: { firstName: `Parent of young : ${id}` } });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
