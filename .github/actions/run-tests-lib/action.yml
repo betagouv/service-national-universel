@@ -37,32 +37,32 @@ runs:
         restore-keys: |
           ${{ runner.os }}-nodemodules-
 
-      - name: Install packages
-        if: steps.cache-npm.outputs.cache-hit != 'true'
-        shell: bash
-        run: npm ci
+    - name: Install packages
+      if: steps.cache-npm.outputs.cache-hit != 'true'
+      shell: bash
+      run: npm ci
 
-      - name: Build lib
-        working-directory: packages/lib
-        shell: bash
-        run: npm run build
+    - name: Build lib
+      working-directory: packages/lib
+      shell: bash
+      run: npm run build
 
-      - name: Lint lib code
-        working-directory: packages/lib
-        shell: bash
-        run: npm run lint
+    - name: Lint lib code
+      working-directory: packages/lib
+      shell: bash
+      run: npm run lint
 
-      - name: Test lib
-        working-directory: packages/lib
-        shell: bash
-        run: npm run test
+    - name: Test lib
+      working-directory: packages/lib
+      shell: bash
+      run: npm run test
 
-      - name: Build ds
-        working-directory: packages/ds
-        shell: bash
-        run: npm run build
+    - name: Build ds
+      working-directory: packages/ds
+      shell: bash
+      run: npm run build
 
-      - name: Lint ds code
-        working-directory: packages/ds
-        shell: bash
-        run: npm run lint
+    - name: Lint ds code
+      working-directory: packages/ds
+      shell: bash
+      run: npm run lint
