@@ -2,8 +2,6 @@ const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { EnvConfig, AppConfig, APPLICATIONS } = require("./lib/config");
 
-// TODO: REMOVE after migration
-
 class CreateEnvironment {
   constructor(scalewayClient, options = {}) {
     this.scaleway = scalewayClient;
