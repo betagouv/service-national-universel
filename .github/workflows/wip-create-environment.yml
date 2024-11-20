@@ -122,9 +122,20 @@ jobs:
     strategy:
       matrix:
         app:
-          [{ name: api, run_test: "${{ needs.prepare.outputs.api_run_test }}" }]
-          [{ name: apiv2, run_test: "${{ needs.prepare.outputs.apiv2_run_test }}" }]
-          [{ name: lib, run_test: "${{ needs.prepare.outputs.lib_run_test }}" }]
+          [
+            {
+              name: api,
+              run_test: "${{ needs.prepare.outputs.api_run_test }}",
+            },
+            {
+              name: apiv2,
+              run_test: "${{ needs.prepare.outputs.apiv2_run_test }}",
+            },
+            {
+              name: lib,
+              run_test: "${{ needs.prepare.outputs.lib_run_test }}",
+            },
+          ]
     steps:
       - uses: actions/checkout@v4
         with:
