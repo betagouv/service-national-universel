@@ -76,6 +76,8 @@ jobs:
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
+          git switch main
+
           api_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- api packages/lib package-lock.json)
           echo "api_run_test: $api_run_test"
           echo "api_run_test=$api_run_test" >> $GITHUB_OUTPUT
