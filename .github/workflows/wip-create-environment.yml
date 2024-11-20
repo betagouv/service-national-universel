@@ -20,9 +20,9 @@ jobs:
       apiv2_image_tag: ${{ steps.tags.outputs.apiv2_image_tag }}
       admin_image_tag: ${{ steps.tags.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.tags.outputs.app_image_tag }}
-      api_run_test: ${{ steps.tags.outputs.api_run_test }}
-      apiv2_run_test: ${{ steps.tags.outputs.apiv2_run_test }}
-      lib_run_test: ${{ steps.tags.outputs.lib_run_test }}
+      api_run_test: ${{ steps.test.outputs.api_run_test }}
+      apiv2_run_test: ${{ steps.test.outputs.apiv2_run_test }}
+      lib_run_test: ${{ steps.test.outputs.lib_run_test }}
 
     steps:
       - name: Check branch name
@@ -76,6 +76,17 @@ jobs:
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
+      - name: Create environment
+        working-directory: devops/scripts
+        env:
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+        run: |
+          node create-environment.js ${{ steps.env_name.outputs.env_name }}
+
+      - name: Get test configuration
+        id: test
+        run: |
           git switch main
 
           api_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- api packages/lib package-lock.json)
@@ -89,14 +100,6 @@ jobs:
           lib_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- packages package-lock.json)
           echo "lib_run_test: $lib_run_test"
           echo "lib_run_test=$lib_run_test" >> $GITHUB_OUTPUT
-
-      - name: Create environment
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          node create-environment.js ${{ steps.env_name.outputs.env_name }}
 
   # run_tests_api:
   #   needs: prepare
