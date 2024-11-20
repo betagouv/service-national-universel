@@ -1,21 +1,22 @@
-name: Test and deploy environment
+name: Test and deploy CI
 
 on:
   workflow_dispatch:
   push:
-    branches-ignore:
+    branches:
       - main
-      - production
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+env:
+  CI_ENV_NAME: ci
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      env_name: ${{ steps.env_name.outputs.env_name }}
       build_matrix: ${{ steps.build.outputs.tags }}
       test_matrix: ${{ steps.test.outputs.tests }}
 
@@ -29,14 +30,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18.20"
-
-      - name: Get environment name
-        id: env_name
-        working-directory: devops/scripts
-        run: |
-          env_name=$(node get-environment-name.js ${{ github.ref_name }})
-          echo "env_name: $env_name"
-          echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
       - name: Get build configuration
         id: build
@@ -53,14 +46,12 @@ jobs:
       - name: Get test configuration
         id: test
         run: |
-          git switch main
-
           echo "[]" \
-          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- api packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- app packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- admin packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- packages package-lock.json | cut -d " " -f 1)" > tests.json
+          | jq  '. + [{name:"api"}]' \
+          | jq  '. + [{name:"apiv2"}]' \
+          | jq  '. + [{name:"app"}]' \
+          | jq  '. + [{name:"admin"}]' \
+          | jq  '. + [{name:"lib"}]' > tests.json
 
           cat tests.json
           echo "tests=$(jq -c < tests.json)" >> $GITHUB_OUTPUT
@@ -78,44 +69,12 @@ jobs:
 
       - name: Run tests
         uses: jenseng/dynamic-uses@v1
-        if: ${{matrix.app.run_test}}
         with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
           with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
-  create_environment:
-    if: |
-      !(contains(github.ref_name, '-no-ci-') ||
-        startsWith(github.ref_name, 'no-ci-') ||
-        endsWith(github.ref_name, 'no-ci') ||
-        contains(github.ref_name, '_no_ci_') ||
-        startsWith(github.ref_name, 'no_ci_') ||
-        endsWith(github.ref_name, '_no_ci')
-      )
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18.20"
-
-      - name: Create environment
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          node create-environment.js ${{ needs.prepare.outputs.env_name }}
-
-      # TODO: create PR comment with env urls
-
   build:
-    needs: [prepare, create_environment]
+    needs: [prepare, test]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -137,7 +96,7 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
         run: |
-          node build-application-docker.js --push ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
+          node build-application-docker.js --push ${{ env.CI_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
 
   deploy:
     needs: [prepare, build]
@@ -162,4 +121,4 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
         run: |
-          node deploy-scaleway.js ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
+          node deploy-scaleway.js ${{ env.CI_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
