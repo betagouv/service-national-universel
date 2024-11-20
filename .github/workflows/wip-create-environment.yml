@@ -20,6 +20,7 @@ jobs:
       apiv2_image_tag: ${{ steps.tags.outputs.apiv2_image_tag }}
       admin_image_tag: ${{ steps.tags.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.tags.outputs.app_image_tag }}
+      api_run_test: ${{ steps.tags.outputs.api_run_test }}
 
     steps:
       - name: Check branch name
@@ -60,6 +61,11 @@ jobs:
           api_image_tag=$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)
           echo "api_image_tag: $api_image_tag"
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
+
+          # api_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- api packages/lib package-lock.json)
+          api_run_test=""
+          echo "api_run_test: $api_run_test"
+          echo "api_run_test=$api_run_test" >> $GITHUB_OUTPUT
 
           apiv2_image_tag=$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)
           echo "apiv2_image_tag: $apiv2_image_tag"
@@ -106,7 +112,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [{ name: api }]
+        app:
+          [{ name: api, run_test: "${{ needs.prepare.outputs.api_run_test }}" }]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -116,7 +123,7 @@ jobs:
         uses: jenseng/dynamic-uses@v1
         with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          # if: steps.check.outputs.tag_exists == 0
+          if: ${{matrix.app.run_test}}
           with: '{"branch_name": "${{ needs.prepare.outputs.branch_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
   build:
