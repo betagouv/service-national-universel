@@ -36,5 +36,6 @@ export * from "./school";
 export * from "./schoolRAMSES";
 export * from "./structure";
 export * from "./tags";
+export * from "./task";
 export * from "./waitingList";
 export * from "./young";

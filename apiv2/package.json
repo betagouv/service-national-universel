@@ -94,7 +94,8 @@
             "^@config/(.*)$": "<rootDir>/src/config/$1",
             "^@infra/(.*)$": "<rootDir>/src/infra/$1",
             "^@shared/(.*)$": "<rootDir>/src/shared/$1",
-            "^@notification/(.*)$": "<rootDir>/src/notification/$1"
+            "^@notification/(.*)$": "<rootDir>/src/notification/$1",
+            "^@task/(.*)$": "<rootDir>/src/task/$1"
         },
         "modulePathIgnorePatterns": [
             "<rootDir>/packages"
