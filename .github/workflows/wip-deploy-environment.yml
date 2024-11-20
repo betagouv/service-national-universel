@@ -1,10 +1,11 @@
-name: Create environment
+name: Test and deploy environment
 
 on:
   workflow_dispatch:
   push:
-    branches: # TODO: remove me
-      - 3577-app
+    branches-ignore:
+      - main
+      - production
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
@@ -98,6 +99,14 @@ jobs:
           with: '{"branch_name": "${{ needs.prepare.outputs.branch_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
   create_environment:
+    if: |
+      !(contains(needs.prepare.outputs.branch_name, '-no-ci-') ||
+        startsWith(needs.prepare.outputs.branch_name, 'no-ci-') ||
+        endsWith(needs.prepare.outputs.branch_name, 'no-ci') ||
+        contains(needs.prepare.outputs.branch_name, '_no_ci_') ||
+        startsWith(needs.prepare.outputs.branch_name, 'no_ci_') ||
+        endsWith(needs.prepare.outputs.branch_name, '_no_ci')
+      )
     needs: prepare
     runs-on: ubuntu-latest
     steps:
