@@ -12,16 +12,24 @@ function setNestedValue(obj, path, value) {
 }
 
 // Génère tous les chemins de propriétés possibles dans un objet, y compris les objets imbriqués
-function getAllPaths(obj, parentPath = "") {
+function getAllPaths(obj, parentPath = "", seen = new Set()) {
   let paths = [];
-  for (let key in obj) {
+
+  // Eviter les boucles infinies
+  if (seen.has(obj)) {
+    return paths;
+  }
+
+  seen.add(obj);
+
+  for (let key of Object.keys(obj)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
     if (obj[key] instanceof Date) {
       paths.push(currentPath);
       continue;
     }
     if (typeof obj[key] === "object" && obj[key] !== null && !Array.isArray(obj[key])) {
-      paths = paths.concat(getAllPaths(obj[key], currentPath));
+      paths = paths.concat(getAllPaths(obj[key], currentPath, seen));
     } else {
       paths.push(currentPath);
     }
@@ -62,6 +70,8 @@ function anonymizeNonDeclaredFields(item, whitelist) {
           setNestedValue(item, path, new Date());
         } else if (typeof value === "string") {
           setNestedValue(item, path, "");
+        } else if (typeof value === "number") {
+          setNestedValue(item, path, 0);
         } else {
           setNestedValue(item, path, null);
         }
