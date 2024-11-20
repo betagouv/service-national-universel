@@ -1,0 +1,53 @@
+name: APIv2 - Run Tests
+
+inputs:
+  branch_name:
+    description: "Branch name"
+    required: true
+  CC_TEST_REPORTER_ID:
+    description: "CC_TEST_REPORTER_ID"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Git checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.branch_name }}
+
+    - name: Node 18.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: "18.20"
+
+    - uses: actions/cache@v4
+      id: cache-npm
+      with:
+        path: |
+          apiv2/node_modules
+          node_modules
+          api/node_modules
+          app/node_modules
+          admin/node_modules
+          packages/ds/node_modules
+          packages/lib/node_modules
+        key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nodemodules-
+
+    - name: Install packages
+      if: steps.cache-npm.outputs.cache-hit != 'true'
+      shell: bash
+      run: npm ci
+
+    - name: Build lib
+      working-directory: packages/lib
+      shell: bash
+      run: npm run build
+
+    - name: Run tests
+      working-directory: apiv2
+      shell: bash
+      run: npm test

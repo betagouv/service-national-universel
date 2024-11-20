@@ -21,6 +21,8 @@ jobs:
       admin_image_tag: ${{ steps.tags.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.tags.outputs.app_image_tag }}
       api_run_test: ${{ steps.tags.outputs.api_run_test }}
+      apiv2_run_test: ${{ steps.tags.outputs.apiv2_run_test }}
+      lib_run_test: ${{ steps.tags.outputs.lib_run_test }}
 
     steps:
       - name: Check branch name
@@ -62,11 +64,6 @@ jobs:
           echo "api_image_tag: $api_image_tag"
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
 
-          # api_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- api packages/lib package-lock.json)
-          api_run_test=""
-          echo "api_run_test: $api_run_test"
-          echo "api_run_test=$api_run_test" >> $GITHUB_OUTPUT
-
           apiv2_image_tag=$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)
           echo "apiv2_image_tag: $apiv2_image_tag"
           echo "apiv2_image_tag=$apiv2_image_tag" >> $GITHUB_OUTPUT
@@ -78,6 +75,18 @@ jobs:
           app_image_tag=$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
+
+          api_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- api packages/lib package-lock.json)
+          echo "api_run_test: $api_run_test"
+          echo "api_run_test=$api_run_test" >> $GITHUB_OUTPUT
+
+          apiv2_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- apiv2 packages/lib package-lock.json)
+          echo "apiv2_run_test: $apiv2_run_test"
+          echo "apiv2_run_test=$apiv2_run_test" >> $GITHUB_OUTPUT
+
+          lib_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- packages package-lock.json)
+          echo "lib_run_test: $lib_run_test"
+          echo "lib_run_test=$lib_run_test" >> $GITHUB_OUTPUT
 
       - name: Create environment
         working-directory: devops/scripts
@@ -114,6 +123,8 @@ jobs:
       matrix:
         app:
           [{ name: api, run_test: "${{ needs.prepare.outputs.api_run_test }}" }]
+          [{ name: apiv2, run_test: "${{ needs.prepare.outputs.apiv2_run_test }}" }]
+          [{ name: lib, run_test: "${{ needs.prepare.outputs.lib_run_test }}" }]
     steps:
       - uses: actions/checkout@v4
         with:
