@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
 import { supportURL } from "@/config";
 import { fetchReInscriptionOpen } from "../../../services/reinscription.service";
-import AlertSection from "../components/AlertSection";
+import NoSejourSection from "../components/NoSejourSection";
 
 export default function ChangeSejour() {
   const { young } = useAuth();
@@ -41,7 +41,7 @@ export default function ChangeSejour() {
   return (
     <div className="flex flex-col justify-center items-center bg-white pb-12 px-4 md:px-[8rem]">
       <div className="w-full flex items-center justify-between py-4">
-        <button onClick={() => history.goBack()} className="flex items-center gap-1 mr-2">
+        <button onClick={() => history.push("/home")} className="flex items-center gap-1 mr-2">
           <HiArrowLeft className="text-xl text-gray-500" />
         </button>
         <h1 className="text-2xl font-bold text-center">{"Choisir un nouveau séjour"}</h1>
@@ -56,10 +56,10 @@ export default function ChangeSejour() {
           <h1 className="text-base leading-6 font-bold text-center mt-4"> S'inscrire à un séjour en {getCohortYear(cohort)}</h1>
           <p className="text-sm leading-5 font-normal text-[#6B7280] mt-2 text-center">Séjour auxquels vous êtes éligible :</p>
           {sessions.map((session) => (
-            <div key={session._id} className="mt-2 flex py-3 px-2 justify-between rounded-md border border-gray-500 w-full">
+            <Link to="/changer-de-sejour/motif" key={session._id} className="mt-2 flex py-3 px-2 justify-between rounded-md border border-gray-500 w-full">
               <button className="text-sm leading-5 font-medium capitalize">{getCohortPeriod(session)}</button>
               <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
-            </div>
+            </Link>
           ))}
           <a
             href={supportURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}
@@ -84,16 +84,12 @@ export default function ChangeSejour() {
         </section>
       )}
       {isReinscriptionOpen === true && sessions.length > 0 ? (
-        // <button className="mt-4 flex py-3 px-2 justify-between rounded-md border border-gray-500 w-full md:w-1/2">
-        //   <p className="text-sm leading-5 font-medium">Aucune Date ne me convient</p>
-        //   <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
-        // </button>
         <Link to="/changer-de-sejour/no-date" className="mt-4 flex py-3 px-2 justify-between rounded-md border border-gray-500 w-full md:w-1/2">
           <p className="text-sm leading-5 font-medium">Aucune Date ne me convient</p>
           <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
         </Link>
       ) : (
-        <AlertSection />
+        <NoSejourSection />
       )}
     </div>
   );
