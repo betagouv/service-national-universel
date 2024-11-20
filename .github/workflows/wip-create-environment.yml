@@ -78,14 +78,6 @@ jobs:
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
-      - name: Create environment
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          node create-environment.js ${{ steps.env_name.outputs.env_name }}
-
       - name: Get test configuration
         id: test
         run: |
@@ -111,26 +103,6 @@ jobs:
           echo "admin_run_test: $admin_run_test"
           echo "admin_run_test=$admin_run_test" >> $GITHUB_OUTPUT
 
-  # run_tests_api:
-  #   needs: prepare
-  #   uses: ./.github/workflows/run-tests-api-pr.yml
-  #   with:
-  #     branch_name: ${{ needs.prepare.outputs.branch_name }}
-  #   secrets: inherit
-
-  # run_tests_front:
-  #   needs: prepare
-  #   uses: ./.github/workflows/run-tests-front.yml
-  #   with:
-  #     branch_name: ${{ needs.prepare.outputs.branch_name }}
-  #   secrets: inherit
-
-  # run_tests_lib:
-  #   needs: prepare
-  #   uses: ./.github/workflows/run-tests-lib.yml
-  #   with:
-  #     branch_name: ${{ needs.prepare.outputs.branch_name }}
-  #   secrets: inherit
   test:
     needs: prepare
     runs-on: ubuntu-latest
@@ -163,8 +135,29 @@ jobs:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
           with: '{"branch_name": "${{ needs.prepare.outputs.branch_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
-  build:
+  create_environment:
     needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.branch_name }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.20"
+
+      - name: Create environment
+        working-directory: devops/scripts
+        env:
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+        run: |
+          node create-environment.js ${{ needs.prepare.outputs.env_name }}
+
+  build:
+    needs: [prepare, create_environment]
     runs-on: ubuntu-latest
     strategy:
       matrix:
