@@ -17,6 +17,9 @@ module.exports = {
   // SMTP_HOST: "localhost",
   // SMTP_PORT: 1025,
   // REDIS_URL: "redis://127.0.0.1:6379",
-  // MONGO_URL: "mongodb://root:password123@localhost:27017/snu_dev?replicaSet=rs0&authSource=admin&directConnection=true",
   // ES_ENDPOINT: "http://localhost:9200",
+  // mongo mono instance
+  // MONGO_URL: "mongodb://localhost:27017/snu_dev",
+  // mongo mono multi-noeud (cf devops/local/docker-compose.replica.yml)
+  // MONGO_URL: "mongodb://root:password123@localhost:27017/snu_dev?replicaSet=rs0&authSource=admin&directConnection=true",
 };
