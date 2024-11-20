@@ -25,11 +25,6 @@ export const handler = async (): Promise<void> => {
         const sessionPhase1 = await CohortModel.findById(young.sessionPhase1Id);
         const dateStart = getDepartureDate(young, sessionPhase1, cohort, { bus });
 
-        let daysToValidate = cohort.daysToValidate;
-        if (!daysToValidate) {
-          console.warn(`Cohort ${cohort.name} has no daysToValidate`);
-          daysToValidate = 8;
-        }
         if (differenceInDays(now, dateStart) !== cohort.daysToValidate) continue;
 
         const validationDateWithDays = addDays(new Date(dateStart), cohort.daysToValidate).toISOString();

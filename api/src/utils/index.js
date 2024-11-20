@@ -39,6 +39,7 @@ const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
 const dayjs = require("dayjs");
 const { getCohortIdsFromCohortName } = require("../cohort/cohortService");
+const { updateStatusPhase1WithOldRules, updateStatusPhase1WithSpecificCase } = require("./old_cohorts_logic");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -730,21 +731,32 @@ async function addingDayToDate(days, dateStart) {
 }
 
 async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
-  let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023"];
   const youngCohort = await CohortModel.findOne({ name: young.cohort });
+  let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"];
 
-  // ! Freeze validation for legacy cohort
-  if (cohortWithOldRules.includes(youngCohort.name)) return;
-
-  const { daysToValidate: daysToValidate, dateStart: dateStartCohort } = await getCohortDateInfo(sessionPhase1.cohort);
+  const {
+    daysToValidate: daysToValidate,
+    validationDate: dateDeValidation,
+    validationDateForTerminaleGrade: dateDeValidationTerminale,
+    dateStart: dateStartcohort,
+  } = await getCohortDateInfo(sessionPhase1.cohort);
 
   // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
   const bus = await LigneBusModel.findById(young.ligneId);
   const dateStart = getDepartureDate(young, sessionPhase1, youngCohort, { bus });
+  const isTerminale = young?.grade === "Terminale";
+  // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
+  const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
   const validationDateWithDays = await addingDayToDate(daysToValidate, dateStart);
 
-  await updateStatusPhase1(young, validationDateWithDays, user);
-  return { dateStart, daysToValidate, validationDateWithDays, dateStartCohort };
+  if (young.cohort === "Juin 2023") {
+    await updateStatusPhase1WithSpecificCase(young, validationDate, user);
+  } else if (cohortWithOldRules.includes(young.cohort)) {
+    await updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user);
+  } else {
+    await updateStatusPhase1(young, validationDateWithDays, user);
+  }
+  return { dateStart, daysToValidate, validationDateWithDays, dateStartcohort };
 }
 
 async function updateStatusPhase1(young, validationDateWithDays, user) {
@@ -783,8 +795,10 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
       await young.save({ fromUser: user });
       return true;
     }
+    return false;
   } catch (e) {
     capture(e);
+    return false;
   }
 }
 
