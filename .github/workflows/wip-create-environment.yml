@@ -62,7 +62,7 @@ jobs:
           | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > tags.json
 
           cat tags.json
-          echo "tags=$(cat tags.json)" >> $GITHUB_OUTPUT
+          echo "tags=$(jq -c < tags.json)" >> $GITHUB_OUTPUT
 
       - name: Get test configuration
         id: tests
@@ -77,7 +77,7 @@ jobs:
           | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- packages package-lock.json | cut -d " " -f 1)" > tests.json
 
           cat tests.json
-          echo "tests=$(cat tests.json)" >> $GITHUB_OUTPUT
+          echo "tests=$(jq -c < tests.json)" >> $GITHUB_OUTPUT
 
   test:
     needs: prepare
