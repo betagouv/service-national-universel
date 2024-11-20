@@ -8,36 +8,21 @@ on:
       - production
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      branch_name: ${{ steps.check.outputs.branch_name }}
       env_name: ${{ steps.env_name.outputs.env_name }}
       build_matrix: ${{ steps.tags.outputs.tags }}
       test_matrix: ${{ steps.tests.outputs.tests }}
 
     steps:
-      - name: Check branch name
-        id: check
-        run: |
-          if [[ ${{ github.event_name }} == 'pull_request' ]] ; then
-            branch_name=${{ github.head_ref }}
-          else
-            branch_name=${{ github.ref_name }}
-          fi
-          if [[ $branch_name == 'main' ]] || [[ $branch_name == 'production' ]] ; then
-            echo "This action is not available on the branch $branch_name"
-            exit 1
-          fi
-          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
-
       - uses: actions/checkout@v4
         with:
-          ref: ${{ steps.check.outputs.branch_name }}
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Use Node.js
@@ -49,7 +34,7 @@ jobs:
         id: env_name
         working-directory: devops/scripts
         run: |
-          env_name=$(node get-environment-name.js ${{ steps.check.outputs.branch_name }})
+          env_name=$(node get-environment-name.js ${{ ${{ github.ref_name }} }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
@@ -71,11 +56,11 @@ jobs:
           git switch main
 
           echo "[]" \
-          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- api packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- app packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- admin packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- packages package-lock.json | cut -d " " -f 1)" > tests.json
+          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- api packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- app packages package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- admin packages package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- packages package-lock.json | cut -d " " -f 1)" > tests.json
 
           cat tests.json
           echo "tests=$(jq -c < tests.json)" >> $GITHUB_OUTPUT
@@ -89,30 +74,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.branch_name }}
+          ref: ${{ github.ref_name }}
 
       - name: Run tests
         uses: jenseng/dynamic-uses@v1
         if: ${{matrix.app.run_test}}
         with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          with: '{"branch_name": "${{ needs.prepare.outputs.branch_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
+          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
   create_environment:
     if: |
-      !(contains(needs.prepare.outputs.branch_name, '-no-ci-') ||
-        startsWith(needs.prepare.outputs.branch_name, 'no-ci-') ||
-        endsWith(needs.prepare.outputs.branch_name, 'no-ci') ||
-        contains(needs.prepare.outputs.branch_name, '_no_ci_') ||
-        startsWith(needs.prepare.outputs.branch_name, 'no_ci_') ||
-        endsWith(needs.prepare.outputs.branch_name, '_no_ci')
+      !(contains(github.ref_name, '-no-ci-') ||
+        startsWith(github.ref_name, 'no-ci-') ||
+        endsWith(github.ref_name, 'no-ci') ||
+        contains(github.ref_name, '_no_ci_') ||
+        startsWith(github.ref_name, 'no_ci_') ||
+        endsWith(github.ref_name, '_no_ci')
       )
     needs: prepare
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.branch_name }}
+          ref: ${{ github.ref_name }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -127,6 +112,8 @@ jobs:
         run: |
           node create-environment.js ${{ needs.prepare.outputs.env_name }}
 
+      # TODO: create PR comment with env urls
+
   build:
     needs: [prepare, create_environment]
     runs-on: ubuntu-latest
@@ -137,7 +124,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.branch_name }}
+          ref: ${{ github.ref_name }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -162,7 +149,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.branch_name }}
+          ref: ${{ github.ref_name }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
