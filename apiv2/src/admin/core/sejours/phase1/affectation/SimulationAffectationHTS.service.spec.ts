@@ -450,16 +450,25 @@ describe("SimulationAffectationHTSService", () => {
                 pdrList,
                 jeunesAvantAffectationList,
                 jeuneIntraDepartementList,
+                {
+                    selectedCost: [],
+                    tauxRepartitionCentreList: [],
+                    centreIdList: [],
+                    tauxRemplissageCentreList: [],
+                    tauxOccupationLignesParCentreList: [],
+                    iterationCostList: [],
+                },
             );
 
             // assertions
-            expect(result.Affectes).toBeInstanceOf(Array);
-            expect(result["Affectes en amont"]).toBeInstanceOf(Array);
-            expect(result.Attente).toBeInstanceOf(Array);
-            expect(result.SessionPhase1).toBeInstanceOf(Array);
-            expect(result.lignebuses).toBeInstanceOf(Array);
-            expect(result.pdr).toBeInstanceOf(Array);
-            expect(result["intradep à affecter"]).toBeInstanceOf(Array);
+            expect(result.jeunesNouvellementAffectedList).toBeInstanceOf(Array);
+            expect(result.jeunesDejaAffectedList).toBeInstanceOf(Array);
+            expect(result.jeuneAttenteAffectationList).toBeInstanceOf(Array);
+            expect(result.sejourList).toBeInstanceOf(Array);
+            expect(result.ligneDeBusList).toBeInstanceOf(Array);
+            expect(result.pdrList).toBeInstanceOf(Array);
+            expect(result.centreList).toBeInstanceOf(Array);
+            expect(result.jeuneIntraDepartementList).toBeInstanceOf(Array);
         });
     });
 });

@@ -6,7 +6,12 @@ import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { JeuneAffectationModel, SimulationAffectationHTSService } from "./SimulationAffectationHTS.service";
+import {
+    Analytics,
+    JeuneAffectationModel,
+    RapportData,
+    SimulationAffectationHTSService,
+} from "./SimulationAffectationHTS.service";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
@@ -17,7 +22,15 @@ import { JeuneModel } from "../../jeune/Jeune.model";
 
 const NB_MAX_ITERATION = 10;
 
-export class SimulationAffectationHTS implements UseCase<any> {
+type SimulationAffectationHTSResult = {
+    rapportData: RapportData;
+    analytics: Analytics;
+    jeuneList: JeuneAffectationModel[];
+    sejourList: SejourModel[];
+    ligneDeBusList: LigneDeBusModel[];
+};
+
+export class SimulationAffectationHTS implements UseCase<SimulationAffectationHTSResult> {
     constructor(
         @Inject(SimulationAffectationHTSService)
         private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
@@ -27,7 +40,7 @@ export class SimulationAffectationHTS implements UseCase<any> {
         @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
         @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
     ) {}
-    async execute({ sessionId }: { sessionId: string }) {
+    async execute({ sessionId }: { sessionId: string }): Promise<SimulationAffectationHTSResult> {
         /***
          * Chargement des données associés à la session
          ***/
@@ -99,18 +112,21 @@ export class SimulationAffectationHTS implements UseCase<any> {
             }, {}),
         };
 
+        const results: Omit<SimulationAffectationHTSResult, "rapportData"> = {
+            analytics: {
+                selectedCost: [],
+                tauxRepartitionCentreList: [],
+                centreIdList: [],
+                tauxRemplissageCentreList: [],
+                tauxOccupationLignesParCentreList: [],
+                iterationCostList: [],
+            },
+            jeuneList: [],
+            sejourList: [],
+            ligneDeBusList: [],
+        };
+
         let validCostList = [1e3]; // infini
-        let validTauxRepartitionCentreList: number[][] = [];
-        let validTauxRemplissageCentreList: number[] = [];
-        let validTauxOccupationLignesParCentreList: number[][] = [];
-
-        const iterationCostList: number[] = [];
-        let centreIdList: string[] = [];
-
-        let resulatJeunesList: JeuneAffectationModel[] = [];
-        let resultatSejourList: SejourModel[] = [];
-        let resultatLigneDeBusList: LigneDeBusModel[] = [];
-
         for (let currentIterationNumber = 0; currentIterationNumber < NB_MAX_ITERATION; currentIterationNumber++) {
             console.log("Iteration : ", currentIterationNumber + 1, " sur ", NB_MAX_ITERATION);
 
@@ -137,7 +153,6 @@ export class SimulationAffectationHTS implements UseCase<any> {
                 randomSejourList,
                 randomLigneDeBusList,
             );
-            centreIdList = centreIdTmp; // pour les analytics
 
             const currentCost = this.simulationAffectationHTSService.computeCost(
                 tauxRepartitionCentres,
@@ -145,7 +160,7 @@ export class SimulationAffectationHTS implements UseCase<any> {
                 ratioRepartition,
             );
 
-            iterationCostList.push(currentCost);
+            results.analytics.iterationCostList.push(currentCost);
 
             const isSafe = this.simulationAffectationHTSService.isRemainingSeatSafe(
                 randomLigneDeBusList,
@@ -156,46 +171,51 @@ export class SimulationAffectationHTS implements UseCase<any> {
             if (isSafe && currentCost < validCostList[validCostList.length - 1]) {
                 console.log("Better simulation found", currentCost);
                 validCostList.push(currentCost);
+                results.analytics.selectedCost = [currentCost];
+                results.analytics.centreIdList = centreIdTmp;
 
                 // analytics (graphics)
-                validTauxRepartitionCentreList = tauxRepartitionCentres;
-                validTauxRemplissageCentreList = tauxRemplissageCentres;
-                validTauxOccupationLignesParCentreList = tauxOccupationLignesParCentreList;
+                results.analytics.tauxRepartitionCentreList = tauxRepartitionCentres;
+                results.analytics.tauxRemplissageCentreList = tauxRemplissageCentres;
+                results.analytics.tauxOccupationLignesParCentreList = tauxOccupationLignesParCentreList;
 
-                resulatJeunesList = JSON.parse(JSON.stringify(randomJeuneList));
-                resultatSejourList = JSON.parse(JSON.stringify(randomSejourList));
-                resultatLigneDeBusList = JSON.parse(JSON.stringify(randomLigneDeBusList));
+                results.jeuneList = JSON.parse(JSON.stringify(randomJeuneList));
+                results.sejourList = JSON.parse(JSON.stringify(randomSejourList));
+                results.ligneDeBusList = JSON.parse(JSON.stringify(randomLigneDeBusList));
             }
         }
 
         ///
         // Calcul des résultats
         ///
-        const selectedCost = validCostList.slice(1);
-        const results = {
-            analytics: [
-                selectedCost,
-                validTauxRepartitionCentreList,
-                centreIdList,
-                validTauxRemplissageCentreList,
-                validTauxOccupationLignesParCentreList,
-                iterationCostList,
-            ],
-            jeunes: resulatJeunesList,
-            sejours: resultatSejourList,
-            ligneDeBus: resultatLigneDeBusList,
-        };
+        // const results: Omit<SimulationAffectationHTSResult, "rapportData"> = {
+        //     analytics: {
+        //         selectedCost: validCostList.slice(1),
+        //         validTauxRepartitionCentreList,
+        //         centreIdList,
+        //         validTauxRemplissageCentreList,
+        //         validTauxOccupationLignesParCentreList,
+        //         iterationCostList,
+        //     },
+        //     jeuneList: resulatJeunesList,
+        //     sejourList: resultatSejourList,
+        //     ligneDeBusList: resultatLigneDeBusList,
+        // };
 
-        const reportData = this.simulationAffectationHTSService.computeRapport(
-            results.jeunes,
-            results.sejours,
-            results.ligneDeBus,
+        const rapportData = this.simulationAffectationHTSService.computeRapport(
+            results.jeuneList,
+            results.sejourList,
+            results.ligneDeBusList,
             centreList,
             pdrList,
             jeunesList,
             jeuneIntraDepartementList,
+            results.analytics,
         );
 
-        return reportData;
+        return {
+            ...results,
+            rapportData,
+        };
     }
 }

@@ -15,12 +15,12 @@ export class AffectationController {
         // TODO: faire le traitement dans un job asynchrone (actuellement sync temporaire pour test)
         const simulation = await this.simulationAffectationHts.execute({ sessionId });
         this.simulationAffectationHTSService.saveExcelFile(
-            simulation,
+            simulation.rapportData,
             `affectation_simulation_${sessionId}_${new Date().toISOString()}.xlsx`,
         );
-        this.simulationAffectationHTSService.savePdfFile(
-            simulation,
-            `affectation_simulation_${sessionId}_${new Date().toISOString()}.pdf`,
-        );
+        // this.simulationAffectationHTSService.savePdfFile(
+        //     simulation,
+        //     `affectation_simulation_${sessionId}_${new Date().toISOString()}.pdf`,
+        // );
     }
 }

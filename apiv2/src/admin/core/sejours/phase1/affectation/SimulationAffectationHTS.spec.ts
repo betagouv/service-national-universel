@@ -23,10 +23,6 @@ const cohortName = "Avril 2024 - C";
 describe("SimulationAffectationHTS", () => {
     let simulationAffectationHTS: SimulationAffectationHTS;
     let simulationAffectationHTSService: SimulationAffectationHTSService;
-    let jeuneGateway: JeuneGateway;
-    let ligneDeBusGateway: LigneDeBusGateway;
-    let pointDeRassemblementGateway: PointDeRassemblementGateway;
-    let sejourGateway: SejourGateway;
 
     beforeEach(async () => {
         const mockJeunes = (await readCSVBuffer(await fs.readFile(path.dirname(__filename) + "/__tests__/youngs.csv")))
@@ -119,38 +115,39 @@ describe("SimulationAffectationHTS", () => {
 
         simulationAffectationHTS = module.get<SimulationAffectationHTS>(SimulationAffectationHTS);
         simulationAffectationHTSService = module.get<SimulationAffectationHTSService>(SimulationAffectationHTSService);
-        jeuneGateway = module.get<JeuneGateway>(JeuneGateway);
-        ligneDeBusGateway = module.get<LigneDeBusGateway>(LigneDeBusGateway);
-        pointDeRassemblementGateway = module.get<PointDeRassemblementGateway>(PointDeRassemblementGateway);
-        sejourGateway = module.get<SejourGateway>(SejourGateway);
+        // jeuneGateway = module.get<JeuneGateway>(JeuneGateway);
+        // ligneDeBusGateway = module.get<LigneDeBusGateway>(LigneDeBusGateway);
+        // pointDeRassemblementGateway = module.get<PointDeRassemblementGateway>(PointDeRassemblementGateway);
+        // sejourGateway = module.get<SejourGateway>(SejourGateway);
     });
 
     it("should simulate young affectation", async () => {
-        const reportData = await simulationAffectationHTS.execute({
+        const result = await simulationAffectationHTS.execute({
             sessionId: cohortName,
         });
 
         // sauvegarde du resultat pour debug : TODO supprimer
         simulationAffectationHTSService.saveExcelFile(
-            reportData,
+            result.rapportData,
             `affectation_simulation_${cohortName}_${new Date().toISOString()}.xlsx`,
         );
 
-        simulationAffectationHTSService.savePdfFile(
-            reportData,
-            `affectation_simulation_${cohortName}_${new Date().toISOString()}.pdf`,
-        );
+        // simulationAffectationHTSService.savePdfFile(
+        //     result.rapportData,
+        //     `affectation_simulation_${cohortName}_${new Date().toISOString()}.pdf`,
+        // );
 
         // fixed data
-        expect(reportData.SessionPhase1.length).toEqual(15);
-        expect(reportData.lignebuses.length).toEqual(37);
-        expect(reportData.pdr.length).toEqual(23);
+        expect(result.rapportData.sejourList.length).toEqual(15);
+        expect(result.rapportData.ligneDeBusList.length).toEqual(37);
+        expect(result.rapportData.pdrList.length).toEqual(23);
+        expect(result.rapportData.centreList.length).toEqual(15);
 
         // affectation result
-        expect(reportData["intradep à affecter"].length).toEqual(4);
-        expect(reportData.Attente.length).toBeGreaterThan(1000);
-        expect(reportData["Affectes en amont"].length).toEqual(179);
-        expect(reportData.Affectes.length).toBeGreaterThan(400);
-        expect(reportData.Attente[0]["Ligne Theorique"]).toBeDefined();
+        expect(result.rapportData.jeuneIntraDepartementList.length).toEqual(4);
+        expect(result.rapportData.jeuneAttenteAffectationList.length).toBeGreaterThan(1000);
+        expect(result.rapportData.jeunesDejaAffectedList.length).toEqual(179);
+        expect(result.rapportData.jeunesNouvellementAffectedList.length).toBeGreaterThan(400);
+        expect(result.rapportData.jeuneAttenteAffectationList[0]["Ligne Theorique"]).toBeDefined();
     });
 });

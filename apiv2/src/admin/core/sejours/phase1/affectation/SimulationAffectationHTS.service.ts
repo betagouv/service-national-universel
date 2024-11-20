@@ -11,7 +11,47 @@ import { SejourModel } from "../sejour/Sejour.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { CentreModel } from "../centre/Centre.model";
 
-interface DistributionJeunes {
+export type RapportData = {
+    jeunesNouvellementAffectedList: Array<
+        JeuneAffectationModel & {
+            "Point de rassemblement (id)": string;
+            sp1_id: string;
+        }
+    >;
+    jeunesDejaAffectedList: JeuneAffectationModel[];
+    jeuneAttenteAffectationList: JeuneAffectationModel[];
+    sejourList: SejourModel[];
+    pdrList: PointDeRassemblementModel[];
+    ligneDeBusList: Array<
+        Partial<LigneDeBusModel> & {
+            pointDeRassemblementIds: string;
+            centreNom: string;
+            tauxRemplissageCentre: string;
+        }
+    >;
+    centreList: Array<
+        Partial<CentreModel> & {
+            tauxRemplissage: string;
+            tauxGarcon: string;
+            tauxFille: string;
+            tauxQVP: string;
+            tauxPSH: string;
+            [key: string]: string;
+        }
+    >;
+    jeuneIntraDepartementList: JeuneModel[];
+};
+
+export type Analytics = {
+    selectedCost: number[];
+    tauxRepartitionCentreList: number[][];
+    centreIdList: string[];
+    tauxRemplissageCentreList: number[];
+    tauxOccupationLignesParCentreList: number[][];
+    iterationCostList: number[];
+};
+
+export interface DistributionJeunes {
     Department: string[];
     idJeunes: string[][];
     Lignes: string[][];
@@ -23,7 +63,7 @@ export type JeuneAffectationModel = JeuneModel & { pointDeRassemblementIds: stri
 
 @Injectable()
 export class SimulationAffectationHTSService {
-    constructor() {}
+    constructor() {} // readonly simulationAffectationPdfService: SimulationAffectationPdfService
 
     computeRatioRepartition(jeunesList: JeuneModel[]): number[] {
         let initialRatios = [0.5, 0.3, 0.1];
@@ -449,47 +489,51 @@ export class SimulationAffectationHTSService {
         pdrList: PointDeRassemblementModel[],
         jeunesAvantAffectationList: JeuneModel[],
         jeuneIntraDepartementList: JeuneModel[],
-    ) {
+        analytics: Analytics,
+    ): RapportData {
         const jeunesAffectedList = jeunesList.filter((young) => young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED);
         const regionsConcerneeList = [...new Set(pdrList.map((pdr) => pdr.region))];
+        const sejourCentreIdList = sejourList.map((s) => s.centreId || "");
+        const sejourIdList = sejourList.map((s) => s.id);
 
         const pdrIdJeuneAffectedList: string[] = [];
+        const jeuneSejourIdList: string[] = [];
 
         for (const jeune of jeunesAffectedList) {
             const pdrIds = jeune.pointDeRassemblementIds || [];
             const randomPdrIndex = Math.floor(Math.random() * pdrIds.length);
             const selectedPdrID = pdrIds[randomPdrIndex]?.replace(/[^a-zA-Z0-9]+/g, "");
             pdrIdJeuneAffectedList.push(selectedPdrID);
-        }
 
-        const jeunesCentresIdList = jeunesAffectedList.map((young) => young.centreId);
-        const centreIdList = sejourList.map((s) => s.centreId || "");
-        const jeuneSejourIdList: string[] = [];
-
-        const sejourIdList: string[] = sejourList.map((s) => s.id);
-        jeunesCentresIdList.forEach((jeuneCentreId) => {
-            centreIdList.forEach((id, index) => {
-                if (jeuneCentreId === id) {
+            // FIXME: index non coherent entre les deux listes ?
+            sejourCentreIdList.forEach((centreId, index) => {
+                if (jeune.centreId === centreId) {
                     jeuneSejourIdList.push(sejourIdList[index]);
                 }
             });
-        });
+        }
 
-        const jeuneAlreadyAffectedId: string[] = [];
-        jeunesAvantAffectationList.forEach((jeune) => {
+        const jeuneAlreadyAffectedId = jeunesAvantAffectationList.reduce((acc, jeune) => {
             if (jeune.centreId) {
-                jeuneAlreadyAffectedId.push(jeune.id);
+                acc.push(jeune.id);
             }
-        });
+            return acc;
+        }, [] as string[]);
 
         const jeunesDejaAffectedList = jeunesList.filter((jeune) => jeuneAlreadyAffectedId.includes(jeune.id));
-        const jeunesNouvellementAffectedList = jeunesAffectedList
-            .filter((jeune) => !jeuneAlreadyAffectedId.includes(jeune.id))
-            .map((jeune, index) => ({
-                ...jeune,
-                "Point de rassemblement (id)": pdrIdJeuneAffectedList[index],
-                sp1_id: jeuneSejourIdList[index],
-            }));
+        const jeunesNouvellementAffectedList = jeunesAffectedList.reduce(
+            (acc, jeune, index) => {
+                if (!jeuneAlreadyAffectedId.includes(jeune.id)) {
+                    acc.push({
+                        ...jeune,
+                        "Point de rassemblement (id)": pdrIdJeuneAffectedList[index],
+                        sp1_id: jeuneSejourIdList[index],
+                    });
+                }
+                return acc;
+            },
+            [] as RapportData["jeunesNouvellementAffectedList"],
+        );
 
         let jeuneAttenteAffectationList = jeunesList.filter(
             (jeune) => jeune.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
@@ -525,14 +569,69 @@ export class SimulationAffectationHTSService {
             return sejour;
         });
 
+        const centreListUpdated = centreList.map((centre) => {
+            const indexCentre = sejourCentreIdList.indexOf(centre.id);
+            const centreSejourList = sejourList.filter((sejour) => sejour.centreId === centre.id);
+            const ligneSejourList = ligneDeBusList.filter((ligne) => ligne.centreId === centre.id);
+            const stats = {
+                tauxRemplissage: analytics.tauxRemplissageCentreList[indexCentre],
+                tauxGarcon: analytics.tauxRepartitionCentreList[indexCentre]?.[0],
+                tauxQVP: analytics.tauxRepartitionCentreList[indexCentre]?.[1],
+                tauxPSH: analytics.tauxRepartitionCentreList[indexCentre]?.[2],
+            };
+            return {
+                id: centre.id,
+                nom: centre.nom,
+                departement: centre.departement,
+                region: centre.region,
+                ville: centre.ville,
+                codePostal: centre.codePostal,
+                tauxRemplissage: this.formatPourcent(stats.tauxRemplissage),
+                tauxGarcon: this.formatPourcent(stats.tauxGarcon),
+                tauxFille: this.formatPourcent(1 - stats.tauxGarcon),
+                tauxQVP: this.formatPourcent(stats.tauxQVP),
+                tauxPSH: this.formatPourcent(stats.tauxPSH),
+                ...centreSejourList.reduce((acc, sejour, index) => {
+                    acc[`sp1-id-${index}`] = sejour.id;
+                    acc[`sp1-places_restantes-${index}`] = sejour.placesRestantes;
+                    acc[`sp1-places_total-${index}`] = sejour.placesTotal;
+                    return acc;
+                }, {}),
+                ...ligneSejourList.reduce((acc, ligne, index) => {
+                    acc[`bus-numero_ligne-${index}`] = ligne.numeroLigne;
+                    acc[`bus-places_occupées-${index}`] = ligne.placesOccupeesJeunes;
+                    acc[`bus-places_total-${index}`] = ligne.capaciteJeunes;
+                    return acc;
+                }, {}),
+            } as RapportData["centreList"][0];
+        });
+
+        const ligneDeBusListUpdated = ligneDeBusList.map((ligne) => {
+            const indexCentre = sejourCentreIdList.indexOf(ligne.centreId);
+            const centreLigne = centreList.find((centre) => centre.id === ligne.centreId);
+            const tauxRemplissageCentre = analytics.tauxRemplissageCentreList[indexCentre];
+            return {
+                sessionNom: ligne.sessionNom,
+                id: ligne.id,
+                numeroLigne: ligne.numeroLigne,
+                pointDeRassemblementIds: ligne.pointDeRassemblementIds,
+                placesOccupeesJeunes: ligne.placesOccupeesJeunes,
+                capaciteJeunes: ligne.capaciteJeunes,
+                centreId: ligne.centreId,
+                centreNom: centreLigne?.nom,
+                tauxRemplissageCentre: this.formatPourcent(tauxRemplissageCentre),
+            } as RapportData["ligneDeBusList"][0];
+        });
+
         return {
-            Affectes: jeunesNouvellementAffectedList,
-            "Affectes en amont": jeunesDejaAffectedList,
-            Attente: jeuneAttenteAffectationList,
-            SessionPhase1: sejourList,
-            lignebuses: ligneDeBusList,
-            pdr: pdrList,
-            "intradep à affecter": jeuneIntraDepartementList,
+            jeunesNouvellementAffectedList,
+            jeunesDejaAffectedList,
+            jeuneAttenteAffectationList,
+            sejourList,
+            ligneDeBusList: ligneDeBusListUpdated,
+            pdrList,
+            centreList: centreListUpdated,
+            jeuneIntraDepartementList,
         };
     }
 
@@ -552,7 +651,7 @@ export class SimulationAffectationHTSService {
     }[] {
         const pdrDepartementList = pdrList.map((pdr) => pdr.departement);
         const lignePdrIdList = ligneDeBusList.map((ligne) => ligne.pointDeRassemblementIds);
-        const centreIdList = centreList.map((centre) => centre.id);
+        const sejourCentreIdList = centreList.map((centre) => centre.id);
 
         // Iterate through the young individuals
         return jeuneAttenteAffectationList.map(({ departement, region }) => {
@@ -576,7 +675,7 @@ export class SimulationAffectationHTSService {
                                 placesLigneList.push(nbPlaceDispoLigne);
                             }
 
-                            centreIdList.forEach((currentCentreId, currentCentreIndex) => {
+                            sejourCentreIdList.forEach((currentCentreId, currentCentreIndex) => {
                                 if (currentLigne.centreId === currentCentreId) {
                                     const currentCentre = centreList[currentCentreIndex];
                                     const currentSejourList = sejourList.filter(
@@ -606,33 +705,27 @@ export class SimulationAffectationHTSService {
     }
 
     // TODO: déplacer cette fonction dans un service/utilitaire
-    async saveExcelFile(
-        reportData: {
-            Affectes: JeuneModel[];
-            "Affectes en amont": JeuneModel[];
-            Attente: JeuneModel[];
-            SessionPhase1: SejourModel[];
-            lignebuses: LigneDeBusModel[];
-            pdr: PointDeRassemblementModel[];
-            "intradep à affecter": JeuneModel[];
-        },
-        fileName: string,
-    ): Promise<void> {
+    async saveExcelFile(rapportData: RapportData, fileName: string): Promise<void> {
         const wb = XLSX.utils.book_new();
 
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(reportData["Affectes"]), "Affectes");
         XLSX.utils.book_append_sheet(
             wb,
-            XLSX.utils.json_to_sheet(reportData["Affectes en amont"]),
+            XLSX.utils.json_to_sheet(rapportData.jeunesNouvellementAffectedList),
+            "Affectes",
+        );
+        XLSX.utils.book_append_sheet(
+            wb,
+            XLSX.utils.json_to_sheet(rapportData.jeunesDejaAffectedList),
             "Affectes en amont",
         );
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(reportData["Attente"]), "Attente");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(reportData["SessionPhase1"]), "SessionPhase1");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(reportData["lignebuses"]), "lignebuses");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(reportData["pdr"]), "pdr");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rapportData.jeuneAttenteAffectationList), "Attente");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rapportData.sejourList), "SessionPhase1");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rapportData.ligneDeBusList), "Lignes de bus");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rapportData.pdrList), "PDR");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rapportData.centreList), "Centres");
         XLSX.utils.book_append_sheet(
             wb,
-            XLSX.utils.json_to_sheet(reportData["intradep à affecter"]),
+            XLSX.utils.json_to_sheet(rapportData.jeuneIntraDepartementList),
             "intradep à affecter",
         );
 
@@ -642,5 +735,9 @@ export class SimulationAffectationHTSService {
 
     async savePdfFile(reportData: any, fileName: string): Promise<void> {
         // TODO: récupération de la logique de génération du PDF
+    }
+
+    formatPourcent(value: number): string {
+        return (value * 100).toFixed(2) + "%";
     }
 }
