@@ -23,6 +23,8 @@ jobs:
       api_run_test: ${{ steps.test.outputs.api_run_test }}
       apiv2_run_test: ${{ steps.test.outputs.apiv2_run_test }}
       lib_run_test: ${{ steps.test.outputs.lib_run_test }}
+      app_run_test: ${{ steps.test.outputs.app_run_test }}
+      admin_run_test: ${{ steps.test.outputs.admin_run_test }}
 
     steps:
       - name: Check branch name
@@ -100,6 +102,14 @@ jobs:
           lib_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- packages package-lock.json)
           echo "lib_run_test: $lib_run_test"
           echo "lib_run_test=$lib_run_test" >> $GITHUB_OUTPUT
+
+          app_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- app packages package-lock.json)
+          echo "app_run_test: $app_run_test"
+          echo "app_run_test=$app_run_test" >> $GITHUB_OUTPUT
+
+          admin_run_test=$(git log --max-count=1 --oneline main..${{ steps.check.outputs.branch_name }} -- admin packages package-lock.json)
+          echo "admin_run_test: $admin_run_test"
+          echo "admin_run_test=$admin_run_test" >> $GITHUB_OUTPUT
 
   # run_tests_api:
   #   needs: prepare
