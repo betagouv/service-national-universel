@@ -44,8 +44,14 @@ function isWhitelisted(path, whitelist) {
 }
 
 // Anonymise tous les champs d'un objet qui ne sont pas dans la whitelist
-function anonymizeNonDeclaredFields(item, whitelist) {
-  const allPaths = getAllPaths(item);
+function anonymizeNonDeclaredFields(item, whitelist, seen = new Set()) {
+  // Eviter les boucles infinies
+  if (seen.has(item)) {
+    return item;
+  }
+  seen.add(item);
+
+  const allPaths = getAllPaths(item, "", seen);
 
   for (const path of allPaths) {
     if (!isWhitelisted(path, whitelist)) {
@@ -55,7 +61,7 @@ function anonymizeNonDeclaredFields(item, whitelist) {
         // Si le tableau contient des objets, anonymise chaque objet
         if (typeof value[0] === "object") {
           value.forEach((element, index) => {
-            value[index] = anonymizeNonDeclaredFields(element, whitelist);
+            value[index] = anonymizeNonDeclaredFields(element, whitelist, seen);
           });
         } else {
           setNestedValue(item, path, []);
