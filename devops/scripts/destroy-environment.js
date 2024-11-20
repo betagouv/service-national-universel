@@ -9,7 +9,12 @@ class DestroyEnvironment {
   }
 
   async execute() {
-    console.log(`Deleting environment ${this.environmentName} `);
+    if (this.environmentName === "production") {
+      console.log(`Prevent deletion of environment ${this.environmentName}`);
+      return;
+    } else {
+      console.log(`Deleting environment ${this.environmentName}`);
+    }
 
     const config = new EnvConfig(this.environmentName);
 
