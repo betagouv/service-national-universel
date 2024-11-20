@@ -72,7 +72,7 @@ jobs:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           NOTION_SECRET_KEY: ${{ secrets.NOTION_SECRET_KEY }}
         run: |
-          .github/scripts/generate_changelog.sh "${{ github.event.before }}...${{ github.event.after }}" > CHANGELOG.md
+          .github/scripts/generate_changelog.sh "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}" > CHANGELOG.md
           cat CHANGELOG.md
           {
             echo 'changelog<<EOF'
@@ -83,8 +83,7 @@ jobs:
       - name: Post Changelog on slack
         uses: slackapi/slack-github-action@v1.25.0
         with:
-          # channel-id: "#dev-release,#nouveauté-produit"
-          channel-id: "#dev-release" # TODO REMOVE
+          channel-id: "#dev-release,#nouveauté-produit"
           slack-message: "${{ steps.changelog.outputs.changelog }}"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
