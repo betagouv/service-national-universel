@@ -69,6 +69,8 @@ function capture(err, contexte) {
     return sentryCaptureMessage(msg);
   }
 
+  if (typeof err === "string") return captureMessage(err, contexte);
+
   if (err instanceof Error) {
     // Capture the current error and recursively capture any nested causes
     const eventId = captureError(err, contexte);
