@@ -4,6 +4,7 @@ export function injectRoutes(app) {
   app.use("/bus", require("./controllers/bus"));
   app.use("/cohesion-center", require("./cohesionCenter").default);
   app.use("/cohort", require("./cohort/cohortController"));
+  app.use("/cohort-group", require("./cohortGroup/cohortGroupController").default);
   app.use("/cohort-session", require("./controllers/cohort-session").default);
   app.use("/contract", require("./controllers/contract"));
   app.use("/correction-request", require("./controllers/correction-request").default);

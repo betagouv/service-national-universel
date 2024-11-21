@@ -1,4 +1,4 @@
-FROM node:18.20-alpine AS base
+FROM node:20.17-alpine AS base
 ENV APP_NAME="admin"
 
 FROM base AS builder

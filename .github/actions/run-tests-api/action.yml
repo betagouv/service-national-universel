@@ -17,10 +17,10 @@ runs:
       with:
         ref: ${{ inputs.branch_name }}
 
-    - name: Node 18.x
+    - name: Use Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: "18.20"
+        node-version: "20.17"
 
     - name: Start MongoDB 7.0
       uses: supercharge/mongodb-github-action@v1.10.0

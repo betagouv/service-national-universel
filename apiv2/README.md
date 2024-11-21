@@ -153,6 +153,16 @@ En cours:
         }
         ```
 
+- [ ] Gestion des tâches asynchrones
+    - [x] Collection
+    - [x] Queue
+    - [x] Consumer
+    - [x] Producer
+    - [x] Module job admin dédié
+    - [x] Module task dédié
+
+
+
 \
 
 

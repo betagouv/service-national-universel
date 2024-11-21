@@ -1,5 +1,5 @@
 # * https://turbo.build/repo/docs/handbook/deploying-with-docker
-FROM node:18.20-alpine AS base
+FROM node:20.17-alpine AS base
 ENV APP_NAME="api"
 
 FROM base AS builder

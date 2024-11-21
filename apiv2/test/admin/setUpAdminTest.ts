@@ -4,7 +4,7 @@ import { Logger } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
-import { QueueType } from "@notification/infra/Notification";
+import { QueueName } from "@shared/infra/Queue";
 import { NotificationModule } from "@notification/Notification.module";
 import { ClsModule } from "nestjs-cls";
 import { SigninReferent } from "src/admin/core/iam/useCase/SigninReferent";
@@ -20,6 +20,7 @@ import { gatewayProviders } from "src/admin/infra/sejours/cle/initProvider/gatew
 import { guardProviders } from "src/admin/infra/sejours/cle/initProvider/guard";
 import { useCaseProvider } from "src/admin/infra/sejours/cle/initProvider/useCase";
 import { testDatabaseProviders } from "../testDatabaseProvider";
+import { QueueModule } from "@infra/Queue.module";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -42,6 +43,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
                 secret: "your-secret-key",
                 signOptions: { expiresIn: "1h" },
             }),
+            QueueModule,
         ],
         controllers: [ClasseController, AuthController],
         providers: [
@@ -58,9 +60,11 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...useCaseProvider,
         ],
     })
-        .overrideProvider(getQueueToken(QueueType.EMAIL))
+        .overrideProvider(getQueueToken(QueueName.EMAIL))
         .useValue(mockQueue)
-        .overrideProvider(getQueueToken(QueueType.CONTACT))
+        .overrideProvider(getQueueToken(QueueName.CONTACT))
+        .useValue(mockQueue)
+        .overrideProvider(getQueueToken(QueueName.ADMIN_TASK))
         .useValue(mockQueue)
         .compile();
 

@@ -55,6 +55,12 @@ export const CohortSchema = {
       description: "Statut de la cohorte",
     },
   },
+  cohortGroupId: {
+    type: String,
+    documentation: {
+      description: "Groupe de cohortes",
+    },
+  },
   dsnjExportDates: {
     type: new Schema(YoungDSNJExportDatesSchema),
     documentation: {

@@ -32,7 +32,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18.20"
+          node-version: "20.17"
 
       - name: Get registry
         id: registry
@@ -135,7 +135,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18.20"
+          node-version: "20.17"
 
       - name: Build image
         working-directory: devops/scripts
@@ -160,7 +160,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18.20"
+          node-version: "20.17"
 
       - name: Deploy image on Scaleway
         working-directory: devops/scripts
@@ -192,7 +192,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18.20"
+          node-version: "20.17"
 
       - name: Build image
         working-directory: devops/scripts
@@ -219,7 +219,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18.20"
+          node-version: "20.17"
 
       - name: Deploy image on Scaleway
         working-directory: devops/scripts

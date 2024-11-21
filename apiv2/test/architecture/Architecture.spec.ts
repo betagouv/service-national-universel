@@ -111,8 +111,8 @@ describe("Architecture test", () => {
                 .resideInAPackage(MatchingPattern.SHARED_CORE)
                 .should()
                 .onlyDependOnClassesThat()
-                .resideInAnyPackage(MatchingPattern.SHARED_CORE, MatchingPattern.NESTJS_COMMON)
-                .because("Core should not depend on any other dependencies")
+                .resideInAnyPackage(MatchingPattern.SHARED_CORE, MatchingPattern.NESTJS_COMMON, MatchingPattern.SNU_LIB)
+                .because("Shared should not depend on any other dependencies")
                 .check(srcProject.allClasses());
         });
     });
