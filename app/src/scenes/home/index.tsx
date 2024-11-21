@@ -16,6 +16,7 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
+import AvenirCohort from "./AvenirCohort";
 import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
@@ -52,13 +53,12 @@ export default function Home() {
     return <HomePhase2 />;
   }
 
-  if (hasWithdrawn) {
-    return <Withdrawn />;
-  }
+  if (hasWithdrawn) return <Withdrawn />;
 
-  if (new Date() > new Date(cohort.dateEnd)) {
-    return <Phase1NotDone />;
-  }
+  if (young.cohort === "à venir") return <AvenirCohort />;
+  // TODO: if (cohortGroup.type === COHORT_GROUP_TYPE.RESERVE) return <AvenirCohort />;
+
+  if (new Date() > new Date(cohort.dateEnd)) return <Phase1NotDone />;
 
   return <HomePhase1 />;
 }
