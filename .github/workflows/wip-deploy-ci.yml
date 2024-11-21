@@ -19,6 +19,7 @@ jobs:
     outputs:
       registry: ${{ steps.registry.outputs.registry }}
       build_matrix: ${{ steps.config.outputs.build }}
+      deploy_matrix: ${{ steps.config.outputs.deploy }}
       test_matrix: ${{ steps.config.outputs.test }}
 
     steps:
@@ -46,15 +47,27 @@ jobs:
       - name: Get matrices configuration
         id: config
         run: |
+          # BUILD MATRIX
           echo "[]" \
           | jq  '. + [{name:"api", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
           | jq  '. + [{name:"apiv2", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
           | jq  '. + [{name:"app", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
           | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > build.json
 
+          echo "Build matrix"
           cat build.json
           echo "build=$(jq -c < build.json)" >> $GITHUB_OUTPUT
 
+          # DEPLOY MATRIX
+          cat build.json \
+          | jq '. + [{name:"tasks", tag:.[]|select(.name == "api")|.tag}]' \
+          | jq '. + [{name:"tasksv2", tag:.[]|select(.name == "apiv2")|.tag}]' > deploy.json
+
+          echo "Deploy matrix"
+          cat deploy.json
+          echo "deploy=$(jq -c < deploy.json)" >> $GITHUB_OUTPUT
+
+          # TEST MATRIX
           echo "[]" \
           | jq  '. + [{name:"api"}]' \
           | jq  '. + [{name:"apiv2"}]' \
@@ -62,6 +75,7 @@ jobs:
           | jq  '. + [{name:"admin"}]' \
           | jq  '. + [{name:"lib"}]' > test.json
 
+          echo "Test matrix"
           cat test.json
           echo "test=$(jq -c < test.json)" >> $GITHUB_OUTPUT
 
@@ -119,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
+        app: ${{ fromJSON(needs.prepare.outputs.deploy_matrix) }}
 
     steps:
       - uses: actions/checkout@v4
