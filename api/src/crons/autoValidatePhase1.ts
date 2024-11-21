@@ -10,8 +10,10 @@ export const handler = async (): Promise<void> => {
   try {
     const now = new Date().toISOString();
 
+    const cohortsAVenir = ["CLE 23-24", "2025 CLE Globale"];
+
     const onGoingCohorts = await CohortModel.find({
-      $and: [{ dateStart: { $lte: now } }, { dateEnd: { $gte: now } }],
+      $and: [{ dateStart: { $lte: now } }, { dateEnd: { $gte: now } }, { name: { $nin: cohortsAVenir } }],
     });
 
     if (!onGoingCohorts.length) return;
