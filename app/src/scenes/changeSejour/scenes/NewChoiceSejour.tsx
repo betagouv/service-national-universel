@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 import { HiArrowLeft } from "react-icons/hi";
-import { getCohortPeriod } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
 import { WITHRAWN_REASONS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import ReasonMotifSection from "../components/ReasonMotifSection";
+import CurrentSejourNotice from "../components/CurrentSejourNotice";
 
 export default function NewChoicSejour() {
   const { young } = useAuth();
-  const cohort = getCohort(young.cohort);
   const history = useHistory();
-  const cohortPeriod = getCohortPeriod(cohort);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const cohortId = queryParams.get("cohortid");
+  const newCohortPeriod = queryParams.get("period");
   const [withdrawnMessage, setWithdrawnMessage] = useState("");
   const [withdrawnReason, setWithdrawnReason] = useState("");
   const filteredWithdrawnReasons = WITHRAWN_REASONS.filter(
@@ -23,17 +24,15 @@ export default function NewChoicSejour() {
   return (
     <div className="flex flex-col justify-center items-center bg-white pb-12 px-4 md:px-[8rem]">
       <div className="w-full flex items-center justify-between py-4">
-        <button onClick={() => history.push("/changer-de-sejour/no-date")} className="flex items-center gap-1 mr-2">
+        <button onClick={() => history.push("/changer-de-sejour/")} className="flex items-center gap-1 mr-2">
           <HiArrowLeft className="text-xl text-gray-500" />
         </button>
-        <h1 className="text-2xl font-bold text-center">Séjour -INSERT COHORT DATE-</h1>
+        <h1 className="text-2xl font-bold text-center">Séjour {newCohortPeriod}</h1>
         <div></div>
       </div>
-      <div className="bg-blue-100 text-[#1E40AF] w-fit text-center p-2 rounded-md">
-        Vous êtes positionné(e) sur le séjour <span className="font-bold">{cohortPeriod}</span>.
-      </div>
+      <CurrentSejourNotice />
       <hr />
-      <p className="mt-4 mb-6 text-sm leading-5 text-[#6B7280] font-normal">Veuillez précisez la raison de votre désistement.</p>
+      <p className="mt-4 mb-6 text-sm leading-5 text-[#6B7280] font-normal">Pour quelle(s) raison(s) souhaitez-vous changer de séjour ?</p>
 
       <ReasonMotifSection
         filteredWithdrawnReasons={filteredWithdrawnReasons}

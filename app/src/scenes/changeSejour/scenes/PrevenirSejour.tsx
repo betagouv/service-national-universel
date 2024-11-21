@@ -6,6 +6,7 @@ import { getCohortPeriod } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import { WITHRAWN_REASONS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import ReasonMotifSection from "../components/ReasonMotifSection";
+import CurrentSejourNotice from "../components/CurrentSejourNotice";
 
 export default function PrevenirSejour() {
   const { young } = useAuth();
@@ -29,9 +30,7 @@ export default function PrevenirSejour() {
         <h1 className="text-2xl font-bold text-center">Etre alerté lors de l'ouverture des inscriptions sur les prochains séjours</h1>
         <div></div>
       </div>
-      <div className="bg-blue-100 text-[#1E40AF] w-fit text-center p-2 rounded-md">
-        Vous êtes positionné(e) sur le séjour <span className="font-bold">{cohortPeriod}</span>.
-      </div>
+      <CurrentSejourNotice />
       <hr />
       <p className="mt-4 mb-6 text-sm leading-5 text-[#6B7280] font-normal">Vous serez alerté(e) par e-mail lors de l'ouverture des futures inscriptions.</p>
 

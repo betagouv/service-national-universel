@@ -11,12 +11,13 @@ import Loader from "@/components/Loader";
 import { supportURL } from "@/config";
 import { fetchReInscriptionOpen } from "../../../services/reinscription.service";
 import NoSejourSection from "../components/NoSejourSection";
+import CurrentSejourNotice from "../components/CurrentSejourNotice";
 
 export default function ChangeSejour() {
   const { young } = useAuth();
   const cohort = getCohort(young.cohort);
-  const history = useHistory();
   const cohortPeriod = getCohortPeriod(cohort);
+  const history = useHistory();
 
   const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useQuery({
     queryKey: ["isReInscriptionOpen"],
@@ -47,16 +48,17 @@ export default function ChangeSejour() {
         <h1 className="text-2xl font-bold text-center">{"Choisir un nouveau séjour"}</h1>
         <div></div>
       </div>
-      <div className="bg-blue-100 text-[#1E40AF] w-fit text-center p-2 rounded-md">
-        Vous êtes positionné(e) sur le séjour <span className="font-bold">{cohortPeriod}</span>.
-      </div>
+      <CurrentSejourNotice />
       <hr />
       {sessions.length > 0 && (
         <section className="w-full flex flex-col md:w-1/2">
           <h1 className="text-base leading-6 font-bold text-center mt-4"> S'inscrire à un séjour en {getCohortYear(cohort)}</h1>
           <p className="text-sm leading-5 font-normal text-[#6B7280] mt-2 text-center">Séjour auxquels vous êtes éligible :</p>
           {sessions.map((session) => (
-            <Link to="/changer-de-sejour/motif" key={session._id} className="mt-2 flex py-3 px-2 justify-between rounded-md border border-gray-500 w-full">
+            <Link
+              to={`/changer-de-sejour/motif?cohortid=${session._id}&period=${getCohortPeriod(session)}`}
+              key={session._id}
+              className="mt-2 flex py-3 px-2 justify-between rounded-md border border-gray-500 w-full">
               <button className="text-sm leading-5 font-medium capitalize">{getCohortPeriod(session)}</button>
               <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
             </Link>
@@ -83,9 +85,9 @@ export default function ChangeSejour() {
           </div>
         </section>
       )}
-      {isReinscriptionOpen === true && sessions.length > 0 ? (
+      {isReinscriptionOpen === true || sessions.length > 0 ? (
         <Link to="/changer-de-sejour/no-date" className="mt-4 flex py-3 px-2 justify-between rounded-md border border-gray-500 w-full md:w-1/2">
-          <p className="text-sm leading-5 font-medium">Aucune Date ne me convient</p>
+          <p className="text-sm leading-5 font-medium">Aucune date ne me convient</p>
           <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
         </Link>
       ) : (
