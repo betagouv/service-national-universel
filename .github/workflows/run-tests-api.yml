@@ -23,10 +23,10 @@ jobs:
         with:
           ref: ${{ inputs.branch_name }}
 
-      - name: Node 20.x
+      - name: Node 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
 
       - name: Start MongoDB 7.0
         uses: supercharge/mongodb-github-action@v1.10.0
