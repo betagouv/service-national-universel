@@ -16,8 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       env_name: ${{ steps.env_name.outputs.env_name }}
-      build_matrix: ${{ steps.build.outputs.tags }}
-      test_matrix: ${{ steps.test.outputs.tests }}
+      build_matrix: ${{ steps.config.outputs.build }}
+      deploy_matrix: ${{ steps.config.outputs.deploy }}
+      test_matrix: ${{ steps.config.outputs.test }}
 
     steps:
       - uses: actions/checkout@v4
@@ -38,21 +39,27 @@ jobs:
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
-      - name: Get build configuration
-        id: build
+      - name: Get matrices configuration
+        id: config
         run: |
           echo "[]" \
           | jq  '. + [{name:"api", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
           | jq  '. + [{name:"apiv2", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
           | jq  '. + [{name:"app", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > tags.json
+          | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > build.json
 
-          cat tags.json
-          echo "tags=$(jq -c < tags.json)" >> $GITHUB_OUTPUT
+          cat build.json
+          echo "build=$(jq -c < build.json)" >> $GITHUB_OUTPUT
 
-      - name: Get test configuration
-        id: test
-        run: |
+
+          cat build.json \
+          | jq '. + [{name:"tasks", tag:.[]|select(.name == "api")|.tag}]' \
+          | jq '. + [{name:"tasksv2", tag:.[]|select(.name == "apiv2")|.tag}]' > deploy.json
+
+          cat deploy.json
+          echo "deploy=$(jq -c < deploy.json)" >> $GITHUB_OUTPUT
+
+
           git switch main
 
           echo "[]" \
@@ -60,120 +67,120 @@ jobs:
           | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
           | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- app packages package-lock.json | cut -d " " -f 1)" \
           | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- admin packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- packages package-lock.json | cut -d " " -f 1)" > tests.json
+          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- packages package-lock.json | cut -d " " -f 1)" > test.json
 
-          cat tests.json
-          echo "tests=$(jq -c < tests.json)" >> $GITHUB_OUTPUT
+          cat test.json
+          echo "test=$(jq -c < test.json)" >> $GITHUB_OUTPUT
 
-  test:
-    needs: prepare
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
+  # test:
+  #   needs: prepare
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ github.ref_name }}
 
-      - name: Run tests
-        uses: jenseng/dynamic-uses@v1
-        if: ${{matrix.app.run_test}}
-        with:
-          uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
+  #     - name: Run tests
+  #       uses: jenseng/dynamic-uses@v1
+  #       if: ${{matrix.app.run_test}}
+  #       with:
+  #         uses: ./.github/actions/run-tests-${{matrix.app.name}}
+  #         with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
-  create_environment:
-    if: |
-      !(contains(github.ref_name, '-no-ci-') ||
-        startsWith(github.ref_name, 'no-ci-') ||
-        endsWith(github.ref_name, 'no-ci') ||
-        contains(github.ref_name, '_no_ci_') ||
-        startsWith(github.ref_name, 'no_ci_') ||
-        endsWith(github.ref_name, '_no_ci')
-      )
-    needs: prepare
-    runs-on: ubuntu-latest
-    outputs:
-      registry: ${{ steps.registry.outputs.registry }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
+  # create_environment:
+  #   if: |
+  #     !(contains(github.ref_name, '-no-ci-') ||
+  #       startsWith(github.ref_name, 'no-ci-') ||
+  #       endsWith(github.ref_name, 'no-ci') ||
+  #       contains(github.ref_name, '_no_ci_') ||
+  #       startsWith(github.ref_name, 'no_ci_') ||
+  #       endsWith(github.ref_name, '_no_ci')
+  #     )
+  #   needs: prepare
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     registry: ${{ steps.registry.outputs.registry }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ github.ref_name }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
+  #     - name: Use Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20.17"
 
-      - name: Create environment
-        id: registry
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          node create-environment.js ${{ needs.prepare.outputs.env_name }}
+  #     - name: Create environment
+  #       id: registry
+  #       working-directory: devops/scripts
+  #       env:
+  #         SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+  #         SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+  #       run: |
+  #         node create-environment.js ${{ needs.prepare.outputs.env_name }}
 
-          registry=$(node get-environment-registry.js ${{ needs.prepare.outputs.env_name }})
-          echo "registry: $registry"
-          echo "registry=$registry" >> $GITHUB_OUTPUT
+  #         registry=$(node get-environment-registry.js ${{ needs.prepare.outputs.env_name }})
+  #         echo "registry: $registry"
+  #         echo "registry=$registry" >> $GITHUB_OUTPUT
 
-      # TODO: create PR comment with env urls
+  #     # TODO: create PR comment with env urls
 
-  build:
-    needs: [prepare, create_environment]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
+  # build:
+  #   needs: [prepare, create_environment]
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ github.ref_name }}
 
-      - name: Login to Docker Container Registry
-        uses: docker/login-action@v2
-        with:
-          username: nologin
-          password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-          registry: ${{ needs.create_environment.outputs.registry }}
+  #     - name: Login to Docker Container Registry
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: nologin
+  #         password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+  #         registry: ${{ needs.create_environment.outputs.registry }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
+  #     - name: Use Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20.17"
 
-      - name: Build image
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          node build-application-docker.js --push ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
+  #     - name: Build image
+  #       working-directory: devops/scripts
+  #       env:
+  #         SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+  #         SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+  #       run: |
+  #         node build-application-docker.js --push ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
 
-  deploy:
-    needs: [prepare, build]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
+  # deploy:
+  #   needs: [prepare, build]
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ github.ref_name }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
+  #     - name: Use Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20.17"
 
-      - name: Deploy image on Scaleway
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          node deploy-scaleway.js ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
+  #     - name: Deploy image on Scaleway
+  #       working-directory: devops/scripts
+  #       env:
+  #         SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+  #         SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+  #       run: |
+  #         node deploy-scaleway.js ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}

@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       registry: ${{ steps.registry.outputs.registry }}
-      build_matrix: ${{ steps.build.outputs.tags }}
-      test_matrix: ${{ steps.test.outputs.tests }}
+      build_matrix: ${{ steps.config.outputs.build }}
+      test_matrix: ${{ steps.config.outputs.test }}
 
     steps:
       - uses: actions/checkout@v4
@@ -43,30 +43,27 @@ jobs:
           echo "registry: $registry"
           echo "registry=$registry" >> $GITHUB_OUTPUT
 
-      - name: Get build configuration
-        id: build
+      - name: Get matrices configuration
+        id: config
         run: |
           echo "[]" \
           | jq  '. + [{name:"api", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
           | jq  '. + [{name:"apiv2", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
           | jq  '. + [{name:"app", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > tags.json
+          | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > build.json
 
-          cat tags.json
-          echo "tags=$(jq -c < tags.json)" >> $GITHUB_OUTPUT
+          cat build.json
+          echo "build=$(jq -c < build.json)" >> $GITHUB_OUTPUT
 
-      - name: Get test configuration
-        id: test
-        run: |
           echo "[]" \
           | jq  '. + [{name:"api"}]' \
           | jq  '. + [{name:"apiv2"}]' \
           | jq  '. + [{name:"app"}]' \
           | jq  '. + [{name:"admin"}]' \
-          | jq  '. + [{name:"lib"}]' > tests.json
+          | jq  '. + [{name:"lib"}]' > test.json
 
-          cat tests.json
-          echo "tests=$(jq -c < tests.json)" >> $GITHUB_OUTPUT
+          cat test.json
+          echo "test=$(jq -c < test.json)" >> $GITHUB_OUTPUT
 
   test:
     needs: prepare

@@ -68,7 +68,14 @@ class AppConfig extends EnvConfig {
   }
 
   imageName() {
-    return this.app;
+    switch (this.app) {
+      case "tasks":
+        return "api";
+      case "tasksv2":
+        return "apiv2";
+      default:
+        return this.app;
+    }
   }
 
   async containerOptions() {

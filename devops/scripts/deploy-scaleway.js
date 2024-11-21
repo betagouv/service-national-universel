@@ -6,7 +6,7 @@ const { registryEndpoint } = require("./lib/utils");
 async function main() {
   const input = new UserInput(`Deploy application on Scaleway`)
     .arg("environment", "Environment (ci, staging, production)")
-    .arg("application", "Application (app, admin)")
+    .arg("application", "Application (app, admin, api, apiv2, tasks, tasksv2)")
     .arg("release", "Release")
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
