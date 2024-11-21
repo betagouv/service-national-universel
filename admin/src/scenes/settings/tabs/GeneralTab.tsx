@@ -23,10 +23,11 @@ import { CleSettings } from "../components/CleSettings";
 import { InformationsConvoyage } from "../components/InformationsConvoyage";
 import { ManualInscriptionSettings } from "../phase0/ManualInscriptionSettings";
 import { Select } from "@snu/ds/admin";
+import CohortGroupSelector from "../components/CohortGroupSelector";
 
 // Define the interface for GeneralTab props
 interface GeneralTabProps {
-  cohort?: CohortDto;
+  cohort: CohortDto;
   onCohortChange: React.Dispatch<React.SetStateAction<CohortDto>>;
   readOnly: boolean;
   getCohort: () => void;
@@ -38,6 +39,7 @@ interface GeneralTabProps {
 export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort, isLoading, onLoadingChange }: GeneralTabProps) {
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(cohort?.reInscriptionStartDate || cohort?.reInscriptionEndDate);
+
   const statusOptions = [
     { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
     { value: COHORT_STATUS.ARCHIVED, label: "Archivée" },
@@ -51,7 +53,6 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
       if (!cohort!.inscriptionStartDate) err.inscriptionStartDate = "La date d'ouverture des inscriptions est obligatoire";
       if (!cohort!.inscriptionEndDate) err.inscriptionEndDate = "La date de fermeture des inscriptions est obligatoire";
       if (!cohort!.instructionEndDate) err.instructionEndDate = "La date de fermeture des inscriptions est obligatoire";
-
       if (isAfter(new Date(cohort!.reInscriptionStartDate as Date), new Date(cohort!.reInscriptionEndDate as Date)))
         err.reInscriptionStartDate = "La date d'ouverture des réinscriptions est antérieure a la date de cloture.";
       if (isAfter(new Date(cohort!.reInscriptionEndDate as Date), new Date(cohort!.inscriptionEndDate)))
@@ -81,10 +82,6 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
     }
   };
 
-  if (!cohort) {
-    return null;
-  }
-
   return (
     <div className="flex w-full flex-col gap-8">
       <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
@@ -99,7 +96,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   <ReactTooltip id="identification" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md ">
                     <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                       <li>Nom donné à la cohorte.</li>
-                      <li>Identifiant techniq§ue donné à la cohorte.</li>
+                      <li>Identifiant technique donné à la cohorte.</li>
                     </ul>
                   </ReactTooltip>
                 </div>
@@ -129,6 +126,20 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                     closeMenuOnSelect
                     disabled={isLoading || readOnly}
                   />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-medium text-gray-900">Groupe de cohorte</p>
+                    <MdInfoOutline data-tip data-for="statut" className="h-5 w-5 cursor-pointer text-gray-400" />
+                    <ReactTooltip id="statut" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                      <ul className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                        <li>Permet de rattacher une cohorte à un groupe afin d'orienter les volontaires lors des changements de séjour.</li>
+                        <li className="mt-2">Pour changer de séjour dans un même groupe de cohorte, pas besoin de réinscription.</li>
+                        <li className="mt-2">Pour changer vers un séjour du groupe suivant, réinscription obligatoire.</li>
+                      </ul>
+                    </ReactTooltip>
+                  </div>
+                  <CohortGroupSelector cohort={cohort} setCohort={onCohortChange} readOnly={readOnly} />
                 </div>
               </div>
               <div className="flex flex-col gap-3">

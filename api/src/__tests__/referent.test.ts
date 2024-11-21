@@ -3,7 +3,7 @@ import request from "supertest";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, SUB_ROLE_GOD } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, SUB_ROLE_GOD, YOUNG_SOURCE } from "snu-lib";
 
 import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
 import { getCompletionObjectifs } from "../services/inscription-goal";
@@ -541,7 +541,7 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.applications).toEqual([
         {
-          ...application.toObject(),
+          ...JSON.parse(JSON.stringify(application.toObject())),
           structure: {
             ...structure.toObject(),
             _id: structure._id.toString(),
@@ -812,6 +812,57 @@ describe("Referent", () => {
       });
 
       expect(res.status).toEqual(409);
+    });
+
+    it("should change the cohort of the young from HTS to HTS while keeping school data unchanged", async () => {
+      const cohort1 = await createCohortHelper(getNewCohortFixture({ name: "Février 2024" }));
+      const cohort2 = await createCohortHelper(getNewCohortFixture({ name: "Juin 2024" }));
+
+      const etablissement = createFixtureEtablissement();
+      const school = await createEtablissement(etablissement);
+
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        cohort: cohort1.name,
+        cohortId: cohort1._id,
+        source: YOUNG_SOURCE.VOLONTAIRE,
+        schoolId: school._id,
+        schoolName: school.name,
+        schoolType: school.type[0],
+        schoolAddress: school.address,
+        schoolZip: school.zip,
+        schoolCity: school.city,
+        schoolDepartment: school.department,
+        schoolRegion: school.region,
+        schoolCountry: school.country,
+      });
+
+      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
+        source: YOUNG_SOURCE.VOLONTAIRE,
+        cohort: cohort2.name,
+        message: "Changing cohort for testing purposes",
+        cohortChangeReason: "Testing HTS to HTS",
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.cohort).toBe(cohort2.name);
+      expect(res.body.data.cohortId).toBe(cohort2._id.toString());
+      expect(res.body.data.cohortChangeReason).toBe("Testing HTS to HTS");
+      expect(res.body.data.originalCohort).toBe(cohort1.name);
+
+      // Vérifier que les données de l'école sont inchangées
+      expect(res.body.data.schoolId).toBe(school._id.toString());
+      expect(res.body.data.schoolName).toBe(school.name);
+      expect(res.body.data.schoolType).toBe(school.type[0]);
+      expect(res.body.data.schoolAddress).toBe(school.address);
+      expect(res.body.data.schoolZip).toBe(school.zip);
+      expect(res.body.data.schoolCity).toBe(school.city);
+      expect(res.body.data.schoolDepartment).toBe(school.department);
+      expect(res.body.data.schoolRegion).toBe(school.region);
+      expect(res.body.data.schoolCountry).toBe(school.country);
+
+      // Vérifier que la source reste VOLONTAIRE
+      expect(res.body.data.source).toBe(YOUNG_SOURCE.VOLONTAIRE);
     });
   });
 });

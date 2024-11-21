@@ -69,16 +69,17 @@ export const updateClasse = async (classeToUpdateMapped: ClasseMapped): Promise<
   let updatedFields: string[] = [];
   let error: string[] = [];
 
+  if (cohortId.toString() !== classe.cohortId) {
+    await updateYoungsCohorts(classe._id, cohort);
+    updatedFields.push("youngsCohorts");
+  }
+
   classe.set({ cohortId: cohortId, cohort: cohort.name, totalSeats: classeToUpdateMapped.classeTotalSeats });
   updatedFields.push("cohortId", "cohort", "totalSeats");
 
   if (classe.status === STATUS_CLASSE.VERIFIED) {
     classe.set({ status: STATUS_CLASSE.ASSIGNED });
     updatedFields.push("status");
-  }
-  if (cohortId.toString() !== classe.cohortId) {
-    await updateYoungsCohorts(classe._id, cohort);
-    updatedFields.push("youngsCohorts");
   }
 
   try {

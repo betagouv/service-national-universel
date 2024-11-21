@@ -4,6 +4,7 @@ export { AreasModel, AreasDocument } from "./areas";
 export { BusModel } from "./bus";
 export { CohesionCenterModel, CohesionCenterDocument } from "./cohesionCenter";
 export { CohortModel, CohortDocument } from "./cohort";
+export { CohortGroupModel, CohortGroupDocument } from "./cohortGroup";
 export { ContractModel, ContractDocument } from "./contract";
 export { DepartmentServiceModel, DepartmentServiceDocument } from "./departmentService";
 export { EmailModel, EmailDocument } from "./email";

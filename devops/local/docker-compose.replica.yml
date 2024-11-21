@@ -1,0 +1,116 @@
+# https://medium.com/@JosephOjo/mongodb-replica-set-with-docker-compose-5ab95c02af0d
+services:
+  # https://medium.com/@ravikushwaha18.rk/setting-up-a-mongodb-replica-set-with-docker-compose-62ece5c295a1
+  mongo-1:
+    image: mongo:7
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+      - MONGO_INITDB_DATABASE=snu_dev
+    entrypoint: >
+      /bin/bash -c '
+      openssl rand -base64 756 > /data/keyfile.key &&
+      chmod 400 /data/keyfile.key &&
+      chown mongodb:mongodb /data/keyfile.key &&
+      /usr/local/bin/docker-entrypoint.sh mongod --replSet rs0 --keyFile /data/keyfile.key --bind_ip_all --tlsMode disabled'
+    healthcheck:
+      test: mongosh
+        -u $${MONGO_INITDB_ROOT_USERNAME}
+        -p $${MONGO_INITDB_ROOT_PASSWORD}
+        --eval "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo-1:27017',priority:1},{_id:1,host:'mongo-2:27018',priority:0.5}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+    ports:
+      - "27017:27017"
+    networks:
+      - "replica_network"
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    volumes:
+      - mongo1_data:/data/mongodb
+      - mongo1_config:/data/configdb
+      - mongo_sharedconfig:/data
+    # docker-compose -f docker-compose.replica.yml exec mongo-1 mongosh --eval "rs.status()"
+  mongo-2:
+    image: mongo:7
+    command: --replSet rs0 --bind_ip_all --port 27018 --keyFile /data/keyfile.key --tlsMode disabled
+    ports:
+      - "27018:27018"
+    networks:
+      - "replica_network"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - mongo2_data:/data/mongodb
+      - mongo2_config:/data/configdb
+      - mongo_sharedconfig:/data
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+    networks:
+      - "replica_network"
+    volumes:
+      - elasticsearch_data:/data/elastic
+  es_datariver:
+    depends_on:
+      - mongo-1
+      - elasticsearch
+    networks:
+      - "replica_network"
+    build:
+      context: ../ES_datariver
+      args:
+        MONGO_DB_NAME: snu_dev
+    environment:
+      MONSTACHE_ES_URLS: http://elasticsearch:9200
+      MONSTACHE_MONGO_URL: mongodb://root:password123@mongo-1:27017/snu_dev?replicaSet=rs0&authSource=admin
+      MONGO_DB_NAME: snu_dev
+  mailcatcher:
+    image: schickling/mailcatcher
+    ports:
+      - "1025:1025"
+      - "1080:1080"
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
+    networks:
+      - redis
+  redis-ui:
+    image: redis/redisinsight
+    container_name: redis-ui
+    ports:
+      - "5540:5540"
+    networks:
+      - redis
+  bullboard:
+    container_name: bullboard
+    image: venatum/bull-board:1.5
+    restart: always
+    ports:
+      - 3001:3000
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - redis
+
+networks:
+  redis:
+    driver: bridge
+
+volumes:
+  mongo1_data:
+  mongo1_config:
+  mongo2_data:
+  mongo2_config:
+  mongo_sharedconfig:
+  elasticsearch_data:

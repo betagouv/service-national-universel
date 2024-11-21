@@ -1,3 +1,5 @@
+import { CohortGroupType } from "../mongoSchema";
+
 export type Eligibility = {
   zones?: string[];
   schoolLevels?: string[];
@@ -12,6 +14,8 @@ export type CohortDto = {
   status: string;
   type: string;
   dateStart: Date;
+  cohortGroupId: string;
+  cohortGroup?: CohortGroupType;
   dateEnd: Date;
   inscriptionStartDate: Date;
   inscriptionEndDate: Date;
