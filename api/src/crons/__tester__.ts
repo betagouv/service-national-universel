@@ -1,7 +1,7 @@
 // To test run:
 // ts-node ./src/crons/__tester__.ts patch/young
-// import path from "path";
-// process.env["NODE_CONFIG_DIR"] = path.resolve(__dirname, "../../config");
+import path from "path";
+process.env["NODE_CONFIG_DIR"] = path.resolve(__dirname, "../../config");
 
 import config from "config";
 import { initDB } from "../mongo";
