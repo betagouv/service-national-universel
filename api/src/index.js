@@ -25,9 +25,7 @@ process.on("unhandledRejection", (reason, promise) => {
   throw reason;
 });
 
-console.log("before require");
 const { runTasks, runAPI } = require("./main");
-console.log("after require");
 if (config.RUN_TASKS) {
   runTasks();
 } else {
