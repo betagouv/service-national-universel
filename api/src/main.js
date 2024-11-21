@@ -1,32 +1,99 @@
+console.time("http");
 const http = require("http");
+console.timeEnd("http");
+
+console.time("bodyParser");
 const bodyParser = require("body-parser");
+console.timeEnd("bodyParser");
+
+console.time("cors");
 const cors = require("cors");
+console.timeEnd("cors");
+
+console.time("events");
 const events = require("events");
+console.timeEnd("events");
+
+console.time("cookieParser");
 const cookieParser = require("cookie-parser");
+console.timeEnd("cookieParser");
+
+console.time("helmet");
 const helmet = require("helmet");
+console.timeEnd("helmet");
+
+console.time("passport");
 const passport = require("passport");
+console.timeEnd("passport");
+
+console.time("validateCustomHeader");
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
+console.timeEnd("validateCustomHeader");
+
+console.time("loggingMiddleware");
 const loggingMiddleware = require("./middlewares/loggingMiddleware");
+console.timeEnd("loggingMiddleware");
+
+console.time("forcedomain");
 const { forceDomain } = require("forcedomain");
+console.timeEnd("forcedomain");
+
+console.time("request-ip");
 const requestIp = require("request-ip"); // Import request-ip package
+console.timeEnd("request-ip");
+
+console.time("express");
 const express = require("express");
+console.timeEnd("express");
+
+console.time("@godaddy/terminus");
 const { createTerminus } = require("@godaddy/terminus");
+console.timeEnd("@godaddy/terminus");
 
+console.time("config");
 const config = require("config");
-const { logger } = require("./logger");
+console.timeEnd("config");
 
+console.time("logger");
+const { logger } = require("./logger");
+console.timeEnd("logger");
+
+console.time("sentry");
 const { capture } = require("./sentry");
 const { setupExpressErrorHandler } = require("@sentry/node");
+console.timeEnd("sentry");
 
+console.time("mongo");
 const { initDB, closeDB } = require("./mongo");
-const { initRedisClient, closeRedisClient } = require("./redis");
-const { getAllPdfTemplates } = require("./utils/pdf-renderer");
-const { initPassport } = require("./passport");
-const { injectRoutes } = require("./routes");
-const { runMigrations } = require("./migration");
+console.timeEnd("mongo");
 
+console.time("redis");
+const { initRedisClient, closeRedisClient } = require("./redis");
+console.timeEnd("redis");
+
+console.time("pdf-renderer");
+const { getAllPdfTemplates } = require("./utils/pdf-renderer");
+console.timeEnd("pdf-renderer");
+
+console.time("passport-init");
+const { initPassport } = require("./passport");
+console.timeEnd("passport-init");
+
+console.time("routes");
+const { injectRoutes } = require("./routes");
+console.timeEnd("routes");
+
+console.time("migration");
+const { runMigrations } = require("./migration");
+console.timeEnd("migration");
+
+console.time("express-basic-auth");
 const basicAuth = require("express-basic-auth");
+console.timeEnd("express-basic-auth");
+
+console.time("redisQueue");
 const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers, scheduleRepeatableTasks } = require("./queues/redisQueue");
+console.timeEnd("redisQueue");
 
 async function runTasks() {
   await Promise.all([initDB(), getAllPdfTemplates()]);
