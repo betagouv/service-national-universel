@@ -11,7 +11,7 @@ const {
 
 async function main() {
   const input = new UserInput(`Build application docker image`)
-    .arg("environment", "Environment (ci, staging, production)")
+    .arg("environment", "Environment (ci, staging, production, development)")
     .arg("application", "Application (api, apiv2, app, admin)")
     .arg("tag", "Image tag (commit sha)")
     .optBool("push", "Push image on registry", {
@@ -36,30 +36,34 @@ async function main() {
     secretName: config.buildSecretName(),
   }).execute();
 
-  const namespace = await scaleway.findOrThrow(RESOURCE.ContainerNamespace, {
+  const namespace = await scaleway.find(RESOURCE.ContainerNamespace, {
     project_id: project.id,
     name: config.containerNamespace(),
   });
 
+  const registry = namespace ? namespace.registry_endpoint : input.environment;
+
   const imageEndpoint = registryEndpoint(
-    namespace.registry_endpoint,
+    registry,
     config.imageName(),
     input.tag
   );
 
-  const image = await scaleway.find(RESOURCE.Image, {
-    namespace_id: namespace.registry_namespace_id,
-    name: config.imageName(),
-  });
-  if (image) {
-    const imageTag = await scaleway.find(RESOURCE.Image.Tag, {
-      image_id: image.id,
-      name: input.tag,
+  if (namespace) {
+    const image = await scaleway.find(RESOURCE.Image, {
+      namespace_id: namespace.registry_namespace_id,
+      name: config.imageName(),
     });
+    if (image) {
+      const imageTag = await scaleway.find(RESOURCE.Image.Tag, {
+        image_id: image.id,
+        name: input.tag,
+      });
 
-    if (imageTag) {
-      console.log(`Image ${imageEndpoint} already exists`);
-      return;
+      if (imageTag) {
+        console.log(`Image ${imageEndpoint} already exists`);
+        return;
+      }
     }
   }
 
@@ -67,7 +71,7 @@ async function main() {
 
   const values = {
     ...secrets,
-    ...config.buildEnvVariables(namespace.registry_endpoint, input.tag),
+    ...config.buildEnvVariables(registry, input.tag),
   };
 
   const args = [
@@ -100,13 +104,7 @@ async function main() {
   if (input.login) {
     await childProcessStdin(
       "docker",
-      [
-        "login",
-        namespace.registry_endpoint,
-        "-u",
-        "nologin",
-        "--password-stdin",
-      ],
+      ["login", registry, "-u", "nologin", "--password-stdin"],
       input.SCW_SECRET_KEY,
       { env }
     );

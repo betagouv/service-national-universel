@@ -125,6 +125,7 @@ class AppConfig extends EnvConfig {
       case "staging":
       case "production":
       case "ci":
+      case "development":
         return vars;
     }
 
