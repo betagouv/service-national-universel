@@ -18,10 +18,11 @@ const staticConfig = {
 // NODE_ENV environment variable is used by :
 // - jest : unit test (NODE_ENV == "test")
 const defaultEnv = process.env.NODE_ENV === "test" ? "test" : "development";
+const environment = _env(envStr, "ENVIRONMENT", defaultEnv);
 
 export const config = {
   ...staticConfig,
-  ENVIRONMENT: _env(envStr, "ENVIRONMENT", defaultEnv),
+  ENVIRONMENT: environment,
   RELEASE: _env(envStr, "RELEASE", "development"),
   PORT: _env(envInt, "PORT", 8080),
   RUN_CRONS: _env(envBool, "RUN_CRONS", false),
@@ -79,7 +80,7 @@ export const config = {
   API_DEMARCHE_SIMPLIFIEE_TOKEN: _env(envStr, "API_DEMARCHE_SIMPLIFIEE_TOKEN"),
   PM2_SLACK_URL: _env(envStr, "PM2_SLACK_URL"),
   API_ANTIVIRUS_KEY: _env(envStr, "API_ANTIVIRUS_KEY"),
-  TASK_QUEUE_PREFIX: _env(envStr, "TASK_QUEUE_PREFIX", "dev"),
+  TASK_QUEUE_PREFIX: _env(envStr, "TASK_QUEUE_PREFIX", environment),
   TASK_MONITOR_ENABLE_AUTH: _env(envBool, "TASK_MONITOR_ENABLE_AUTH", false),
   TASK_MONITOR_USER: _env(envStr, "TASK_MONITOR_USER"),
   TASK_MONITOR_SECRET: _env(envStr, "TASK_MONITOR_SECRET"),

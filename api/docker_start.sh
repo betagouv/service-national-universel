@@ -12,4 +12,9 @@ then
   rsyslogd -f api/docker_rsyslog.conf
 fi
 
+if [[ $ENVIRONMENT != "production" && $ENVIRONMENT != "staging" && $ENVIRONMENT != "ci" ]]
+then
+  RUN_TASKS=true PORT=8087 pm2-runtime --error=/var/log/api.error.log --output=/var/log/api.output.log api/src/index.js &
+fi
+
 exec pm2-runtime --error=/var/log/api.error.log --output=/var/log/api.output.log api/src/index.js
