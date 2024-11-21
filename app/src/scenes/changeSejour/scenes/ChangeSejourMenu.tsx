@@ -16,7 +16,6 @@ import CurrentSejourNotice from "../components/CurrentSejourNotice";
 export default function ChangeSejour() {
   const { young } = useAuth();
   const cohort = getCohort(young.cohort);
-  const cohortPeriod = getCohortPeriod(cohort);
   const history = useHistory();
 
   const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useQuery({
