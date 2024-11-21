@@ -2,6 +2,11 @@
 
 set -e
 
+#temp
+grep -c ^processor /proc/cpuinfo
+grep ^cpu\\scores /proc/cpuinfo | uniq |  awk '{print $4}'
+grep -c 'cpu[0-9]' /proc/stat
+
 touch /var/log/api.error.log /var/log/api.output.log
 
 if [[ $LOGS_ES_ENDPOINT != "" ]]
