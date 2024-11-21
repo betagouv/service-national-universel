@@ -14,8 +14,8 @@ import UserMenu from "./components/UserMenu";
 
 export default function Navbar() {
   const device = useDevice();
-  const { data: ticketsInfo } = useTickets();
-
+  const { isIdle, isLoading, data: ticketsInfo } = useTickets();
+  if (isIdle || isLoading) return null;
   if (device === "mobile") {
     return <MobileNavbar ticketsInfo={ticketsInfo} />;
   }
