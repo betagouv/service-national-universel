@@ -50,4 +50,4 @@ ENV SENTRY_RELEASE=${RELEASE}
 
 EXPOSE 8080
 
-CMD ["node", "./apiv2/dist/main.js"]
+CMD ["apiv2/docker_start.sh"]
