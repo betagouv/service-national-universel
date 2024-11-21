@@ -56,7 +56,8 @@ export default function Home() {
     return <Withdrawn />;
   }
 
-  if (new Date() > new Date(cohort.endDate)) {
+  console.log("🚀 ~ Home ~ cohort.endDate:", cohort.dateEnd);
+  if (new Date() > new Date(cohort.dateEnd)) {
     return <Phase1NotDone />;
   }
 
