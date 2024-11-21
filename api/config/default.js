@@ -22,6 +22,7 @@ module.exports = {
   MONGO_URL: undefined,
   JWT_SECRET: "not-so-secret",
   SUPPORT_URL: "http://localhost:3000",
+  SUPPORT_FRONT_URL: "http://localhost:8083",
   SUPPORT_APIKEY: undefined,
   KNOWLEDGEBASE_URL: "http://localhost:8084",
   API_ANALYTICS_ENDPOINT: "http://localhost:8085",
