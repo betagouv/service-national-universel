@@ -80,8 +80,8 @@
     "validator": "13.7.0"
   },
   "engines": {
-    "node": "^20.17",
-    "npm": "^10.8",
+    "node": "^22.11",
+    "npm": "^10.9",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "optionalDependencies": {
