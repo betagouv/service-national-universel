@@ -29,7 +29,6 @@ COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
 RUN npm run build
-RUN find api -name "*.ts" -delete
 
 FROM base AS runner
 WORKDIR /app
