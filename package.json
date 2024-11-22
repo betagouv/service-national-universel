@@ -9,7 +9,8 @@
     "test": "turbo run test --filter=$APP_NAME",
     "lint": "turbo run lint --continue --filter=$APP_NAME",
     "check-types": "turbo run check-types --continue --filter=$APP_NAME",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "endpoints": "node devops/scripts/get-applications-endpoints --from-branch $(git rev-parse --abbrev-ref HEAD)"
   },
   "dependencies": {
     "classnames": "^2.5.1",

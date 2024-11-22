@@ -15,7 +15,7 @@ function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallbac
 
 export default () => ({
     httpServer: {
-        port: _env(envInt, "PORT", 8080),
+        port: _env(envInt, "PORT", 8086),
     },
     database: {
         url: _env(envStr, "DATABASE_URL", "mongodb://localhost:27017/local_app"),

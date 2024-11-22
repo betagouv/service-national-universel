@@ -15,17 +15,12 @@ function mountSecretKeys(app) {
   }
 }
 
-function applicationUrls(registryEndpoint) {
-  const domain_prefix = registryEndpoint.replace(
-    "rg.fr-par.scw.cloud/funcscw",
-    ""
-  );
-
+function _urlsFromDomain(domain) {
   return {
-    admin: `https://${domain_prefix}-admin.functions.fnc.fr-par.scw.cloud`,
-    api: `https://${domain_prefix}-api.functions.fnc.fr-par.scw.cloud`,
-    apiv2: `https://${domain_prefix}-apiv2.functions.fnc.fr-par.scw.cloud`,
-    app: `https://${domain_prefix}-app.functions.fnc.fr-par.scw.cloud`,
+    admin: `https://admin.${domain}`,
+    api: `https://api.${domain}`,
+    apiv2: `https://apiv2.${domain}`,
+    app: `https://moncompte.${domain}`,
   };
 }
 
@@ -44,6 +39,39 @@ class EnvConfig {
         return `snu-production`;
       default:
         return `snu-ci`;
+    }
+  }
+
+  applicationUrls(registryEndpoint) {
+    let domain;
+    switch (this.env) {
+      case "staging":
+        return _urlsFromDomain("beta-snu.dev");
+      case "production":
+        return _urlsFromDomain("snu.gouv.fr");
+      case "ci":
+        return _urlsFromDomain("ci.beta-snu.dev");
+      case "development":
+        domain = "localhost";
+        return {
+          admin: `http://${domain}:8082`,
+          api: `http://${domain}:8080`,
+          apiv2: `http://${domain}:8086`,
+          app: `http://${domain}:8081`,
+        };
+      default: //custom_env
+        const domain_prefix = registryEndpoint.replace(
+          "rg.fr-par.scw.cloud/funcscw",
+          ""
+        );
+        domain = "functions.fnc.fr-par.scw.cloud";
+
+        return {
+          admin: `https://${domain_prefix}-admin.${domain}`,
+          api: `https://${domain_prefix}-api.${domain}`,
+          apiv2: `https://${domain_prefix}-apiv2.${domain}`,
+          app: `https://${domain_prefix}-app.${domain}`,
+        };
     }
   }
 }
@@ -136,7 +164,7 @@ class AppConfig extends EnvConfig {
         return vars;
     }
 
-    const urls = applicationUrls(registryEndpoint);
+    const urls = this.applicationUrls(registryEndpoint);
 
     switch (this.app) {
       case "app":
