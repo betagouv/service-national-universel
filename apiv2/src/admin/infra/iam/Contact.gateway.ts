@@ -1,4 +1,4 @@
-import { ReferentModel } from "src/admin/core/iam/Referent.model";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
 
 export interface ContactGateway {
     syncReferent(referent: ReferentModel): Promise<void>;
