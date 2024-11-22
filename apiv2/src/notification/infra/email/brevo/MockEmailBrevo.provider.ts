@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { ReferentModel } from "src/admin/core/iam/Referent.model";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { EmailParams, EmailTemplate } from "@notification/core/Notification";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 import { ContactProvider } from "../Contact.provider";
