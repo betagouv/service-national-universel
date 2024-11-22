@@ -1,4 +1,4 @@
-import { SuperAdminGuard } from "src/admin/infra/iam/guard/SuperAdmin.guard";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { ClasseAdminCleGuard } from "../classe/guard/ClasseAdminCle.guard";
 import { ClasseDepartementGuard } from "../classe/guard/ClasseDepartement.guard";
 import { ClasseGuardService } from "../classe/guard/ClasseGuard.service";
