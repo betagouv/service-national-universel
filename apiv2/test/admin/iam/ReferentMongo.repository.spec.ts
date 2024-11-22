@@ -1,9 +1,9 @@
 import { INestApplication } from "@nestjs/common";
 import mongoose, { Model } from "mongoose";
 
-import { ReferentGateway } from "src/admin/core/iam/Referent.gateway";
-import { ReferentModel } from "src/admin/core/iam/Referent.model";
-import { REFERENT_MONGOOSE_ENTITY, ReferentDocument } from "src/admin/infra/iam/provider/ReferentMongo.provider";
+import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
+import { REFERENT_MONGOOSE_ENTITY, ReferentDocument } from "@admin/infra/iam/provider/ReferentMongo.provider";
 import { setupAdminTest } from "../setUpAdminTest";
 import { createReferent } from "./ReferentHelper";
 import { ClsService } from "nestjs-cls";
