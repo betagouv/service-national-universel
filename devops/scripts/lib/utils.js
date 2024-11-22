@@ -8,6 +8,9 @@ function imageTag(commit) {
 }
 
 function environmentFromBranch(branchName) {
+  if (branchName === "main") {
+    return "ci";
+  }
   return branchName
     .toLowerCase() // lowercase
     .replace(/_/g, "-") // replace _ by -
