@@ -1,10 +1,8 @@
+# TODO: REMOVE
 name: Build and deploy Production
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - release_candidate
 
 concurrency:
   group: ${{ github.workflow }}
