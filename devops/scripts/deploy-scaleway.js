@@ -35,7 +35,7 @@ async function main() {
     input.release
   );
 
-  if (container.registry_image === imageUrl) {
+  if (container.status !== "error" && container.registry_image === imageUrl) {
     console.log(`${imageUrl} is already deployed on ${container.name}`);
     return;
   }
