@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import {
     EmailTemplate,
     VerifierClasseEmailAdminCleParams,
@@ -25,6 +26,7 @@ export class VerifierClasse implements UseCase<ClasseModel> {
         @Inject(ReferentGateway) private readonly referentGateway: ReferentGateway,
         private readonly getReferentDepToBeNotified: GetReferentDepToBeNotified,
         private readonly inviterReferentClasse: InviterReferentClasse,
+        private readonly config: ConfigService,
     ) {}
     async execute(classeId: string): Promise<ClasseModel> {
         const classe = await this.classeGateway.findById(classeId);
@@ -45,8 +47,7 @@ export class VerifierClasse implements UseCase<ClasseModel> {
             to: referents.map((referent) => ({ email: referent.email, name: `${referent.prenom} ${referent.nom}` })),
             classeNom: classe.nom,
             classeCode: classe.uniqueKeyAndId,
-            // TODO : add right URL when config is available
-            classeUrl: `${"config.ADMIN_URL"}/classes/${classe.id?.toString()}`,
+            classeUrl: `${this.config.get("urls.admin")}/classes/${classe.id?.toString()}`,
         };
 
         await this.notificationGateway.sendEmail<VerifierClasseEmailAdminCleParams>(
@@ -65,8 +66,7 @@ export class VerifierClasse implements UseCase<ClasseModel> {
                 })),
                 classeNom: classe.nom,
                 classeCode: classe.uniqueKeyAndId,
-                // TODO : add right URL when config is available
-                classeUrl: `${"config.ADMIN_URL"}/classes/${classe.id?.toString()}`,
+                classeUrl: `${this.config.get("urls.admin")}/classes/${classe.id?.toString()}`,
             };
 
             await this.notificationGateway.sendEmail<VerifierClasseEmailReferentDepRegParams>(

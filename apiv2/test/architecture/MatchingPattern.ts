@@ -20,6 +20,7 @@ export enum MatchingPattern {
     SHARED_CORE = "..shared.core..",
 
     NESTJS_COMMON = "@nestjs.common",
+    NESTJS_CONFIG = "@nestjs.config",
     NESTJS_TESTING = "@nestjs.testing",
     NESTJS_BULLMQ = "@nestjs.bullmq",
 
