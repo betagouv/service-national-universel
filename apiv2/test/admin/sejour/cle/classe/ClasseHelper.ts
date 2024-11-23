@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
-import { ClasseGateway } from "src/admin/core/sejours/cle/classe/Classe.gateway";
-import { ClasseModel } from "src/admin/core/sejours/cle/classe/Classe.model";
+import { ClasseGateway } from "@admin/core/sejours/cle/classe/Classe.gateway";
+import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
 import { getAdminTestModuleRef } from "../../../setUpAdminTest";
 
 export const createClasse = async (classe: Partial<ClasseModel>) => {

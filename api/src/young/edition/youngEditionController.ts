@@ -35,11 +35,13 @@ import {
   canEditYoung,
   canAllowSNU,
   YoungType,
+  isAdmin,
+  isReferentReg,
   getPhaseStatusOptions,
 } from "snu-lib";
 import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
-import { format } from "date-fns";
+import { format, isAfter } from "date-fns";
 import { config } from "../../config";
 const { logger } = require("../../logger");
 import { validateId, idSchema } from "../../utils/validator";
@@ -115,6 +117,10 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (!canEditYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+
+    const cohort = await CohortModel.findById(young.cohortId);
+    if (!isAdmin(req.user) && !isReferentReg(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate)))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);
@@ -259,6 +265,10 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     if (!canEditYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+
+    const cohort = await CohortModel.findById(young.cohortId);
+    if (!isAdmin(req.user) && !isReferentReg(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate)))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     young.set({

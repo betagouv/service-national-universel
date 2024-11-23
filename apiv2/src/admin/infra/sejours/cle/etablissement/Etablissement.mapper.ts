@@ -1,5 +1,5 @@
 import { EtablissementType } from "snu-lib";
-import { EtablissementModel } from "src/admin/core/sejours/cle/etablissement/Etablissement.model";
+import { EtablissementModel } from "@admin/core/sejours/cle/etablissement/Etablissement.model";
 import { EtablissementDocument } from "./provider/EtablissementMongo.provider";
 import e from "express";
 

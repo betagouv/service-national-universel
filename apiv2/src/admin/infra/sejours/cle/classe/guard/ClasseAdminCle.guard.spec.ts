@@ -1,9 +1,9 @@
 import { ExecutionContext } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { CustomRequest } from "@shared/infra/CustomRequest";
-import { ClasseModel } from "src/admin/core/sejours/cle/classe/Classe.model";
-import { EtablissementGateway } from "src/admin/core/sejours/cle/etablissement/Etablissement.gateway";
-import { EtablissementModel } from "src/admin/core/sejours/cle/etablissement/Etablissement.model";
+import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
+import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etablissement.gateway";
+import { EtablissementModel } from "@admin/core/sejours/cle/etablissement/Etablissement.model";
 import { ClasseAdminCleGuard } from "./ClasseAdminCle.guard";
 import { ClasseDepartementGuard } from "./ClasseDepartement.guard";
 import { ClasseGuardService } from "./ClasseGuard.service";

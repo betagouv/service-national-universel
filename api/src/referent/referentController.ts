@@ -106,6 +106,7 @@ import {
   YoungType,
   getDepartmentForInscriptionGoal,
   isAdmin,
+  isReferentReg,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -649,18 +650,18 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
         const classe = await ClasseModel.findById(young.classeId);
         if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const now = new Date();
-        const isInsctructionOpen = now < cohort.instructionEndDate;
+        const isInstructionOpen = now < cohort.instructionEndDate;
         const remainingPlaces = classe.totalSeats - classe.seatsTaken;
         if (remainingPlaces <= 0) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
-        if (!isInsctructionOpen && !isAdmin(req.user)) {
+        if (!isInstructionOpen && !isAdmin(req.user) && !isReferentReg(req.user)) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       } else {
         const now = new Date();
-        const isInsctructionOpen = now < cohort.instructionEndDate;
-        if (!isInsctructionOpen && !isAdmin(req.user)) {
+        const isInstructionOpen = now < cohort.instructionEndDate;
+        if (!isInstructionOpen && !isAdmin(req.user) && !isReferentReg(req.user)) {
           return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }

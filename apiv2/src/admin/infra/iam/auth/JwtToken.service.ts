@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { ReferentPasswordModel } from "src/admin/core/iam/Referent.model";
+import { ReferentPasswordModel } from "@admin/core/iam/Referent.model";
 import { TechnicalException, TechnicalExceptionType } from "@shared/infra/TechnicalException";
 import { AuthProvider } from "./Auth.provider";
 

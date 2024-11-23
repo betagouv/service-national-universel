@@ -1,7 +1,7 @@
 import { Inject, Injectable, NestMiddleware, UnauthorizedException } from "@nestjs/common";
 import { NextFunction, Response } from "express";
 import { CustomRequest } from "../../../../shared/infra/CustomRequest";
-import { ReferentGateway } from "src/admin/core/iam/Referent.gateway";
+import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { AuthProvider } from "./Auth.provider";
 import { ClsService } from "nestjs-cls";
 
