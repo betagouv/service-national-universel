@@ -1,6 +1,10 @@
 import process from "node:process";
 import { envStr, envFloat, envBool, envInt } from "snu-lib";
 
+import dotenv from "dotenv";
+
+dotenv.config();
+
 function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallback?: T) {
   try {
     return callback(process.env[key], fallback);
