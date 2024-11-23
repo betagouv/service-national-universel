@@ -8,6 +8,9 @@
         "npm": "^10.8"
     },
     "scripts": {
+        "dev": "sleep 2 && concurrently -k 'npm run dev:api' 'npm run dev:tasks'",
+        "dev:api": "nest start api --debug --watch --preserveWatchOutput",
+        "dev:tasks": "nest start job --debug --watch --preserveWatchOutput",
         "build": "nest build",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "nest start",
@@ -60,6 +63,7 @@
         "@typescript-eslint/eslint-plugin": "^8.0.0",
         "@typescript-eslint/parser": "^8.0.0",
         "arch-unit-ts": "^1.0.8",
+        "concurrently": "^9.1.0",
         "eslint": "^8.42.0",
         "eslint-config-prettier": "^9.0.0",
         "eslint-plugin-prettier": "^5.0.0",
