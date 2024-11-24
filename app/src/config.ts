@@ -13,6 +13,7 @@ function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallbac
 const RELEASE = _env(envStr, "VITE_RELEASE", "development");
 const environment = _env(envStr, "VITE_ENVIRONMENT", "development");
 const apiURL = _env(envStr, "VITE_API_URL", "http://localhost:8080");
+const apiv2URL = _env(envStr, "VITE_APIV2_URL", "http://localhost:8086");
 const appURL = _env(envStr, "VITE_APP_URL", "http://localhost:8081");
 const adminURL = _env(envStr, "VITE_ADMIN_URL", "http://localhost:8082");
 const supportURL = _env(envStr, "VITE_SUPPORT_URL", "http://localhost:8083");
@@ -26,6 +27,7 @@ const API_ENGAGEMENT_SNU_ID = _env(envStr, "VITE_API_ENGAGEMENT_SNU_ID");
 
 export {
   apiURL,
+  apiv2URL,
   RELEASE,
   SENTRY_TRACING_SAMPLE_RATE,
   SENTRY_SESSION_SAMPLE_RATE,

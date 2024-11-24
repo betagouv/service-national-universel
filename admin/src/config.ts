@@ -13,6 +13,7 @@ function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallbac
 const RELEASE = _env(envStr, "VITE_RELEASE", "development");
 const environment: "production" | "staging" | "ci" | "custom" | "test" | "development" = _env(envStr, "VITE_ENVIRONMENT", "development");
 const apiURL = _env(envStr, "VITE_API_URL", "http://localhost:8080");
+const apiv2URL = _env(envStr, "VITE_APIV2_URL", "http://localhost:8086");
 const appURL = _env(envStr, "VITE_APP_URL", "http://localhost:8081");
 const adminURL = _env(envStr, "VITE_ADMIN_URL", "http://localhost:8082");
 const supportURL = _env(envStr, "VITE_SUPPORT_URL", "http://localhost:8083");
@@ -21,4 +22,4 @@ const SENTRY_TRACING_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_TRACING_SAMPLE_RA
 const SENTRY_SESSION_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_SESSION_SAMPLE_RATE", 0.1);
 const SENTRY_ON_ERROR_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_ON_ERROR_SAMPLE_RATE", 1.0);
 
-export { apiURL, appURL, RELEASE, SENTRY_TRACING_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_ON_ERROR_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };
+export { apiURL, apiv2URL, appURL, RELEASE, SENTRY_TRACING_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_ON_ERROR_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };

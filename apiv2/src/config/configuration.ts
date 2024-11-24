@@ -36,6 +36,9 @@ export default () => ({
     },
     urls: {
         admin: _env(envStr, "ADMIN_URL", "http://localhost:8082"),
+        app: _env(envStr, "APP_URL", "http://localhost:8081"),
+        api: _env(envStr, "API_URL", "http://localhost:8080"),
+        apiv2: _env(envStr, "APIV2_URL", "http://localhost:8086"),
     },
     auth: {
         jwtSecret: _env(envStr, "JWT_SECRET"),

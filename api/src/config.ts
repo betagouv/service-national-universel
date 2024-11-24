@@ -39,6 +39,7 @@ export const config = {
   ENABLE_ANTIVIRUS: _env(envBool, "ENABLE_ANTIVIRUS", false),
   ENABLE_FLATTEN_ERROR_LOGS: _env(envBool, "ENABLE_FLATTEN_ERROR_LOGS", false), // Print error stack without newlines on stderr
   API_URL: _env(envStr, "API_URL", "http://localhost:8080"),
+  APIV2_URL: _env(envStr, "APIV2_URL", "http://localhost:8086"),
   APP_URL: _env(envStr, "APP_URL", "http://localhost:8081"),
   ADMIN_URL: _env(envStr, "ADMIN_URL", "http://localhost:8082"),
   SENTRY_TRACING_SAMPLE_RATE: _env(envFloat, "SENTRY_TRACING_SAMPLE_RATE", 1),
