@@ -13,6 +13,6 @@ then
     exec node apiv2/dist/main.js
   fi
 else
-  RUN_TASKS=true node apiv2/dist/mainJob.js &
+  node apiv2/dist/mainJob.js &
   exec node apiv2/dist/main.js
 fi

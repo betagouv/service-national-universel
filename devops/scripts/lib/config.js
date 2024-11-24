@@ -1,7 +1,7 @@
 const { readFile } = require("node:fs/promises");
 const { resolve } = require("node:path");
 
-const APPLICATIONS = ["app", "admin", "api", "apiv2"];
+const APPLICATIONS = ["app", "admin", "api", "apiv2", "tasks", "tasksv2"];
 
 const FRONTEND_APPS = ["app", "admin"];
 
@@ -128,12 +128,15 @@ class AppConfig extends EnvConfig {
     if (FRONTEND_APPS.includes(this.app)) {
       return "";
     }
+
+    const app = this.imageName();
+
     switch (this.env) {
       case "staging":
       case "production":
-        return `${this.env}-${this.app}-run`;
+        return `${this.env}-${app}-run`;
       default:
-        return `ci-${this.app}-run`;
+        return `ci-${app}-run`;
     }
   }
 
@@ -187,7 +190,13 @@ class AppConfig extends EnvConfig {
       case "staging":
       case "production":
       case "ci":
-        return {};
+        switch (this.app) {
+          case "tasks":
+          case "tasksv2":
+            return { RUN_TASKS: "true" };
+          default:
+            return {};
+        }
     }
 
     const urls = this.applicationUrls(registryEndpoint);
