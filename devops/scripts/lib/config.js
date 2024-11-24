@@ -189,7 +189,7 @@ class AppConfig extends EnvConfig {
         return {};
     }
 
-    const urls = applicationUrls(registryEndpoint);
+    const urls = this.applicationUrls(registryEndpoint);
 
     switch (this.app) {
       case "api":
