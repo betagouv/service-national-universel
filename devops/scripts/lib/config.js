@@ -173,6 +173,7 @@ class AppConfig extends EnvConfig {
           ...vars,
           VITE_APP_URL: urls.app,
           VITE_API_URL: urls.api,
+          VITE_APIV2_URL: urls.apiv2,
           VITE_ADMIN_URL: urls.admin,
           NGINX_HOSTNAME: urls[this.app].replace("https://", ""),
         };
@@ -193,9 +194,11 @@ class AppConfig extends EnvConfig {
 
     switch (this.app) {
       case "api":
+      case "apiv2":
         return {
           APP_URL: urls.app,
           API_URL: urls.api,
+          APIV2_URL: urls.apiv2,
           ADMIN_URL: urls.admin,
         };
       default:
