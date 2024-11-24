@@ -128,8 +128,6 @@ jobs:
           echo "registry: $registry"
           echo "registry=$registry" >> $GITHUB_OUTPUT
 
-      # TODO: create PR comment with env urls
-
   build:
     needs: [prepare, create_environment]
     runs-on: ubuntu-latest
