@@ -18,6 +18,7 @@
     "clean": "rm -fr node_modules .turbo build .swc"
   },
   "devDependencies": {
+    "@types/react-redux-toastr": "^7.0.0",
     "@swc/plugin-styled-components": "1.5.111",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "eslint": "^8.56.0",

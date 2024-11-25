@@ -34,3 +34,4 @@ export * from "./utils/parseEnv";
 export * from "./young";
 export * from "./mongoSchema";
 export * from "./constants/cohesionCenter";
+export * from "./domains";

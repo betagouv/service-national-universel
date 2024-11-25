@@ -3,6 +3,7 @@ import { InterfaceExtended } from "..";
 
 import { PointDeRassemblementSchema } from "./pointDeRassemblement";
 import { ModificationBusSchema } from "./modificationBus";
+import { TRANSPORT_MODES } from "../../domains";
 
 export const PlanTransportPointDeRassemblementEnrichedSchema = {
   // * ES ne save pas le champ _id si il est contenu dans un array, obligé de corriger le plugin ElasticMongoose ou de dupliquer l'id
@@ -44,7 +45,7 @@ export const PlanTransportPointDeRassemblementEnrichedSchema = {
   transportType: {
     type: String,
     required: true,
-    enum: ["train", "bus", "fusée", "avion"],
+    enum: TRANSPORT_MODES,
     documentation: {
       description: "Type de transport",
     },

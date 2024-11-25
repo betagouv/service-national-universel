@@ -1,7 +1,5 @@
 // To test run:
 // ts-node ./src/crons/__tester__.ts patch/young
-
-import { config } from "../config";
 import { initDB } from "../mongo";
 
 // You need to run in local apps and target the right database (Prod usually)
@@ -39,6 +37,9 @@ import { initDB } from "../mongo";
       break;
     case "check-coherence":
       await require("./checkCoherence").handler();
+      break;
+    case "autoValidatePhase1":
+      await require("./autoValidatePhase1").handler();
       break;
     default:
       console.log("No cron found for " + process.argv[2]);

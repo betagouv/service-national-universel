@@ -69,6 +69,8 @@ function capture(err, contexte) {
     return sentryCaptureMessage(msg);
   }
 
+  if (typeof err === "string") return captureMessage(err, contexte);
+
   if (err instanceof Error) {
     // Capture the current error and recursively capture any nested causes
     const eventId = captureError(err, contexte);
@@ -92,7 +94,7 @@ function capture(err, contexte) {
     return sentryCaptureMessage(err.message, contexte);
   } else {
     const msg = "Error not defined well (Change to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause#examples)";
-    logger.error(`capture: ${msg}`);
+    logger.error(`capture: ${msg}: Error ${err}`);
     return sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
 }
