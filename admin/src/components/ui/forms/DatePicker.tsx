@@ -75,7 +75,6 @@ export default function DatePicker({ value, onChange, disabled, fromYear, toYear
       toYear={toYear}
       selected={selected}
       onSelect={(date) => {
-        console.log("SELECTED", selected)
         // @ts-expect-error toUtc
         if (mode === "range") return onChange({ from: date?.from ? dayjs(date.from).toUtc().toDate() : undefined, to: date?.to ? dayjs(date.to).toUtc().toDate() : undefined });
         // @ts-expect-error toUtc
