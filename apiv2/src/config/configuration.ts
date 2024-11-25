@@ -24,7 +24,7 @@ export default () => ({
         port: _env(envInt, "PORT", 8086),
     },
     database: {
-        url: _env(envStr, "DATABASE_URL", "mongodb://localhost:27017/local_app"), // MONGO_URL in v1
+        url: _env(envStr, "DATABASE_URL", "mongodb://localhost:27017/snu_dev"), // MONGO_URL in v1
     },
     broker: {
         url: _env(envStr, "BROKER_URL", "redis://127.0.0.1:6379"), // REDIS_URL in v1
