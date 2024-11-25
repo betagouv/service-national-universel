@@ -71,8 +71,11 @@ router.get(
   async (req: RouteRequest<CohortsRoutes["GetIsReincriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsReincriptionOpen"]>) => {
     try {
       const user = req.user;
-      const cohort = await CohortModel.findOne({ _id: user.cohortId });
-      const isOpen = await isReInscriptionOpen(cohort?.cohortGroupId);
+      const cohort = await CohortModel.findById(user.cohortId);
+      if (!cohort) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+      const isOpen = await isReInscriptionOpen(cohort.cohortGroupId);
 
       return res.json({
         ok: true,

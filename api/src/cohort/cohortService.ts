@@ -6,15 +6,6 @@ const isInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
   return cohorts.some((cohort) => cohort.isInscriptionOpen);
 };
 
-const isReInscriptionOpenOnSomeCohorts = async (cohortGroupId?: string): Promise<boolean> => {
-  let query: { type: string; cohortGroupId?: string } = { type: COHORT_TYPE.VOLONTAIRE };
-  if (cohortGroupId) {
-    query = { ...query, cohortGroupId };
-  }
-  const cohorts = await CohortModel.find(query);
-  return cohorts.some((cohort) => cohort.isReInscriptionOpen);
-};
-
 export const isInscriptionOpen = async (cohortName: string | undefined): Promise<boolean> => {
   if (cohortName) {
     const cohort = await CohortModel.findOne({ name: cohortName });
@@ -24,13 +15,16 @@ export const isInscriptionOpen = async (cohortName: string | undefined): Promise
   return isInscriptionOpenOnSomeCohorts();
 };
 
-export const isReInscriptionOpen = async (cohortGroupId?: string, cohortName?: string): Promise<boolean> => {
-  if (cohortName) {
-    const cohort = await CohortModel.findOne({ name: cohortName });
-    if (!cohort) return false;
-    return cohort.isReInscriptionOpen;
+type ReinscriptionQuery = { type?: string; cohortGroupId?: { $ne: string } };
+
+export const isReInscriptionOpen = async (cohortGroupId?: string): Promise<boolean> => {
+  let query: ReinscriptionQuery = { type: COHORT_TYPE.VOLONTAIRE };
+  // On exclut les séjours appartenant à l'année du séjour actuel du volontaire.
+  if (cohortGroupId) {
+    query = { ...query, cohortGroupId: { $ne: cohortGroupId } };
   }
-  return isReInscriptionOpenOnSomeCohorts(cohortGroupId);
+  const cohorts = await CohortModel.find(query);
+  return cohorts.some((cohort) => cohort.isReInscriptionOpen);
 };
 
 export const findCohortBySnuIdOrThrow = async (cohortName: string) => {

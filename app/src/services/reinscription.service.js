@@ -2,6 +2,7 @@ import { apiURL } from "@/config";
 
 export async function fetchReInscriptionOpen() {
   return fetch(`${apiURL}/cohort-session/isReInscriptionOpen`, {
+    credentials: "include",
     headers: { "x-user-timezone": new Date().getTimezoneOffset() },
   })
     .then((res) => res.json())
