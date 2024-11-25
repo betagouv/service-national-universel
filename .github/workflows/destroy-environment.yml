@@ -11,6 +11,7 @@ defaults:
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: github.ref_name != 'main' || github.ref_name != 'production'
     steps:
       - uses: actions/checkout@v4
 
