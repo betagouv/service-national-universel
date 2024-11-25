@@ -1,4 +1,4 @@
-import { ReferentPasswordModel } from "src/admin/core/iam/Referent.model";
+import { ReferentPasswordModel } from "@admin/core/iam/Referent.model";
 
 export interface AuthProvider {
     forgeToken(referent: ReferentPasswordModel): Promise<string>;

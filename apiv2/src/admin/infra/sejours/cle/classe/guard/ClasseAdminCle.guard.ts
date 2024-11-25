@@ -1,11 +1,10 @@
 import { CanActivate, ExecutionContext, Inject, Injectable } from "@nestjs/common";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 import { isSuperAdmin } from "snu-lib";
-import { EtablissementGateway } from "src/admin/core/sejours/cle/etablissement/Etablissement.gateway";
+import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etablissement.gateway";
 import { ClasseDepartementGuard } from "./ClasseDepartement.guard";
 import { ClasseGuardService } from "./ClasseGuard.service";
 import { ClasseRegionGuard } from "./ClasseRegion.guard";
-import { ReferentMapper } from "src/admin/infra/iam/repository/mongo/Referent.mapper";
 
 @Injectable()
 export class ClasseAdminCleGuard implements CanActivate {

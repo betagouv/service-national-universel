@@ -20,6 +20,7 @@
         "noFallthroughCasesInSwitch": false,
         "strict": true,
         "paths": {
+            "@admin/*": ["src/admin/*"],
             "@config/*": ["src/config/*"],
             "@infra/*": ["src/infra/*"],
             "@shared/*": ["src/shared/*"],

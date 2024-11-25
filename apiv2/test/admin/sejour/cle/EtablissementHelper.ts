@@ -1,7 +1,7 @@
 import mongoose, { Types } from "mongoose";
 import { CLE_SECTOR, CLE_TYPE } from "snu-lib";
-import { EtablissementGateway } from "src/admin/core/sejours/cle/etablissement/Etablissement.gateway";
-import { EtablissementModel } from "src/admin/core/sejours/cle/etablissement/Etablissement.model";
+import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etablissement.gateway";
+import { EtablissementModel } from "@admin/core/sejours/cle/etablissement/Etablissement.model";
 import { getAdminTestModuleRef } from "../../setUpAdminTest";
 
 export const createEtablissement = async (etablissement?: Partial<EtablissementModel>) => {
