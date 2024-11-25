@@ -1,4 +1,4 @@
-import config from "config";
+import { config } from "../../config";
 import { SENDINBLUE_TEMPLATES } from "snu-lib";
 import { sendTemplate } from "../../brevo";
 import { getCcOfYoung } from "../../utils";

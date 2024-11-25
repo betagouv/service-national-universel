@@ -1,6 +1,6 @@
 const { ReferentModel, StructureModel } = require("../models");
 const { ROLES } = require("snu-lib");
-const config = require("config");
+const { config } = require("../config");
 const { isYoung } = require("../utils");
 
 const getUserAttributes = async (user) => {

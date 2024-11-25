@@ -13,7 +13,7 @@ const { decrypt, encrypt } = require("../cryptoUtils");
 
 const { sendTemplate } = require("../brevo");
 const { validateUpdateApplication, validateNewApplication, validateId, idSchema } = require("../utils/validator");
-const config = require("config");
+const { config } = require("../config");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,

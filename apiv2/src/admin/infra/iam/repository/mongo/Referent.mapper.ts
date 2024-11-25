@@ -35,6 +35,7 @@ export class ReferentMapper {
             mobile: referentDocument.mobile,
             acceptCGU: referentDocument.acceptCGU === "true" ? true : false,
             lastLogoutAt: referentDocument.lastLogoutAt,
+            passwordChangedAt: referentDocument.passwordChangedAt, // required by jwt_token v1
 
             // used by usecase or frontend ?
             // lastLoginAt: referentDocument.lastLoginAt,
@@ -45,7 +46,6 @@ export class ReferentMapper {
             // token2FA: referentDocument.token2FA,
             // token2FAExpires: referentDocument.token2FAExpires,
             // attempts2FA: referentDocument.attempts2FA,
-            // passwordChangedAt: referentDocument.passwordChangedAt,
             // registredAt: referentDocument.registredAt,
             // nextLoginAttemptIn: referentDocument.nextLoginAttemptIn,
             // forgotPasswordResetToken: referentDocument.forgotPasswordResetToken,
@@ -79,6 +79,7 @@ export class ReferentMapper {
             invitationExpires: referentModel.invitationExpires,
             acceptCGU: referentModel.acceptCGU ? "true" : "false",
             lastLogoutAt: referentModel.lastLogoutAt,
+            passwordChangedAt: referentModel.passwordChangedAt, // required by jwt_token v1
 
             // update from usecase ?
             // lastLoginAt: referentModel.lastLoginAt,
@@ -89,7 +90,6 @@ export class ReferentMapper {
             // token2FA: referentModel.token2FA,
             // token2FAExpires: referentModel.token2FAExpires,
             // attempts2FA: referentModel.attempts2FA,
-            // passwordChangedAt: referentModel.passwordChangedAt,
             // registredAt: referentModel.registredAt,
             // nextLoginAttemptIn: referentModel.nextLoginAttemptIn,
             // forgotPasswordResetToken: referentModel.forgotPasswordResetToken,

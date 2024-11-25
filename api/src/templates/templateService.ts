@@ -1,6 +1,6 @@
 import path from "path";
 import PDFDocument from "pdfkit";
-import config from "config";
+import { config } from "../config";
 
 export const FONT = "Marianne";
 export const FONT_BOLD = `${FONT}-Bold`;

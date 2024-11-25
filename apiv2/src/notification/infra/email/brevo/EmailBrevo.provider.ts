@@ -1,5 +1,6 @@
 import * as brevo from "@getbrevo/brevo";
 import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { EmailParams, EmailTemplate } from "@notification/core/Notification";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
@@ -7,18 +8,24 @@ import { ContactProvider } from "../Contact.provider";
 import { EmailProvider } from "../Email.provider";
 import { EmailBrevoMapper } from "./EmailBrevo.mapper";
 
+function setApiKey(apiInstance: brevo.TransactionalEmailsApi | brevo.ContactsApi, value: string) {
+    //@ts-ignore
+    let apiKey = apiInstance.authentications["apiKey"];
+    apiKey.apiKey = value;
+}
 @Injectable()
 export class EmailBrevoProvider implements EmailProvider, ContactProvider {
     emailsApi: brevo.TransactionalEmailsApi;
     contactsApi: brevo.ContactsApi;
 
-    constructor() {
+    constructor(private readonly config: ConfigService) {
+        let apiKey = this.config.getOrThrow("email.apiKey");
+
         this.emailsApi = new brevo.TransactionalEmailsApi();
+        setApiKey(this.emailsApi, apiKey);
+
         this.contactsApi = new brevo.ContactsApi();
-        //@ts-ignore
-        let apiKey = this.emailsApi.authentications["apiKey"];
-        // TODO : inject node-config key
-        apiKey.apiKey = "";
+        setApiKey(this.contactsApi, apiKey);
     }
 
     async send(template: EmailTemplate, emailParams: EmailParams): Promise<{ response: object; body: object }> {

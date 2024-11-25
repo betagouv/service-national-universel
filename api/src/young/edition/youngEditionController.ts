@@ -42,7 +42,7 @@ import {
 import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
 import { format, isAfter } from "date-fns";
-import config from "config";
+import { config } from "../../config";
 const { logger } = require("../../logger");
 import { validateId, idSchema } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";

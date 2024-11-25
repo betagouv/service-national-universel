@@ -1,7 +1,6 @@
 const http = require("http");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const events = require("events");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const passport = require("passport");
@@ -12,7 +11,7 @@ const requestIp = require("request-ip"); // Import request-ip package
 const express = require("express");
 const { createTerminus } = require("@godaddy/terminus");
 
-const config = require("config");
+const { config } = require("./config");
 const { logger } = require("./logger");
 
 const { capture } = require("./sentry");
@@ -25,59 +24,7 @@ const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
 const { runMigrations } = require("./migration");
 
-const basicAuth = require("express-basic-auth");
-const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers, scheduleRepeatableTasks } = require("./queues/redisQueue");
-
-async function runTasks() {
-  await Promise.all([initDB(), getAllPdfTemplates()]);
-
-  initQueues();
-  initWorkers();
-  await scheduleRepeatableTasks();
-
-  const app = express();
-
-  if (config.get("TASK_MONITOR_ENABLE_AUTH")) {
-    app.use(
-      basicAuth({
-        challenge: true,
-        users: {
-          [config.get("TASK_MONITOR_USER")]: config.get("TASK_MONITOR_SECRET"),
-        },
-      }),
-    );
-  }
-  app.use("/", initMonitor());
-  setupExpressErrorHandler(app);
-
-  // * Use Terminus for graceful shutdown when using Docker
-  const server = http.createServer(app);
-
-  function onSignal() {
-    logger.debug("server is starting cleanup");
-    return Promise.all([closeDB(), closeQueues(), closeWorkers()]);
-  }
-
-  function onShutdown() {
-    logger.debug("cleanup finished, server is shutting down");
-  }
-
-  function healthCheck({ state }) {
-    return Promise.resolve();
-  }
-
-  const options = {
-    healthChecks: {
-      "/healthcheck": healthCheck,
-    },
-    onSignal,
-    onShutdown,
-  };
-
-  createTerminus(server, options);
-
-  server.listen(config.PORT, () => logger.debug(`Listening on port ${config.PORT}`));
-}
+const { initQueues, closeQueues, initWorkers, closeWorkers } = require("./queues/redisQueue");
 
 async function runAPI() {
   if (config.ENVIRONMENT !== "test") {
@@ -236,7 +183,7 @@ async function runAPI() {
 
   function onSignal() {
     logger.debug("server is starting cleanup");
-    return Promise.all([closeDB(), closeRedisClient(), closeQueues()]);
+    return Promise.all([closeDB(), closeRedisClient(), closeQueues(), closeWorkers()]);
   }
 
   function onShutdown() {
@@ -260,9 +207,12 @@ async function runAPI() {
   server.listen(config.PORT, () => logger.debug(`Listening on port ${config.PORT}`));
 
   await runMigrations();
+
+  if (config.RUN_API_AND_TASKS) {
+    await initWorkers();
+  }
 }
 
 module.exports = {
   runAPI,
-  runTasks,
 };

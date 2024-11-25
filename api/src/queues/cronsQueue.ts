@@ -1,4 +1,4 @@
-import config from "config";
+import { config } from "../config";
 import { logger } from "../logger";
 import { Worker, Queue, Job, RepeatableJob } from "bullmq";
 import { capture, captureMessage } from "../sentry";
@@ -8,7 +8,7 @@ import { captureCheckIn } from "@sentry/node";
 import { MonitorConfig } from "@sentry/types";
 import { logStartedTask, logSucceedTask, logFailedTask } from "./taskLoggerService";
 
-const CRONS_QUEUE = `${config.get("TASK_QUEUE_PREFIX")}_crons`;
+const CRONS_QUEUE = `${config.TASK_QUEUE_PREFIX}_crons`;
 const CONCURRENCY = 2;
 
 let queue: Queue | null = null;

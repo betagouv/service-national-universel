@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import config from "config";
+import { config } from "../../config";
 import { logger } from "../../logger";
 
 import { CLE_COLORATION, TYPE_CLASSE, ClasseType } from "snu-lib";

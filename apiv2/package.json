@@ -8,21 +8,24 @@
         "npm": "^10.8"
     },
     "scripts": {
+        "dev": "nest start apiAndJob --debug --watch --preserveWatchOutput",
+        "dev:api": "nest start api --debug --watch --preserveWatchOutput",
+        "dev:tasks": "nest start job --debug --watch --preserveWatchOutput",
         "build": "nest build",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-        "start": "nest start",
-        "start:dev": "nest start --watch",
+        "start": "nest start apiAndJob",
+        "start:dev": "nest start apiAndJob --watch",
         "start:api": "nest start api --debug --watch",
         "start:job": "nest start job --debug --watch",
         "start:debug": "nest start --debug --watch",
         "start:prod": "node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-        "test": "jest --runInBand",
+        "test": "jest --runInBand --testTimeout=30000",
         "test:watch": "jest --watch",
         "test:cov": "jest --coverage",
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --config ./test/jest-e2e.json",
-        "clean": "rm -fr node_modules .turbo"
+        "clean": "rm -fr node_modules dist .turbo"
     },
     "dependencies": {
         "@getbrevo/brevo": "^2.2.0",

@@ -1,3 +1,4 @@
+import { ConfigModule } from "@nestjs/config";
 import { DatabaseModule } from "@infra/Database.module"; // TO REMOVE ?
 import { JwtAuthModule } from "@infra/JwtAuth.module";
 // import { databaseProviders } from "@infra/Database.provider"; // TO REMOVE ?
@@ -29,7 +30,15 @@ import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
 
 @Module({
-    imports: [ClsModule.forRoot({}), DatabaseModule, JwtAuthModule, NotificationModule, QueueModule, TaskModule],
+    imports: [
+        ClsModule.forRoot({}),
+        ConfigModule,
+        DatabaseModule,
+        JwtAuthModule,
+        NotificationModule,
+        QueueModule,
+        TaskModule,
+    ],
     controllers: [ClasseController, AuthController, AdminTaskController],
     providers: [
         ClasseService,

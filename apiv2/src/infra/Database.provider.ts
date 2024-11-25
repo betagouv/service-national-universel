@@ -6,9 +6,9 @@ export const databaseProviders = [
     {
         inject: [ConfigService],
         provide: DATABASE_CONNECTION,
-        useFactory: async (configService: ConfigService): Promise<typeof mongoose> => {
+        useFactory: async (config: ConfigService): Promise<typeof mongoose> => {
             mongoose.set("transactionAsyncLocalStorage", true);
-            return await mongoose.connect(configService.getOrThrow("database.url"));
+            return await mongoose.connect(config.getOrThrow("database.url"));
         },
     },
 ];

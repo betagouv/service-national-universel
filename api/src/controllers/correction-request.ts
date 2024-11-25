@@ -11,7 +11,7 @@
 import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
-import config from "config";
+import { config } from "../config";
 
 import { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES } from "snu-lib";
 

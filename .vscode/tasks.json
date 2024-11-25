@@ -60,12 +60,24 @@
     },
     {
       "label": "Start Admin Applications",
-      "dependsOn": ["Start Lib", "Start DS", "Start Api", "Start Admin"],
+      "dependsOn": [
+        "Start Lib",
+        "Start DS",
+        "Start Api",
+        "Start Apiv2",
+        "Start Admin"
+      ],
       "problemMatcher": []
     },
     {
       "label": "Start App Applications",
-      "dependsOn": ["Start Lib", "Start DS", "Start Api", "Start App"],
+      "dependsOn": [
+        "Start Lib",
+        "Start DS",
+        "Start Api",
+        "Start Apiv2",
+        "Start App"
+      ],
       "problemMatcher": []
     },
     {
@@ -74,6 +86,7 @@
         "Start Lib",
         "Start DS",
         "Start Api",
+        "Start Apiv2",
         "Start Admin",
         "Start App",
         "Start Support"
@@ -101,6 +114,15 @@
     {
       "label": "Start Api",
       "command": "npm run dev:app api",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start Apiv2",
+      "command": "npm run dev:app apiv2",
       "type": "shell",
       "problemMatcher": [],
       "options": {

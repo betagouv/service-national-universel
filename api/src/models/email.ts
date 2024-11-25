@@ -1,4 +1,4 @@
-import config from "config";
+import { config } from "../config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import esClient from "../es";
@@ -12,7 +12,7 @@ const MODELNAME = "email";
 
 const schema = new Schema(EmailSchema);
 
-if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+if (config.ENABLE_MONGOOSE_ELASTIC) {
   schema.plugin(mongooseElastic(esClient), MODELNAME);
 }
 

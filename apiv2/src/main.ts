@@ -8,9 +8,11 @@ import { AppModule } from "./App.module";
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.useGlobalPipes(new ValidationPipe());
-
-    const configService = app.get(ConfigService);
-    const port = configService.getOrThrow("httpServer.port");
+    const config = app.get(ConfigService);
+    app.enableCors({
+        origin: [config.getOrThrow("urls.admin"), config.getOrThrow("urls.app")],
+    });
+    const port = config.getOrThrow("httpServer.port");
     await app.listen(port);
 }
 bootstrap();

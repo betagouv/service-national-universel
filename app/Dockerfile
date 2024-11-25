@@ -1,4 +1,5 @@
 FROM node:20.17-alpine AS base
+ENV APP_NAME="app"
 
 FROM base AS builder
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
@@ -8,7 +9,6 @@ RUN apk update
 WORKDIR /app
 RUN npm install --global turbo@^2.0.0
 COPY . .
-ENV APP_NAME app
 RUN turbo prune $APP_NAME --docker
 
 # Add lockfile and package.json's of isolated subworkspace
@@ -32,12 +32,26 @@ COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 COPY tsconfig.front.json tsconfig.front.json
 
-ARG RELEASE=""
-ENV RELEASE=${RELEASE}
-ARG SENTRY_AUTH_TOKEN=""
-ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
-ENV APP_NAME app
-RUN npm run build
+ARG ENVIRONMENT
+ARG RELEASE
+
+ENV VITE_ENVIRONMENT=${ENVIRONMENT}
+ENV VITE_RELEASE=${RELEASE}
+ARG VITE_API_URL
+ARG VITE_APP_URL
+ARG VITE_ADMIN_URL
+ARG VITE_SUPPORT_URL
+ARG VITE_MAINTENANCE
+ARG VITE_SENTRY_SESSION_SAMPLE_RATE
+ARG VITE_SENTRY_TRACING_SAMPLE_RATE
+ARG VITE_SENTRY_ON_ERROR_SAMPLE_RATE
+ARG VITE_FRANCE_CONNECT_URL
+ARG VITE_API_ENGAGEMENT_URL
+ARG VITE_API_ENGAGEMENT_SNU_ID
+
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) \
+    npm run build
 
 FROM nginx AS runner
 
@@ -46,17 +60,9 @@ LABEL org.opencontainers.image.description="This image provides a consistent and
 
 COPY --from=installer /app/app/build/ /usr/share/nginx/html
 COPY --from=builder /app/app/docker_nginx.conf /etc/nginx/templates/default.conf.template
-COPY --from=builder /app/app/docker_start.sh .
-COPY --from=builder /app/admin/docker_config docker_config
 
-RUN chmod +x ./docker_start.sh
-
-ENV APP_NAME app
-ARG RELEASE=""
-ENV RELEASE=${RELEASE}
-ENV MAINTENANCE="false"
+ARG NGINX_HOSTNAME=""
+RUN sed "s/\${NGINX_HOSTNAME}/${NGINX_HOSTNAME}/g" /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
+RUN rm /etc/nginx/templates/default.conf.template
 
 EXPOSE 8080
-
-# override default entrypoint
-ENTRYPOINT ["./docker_start.sh"]
