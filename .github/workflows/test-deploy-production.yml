@@ -55,10 +55,10 @@ jobs:
         run: |
           # BUILD MATRIX
           echo "[]" \
-          | jq  '. + [{name:"api", remote: "CLEVER_CLOUD_GIT_REMOTE_API_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"apiv2", remote: "CLEVER_CLOUD_GIT_REMOTE_APIV2_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"app", remote: "CLEVER_CLOUD_GIT_REMOTE_APP_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", remote: "CLEVER_CLOUD_GIT_REMOTE_ADMIN_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > build.json
+          | jq  '. + [{name:"api", image: "api", remote: "CLEVER_CLOUD_GIT_REMOTE_API_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"apiv2", image: "apiv2", remote: "CLEVER_CLOUD_GIT_REMOTE_APIV2_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"app", image: "app", remote: "CLEVER_CLOUD_GIT_REMOTE_APP_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"admin", image: "admin", remote: "CLEVER_CLOUD_GIT_REMOTE_ADMIN_DOCKER", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > build.json
 
           echo "Build matrix"
           cat build.json
@@ -66,8 +66,8 @@ jobs:
 
           # DEPLOY MATRIX
           cat build.json \
-          | jq '. + [{name:"tasks", tag:.[]|select(.name == "api")|.tag, remote: "CLEVER_CLOUD_GIT_REMOTE_TASKS_DOCKER"}]' \
-          | jq '. + [{name:"tasksv2", tag:.[]|select(.name == "apiv2")|.tag, remote: "CLEVER_CLOUD_GIT_REMOTE_TASKSV2_DOCKER"}]' > deploy.json
+          | jq '. + [{name:"tasks", image: "api", tag:.[]|select(.name == "api")|.tag, remote: "CLEVER_CLOUD_GIT_REMOTE_TASKS_DOCKER"}]' \
+          | jq '. + [{name:"tasksv2", image: "apiv2", tag:.[]|select(.name == "apiv2")|.tag, remote: "CLEVER_CLOUD_GIT_REMOTE_TASKSV2_DOCKER"}]' > deploy.json
 
           echo "Deploy matrix"
           cat deploy.json
@@ -267,7 +267,7 @@ jobs:
         run: |
           mkdir docker
           cd docker
-          image_tag=${{ needs.prepare.outputs.prod_registry }}/${{ matrix.app.name }}:${{ matrix.app.tag }}
+          image_tag=${{ needs.prepare.outputs.prod_registry }}/${{ matrix.app.image }}:${{ matrix.app.tag }}
           echo "FROM $image_tag" > Dockerfile
           git init
           git config user.email "github.deployer@gmail.com"
