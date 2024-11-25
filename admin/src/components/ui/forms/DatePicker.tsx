@@ -21,46 +21,33 @@ type DatePickerProps = {
 };
 
 export default function DatePicker({ value, onChange, disabled, fromYear, toYear, mode = "single" }: DatePickerProps) {
-  const defaultMonth =
-    mode === "single"
-      ? value
-        ? // @ts-expect-error toUtcLocally
-          dayjs(value).toUtcLocally().toDate()
-        : // @ts-expect-error toUtcLocally
-          dayjs(new Date()).toUtcLocally().toDate()
-      : // @ts-expect-error from
-        value?.from
-        ? // @ts-expect-error from
-          dayjs(value?.from)
-            // @ts-expect-error toUtcLocally
-            .toUtcLocally()
-            .toDate()
-        : // @ts-expect-error toUtcLocally
-          dayjs(new Date()).toUtcLocally().toDate();
-  const selected =
-    mode === "single"
-      ? value
-        ? // @ts-expect-error toUtcLocally
-          dayjs(value).toUtcLocally().toDate()
-        : undefined
-      : {
-          // @ts-expect-error from
-          from: value?.from
-            ? // @ts-expect-error from
-              dayjs(value?.from)
-                // @ts-expect-error toUtcLocally
-                .toUtcLocally()
-                .toDate()
-            : undefined,
-          // @ts-expect-error to
-          to: value?.to
-            ? // @ts-expect-error to
-              dayjs(value?.to)
-                // @ts-expect-error toUtcLocally
-                .toUtcLocally()
-                .toDate()
-            : undefined,
-        };
+  const defaultMonth = React.useMemo(() => {
+    if (mode === "single") {
+      if (value && typeof value !== "string" && !(value instanceof Date)) {
+        return dayjs().toDate();
+      }
+      return value ? dayjs(value).toDate() : dayjs().toDate();
+    } else {
+      if (value && typeof value === "object" && "from" in value && value.from) {
+        return dayjs(value.from).toDate();
+      }
+      return dayjs().toDate();
+    }
+  }, [value, mode]);
+
+  const selected = React.useMemo(() => {
+    if (mode === "single") {
+      if (value && typeof value !== "string" && !(value instanceof Date)) {
+        return undefined;
+      }
+      return value ? dayjs(value).toDate() : undefined;
+    } else {
+      return {
+        from: value && typeof value === "object" && "from" in value && value.from ? dayjs(value.from).toDate() : undefined,
+        to: value && typeof value === "object" && "to" in value && value.to ? dayjs(value.to).toDate() : undefined,
+      };
+    }
+  }, [value, mode]);
 
   return (
     <DayPicker
@@ -75,10 +62,18 @@ export default function DatePicker({ value, onChange, disabled, fromYear, toYear
       toYear={toYear}
       selected={selected}
       onSelect={(date) => {
-        // @ts-expect-error toUtc
-        if (mode === "range") return onChange({ from: date?.from ? dayjs(date.from).toUtc().toDate() : undefined, to: date?.to ? dayjs(date.to).toUtc().toDate() : undefined });
-        // @ts-expect-error toUtc
-        onChange(date ? dayjs(date).toUtc().toDate() : undefined);
+        if (mode === "range") {
+          onChange(
+            date
+              ? {
+                  from: date.from ? dayjs(date.from).toDate() : undefined,
+                  to: date.to ? dayjs(date.to).toDate() : undefined,
+                }
+              : undefined,
+          );
+        } else {
+          onChange(date ? dayjs(date).toDate() : undefined);
+        }
       }}
     />
   );
