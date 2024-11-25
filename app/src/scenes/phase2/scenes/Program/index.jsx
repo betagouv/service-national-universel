@@ -3,15 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { fetchProgram } from "../../engagement.repository";
 import Loader from "@/components/Loader";
-import { useHistory } from "react-router-dom";
-import { HiArrowLeft, HiExternalLink } from "react-icons/hi";
+import { HiExternalLink } from "react-icons/hi";
 import MissionList from "./MissionList";
-import Header from "../../components/Header";
+import Container from "@/components/layout/Container";
 
 export default function Program() {
   const { id } = useParams();
   const { isPending, error, data } = useQuery({ queryKey: ["program", id], queryFn: () => fetchProgram(id) });
-  const history = useHistory();
 
   if (isPending) return <Loader />;
 
@@ -20,18 +18,7 @@ export default function Program() {
   const imgSrc = `https://snu-bucket-prod.cellar-c2.services.clever-cloud.com/programmes-engagement/${data.imageString}`;
   const url = data.urlPhaseEngagement || data.url;
   return (
-    <div className="bg-white pb-12">
-      <Header
-        title={data.name}
-        subtitle="Trouvez un engagement"
-        backAction={
-          <button onClick={() => history.goBack()} className="flex items-center gap-1 row-start-1 md:row-start-2">
-            <HiArrowLeft className="text-2xl text-white" />
-          </button>
-        }
-        imgSrc={imgSrc}
-      />
-
+    <Container title={data.name} subtitle="Trouver un engagement" imgSrc={imgSrc}>
       <div className="max-w-4xl mx-auto px-[1rem] md:px-[2.5rem]">
         {data.publisherName ? null : (
           <a
@@ -48,7 +35,7 @@ export default function Program() {
 
         {data.publisherName ? <MissionList publisherName={data.publisherName} /> : null}
       </div>
-    </div>
+    </Container>
   );
 }
 
