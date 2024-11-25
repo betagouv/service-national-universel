@@ -24,28 +24,41 @@ export default function DatePicker({ value, onChange, disabled, fromYear, toYear
   const defaultMonth =
     mode === "single"
       ? value
-        ? dayjs(typeof value === "string" || value instanceof Date ? value : new Date()).toDate()
-        : dayjs(new Date()).toDate()
+        ? // @ts-expect-error toUtcLocally
+          dayjs(value).toUtcLocally().toDate()
+        : // @ts-expect-error toUtcLocally
+          dayjs(new Date()).toUtcLocally().toDate()
       : // @ts-expect-error from
         value?.from
         ? // @ts-expect-error from
-          dayjs(value?.from).toDate()
-        : dayjs(new Date()).toDate();
+          dayjs(value?.from)
+            // @ts-expect-error toUtcLocally
+            .toUtcLocally()
+            .toDate()
+        : // @ts-expect-error toUtcLocally
+          dayjs(new Date()).toUtcLocally().toDate();
   const selected =
     mode === "single"
       ? value
-        ? dayjs(typeof value === "string" || value instanceof Date ? value : new Date()).toDate()
+        ? // @ts-expect-error toUtcLocally
+          dayjs(value).toUtcLocally().toDate()
         : undefined
       : {
           // @ts-expect-error from
           from: value?.from
             ? // @ts-expect-error from
-              dayjs(value?.from).toDate()
+              dayjs(value?.from)
+                // @ts-expect-error toUtcLocally
+                .toUtcLocally()
+                .toDate()
             : undefined,
           // @ts-expect-error to
           to: value?.to
             ? // @ts-expect-error to
-              dayjs(value?.to).toDate()
+              dayjs(value?.to)
+                // @ts-expect-error toUtcLocally
+                .toUtcLocally()
+                .toDate()
             : undefined,
         };
 
@@ -62,6 +75,7 @@ export default function DatePicker({ value, onChange, disabled, fromYear, toYear
       toYear={toYear}
       selected={selected}
       onSelect={(date) => {
+        console.log("SELECTED", selected)
         // @ts-expect-error toUtc
         if (mode === "range") return onChange({ from: date?.from ? dayjs(date.from).toUtc().toDate() : undefined, to: date?.to ? dayjs(date.to).toUtc().toDate() : undefined });
         // @ts-expect-error toUtc

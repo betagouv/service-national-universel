@@ -21,7 +21,7 @@ dayjs.prototype.toUtc = function () {
 
 // Get the local date of the UTC date/time: yyyy-MM-ddT04:00:00.000Z (GMT-4)
 dayjs.prototype.toUtcLocally = function () {
-  return this.year(this.$d.getFullYear()).month(this.$d.getMonth()).date(this.$d.getDate()).shiftTimeToUtc().hour(0).second(0).millisecond(0);
+  return dayjs.utc(this.format("YYYY-MM-DD"), "YYYY-MM-DD");
 };
 
 dayjs.prototype.shiftTimeToUtc = function () {
