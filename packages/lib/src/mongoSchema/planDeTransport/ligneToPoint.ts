@@ -1,5 +1,6 @@
 import { Schema, InferSchemaType } from "mongoose";
 import { InterfaceExtended } from "..";
+import { TRANSPORT_MODES } from "../../domains";
 
 export const LigneToPointSchema = {
   lineId: {
@@ -52,7 +53,7 @@ export const LigneToPointSchema = {
   transportType: {
     type: String,
     required: true,
-    enum: ["train", "bus", "fusée", "avion"],
+    enum: TRANSPORT_MODES,
     documentation: {
       description: "Type de transport",
     },
@@ -88,7 +89,7 @@ export const LigneToPointSchema = {
         },
         transportType: {
           type: String,
-          enum: ["train", "bus", "fusée", "avion"],
+          enum: TRANSPORT_MODES,
           documentation: {
             description: "Type de transport du point d'étape",
           },
