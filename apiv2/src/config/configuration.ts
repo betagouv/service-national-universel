@@ -41,6 +41,6 @@ export default () => ({
         apiv2: _env(envStr, "APIV2_URL", "http://localhost:8086"),
     },
     auth: {
-        jwtSecret: _env(envStr, "JWT_SECRET"),
+        jwtSecret: _env(envStr, "JWT_SECRET", "my-secret"),
     },
 });
