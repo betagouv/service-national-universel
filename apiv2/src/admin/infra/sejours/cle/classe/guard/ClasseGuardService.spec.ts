@@ -1,6 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ClasseGuardService } from "./ClasseGuard.service";
-import { ClasseGateway } from "src/admin/core/sejours/cle/classe/Classe.gateway";
+import { ClasseGateway } from "@admin/core/sejours/cle/classe/Classe.gateway";
 
 describe("ClasseGuard.service", () => {
     let service: ClasseGuardService;

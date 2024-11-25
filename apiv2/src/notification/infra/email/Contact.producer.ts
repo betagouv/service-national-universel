@@ -1,8 +1,8 @@
 import { InjectQueue } from "@nestjs/bullmq";
 import { Inject } from "@nestjs/common";
 import { Queue } from "bullmq";
-import { ReferentModel } from "src/admin/core/iam/Referent.model";
-import { ContactGateway } from "src/admin/infra/iam/Contact.gateway";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
+import { ContactGateway } from "@admin/infra/iam/Contact.gateway";
 import { ContactType } from "../Notification";
 import { QueueName } from "@shared/infra/Queue";
 

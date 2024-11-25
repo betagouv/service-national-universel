@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Model } from "mongoose";
-import { EtablissementGateway } from "src/admin/core/sejours/cle/etablissement/Etablissement.gateway";
-import { EtablissementModel } from "src/admin/core/sejours/cle/etablissement/Etablissement.model";
+import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etablissement.gateway";
+import { EtablissementModel } from "@admin/core/sejours/cle/etablissement/Etablissement.model";
 import { EtablissementMapper } from "./Etablissement.mapper";
 import { ETABLISSEMENT_MONGOOSE_ENTITY, EtablissementDocument } from "./provider/EtablissementMongo.provider";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";

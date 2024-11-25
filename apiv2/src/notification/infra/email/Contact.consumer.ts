@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Inject, Logger } from "@nestjs/common";
 import { Job } from "bullmq";
-import { ReferentModel } from "src/admin/core/iam/Referent.model";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { ContactType } from "../Notification";
 import { QueueName } from "@shared/infra/Queue";
 import { ContactProvider } from "./Contact.provider";
