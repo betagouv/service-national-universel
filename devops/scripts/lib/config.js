@@ -219,5 +219,4 @@ class AppConfig extends EnvConfig {
 module.exports = {
   EnvConfig,
   AppConfig,
-  APPLICATIONS,
 };

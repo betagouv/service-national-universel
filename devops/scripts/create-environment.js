@@ -1,6 +1,6 @@
 const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
-const { EnvConfig, AppConfig, APPLICATIONS } = require("./lib/config");
+const { EnvConfig, AppConfig } = require("./lib/config");
 
 class CreateEnvironment {
   constructor(scalewayClient, options = {}) {
@@ -85,7 +85,9 @@ class CreateEnvironment {
     });
 
     await Promise.all(
-      APPLICATIONS.map((app) => this.findOrCreateContainer(namespace, app))
+      ["app", "admin", "api", "apiv2"].map((app) =>
+        this.findOrCreateContainer(namespace, app)
+      )
     );
   }
 }
