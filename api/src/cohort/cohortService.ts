@@ -6,12 +6,16 @@ const isInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
   return cohorts.some((cohort) => cohort.isInscriptionOpen);
 };
 
-const isReInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
-  const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
+const isReInscriptionOpenOnSomeCohorts = async (cohortGroupId?: string): Promise<boolean> => {
+  let query: { type: string; cohortGroupId?: string } = { type: COHORT_TYPE.VOLONTAIRE };
+  if (cohortGroupId) {
+    query = { ...query, cohortGroupId };
+  }
+  const cohorts = await CohortModel.find(query);
   return cohorts.some((cohort) => cohort.isReInscriptionOpen);
 };
 
-export const isInscriptionOpen = async (cohortName: String | undefined): Promise<boolean> => {
+export const isInscriptionOpen = async (cohortName: string | undefined): Promise<boolean> => {
   if (cohortName) {
     const cohort = await CohortModel.findOne({ name: cohortName });
     if (!cohort) return false;
@@ -20,13 +24,13 @@ export const isInscriptionOpen = async (cohortName: String | undefined): Promise
   return isInscriptionOpenOnSomeCohorts();
 };
 
-export const isReInscriptionOpen = async (cohortName?: String): Promise<boolean> => {
+export const isReInscriptionOpen = async (cohortGroupId?: string, cohortName?: string): Promise<boolean> => {
   if (cohortName) {
     const cohort = await CohortModel.findOne({ name: cohortName });
     if (!cohort) return false;
     return cohort.isReInscriptionOpen;
   }
-  return isReInscriptionOpenOnSomeCohorts();
+  return isReInscriptionOpenOnSomeCohorts(cohortGroupId);
 };
 
 export const findCohortBySnuIdOrThrow = async (cohortName: string) => {

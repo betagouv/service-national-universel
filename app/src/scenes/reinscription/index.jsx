@@ -52,7 +52,7 @@ export default function ReInscription() {
     queryFn: fetchReInscriptionOpen,
   });
 
-  if (!hasAccessToReinscription(young, cohort)) return <Redirect to="/" />;
+  // if (!hasAccessToReinscription(young, cohort)) return <Redirect to="/" />;
 
   if (isReinscriptionOpenLoading) return <Loader />;
 

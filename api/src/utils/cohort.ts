@@ -1,5 +1,5 @@
 import { YOUNG_STATUS, getRegionForEligibility, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS } from "snu-lib";
-import { YoungModel, CohortModel, InscriptionGoalModel, CohortDocument } from "../models";
+import { YoungModel, CohortModel, InscriptionGoalModel, CohortDocument, CohortGroupModel } from "../models";
 
 type CohortDocumentWithPlaces = CohortDocument<{
   numberOfCandidates?: number;
@@ -10,22 +10,31 @@ type CohortDocumentWithPlaces = CohortDocument<{
   isEligible?: boolean;
 }>;
 
-type YoungInfo = Pick<YoungType, "cohort" | "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip"> & {
+type YoungInfo = Pick<
+  YoungType,
+  "cohortId" | "cohort" | "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip"
+> & {
   _id?: YoungType["_id"];
   isReInscription?: boolean;
 };
 
 // TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
 export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
-  const cohorts = await CohortModel.find({ status: COHORT_STATUS.PUBLISHED });
+  let query: { status: string; cohortGroupId?: string } = { status: COHORT_STATUS.PUBLISHED };
+  if (young.cohortId) {
+    const youngCohort = await CohortModel.findOne({ _id: young.cohortId });
+    if (!youngCohort) throw new Error("Cohort not found");
+    query = { ...query, cohortGroupId: youngCohort.cohortGroupId };
+  }
+
+  const cohorts = await CohortModel.find(query);
   const region = getRegionForEligibility(young);
   const department = getDepartmentForEligibility(young);
 
-  const currentCohortYear = young.cohort ? new Date(cohorts.find((c) => c.name === young.cohort)?.dateStart || "")?.getFullYear() : undefined;
   const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
     // if the young has already a cohort, he can only apply for the cohorts of the same year
+
     return (
-      (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
       session.eligibility?.zones.includes(department) &&
       session.eligibility?.schoolLevels.includes(young.grade!) &&
       young.birthdateAt &&
