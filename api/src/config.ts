@@ -31,6 +31,7 @@ export const config = {
   PORT: _env(envInt, "PORT", 8080),
   RUN_CRONS: _env(envBool, "RUN_CRONS", false),
   RUN_TASKS: _env(envBool, "RUN_TASKS", false),
+  RUN_API_AND_TASKS: _env(envBool, "RUN_API_AND_TASKS", false),
   ENABLE_SENTRY: _env(envBool, "ENABLE_SENTRY", false),
   ENABLE_SENDINBLUE: _env(envBool, "ENABLE_SENDINBLUE", false),
   MAIL_TRANSPORT: _env(envStr, "MAIL_TRANSPORT", null), // BREVO / SMTP / null (pas d'envoi d'email)

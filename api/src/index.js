@@ -25,9 +25,10 @@ process.on("unhandledRejection", (reason, promise) => {
   throw reason;
 });
 
-const { runTasks, runAPI } = require("./main");
 if (config.RUN_TASKS) {
+  const { runTasks } = require("./mainJob");
   runTasks();
 } else {
+  const { runAPI } = require("./main");
   runAPI();
 }

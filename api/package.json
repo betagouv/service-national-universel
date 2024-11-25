@@ -10,7 +10,7 @@
   },
   "scripts": {
     "//": "dev sleep 2 seconds to let lib compile",
-    "dev": "sleep 2 && concurrently -k 'npm run dev:api' 'npm run dev:tasks'",
+    "dev": "RUN_API_AND_TASKS=true nodemon",
     "dev:api": "nodemon",
     "dev:tasks": "RUN_TASKS=true PORT=8087 nodemon",
     "debug": "DEBUG=express:* nodemon",
@@ -87,7 +87,6 @@
     "@types/bull": "^4.10.0",
     "@types/jest": "^29.5.13",
     "@types/pdfkit": "^0.13.4",
-    "concurrently": "^9.0.1",
     "csv-parser": "^3.0.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
