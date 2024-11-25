@@ -13,6 +13,5 @@ then
     exec node apiv2/dist/main.js
   fi
 else
-  node apiv2/dist/mainJob.js &
-  exec node apiv2/dist/main.js
+  exec node apiv2/dist/mainApiAndJob.js
 fi
