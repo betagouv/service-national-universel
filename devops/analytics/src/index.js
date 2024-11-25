@@ -1,5 +1,4 @@
 (async () => {
-  return;
   await require("./env-manager")();
 
   const helmet = require("helmet");
