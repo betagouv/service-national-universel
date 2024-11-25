@@ -99,7 +99,8 @@ jobs:
         endsWith(github.ref_name, 'no-ci') ||
         contains(github.ref_name, '_no_ci_') ||
         startsWith(github.ref_name, 'no_ci_') ||
-        endsWith(github.ref_name, '_no_ci')
+        endsWith(github.ref_name, '_no_ci') ||
+        startsWith(github.ref_name, 'renovate')
       )
     needs: prepare
     runs-on: ubuntu-latest
