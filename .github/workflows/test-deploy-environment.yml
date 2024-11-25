@@ -100,7 +100,8 @@ jobs:
         contains(github.ref_name, '_no_ci_') ||
         startsWith(github.ref_name, 'no_ci_') ||
         endsWith(github.ref_name, '_no_ci') ||
-        startsWith(github.ref_name, 'renovate')
+        startsWith(github.ref_name, 'renovate') ||
+        startsWith(github.ref_name, 'gh-readonly-')
       )
     needs: prepare
     runs-on: ubuntu-latest
