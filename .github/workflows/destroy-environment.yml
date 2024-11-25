@@ -9,7 +9,7 @@ defaults:
 
 jobs:
   test:
-    if: github.event.ref != "main" && github.event.ref != "production"
+    if: github.event.ref != 'main' && github.event.ref != 'production'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
