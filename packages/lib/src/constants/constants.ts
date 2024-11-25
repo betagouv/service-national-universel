@@ -779,6 +779,8 @@ const TYPE_CLASSE = {
   FULL: "FULL",
 } as const;
 
+
+
 const LIMIT_DATE_ESTIMATED_SEATS = new Date("2024-08-28");
 const LIMIT_DATE_TOTAL_SEATS = new Date("2024-09-30");
 
