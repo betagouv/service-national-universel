@@ -195,7 +195,7 @@ resource "scaleway_container" "apiv2" {
   cpu_limit       = 1024
   memory_limit    = 2048
   min_scale       = 0
-  max_scale       = 20
+  max_scale       = 1
   timeout         = 60
   max_concurrency = 25
   privacy         = "public"
