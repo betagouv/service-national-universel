@@ -7,5 +7,6 @@
   "privacy": "public",
   "timeout": "60s",
   "cpu_limit": 768,
-  "memory_limit": 2048
+  "memory_limit": 2048,
+  "sandbox": "v1"
 }
