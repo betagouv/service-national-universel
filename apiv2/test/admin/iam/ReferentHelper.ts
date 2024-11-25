@@ -1,8 +1,8 @@
 import { randomUUID } from "crypto";
 import mongoose from "mongoose";
 import { ROLES } from "snu-lib";
-import { ReferentGateway } from "src/admin/core/iam/Referent.gateway";
-import { ReferentModel } from "src/admin/core/iam/Referent.model";
+import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { getAdminTestModuleRef } from "../setUpAdminTest";
 
 export const createReferent = (referent?: Partial<ReferentModel>) => {

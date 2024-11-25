@@ -4,12 +4,12 @@ import { Link, useParams } from "react-router-dom";
 import { fetchEquivalence, fetchEquivalenceFile } from "../../engagement.repository";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
-import { HiArrowLeft, HiChat, HiDownload, HiPaperClip, HiPencil } from "react-icons/hi";
+import { HiChat, HiDownload, HiPaperClip, HiPencil } from "react-icons/hi";
 import EngagementStatusBadge from "../../components/EquivalenceStatusBadge";
 import CopyButton from "@/components/buttons/CopyButton";
 import { EQUIVALENCE_STATUS } from "snu-lib";
 import { toastr } from "react-redux-toastr";
-import Header from "../../components/Header";
+import Container from "@/components/layout/Container";
 
 export default function Equivalence() {
   const { young } = useAuth();
@@ -36,20 +36,11 @@ export default function Equivalence() {
     </Link>
   ) : null;
 
-  return (
-    <div className="bg-white">
-      <Header
-        title={data.type === "Autre" ? data.desc : data.type}
-        subtitle="Engagement ajouté"
-        action={action}
-        backAction={
-          <Link to="/phase2/mes-engagements" className="flex items-center gap-1">
-            <HiArrowLeft className="text-2xl text-gray-400" />
-          </Link>
-        }
-      />
+  const title = data.type === "Autre" ? data.desc : data.type;
 
-      <div className="mt-[2rem] md:mt-0 max-w-3xl mx-auto px-[1rem] pb-[6rem]">
+  return (
+    <Container title={title} subtitle="Engagement ajouté" action={action} backlink="/phase2/mes-engagements">
+      <div className="mt-[2rem] md:mt-0 max-w-3xl mx-auto pb-[6rem]">
         <h2 className="text-2xl md:text-3xl font-bold m-0">Statut</h2>
         <div className="mt-4 px-4 py-3 border rounded-xl w-full">
           <EngagementStatusBadge status={data.status} />
@@ -158,6 +149,6 @@ export default function Equivalence() {
           )}
         </div>
       </div>
-    </div>
+    </Container>
   );
 }

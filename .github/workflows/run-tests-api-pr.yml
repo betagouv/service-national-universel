@@ -25,11 +25,11 @@ jobs:
         with:
           ref: ${{ inputs.branch_name }}
 
-      - name: Node 18.x
+      - name: Node 20.x
         if: steps.changes.outputs.src == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 20.x
 
       - name: Start MongoDB 7.0
         if: steps.changes.outputs.src == 'true'
@@ -48,7 +48,7 @@ jobs:
             admin/node_modules
             packages/ds/node_modules
             packages/lib/node_modules
-          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json', '.nvmrc') }}
           restore-keys: |
             ${{ runner.os }}-nodemodules-
 

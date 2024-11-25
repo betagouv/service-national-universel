@@ -11,7 +11,6 @@ import { contactFactory, emailFactory } from "./infra/email/brevo/EmailContact.f
         ConfigModule.forRoot({
             load: [configuration],
         }),
-        QueueModule,
     ],
     providers: [Logger, EmailConsumer, ContactConsumer, emailFactory, contactFactory],
 })

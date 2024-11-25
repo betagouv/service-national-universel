@@ -4,8 +4,8 @@
     "description": "",
     "author": "",
     "engines": {
-        "node": "^18.20",
-        "npm": "^10.5"
+        "node": "^20.17",
+        "npm": "^10.8"
     },
     "scripts": {
         "build": "nest build",
@@ -92,9 +92,11 @@
         "moduleNameMapper": {
             "^src/(.*)$": "<rootDir>/src/$1",
             "^@config/(.*)$": "<rootDir>/src/config/$1",
+            "^@admin/(.*)$": "<rootDir>/src/admin/$1",
             "^@infra/(.*)$": "<rootDir>/src/infra/$1",
             "^@shared/(.*)$": "<rootDir>/src/shared/$1",
-            "^@notification/(.*)$": "<rootDir>/src/notification/$1"
+            "^@notification/(.*)$": "<rootDir>/src/notification/$1",
+            "^@task/(.*)$": "<rootDir>/src/task/$1"
         },
         "modulePathIgnorePatterns": [
             "<rootDir>/packages"

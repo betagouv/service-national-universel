@@ -32,6 +32,7 @@ locals {
   env             = "ci"
   domain          = "ci.beta-snu.dev"
   api_hostname    = "api.${local.domain}"
+  apiv2_hostname    = "apiv2.${local.domain}"
   admin_hostname  = "admin.${local.domain}"
   app_hostname    = "moncompte.${local.domain}"
   secrets         = jsondecode(base64decode(data.scaleway_secret_version.main.data))
@@ -133,8 +134,8 @@ resource "scaleway_container" "api" {
   namespace_id    = scaleway_container_namespace.main.id
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port            = 8080
-  cpu_limit       = 768
-  memory_limit    = 1024
+  cpu_limit       = 1024
+  memory_limit    = 2048
   min_scale       = 1
   max_scale       = 1
   timeout         = 60
@@ -180,6 +181,63 @@ resource "scaleway_container" "tasks" {
 
   secret_environment_variables = {
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  }
+}
+
+resource "scaleway_container" "apiv2" {
+  name            = "${local.env}-apiv2"
+  namespace_id    = scaleway_container_namespace.main.id
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/apiv2:latest"
+  port            = 8080
+  cpu_limit       = 1024
+  memory_limit    = 2048
+  min_scale       = 1
+  max_scale       = 1
+  timeout         = 60
+  max_concurrency = 50
+  privacy         = "public"
+  protocol        = "http1"
+  deploy          = true
+  http_option     = "redirected"
+
+  environment_variables = {
+    "ENVIRONMENT" = "ci"
+  }
+
+  secret_environment_variables = {
+    "DATABASE_URL" = local.secrets.MONGO_URL
+    "BROKER_URL" = local.secrets.REDIS_URL
+  }
+}
+
+resource "scaleway_container_domain" "apiv2" {
+  container_id = scaleway_container.apiv2.id
+  hostname     = local.apiv2_hostname
+}
+
+
+resource "scaleway_container" "tasksv2" {
+  name           = "${local.env}-tasksv2"
+  namespace_id   = scaleway_container_namespace.main.id
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/apiv2:latest"
+  port           = 8080
+  cpu_limit      = 1024
+  memory_limit   = 2048
+  min_scale      = 1
+  max_scale      = 1
+  privacy        = "public"
+  protocol       = "http1"
+  deploy         = true
+  http_option    = "redirected"
+
+  environment_variables = {
+    "RUN_TASKS"      = "true"
+    "ENVIRONMENT" = "ci"
+  }
+
+  secret_environment_variables = {
+    "DATABASE_URL" = local.secrets.MONGO_URL
+    "BROKER_URL" = local.secrets.REDIS_URL
   }
 }
 

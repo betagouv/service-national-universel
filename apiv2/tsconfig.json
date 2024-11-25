@@ -20,10 +20,12 @@
         "noFallthroughCasesInSwitch": false,
         "strict": true,
         "paths": {
+            "@admin/*": ["src/admin/*"],
             "@config/*": ["src/config/*"],
             "@infra/*": ["src/infra/*"],
             "@shared/*": ["src/shared/*"],
-            "@notification/*": ["src/notification/*"]
+            "@notification/*": ["src/notification/*"],
+            "@task/*": ["src/task/*"]
         }
     }
 }

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ClasseGateway } from "src/admin/core/sejours/cle/classe/Classe.gateway";
-import { ClasseModel } from "src/admin/core/sejours/cle/classe/Classe.model";
+import { ClasseGateway } from "@admin/core/sejours/cle/classe/Classe.gateway";
+import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
 
 @Injectable()
 export class ClasseGuardService {

@@ -4,22 +4,23 @@ import { Logger } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
-import { QueueType } from "@notification/infra/Notification";
+import { QueueName } from "@shared/infra/Queue";
 import { NotificationModule } from "@notification/Notification.module";
 import { ClsModule } from "nestjs-cls";
-import { SigninReferent } from "src/admin/core/iam/useCase/SigninReferent";
-import { ClasseService } from "src/admin/core/sejours/cle/classe/Classe.service";
-import { AuthController } from "src/admin/infra/iam/api/Auth.controller";
-import { AuthProvider } from "src/admin/infra/iam/auth/Auth.provider";
-import { JwtTokenService } from "src/admin/infra/iam/auth/JwtToken.service";
-import { referentMongoProviders } from "src/admin/infra/iam/provider/ReferentMongo.provider";
-import { ClasseController } from "src/admin/infra/sejours/cle/classe/api/Classe.controller";
-import { classeMongoProviders } from "src/admin/infra/sejours/cle/classe/provider/ClasseMongo.provider";
-import { etablissementMongoProviders } from "src/admin/infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
-import { gatewayProviders } from "src/admin/infra/sejours/cle/initProvider/gateway";
-import { guardProviders } from "src/admin/infra/sejours/cle/initProvider/guard";
-import { useCaseProvider } from "src/admin/infra/sejours/cle/initProvider/useCase";
+import { SigninReferent } from "@admin/core/iam/useCase/SigninReferent";
+import { ClasseService } from "@admin/core/sejours/cle/classe/Classe.service";
+import { AuthController } from "@admin/infra/iam/api/Auth.controller";
+import { AuthProvider } from "@admin/infra/iam/auth/Auth.provider";
+import { JwtTokenService } from "@admin/infra/iam/auth/JwtToken.service";
+import { referentMongoProviders } from "@admin/infra/iam/provider/ReferentMongo.provider";
+import { ClasseController } from "@admin/infra/sejours/cle/classe/api/Classe.controller";
+import { classeMongoProviders } from "@admin/infra/sejours/cle/classe/provider/ClasseMongo.provider";
+import { etablissementMongoProviders } from "@admin/infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
+import { gatewayProviders } from "@admin/infra/sejours/cle/initProvider/gateway";
+import { guardProviders } from "@admin/infra/sejours/cle/initProvider/guard";
+import { useCaseProvider } from "@admin/infra/sejours/cle/initProvider/useCase";
 import { testDatabaseProviders } from "../testDatabaseProvider";
+import { QueueModule } from "@infra/Queue.module";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -42,6 +43,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
                 secret: "your-secret-key",
                 signOptions: { expiresIn: "1h" },
             }),
+            QueueModule,
         ],
         controllers: [ClasseController, AuthController],
         providers: [
@@ -58,9 +60,11 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...useCaseProvider,
         ],
     })
-        .overrideProvider(getQueueToken(QueueType.EMAIL))
+        .overrideProvider(getQueueToken(QueueName.EMAIL))
         .useValue(mockQueue)
-        .overrideProvider(getQueueToken(QueueType.CONTACT))
+        .overrideProvider(getQueueToken(QueueName.CONTACT))
+        .useValue(mockQueue)
+        .overrideProvider(getQueueToken(QueueName.ADMIN_TASK))
         .useValue(mockQueue)
         .compile();
 

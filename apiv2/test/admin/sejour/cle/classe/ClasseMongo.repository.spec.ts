@@ -1,12 +1,9 @@
 import { INestApplication } from "@nestjs/common";
 import mongoose, { Model } from "mongoose";
 import { STATUS_CLASSE } from "snu-lib";
-import { ClasseGateway } from "src/admin/core/sejours/cle/classe/Classe.gateway";
-import { ClasseModel } from "src/admin/core/sejours/cle/classe/Classe.model";
-import {
-    CLASSE_MONGOOSE_ENTITY,
-    ClasseDocument,
-} from "src/admin/infra/sejours/cle/classe/provider/ClasseMongo.provider";
+import { ClasseGateway } from "@admin/core/sejours/cle/classe/Classe.gateway";
+import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
+import { CLASSE_MONGOOSE_ENTITY, ClasseDocument } from "@admin/infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { setupAdminTest } from "../../../setUpAdminTest";
 import { createClasse } from "./ClasseHelper";
 
