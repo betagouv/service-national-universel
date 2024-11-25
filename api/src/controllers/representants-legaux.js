@@ -21,7 +21,7 @@ const { ERRORS } = require("../utils");
 
 const { validateFirstName, validateString, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../brevo");
-const config = require("config");
+const { config } = require("../config");
 
 function tokenParentValidMiddleware(req, res, next) {
   const { error, value: token } = validateString(req.query.token);

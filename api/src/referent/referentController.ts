@@ -38,7 +38,7 @@ import emailsEmitter from "../emails";
 import { sendEmailToYoung } from "../young/email/youngEmailService";
 
 import { getQPV, getDensity } from "../geo";
-import config from "config";
+import { config } from "../config";
 import { capture } from "../sentry";
 import { decrypt, encrypt } from "../cryptoUtils";
 import { sendTemplate } from "../brevo";

@@ -1,4 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { ConfigModule } from "@nestjs/config";
+import configuration from "@config/testConfiguration";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { FUNCTIONAL_ERRORS, InvitationType } from "snu-lib";
@@ -19,6 +21,11 @@ describe("InviterReferentClasse", () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
+            imports: [
+                ConfigModule.forRoot({
+                    load: [configuration],
+                }),
+            ],
             providers: [
                 InviterReferentClasse,
                 {

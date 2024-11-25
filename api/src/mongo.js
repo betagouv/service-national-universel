@@ -1,4 +1,4 @@
-const config = require("config");
+const { config } = require("./config");
 const { logger } = require("./logger");
 const mongoose = require("mongoose");
 const { capture } = require("./sentry");

@@ -1,4 +1,4 @@
-import config from "config";
+import { config } from "../config";
 import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { ExpressAdapter } from "@bull-board/express";
@@ -15,15 +15,15 @@ export function initQueues() {
   const opts = {
     enableOfflineQueue: false,
   };
-  const connection = new Redis(config.get("REDIS_URL"), opts);
+  const connection = new Redis(config.REDIS_URL, opts);
   queues.push(sendMailQueue.initQueue(connection));
-  if (config.get("RUN_CRONS")) {
+  if (config.RUN_CRONS) {
     queues.push(cronsQueue.initQueue(connection));
   }
 }
 
 export async function scheduleRepeatableTasks() {
-  if (config.get("RUN_CRONS")) {
+  if (config.RUN_CRONS) {
     await cronsQueue.scheduleCrons();
   }
 }
@@ -36,9 +36,9 @@ export function initWorkers() {
   const opts = {
     maxRetriesPerRequest: null,
   };
-  const connection = new Redis(config.get("REDIS_URL"), opts);
+  const connection = new Redis(config.REDIS_URL, opts);
   workers.push(sendMailQueue.initWorker(connection));
-  if (config.get("RUN_CRONS")) {
+  if (config.RUN_CRONS) {
     workers.push(cronsQueue.initWorker(connection));
   }
 }

@@ -1,10 +1,8 @@
+# TODO: REMOVE
 name: Build and deploy CI
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 jobs:
   prepare:

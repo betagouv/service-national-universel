@@ -1,7 +1,7 @@
 const { Client } = require("@elastic/elasticsearch");
 const { logger } = require("../logger");
 
-const config = require("config");
+const { config } = require("../config");
 
 let esClient;
 

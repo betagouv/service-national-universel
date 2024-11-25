@@ -10,10 +10,11 @@ import { QueueName } from "@shared/infra/Queue";
         BullModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
+            useFactory: (config: ConfigService) => ({
                 connection: {
-                    url: configService.getOrThrow("broker.url"),
+                    url: config.getOrThrow("broker.url"),
                 },
+                prefix: config.getOrThrow("broker.queuePrefix"),
             }),
         }),
         BullModule.registerQueue({

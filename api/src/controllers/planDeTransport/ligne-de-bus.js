@@ -4,7 +4,7 @@ const passport = require("passport");
 const Joi = require("joi");
 const { ObjectId } = require("mongoose").Types;
 const mongoose = require("mongoose");
-const config = require("config");
+const { config } = require("../../config");
 
 const {
   canViewLigneBus,

@@ -7,7 +7,7 @@
     "mobile": "vite --host 0.0.0.0",
     "mobile:open": "vite --host",
     "start": "vite",
-    "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build",
+    "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode \"$VITE_ENVIRONMENT\"",
     "preview": "vite preview",
     "postinstall": "npm run copy:dsfr",
     "copy:dsfr": "copy-dsfr-to-public",

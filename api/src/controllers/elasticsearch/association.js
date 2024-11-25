@@ -5,7 +5,7 @@ const router = express.Router();
 const { canSearchAssociation } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
-const config = require("config");
+const { config } = require("../../config");
 
 const apiEngagement = async ({ path = "/", body }) => {
   try {

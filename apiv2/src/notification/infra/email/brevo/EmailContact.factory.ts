@@ -17,11 +17,11 @@ export const contactFactory = {
     useFactory: (configService: ConfigService) => customFactory(configService),
 };
 
-const customFactory = (configService: ConfigService) => {
-    const emailProvider = configService.getOrThrow("email.provider");
+const customFactory = (config: ConfigService) => {
+    const emailProvider = config.getOrThrow("email.provider");
     Logger.log(`Provider used : ${emailProvider}`, "EmailContactFactory");
     if (emailProvider === "brevo") {
-        return new EmailBrevoProvider();
+        return new EmailBrevoProvider(config);
     }
     if (emailProvider === "mock") {
         return new MockEmailBrevoProvider();

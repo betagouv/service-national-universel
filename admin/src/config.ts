@@ -1,29 +1,25 @@
-function getEnv(name: string, fallback?: string | number | boolean) {
-  const runtime = globalThis.runtime_env || {};
-  let v = runtime[name];
-  if (v !== undefined && v !== "") {
-    return v;
+import { envStr, envFloat, envBool } from "snu-lib";
+
+function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallback?: T) {
+  try {
+    // @ts-expect-error import.meta
+    return callback(import.meta.env[key], fallback);
+  } catch (error) {
+    console.warn(`Environment ${key}: ${error.message}`);
   }
-  // @ts-expect-error import.meta
-  v = import.meta.env[`VITE_${name}`];
-  if (v !== undefined && v !== "") {
-    return v;
-  }
-  if (fallback === undefined) {
-    console.warn(`Environment variable ${name} is not defined`);
-  }
-  return fallback;
+  return undefined;
 }
 
-const apiURL = getEnv("API_URL", "http://localhost:8080");
-const appURL = getEnv("APP_URL", "http://localhost:8081");
-const adminURL = getEnv("ADMIN_URL", "http://localhost:8082");
-const supportURL = getEnv("SUPPORT_URL", "http://localhost:8083");
-const maintenance = getEnv("MAINTENANCE", false) === "true";
-const environment: "production" | "staging" | "ci" | "custom" | "test" | "development" = getEnv("ENVIRONMENT", "development");
-const RELEASE = getEnv("RELEASE");
-const SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 0.1);
-const SENTRY_SESSION_SAMPLE_RATE = getEnv("SENTRY_SESSION_SAMPLE_RATE", 0.1);
-const SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("SENTRY_ON_ERROR_SAMPLE_RATE", 1);
+const RELEASE = _env(envStr, "VITE_RELEASE", "development");
+const environment: "production" | "staging" | "ci" | "custom" | "test" | "development" = _env(envStr, "VITE_ENVIRONMENT", "development");
+const apiURL = _env(envStr, "VITE_API_URL", "http://localhost:8080");
+const apiv2URL = _env(envStr, "VITE_APIV2_URL", "http://localhost:8086");
+const appURL = _env(envStr, "VITE_APP_URL", "http://localhost:8081");
+const adminURL = _env(envStr, "VITE_ADMIN_URL", "http://localhost:8082");
+const supportURL = _env(envStr, "VITE_SUPPORT_URL", "http://localhost:8083");
+const maintenance = _env(envBool, "VITE_MAINTENANCE", false);
+const SENTRY_TRACING_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_TRACING_SAMPLE_RATE", 0.1);
+const SENTRY_SESSION_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_SESSION_SAMPLE_RATE", 0.1);
+const SENTRY_ON_ERROR_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_ON_ERROR_SAMPLE_RATE", 1.0);
 
-export { apiURL, appURL, RELEASE, SENTRY_TRACING_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_ON_ERROR_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };
+export { apiURL, apiv2URL, appURL, RELEASE, SENTRY_TRACING_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_ON_ERROR_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };

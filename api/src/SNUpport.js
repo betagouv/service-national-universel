@@ -1,5 +1,5 @@
 const fetch = require("node-fetch");
-const config = require("config");
+const { config } = require("./config");
 
 const getCustomerIdByEmail = async (email) => {
   const res = await api(`/users/search?query=email:${email}&limit=1`, { method: "GET" });
