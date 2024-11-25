@@ -891,7 +891,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
 router.put("/withdraw", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
+    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().allow(""), withdrawnReason: Joi.string().required() })
       .unknown()
       .validate(req.body, { stripUnknown: true });
     if (validationError) {

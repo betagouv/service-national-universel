@@ -2,17 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 import { HiArrowLeft } from "react-icons/hi";
-import { getCohortPeriod } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
-import { WITHRAWN_REASONS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { toastr } from "react-redux-toastr";
+import { WITHRAWN_REASONS, YOUNG_STATUS_PHASE1, translate } from "snu-lib";
 import ReasonMotifSection from "../components/ReasonMotifSection";
 import CurrentSejourNotice from "../components/CurrentSejourNotice";
-
+import { withdrawYoungAccount } from "@/services/young.service";
+import { setYoung } from "../../../redux/auth/actions";
+import { useDispatch } from "react-redux";
 export default function WithdrawSejour() {
+  const dispatch = useDispatch();
   const { young } = useAuth();
-  const cohort = getCohort(young.cohort);
   const history = useHistory();
-  const cohortPeriod = getCohortPeriod(cohort);
   const [withdrawnMessage, setWithdrawnMessage] = useState("");
   const [withdrawnReason, setWithdrawnReason] = useState("");
   const filteredWithdrawnReasons = WITHRAWN_REASONS.filter(
@@ -21,6 +21,16 @@ export default function WithdrawSejour() {
       (!r.cohortOnly || r.cohortOnly.includes(young.cohort)),
   );
 
+  const handleWithdraw = async () => {
+    try {
+      const { ok, data, code } = await withdrawYoungAccount({ withdrawnMessage, withdrawnReason });
+      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+      dispatch(setYoung(data));
+      history.push("/");
+    } catch (error) {
+      console.error("Erreur lors du désistement :", error);
+    }
+  };
   return (
     <div className="flex flex-col justify-center items-center bg-white pb-12 px-4 md:px-[8rem]">
       <div className="w-full flex items-center justify-between py-4">
@@ -42,15 +52,11 @@ export default function WithdrawSejour() {
         setWithdrawnMessage={setWithdrawnMessage}
       />
 
-      {/* <div className="mt-10 flex w-full flex-col gap-3 md:flex-row">
-          <CancelButton className="hidden flex-1 md:block" onClick={onCancel} />
-          <PlainButton disabled={!withdrawnReason || !withdrawnMessage} className="flex-1" onClick={onConfirm}>
-            {confirmButtonName}
-          </PlainButton>
-          <CancelButton className="flex-1 md:hidden" onClick={onBack}>
-            Retour
-          </CancelButton>
-        </div> */}
+      <button
+        onClick={handleWithdraw}
+        className="mt-4 w-1/2 rounded-[10px] border-[1px] border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600">
+        Confirmer le désistement
+      </button>
     </div>
   );
 }
