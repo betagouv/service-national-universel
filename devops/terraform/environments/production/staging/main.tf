@@ -33,6 +33,7 @@ locals {
   project_id     = "a0c93450-f68c-4768-8fe8-6e07a1644530"
   domain         = "beta-snu.dev"
   api_hostname   = "api.${local.domain}"
+  apiv2_hostname    = "apiv2.${local.domain}"
   admin_hostname = "admin.${local.domain}"
   app_hostname   = "moncompte.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.staging.data))
@@ -121,6 +122,62 @@ resource "scaleway_container" "tasks" {
   }
 }
 
+resource "scaleway_container" "apiv2" {
+  name            = "staging-apiv2"
+  namespace_id    = scaleway_container_namespace.staging.id
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/apiv2:latest"
+  port            = 8080
+  cpu_limit       = 1024
+  memory_limit    = 2048
+  min_scale       = 1
+  max_scale       = 1
+  timeout         = 60
+  max_concurrency = 50
+  privacy         = "public"
+  protocol        = "http1"
+  deploy          = true
+  http_option     = "redirected"
+
+  environment_variables = {
+    "ENVIRONMENT" = "staging"
+  }
+
+  secret_environment_variables = {
+    "DATABASE_URL" = local.secrets.MONGO_URL
+    "BROKER_URL" = local.secrets.REDIS_URL
+  }
+}
+
+resource "scaleway_container_domain" "apiv2" {
+  container_id = scaleway_container.apiv2.id
+  hostname     = local.apiv2_hostname
+}
+
+
+resource "scaleway_container" "tasksv2" {
+  name           = "staging-tasksv2"
+  namespace_id   = scaleway_container_namespace.staging.id
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/apiv2:latest"
+  port           = 8080
+  cpu_limit      = 1024
+  memory_limit   = 2048
+  min_scale      = 1
+  max_scale      = 1
+  privacy        = "public"
+  protocol       = "http1"
+  deploy         = true
+  http_option    = "redirected"
+
+  environment_variables = {
+    "RUN_TASKS"      = "true"
+    "ENVIRONMENT" = "staging"
+  }
+
+  secret_environment_variables = {
+    "DATABASE_URL" = local.secrets.MONGO_URL
+    "BROKER_URL" = local.secrets.REDIS_URL
+  }
+}
 
 
 resource "scaleway_container" "admin" {

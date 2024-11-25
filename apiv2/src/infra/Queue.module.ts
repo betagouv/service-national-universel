@@ -1,9 +1,10 @@
 import { ConfigModule, ConfigService } from "@nestjs/config";
 
 import { BullModule } from "@nestjs/bullmq";
-import { Module } from "@nestjs/common";
-import { QueueType } from "@notification/infra/Notification";
+import { Global, Module } from "@nestjs/common";
+import { QueueName } from "@shared/infra/Queue";
 
+@Global()
 @Module({
     imports: [
         BullModule.forRootAsync({
@@ -16,10 +17,13 @@ import { QueueType } from "@notification/infra/Notification";
             }),
         }),
         BullModule.registerQueue({
-            name: QueueType.EMAIL,
+            name: QueueName.EMAIL,
         }),
         BullModule.registerQueue({
-            name: QueueType.CONTACT,
+            name: QueueName.CONTACT,
+        }),
+        BullModule.registerQueue({
+            name: QueueName.ADMIN_TASK,
         }),
     ],
     exports: [BullModule],

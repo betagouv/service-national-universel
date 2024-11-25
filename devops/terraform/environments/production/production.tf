@@ -19,6 +19,7 @@ variable "antivirus_image_tag" {
 locals {
   domain             = "snu.gouv.fr"
   api_hostname       = "api.${local.domain}"
+  apiv2_hostname    = "apiv2.${local.domain}"
   admin_hostname     = "admin.${local.domain}"
   app_hostname       = "moncompte.${local.domain}"
   antivirus_hostname = "antivirus.beta-snu.dev"
@@ -183,6 +184,62 @@ resource "scaleway_container" "tasks" {
 
   secret_environment_variables = {
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  }
+}
+
+resource "scaleway_container" "apiv2" {
+  name            = "production-apiv2"
+  namespace_id    = scaleway_container_namespace.production.id
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/apiv2:latest"
+  port            = 8080
+  cpu_limit       = 1024
+  memory_limit    = 2048
+  min_scale       = 0
+  max_scale       = 20
+  timeout         = 60
+  max_concurrency = 25
+  privacy         = "public"
+  protocol        = "http1"
+  deploy          = true
+  http_option     = "redirected"
+
+  environment_variables = {
+    "ENVIRONMENT" = "production"
+  }
+
+  secret_environment_variables = {
+    "DATABASE_URL" = local.secrets.MONGO_URL
+    "BROKER_URL" = local.secrets.REDIS_URL
+  }
+}
+
+# resource "scaleway_container_domain" "apiv2" {
+#  container_id = scaleway_container.apiv2.id
+#  hostname     = local.api_hostname
+# }
+
+resource "scaleway_container" "tasksv2" {
+  name           = "production-tasksv2"
+  namespace_id   = scaleway_container_namespace.production.id
+  registry_image = "${scaleway_registry_namespace.main.endpoint}/apiv2:latest"
+  port           = 8080
+  cpu_limit      = 1024
+  memory_limit   = 2048
+  min_scale      = 0
+  max_scale      = 1
+  privacy        = "public"
+  protocol       = "http1"
+  deploy         = true
+  http_option    = "redirected"
+
+  environment_variables = {
+    "RUN_TASKS"      = "true"
+    "ENVIRONMENT" = "production"
+  }
+
+  secret_environment_variables = {
+    "DATABASE_URL" = local.secrets.MONGO_URL
+    "BROKER_URL" = local.secrets.REDIS_URL
   }
 }
 

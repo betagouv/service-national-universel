@@ -52,7 +52,7 @@ export default function Home() {
 
   if (hasCompletedPhase1(young)) {
     // les volontaires des première cohortes n'ont plus le droit de faire la phase 2 SAUF si ils l'ont commencé
-    if (isCohortTooOld(young) && !hasCompletedPhase2(young) && !hasMission && !hasEquivalence) {
+    if (isCohortTooOld(cohort) && !hasCompletedPhase2(young) && !hasMission && !hasEquivalence) {
       return <DelaiDepasse />;
     }
     if (hasWithdrawn) {

@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
-import { ReferentAuthGateway } from "src/admin/core/iam/ReferentAuth.gateway";
-import { ReferentGateway } from "src/admin/core/iam/Referent.gateway";
-import { ReferentTokenModel } from "src/admin/core/iam/ReferentToken.model";
+import { ReferentAuthGateway } from "@admin/core/iam/ReferentAuth.gateway";
+import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
+import { ReferentTokenModel } from "@admin/core/iam/ReferentToken.model";
 import { AuthProvider } from "./Auth.provider";
 import * as bcrypt from "bcrypt";
 import { ReferentMapper } from "../repository/mongo/Referent.mapper";

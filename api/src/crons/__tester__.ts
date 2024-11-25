@@ -1,8 +1,7 @@
 // To test run:
 // ts-node ./src/crons/__tester__.ts patch/young
-
-// uncomment when running in local
-// process.env["NODE_CONFIG_DIR"] = "<RELATIVE PATH>/service-national-universel/api/config/";
+import path from "path";
+process.env["NODE_CONFIG_DIR"] = path.resolve(__dirname, "../../config");
 
 import config from "config";
 import { initDB } from "../mongo";
@@ -42,6 +41,9 @@ import { initDB } from "../mongo";
       break;
     case "check-coherence":
       await require("./checkCoherence").handler();
+      break;
+    case "autoValidatePhase1":
+      await require("./autoValidatePhase1").handler();
       break;
     default:
       console.log("No cron found for " + process.argv[2]);

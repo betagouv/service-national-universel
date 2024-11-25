@@ -4,7 +4,6 @@ import { ConfigService } from "@nestjs/config";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./App.module";
-import { NotificationJobModule } from "./notification/NotificationJob.module";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);

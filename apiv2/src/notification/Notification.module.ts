@@ -3,13 +3,13 @@ import { Logger, Module } from "@nestjs/common";
 import { APP_FILTER } from "@nestjs/core";
 import { AllExceptionsFilter } from "@shared/infra/AllExceptions.filter";
 import { SharedModule } from "@shared/Shared.module";
-import { ContactGateway } from "src/admin/infra/iam/Contact.gateway";
+import { ContactGateway } from "@admin/infra/iam/Contact.gateway";
 import { NotificationGateway } from "./core/Notification.gateway";
 import { ContactProducer } from "./infra/email/Contact.producer";
 import { NotificationProducer } from "./infra/Notification.producer";
 
 @Module({
-    imports: [QueueModule, SharedModule],
+    imports: [SharedModule],
     providers: [
         {
             provide: NotificationGateway,

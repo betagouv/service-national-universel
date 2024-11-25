@@ -1159,6 +1159,35 @@ const translateStatusClasse = (status) => {
 };
 
 // --------------------------------------------------------------
+// Utilisé formater les noms et adresses des centres du SI
+
+const formatNameAndAddress = (address: string): string => {
+  const addressExceptions = ["de", "du", "des", "le", "la", "les", "à", "au", "aux", "l'", "sur", "sous", "et"];
+
+  return address
+    .split(" ")
+    .map((word) => {
+      if (word.includes("-")) {
+        return word
+          .split("-")
+          .map((part, index) => {
+            if (index !== 0 && addressExceptions.includes(part.toLowerCase())) {
+              return part.toLowerCase();
+            }
+            return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+          })
+          .join("-");
+      } else {
+        if (addressExceptions.includes(word.toLowerCase())) {
+          return word.toLowerCase();
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }
+    })
+    .join(" ");
+};
+
+// --------------------------------------------------------------
 // Utilisé pour traduire l'historique des plans de transport
 
 const globalFields = {
@@ -1259,6 +1288,7 @@ export {
   translateColoration,
   translateYoungSource,
   translateStatusClasse,
+  formatNameAndAddress,
 };
 export default {
   translate,
@@ -1294,4 +1324,5 @@ export default {
   translateColoration,
   translateYoungSource,
   translateStatusClasse,
+  formatNameAndAddress,
 };

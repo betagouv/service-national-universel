@@ -106,6 +106,7 @@ import {
   YoungType,
   getDepartmentForInscriptionGoal,
   isAdmin,
+  isReferentReg,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -649,18 +650,18 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
         const classe = await ClasseModel.findById(young.classeId);
         if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const now = new Date();
-        const isInsctructionOpen = now < cohort.instructionEndDate;
+        const isInstructionOpen = now < cohort.instructionEndDate;
         const remainingPlaces = classe.totalSeats - classe.seatsTaken;
         if (remainingPlaces <= 0) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
-        if (!isInsctructionOpen && !isAdmin(req.user)) {
+        if (!isInstructionOpen && !isAdmin(req.user) && !isReferentReg(req.user)) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       } else {
         const now = new Date();
-        const isInsctructionOpen = now < cohort.instructionEndDate;
-        if (!isInsctructionOpen && !isAdmin(req.user)) {
+        const isInstructionOpen = now < cohort.instructionEndDate;
+        if (!isInstructionOpen && !isAdmin(req.user) && !isReferentReg(req.user)) {
           return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
@@ -898,6 +899,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohesionStayMedicalFileReceived: undefined,
       cohortId: cohortModel?._id,
     });
+
     if (payload.source === YOUNG_SOURCE.CLE) {
       const correctionRequestsFiltered = young?.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];
       young.set({
@@ -932,39 +934,41 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
           statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
         });
       }
-    } else {
-      if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
-        if (young.source !== YOUNG_SOURCE.VOLONTAIRE) {
-          young.set({
-            statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-            cniFiles: [],
-            "files.cniFiles": [],
-            latestCNIFileExpirationDate: undefined,
-            latestCNIFileCategory: undefined,
-          });
-        }
-      }
+    } else if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
       const step2023 = young.hasStartedReinscription ? "reinscriptionStep2023" : "inscriptionStep2023";
       const step2023Value =
         young.status === YOUNG_STATUS.NOT_AUTORISED ? "WAITING_CONSENT" : young.hasStartedReinscription ? young.reinscriptionStep2023 : young.inscriptionStep2023;
-      const school = await SchoolRAMSESModel.findOne({ uai: previousEtablissement?.uai });
+
+      // Only for CLE to HTS changes
+      if (young.source !== YOUNG_SOURCE.VOLONTAIRE) {
+        const school = await SchoolRAMSESModel.findOne({ uai: previousEtablissement?.uai });
+        young.set({
+          statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+          cniFiles: [],
+          "files.cniFiles": [],
+          latestCNIFileExpirationDate: undefined,
+          latestCNIFileCategory: undefined,
+          source: YOUNG_SOURCE.VOLONTAIRE,
+          etablissementId: undefined,
+          classeId: undefined,
+          schoolId: school?._id ?? undefined,
+          schoolName: school?.fullName ?? undefined,
+          schoolType: school?.type ?? undefined,
+          schoolAddress: school?.adresse ?? undefined,
+          schoolZip: school?.postcode ?? undefined,
+          schoolCity: school?.city ?? undefined,
+          schoolDepartment: school?.department ?? undefined,
+          schoolRegion: school?.region ?? undefined,
+          schoolCountry: school?.country ?? undefined,
+        });
+      }
+      // Only for HTS to HTS changes
       young.set({
-        // Init if young was previously CLE
-        source: YOUNG_SOURCE.VOLONTAIRE,
         status: youngStatus,
         [step2023]: step2023Value,
-        etablissementId: undefined,
-        classeId: undefined,
-        schoolId: school?._id ?? undefined,
-        schoolName: school?.fullName ?? undefined,
-        schoolType: school?.type ?? undefined,
-        schoolAddress: school?.adresse ?? undefined,
-        schoolZip: school?.postcode ?? undefined,
-        schoolCity: school?.city ?? undefined,
-        schoolDepartment: school?.department ?? undefined,
-        schoolRegion: school?.region ?? undefined,
-        schoolCountry: school?.country ?? undefined,
       });
+    } else {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     const date = new Date();

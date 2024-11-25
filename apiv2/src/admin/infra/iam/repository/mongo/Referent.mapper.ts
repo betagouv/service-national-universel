@@ -1,6 +1,6 @@
-import { ReferentMetadataModel, ReferentModel, ReferentPasswordModel } from "src/admin/core/iam/Referent.model";
-import { ReferentDocument } from "../../provider/ReferentMongo.provider";
+import { ReferentMetadataModel, ReferentModel, ReferentPasswordModel } from "@admin/core/iam/Referent.model";
 import { ReferentType } from "snu-lib";
+import { ReferentDocument } from "../../provider/ReferentMongo.provider";
 
 export class ReferentMapper {
     static toModels(referentDocuments: ReferentDocument[]): ReferentModel[] {
