@@ -57,7 +57,7 @@ export default function InfoConvocation({ isOpen, onCancel, title, meetingPoint,
       if (!ok) {
         throw new Error(translate(code));
       }
-      toastr.success(`Document envoyé à ${young.email}`);
+      toastr.success(`Document envoyé à ${young.email}`, "");
     } catch (e) {
       capture(e);
       setLoadingConvocation(false);

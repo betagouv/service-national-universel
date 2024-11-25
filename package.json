@@ -8,7 +8,7 @@
     "build": "turbo run build --filter=$APP_NAME",
     "start": "turbo run start --filter=$APP_NAME",
     "test": "turbo build --filter='./packages/lib' && turbo run test --filter=api",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean && rm -fr node_modules .turbo"
   },
   "dependencies": {
     "classnames": "^2.5.1",

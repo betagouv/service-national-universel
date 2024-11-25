@@ -54,7 +54,7 @@ export default function Index() {
   return (
     <>
       {user.role !== ROLES.HEAD_CENTER && <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
-      <CenterInformations center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} />
+      <CenterInformations center={center} />
       <SessionList center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} />
     </>
   );

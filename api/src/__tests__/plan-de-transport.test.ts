@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import request from "supertest";
 
-import { ROLES } from "snu-lib";
+import { ROLES, TRANSPORT_MODES } from "snu-lib";
 
 import {
   ImportPlanTransportModel,
@@ -93,7 +93,7 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
     expect(response.status).toBe(400);
   });
 
-  it("sgould return 403 if user is not authenticated", async () => {
+  it("should return 403 if user is not authenticated", async () => {
     const response = await request(getAppHelper({ role: ROLES.VISITOR }))
       .post(`/plan-de-transport/import/${new ObjectId()}/execute`)
       .send();
@@ -123,5 +123,126 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
     expect(pdt.pointDeRassemblements[0].__t).toBe("Enriched");
     expect(pdt.pointDeRassemblements[0].returnHour).toBeDefined();
     expect(pdt.pointDeRassemblements[0].cohorts).toBeDefined();
+  });
+
+  it("should set meetingHour correctly for bus transport", async () => {
+    const planTransportFixture = getNewImportPlanTransportFixture();
+    const planTransportModified = {
+      ...planTransportFixture,
+      lines: [
+        {
+          ...planTransportFixture.lines[0],
+          "TYPE DE TRANSPORT PDR 1": TRANSPORT_MODES.BUS,
+          "HEURE DEPART DU PDR 1": "09:00",
+        },
+      ],
+    };
+    const importPlanTransport = await ImportPlanTransportModel.create(planTransportModified);
+
+    await initPlanTransport(importPlanTransport);
+
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post(`/plan-de-transport/import/${importPlanTransport._id}/execute`)
+      .send();
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+
+    const importedPdts = await PlanTransportModel.find({ cohort: importPlanTransport.cohort });
+    const pdt = importedPdts[0];
+    const pdr = pdt.pointDeRassemblements[0];
+
+    expect(pdr.departureHour).toBe("09:00");
+    expect(pdr.meetingHour).toBe("08:30");
+  });
+
+  it("should set meetingHour correctly for train transport", async () => {
+    const planTransportFixture = getNewImportPlanTransportFixture();
+    const planTransportModified = {
+      ...planTransportFixture,
+      lines: [
+        {
+          ...planTransportFixture.lines[0],
+          "TYPE DE TRANSPORT PDR 1": TRANSPORT_MODES.TRAIN,
+          "HEURE DEPART DU PDR 1": "10:00",
+        },
+      ],
+    };
+    const importPlanTransport = await ImportPlanTransportModel.create(planTransportModified);
+
+    await initPlanTransport(importPlanTransport);
+
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post(`/plan-de-transport/import/${importPlanTransport._id}/execute`)
+      .send();
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+
+    const importedPdts = await PlanTransportModel.find({ cohort: importPlanTransport.cohort });
+    const pdt = importedPdts[0];
+    const pdr = pdt.pointDeRassemblements[0];
+
+    expect(pdr.departureHour).toBe("10:00");
+    expect(pdr.meetingHour).toBe("08:30");
+  });
+
+  it("should set meetingHour correctly for multiple transport modes", async () => {
+    const planTransportFixture = getNewImportPlanTransportFixture();
+    const planTransportModified = {
+      ...planTransportFixture,
+      lines: [
+        {
+          ...planTransportFixture.lines[1],
+          "TYPE DE TRANSPORT PDR 1": TRANSPORT_MODES.BUS,
+          "HEURE DEPART DU PDR 1": "09:00",
+          "TYPE DE TRANSPORT PDR 2": TRANSPORT_MODES.TRAIN,
+          "HEURE DEPART DU PDR 2": "10:00",
+        }
+      ],
+    };
+    const importPlanTransport = await ImportPlanTransportModel.create(planTransportModified);
+
+    await initPlanTransport(importPlanTransport);
+
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post(`/plan-de-transport/import/${importPlanTransport._id}/execute`)
+      .send();
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+
+    const importedPdts = await PlanTransportModel.find({ cohort: importPlanTransport.cohort });
+    const pdt = importedPdts[0];
+
+    expect(pdt.pointDeRassemblements[0].departureHour).toBe("09:00");
+    expect(pdt.pointDeRassemblements[0].meetingHour).toBe("08:30");
+
+    expect(pdt.pointDeRassemblements[1].departureHour).toBe("10:00");
+    expect(pdt.pointDeRassemblements[1].meetingHour).toBe("08:30");
+  });
+
+  it("should set meetingHour correctly for unknown transport mode", async () => {
+    const planTransportFixture = getNewImportPlanTransportFixture();
+    const planTransportModified = {
+      ...planTransportFixture,
+      lines: [
+        {
+          ...planTransportFixture.lines[0],
+          "TYPE DE TRANSPORT PDR 1": "UNKNOWN_MODE",
+          "HEURE DEPART DU PDR 1": "09:00",
+        },
+      ],
+    };
+    const importPlanTransport = await ImportPlanTransportModel.create(planTransportModified);
+
+    await initPlanTransport(importPlanTransport);
+
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post(`/plan-de-transport/import/${importPlanTransport._id}/execute`)
+      .send();
+
+    expect(response.status).toBe(500);
+    expect(response.body.ok).toBe(false);
   });
 });

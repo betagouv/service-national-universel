@@ -1,6 +1,7 @@
 import { Schema, InferSchemaType } from "mongoose";
 
-import { COHORT_TYPE_LIST, InterfaceExtended } from "..";
+import { InterfaceExtended } from ".";
+import { COHORT_TYPE_LIST } from "../constants/constants";
 
 export const CohortGroupSchema = {
   name: {

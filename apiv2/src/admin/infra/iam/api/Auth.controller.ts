@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { SigninReferent } from "src/admin/core/iam/useCase/SigninReferent";
+import { SigninReferent } from "@admin/core/iam/useCase/SigninReferent";
 
 export interface SigninDto {
     email: string;

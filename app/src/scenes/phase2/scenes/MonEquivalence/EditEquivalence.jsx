@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import AddImage from "../../../../assets/icons/AddImage";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import InformationCircle from "../../../../assets/icons/InformationCircle";
@@ -12,9 +12,8 @@ import validator from "validator";
 import { slugifyFileName, UNSS_TYPE, translate } from "../../../../utils";
 import { capture } from "../../../../sentry";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES } from "snu-lib";
-import { GrClose } from "react-icons/gr";
 import { queryClient } from "@/services/react-query";
-import Header from "../../components/Header";
+import Container from "@/components/layout/Container";
 
 export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
@@ -220,17 +219,10 @@ export default function EditEquivalence() {
   if (data?._id && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data?.status)) history.push("/phase2");
 
   return (
-    <div className="bg-white pb-12">
-      <Header
-        title={mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}
-        backAction={
-          <Link to={data?._id ? `/phase2/equivalence/${data._id}` : "/phase2"} className="flex items-center gap-1">
-            <GrClose className="text-xl text-gray-500" />
-          </Link>
-        }
-      />
-
-      <div className="max-w-2xl mx-auto px-[1rem]">
+    <Container
+      title={mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}
+      backlink={data?._id ? `/phase2/equivalence/${data._id}` : "/phase2"}>
+      <div className="max-w-2xl mx-auto">
         <div className="rounded-lg border-[1px] border-blue-400 bg-blue-50">
           <div className="flex items-center px-4 py-3">
             <InformationCircle className="text-blue-400" />
@@ -566,7 +558,7 @@ export default function EditEquivalence() {
           {loading ? "Chargement" : mode === "edit" ? "Modifier ma demande" : "Soumettre ma demande"}
         </button>
       </div>
-    </div>
+    </Container>
   );
 }
 
