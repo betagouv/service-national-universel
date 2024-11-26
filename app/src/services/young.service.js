@@ -76,10 +76,10 @@ export const downloadYoungDocument = async ({ youngId, fileId, fileType }) => {
   }
 };
 
-export const changeYoungCohort = async (youngId, { withdrawnReason, withdrawnMessage, cohortId, cohort }) => {
+export const changeYoungCohort = async (youngId, { reason, message, cohortId, cohort }) => {
   const data = await api.put(`/young/${youngId}/change-cohort/`, {
-    cohortChangeReason: withdrawnReason,
-    cohortDetailedChangeReason: withdrawnMessage,
+    cohortChangeReason: reason,
+    cohortDetailedChangeReason: message,
     cohortId,
     cohort,
   });

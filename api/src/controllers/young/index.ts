@@ -584,11 +584,11 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     }
 
     const sessions = await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
-    const session = sessions.find(({ name }) => name === cohort);
+    const session = sessions.find(({ name }) => name === cohortObj.name);
     if (!session && cohort !== "à venir") return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     young.set({
-      cohort,
+      cohort: cohortObj.name,
       cohortId: cohortObj._id,
       cohortChangeReason,
       cohortDetailedChangeReason,
@@ -597,7 +597,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     });
 
     if (cohort !== "à venir") {
-      const completionObjectif = await getCompletionObjectifs(young.department!, cohort);
+      const completionObjectif = await getCompletionObjectifs(young.department!, cohortObj.name);
 
       if (completionObjectif.isAtteint && young.status === YOUNG_STATUS.VALIDATED) {
         young.set({ status: YOUNG_STATUS.WAITING_LIST });
@@ -653,7 +653,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
       young,
       previousYoung,
-      cohortName: cohort,
+      cohortName: cohortObj.name,
       cohortChangeReason,
       message: value.message,
     });
