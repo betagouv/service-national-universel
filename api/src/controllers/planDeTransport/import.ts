@@ -217,7 +217,6 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           totalCapacity: line["CAPACITE TOTALE LIGNE"],
           youngSeatsTaken: 0,
           lunchBreak: (line["PAUSE DÉJEUNER ALLER"] || "").toLowerCase() === "oui",
-          lunchBreakReturn: (line["PAUSE DÉJEUNER RETOUR"] || "").toLowerCase() === "oui",
           travelTime: formatTime(line["TEMPS DE ROUTE"]),
           sessionId: session?._id.toString(),
           meetingPointsIds: meetingPointsIds,
@@ -227,7 +226,6 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
         const newBusLine = new LigneBusModel(busLineData);
         const busLine = await newBusLine.save({ session: transaction });
-
         // Mise à jour des lignes fusionnées existantes
         for (const mergedBusId of busLineData.mergedBusIds) {
           const oldMergeLine = await LigneBusModel.findOne({ busId: mergedBusId });
