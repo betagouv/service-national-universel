@@ -508,6 +508,8 @@ const translateContractStatus = (contract) => {
       return "Envoyé";
     case "VALIDATED":
       return "Validé";
+    case "ABANDON":
+      return "Abandon";
     default:
       return contract;
   }

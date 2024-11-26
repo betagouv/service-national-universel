@@ -380,7 +380,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     }
 
     if (application.status === APPLICATION_STATUS.ABANDON && application.contractStatus === "SENT") {
-      application.set({ contractStatus: "DRAFT" });
+      application.set({ contractStatus: "ABANDON" });
     }
 
     await application.save({ fromUser: req.user });
