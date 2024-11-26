@@ -9,10 +9,11 @@ interface ReasonMotifSectionProps {
   message: string;
   setMessage: (value: string) => void;
   onSubmit: () => void;
+  disabled?: boolean;
   text?: string;
 }
 
-const ReasonForm: React.FC<ReasonMotifSectionProps> = ({ reason, setReason, message, setMessage, onSubmit, text }) => {
+const ReasonForm: React.FC<ReasonMotifSectionProps> = ({ reason, setReason, message, setMessage, onSubmit, disabled, text }) => {
   const { young } = useAuth();
 
   const filteredWithdrawnReasons = WITHRAWN_REASONS.filter(
@@ -40,7 +41,7 @@ const ReasonForm: React.FC<ReasonMotifSectionProps> = ({ reason, setReason, mess
       <Field className="mt-4 w-full" type="textarea" name="withdrawnMessage" label="Expliquer votre choix (facultatif)" value={message} onChange={setMessage} />
       <button
         type="submit"
-        disabled={!reason}
+        disabled={disabled}
         className="w-full mt-4 rounded-md border-[1px] bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-300 ease-in-out hover:bg-blue-800 disabled:bg-gray-400">
         {text || "Envoyer ma demande"}
       </button>
