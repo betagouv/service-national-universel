@@ -6,7 +6,8 @@ import { IoWarningOutline } from "react-icons/io5";
 import { ModalConfirmation, Button } from "@snu/ds/admin";
 import { translate, ClassesRoutes } from "snu-lib";
 import { capture } from "@/sentry";
-import api from "@/services/api";
+import { apiv2 } from "@/services/apiv2";
+import { ClasseService } from "@/services/classeService";
 
 interface Props {
   classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
@@ -44,7 +45,7 @@ export default function VerifClassButton({ classe, setClasse, isLoading, setLoad
     try {
       setLoading(true);
 
-      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}/verify`, classe);
+      const { ok, code, data } = await apiv2.put(`/classe/${classe?._id}/verify`, classe);
 
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", translate(code));
@@ -52,10 +53,11 @@ export default function VerifClassButton({ classe, setClasse, isLoading, setLoad
       } else {
         toastr.success("Opération réussie", "La classe a bien été vérifiée");
       }
-      setClasse(data);
+      const classeView = ClasseService.mapDtoToView(data);
+      setClasse(classeView);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", e);
+      toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", `Code d'erreur: ${e.correlationId}`, e);
     } finally {
       setLoading(false);
     }
