@@ -1,6 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { HiArrowRight } from "react-icons/hi";
+import { HiOutlineInformationCircle } from "react-icons/hi";
 import useAuth from "@/services/useAuth";
 import { getCohortPeriod } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
@@ -11,8 +10,13 @@ const CurrentSejourNotice = () => {
   const cohortPeriod = getCohortPeriod(cohort);
 
   return (
-    <div className="bg-blue-100 text-[#1E40AF] w-fit text-center p-2 rounded-md">
-      Vous êtes positionné(e) sur le séjour <span className="font-bold">{cohortPeriod}</span>.
+    <div className="bg-blue-50 text-sm text-blue-800 px-3 py-2.5 rounded-md flex gap-2">
+      <div className="flex-none">
+        <HiOutlineInformationCircle className="text-blue-800 h-5 w-5 " />
+      </div>
+      <p>
+        Vous êtes positionné(e) sur le séjour <strong>{cohortPeriod}</strong>.
+      </p>
     </div>
   );
 };
