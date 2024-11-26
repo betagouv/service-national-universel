@@ -10,7 +10,9 @@ export const getAvailableSessions = async (young: YoungType) => {
     method: "POST",
     params: { id: young._id },
   })();
-  if (!ok) return [];
+  if (!ok || cohorts === undefined) {
+    throw new Error("Impossible de récupérer les sessions disponibles");
+  }
   return cohorts;
 };
 

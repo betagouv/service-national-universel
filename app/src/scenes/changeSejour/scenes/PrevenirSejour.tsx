@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
-import useAuth from "@/services/useAuth";
+import React, { useState } from "react";
+import ReasonForm from "../components/ReasonForm";
+import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { HiArrowLeft } from "react-icons/hi";
-import { WITHRAWN_REASONS, YOUNG_STATUS_PHASE1, translate } from "snu-lib";
-import ReasonMotifSection from "../components/ReasonMotifSection";
 import CurrentSejourNotice from "../components/CurrentSejourNotice";
+import useAuth from "@/services/useAuth";
+import Container from "@/components/layout/Container";
+import FullscreenModal from "@/components/modals/FullscreenModal";
+import { translate } from "snu-lib";
 import { changeYoungCohort } from "@/services/young.service";
 import { setYoung } from "../../../redux/auth/actions";
 import { useDispatch } from "react-redux";
@@ -14,13 +15,10 @@ export default function PrevenirSejour() {
   const dispatch = useDispatch();
   const { young } = useAuth();
   const history = useHistory();
+  const [open, setOpen] = useState(false);
   const [withdrawnMessage, setWithdrawnMessage] = useState("");
   const [withdrawnReason, setWithdrawnReason] = useState("");
-  const filteredWithdrawnReasons = WITHRAWN_REASONS.filter(
-    (r) =>
-      (!r.phase2Only || young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) &&
-      (!r.cohortOnly || r.cohortOnly.includes(young.cohort)),
-  );
+
   const handleChangeCohort = async () => {
     const cohortId = null;
     const cohort = "à venir";
@@ -35,31 +33,13 @@ export default function PrevenirSejour() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center bg-white pb-12 px-4 md:px-[8rem]">
-      <div className="w-full flex items-center justify-between py-4">
-        <button onClick={() => history.push("/changer-de-sejour/no-date")} className="flex items-center gap-1 mr-2">
-          <HiArrowLeft className="text-xl text-gray-500" />
-        </button>
-        <h1 className="text-2xl font-bold text-center">Etre alerté lors de l'ouverture des inscriptions sur les prochains séjours</h1>
-        <div></div>
-      </div>
+    <Container title="M'alerter lors de l'ouverture des prochaines inscriptions" backlink="/changer-de-sejour/no-date">
       <CurrentSejourNotice />
-      <hr />
       <p className="mt-4 mb-6 text-sm leading-5 text-[#6B7280] font-normal">Vous serez alerté(e) par e-mail lors de l'ouverture des futures inscriptions.</p>
-
-      <ReasonMotifSection
-        filteredWithdrawnReasons={filteredWithdrawnReasons}
-        withdrawnReason={withdrawnReason}
-        setWithdrawnReason={setWithdrawnReason}
-        withdrawnMessage={withdrawnMessage}
-        setWithdrawnMessage={setWithdrawnMessage}
-      />
-
-      <button
-        onClick={handleChangeCohort}
-        className="mt-4 w-1/2  rounded-[10px] border-[1px] border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600">
-        Confirmer le changement de séjour
-      </button>
-    </div>
+      <ReasonForm reason={withdrawnReason} setReason={setWithdrawnReason} message={withdrawnMessage} setMessage={setWithdrawnMessage} onSubmit={() => setOpen(true)} />
+      <FullscreenModal isOpen={open} setOpen={() => setOpen(false)} title="Êtes-vous sûr de vouloir changer de séjour ?">
+        wesh
+      </FullscreenModal>
+    </Container>
   );
 }
