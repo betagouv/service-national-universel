@@ -28,20 +28,22 @@ export default function ChangeSejour() {
 
       {sessions.length > 0 && (
         <section id="changement-de-sejour" className="w-full flex flex-col">
-          <h2 className="text-base leading-6 font-bold text-center mt-4">S'inscrire à un séjour en {getCohortYear(cohort)}</h2>
+          <h2 className="text-base leading-6 font-bold text-center mt-4">S'inscrire à un autre séjour en {getCohortYear(cohort)}</h2>
           <p className="text-sm leading-5 font-normal text-[#6B7280] mt-2 text-center">Séjour auxquels vous êtes éligible :</p>
-          {sessions.map((session) => (
-            <Link
-              to={`/changer-de-sejour/motif?cohortid=${session._id}&period=${getCohortPeriod(session)}`}
-              key={session._id}
-              className="mt-2 flex py-3 px-2 justify-between rounded-md border border-gray-500 w-full">
-              <button className="text-sm leading-5 font-medium capitalize">{getCohortPeriod(session)}</button>
-              <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
-            </Link>
-          ))}
+          <div className="grid mt-2">
+            {sessions.map((session) => (
+              <Link
+                to={`/changer-de-sejour/motif?cohortid=${session._id}&period=${getCohortPeriod(session)}`}
+                key={session._id}
+                className="mt-2 flex p-3 justify-between rounded-md border border-gray-500 w-full">
+                <p className="text-sm leading-5 font-medium capitalize">{getCohortPeriod(session)}</p>
+                <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
+              </Link>
+            ))}
+          </div>
           <a
             href={supportURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}
-            className="text-sm leading-5 font-normal text-[#6B7280] mt-2 text-center underline"
+            className="text-sm leading-8 font-normal text-[#6B7280] mt-2 text-center underline"
             target="_blank"
             rel="noreferrer">
             Pourquoi je ne vois pas tous les séjours ?

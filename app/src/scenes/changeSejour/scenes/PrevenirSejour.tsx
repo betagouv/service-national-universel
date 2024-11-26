@@ -59,11 +59,11 @@ export default function PrevenirSejour() {
             <p className="text-gray-900 leading-6 font-medium">Être alerté(e) lors de l’ouverture des inscriptions pour les prochains séjours</p>
           </div>
         </div>
-        <div className="absolute bottom-0 w-full p-3 grid gap-2 bg-gray-50">
-          <button onClick={handleChangeCohort} className="w-full bg-blue-600 text-white p-2 rounded-md">
+        <div className="absolute bottom-0 w-full p-3 grid gap-3 bg-gray-50">
+          <button onClick={handleChangeCohort} className="w-full text-sm bg-blue-600 text-white p-2 rounded-md">
             Oui, confirmer ce choix
           </button>
-          <button onClick={() => setOpen(false)} className="w-full border bg-white text-gray-500 p-2 rounded-md">
+          <button onClick={() => setOpen(false)} className="w-full text-sm border bg-white text-gray-500 p-2 rounded-md">
             Non, annuler
           </button>
         </div>
