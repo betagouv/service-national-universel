@@ -94,5 +94,4 @@ export const config = {
   ENABLE_2FA: _env(envBool, "ENABLE_2FA", false),
   LOG_LEVEL: _env(envStr, "LOG_LEVEL", "debug"), // error, warn, info, http, debug
   DO_MIGRATION: _env(envBool, "DO_MIGRATION", false),
-  ENABLE_MONGOOSE_ELASTIC: _env(envBool, "ENABLE_MONGOOSE_ELASTIC", false),
 };
