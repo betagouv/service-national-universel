@@ -531,7 +531,6 @@ router.put("/accept-ri", passport.authenticate("young", { session: false, failWi
 router.put("/:id/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = validateYoung(req.body);
-
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -547,10 +546,13 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
-    const previousYoung = { ...young.toObject() };
+    const { cohort, cohortId, cohortChangeReason, cohortDetailedChangeReason } = value;
+    if (!cohortChangeReason || (!cohort && !cohortId)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const cohortObj = await CohortModel.findOne({ name: cohort });
+    const previousYoung = { ...young.toObject() };
+    const cohortObj = await CohortModel.findOne({
+      $or: [{ _id: cohortId }, { name: cohort }],
+    });
     if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;

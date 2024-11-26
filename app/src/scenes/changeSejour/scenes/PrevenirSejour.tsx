@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
+import { toastr } from "react-redux-toastr";
 import { HiArrowLeft } from "react-icons/hi";
-import { getCohortPeriod } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
-import { WITHRAWN_REASONS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { WITHRAWN_REASONS, YOUNG_STATUS_PHASE1, translate } from "snu-lib";
 import ReasonMotifSection from "../components/ReasonMotifSection";
 import CurrentSejourNotice from "../components/CurrentSejourNotice";
+import { changeYoungCohort } from "@/services/young.service";
+import { setYoung } from "../../../redux/auth/actions";
+import { useDispatch } from "react-redux";
 
 export default function PrevenirSejour() {
+  const dispatch = useDispatch();
   const { young } = useAuth();
-  const cohort = getCohort(young.cohort);
   const history = useHistory();
-  const cohortPeriod = getCohortPeriod(cohort);
   const [withdrawnMessage, setWithdrawnMessage] = useState("");
   const [withdrawnReason, setWithdrawnReason] = useState("");
   const filteredWithdrawnReasons = WITHRAWN_REASONS.filter(
@@ -20,6 +21,18 @@ export default function PrevenirSejour() {
       (!r.phase2Only || young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) &&
       (!r.cohortOnly || r.cohortOnly.includes(young.cohort)),
   );
+  const handleChangeCohort = async () => {
+    const cohortId = null;
+    const cohort = "à venir";
+    try {
+      const { ok, data, code } = await changeYoungCohort(young._id, { withdrawnReason, withdrawnMessage, cohortId, cohort });
+      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+      dispatch(setYoung(data));
+      history.push("/");
+    } catch (error) {
+      console.error("Erreur lors du changement de cohorte :", error);
+    }
+  };
 
   return (
     <div className="flex flex-col justify-center items-center bg-white pb-12 px-4 md:px-[8rem]">
@@ -41,6 +54,12 @@ export default function PrevenirSejour() {
         withdrawnMessage={withdrawnMessage}
         setWithdrawnMessage={setWithdrawnMessage}
       />
+
+      <button
+        onClick={handleChangeCohort}
+        className="mt-4 w-1/2  rounded-[10px] border-[1px] border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600">
+        Confirmer le changement de séjour
+      </button>
     </div>
   );
 }
