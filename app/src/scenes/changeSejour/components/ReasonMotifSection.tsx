@@ -12,7 +12,7 @@ interface ReasonMotifSectionProps {
 
 const ReasonMotifSection: React.FC<ReasonMotifSectionProps> = ({ filteredWithdrawnReasons, withdrawnReason, setWithdrawnReason, withdrawnMessage, setWithdrawnMessage }) => {
   return (
-    <div className="w-full md:w-1/2 md:px-3">
+    <div>
       <Field
         className="w-full"
         type="select"
