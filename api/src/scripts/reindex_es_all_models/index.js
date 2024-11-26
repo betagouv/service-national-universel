@@ -1,4 +1,4 @@
-const config = require("config");
+const { config } = require("../../config");
 
 const fs = require("fs");
 const path = require("path");
@@ -47,7 +47,7 @@ if (args.length > 0) {
 }
 
 async function reindexESAllModels() {
-  if (!config.get("ENABLE_MONGOOSE_ELASTIC")) {
+  if (!config.ENABLE_MONGOOSE_ELASTIC) {
     console.log("MongooseElastic is disabled (see ENABLE_MONGOOSE_ELASTIC). Synchronization is performed by listening to Mongo changestream (see ESDatariver)");
     console.log("Aborting");
     return;

@@ -1,4 +1,4 @@
-import config from "config";
+import { config } from "../config";
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import mongooseElastic from "@selego/mongoose-elastic";
@@ -115,7 +115,7 @@ schema.plugin(patchHistory, {
   ],
 });
 
-if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+if (config.ENABLE_MONGOOSE_ELASTIC) {
   schema.plugin(
     mongooseElastic(esClient, {
       selectiveIndexing: true,

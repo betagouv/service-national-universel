@@ -3,7 +3,7 @@ const { YoungModel, CohortModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { YOUNG_STATUS, SENDINBLUE_TEMPLATES, REGLEMENT_INTERIEUR_VERSION } = require("snu-lib");
-const config = require("config");
+const { config } = require("../config");
 
 exports.handler = async () => {
   try {

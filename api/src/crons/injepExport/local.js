@@ -1,7 +1,4 @@
-// !!! change the path
-// process.env["NODE_CONFIG_DIR"] = "/MY_ABSOLUTE_PATH/service-national-universel/api/config/";
-
-const config = require("config");
+const { config } = require("../../config");
 const { initDB } = require("../../mongo");
 
 (async () => {

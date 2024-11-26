@@ -1,5 +1,5 @@
 import nodemailer, { SendMailOptions } from "nodemailer";
-import config from "config";
+import { config } from "./config";
 
 import type { SendMailParameters } from "./brevo";
 

@@ -1,20 +1,25 @@
 {
-  "$schema": "https://json.schemastore.org/nest-cli",
-  "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
-  "compilerOptions": {
-    "deleteOutDir": true
-  },
-  "projects": {
-    "api": {
-      "type": "application",
-      "root": "src",
-      "entryFile": "main"
+    "$schema": "https://json.schemastore.org/nest-cli",
+    "collection": "@nestjs/schematics",
+    "sourceRoot": "src",
+    "compilerOptions": {
+        "deleteOutDir": true
     },
-    "job": {
-      "type": "application",
-      "root": "src",
-      "entryFile": "mainJob"
+    "projects": {
+        "api": {
+            "type": "application",
+            "root": "src",
+            "entryFile": "main"
+        },
+        "job": {
+            "type": "application",
+            "root": "src",
+            "entryFile": "mainJob"
+        },
+        "apiAndJob": {
+            "type": "application",
+            "root": "src",
+            "entryFile": "mainApiAndJob"
+        }
     }
-  }
 }

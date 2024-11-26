@@ -1,4 +1,4 @@
-import config from "config";
+import { config } from "../../config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
@@ -47,7 +47,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
+if (config.ENABLE_MONGOOSE_ELASTIC) {
   schema.plugin(mongooseElastic(esClient), MODELNAME);
 }
 

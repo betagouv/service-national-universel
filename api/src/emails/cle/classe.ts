@@ -1,7 +1,7 @@
 import { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, isChefEtablissement, UserDto, FeatureFlagName, ClasseType } from "snu-lib";
 import { EtablissementModel, ReferentDocument, ReferentModel } from "../../models";
 import { capture } from "../../sentry";
-import config from "config";
+import { config } from "../../config";
 import { logger } from "../../logger";
 import { sendTemplate } from "../../brevo";
 import { getEstimatedSeatsByEtablissement, getNumberOfClassesByEtablissement } from "../../cle/classe/classeService";

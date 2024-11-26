@@ -1,5 +1,5 @@
 const fetch = require("node-fetch");
-const config = require("config");
+const { config } = require("../config");
 const { capture, captureMessage } = require("../sentry");
 const slack = require("../slack");
 const { MissionAPIModel } = require("../models");
