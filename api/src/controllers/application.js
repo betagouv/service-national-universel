@@ -379,6 +379,10 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
       }
     }
 
+    if (application.status === APPLICATION_STATUS.ABANDON && application.contractStatus === "SENT") {
+      application.set({ contractStatus: "DRAFT" });
+    }
+
     await application.save({ fromUser: req.user });
 
     await updateYoungPhase2StatusAndHours(young, req.user);
