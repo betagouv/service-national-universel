@@ -16,6 +16,18 @@ class Apiv2 {
     this.token = token;
   }
 
+  async get(path: string) {
+    return this.axios.get(path);
+  }
+
+  async post(path: string, payload: any) {
+    return this.axios.post(path, payload);
+  }
+
+  async remove(path: string, payload: any) {
+    return this.axios.delete(path, payload);
+  }
+
   async put(path: string, payload: any) {
     return this.axios.put(path, payload).then((res) => {
       return { ok: res.statusText, code: res.status, data: res.data };
