@@ -25,6 +25,9 @@ export interface FileGateway {
     uploadFile(
         path: string,
         file: { data: Buffer; encoding?: string; mimetype: string },
+        options?: {
+            ACL?: "private" | "public-read";
+        },
     ): Promise<{
         Location: string;
         ETag: string;

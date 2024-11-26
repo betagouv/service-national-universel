@@ -1,3 +1,4 @@
+import { TaskType } from "./mongoSchema/task";
 import { FUNCTIONAL_ERRORS } from "./constants/functionalErrors";
 
 const translate = (value) => {
@@ -1157,6 +1158,30 @@ const translateStatusClasse = (status) => {
       return "Statut de la classe invalide";
     default:
       return status;
+  }
+};
+
+export const translateTaskStatus = (status: TaskType["status"]) => {
+  switch (status) {
+    case "PENDING":
+      return "En attente";
+    case "IN_PROGRESS":
+      return "En cours";
+    case "COMPLETED":
+      return "Terminée";
+    case "FAILED":
+      return "Erreur";
+    default:
+      return status;
+  }
+};
+
+export const translateSimulationName = (name: string) => {
+  switch (name) {
+    case "AFFECTATION_HTS_SIMULATION":
+      return "Affectation HTS (Hors DOM TOM)";
+    default:
+      return name;
   }
 };
 

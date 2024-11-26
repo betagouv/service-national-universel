@@ -1,43 +1,123 @@
-import { AffectationService } from "@/services/affectationService";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
-import SimulationsHtsResults from "./SimulationHtsResult";
-import { HiOutlinePaperClip } from "react-icons/hi";
-import { Badge } from "@snu/ds/admin";
+import { HiOutlinePaperClip, HiPlay } from "react-icons/hi";
+import { useLocation } from "react-router-dom";
+
+import { formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
+import { Badge, DataTable, TBadgeStatus, Tooltip } from "@snu/ds/admin";
+
+import { Phase1Service } from "@/services/phase1Service";
+import SimulationsHtsResults from "./somulationHts/SimulationHtsResult";
+import ActionCell from "./ActionCell";
+import SimulationHtsResultStartButton from "./somulationHts/SimulationHtsResultStartButton";
 
 interface SimulationsSubTabProps {
-  cohortId: string;
+  sessionId: string;
 }
 
-export default function SimulationsSubTab({ cohortId }: SimulationsSubTabProps) {
-  const { isPending, data: simulations } = useQuery<any[]>({ queryKey: ["task", "simulations"], queryFn: async () => AffectationService.getSimulations(cohortId) });
+const MAPPING_STATUS_COLOR: { [key: string]: TBadgeStatus } = {
+  PENDING: "none",
+  IN_PROGRESS: "IN_PROGRESS",
+  COMPLETED: "VALIDATED",
+  FAILED: "REFUSED",
+};
+
+export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps) {
+  const { search } = useLocation();
+  const currentAction = new URLSearchParams(search).get("action") || "";
+
+  const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
+  const [filters, setFilters] = useState({
+    action: currentAction,
+    createdAt: "",
+    author: "",
+    statut: "",
+  });
+
+  const {
+    isPending,
+    error,
+    data: simulations,
+  } = useQuery<Phase1Routes["GetSimulationsRoute"]["response"]>({
+    queryKey: ["phase-simulations", filters.action, sort],
+    queryFn: async () => Phase1Service.getSimulations(sessionId, { name: filters.action, sort }),
+  });
+
+  const simulationRows = useMemo(() => {
+    return (
+      simulations?.map((simu) => ({
+        id: simu.id,
+        data: {
+          ...simu,
+          statut: translateTaskStatus(simu.status),
+          action: translateSimulationName(simu.name),
+          date: formatDateFR(getZonedDate(simu.createdAt)),
+          author: `${simu.metadata?.parameters?.auteur?.prenom || ""} ${simu.metadata?.parameters?.auteur?.nom || ""}`,
+        },
+      })) || []
+    );
+  }, [simulations]);
 
   return (
     <div className="flex flex-col gap-8">
-      {isPending && <div>Chargement...</div>}
-      {simulations?.length === 0 && <div>Aucune simulation</div>}
-      {simulations?.map((simulation) => (
-        <div key={simulation.id} className="flex gap-4 items-center">
-          <div>
-            <div>{simulation.name}</div>
-            <div>{simulation.createdAt}</div>
-          </div>
-          {/* <div>{simulation.id}</div> */}
-          {/* <div>{simulation.startDate}</div> */}
-          {/* <div>{simulation.endDate}</div> */}
-          <SimulationsHtsResults simulation={simulation} />
-          <div>
-            <Badge title={simulation.status} />
-            {/* <div>{simulation.libelle}</div> */}
-          </div>
-          {simulation.metadata?.results?.rapportUrl && (
-            <a href={simulation.metadata?.results?.rapportUrl} className="border-[1px] border-blue-600 rounded-full p-2.5" target="_blank" rel="noreferrer">
-              <HiOutlinePaperClip size={24} />
-            </a>
-          )}
-          {/* <div>{simulation.updatedAt}</div> */}
-        </div>
-      ))}
+      <DataTable<{ id: string; data: Phase1Routes["GetSimulationsRoute"]["response"][0] }>
+        isLoading={isPending}
+        isError={!!error}
+        rows={simulationRows}
+        isSortable
+        sort={sort}
+        onSortChange={setSort}
+        filters={filters}
+        onFiltersChange={(filtersUpdated) => setFilters(filtersUpdated as any)}
+        columns={[
+          {
+            key: "name",
+            title: "Action",
+            filtrable: true,
+            filterKeys: [
+              { key: "action", label: "Action", externalKey: "name", external: true },
+              { key: "date", label: "Date" },
+              { key: "author", label: "Auteur" },
+            ],
+            renderCell: (simulation) => <ActionCell simulation={simulation} />,
+          },
+          {
+            key: "fieldKey",
+            title: "Resultats",
+            renderCell: (simulation) => <SimulationsHtsResults simulation={simulation} />,
+          },
+          {
+            key: "statut",
+            title: "Statut",
+            filtrable: true,
+            renderCell: (simulation) => (
+              <Tooltip id={simulation.id} title={simulation.libelle} disabled={!simulation.libelle}>
+                <Badge title={translateTaskStatus(simulation.status)} status={MAPPING_STATUS_COLOR[simulation.status]} />
+              </Tooltip>
+            ),
+          },
+          {
+            key: "rapportUrl",
+            title: "Simulat.",
+            renderCell: (simulation) =>
+              simulation.metadata?.results?.rapportUrl && (
+                <a href={simulation.metadata?.results?.rapportUrl} className="border-[1px] border-blue-600 rounded-full p-2.5" target="_blank" rel="noreferrer">
+                  <HiOutlinePaperClip size={24} />
+                </a>
+              ),
+          },
+          {
+            key: "lancer",
+            title: "Lancer",
+            renderCell: (simulation) => {
+              if (simulation.name === TaskName.AFFECTATION_HTS_SIMULATION) {
+                return <SimulationHtsResultStartButton simulation={simulation} />;
+              }
+              return <HiPlay className="text-gray-400" size={50} />;
+            },
+          },
+        ]}
+      />
     </div>
   );
 }

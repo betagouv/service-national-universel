@@ -45,6 +45,9 @@ export class FileProvider implements FileGateway {
     async uploadFile(
         path: string,
         file: { data: Buffer; encoding?: string; mimetype: string },
+        options: {
+            ACL?: "private" | "public-read";
+        } = {},
     ): Promise<AWS.S3.ManagedUpload.SendData> {
         const bucket = this.config.getOrThrow("bucket.name");
         const endpoint = this.config.getOrThrow("bucket.endpoint");
@@ -53,13 +56,14 @@ export class FileProvider implements FileGateway {
 
         return new Promise((resolve, reject) => {
             const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
-            const params = {
+            const params: AWS.S3.Types.PutObjectRequest = {
                 Bucket: bucket,
                 Key: path,
                 Body: file.data,
                 ContentEncoding: file.encoding || "",
                 ContentType: file.mimetype,
                 Metadata: { "Cache-Control": "max-age=31536000" },
+                ...options,
             };
 
             s3bucket.upload(params, function (err, data) {

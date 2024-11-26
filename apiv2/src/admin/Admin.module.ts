@@ -31,6 +31,7 @@ import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle
 import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
+import { Phase1Controller } from "./infra/sejours/phase1/api/Phase1.controller";
 import { AffectationController } from "./infra/sejours/phase1/affectation/api/Affectation.controller";
 import { SimulationAffectationHTSService } from "./core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { jeuneMongoProviders } from "./infra/sejours/jeune/provider/JeuneMongo.provider";
@@ -52,7 +53,7 @@ import { FileProvider } from "@shared/infra/File.provider";
         QueueModule,
         TaskModule,
     ],
-    controllers: [ClasseController, AffectationController, AuthController, AdminTaskController],
+    controllers: [ClasseController, AffectationController, Phase1Controller, AuthController, AdminTaskController],
     providers: [
         ClasseService,
         SimulationAffectationHTSService,

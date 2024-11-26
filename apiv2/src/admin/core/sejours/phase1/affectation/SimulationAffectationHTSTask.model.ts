@@ -11,7 +11,10 @@ export interface SimulationAffectationHTSTaskParameters {
     changementDepartements: { origine: string; destination: string }[];
 }
 
-export type SimulationAffectationHTSTaskResult = SimulationAffectationHTSResult["analytics"] & {
+export type SimulationAffectationHTSTaskResult = Pick<
+    SimulationAffectationHTSResult["analytics"],
+    "selectedCost" | "jeunesNouvellementAffected" | "jeuneAttenteAffectation" | "jeunesDejaAffected"
+> & {
     rapportUrl: string;
 };
 

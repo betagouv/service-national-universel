@@ -110,7 +110,7 @@ describe("SimulationAffectationHTS", () => {
                 SimulationAffectationHTS,
                 SimulationAffectationHTSService,
                 Logger,
-                { provide: FileGateway, useValue: { generateExcel: jest.fn() } },
+                { provide: FileGateway, useValue: { generateExcel: jest.fn(), uploadFile: jest.fn() } },
                 {
                     provide: SessionGateway,
                     useValue: {

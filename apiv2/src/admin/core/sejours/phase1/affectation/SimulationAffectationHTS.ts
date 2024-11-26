@@ -23,7 +23,7 @@ import { JeuneModel } from "../../jeune/Jeune.model";
 import { SessionGateway } from "../session/Session.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 
-const NB_MAX_ITERATION = 10;
+const NB_MAX_ITERATION = 50;
 
 export type SimulationAffectationHTSResult = {
     rapportData: RapportData;
@@ -225,10 +225,15 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
 
         const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
         const fileName = `simulation-affectation-hts/affectation_simulation_${sessionId}_${timestamp}.xlsx`;
-        const rapportFile = await this.fileGateway.uploadFile(`file/admin/sejours/phase1/affectation/${fileName}`, {
-            data: fileBuffer,
-            mimetype: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
+        const rapportFile = await this.fileGateway.uploadFile(
+            `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
+            {
+                data: fileBuffer,
+                mimetype: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            },
+            // TODO: ajouter un endpoint de lecture des fichiers
+            { ACL: "public-read" },
+        );
 
         return {
             ...results,

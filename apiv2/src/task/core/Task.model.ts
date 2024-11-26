@@ -5,7 +5,7 @@ export type TaskMetadata<T, U> = {
     results?: U;
 };
 
-export type TaskModel<T = object, U = object> = {
+export type TaskModel<T = any, U = any> = {
     id: string;
     name: TaskName;
     libelle?: string;
@@ -17,4 +17,4 @@ export type TaskModel<T = object, U = object> = {
     updatedAt: Date;
 };
 
-export type CreateTaskModel<T = object, U = object> = Omit<TaskModel<T, U>, "id" | "createdAt" | "updatedAt">;
+export type CreateTaskModel<T = any, U = any> = Omit<TaskModel<T, U>, "id" | "createdAt" | "updatedAt">;

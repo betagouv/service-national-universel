@@ -1,17 +1,17 @@
 import React from "react";
 import { Collapsable } from "@snu/ds/admin";
 
-import AffectationSimulationMetropole from "./AffectationSimulationMetropole";
+import AffectationSimulationMetropole from "./AffectationSimulationMetropole/AffectationSimulationMetropole";
 
 interface AffectationsSectionProps {
-  cohortId: string;
-  cohortName: string;
+  sessionId: string;
+  sessionNom: string;
 }
 
-export default function AffectationsSection({ cohortId, cohortName }: AffectationsSectionProps) {
+export default function AffectationsSection({ sessionId, sessionNom }: AffectationsSectionProps) {
   return (
     <Collapsable title="Affectations">
-      <AffectationSimulationMetropole cohortId={cohortId} cohortName={cohortName} />
+      <AffectationSimulationMetropole sessionId={sessionId} sessionNom={sessionNom} />
     </Collapsable>
   );
 }

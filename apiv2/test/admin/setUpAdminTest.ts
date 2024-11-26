@@ -39,6 +39,7 @@ import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
+import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -63,7 +64,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             }),
             QueueModule,
         ],
-        controllers: [ClasseController, AffectationController, AuthController],
+        controllers: [ClasseController, AffectationController, Phase1Controller, AuthController],
         providers: [
             ClasseService,
             SimulationAffectationHTSService,

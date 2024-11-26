@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { Logger } from "@nestjs/common";
 
 import { YOUNG_STATUS_PHASE1 } from "snu-lib";
 
@@ -12,14 +13,18 @@ import { SejourModel } from "../sejour/Sejour.model";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { CentreModel } from "../centre/Centre.model";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
-import { Logger } from "@nestjs/common";
+import { FileGateway } from "@shared/core/File.gateway";
 
 describe("SimulationAffectationHTSService", () => {
     let simulationAffectationHTSService: SimulationAffectationHTSService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [SimulationAffectationHTSService, Logger],
+            providers: [
+                SimulationAffectationHTSService,
+                Logger,
+                { provide: FileGateway, useValue: { generateExcel: jest.fn(), uploadFile: jest.fn() } },
+            ],
         }).compile();
 
         simulationAffectationHTSService = module.get<SimulationAffectationHTSService>(SimulationAffectationHTSService);
@@ -467,6 +472,9 @@ describe("SimulationAffectationHTSService", () => {
                     tauxRemplissageCentreList: [],
                     tauxOccupationLignesParCentreList: [],
                     iterationCostList: [],
+                    jeuneAttenteAffectation: 0,
+                    jeunesDejaAffected: 0,
+                    jeunesNouvellementAffected: 0,
                 },
             );
 

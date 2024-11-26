@@ -8,10 +8,10 @@ export class AdminGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
 
         // TODO : request.user mapping
-        // if (isAdmin({ role: request.user.role, subRole: request.user.sousRole })) {
-        return true;
-        // }
+        if (isAdmin({ role: request.user.role, subRole: request.user.sousRole })) {
+            return true;
+        }
 
-        // return false;
+        return false;
     }
 }

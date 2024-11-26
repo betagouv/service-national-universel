@@ -1,50 +1,53 @@
-import { Body, Controller, Get, Inject, Param, Post, Res, StreamableFile, UseGuards } from "@nestjs/common";
+import { Body, Controller, ExecutionContext, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
 
-import { department2region, departmentList, GRADES, RegionsHorsMetropole, TaskName, TaskStatus } from "snu-lib";
+import {
+    AffectationRoutes,
+    department2region,
+    departmentList,
+    GRADES,
+    RegionsHorsMetropole,
+    TaskName,
+    TaskStatus,
+} from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
-import { TaskModel } from "@task/core/Task.model";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
-
-// TODO: add validation, move dto to a separate file
-export class SimulateDto {
-    departements: string[];
-    niveauScolaires: Array<keyof typeof GRADES>;
-    changementDepartements: { origine: string; destination: string }[];
-}
+import { TaskMapper } from "@task/infra/Task.mapper";
+import { CustomRequest } from "@shared/infra/CustomRequest";
 
 @Controller("affectation")
 export class AffectationController {
     constructor(@Inject(TaskGateway) private readonly taskGateway: TaskGateway) {}
 
     @UseGuards(AdminGuard)
-    @Post("/:sessionId")
-    async simulate(@Param("sessionId") sessionId: string, @Body() simulateDto: SimulateDto): Promise<TaskModel> {
-        const task = this.taskGateway.create({
+    @Post("/:sessionId/simulations")
+    async simulate(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Body() payload: AffectationRoutes["PostSimulationsRoute"]["payload"],
+    ): Promise<AffectationRoutes["PostSimulationsRoute"]["response"]> {
+        // TODO: add payload validation
+        const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_HTS_SIMULATION,
             status: TaskStatus.PENDING,
             metadata: {
                 parameters: {
                     sessionId,
-                    departements:
-                        simulateDto.departements ||
-                        departmentList.filter(
-                            (departement) => !RegionsHorsMetropole.includes(department2region[departement]),
-                        ),
-                    niveauScolaires: simulateDto.niveauScolaires || Object.values(GRADES),
-                    changementDepartements: simulateDto.changementDepartements || [],
+                    departements: payload.departements,
+                    niveauScolaires: payload.niveauScolaires,
+                    changementDepartements: payload.changementDepartements,
+                    etranger: payload.etranger,
+                    affecterPDR: payload.affecterPDR,
+                    auteur: {
+                        id: request.user.id,
+                        prenom: request.user.prenom,
+                        nom: request.user.nom,
+                        role: request.user.role,
+                        sousRole: request.user.sousRole,
+                    },
                 },
             },
         });
-        return task;
-    }
-
-    @UseGuards(AdminGuard)
-    @Get("/:sessionId/simulations")
-    async getSimulations(@Param("sessionId") sessionId: string): Promise<any> {
-        const simulations = await this.taskGateway.findByName(TaskName.AFFECTATION_HTS_SIMULATION, {
-            "metadata.parameters.sessionId": sessionId,
-        });
-        return simulations;
+        return TaskMapper.toDto(task);
     }
 }

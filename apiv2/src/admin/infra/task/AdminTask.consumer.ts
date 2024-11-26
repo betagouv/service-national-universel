@@ -24,9 +24,9 @@ export class AdminTaskConsumer extends WorkerHost {
     // TODO call async usecase task
     async process(job: Job<TaskQueue, any, TaskName>): Promise<ConsumerResponse> {
         this.logger.log(`Processing task "${job.name}" with data ${JSON.stringify(job.data)}`, AdminTaskConsumer.name);
-        const task = await this.adminTaskRepository.toInProgress(job.data.id);
         let results = {};
         try {
+            const task = await this.adminTaskRepository.toInProgress(job.data.id);
             switch (job.name) {
                 case TaskName.IMPORT_CLASSE:
                     // TODO: call usecase
@@ -38,14 +38,16 @@ export class AdminTaskConsumer extends WorkerHost {
                     );
                     results = {
                         rapportUrl: simulation.rapportFile.Location,
-                        ...simulation.analytics,
+                        selectedCost: simulation.analytics.selectedCost,
+                        jeunesNouvellementAffected: simulation.analytics.jeunesNouvellementAffected,
+                        jeuneAttenteAffectation: simulation.analytics.jeuneAttenteAffectation,
+                        jeunesDejaAffected: simulation.analytics.jeunesDejaAffected,
                     } as SimulationAffectationHTSTaskResult;
                     break;
                 default:
-                    throw new Error(`Task "${job.name}" not found`);
+                    throw new Error(`Task "${job.name}" not handle yet`);
             }
         } catch (error: any) {
-            console.log(error);
             this.logger.error(
                 `Error processing task "${job.name}" - ${error.message} - ${error.stack}`,
                 AdminTaskConsumer.name,

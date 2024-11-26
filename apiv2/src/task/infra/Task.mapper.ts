@@ -25,6 +25,20 @@ export class TaskMapper {
         };
     }
 
+    static toDto(taskModel: TaskModel) {
+        return {
+            id: taskModel.id,
+            name: taskModel.name,
+            libelle: taskModel.libelle,
+            startDate: taskModel.startDate?.toISOString(),
+            endDate: taskModel.endDate?.toISOString(),
+            status: taskModel.status,
+            metadata: taskModel.metadata,
+            createdAt: taskModel.createdAt.toISOString(),
+            updatedAt: taskModel.updatedAt.toISOString(),
+        };
+    }
+
     static toEntity(taskModel: TaskModel): TaskType {
         return {
             _id: taskModel.id,
