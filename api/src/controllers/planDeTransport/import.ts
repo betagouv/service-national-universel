@@ -187,9 +187,9 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           const pdrKey = `MATRICULE PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
           const pdrValue = line[pdrKey]?.toString().toLowerCase();
           if (line[pdrKey] && !["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
-            const pdr = await PointDeRassemblementModel.findOne({ matricule: line[`MATRICULE PDR ${pdrNumber}`] });
+            const pdr = await PointDeRassemblementModel.findOne({ matricule: pdrValue });
             if (!pdr) {
-              throw new Error(ERRORS.NOT_FOUND, { cause: `Pdr not found for matricule : ${line[`MATRICULE PDR ${pdrNumber}`]}` });
+              throw new Error(ERRORS.NOT_FOUND, { cause: `Pdr not found for matricule : ${pdrValue}` });
             }
             pdrMatriculeIdMap.set(line[pdrKey] as string, pdr._id);
           }
