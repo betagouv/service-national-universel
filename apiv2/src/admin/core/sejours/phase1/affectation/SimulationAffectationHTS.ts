@@ -21,11 +21,18 @@ import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { CentreGateway } from "../centre/Centre.gateway";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { SessionGateway } from "../session/Session.gateway";
+import { FileGateway } from "@shared/core/File.gateway";
 
 const NB_MAX_ITERATION = 10;
 
-type SimulationAffectationHTSResult = {
+export type SimulationAffectationHTSResult = {
     rapportData: RapportData;
+    rapportFile: {
+        Location: string;
+        ETag: string;
+        Bucket: string;
+        Key: string;
+    };
     analytics: Analytics;
     jeuneList: JeuneAffectationModel[];
     sejourList: SejourModel[];
@@ -36,6 +43,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
     constructor(
         @Inject(SimulationAffectationHTSService)
         private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
+        @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
@@ -123,7 +131,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             changementDepartements,
         );
 
-        const results: Omit<SimulationAffectationHTSResult, "rapportData"> = {
+        const results: Omit<SimulationAffectationHTSResult, "rapportData" | "rapportFile"> = {
             jeuneList: [],
             sejourList: [],
             ligneDeBusList: [],
@@ -134,6 +142,9 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 tauxRemplissageCentreList: [],
                 tauxOccupationLignesParCentreList: [],
                 iterationCostList: [],
+                jeunesNouvellementAffected: 0,
+                jeuneAttenteAffectation: 0,
+                jeunesDejaAffected: 0,
             },
         };
 
@@ -210,9 +221,25 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             results.analytics,
         );
 
+        const fileBuffer = await this.simulationAffectationHTSService.generateRapportExcel(rapportData);
+
+        const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const fileName = `simulation-affectation-hts/affectation_simulation_${sessionId}_${timestamp}.xlsx`;
+        const rapportFile = await this.fileGateway.uploadFile(`file/admin/sejours/phase1/affectation/${fileName}`, {
+            data: fileBuffer,
+            mimetype: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
         return {
             ...results,
+            analytics: {
+                ...results.analytics,
+                jeunesNouvellementAffected: rapportData.jeunesNouvellementAffectedList.length,
+                jeuneAttenteAffectation: rapportData.jeuneAttenteAffectationList.length,
+                jeunesDejaAffected: rapportData.jeunesDejaAffectedList.length,
+            },
             rapportData,
+            rapportFile,
         };
     }
 }

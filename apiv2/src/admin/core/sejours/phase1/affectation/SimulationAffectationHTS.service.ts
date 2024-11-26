@@ -76,6 +76,9 @@ export type Analytics = {
     tauxRemplissageCentreList: number[];
     tauxOccupationLignesParCentreList: number[][];
     iterationCostList: number[];
+    jeunesNouvellementAffected: number;
+    jeuneAttenteAffectation: number;
+    jeunesDejaAffected: number;
 };
 
 export interface DistributionJeunesParDepartement {

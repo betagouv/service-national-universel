@@ -6,7 +6,7 @@ import React from "react";
 import { HiOutlineInformationCircle, HiOutlineRefresh } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { download, translate } from "snu-lib";
+import { translate } from "snu-lib";
 
 interface AffectationSimulationMetropoleProps {
   cohortId: string;
@@ -20,9 +20,8 @@ export default function AffectationSimulationMetropole({ cohortId, cohortName }:
     mutationFn: async () => {
       return await AffectationService.postAffectationMetropole({ cohortId });
     },
-    onSuccess: (file) => {
+    onSuccess: () => {
       toastr.success("Le traitement a bien été ajouté", "");
-      download(file, "simulation.xlsx");
     },
     onError: (error: any) => {
       capture(error);

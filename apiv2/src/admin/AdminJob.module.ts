@@ -1,5 +1,8 @@
 import { DatabaseModule } from "@infra/Database.module";
 import { Logger, Module } from "@nestjs/common";
+import { ClsModule } from "nestjs-cls";
+import { ConfigModule } from "@nestjs/config";
+
 import { TaskModule } from "@task/Task.module";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { AdminTaskConsumer } from "./infra/task/AdminTask.consumer";
@@ -16,10 +19,9 @@ import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phas
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { FileProvider } from "@shared/infra/File.provider";
 import { FileGateway } from "@shared/core/File.gateway";
-import { ClsModule } from "nestjs-cls";
 
 @Module({
-    imports: [ClsModule.forRoot({}), TaskModule, DatabaseModule],
+    imports: [ClsModule.forRoot({}), ConfigModule, TaskModule, DatabaseModule],
     providers: [
         Logger,
         AdminTaskConsumer,

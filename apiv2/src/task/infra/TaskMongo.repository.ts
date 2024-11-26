@@ -29,8 +29,8 @@ export class TaskRepository implements TaskGateway {
         return TaskMapper.toModel(task);
     }
 
-    async findByName(name: CreateTaskModel["name"]): Promise<TaskModel[]> {
-        const tasks = await this.taskMongooseEntity.find({ name }).sort({ createdAt: -1 });
+    async findByName(name: CreateTaskModel["name"], filter: { [key: string]: string } = {}): Promise<TaskModel[]> {
+        const tasks = await this.taskMongooseEntity.find({ name, ...filter }).sort({ createdAt: -1 });
         return tasks.map((task) => TaskMapper.toModel(task));
     }
 
@@ -62,10 +62,10 @@ export class TaskRepository implements TaskGateway {
         return TaskMapper.toModel(updatedTask);
     }
 
-    async toSuccess(id: string): Promise<TaskModel> {
+    async toSuccess(id: string, results: object): Promise<TaskModel> {
         const updatedTask = await this.taskMongooseEntity.findByIdAndUpdate(
             id,
-            { status: TaskStatus.COMPLETED, endDate: new Date() },
+            { status: TaskStatus.COMPLETED, endDate: new Date(), "metadata.results": results },
             {
                 new: true,
             },

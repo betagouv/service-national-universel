@@ -22,6 +22,15 @@ export interface FileGateway {
         },
     ): Promise<T[]>;
     generateExcel(excelSheets: { [sheet: string]: any[] }): Promise<Buffer>;
+    uploadFile(
+        path: string,
+        file: { data: Buffer; encoding?: string; mimetype: string },
+    ): Promise<{
+        Location: string;
+        ETag: string;
+        Bucket: string;
+        Key: string;
+    }>;
 }
 
 export const FileGateway = Symbol("FileGateway");
