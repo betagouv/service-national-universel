@@ -1,11 +1,6 @@
-const { config } = require("../../config");
+const { initDB } = require("../mongo");
 
-const fs = require("fs");
-const path = require("path");
-const dir = path.dirname(__filename);
-const { initDB } = require("../../mongo");
-
-const esClient = require("../../es");
+const esClient = require("../es");
 
 const {
   ApplicationModel,
@@ -34,11 +29,9 @@ const {
   EtablissementModel,
   SchoolRAMSESModel,
   EmailModel,
-} = require("../../models");
+} = require("../models");
 
-const StatsYoungCenterModel = require("../../models/legacy/stats-young-center");
-
-const MAPPING_DIR = path.join(dir, "./mappings");
+const StatsYoungCenterModel = require("../models/legacy/stats-young-center");
 
 const args = process.argv.slice(2);
 let groupName = null;
@@ -47,12 +40,6 @@ if (args.length > 0) {
 }
 
 async function reindexESAllModels() {
-  if (!config.ENABLE_MONGOOSE_ELASTIC) {
-    console.log("MongooseElastic is disabled (see ENABLE_MONGOOSE_ELASTIC). Synchronization is performed by listening to Mongo changestream (see ESDatariver)");
-    console.log("Aborting");
-    return;
-  }
-
   try {
     const all_models = [
       ApplicationModel,
@@ -143,9 +130,7 @@ async function reindexESAllModels() {
 
       console.log("Add mappings");
       try {
-        const data = fs.readFileSync(`${MAPPING_DIR}/${index}.json`);
-        const body = JSON.parse(data);
-        await esClient.indices.create({ index, body });
+        await esClient.indices.create({ index });
       } catch (error) {
         console.log("Mapping by default : Everything will be mapped");
       }

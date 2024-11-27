@@ -9,7 +9,6 @@ class GetSecrets {
     this.projectName = options.projectName;
     this.secretName = options.secretName;
     this.revision = options.revision ?? "latest_enabled";
-    this.format = options.format;
 
     this.project = options.project;
   }
@@ -25,10 +24,20 @@ class GetSecrets {
   }
 }
 
+function formatEnv(secrets) {
+  for (const key of Object.keys(secrets)) {
+    console.log(`${key}="${secrets[key]}"`);
+  }
+}
+
 async function main() {
   const input = new UserInput(`Retreive secrets from Scaleway`)
     .arg("project-name", "Project Name")
     .arg("secret-name", "Secret Name")
+    .opt("format", "Output format (json | env)", {
+      default: "env",
+      shortcut: "f",
+    })
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
     .validate();
@@ -39,8 +48,11 @@ async function main() {
 
   const secrets = await new GetSecrets(scaleway, input).execute();
 
-  for (const key of Object.keys(secrets)) {
-    console.log(`${key}="${secrets[key]}"`);
+  switch (input.format) {
+    case "env":
+      return formatEnv(secrets);
+    case "json":
+      return console.log(JSON.stringify(secrets));
   }
 }
 
