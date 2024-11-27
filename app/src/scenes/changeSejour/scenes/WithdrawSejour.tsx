@@ -53,7 +53,7 @@ function Modal({ open, setOpen, withdrawnReason, withdrawnMessage }) {
   return (
     <FullscreenModal isOpen={open} setOpen={() => setOpen(false)} title="Êtes-vous sûr(e) de vouloir vous désister du SNU ?">
       <p className="text-center text-sm text-gray-500 p-3">Si vous changez d'avis, vous pourrez vous positionner sur un nouveau séjour.</p>
-      <div className="absolute bottom-0 w-full p-3 grid gap-3 bg-gray-50 md:grid-cols-2">
+      <div className="absolute bottom-2 w-full p-3 grid gap-3 bg-gray-50 md:grid-cols-2">
         <button onClick={handleWithdraw} disabled={loading} className="w-full text-sm bg-blue-600 text-white p-2 rounded-md disabled:bg-gray-400">
           {loading ? "Envoi des données..." : "Oui, confirmer mon désistement"}
         </button>

@@ -76,7 +76,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
           ) : null}
         </div>
       </div>
-      <div className="absolute bottom-0 w-full p-3 grid gap-3 bg-gray-50 md:grid-cols-2">
+      <div className="absolute bottom-2 w-full p-3 grid gap-3 bg-gray-50 md:grid-cols-2">
         <button onClick={handleChangeCohort} disabled={loading} className="w-full text-sm bg-blue-600 text-white p-2 rounded-md disabled:bg-gray-400">
           {loading ? "Envoi des données..." : "Oui, confirmer ce choix"}
         </button>
