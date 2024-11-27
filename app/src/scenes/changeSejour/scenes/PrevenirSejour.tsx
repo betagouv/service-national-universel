@@ -20,7 +20,7 @@ export default function PrevenirSejour() {
   const [reason, setReason] = useState("");
 
   return (
-    <ChangeSejourContainer title="M'alerter lors de l'ouverture des prochaines inscriptions" backlink="/changer-de-sejour/no-date">
+    <ChangeSejourContainer title="Être alerté(e) pour les prochains séjours" backlink="/changer-de-sejour/no-date">
       <p className="mt-4 mb-6 text-sm leading-5 text-gray-500 text-center font-normal">Vous serez alerté(e) par e-mail lors de l'ouverture des futures inscriptions.</p>
       <ReasonForm reason={reason} setReason={setReason} message={message} setMessage={setMessage} onSubmit={() => setOpen(true)} disabled={!reason} />
       <Modal open={open} setOpen={setOpen} reason={reason} message={message} />
@@ -51,8 +51,15 @@ function Modal({ open, setOpen, reason, message }) {
   };
 
   return (
-    <FullscreenModal isOpen={open} setOpen={() => setOpen(false)} title="Êtes-vous sûr(e) de vouloir changer de séjour ?">
-      <div className="grid gap-2 p-3 max-w-3xl mx-auto">
+    <FullscreenModal
+      isOpen={open}
+      setOpen={setOpen}
+      title="Êtes-vous sûr(e) de vouloir changer de séjour ?"
+      onConfirm={handleChangeCohort}
+      loading={loading}
+      confirmText="Oui, confirmer ce choix"
+      cancelText="Non, annuler">
+      <div className="grid gap-2 p-3 max-w-xl mx-auto">
         <p className="text-center text-gray-500 p-3">En confirmant, vous vous désisterez du séjour sur lequel vous êtes déjà positionné.</p>
         <div className="grid gap-2 p-3">
           <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
@@ -66,15 +73,6 @@ function Modal({ open, setOpen, reason, message }) {
             <p className="text-gray-900 font-medium leading-normal">Être alerté(e) lors de l’ouverture des inscriptions pour les prochains séjours</p>
           </div>
         </div>
-      </div>
-
-      <div className="absolute bottom-2 w-full p-3 grid gap-3 bg-gray-50 md:grid-cols-2">
-        <button onClick={handleChangeCohort} disabled={loading} className="w-full text-sm bg-blue-600 text-white p-2 rounded-md disabled:bg-gray-500">
-          {loading ? "Envoi des données..." : "Oui, confirmer ce choix"}
-        </button>
-        <button onClick={() => setOpen(false)} disabled={loading} className="w-full text-sm border bg-white text-gray-500 p-2 rounded-md">
-          Non, annuler
-        </button>
       </div>
     </FullscreenModal>
   );

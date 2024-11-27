@@ -45,6 +45,12 @@ const ReasonForm: React.FC<ReasonMotifSectionProps> = ({ reason, setReason, mess
         className="w-full mt-4 rounded-md border-[1px] bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-300 ease-in-out hover:bg-blue-800 disabled:bg-gray-400">
         {text || "Envoyer ma demande"}
       </button>
+      <button
+        type="button"
+        onClick={() => window.history.back()}
+        className="w-full mt-2 rounded-md border-[1px] bg-[00000] py-2.5 px-3 text-sm leading-5 text-gray-500 transition duration-300 ease-in-out hover:bg-gray-100">
+        Annuler
+      </button>
     </form>
   );
 };

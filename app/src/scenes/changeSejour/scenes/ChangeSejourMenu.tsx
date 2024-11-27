@@ -24,7 +24,7 @@ export default function ChangeSejour() {
   return (
     <ChangeSejourContainer title="Choisir un nouveau séjour" backlink="/home">
       {sessions.length > 0 && (
-        <section id="changement-de-sejour">
+        <section id="changement-de-sejour" className="text-center">
           <h2 className="text-base font-bold mt-4 md:text-2xl">S'inscrire à un autre séjour en {getCohortYear(cohort)}</h2>
           <p className="text-sm leading-loose font-normal text-gray-500 mt-1">Séjours auxquels vous êtes éligible&nbsp;:</p>
           <div className="grid my-3 rounded-md border divide-y">

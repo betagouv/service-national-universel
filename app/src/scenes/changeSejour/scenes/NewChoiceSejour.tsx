@@ -54,8 +54,15 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
   };
 
   return (
-    <FullscreenModal isOpen={open} setOpen={() => setOpen(false)} title="Êtes-vous sûr(e) de vouloir changer de séjour ?">
-      <div className="grid gap-2 p-3 max-w-3xl mx-auto">
+    <FullscreenModal
+      isOpen={open}
+      setOpen={setOpen}
+      title="Êtes-vous sûr(e) de vouloir changer de séjour ?"
+      onConfirm={handleChangeCohort}
+      loading={loading}
+      confirmText="Oui, confirmer ce choix"
+      cancelText="Non, annuler">
+      <div className="grid gap-2 p-3 max-w-lg mx-auto">
         <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
           <HiOutlineXCircle className="text-red-600 h-5 w-5 inline-block stroke-2" />
           <p className="text-gray-500 text-sm">Ancien séjour</p>
