@@ -25,6 +25,8 @@ import { ManualInscriptionSettings } from "../phase0/ManualInscriptionSettings";
 import { Select } from "@snu/ds/admin";
 import CohortGroupSelector from "../components/CohortGroupSelector";
 
+type ObjectifLevel = "departemental" | "regional";
+
 // Define the interface for GeneralTab props
 interface GeneralTabProps {
   cohort: CohortDto;
@@ -39,10 +41,16 @@ interface GeneralTabProps {
 export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort, isLoading, onLoadingChange }: GeneralTabProps) {
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(cohort?.reInscriptionStartDate || cohort?.reInscriptionEndDate);
+  const [objectifLevel, setObjectifLevel] = useState<ObjectifLevel>(cohort?.objectifLevel || "departemental");
 
   const statusOptions = [
     { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
     { value: COHORT_STATUS.ARCHIVED, label: "Archivée" },
+  ];
+
+  const objectifOptions = [
+    { value: "departemental", label: "au niveau départemental" },
+    { value: "regional", label: "au niveau régional" },
   ];
 
   const onSubmit = async () => {
@@ -389,6 +397,29 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                     readOnly={readOnly}
                     disabled={isLoading}
                     error={error.instructionEndDate}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-gray-900 text-xs font-medium">Objectifs</p>
+                  <MdInfoOutline data-tip data-for="objectifs" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                  <ReactTooltip id="objectifs" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                    <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                      La définition d'objectifs régionaux permet de dépasser les quotas actuels en matière de traitement de dossiers LP au niveau départemental
+                    </p>
+                  </ReactTooltip>
+                </div>
+                <div className="rounded-lg bg-gray-100 p-3">
+                  <Select
+                    value={objectifOptions.find((o) => o.value === objectifLevel) || null}
+                    options={objectifOptions}
+                    onChange={(e) => {
+                      setObjectifLevel(e.value as ObjectifLevel);
+                      onCohortChange({ ...cohort, objectifLevel: e.value as ObjectifLevel });
+                    }}
+                    closeMenuOnSelect
+                    disabled={isLoading || readOnly}
                   />
                 </div>
               </div>
