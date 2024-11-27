@@ -1,15 +1,20 @@
-import { apiv2URL } from "@/config";
-import { capture } from "@/sentry";
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { toastr } from "react-redux-toastr";
 
-export interface HttpResponse<T = void> extends AxiosResponse {
-  data: T;
-}
+import { HttpError } from "snu-lib";
 
-class Apiv2 {
-  token: string;
-  axios: AxiosInstance;
+import { apiv2URL } from "@/config";
+import { capture } from "@/sentry";
+export interface IApiV2 {
+  get<T>(path: string): Promise<T>;
+  post<T>(path: string, payload: unknown): Promise<T>;
+  remove<T>(path: string): Promise<T>;
+  put<T>(path: string, payload: unknown): Promise<T>;
+  patch<T>(path: string, payload: unknown): Promise<T>;
+}
+class Apiv2 implements IApiV2 {
+  private token: string;
+  private axios: AxiosInstance;
 
   constructor() {
     this.axios = axios.create({
@@ -22,24 +27,24 @@ class Apiv2 {
     this.token = token;
   }
 
-  async get<T>(path: string): Promise<HttpResponse<T>> {
-    return this.axios.get(path);
+  async get<T>(path: string): Promise<T> {
+    return this.axios.get<T, T>(path);
   }
 
-  async post<T>(path: string, payload: any): Promise<HttpResponse<T>> {
-    return this.axios.post(path, payload);
+  async post<T>(path: string, payload: unknown): Promise<T> {
+    return this.axios.post<T, T>(path, payload);
   }
 
-  async remove<T>(path: string, payload: any): Promise<HttpResponse<T>> {
-    return this.axios.delete(path, payload);
+  async remove<T>(path: string): Promise<T> {
+    return this.axios.delete<T, T>(path);
   }
 
-  async put<T>(path: string, payload: any): Promise<HttpResponse<T>> {
-    return this.axios.put(path, payload);
+  async put<T>(path: string, payload: unknown): Promise<T> {
+    return this.axios.put<T, T>(path, payload);
   }
 
-  async patch<T>(path: string, payload: any): Promise<HttpResponse<T>> {
-    return this.axios.patch(path, payload);
+  async patch<T>(path: string, payload: unknown): Promise<T> {
+    return this.axios.patch<T, T>(path, payload);
   }
 
   initInterceptor() {
@@ -51,8 +56,7 @@ class Apiv2 {
 
     this.axios.interceptors.response.use(
       (response: AxiosResponse) => response.data,
-      (error) => {
-        console.log(error);
+      (error: AxiosError<HttpError>) => {
         if (error.response?.status === 401) {
           if (window?.location?.pathname !== "/auth") {
             window.location.href = "/auth?disconnected=1";
@@ -63,7 +67,7 @@ class Apiv2 {
           return Promise.reject(error.response.data);
         }
         capture(error);
-        toastr.error("Oups, une erreur est survenue", `Code d'erreur: ${error.response.data.correlationId}`);
+        toastr.error("Oups, une erreur est survenue", `Code d'erreur: ${error.response?.data.correlationId}`);
         return Promise.reject();
       },
     );

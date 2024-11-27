@@ -45,7 +45,6 @@ export default function VerifClassButton({ classe, setClasse, isLoading, setLoad
     await apiv2
       .post<ClassesRoutes["GetOne"]["response"]["data"]>(`/classe/${classe?._id}/verify`, classe)
       .then((updatedClasse) => {
-        console.log("updatedClasse", updatedClasse);
         toastr.success("Opération réussie", "La classe a bien été vérifiée");
         const classeView = ClasseService.mapDtoToView(updatedClasse);
         setClasse(classeView);
