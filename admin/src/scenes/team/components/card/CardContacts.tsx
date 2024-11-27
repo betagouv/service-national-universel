@@ -2,15 +2,16 @@ import React, { useEffect, useState } from "react";
 import ModalContacts from "../modal/ModalContacts";
 import API from "@/services/api";
 import { capture } from "@/sentry";
+import { CohortDto, ContactDto } from "snu-lib";
 
-export default function CardContacts({ contacts, idServiceDep, getService }) {
+export default function CardContacts({ contacts, idServiceDep, getService }: { contacts: ContactDto[]; idServiceDep: string; getService: () => Promise<any> }) {
   const [isOpen, setIsOpen] = useState(false);
   const [sortedContacts, setSortedContacts] = useState({});
   const [nbCohorts, setNbCohorts] = useState(0);
-  const [cohorts, setCohorts] = useState([]);
-  const [sessions, setSessions] = useState([]);
+  const [cohorts, setCohorts] = useState<string[]>([]);
+  const [sessions, setSessions] = useState<CohortDto[]>([]);
 
-  const [contactsFromCohort, setContactsFromCohort] = useState([]);
+  const [contactsFromCohort, setContactsFromCohort] = useState<ContactDto[]>([]);
 
   async function cohortsInit() {
     try {
@@ -37,16 +38,16 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
 
   useEffect(() => {
     if (contacts && sessions.length > 0) {
-      let existCohort = [];
-      let tempContact = {};
+      const existCohort: string[] = [];
+      const tempContact = {};
 
       //TODO update this when we will have the new cohort or change completely this part
       // We include only CLE from 2025
-      const newCohorts = sessions.filter((cohort) => cohort.name.match(/^(?!.*CLE).*2025/)).map((cohort) => cohort.name);
+      const newCohorts = sessions.filter((cohort: CohortDto) => cohort.name.match(/^(?!.*CLE).*2025/)).map((cohort) => cohort.name);
       setCohorts(newCohorts);
 
-      contacts.forEach((contact) => {
-        if (!existCohort.includes(contact.cohort) && newCohorts.includes(contact.cohort)) {
+      contacts.forEach((contact: ContactDto) => {
+        if (contact.cohort && !existCohort.includes(contact.cohort) && newCohorts.includes(contact.cohort)) {
           existCohort.push(contact.cohort);
         }
       });
@@ -57,7 +58,7 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
       });
       setNbCohorts(existCohort.length);
       setSortedContacts(tempContact);
-      setContactsFromCohort(contacts.filter((contact) => newCohorts.includes(contact.cohort)));
+      setContactsFromCohort(contacts.filter((contact) => contact.cohort && newCohorts.includes(contact.cohort)));
     }
   }, [contacts, sessions]);
 
@@ -74,12 +75,14 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
         </div>
         <div className="mt-4 flex flex-row -space-x-2">
           {contactsFromCohort.map((contact, index) => {
-            if (index < 6)
+            if (index < 6) {
               return (
                 <div key={index} className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs text-indigo-600`}>
                   {getInitials(contact.contactName)}
                 </div>
               );
+            }
+            return null;
           })}
         </div>
       </div>
