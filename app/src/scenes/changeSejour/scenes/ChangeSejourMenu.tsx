@@ -33,7 +33,7 @@ export default function ChangeSejour() {
           <div className="grid mt-2">
             {sessions.map((session) => (
               <Link
-                to={`/changer-de-sejour/motif?cohortid=${session._id}&period=${getCohortPeriod(session)}`}
+                to={`/changer-de-sejour/motif?cohortid=${session._id}&period=${getCohortPeriod(session)}&isFull=${session.isFull}`}
                 key={session._id}
                 className="mt-2 flex p-3 justify-between rounded-md border border-gray-500 w-full">
                 <p className="text-sm leading-5 font-medium capitalize">{getCohortPeriod(session)}</p>

@@ -76,12 +76,27 @@ export const downloadYoungDocument = async ({ youngId, fileId, fileType }) => {
   }
 };
 
-export const changeYoungCohort = async (youngId, { reason, message, cohortId = "", cohort = "" }) => {
+export const changeYoungCohort = async ({
+  youngId,
+  reason,
+  message,
+  cohortId,
+  cohortName,
+}: {
+  youngId: string;
+  reason: string;
+  message?: string;
+  cohortId?: string;
+  cohortName?: string;
+}) => {
+  if (!cohortId && !cohortName) {
+    throw new Error("cohortId or cohortName is required");
+  }
   const data = await api.put(`/young/${youngId}/change-cohort/`, {
     cohortChangeReason: reason,
     cohortDetailedChangeReason: message,
     cohortId,
-    cohort,
+    cohort: cohortName,
   });
   return data;
 };

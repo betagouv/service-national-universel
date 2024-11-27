@@ -10,7 +10,7 @@ export default function FullscreenModal({ isOpen, setOpen, title, children }) {
           transition
           className="absolute top-0 h-screen transform overflow-hidden bg-white transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in w-full data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
           <div className="relative min-h-screen">
-            <div className="grid grid-cols-[3rem_auto_3rem] p-3">
+            <div className="grid grid-cols-[3rem_auto_3rem] p-3 mt-2">
               <div>
                 <button onClick={setOpen}>
                   <IoClose className="text-2xl cursor-pointer text-gray-500" />
