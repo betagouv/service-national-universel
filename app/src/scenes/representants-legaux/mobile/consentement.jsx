@@ -171,49 +171,49 @@ function ConsentementForm({ young, token, step, parentId, cohort, classe }) {
   }
 
   async function saveData() {
-    const ownAddress = data.address.trim() !== young.address || data.zip.trim() !== young.zip || data.city !== young.city;
-    let address;
-    if (ownAddress) {
-      address = {
-        [`parent${parentId}OwnAddress`]: "true",
-        [`parent${parentId}Address`]: data.address.trim(),
-        [`parent${parentId}ComplementAddress`]: data.addressComplement.trim(),
-        [`parent${parentId}Zip`]: data.zip.trim(),
-        [`parent${parentId}City`]: data.city.trim(),
-        [`parent${parentId}Country`]: data.country.trim(),
-        [`addressParent${parentId}Verified`]: data.addressVerified ? "true" : "false",
-        [`parent${parentId}CityCode`]: data.cityCode.trim(),
-        [`parent${parentId}Region`]: data.region.trim(),
-        [`parent${parentId}Department`]: data.department.trim(),
-        [`parent${parentId}Location`]: data.location,
-      };
-    } else {
-      address = { [`parent${parentId}OwnAddress`]: "false" };
-    }
-
-    let body = {
-      [`parent${parentId}FirstName`]: data.firstName.trim(),
-      [`parent${parentId}LastName`]: data.lastName.trim(),
-      [`parent${parentId}Email`]: validator.normalizeEmail(data.email.trim()),
-      [`parent${parentId}PhoneZone`]: data.phoneZone.trim(),
-      [`parent${parentId}Phone`]: data.phone.trim(),
-      ...address,
-    };
-
-    if (parentId === 1) {
-      body.parentAllowSNU = data.allowSNU ? "true" : "false";
-      if (data.allowSNU) {
-        body.parent1AllowImageRights = data.allowImageRights ? "true" : "false";
-        body.rulesParent1 = "true";
-      }
-    } else {
-      body.parent2AllowImageRights = data.allowImageRights ? "true" : "false";
-    }
-
-    if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - Consentement valide - reinscription");
-    else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
-
     try {
+      const ownAddress = data.address.trim() !== young.address || data.zip.trim() !== young.zip || data.city !== young.city;
+      let address;
+      if (ownAddress) {
+        address = {
+          [`parent${parentId}OwnAddress`]: "true",
+          [`parent${parentId}Address`]: data.address.trim(),
+          [`parent${parentId}ComplementAddress`]: data.addressComplement.trim(),
+          [`parent${parentId}Zip`]: data.zip.trim(),
+          [`parent${parentId}City`]: data.city.trim(),
+          [`parent${parentId}Country`]: data.country.trim(),
+          [`addressParent${parentId}Verified`]: data.addressVerified ? "true" : "false",
+          [`parent${parentId}CityCode`]: data.cityCode.trim(),
+          [`parent${parentId}Region`]: data.region.trim(),
+          [`parent${parentId}Department`]: data.department.trim(),
+          [`parent${parentId}Location`]: data.location,
+        };
+      } else {
+        address = { [`parent${parentId}OwnAddress`]: "false" };
+      }
+
+      let body = {
+        [`parent${parentId}FirstName`]: data.firstName.trim(),
+        [`parent${parentId}LastName`]: data.lastName.trim(),
+        [`parent${parentId}Email`]: validator.normalizeEmail(data.email.trim()),
+        [`parent${parentId}PhoneZone`]: data.phoneZone.trim(),
+        [`parent${parentId}Phone`]: data.phone.trim(),
+        ...address,
+      };
+
+      if (parentId === 1) {
+        body.parentAllowSNU = data.allowSNU ? "true" : "false";
+        if (data.allowSNU) {
+          body.parent1AllowImageRights = data.allowImageRights ? "true" : "false";
+          body.rulesParent1 = "true";
+        }
+      } else {
+        body.parent2AllowImageRights = data.allowImageRights ? "true" : "false";
+      }
+
+      if (young.status === "REINSCRIPTION") plausibleEvent("Phase0/CTA representant legal - Consentement valide - reinscription");
+      else plausibleEvent("Phase0/CTA representant legal - Consentement valide");
+
       const { code, ok } = await api.post(API_CONSENT + `?token=${token}&parent=${parentId}`, body);
       if (!ok) {
         setErrors({ global: "Une erreur s'est produite" + (code ? " : " + translate(code) : "") });
