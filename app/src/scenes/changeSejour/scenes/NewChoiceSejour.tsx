@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 import ReasonForm from "../components/ReasonForm";
 import { toastr } from "react-redux-toastr";
-import FullscreenModal from "@/components/modals/FullscreenModal";
+import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import { getCohortPeriod, translate } from "snu-lib";
 import { changeYoungCohort } from "@/services/young.service";
@@ -12,6 +12,8 @@ import { useDispatch } from "react-redux";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
 import { getCohort } from "@/utils/cohorts";
+import API from "@/services/api";
+import { useQuery } from "@tanstack/react-query";
 
 export default function NewChoicSejour() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -29,6 +31,23 @@ export default function NewChoicSejour() {
   );
 }
 
+async function getInscriptionGoalReachedNormalized({ department, cohortId }) {
+  const { data, ok, code } = await API.get(`/inscription-goal/${encodeURIComponent(cohortId)}/department/${encodeURIComponent(department)}`);
+  if (!ok) {
+    toastr.error("Oups, une erreur s'est produite", translate(code));
+    return null;
+  }
+  return data;
+}
+
+function useIsGoalReached(cohortId: string) {
+  const { young } = useAuth();
+  return useQuery({
+    queryFn: () => getInscriptionGoalReachedNormalized({ department: young.department, cohortId }),
+    queryKey: ["inscription-goal", young.department, cohortId],
+  });
+}
+
 function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
   const { young } = useAuth();
   const queryParams = new URLSearchParams(window.location.search);
@@ -38,6 +57,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
   const dispatch = useDispatch();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
+  const { data, isLoading } = useIsGoalReached(cohortId);
 
   const handleChangeCohort = async () => {
     try {
@@ -54,7 +74,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
   };
 
   return (
-    <FullscreenModal
+    <ResponsiveModal
       isOpen={open}
       setOpen={setOpen}
       title="Êtes-vous sûr(e) de vouloir changer de séjour ?"
@@ -91,6 +111,6 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
           Non, annuler
         </button>
       </div>
-    </FullscreenModal>
+    </ResponsiveModal>
   );
 }

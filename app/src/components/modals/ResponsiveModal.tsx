@@ -13,7 +13,7 @@ type PropTypes = {
   cancelText?: string;
 };
 
-export default function FullscreenModal({ isOpen, setOpen, title, children, onConfirm, loading, confirmText, cancelText }: PropTypes) {
+export default function ResponsiveModal({ isOpen, setOpen, title, children, onConfirm, loading, confirmText, cancelText }: PropTypes) {
   return (
     <Dialog open={isOpen} onClose={() => setOpen(false)} className="relative z-10">
       <DialogBackdrop

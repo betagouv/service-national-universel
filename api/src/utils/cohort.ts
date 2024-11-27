@@ -1,5 +1,6 @@
 import { YOUNG_STATUS, getRegionForEligibility, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS } from "snu-lib";
 import { YoungModel, CohortModel, InscriptionGoalModel, CohortDocument, CohortGroupModel } from "../models";
+import { getCompletionObjectifs } from "../services/inscription-goal";
 
 type CohortDocumentWithPlaces = CohortDocument<{
   numberOfCandidates?: number;
@@ -21,10 +22,11 @@ type YoungInfo = Pick<
 // TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
 export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
   let query: { status: string; cohortGroupId?: string } = { status: COHORT_STATUS.PUBLISHED };
+
   if (young.cohortId) {
-    const youngCohort = await CohortModel.findOne({ _id: young.cohortId });
-    if (!youngCohort) throw new Error("Cohort not found");
-    query = { ...query, cohortGroupId: youngCohort.cohortGroupId };
+    const cohort = await CohortModel.findById(young.cohortId, { cohortGroupId: 1 });
+    if (!cohort) throw new Error("Cohort not found");
+    query = { ...query, cohortGroupId: cohort.cohortGroupId };
   }
 
   const cohorts = await CohortModel.find(query);
@@ -50,8 +52,10 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
   });
   for (let session of sessions) {
     session.isEligible = true;
+    session.isFull = (await getCompletionObjectifs(department, session.name)).isAtteint;
   }
-  return getPlaces(sessions, region);
+  // return getPlaces(sessions, region);
+  return sessions;
 }
 
 export async function getAllSessions(young: YoungInfo) {

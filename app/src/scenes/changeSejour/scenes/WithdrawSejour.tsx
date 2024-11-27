@@ -6,7 +6,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { useDispatch } from "react-redux";
 import ReasonForm from "../components/ReasonForm";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
-import FullscreenModal from "@/components/modals/FullscreenModal";
+import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import { translate } from "snu-lib";
 
 export default function WithdrawSejour() {
@@ -51,7 +51,7 @@ function Modal({ open, setOpen, withdrawnReason, withdrawnMessage }) {
   };
 
   return (
-    <FullscreenModal
+    <ResponsiveModal
       isOpen={open}
       setOpen={setOpen}
       title="Êtes-vous sûr(e) de vouloir vous désister du SNU ?"
@@ -60,6 +60,6 @@ function Modal({ open, setOpen, withdrawnReason, withdrawnMessage }) {
       confirmText="Oui, confirmer mon désistement"
       cancelText="Non, annuler">
       <p className="text-center text-sm text-gray-500 p-3">Si vous changez d'avis, vous pourrez vous positionner sur un nouveau séjour.</p>
-    </FullscreenModal>
+    </ResponsiveModal>
   );
 }

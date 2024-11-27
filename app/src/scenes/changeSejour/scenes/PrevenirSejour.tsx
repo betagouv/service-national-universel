@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
-import FullscreenModal from "@/components/modals/FullscreenModal";
+import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import { getCohortPeriod, translate } from "snu-lib";
 import { changeYoungCohort } from "@/services/young.service";
 import { setYoung } from "../../../redux/auth/actions";
@@ -51,7 +51,7 @@ function Modal({ open, setOpen, reason, message }) {
   };
 
   return (
-    <FullscreenModal
+    <ResponsiveModal
       isOpen={open}
       setOpen={setOpen}
       title="Êtes-vous sûr(e) de vouloir changer de séjour ?"
@@ -74,6 +74,6 @@ function Modal({ open, setOpen, reason, message }) {
           </div>
         </div>
       </div>
-    </FullscreenModal>
+    </ResponsiveModal>
   );
 }
