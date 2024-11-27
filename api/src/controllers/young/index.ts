@@ -589,6 +589,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
 
     young.set({
       cohort: cohortObj.name,
+      originalCohort: oldCohort,
       cohortId: cohortObj._id,
       cohortChangeReason,
       cohortDetailedChangeReason,
