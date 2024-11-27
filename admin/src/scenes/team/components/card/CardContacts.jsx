@@ -8,21 +8,17 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
   const [sortedContacts, setSortedContacts] = useState({});
   const [nbCohorts, setNbCohorts] = useState(0);
   const [cohorts, setCohorts] = useState([]);
-  const [sessions2023, setSessions2023] = useState([]);
+  const [sessions, setSessions] = useState([]);
 
   const [contactsFromCohort, setContactsFromCohort] = useState([]);
 
   async function cohortsInit() {
     try {
       const result = await API.get("/cohort");
-      if (result.status === 401) {
-        return;
-      }
-      if (!result?.ok) {
-        capture("Unable to load global cohorts data :" + JSON.stringify(result));
-      } else {
-        setSessions2023(result.data);
-      }
+      if (result.status === 401) return;
+      if (!result?.ok) capture("Unable to load global cohorts data :" + JSON.stringify(result));
+
+      setSessions(result.data);
     } catch (err) {
       capture(err);
     }
@@ -40,12 +36,13 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
   }, []);
 
   useEffect(() => {
-    if (contacts && sessions2023.length > 0) {
+    if (contacts && sessions.length > 0) {
       let existCohort = [];
       let tempContact = {};
 
       //TODO update this when we will have the new cohort or change completely this part
-      const newCohorts = sessions2023.filter((cohort) => cohort.name.match(/^(?!.*CLE).*2024/)).map((cohort) => cohort.name);
+      // We include only CLE from 2025
+      const newCohorts = sessions.filter((cohort) => cohort.name.match(/^(?!.*CLE).*2025/)).map((cohort) => cohort.name);
       setCohorts(newCohorts);
 
       contacts.forEach((contact) => {
@@ -62,7 +59,7 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
       setSortedContacts(tempContact);
       setContactsFromCohort(contacts.filter((contact) => newCohorts.includes(contact.cohort)));
     }
-  }, [contacts, sessions2023]);
+  }, [contacts, sessions]);
 
   const handleShowModal = () => setIsOpen(true);
 
