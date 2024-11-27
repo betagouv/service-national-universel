@@ -3,8 +3,7 @@ import ReasonForm from "../components/ReasonForm";
 import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
-import CurrentSejourNotice from "../components/CurrentSejourNotice";
-import Container from "@/components/layout/Container";
+import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import FullscreenModal from "@/components/modals/FullscreenModal";
 import { getCohortPeriod, translate } from "snu-lib";
 import { changeYoungCohort } from "@/services/young.service";
@@ -21,12 +20,11 @@ export default function PrevenirSejour() {
   const [reason, setReason] = useState("");
 
   return (
-    <Container title="M'alerter lors de l'ouverture des prochaines inscriptions" backlink="/changer-de-sejour/no-date">
-      <CurrentSejourNotice />
+    <ChangeSejourContainer title="M'alerter lors de l'ouverture des prochaines inscriptions" backlink="/changer-de-sejour/no-date">
       <p className="mt-4 mb-6 text-sm leading-5 text-gray-500 text-center font-normal">Vous serez alerté(e) par e-mail lors de l'ouverture des futures inscriptions.</p>
       <ReasonForm reason={reason} setReason={setReason} message={message} setMessage={setMessage} onSubmit={() => setOpen(true)} disabled={!reason} />
       <Modal open={open} setOpen={setOpen} reason={reason} message={message} />
-    </Container>
+    </ChangeSejourContainer>
   );
 }
 
@@ -54,20 +52,23 @@ function Modal({ open, setOpen, reason, message }) {
 
   return (
     <FullscreenModal isOpen={open} setOpen={() => setOpen(false)} title="Êtes-vous sûr(e) de vouloir changer de séjour ?">
-      <p className="text-center text-gray-500 p-3">En confirmant, vous vous désisterez du séjour sur lequel vous êtes déjà positionné.</p>
-      <div className="grid gap-2 p-3">
-        <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
-          <HiOutlineXCircle className="text-red-600 h-5 w-5 inline-block stroke-2" />
-          <p className="text-gray-500 text-sm">Ancien séjour</p>
-          <p className="text-gray-900 font-medium">{date}</p>
-        </div>
-        <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
-          <HiOutlineCheckCircle className="text-blue-600 h-6 w-6 inline-block stroke-2" />
-          <p className="text-gray-500 text-sm">Nouveau séjour</p>
-          <p className="text-gray-900 font-medium leading-normal">Être alerté(e) lors de l’ouverture des inscriptions pour les prochains séjours</p>
+      <div className="grid gap-2 p-3 max-w-3xl mx-auto">
+        <p className="text-center text-gray-500 p-3">En confirmant, vous vous désisterez du séjour sur lequel vous êtes déjà positionné.</p>
+        <div className="grid gap-2 p-3">
+          <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
+            <HiOutlineXCircle className="text-red-600 h-5 w-5 inline-block stroke-2" />
+            <p className="text-gray-500 text-sm">Ancien séjour</p>
+            <p className="text-gray-900 font-medium">{date}</p>
+          </div>
+          <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
+            <HiOutlineCheckCircle className="text-blue-600 h-6 w-6 inline-block stroke-2" />
+            <p className="text-gray-500 text-sm">Nouveau séjour</p>
+            <p className="text-gray-900 font-medium leading-normal">Être alerté(e) lors de l’ouverture des inscriptions pour les prochains séjours</p>
+          </div>
         </div>
       </div>
-      <div className="absolute bottom-0 w-full p-3 grid gap-3 bg-gray-50">
+
+      <div className="absolute bottom-0 w-full p-3 grid gap-3 bg-gray-50 md:grid-cols-2">
         <button onClick={handleChangeCohort} disabled={loading} className="w-full text-sm bg-blue-600 text-white p-2 rounded-md disabled:bg-gray-500">
           {loading ? "Envoi des données..." : "Oui, confirmer ce choix"}
         </button>

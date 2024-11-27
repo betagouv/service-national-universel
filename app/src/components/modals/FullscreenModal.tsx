@@ -13,11 +13,11 @@ export default function FullscreenModal({ isOpen, setOpen, title, children }) {
             <div className="grid grid-cols-[3rem_auto_3rem] p-3 mt-2">
               <div>
                 <button onClick={setOpen}>
-                  <IoClose className="text-2xl cursor-pointer text-gray-500" />
+                  <IoClose className="text-2xl md:text-3xl cursor-pointer text-gray-400" />
                 </button>
               </div>
               <div>
-                <h2 className="text-center font-medium text-lg leading-tight">{title}</h2>
+                <h2 className="text-center font-medium text-lg md:text-3xl leading-tight">{title}</h2>
               </div>
               <div></div>
             </div>

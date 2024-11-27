@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import CurrentSejourNotice from "../components/CurrentSejourNotice";
 import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 import ReasonForm from "../components/ReasonForm";
 import { toastr } from "react-redux-toastr";
 import FullscreenModal from "@/components/modals/FullscreenModal";
-import Container from "@/components/layout/Container";
+import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import { getCohortPeriod, translate } from "snu-lib";
 import { changeYoungCohort } from "@/services/young.service";
 import { setYoung } from "../../../redux/auth/actions";
@@ -22,12 +21,11 @@ export default function NewChoicSejour() {
   const [open, setOpen] = useState(false);
 
   return (
-    <Container title={`Séjour ${newCohortPeriod}`} backlink="/changer-de-sejour/no-date">
-      <CurrentSejourNotice />
+    <ChangeSejourContainer title={`Séjour ${newCohortPeriod}`} backlink="/changer-de-sejour/">
       <p className="mt-4 mb-6 text-sm leading-5 text-gray-500 font-normal text-center">Pour quelle(s) raison(s) souhaitez-vous changer de séjour ?</p>
-      <ReasonForm reason={reason} setReason={setReason} message={message} setMessage={setMessage} onSubmit={() => setOpen(true)} />
+      <ReasonForm reason={reason} setReason={setReason} message={message} setMessage={setMessage} disabled={!reason} onSubmit={() => setOpen(true)} />
       <Modal open={open} setOpen={setOpen} newCohortPeriod={newCohortPeriod} reason={reason} message={message} />
-    </Container>
+    </ChangeSejourContainer>
   );
 }
 
@@ -57,7 +55,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
 
   return (
     <FullscreenModal isOpen={open} setOpen={() => setOpen(false)} title="Êtes-vous sûr(e) de vouloir changer de séjour ?">
-      <div className="grid gap-2 p-3">
+      <div className="grid gap-2 p-3 max-w-3xl mx-auto">
         <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
           <HiOutlineXCircle className="text-red-600 h-5 w-5 inline-block stroke-2" />
           <p className="text-gray-500 text-sm">Ancien séjour</p>
@@ -78,7 +76,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
           ) : null}
         </div>
       </div>
-      <div className="absolute bottom-0 w-full p-3 grid gap-3 bg-gray-50">
+      <div className="absolute bottom-0 w-full p-3 grid gap-3 bg-gray-50 md:grid-cols-2">
         <button onClick={handleChangeCohort} disabled={loading} className="w-full text-sm bg-blue-600 text-white p-2 rounded-md disabled:bg-gray-400">
           {loading ? "Envoi des données..." : "Oui, confirmer ce choix"}
         </button>
