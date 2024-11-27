@@ -1,12 +1,8 @@
-import { YOUNG_STATUS, getRegionForEligibility, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS } from "snu-lib";
-import { YoungModel, CohortModel, InscriptionGoalModel, CohortDocument, CohortGroupModel } from "../models";
+import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS } from "snu-lib";
+import { CohortModel, CohortDocument } from "../models";
 import { getCompletionObjectifs } from "../services/inscription-goal";
 
 type CohortDocumentWithPlaces = CohortDocument<{
-  numberOfCandidates?: number;
-  numberOfValidated?: number;
-  goal?: number;
-  goalReached?: boolean;
   isFull?: boolean;
   isEligible?: boolean;
 }>;
@@ -30,7 +26,6 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
   }
 
   const cohorts = await CohortModel.find(query);
-  const region = getRegionForEligibility(young);
   const department = getDepartmentForEligibility(young);
 
   const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
@@ -54,19 +49,17 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
     session.isEligible = true;
     session.isFull = (await getCompletionObjectifs(department, session.name)).isAtteint;
   }
-  // return getPlaces(sessions, region);
   return sessions;
 }
 
 export async function getAllSessions(young: YoungInfo) {
-  const cohorts = await CohortModel.find({});
-  const region = getRegionForEligibility(young);
-  const sessionsWithPlaces = await getPlaces(cohorts, region);
+  const sessions: Array<CohortDocumentWithPlaces> = await CohortModel.find({});
   const availableSessions = await getFilteredSessions(young);
-  for (let session of sessionsWithPlaces) {
+  for (let session of sessions) {
     session.isEligible = availableSessions.some((e) => e.name === session.name);
+    session.isFull = (await getCompletionObjectifs(getDepartmentForEligibility(young), session.name)).isAtteint;
   }
-  return sessionsWithPlaces;
+  return sessions;
 }
 
 export async function getFilteredSessionsForCLE() {
@@ -81,52 +74,6 @@ export async function getFilteredSessionsForCLE() {
       ((session.inscriptionEndDate && session.inscriptionEndDate > now) || (session.instructionEndDate && session.instructionEndDate > now)),
   );
   return sessions;
-}
-
-async function getPlaces(sessions: CohortDocumentWithPlaces[], region: string): Promise<CohortDocumentWithPlaces[]> {
-  const cohorts = await CohortModel.find({ status: COHORT_STATUS.PUBLISHED });
-  const sessionNames = sessions.map(({ name }) => name);
-  const goals = await InscriptionGoalModel.aggregate([{ $match: { region, cohort: { $in: sessionNames } } }, { $group: { _id: "$cohort", total: { $sum: "$max" } } }]);
-  const agg = await YoungModel.aggregate([
-    {
-      $match: {
-        $or: [
-          { schooled: "true", schoolRegion: region },
-          { schooled: "false", region },
-        ],
-        cohort: { $in: sessionNames },
-      },
-    },
-    {
-      $group: {
-        _id: "$cohort",
-        candidates: { $sum: { $cond: [{ $in: ["$status", ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "WAITING_LIST", "REINSCRIPTION"]] }, 1, 0] } },
-        validated: { $sum: { $cond: [{ $in: ["$status", ["VALIDATED"]] }, 1, 0] } },
-      },
-    },
-  ]);
-
-  const cohortIds = cohorts.map((s) => s._id.toString());
-  const sessionObj = sessions.map((session) => {
-    if (cohorts.map((e) => e.name).includes(session.name)) {
-      return { ...session.toObject() };
-    }
-    return session;
-  });
-
-  for (let session of sessionObj) {
-    if (session._id && cohortIds.includes(session._id.toString())) {
-      session.numberOfCandidates = agg.find(({ _id }) => _id === session.name)?.candidates || 0;
-      session.numberOfValidated = agg.find(({ _id }) => _id === session.name)?.validated || 0;
-      session.goal = goals.find(({ _id }) => _id === session.name)?.total;
-      session.goalReached = session.goal <= 0 ? true : session.numberOfCandidates + session.numberOfValidated >= session.goal * session.buffer;
-      session.isFull = session.goal <= 0 ? true : session.numberOfValidated >= session.goal;
-      session.isEligible = sessions.some((e) => e.name === session.name);
-    }
-  }
-
-  // @ts-ignore
-  return sessionObj;
 }
 
 export async function getCohortsEndAfter(date) {

@@ -12,8 +12,6 @@ import { useDispatch } from "react-redux";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
 import { getCohort } from "@/utils/cohorts";
-import API from "@/services/api";
-import { useQuery } from "@tanstack/react-query";
 
 export default function NewChoicSejour() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -31,23 +29,6 @@ export default function NewChoicSejour() {
   );
 }
 
-async function getInscriptionGoalReachedNormalized({ department, cohortId }) {
-  const { data, ok, code } = await API.get(`/inscription-goal/${encodeURIComponent(cohortId)}/department/${encodeURIComponent(department)}`);
-  if (!ok) {
-    toastr.error("Oups, une erreur s'est produite", translate(code));
-    return null;
-  }
-  return data;
-}
-
-function useIsGoalReached(cohortId: string) {
-  const { young } = useAuth();
-  return useQuery({
-    queryFn: () => getInscriptionGoalReachedNormalized({ department: young.department, cohortId }),
-    queryKey: ["inscription-goal", young.department, cohortId],
-  });
-}
-
 function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
   const { young } = useAuth();
   const queryParams = new URLSearchParams(window.location.search);
@@ -57,7 +38,6 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
   const dispatch = useDispatch();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
-  const { data, isLoading } = useIsGoalReached(cohortId);
 
   const handleChangeCohort = async () => {
     try {
@@ -102,14 +82,6 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
             </>
           ) : null}
         </div>
-      </div>
-      <div className="absolute bottom-2 w-full p-3 grid gap-3 bg-gray-50 md:grid-cols-2">
-        <button onClick={handleChangeCohort} disabled={loading} className="w-full text-sm bg-blue-600 text-white p-2 rounded-md disabled:bg-gray-400">
-          {loading ? "Envoi des données..." : "Oui, confirmer ce choix"}
-        </button>
-        <button onClick={() => setOpen(false)} disabled={loading} className="w-full text-sm border bg-white text-gray-500 p-2 rounded-md">
-          Non, annuler
-        </button>
       </div>
     </ResponsiveModal>
   );
