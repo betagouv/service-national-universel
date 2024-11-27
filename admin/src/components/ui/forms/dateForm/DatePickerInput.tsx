@@ -39,7 +39,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
     minutes = Number(minutes);
     const seconds = hours === 23 && minutes === 59 ? 59 : 0;
 
-    const d = dayjs(date).utc().hour(Number(hours)).minute(Number(minutes)).second(seconds).millisecond(0).toDate();
+    const d = dayjs(date).hour(Number(hours)).minute(Number(minutes)).second(seconds).millisecond(0).toDate();
     onChange(d);
   };
 
@@ -76,14 +76,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                   <input
                     className={`w-full bg-white text-sm ${disabled ? "text-gray-400" : "text-gray-900"}`}
                     disabled={true}
-                    value={
-                      value
-                        ? // @ts-expect-error toUtcLocally
-                          dayjs(value).toUtcLocally().format("DD/MM/YYYY") +
-                          // @ts-expect-error shiftTimeToUtc
-                          (isTime ? " " + dayjs().hour(dayjs(value).utc().hour()).minute(dayjs(value).utc().minute()).shiftTimeToUtc().format("HH:mm") : "")
-                        : ""
-                    }
+                    value={value ? dayjs(value).format("DD/MM/YYYY") + (isTime ? " " + dayjs().hour(dayjs(value).hour()).minute(dayjs(value).minute()).format("HH:mm") : "") : ""}
                     placeholder={placeholder}
                   />
                 </div>

@@ -44,16 +44,16 @@ export const getCohortIdsFromCohortName = async (cohortNames: string[]): Promise
 
 export const isCohortInscriptionOpen = (cohort: CohortType): boolean => {
   const now = getZonedDate(new Date(), "Europe/Paris");
-  const inscriptionStartDate = new Date(cohort.inscriptionStartDate);
-  const inscriptionEndDate = new Date(cohort.inscriptionEndDate);
+  const inscriptionStartDate = getZonedDate(new Date(cohort.inscriptionStartDate), "Europe/Paris");
+  const inscriptionEndDate = getZonedDate(new Date(cohort.inscriptionEndDate), "Europe/Paris");
   const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
   return isInscriptionOpen;
 };
 
 export const isCohortInscriptionClosed = (cohort: CohortType): boolean => {
   const now = getZonedDate(new Date(), "Europe/Paris");
-  const inscriptionStartDate = new Date(cohort.inscriptionStartDate);
-  const inscriptionEndDate = new Date(cohort.inscriptionEndDate);
+  const inscriptionStartDate = getZonedDate(new Date(cohort.inscriptionStartDate), "Europe/Paris");
+  const inscriptionEndDate = getZonedDate(new Date(cohort.inscriptionEndDate), "Europe/Paris");
   const isInscriptionClosed = now >= inscriptionEndDate || now <= inscriptionStartDate;
   return isInscriptionClosed;
 };

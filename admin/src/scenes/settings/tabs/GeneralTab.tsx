@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import dayjs from "dayjs";
 
 import { isAfter } from "date-fns";
 import { BiLoaderAlt } from "react-icons/bi";
@@ -264,7 +265,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   label="Ouverture"
                   placeholder="Date et heure"
                   // @ts-ignore
-                  value={cohort.inscriptionStartDate}
+                  value={dayjs(cohort.inscriptionStartDate).local().toDate()}
                   error={error.inscriptionStartDate}
                   // @ts-ignore
                   onChange={(e) => onCohortChange({ ...cohort, inscriptionStartDate: e })}
@@ -277,7 +278,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   label="Fermeture"
                   placeholder="Date et heure"
                   // @ts-ignore
-                  value={cohort.inscriptionEndDate}
+                  value={dayjs(cohort.inscriptionEndDate).local().toDate()}
                   // @ts-ignore
                   onChange={(e) => onCohortChange({ ...cohort, inscriptionEndDate: e })}
                   readOnly={readOnly}
@@ -308,7 +309,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                       label="Ouverture"
                       placeholder="Date et heure"
                       // @ts-ignore
-                      value={cohort.reInscriptionStartDate || cohort.inscriptionStartDate}
+                      value={dayjs(cohort.reInscriptionStartDate).local().toDate() || dayjs(cohort.inscriptionStartDate).local().toDate()}
                       error={error.reInscriptionStartDate}
                       onChange={(e) => onCohortChange({ ...cohort, reInscriptionStartDate: e })}
                       readOnly={readOnly}
@@ -320,7 +321,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                       label="Fermeture"
                       placeholder="Date et heure"
                       // @ts-ignore
-                      value={cohort.reInscriptionEndDate || cohort.inscriptionEndDate}
+                      value={dayjs(cohort.reInscriptionEndDate).local().toDate() || dayjs(cohort.inscriptionEndDate).local().toDate()}
                       error={error.reInscriptionEndDate}
                       onChange={(e) => onCohortChange({ ...cohort, reInscriptionEndDate: e })}
                       readOnly={readOnly}
@@ -356,7 +357,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                     label="Fermeture"
                     placeholder="Date"
                     // @ts-ignore
-                    value={cohort.inscriptionModificationEndDate}
+                    value={dayjs(cohort.inscriptionModificationEndDate).local().toDate()}
                     // @ts-ignore
                     onChange={(e) => onCohortChange({ ...cohort, inscriptionModificationEndDate: e })}
                     readOnly={readOnly}
@@ -383,7 +384,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                     label="Fermeture"
                     placeholder="Date"
                     // @ts-ignore
-                    value={cohort.instructionEndDate}
+                    value={dayjs(cohort.instructionEndDate).local().toDate()}
                     // @ts-ignore
                     onChange={(e) => onCohortChange({ ...cohort, instructionEndDate: e })}
                     readOnly={readOnly}
@@ -783,7 +784,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                       disabled={isLoading}
                       readOnly={readOnly}
                       // @ts-ignore
-                      value={cohort.pdrChoiceLimitDate}
+                      value={dayjs(cohort.pdrChoiceLimitDate).local().toDate()}
                       onChange={(value) => onCohortChange({ ...cohort, pdrChoiceLimitDate: value })}
                       error={error.pdrChoiceLimitDate}
                     />
