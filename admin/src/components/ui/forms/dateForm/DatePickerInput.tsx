@@ -22,7 +22,7 @@ interface DatePickerWrapperProps {
   className?: string;
 }
 export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, isTime, placeholder, readOnly = false, className }: DatePickerWrapperProps) {
-  const [time, setTime] = useState(value ? `${String(dayjs(value).utc().hour()).padStart(2, "0")}:${String(dayjs(value).utc().minute()).padStart(2, "0")}` : "00:00");
+  const [time, setTime] = useState(value ? `${String(dayjs(value).hour()).padStart(2, "0")}:${String(dayjs(value).minute()).padStart(2, "0")}` : "00:00");
 
   useEffect(() => {
     handleChange(value);

@@ -66,6 +66,15 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
       onLoadingChange(true);
       // @ts-ignore
       delete cohort.snuId;
+      // format date to be sure it is UTC in backend
+      cohort.inscriptionStartDate = dayjs(cohort.inscriptionStartDate).toDate();
+      cohort.inscriptionEndDate = dayjs(cohort.inscriptionEndDate).toDate();
+      cohort.reInscriptionStartDate = dayjs(cohort.reInscriptionStartDate).toDate();
+      cohort.reInscriptionEndDate = dayjs(cohort.reInscriptionEndDate).toDate();
+      cohort.instructionEndDate = dayjs(cohort.instructionEndDate).toDate();
+      cohort.inscriptionModificationEndDate = dayjs(cohort.inscriptionModificationEndDate).toDate();
+      cohort.pdrChoiceLimitDate = dayjs(cohort.pdrChoiceLimitDate).toDate();
+
       const { ok, code } = await api.put(`/cohort/${encodeURIComponent(cohort!.name)}`, cohort);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", code);
