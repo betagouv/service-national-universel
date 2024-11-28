@@ -37,7 +37,6 @@
     "@fast-csv/format": "^5.0.0",
     "@fast-csv/parse": "^5.0.0",
     "@godaddy/terminus": "^4.12.1",
-    "@selego/mongoose-elastic": "1.7.5",
     "@sentry/node": "^8.25.0",
     "@sentry/profiling-node": "^8.25.0",
     "archiver": "^7.0.1",

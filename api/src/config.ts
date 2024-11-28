@@ -45,7 +45,7 @@ export const config = {
   ADMIN_URL: _env(envStr, "ADMIN_URL", "http://localhost:8082"),
   SENTRY_TRACING_SAMPLE_RATE: _env(envFloat, "SENTRY_TRACING_SAMPLE_RATE", 1),
   SENTRY_PROFILE_SAMPLE_RATE: _env(envFloat, "SENTRY_PROFILE_SAMPLE_RATE", 1),
-  MONGO_URL: _env(envStr, "MONGO_URL", "mongodb://localhost:27017/snu_dev"),
+  MONGO_URL: _env(envStr, "MONGO_URL", "mongodb://localhost:27017/snu_dev?directConnection=true"),
   JWT_SECRET: _env(envStr, "JWT_SECRET", "my-secret"),
   SUPPORT_URL: _env(envStr, "SUPPORT_URL", "http://localhost:8084"),
   SUPPORT_FRONT_URL: _env(envStr, "SUPPORT_FRONT_URL", "http://localhost:8083"),
@@ -94,5 +94,4 @@ export const config = {
   ENABLE_2FA: _env(envBool, "ENABLE_2FA", false),
   LOG_LEVEL: _env(envStr, "LOG_LEVEL", "debug"), // error, warn, info, http, debug
   DO_MIGRATION: _env(envBool, "DO_MIGRATION", false),
-  ENABLE_MONGOOSE_ELASTIC: _env(envBool, "ENABLE_MONGOOSE_ELASTIC", false),
 };
