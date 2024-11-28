@@ -185,7 +185,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         const pdrMatriculeIdMap = new Map();
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
           const pdrKey = `MATRICULE PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
-          const pdrValue = line[pdrKey]?.toString().toLowerCase();
+          const pdrValue = line[pdrKey]?.toString();
           if (line[pdrKey] && !["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
             const pdr = await PointDeRassemblementModel.findOne({ matricule: pdrValue });
             if (!pdr) {
@@ -237,14 +237,14 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
         const lineToPointWithCorrespondance: LineToPoint[] = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc: LineToPoint[], pdrNumber) => {
           const pdrKey = `MATRICULE PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
-          const pdrValue = line[pdrKey]?.toString().toLowerCase();
+          const pdrValue = line[pdrKey]?.toString();
 
           if (pdrNumber > 1 && !line[pdrKey]) return acc;
 
           if (!["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
             acc.push({
               lineId: busLine._id.toString(),
-              meetingPointId: line[pdrKey] as string,
+              meetingPointId: pdrMatriculeIdMap.get(line[pdrKey] as string),
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
               busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`] as string),
               departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
