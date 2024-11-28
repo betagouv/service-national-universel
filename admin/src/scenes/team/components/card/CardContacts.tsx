@@ -1,0 +1,92 @@
+import React, { useEffect, useState } from "react";
+import ModalContacts from "../modal/ModalContacts";
+import API from "@/services/api";
+import { capture } from "@/sentry";
+import { CohortDto, ContactDto } from "snu-lib";
+
+export default function CardContacts({ contacts, idServiceDep, getService }: { contacts: ContactDto[]; idServiceDep: string; getService: () => Promise<any> }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [sortedContacts, setSortedContacts] = useState({});
+  const [nbCohorts, setNbCohorts] = useState(0);
+  const [cohorts, setCohorts] = useState<string[]>([]);
+  const [sessions, setSessions] = useState<CohortDto[]>([]);
+
+  const [contactsFromCohort, setContactsFromCohort] = useState<ContactDto[]>([]);
+
+  async function cohortsInit() {
+    try {
+      const result = await API.get("/cohort");
+      if (result.status === 401) return;
+      if (!result?.ok) capture("Unable to load global cohorts data :" + JSON.stringify(result));
+
+      setSessions(result.data);
+    } catch (err) {
+      capture(err);
+    }
+  }
+
+  const getInitials = (word) =>
+    (word || "UK")
+      .match(/\b(\w)/g)
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
+
+  useEffect(() => {
+    cohortsInit();
+  }, []);
+
+  useEffect(() => {
+    if (contacts && sessions.length > 0) {
+      const existCohort: string[] = [];
+      const tempContact = {};
+
+      //TODO update this when we will have the new cohort or change completely this part
+      // We include only CLE from 2025
+      const newCohorts = sessions.filter((cohort: CohortDto) => cohort.name.match(/^(?!.*CLE).*2025/)).map((cohort) => cohort.name);
+      setCohorts(newCohorts);
+
+      contacts.forEach((contact: ContactDto) => {
+        if (contact.cohort && !existCohort.includes(contact.cohort) && newCohorts.includes(contact.cohort)) {
+          existCohort.push(contact.cohort);
+        }
+      });
+
+      newCohorts.forEach((cohort) => {
+        tempContact[cohort] = [];
+        tempContact[cohort].push(...contacts.filter((contact) => contact.cohort === cohort));
+      });
+      setNbCohorts(existCohort.length);
+      setSortedContacts(tempContact);
+      setContactsFromCohort(contacts.filter((contact) => contact.cohort && newCohorts.includes(contact.cohort)));
+    }
+  }, [contacts, sessions]);
+
+  const handleShowModal = () => setIsOpen(true);
+
+  if (!contacts) return null;
+
+  return (
+    <div className=" mr-4 flex flex-row items-center rounded-lg bg-white shadow-sm hover:scale-105 hover:cursor-pointer" onClick={handleShowModal}>
+      <div className="flex flex-col px-7 py-6">
+        <div className="mb-1 text-sm font-bold">Contacts convocation</div>
+        <div className="text-xs text-gray-500">
+          {contactsFromCohort.length} contacts - {nbCohorts} séjours
+        </div>
+        <div className="mt-4 flex flex-row -space-x-2">
+          {contactsFromCohort.map((contact, index) => {
+            if (index < 6) {
+              return (
+                <div key={index} className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs text-indigo-600`}>
+                  {getInitials(contact.contactName)}
+                </div>
+              );
+            }
+            return null;
+          })}
+        </div>
+      </div>
+      <ModalContacts isOpen={isOpen} setIsOpen={setIsOpen} contacts={sortedContacts} cohorts={cohorts} idServiceDep={idServiceDep} getService={getService} />
+    </div>
+  );
+}

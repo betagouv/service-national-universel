@@ -24,6 +24,7 @@ export interface ReferentModel {
     cohesionCenterName?: string;
     acceptCGU?: boolean;
     lastLogoutAt?: Date;
+    passwordChangedAt?: Date; // required by jwt_token v1
 
     // used by usecase or frontend ?
     // lastLoginAt?: Date;
@@ -34,7 +35,6 @@ export interface ReferentModel {
     // token2FA?: string;
     // token2FAExpires?: Date;
     // attempts2FA?: number;
-    // passwordChangedAt?: Date;
     // registredAt?: Date;
     // nextLoginAttemptIn?: Date;
     // forgotPasswordResetToken?: string;

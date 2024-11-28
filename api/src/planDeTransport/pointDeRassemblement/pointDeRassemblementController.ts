@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "passport";
-import config from "config";
+import { config } from "../../config";
 import Joi from "joi";
 
 import { PointDeRassemblementModel, SchemaDeRepartitionModel, LigneBusModel, YoungModel, LigneToPointModel, PlanTransportModel, CohortModel } from "../../models";

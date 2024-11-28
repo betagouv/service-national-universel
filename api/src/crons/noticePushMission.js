@@ -7,7 +7,7 @@ const { YoungModel, CohortModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, translate, formatStringDate } = require("snu-lib");
-const config = require("config");
+const { config } = require("../config");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
 

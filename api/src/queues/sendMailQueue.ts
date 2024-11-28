@@ -1,10 +1,10 @@
-import config from "config";
+import { config } from "../config";
 import { Worker, Queue, Job } from "bullmq";
 import { capture, captureMessage } from "../sentry";
 import { sendDocumentEmail, SendDocumentEmailOptions } from "../young/youngSendDocumentEmailService";
 import { logAddedTask, logStartedTask, logSucceedTask, logFailedTask } from "./taskLoggerService";
 
-const MAIL_QUEUE = `${config.get("TASK_QUEUE_PREFIX")}_send_mail`;
+const MAIL_QUEUE = `${config.TASK_QUEUE_PREFIX}_send_mail`;
 const SEND_DOCUMENT_EMAIL = "send_document_mail";
 const CONCURRENCY = 5;
 

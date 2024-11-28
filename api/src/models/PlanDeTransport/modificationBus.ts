@@ -1,11 +1,8 @@
-import config from "config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
-import mongooseElastic from "@selego/mongoose-elastic";
 
 import { InterfaceExtended, ModificationBusSchema } from "snu-lib";
 
-import esClient from "../../es";
 import anonymize from "../../anonymization/PlanDeTransport/modificationBus";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
@@ -40,10 +37,6 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-
-if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
-  schema.plugin(mongooseElastic(esClient), MODELNAME);
-}
 
 type ModificationBusType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type ModificationBusDocument<T = {}> = DocumentExtended<ModificationBusType & T>;

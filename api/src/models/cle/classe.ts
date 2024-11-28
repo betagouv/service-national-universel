@@ -1,11 +1,8 @@
-import config from "config";
 import mongoose from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import mongooseElastic from "@selego/mongoose-elastic";
 import { ClasseType, ClasseSchema } from "snu-lib";
 
-import esClient from "../../es";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 import { EtablissementDocument } from "./etablissement";
 import { ReferentDocument } from "../referent";
@@ -93,10 +90,6 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-
-if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
-  schema.plugin(mongooseElastic(esClient), MODELNAME);
-}
 
 export type ClasseDocument<T = {}> = DocumentExtended<
   ClasseType & {

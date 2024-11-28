@@ -3,6 +3,7 @@ import fetchRetry from "fetch-retry";
 import { capture } from "../sentry";
 import { apiURL } from "../config";
 import { createFormDataForFileUpload, ERRORS } from "snu-lib";
+import { apiv2 } from "./apiv2";
 
 let fetch = window.fetch;
 
@@ -22,6 +23,7 @@ class api {
 
   setToken(token) {
     this.token = token;
+    apiv2.setToken(token);
   }
 
   checkToken(shouldRefresh) {

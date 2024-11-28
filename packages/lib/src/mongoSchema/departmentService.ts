@@ -1,40 +1,40 @@
 import { Schema, InferSchemaType } from "mongoose";
 import { InterfaceExtended } from ".";
 
+export const ContactSchema = {
+  cohort: {
+    type: String,
+    documentation: "cohorte concerné par le service",
+  },
+  cohortId: {
+    type: String,
+    documentation: {
+      description: "Id de la cohorte",
+    },
+  },
+  contactName: {
+    type: String,
+    documentation: {
+      description: "Nom du contact au sein du service",
+    },
+  },
+  contactPhone: {
+    type: String,
+    documentation: {
+      description: "Téléphone du contact au sein du service",
+    },
+  },
+  contactMail: {
+    type: String,
+    documentation: {
+      description: "Mail du contact au sein du service",
+    },
+  },
+};
+
 export const DepartmentServiceSchema = {
   contacts: {
-    type: [
-      {
-        cohort: {
-          type: String,
-          documentation: "cohorte concerné par le service",
-        },
-        cohortId: {
-          type: String,
-          documentation: {
-            description: "Id de la cohorte",
-          },
-        },
-        contactName: {
-          type: String,
-          documentation: {
-            description: "Nom du contact au sein du service",
-          },
-        },
-        contactPhone: {
-          type: String,
-          documentation: {
-            description: "Téléphone du contact au sein du service",
-          },
-        },
-        contactMail: {
-          type: String,
-          documentation: {
-            description: "Mail du contact au sein du service",
-          },
-        },
-      },
-    ],
+    type: [ContactSchema],
   },
   department: {
     type: String,

@@ -24,7 +24,7 @@ fi
 
 set -e
 
-env_name=$(../../../.github/scripts/get_custom_env_name.sh $branch_name)
+env_name=$(../../../../.github/scripts/get_custom_env_name.sh $branch_name)
 
 cp -R custom $env_name
 cd $env_name

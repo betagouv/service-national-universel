@@ -1,3 +1,4 @@
+# TODO: REMOVE
 name: Synchronise Production (Clever Cloud)
 # This action deploys on Clever Cloud the same images that are deployed on Scaleway
 
