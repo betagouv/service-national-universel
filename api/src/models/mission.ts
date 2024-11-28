@@ -1,11 +1,8 @@
-import { config } from "../config";
 import mongoose, { InferSchemaType } from "mongoose";
-import mongooseElastic from "@selego/mongoose-elastic";
 import patchHistory from "mongoose-patch-history";
 
 import { InterfaceExtended, MissionSchema } from "snu-lib";
 
-import esClient from "../es";
 import anonymize from "../anonymization/mission";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
@@ -41,10 +38,6 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-
-if (config.ENABLE_MONGOOSE_ELASTIC) {
-  schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
-}
 
 type MissionType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type MissionDocument<T = {}> = DocumentExtended<MissionType & T>;

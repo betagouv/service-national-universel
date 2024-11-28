@@ -1153,6 +1153,8 @@ const translateStatusClasse = (status) => {
       return "Brouillon";
     case "INSCRIPTION_IN_PROGRESS":
       return "Inscription en cours";
+    case "CLASSE_STATUT_INVALIDE":
+      return "Statut de la classe invalide";
     default:
       return status;
   }
