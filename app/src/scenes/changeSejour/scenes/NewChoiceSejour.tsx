@@ -2,13 +2,10 @@ import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 import ReasonForm from "../components/ReasonForm";
-import { toastr } from "react-redux-toastr";
 import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
-import { getCohortPeriod, translate } from "snu-lib";
-import { changeYoungCohort } from "@/services/young.service";
-import { setYoung } from "../../../redux/auth/actions";
-import { useDispatch } from "react-redux";
+import { getCohortPeriod } from "snu-lib";
+import useChangeSejour from "../lib/useChangeSejour";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
 import { getCohort } from "@/utils/cohorts";
@@ -32,25 +29,24 @@ export default function NewChoicSejour() {
 function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
   const { young } = useAuth();
   const queryParams = new URLSearchParams(window.location.search);
-  const cohortId = queryParams.get("cohortid") || "";
+  const cohortId = queryParams.get("cohortid");
   const oldCohortPeriod = capitalizeFirstLetter(getCohortPeriod(getCohort(young.cohort)));
   const isFull = queryParams.get("isFull") === "true";
-  const dispatch = useDispatch();
   const history = useHistory();
-  const [loading, setLoading] = useState(false);
+  const { mutate, isPending: loading } = useChangeSejour();
 
-  const handleChangeCohort = async () => {
-    try {
-      setLoading(true);
-      const { ok, data, code } = await changeYoungCohort({ youngId: young._id, reason, message, cohortId });
-      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
-      dispatch(setYoung(data));
-      setLoading(false);
-      history.push("/");
-    } catch (error) {
-      toastr.error("Une erreur est survenue lors du changement de cohorte.", "");
-      setLoading(false);
-    }
+  if (!cohortId) return null;
+
+  const handleChangeCohort = () => {
+    mutate(
+      { reason, message, cohortId },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          history.push("/");
+        },
+      },
+    );
   };
 
   return (

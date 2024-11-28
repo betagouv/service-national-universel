@@ -1,15 +1,22 @@
-import { ERRORS } from "snu-lib";
+import { ERRORS, FILE_KEYS, MILITARY_FILE_KEYS, YoungType } from "snu-lib";
 import api from "./api";
 import { download, translate } from "snu-lib";
 
+type ResponseType = {
+  ok: boolean;
+  data?: YoungType;
+  code?: string;
+};
+
 export const logoutYoung = async () => await api.logout();
 
-export const withdrawYoungAccount = ({ withdrawnMessage, withdrawnReason }) => api.put(`/young/withdraw`, { withdrawnMessage, withdrawnReason });
-export const abandonYoungAccount = ({ withdrawnMessage, withdrawnReason }) => api.put(`/young/abandon`, { withdrawnMessage, withdrawnReason });
+type WithdrawArgs = { withdrawnMessage?: string; withdrawnReason: string };
+export const withdrawYoungAccount = ({ withdrawnMessage, withdrawnReason }: WithdrawArgs) => api.put(`/young/withdraw`, { withdrawnMessage, withdrawnReason });
+export const abandonYoungAccount = ({ withdrawnMessage, withdrawnReason }: WithdrawArgs) => api.put(`/young/abandon`, { withdrawnMessage, withdrawnReason });
 
-export const updateYoung = async (path, youngDataToUpdate) => {
+export const updateYoung = async (path: string, youngDataToUpdate: Partial<YoungType>) => {
   try {
-    const { ok, code, data } = await api.put(`/young/account/${path}`, youngDataToUpdate);
+    const { ok, code, data }: ResponseType = await api.put(`/young/account/${path}`, youngDataToUpdate);
     if (!ok && code === ERRORS.OPERATION_UNAUTHORIZED) {
       throw {
         title: `${translate(code)} :`,
@@ -36,9 +43,11 @@ export const updateYoung = async (path, youngDataToUpdate) => {
   }
 };
 
-export const changeYoungPassword = async ({ password, newPassword, verifyPassword }) => {
+type ChangePasswordArgs = { password: string; newPassword: string; verifyPassword: string };
+
+export const changeYoungPassword = async ({ password, newPassword, verifyPassword }: ChangePasswordArgs) => {
   try {
-    const { ok, code, user } = await api.post("/young/reset_password", { password, verifyPassword, newPassword });
+    const { ok, code, user }: ResponseType & { user: YoungType } = await api.post("/young/reset_password", { password, verifyPassword, newPassword });
     if (!ok) {
       throw {
         title: "Une erreur s'est produite :",
@@ -59,7 +68,11 @@ export const changeYoungPassword = async ({ password, newPassword, verifyPasswor
   }
 };
 
-export const downloadYoungDocument = async ({ youngId, fileId, fileType }) => {
+const fileTypes = [...FILE_KEYS, ...MILITARY_FILE_KEYS];
+
+type DownloadFileArgs = { youngId: string; fileId: string; fileType: (typeof fileTypes)[number] };
+
+export const downloadYoungDocument = async ({ youngId, fileId, fileType }: DownloadFileArgs) => {
   try {
     const result = await api.get(`/young/${youngId}/documents/${fileType}/${fileId}`);
     const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
@@ -76,27 +89,25 @@ export const downloadYoungDocument = async ({ youngId, fileId, fileType }) => {
   }
 };
 
-export const changeYoungCohort = async ({
-  youngId,
-  reason,
-  message,
-  cohortId,
-  cohortName,
-}: {
+type ChangeCohortArgs = {
   youngId: string;
   reason: string;
   message?: string;
   cohortId?: string;
   cohortName?: string;
-}) => {
+};
+
+export const changeYoungCohort = async ({ youngId, reason, message, cohortId, cohortName }: ChangeCohortArgs) => {
   if (!cohortId && !cohortName) {
     throw new Error("cohortId or cohortName is required");
   }
-  const data = await api.put(`/young/${youngId}/change-cohort/`, {
+  const { ok, data, code }: ResponseType = await api.put(`/young/${youngId}/change-cohort/`, {
     cohortChangeReason: reason,
     cohortDetailedChangeReason: message,
     cohortId,
     cohort: cohortName,
   });
+  if (!ok) throw new Error(code);
+  if (!data) throw new Error("No data");
   return data;
 };
