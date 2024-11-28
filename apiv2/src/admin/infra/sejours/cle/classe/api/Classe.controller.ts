@@ -12,7 +12,7 @@ export class ClasseController {
         private readonly classeService: ClasseService,
     ) {}
 
-    // TODO : removed after testing
+    // TODO : remove after testing
     @Get("/")
     @UseGuards(SuperAdminGuard)
     findAll(): Promise<ClasseModel[]> {

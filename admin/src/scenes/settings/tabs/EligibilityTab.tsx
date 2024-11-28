@@ -7,8 +7,10 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import api from "@/services/api";
+import { apiv2 } from "@/services/apiv2";
 import { IoWarningOutline } from "react-icons/io5";
 import ReactTooltip from "react-tooltip";
+import ButtonLight from "@/components/ui/buttons/ButtonLight";
 
 type EligibilityTabsProps = {
   cohort?: CohortDto;
@@ -220,6 +222,11 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
           </ButtonPrimary>
         </div>
       )}
+      <div className="flex items-center justify-center gap-3 ">
+        <ButtonLight className="h-[50px] w-[300px]" onClick={() => apiv2.get("/classe")}>
+          Testing apiv2
+        </ButtonLight>
+      </div>
     </div>
   );
 }
