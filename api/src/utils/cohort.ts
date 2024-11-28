@@ -24,7 +24,7 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
   let query: { status: string; cohortGroupId?: string } = { status: COHORT_STATUS.PUBLISHED };
 
   if (young.cohortId) {
-    const cohort = await CohortModel.findById(young.cohortId, { cohortGroupId: 1 });
+    const cohort = await CohortModel.findById(young.cohortId);
     if (!cohort) throw new Error("Cohort not found");
     query = { ...query, cohortGroupId: cohort.cohortGroupId };
   }
@@ -35,9 +35,9 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
 
   const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
     // if the young has already a cohort, he can only apply for the cohorts of the same year
-    if (session._id.equals(young.cohortId)) {
-      return false;
-    }
+    // if (session._id.equals(young.cohortId)) {
+    //   return false;
+    // }
     return (
       session.eligibility?.zones.includes(department) &&
       session.eligibility?.schoolLevels.includes(young.grade!) &&

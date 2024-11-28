@@ -26,25 +26,30 @@ export default function ResponsiveModal({ isOpen, setOpen, title, children, onCo
             transition
             className="absolute top-0 md:relative transform overflow-hidden md:rounded-lg bg-white transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in w-full md:w-fit max-w-2xl data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
             <div className="relative min-h-screen md:min-h-fit">
-              <div className="grid grid-cols-[3rem_auto_3rem] px-3 pt-4">
-                <button onClick={() => setOpen(false)}>
-                  <IoClose className="text-2xl md:text-3xl cursor-pointer text-gray-400" />
-                </button>
+              <div className="mt-2 grid grid-cols-[4rem_auto_4rem]">
                 <div>
-                  <h2 className="text-center font-medium text-lg md:text-3xl leading-tight">{title}</h2>
+                  <button onClick={() => setOpen(false)} className="w-full p-3">
+                    <IoClose className="text-2xl md:text-3xl cursor-pointer text-gray-400" />
+                  </button>
+                </div>
+                <div>
+                  <h2 className="mt-3 text-center font-medium text-lg md:text-3xl leading-6">{title}</h2>
                 </div>
                 <div></div>
               </div>
               {children}
               {onConfirm ? (
                 <div className="absolute bottom-0 md:relative w-full p-3 grid gap-3 bg-gray-50">
-                  <button onClick={onConfirm} disabled={loading} className="w-full text-sm bg-blue-600 text-white p-2 rounded-md disabled:bg-gray-400 hover:bg-blue-800 transition">
+                  <button
+                    onClick={onConfirm}
+                    disabled={loading}
+                    className="w-full text-sm bg-blue-600 border-[1px] border-blue-600 text-white p-2 rounded-md disabled:bg-gray-400 hover:bg-blue-800 hover:border-blue-800 transition shadow-sm">
                     {loading ? "Envoi des données..." : confirmText || "Envoyer"}
                   </button>
                   <button
                     onClick={() => setOpen(false)}
                     disabled={loading}
-                    className="w-full text-sm border bg-[#ffffff] text-gray-500 p-2 rounded-md hover:bg-gray-100 transition">
+                    className="w-full text-sm border bg-[#ffffff] text-gray-500 p-2 rounded-md hover:bg-gray-100 transition shadow-sm">
                     {cancelText || "Annuler"}
                   </button>
                 </div>
