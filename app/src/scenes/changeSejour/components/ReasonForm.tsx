@@ -1,5 +1,5 @@
 import React from "react";
-import Field from "./Fields";
+import Field from "../../../components/forms/inputs/Fileds";
 import { WITHRAWN_REASONS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import useAuth from "@/services/useAuth";
 
