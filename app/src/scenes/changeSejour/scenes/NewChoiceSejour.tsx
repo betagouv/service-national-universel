@@ -9,8 +9,10 @@ import useChangeSejour from "../lib/useChangeSejour";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
 import { getCohort } from "@/utils/cohorts";
+import useInscriptionGoal from "../lib/useInscriptionGoal";
+import Loader from "@/components/Loader";
 
-export default function NewChoicSejour() {
+export default function NewChoiceSejour() {
   const queryParams = new URLSearchParams(window.location.search);
   const newCohortPeriod = queryParams.get("period");
   const [message, setMessage] = useState("");
@@ -29,16 +31,18 @@ export default function NewChoicSejour() {
 function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
   const { young } = useAuth();
   const queryParams = new URLSearchParams(window.location.search);
-  const cohortId = queryParams.get("cohortid");
+  const cohortId = queryParams.get("cohortid") || "";
+  const cohortName = queryParams.get("cohortName") || "";
   const oldCohortPeriod = capitalizeFirstLetter(getCohortPeriod(getCohort(young.cohort)));
-  const isFull = queryParams.get("isFull") === "true";
   const history = useHistory();
-  const { mutate, isPending: loading } = useChangeSejour();
+  const sejourMutation = useChangeSejour();
+  const goalQuery = useInscriptionGoal(cohortName);
 
-  if (!cohortId) return null;
+  if (goalQuery.isPending) return <Loader />;
+  if (goalQuery.isError) return <div>Erreur</div>;
 
   const handleChangeCohort = () => {
-    mutate(
+    sejourMutation.mutate(
       { reason, message, cohortId },
       {
         onSuccess: () => {
@@ -55,7 +59,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
       setOpen={setOpen}
       title="Êtes-vous sûr(e) de vouloir changer de séjour ?"
       onConfirm={handleChangeCohort}
-      loading={loading}
+      loading={sejourMutation.isPending}
       confirmText="Oui, confirmer ce choix"
       cancelText="Non, annuler">
       <div className="grid gap-2 p-3 max-w-lg mx-auto">
@@ -68,7 +72,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
           <HiOutlineCheckCircle className="text-blue-600 h-5 w-5 inline-block stroke-2" />
           <p className="text-gray-500 text-sm">Nouveau séjour</p>
           <p className="text-gray-900 font-medium">{capitalizeFirstLetter(newCohortPeriod)}</p>
-          {isFull ? (
+          {goalQuery.data ? (
             <>
               <hr className="my-3"></hr>
               <p className="text-sm leading-normal text-gray-500">

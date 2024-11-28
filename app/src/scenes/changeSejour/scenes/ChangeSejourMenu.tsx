@@ -30,7 +30,7 @@ export default function ChangeSejour() {
           <div className="grid my-3 rounded-md border divide-y">
             {sessions.map((session) => (
               <Link
-                to={`/changer-de-sejour/motif?cohortid=${session._id}&period=${getCohortPeriod(session)}&isFull=${session.isFull}`}
+                to={`/changer-de-sejour/motif?cohortid=${session._id}&cohortName=${session.name}&period=${getCohortPeriod(session)}`}
                 key={session._id}
                 className="flex p-3 justify-between w-full">
                 <p className="text-sm leading-5 font-medium capitalize">{getCohortPeriod(session)}</p>
