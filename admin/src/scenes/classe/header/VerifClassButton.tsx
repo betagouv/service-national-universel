@@ -4,9 +4,9 @@ import { HiOutlineCheck } from "react-icons/hi";
 import { IoWarningOutline } from "react-icons/io5";
 
 import { ModalConfirmation, Button } from "@snu/ds/admin";
-import { translate, ClassesRoutes } from "snu-lib";
-import { capture } from "@/sentry";
-import api from "@/services/api";
+import { ClassesRoutes, HttpError, translateStatusClasse } from "snu-lib";
+import { apiv2 } from "@/services/apiv2";
+import { ClasseService } from "@/services/classeService";
 
 interface Props {
   classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
@@ -41,24 +41,22 @@ export default function VerifClassButton({ classe, setClasse, isLoading, setLoad
   };
 
   const verifyClasse = async () => {
-    try {
-      setLoading(true);
-
-      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}/verify`, classe);
-
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", translate(code));
-        return setLoading(false);
-      } else {
+    setLoading(true);
+    await apiv2
+      .post<ClassesRoutes["GetOne"]["response"]["data"]>(`/classe/${classe?._id}/verify`, classe)
+      .then((updatedClasse) => {
         toastr.success("Opération réussie", "La classe a bien été vérifiée");
-      }
-      setClasse(data);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", e);
-    } finally {
-      setLoading(false);
-    }
+        const classeView = ClasseService.mapDtoToView(updatedClasse);
+        setClasse(classeView);
+      })
+      .catch((error: HttpError) => {
+        if (error?.statusCode === 422) {
+          toastr.error("Oups, une erreur est survenue lors de la vérification de la classe", `${translateStatusClasse(error.message)} - Erreur : ${error.correlationId}`);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
