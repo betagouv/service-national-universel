@@ -41,7 +41,10 @@ export default function ResponsiveModal({ isOpen, setOpen, title, children, onCo
                   <button onClick={onConfirm} disabled={loading} className="w-full text-sm bg-blue-600 text-white p-2 rounded-md disabled:bg-gray-400 hover:bg-blue-800 transition">
                     {loading ? "Envoi des données..." : confirmText || "Envoyer"}
                   </button>
-                  <button onClick={() => setOpen(false)} disabled={loading} className="w-full text-sm border bg-[000000] text-gray-500 p-2 rounded-md hover:bg-gray-100 transition">
+                  <button
+                    onClick={() => setOpen(false)}
+                    disabled={loading}
+                    className="w-full text-sm border bg-[#ffffff] text-gray-500 p-2 rounded-md hover:bg-gray-100 transition">
                     {cancelText || "Annuler"}
                   </button>
                 </div>

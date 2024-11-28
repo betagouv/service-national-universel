@@ -62,7 +62,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
       loading={sejourMutation.isPending}
       confirmText="Oui, confirmer ce choix"
       cancelText="Non, annuler">
-      <div className="grid gap-2 p-3 max-w-lg mx-auto">
+      <div className="grid gap-2 p-3 max-w-lg mx-auto my-4">
         <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
           <HiOutlineXCircle className="text-red-600 h-5 w-5 inline-block stroke-2" />
           <p className="text-gray-500 text-sm">Ancien séjour</p>

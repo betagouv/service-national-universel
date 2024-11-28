@@ -40,7 +40,7 @@ export default function ChangeSejour() {
           </div>
           <a
             href={supportURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}
-            className="text-sm leading-8 font-normal text-[#6B7280] mt-2 underline"
+            className="text-sm leading-8 font-normal text-gray-500 mt-2 underline underline-offset-2"
             target="_blank"
             rel="noreferrer">
             Pourquoi je ne vois pas tous les séjours&nbsp;?
