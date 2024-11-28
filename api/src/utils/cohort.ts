@@ -21,12 +21,12 @@ type YoungInfo = Pick<
 
 // TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
 export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
-  let query: { status: string; cohortGroupId?: string } = { status: COHORT_STATUS.PUBLISHED };
+  let query: { status: string; cohortGroupId?: string; cohortId?: { $ne: string } } = { status: COHORT_STATUS.PUBLISHED };
 
   if (young.cohortId) {
     const cohort = await CohortModel.findById(young.cohortId);
     if (!cohort) throw new Error("Cohort not found");
-    query = { ...query, cohortGroupId: cohort.cohortGroupId };
+    query = { ...query, cohortGroupId: cohort.cohortGroupId, cohortId: { $ne: young.cohortId } };
   }
 
   const cohorts = await CohortModel.find(query);
@@ -35,9 +35,6 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
 
   const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
     // if the young has already a cohort, he can only apply for the cohorts of the same year
-    if (session._id.equals(young.cohortId)) {
-      return false;
-    }
     return (
       session.eligibility?.zones.includes(department) &&
       session.eligibility?.schoolLevels.includes(young.grade!) &&
