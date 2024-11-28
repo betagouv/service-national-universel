@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const config = require("config");
+const { config } = require("../../config");
 const { getAccessToken } = require("./utils");
 
 let token;

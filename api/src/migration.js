@@ -1,5 +1,5 @@
 const migrateMongo = require("migrate-mongo");
-const config = require("config");
+const { config } = require("./config");
 const { up, status, config: migrateMongoConfig } = migrateMongo;
 const { getDb } = require("./mongo");
 const { capture } = require("./sentry");

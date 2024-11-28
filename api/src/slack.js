@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const config = require("config");
+const { config } = require("./config");
 const { logger } = require("./logger");
 const { capture, captureMessage } = require("./sentry");
 

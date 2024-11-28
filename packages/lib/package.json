@@ -8,7 +8,6 @@
     "dist"
   ],
   "scripts": {
-    "postinstall": "npm run build",
     "build": "rollup --config rollup.config.mjs",
     "dev": "rollup --watch --config rollup.config.mjs",
     "check-types": "tsc --emitDeclarationOnly",

@@ -1,13 +1,10 @@
-import config from "config";
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import bcrypt from "bcryptjs";
 
-import mongooseElastic from "@selego/mongoose-elastic";
 import { ReferentSchema, ReferentType } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
-import esClient from "../es";
 import * as brevo from "../brevo";
 import anonymize from "../anonymization/referent";
 
@@ -88,31 +85,6 @@ schema.plugin(patchHistory, {
     "/token2FAExpires",
   ],
 });
-
-if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
-  schema.plugin(
-    mongooseElastic(esClient, {
-      selectiveIndexing: true,
-      ignore: [
-        "password",
-        "lastLogoutAt",
-        "passwordChangedAt",
-        "nextLoginAttemptIn",
-        "forgotPasswordResetToken",
-        "forgotPasswordResetExpires",
-        "invitationToken",
-        "invitationExpires",
-        "loginAttempts",
-        "attempts2FA",
-        "updatedAt",
-        "lastActivityAt",
-        "token2FA",
-        "token2FAExpires",
-      ],
-    }),
-    MODELNAME,
-  );
-}
 
 schema.set("toObject", { virtuals: true });
 schema.set("toJSON", { virtuals: true });

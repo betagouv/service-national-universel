@@ -1,19 +1,19 @@
 const { captureException: sentryCaptureException, captureMessage: sentryCaptureMessage, init, extraErrorDataIntegration, rewriteFramesIntegration } = require("@sentry/node");
 const { nodeProfilingIntegration } = require("@sentry/profiling-node");
 
-const config = require("config");
+const { config } = require("./config");
 const { logger } = require("./logger");
 
 function initSentry() {
-  if (config.get("ENABLE_SENTRY")) {
+  if (config.ENABLE_SENTRY) {
     init({
       dsn: "https://584ccb2737f20b13078d0b80b9eeacab@sentry.selego.co/160",
       environment: config.ENVIRONMENT,
-      release: config.get("RELEASE"),
+      release: config.RELEASE,
       normalizeDepth: 16,
       integrations: [extraErrorDataIntegration({ depth: 16 }), rewriteFramesIntegration({ root: process.cwd() }), nodeProfilingIntegration()],
-      tracesSampleRate: Number(config.get("SENTRY_TRACING_SAMPLE_RATE")) || 0.01,
-      profilesSampleRate: Number(config.get("SENTRY_PROFILE_SAMPLE_RATE")) || 0.1, // Percent of Transactions profiled
+      tracesSampleRate: Number(config.SENTRY_TRACING_SAMPLE_RATE) || 0.01,
+      profilesSampleRate: Number(config.SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
       ignoreErrors: [
         /^No error$/,
         /__show__deepen/,
@@ -50,7 +50,7 @@ function _flattenStack(stack) {
 }
 
 function captureError(err, contexte) {
-  if (err.stack && config.get("ENABLE_FLATTEN_ERROR_LOGS")) {
+  if (err.stack && config.ENABLE_FLATTEN_ERROR_LOGS) {
     const flattened = _flattenStack(err.stack);
     logger.error(`capture: ${flattened}`);
   } else {

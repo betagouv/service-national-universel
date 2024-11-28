@@ -4,7 +4,7 @@ const { ApplicationModel } = require("../models");
 const { StructureModel } = require("../models");
 const { YoungModel } = require("../models");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
-const config = require("config");
+const { config } = require("../config");
 const { sendTemplate } = require("../brevo");
 const { getCcOfYoung } = require("../utils");
 

@@ -1,3 +1,4 @@
+# TODO: REMOVE
 name: API - Run Tests
 
 on:
@@ -25,7 +26,7 @@ jobs:
         with:
           ref: ${{ inputs.branch_name }}
 
-      - name: Node 20.x
+      - name: Use Node.js
         if: steps.changes.outputs.src == 'true'
         uses: actions/setup-node@v4
         with:

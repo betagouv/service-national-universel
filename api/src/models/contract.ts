@@ -1,8 +1,5 @@
-import config from "config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
-import mongooseElastic from "@selego/mongoose-elastic";
-import esClient from "../es";
 import anonymize from "../anonymization/contract";
 
 import { ContractSchema, InterfaceExtended } from "snu-lib";
@@ -40,10 +37,6 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/parent1Token", "/projectManagerToken", "/structureManagerToken", "/parent2Token", "/youngContractToken", "/updatedAt"],
 });
-
-if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
-  schema.plugin(mongooseElastic(esClient), MODELNAME);
-}
 
 type ContractType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type ContractDocument<T = {}> = DocumentExtended<ContractType & T>;

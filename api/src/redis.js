@@ -1,12 +1,12 @@
 const redis = require("redis");
-const config = require("config");
+const { config } = require("./config");
 const { capture } = require("./sentry");
 const { logger } = require("./logger");
 
 let client = null;
 
 async function initRedisClient() {
-  if (!config.get("REDIS_URL")) {
+  if (!config.REDIS_URL) {
     throw new Error("ERROR CONNECTION. REDIS URL EMPTY");
   }
   client = redis.createClient({

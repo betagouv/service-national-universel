@@ -4,7 +4,7 @@ const Joi = require("joi");
 const { getDb } = require("./mongo");
 
 const { capture, captureMessage } = require("./sentry");
-const config = require("config");
+const { config } = require("./config");
 const { logger } = require("./logger");
 const { sendTemplate } = require("./brevo");
 const {

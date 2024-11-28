@@ -32,7 +32,7 @@ function logOption(option) {
 
 function validateName(name, pattern) {
   if (!name.match(pattern)) {
-    throw new Error(`Invalid format for ${opt.name}`);
+    throw new Error(`Invalid format for ${name}`);
   }
 }
 
@@ -197,7 +197,7 @@ class UserInput {
     return this;
   }
 
-  option(name, description, options) {
+  opt(name, description, options) {
     return this._opt(STRING, name, description, options);
   }
 

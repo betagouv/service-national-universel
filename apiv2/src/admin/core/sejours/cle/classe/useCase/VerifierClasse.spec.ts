@@ -1,4 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { ConfigModule } from "@nestjs/config";
+import configuration from "@config/testConfiguration";
 import { EmailTemplate } from "@notification/core/Notification";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -41,6 +43,11 @@ describe("VerifierClasse", () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
+            imports: [
+                ConfigModule.forRoot({
+                    load: [configuration],
+                }),
+            ],
             providers: [
                 VerifierClasse,
                 {

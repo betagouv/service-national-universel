@@ -7,7 +7,7 @@ const slack = require("../../slack");
 const { StructureModel, MissionEquivalenceModel } = require("../../models");
 const MissionEquivalencePatchModel = require("./models/missionEquivalencePatch");
 
-const config = require("config");
+const { config } = require("../../config");
 const { logger } = require("../../logger");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 

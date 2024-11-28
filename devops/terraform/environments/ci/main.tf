@@ -2,6 +2,7 @@ terraform {
   required_providers {
     scaleway = {
       source = "scaleway/scaleway"
+      version = "2.47.0"
     }
   }
   required_version = ">= 0.13"
@@ -14,19 +15,6 @@ provider "scaleway" {
   region = "fr-par"
 }
 
-variable "api_image_tag" {
-  type     = string
-  nullable = false
-}
-variable "admin_image_tag" {
-  type     = string
-  nullable = false
-}
-variable "app_image_tag" {
-  type     = string
-  nullable = false
-}
-
 locals {
   organization_id = "db949d19-5fe0-4def-a89b-f801aad2d050" # Selego
   env             = "ci"
@@ -35,7 +23,6 @@ locals {
   apiv2_hostname    = "apiv2.${local.domain}"
   admin_hostname  = "admin.${local.domain}"
   app_hostname    = "moncompte.${local.domain}"
-  secrets         = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
 # Project
@@ -49,10 +36,6 @@ resource "scaleway_secret" "ci" {
   name        = "snu-${local.env}"
   project_id  = scaleway_account_project.main.id
   description = "Secrets for environment '${local.env}'"
-}
-data "scaleway_secret_version" "main" {
-  secret_id = scaleway_secret.ci.id
-  revision  = "latest_enabled"
 }
 
 # Logs
@@ -132,7 +115,6 @@ resource "scaleway_container_namespace" "custom" {
 resource "scaleway_container" "api" {
   name            = "${local.env}-api"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port            = 8080
   cpu_limit       = 1024
   memory_limit    = 2048
@@ -144,26 +126,22 @@ resource "scaleway_container" "api" {
   protocol        = "http1"
   deploy          = true
   http_option     = "redirected"
+  sandbox         = "v1"
 
-  environment_variables = {
-    "NODE_ENV"       = "ci"
-  }
-
-  secret_environment_variables = {
-    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  lifecycle {
+    ignore_changes = [
+      registry_image,
+      environment_variables,
+      secret_environment_variables,
+    ]
   }
 }
 
-resource "scaleway_container_domain" "api" {
-  container_id = scaleway_container.api.id
-  hostname     = local.api_hostname
-}
 
 
 resource "scaleway_container" "tasks" {
   name           = "${local.env}-tasks"
   namespace_id   = scaleway_container_namespace.main.id
-  registry_image = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port           = 8080
   cpu_limit      = 1024
   memory_limit   = 2048
@@ -173,21 +151,21 @@ resource "scaleway_container" "tasks" {
   protocol       = "http1"
   deploy         = true
   http_option    = "redirected"
+  sandbox        = "v1"
 
-  environment_variables = {
-    "NODE_ENV"       = "ci"
-    "RUN_TASKS"      = "true"
-  }
 
-  secret_environment_variables = {
-    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  lifecycle {
+    ignore_changes = [
+      registry_image,
+      environment_variables,
+      secret_environment_variables,
+    ]
   }
 }
 
 resource "scaleway_container" "apiv2" {
   name            = "${local.env}-apiv2"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/apiv2:latest"
   port            = 8080
   cpu_limit       = 1024
   memory_limit    = 2048
@@ -199,27 +177,22 @@ resource "scaleway_container" "apiv2" {
   protocol        = "http1"
   deploy          = true
   http_option     = "redirected"
+  sandbox         = "v1"
 
-  environment_variables = {
-    "ENVIRONMENT" = "ci"
-  }
-
-  secret_environment_variables = {
-    "DATABASE_URL" = local.secrets.MONGO_URL
-    "BROKER_URL" = local.secrets.REDIS_URL
+  lifecycle {
+    ignore_changes = [
+      registry_image,
+      environment_variables,
+      secret_environment_variables,
+    ]
   }
 }
 
-resource "scaleway_container_domain" "apiv2" {
-  container_id = scaleway_container.apiv2.id
-  hostname     = local.apiv2_hostname
-}
 
 
 resource "scaleway_container" "tasksv2" {
   name           = "${local.env}-tasksv2"
   namespace_id   = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/apiv2:latest"
   port           = 8080
   cpu_limit      = 1024
   memory_limit   = 2048
@@ -229,15 +202,14 @@ resource "scaleway_container" "tasksv2" {
   protocol       = "http1"
   deploy         = true
   http_option    = "redirected"
+  sandbox        = "v1"
 
-  environment_variables = {
-    "RUN_TASKS"      = "true"
-    "ENVIRONMENT" = "ci"
-  }
-
-  secret_environment_variables = {
-    "DATABASE_URL" = local.secrets.MONGO_URL
-    "BROKER_URL" = local.secrets.REDIS_URL
+  lifecycle {
+    ignore_changes = [
+      registry_image,
+      environment_variables,
+      secret_environment_variables,
+    ]
   }
 }
 
@@ -246,7 +218,6 @@ resource "scaleway_container" "tasksv2" {
 resource "scaleway_container" "admin" {
   name            = "${local.env}-admin"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.admin_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -259,21 +230,18 @@ resource "scaleway_container" "admin" {
   deploy          = true
   http_option     = "redirected"
 
-  environment_variables = {
-    "NGINX_HOSTNAME" = local.admin_hostname
-    "ENVIRONMENT"    = "ci"
+  lifecycle {
+    ignore_changes = [
+      registry_image,
+      environment_variables,
+      secret_environment_variables,
+    ]
   }
-}
-
-resource "scaleway_container_domain" "admin" {
-  container_id = scaleway_container.admin.id
-  hostname     = local.admin_hostname
 }
 
 resource "scaleway_container" "app" {
   name            = "${local.env}-app"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -286,54 +254,28 @@ resource "scaleway_container" "app" {
   deploy          = true
   http_option     = "redirected"
 
-  environment_variables = {
-    "NGINX_HOSTNAME" = local.app_hostname
-    "ENVIRONMENT"    = "ci"
+  lifecycle {
+    ignore_changes = [
+      registry_image,
+      environment_variables,
+      secret_environment_variables,
+    ]
   }
 }
 
+resource "scaleway_container_domain" "api" {
+  container_id = scaleway_container.api.id
+  hostname     = local.api_hostname
+}
+resource "scaleway_container_domain" "apiv2" {
+  container_id = scaleway_container.apiv2.id
+  hostname     = local.apiv2_hostname
+}
+resource "scaleway_container_domain" "admin" {
+  container_id = scaleway_container.admin.id
+  hostname     = local.admin_hostname
+}
 resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
   hostname     = local.app_hostname
-}
-
-
-output "project_id" {
-  value = scaleway_account_project.main.id
-}
-output "secret_id" {
-  value = scaleway_secret.ci.id
-}
-output "registry_endpoint" {
-  value = scaleway_registry_namespace.main.endpoint
-}
-
-output "api_endpoint" {
-  value = "https://${local.api_hostname}"
-}
-output "api_image_tag" {
-  value = split(":", scaleway_container.api.registry_image)[1]
-}
-output "api_container_status" {
-  value = scaleway_container.api.status
-}
-
-output "app_endpoint" {
-  value = "https://${local.app_hostname}"
-}
-output "app_image_tag" {
-  value = split(":", scaleway_container.app.registry_image)[1]
-}
-output "app_container_status" {
-  value = scaleway_container.app.status
-}
-
-output "admin_endpoint" {
-  value = "https://${local.admin_hostname}"
-}
-output "admin_image_tag" {
-  value = split(":", scaleway_container.admin.registry_image)[1]
-}
-output "admin_container_status" {
-  value = scaleway_container.admin.status
 }

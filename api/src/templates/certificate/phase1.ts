@@ -2,7 +2,7 @@ import path from "path";
 import { getDepartureDateSession, getReturnDateSession } from "../../utils/cohort";
 import { getCohortEndDate, transportDatesToString } from "snu-lib";
 import { SessionPhase1Model, CohesionCenterModel, MeetingPointModel, CohortModel } from "../../models";
-import config from "config";
+import { config } from "../../config";
 import { logger } from "../../logger";
 import { ERRORS } from "../../utils/errors";
 import { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } from "./utils";

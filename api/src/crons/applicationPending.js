@@ -3,7 +3,7 @@ const { ApplicationModel, ReferentModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const config = require("config");
+const { config } = require("../config");
 const { differenceInDays, getMonth } = require("date-fns");
 
 exports.handler = async () => {

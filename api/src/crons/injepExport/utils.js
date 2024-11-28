@@ -1,5 +1,3 @@
-process.env.NODE_CONFIG_DIR = "../../../config";
-
 const XLSX = require("xlsx");
 const { getAge, translate, translateColoration } = require("snu-lib");
 

@@ -4,7 +4,7 @@ const { CohortModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
-const config = require("config");
+const { config } = require("../config");
 
 exports.handler = async () => {
   try {

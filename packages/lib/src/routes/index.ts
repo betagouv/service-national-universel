@@ -14,3 +14,9 @@ export type { CohortGroupRoutes } from "./cohortGroup";
 export type { ClassesRoutes } from "./cle/classe";
 export type { InscriptionGoalsRoutes } from "./inscriptiongoal";
 export type { PreinscriptionRoutes } from "./preinscription";
+
+export interface HttpError {
+  message: string;
+  statusCode: number;
+  correlationId: string;
+}

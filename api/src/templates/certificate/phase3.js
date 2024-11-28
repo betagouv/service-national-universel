@@ -1,6 +1,6 @@
 const path = require("path");
 const { initDocument, getMinistres, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
-const config = require("config");
+const { config } = require("../../config");
 const { logger } = require("../../logger");
 const { withPipeStream } = require("../utils");
 
