@@ -21,12 +21,12 @@ type YoungInfo = Pick<
 
 // TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
 export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
-  let query: { status: string; cohortGroupId?: string; cohortId?: { $ne: string } } = { status: COHORT_STATUS.PUBLISHED };
+  let query: { status: string; cohortGroupId?: string; _id?: { $ne: string } } = { status: COHORT_STATUS.PUBLISHED };
 
   if (young.cohortId) {
     const cohort = await CohortModel.findById(young.cohortId);
     if (!cohort) throw new Error("Cohort not found");
-    query = { ...query, cohortGroupId: cohort.cohortGroupId, cohortId: { $ne: young.cohortId } };
+    query = { ...query, cohortGroupId: cohort.cohortGroupId, _id: { $ne: young.cohortId } };
   }
 
   const cohorts = await CohortModel.find(query);
