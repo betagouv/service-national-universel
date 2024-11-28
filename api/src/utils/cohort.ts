@@ -52,7 +52,6 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
   });
   for (let session of sessions) {
     session.isEligible = true;
-    session.isFull = (await getCompletionObjectifs(department, session.name)).isAtteint;
   }
   return getPlaces(sessions, region);
 }
