@@ -15,7 +15,7 @@ export default function WithdrawSejour() {
   const [open, setOpen] = useState(false);
 
   return (
-    <ChangeSejourContainer title="Se désister" backlink="/changer-de-sejour/">
+    <ChangeSejourContainer title="Se désister" backlink="/changer-de-sejour/no-date">
       <p className="mt-4 mb-6 text-sm leading-5 text-[#6B7280] font-normal">Veuillez précisez la raison de votre désistement.</p>
       <ReasonForm
         reason={withdrawnReason}
