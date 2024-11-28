@@ -35,9 +35,9 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
 
   const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
     // if the young has already a cohort, he can only apply for the cohorts of the same year
-    // if (session._id.equals(young.cohortId)) {
-    //   return false;
-    // }
+    if (session._id.equals(young.cohortId)) {
+      return false;
+    }
     return (
       session.eligibility?.zones.includes(department) &&
       session.eligibility?.schoolLevels.includes(young.grade!) &&
