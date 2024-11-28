@@ -39,7 +39,7 @@ export default defineConfig(({ command, mode }) => {
         url: "https://sentry.selego.co/",
         environment: mode,
         release: {
-          name: env.RELEASE,
+          name: env.VITE_RELEASE,
           deploy: {
             env: mode,
           },

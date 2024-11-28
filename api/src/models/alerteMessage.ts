@@ -1,7 +1,4 @@
-import config from "config";
 import mongoose, { Schema } from "mongoose";
-import mongooseElastic from "@selego/mongoose-elastic";
-import esClient from "../es";
 import patchHistory from "mongoose-patch-history";
 
 import { AlerteMessageSchema, AlerteMessageType } from "snu-lib";
@@ -35,10 +32,6 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-
-if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
-  schema.plugin(mongooseElastic(esClient), MODELNAME);
-}
 
 export type AlerteMessageDocument<T = {}> = DocumentExtended<AlerteMessageType & T>;
 type SchemaExtended = AlerteMessageDocument & UserExtension;

@@ -1,7 +1,7 @@
 import fs from "fs";
 import fetch from "node-fetch";
 import queryString from "querystring";
-import config from "config";
+import { config } from "./config";
 import { logger } from "./logger";
 
 import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
@@ -112,12 +112,12 @@ export async function sendSMS(phoneNumber, content, tag) {
 // https://developers.sendinblue.com/reference#sendtransacemail
 export async function sendEmail(to: Email[], subject: string, htmlContent, { params, attachment, cc, bcc }: Omit<SendMailParameters, "emailTo"> = {}) {
   try {
-    if (config.get("MAIL_TRANSPORT") === "SMTP") {
+    if (config.MAIL_TRANSPORT === "SMTP") {
       await sendMailCatcher(subject, htmlContent, { emailTo: to, cc, bcc, attachment });
       return;
     }
 
-    if (config.get("MAIL_TRANSPORT") !== "BREVO") {
+    if (config.MAIL_TRANSPORT !== "BREVO") {
       return;
     }
 
@@ -229,11 +229,11 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
   try {
     if (!id) throw new Error("No template id provided");
 
-    if (!options.force && config.get("MAIL_TRANSPORT") === "SMTP") {
+    if (!options.force && config.MAIL_TRANSPORT === "SMTP") {
       await simulateTemplate(id, { params, emailTo, cc, bcc, attachment });
       return;
     }
-    if (!options.force && config.get("MAIL_TRANSPORT") !== "BREVO") {
+    if (!options.force && config.MAIL_TRANSPORT !== "BREVO") {
       return;
     }
     const body: any = { templateId: parseInt(id) };

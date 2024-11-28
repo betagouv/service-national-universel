@@ -1,4 +1,4 @@
-# Terraform infastructure stack
+# Terraform infastructure stack - TODO: REMOVE
 
 This directory contains files that describe the cloud infrastructure required to run the SNU applications.
 
@@ -70,7 +70,6 @@ Each environment has its corresponding directory :
 
 - [production](environments/production/README.md)
 - [ci](environments/ci/README.md)
-
 
 ## HOW TO
 

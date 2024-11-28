@@ -4,7 +4,7 @@ import { Architectures } from "arch-unit-ts/dist/arch-unit/library/Architectures
 import { classes, noClasses } from "arch-unit-ts/dist/main";
 import { MatchingPattern } from "./MatchingPattern";
 describe("Architecture test", () => {
-    const srcProject = new TypeScriptProject(RelativePath.of("src"));
+    const srcProject = new TypeScriptProject(RelativePath.of("src"), "**/*.spec.ts"); // Ignore tests files
 
     describe("Application", () => {
         it("Should not depend on infrastructure", () => {
@@ -28,6 +28,7 @@ describe("Architecture test", () => {
                     MatchingPattern.CORE,
                     MatchingPattern.NESTJS_COMMON,
                     MatchingPattern.NESTJS_TESTING,
+                    MatchingPattern.NESTJS_CONFIG,
                 )
                 .because("Core should not depend on any other dependencies")
                 .check(srcProject.allClasses());
@@ -98,6 +99,7 @@ describe("Architecture test", () => {
                     MatchingPattern.ADMIN_CORE,
                     MatchingPattern.NESTJS_COMMON,
                     MatchingPattern.NESTJS_TESTING,
+                    MatchingPattern.NESTJS_CONFIG,
                 )
                 .because("Core should not depend on any other dependencies")
                 .check(srcProject.allClasses());

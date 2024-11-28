@@ -1,9 +1,8 @@
+# TODO: REMOVE
 name: Build and deploy Production Hotfix
 
 on:
-  push:
-    branches:
-      - production_hotfix
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}

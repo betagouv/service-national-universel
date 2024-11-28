@@ -46,7 +46,7 @@ import {
 import { serializeSessionPhase1, serializeCohesionCenter } from "../utils/serializer";
 import { validateSessionPhase1, validateId } from "../utils/validator";
 import { sendTemplate } from "../brevo";
-import config from "config";
+import { config } from "../config";
 import { encrypt, decrypt } from "../cryptoUtils";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";

@@ -4,7 +4,7 @@ import { ApplicationModel } from "../models";
 import { YoungModel } from "../models";
 import { ReferentModel } from "../models";
 import { sendTemplate } from "../brevo";
-import config from "config";
+import { config } from "../config";
 import { getCcOfYoung } from "../utils";
 import { getTutorName } from "./mission";
 import { capture } from "../sentry";

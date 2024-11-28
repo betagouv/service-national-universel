@@ -1,18 +1,19 @@
 services:
   mongo:
     image: mongo:7
+    command: --replSet rs0
     ports:
       - "27017:27017"
-    volumes:
-      - mongodb_data:/data/mongodb
+    # volumes:
+    #   - mongodb_data:/data/mongodb
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     environment:
       - discovery.type=single-node
     ports:
       - "9200:9200"
-    volumes:
-      - elasticsearch_data:/data/elastic
+    # volumes:
+    #   - elasticsearch_data:/data/elastic
   mailcatcher:
     image: schickling/mailcatcher
     ports:
@@ -44,11 +45,41 @@ services:
       - REDIS_HOST=redis
     networks:
       - redis
+  env-setup:
+    build:
+      context: ../
+      dockerfile: ./local/Dockerfile.env-setup
+    volumes:
+      - type: bind
+        source: ${DUMP_DIRECTORY:-dump}
+        target: /dump
+    depends_on:
+      - mongo
+      - elasticsearch
+    restart: "no"
+    environment:
+      - ES_ENDPOINT=http://elasticsearch:9200
+      - MONGO_LOCAL_URL=mongodb://mongo:27017/snu_dev?directConnection=true
+      - DUMP_DIRECTORY=/dump
+  es_datariver:
+    container_name: es_datariver
+    build:
+      context: ../elastic-search-datariver
+      dockerfile: ../elastic-search-datariver/local/Dockerfile
+      args:
+        MONGO_DB_NAME: snu_dev
+    ports:
+      - 3002:8080
+    environment:
+      - MONSTACHE_ES_URLS=http://elasticsearch:9200
+      - MONSTACHE_MONGO_URL=mongodb://mongo:27017/snu_dev?directConnection=true
+    depends_on:
+      env-setup:
+        condition: service_completed_successfully
 
 networks:
   redis:
     driver: bridge
-
-volumes:
-  mongodb_data:
-  elasticsearch_data:
+# volumes:
+#   mongodb_data:
+#   elasticsearch_data:

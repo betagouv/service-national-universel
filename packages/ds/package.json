@@ -6,7 +6,6 @@
   "module": "./dist/index.js",
   "types": "./src/index.ts",
   "scripts": {
-    "postinstall": "npm run build",
     "dev": "npx tsc -w --jsx preserve -t ES2021 --outDir dist --noEmit false",
     "build": "npx tsc --jsx preserve -t ES2021 --outDir dist --noEmit false",
     "lint": "eslint src \"{**/*,*}.{js,ts,jsx,tsx}\"",

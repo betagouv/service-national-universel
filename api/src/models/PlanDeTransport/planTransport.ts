@@ -1,11 +1,8 @@
-import config from "config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
-import mongooseElastic from "@selego/mongoose-elastic";
 
 import { InterfaceExtended, ModificationBusSchema, PlanTransportPointDeRassemblementEnrichedSchema, PlanTransportSchema, TRANSPORT_MODES_LIST } from "snu-lib";
 
-import esClient from "../../es";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
 import { PointDeRassemblementModel } from "./pointDeRassemblement";
@@ -49,10 +46,6 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-
-if (config.get("ENABLE_MONGOOSE_ELASTIC")) {
-  schema.plugin(mongooseElastic(esClient), MODELNAME);
-}
 
 schema.index({ ligneDeBusId: 1 });
 

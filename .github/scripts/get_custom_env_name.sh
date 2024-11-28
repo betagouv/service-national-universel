@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: REMOVE
+
 if [ "$#" -lt 1 ]; then
     echo "Usage $0 <branch_name>"
     echo "Format environment name based on <branch_name>"

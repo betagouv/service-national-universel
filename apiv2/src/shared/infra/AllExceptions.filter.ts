@@ -1,12 +1,12 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from "@nestjs/common";
-import { HttpAdapterHost } from "@nestjs/core";
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from "@nestjs/common";
 import { HttpArgumentsHost } from "@nestjs/common/interfaces";
+import { HttpAdapterHost } from "@nestjs/core";
 import * as Sentry from "@sentry/nestjs";
 import { Router } from "express";
-
+import { HttpError } from "snu-lib";
+import { FunctionalException } from "../core/FunctionalException";
 import { CustomRequest } from "./CustomRequest";
 import { TechnicalException } from "./TechnicalException";
-import { FunctionalException } from "../core/FunctionalException";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -75,7 +75,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const httpStatus =
             exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
         const message = exception instanceof HttpException ? exception.message : "Internal Server Error";
-        const responseBody = {
+        const responseBody: HttpError = {
             message: message,
             statusCode: httpStatus,
             correlationId: request.correlationId,

@@ -30,6 +30,7 @@ export * from "./utils/date";
 export * from "./utils/file";
 export * from "./utils/request";
 export * from "./utils/cohortUtils";
+export * from "./utils/parseEnv";
 export * from "./young";
 export * from "./mongoSchema";
 export * from "./constants/cohesionCenter";

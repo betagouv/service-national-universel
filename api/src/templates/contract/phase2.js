@@ -1,6 +1,6 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const config = require("config");
+const { config } = require("../../config");
 const { logger } = require("../../logger");
 const { formatDateFRTimezoneUTC } = require("snu-lib");
 const { withPipeStream } = require("../utils");

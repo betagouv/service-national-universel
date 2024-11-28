@@ -1,5 +1,5 @@
 import { YOUNG_STATUS, SENDINBLUE_TEMPLATES, canEditYoung } from "snu-lib";
-import config from "config";
+import { config } from "../../config";
 
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
