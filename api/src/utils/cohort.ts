@@ -1,4 +1,4 @@
-import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility, CohortType } from "snu-lib";
+import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility, CohortType, YoungDto } from "snu-lib";
 import { CohortModel, CohortDocument, InscriptionGoalModel, YoungModel } from "../models";
 
 type CohortDocumentWithPlaces = CohortDocument<{
@@ -101,7 +101,7 @@ export async function getFilteredSessionsForChangementSejour(young: YoungType, t
   return getPlaces(openSessions, region);
 }
 
-export async function getFilteredSessionsForReinscription(young: YoungInfo, timeZoneOffset?: string | number | null) {
+export async function getFilteredSessionsForReinscription(young: YoungDto, timeZoneOffset?: string | number | null) {
   if (!young.birthdateAt) throw new Error("Missing birthdate");
   if (!young.grade) throw new Error("Missing grade");
   if (!young.cohortId) throw new Error("Missing cohortId");
@@ -114,8 +114,11 @@ export async function getFilteredSessionsForReinscription(young: YoungInfo, time
   if (!department) throw new Error("Unable to determine department");
 
   const query = buildCohortQueryForReinscription(new Date(young.birthdateAt), young.grade, department, currentCohort.cohortGroupId);
+  console.log("🚀 ~ getFilteredSessionsForReinscription ~ query:", query);
   const cohorts = await CohortModel.find(query);
+  console.log("🚀 ~ getFilteredSessionsForReinscription ~ cohorts:", cohorts);
   const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => session.getIsReInscriptionOpen(Number(timeZoneOffset)));
+  console.log("🚀 ~ getFilteredSessionsForReinscription ~ openSessions:", openSessions);
 
   for (let session of openSessions) session.isEligible = true;
   const region = getRegionForEligibility(young);

@@ -14,6 +14,7 @@ const { getFilteredSessionsForReinscription } = require("../../utils/cohort");
  * ROUTES:
  *  PUT  /reinscription                => updates young who start a reinscription process
  *  PUT  /reinscription/not-eligible   => updates to young status to not eligible
+ *  POST /reinscription/eligibilite    => returns the list of cohorts the young can choose for a reinscription
  */
 
 router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
@@ -122,6 +123,31 @@ router.put("/not-eligible", passport.authenticate("young", { session: false, fai
 
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+const eligibiliteValidator = Joi.object({
+  schoolDepartment: Joi.string().trim().allow(null, ""),
+  department: Joi.string().trim().allow(null, ""),
+  schoolRegion: Joi.string().trim().allow(null, ""),
+  birthdateAt: Joi.string().trim().allow(null, ""),
+  grade: Joi.string().trim().allow(null, ""),
+  zip: Joi.string().trim().allow(null, ""),
+});
+
+router.post("/eligibilite", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungModel.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const { error, value } = eligibiliteValidator.validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const cohorts = await getFilteredSessionsForReinscription({ ...young, ...value }, req.headers["x-user-timezone"] || null);
+    return res.json({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

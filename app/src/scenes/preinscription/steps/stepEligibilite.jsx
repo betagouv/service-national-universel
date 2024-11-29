@@ -156,7 +156,9 @@ export default function StepEligibilite() {
     setLoading(true);
 
     try {
-      const { data: sessions, message } = await api.post(`/preinscription/eligibilite`, {
+      const url = data.isReInscription ? "/reinscription/eligibilite" : "/preinscription/eligibilite";
+
+      const { data: sessions, message } = await api.post(url, {
         schoolDepartment: data.school?.departmentName || data.school?.department,
         department: data.department,
         schoolRegion: data.school?.region,
