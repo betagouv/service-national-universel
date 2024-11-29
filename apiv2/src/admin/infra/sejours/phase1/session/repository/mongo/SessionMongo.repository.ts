@@ -6,7 +6,7 @@ import { SESSION_MONGOOSE_ENTITY, SessionDocument } from "../../provider/Session
 
 import { SessionMapper } from "../Session.mapper";
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
-import { SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
+import { CreateSessionModel, SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
 
 @Injectable()
 export class SessionRepository implements SessionGateway {
@@ -15,8 +15,8 @@ export class SessionRepository implements SessionGateway {
         private readonly cls: ClsService,
     ) {}
 
-    async create(session: SessionModel): Promise<SessionModel> {
-        const sessionEntity = SessionMapper.toEntity(session);
+    async create(session: CreateSessionModel): Promise<SessionModel> {
+        const sessionEntity = SessionMapper.toEntityCreate(session);
         const createdSession = await this.sesssionMongooseEntity.create(sessionEntity);
         return SessionMapper.toModel(createdSession);
     }

@@ -21,5 +21,5 @@ export type { CohortGroupRoutes } from "./cohortGroup";
 export type { ClassesRoutes } from "./cle/classe";
 export type { InscriptionGoalsRoutes } from "./inscriptiongoal";
 export type { PreinscriptionRoutes } from "./preinscription";
-export type { AffectationRoutes } from "./affectation";
-export type { Phase1Routes } from "./phase1";
+export type { AffectationRoutes } from "./phase1/affectation";
+export * from "./phase1";

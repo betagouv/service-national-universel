@@ -1,3 +1,4 @@
+// TODO: Mettre à niveau pour de l'ecriture
 export type PointDeRassemblementModel = {
     id: string;
     code: string;

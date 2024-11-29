@@ -13,6 +13,7 @@ export class TaskMapper {
             endDate: taskType.endDate,
             status: taskType.status,
             metadata: taskType.metadata,
+            erreur: taskType.erreur,
             createdAt: taskType.createdAt,
             updatedAt: taskType.updatedAt,
         };
@@ -34,6 +35,7 @@ export class TaskMapper {
             endDate: taskModel.endDate?.toISOString(),
             status: taskModel.status,
             metadata: taskModel.metadata,
+            erreur: taskModel.erreur,
             createdAt: taskModel.createdAt.toISOString(),
             updatedAt: taskModel.updatedAt.toISOString(),
         };
@@ -50,6 +52,7 @@ export class TaskMapper {
             metadata: {
                 ...taskModel.metadata,
             },
+            erreur: taskModel.erreur,
             createdAt: taskModel.createdAt,
             updatedAt: taskModel.updatedAt,
         };
@@ -65,6 +68,7 @@ export class TaskMapper {
             metadata: {
                 ...taskModel.metadata,
             },
+            erreur: taskModel.erreur,
             createdAt: new Date(),
             updatedAt: new Date(),
         };

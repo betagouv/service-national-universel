@@ -31,6 +31,17 @@ export const TaskSchema = {
     type: Object,
   },
 
+  erreur: {
+    type: {
+      code: {
+        type: String,
+      },
+      description: {
+        type: String,
+      },
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 };

@@ -1,19 +1,13 @@
-import { Body, Controller, ExecutionContext, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
 
-import {
-    AffectationRoutes,
-    department2region,
-    departmentList,
-    GRADES,
-    RegionsHorsMetropole,
-    TaskName,
-    TaskStatus,
-} from "snu-lib";
+import { AffectationRoutes, TaskName, TaskStatus } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
+
+import { PostSimulationsPayloadDto } from "./Affectation.validation";
 
 @Controller("affectation")
 export class AffectationController {
@@ -24,9 +18,8 @@ export class AffectationController {
     async simulate(
         @Request() request: CustomRequest,
         @Param("sessionId") sessionId: string,
-        @Body() payload: AffectationRoutes["PostSimulationsRoute"]["payload"],
+        @Body() payload: PostSimulationsPayloadDto,
     ): Promise<AffectationRoutes["PostSimulationsRoute"]["response"]> {
-        // TODO: add payload validation
         const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_HTS_SIMULATION,
             status: TaskStatus.PENDING,

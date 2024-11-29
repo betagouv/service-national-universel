@@ -10,6 +10,10 @@ export interface TaskDto<T = object, U = object> {
   name: string;
   status: TaskStatus;
   metadata?: TaskMetadataDto<T, U>;
+  erreur?: {
+    code?: string;
+    description?: string;
+  };
   libelle?: string;
   startDate?: string;
   endDate?: string;

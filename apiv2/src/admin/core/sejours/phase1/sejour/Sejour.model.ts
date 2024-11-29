@@ -1,3 +1,4 @@
+// TODO: Mettre à niveau pour de l'ecriture
 export type SejourModel = {
     id: string;
     nom?: string;

@@ -146,6 +146,8 @@ function normalizeDepartmentName(deptName) {
 
 const getDepartmentNumber = (depNum: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === normalizeDepartmentName(depNum));
 
+export const formatDepartement = (department: string) => `${department} (${getDepartmentNumber(department)})`;
+
 const getDepartmentByZip = (zip?: string) => {
   if (!zip) return;
   if (zip.length !== 5) return;

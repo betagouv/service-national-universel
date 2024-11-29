@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 
 import { HiOutlineLightningBolt, HiPlay } from "react-icons/hi";
 
-import { Phase1Routes, region2department, RegionsMetropole, SimulationAffectationHTSTaskDto, translate } from "snu-lib";
+import { formatDepartement, getDepartmentNumber, Phase1Routes, region2department, RegionsMetropole, SimulationAffectationHTSTaskDto, translate } from "snu-lib";
 import { Button, Modal } from "@snu/ds/admin";
 import { useToggle } from "react-use";
 
@@ -63,9 +63,7 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
                 </div>
               </div>
               <h1 className="font-bold text-xl m-0">Affectation HTS (Hors DOM TOM)</h1>
-              <p className="text-lg">
-                La simulation se basera sur le schéma de répartition suivant : <b>Nom-du-Fichier.xxx</b>
-              </p>
+              <p className="text-lg">Vérifier les paramètres avant de lancer ce traitement.</p>
             </div>
             <div className="flex items-start flex-col w-full gap-8">
               <div className="flex flex-col w-full gap-2.5">
@@ -80,7 +78,7 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Situations scolaires</h2>
                 <div className="flex gap-2">
-                  <div className="text-gray-400">Niveaux :</div>
+                  <div className="text-gray-400">Niveaux&nbsp;:</div>
                   <div className="text-sm leading-5 font-normal">
                     {simulationHts.metadata?.parameters?.niveauScolaires?.map((niveau) => translate(niveau)).join(", ") || "Aucun"}
                   </div>
@@ -91,20 +89,20 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
                 <div className="flex flex-col w-full gap-4">
                   {RegionsMetropole.map((region) => (
                     <div key={region} className="flex gap-2">
-                      <div className="text-gray-400 min-w-[200px]">{region} :</div>
-                      <div className="text-sm leading-5 font-normal">{regions[region].join(", ") || "Aucun"}</div>
+                      <div className="text-gray-400 min-w-[200px]">{region}&nbsp;:</div>
+                      <div className="text-sm leading-5 font-normal">{regions[region].map(formatDepartement).join(", ") || "Aucun"}</div>
                     </div>
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <div className="text-gray-400">Etranger :</div>
+                  <div className="text-gray-400">Etranger&nbsp;:</div>
                   <div className="text-sm leading-5 font-normal">{simulationHts.metadata?.parameters?.etranger ? "Oui" : "Non"}</div>
                 </div>
               </div>
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Points de rassemblement</h2>
                 <div className="flex gap-2">
-                  <div className="text-gray-400">Affecter les PDR :</div>
+                  <div className="text-gray-400">Affecter les PDR&nbsp;:</div>
                   <div className="text-sm leading-5 font-normal">{simulationHts.metadata?.parameters?.affecterPDR ? "Oui" : "Non"}</div>
                 </div>
               </div>

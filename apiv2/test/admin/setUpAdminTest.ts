@@ -1,6 +1,6 @@
 import configuration from "@config/testConfiguration";
 import { getQueueToken } from "@nestjs/bullmq";
-import { Logger } from "@nestjs/common";
+import { Logger, ValidationPipe } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
@@ -101,6 +101,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         .compile();
 
     const app = adminTestModule.createNestApplication({ logger: false });
+    app.useGlobalPipes(new ValidationPipe());
 
     return { app, adminTestModule };
 };

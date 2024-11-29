@@ -1,6 +1,6 @@
-import { GRADES } from "../../constants/constants";
-import { TaskDto } from "../taskDto";
-import { SimulationPhase1TaskParameters } from "../phase1/SimulationPhase1TaskHTSTaskDto";
+import { GRADES } from "../../../constants/constants";
+import { TaskDto } from "../../taskDto";
+import { SimulationPhase1TaskParameters } from "../../phase1/SimulationPhase1TaskHTSTaskDto";
 
 export interface RatioRepartition {
   male: number;

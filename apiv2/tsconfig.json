@@ -28,4 +28,5 @@
             "@task/*": ["src/task/*"]
         }
     }
+    // "references": [{ "path": "../packages/lib" }]
 }

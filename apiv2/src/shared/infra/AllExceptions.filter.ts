@@ -1,4 +1,12 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from "@nestjs/common";
+import {
+    ArgumentsHost,
+    BadRequestException,
+    Catch,
+    ExceptionFilter,
+    HttpException,
+    HttpStatus,
+    Logger,
+} from "@nestjs/common";
 import { HttpArgumentsHost } from "@nestjs/common/interfaces";
 import { HttpAdapterHost } from "@nestjs/core";
 import * as Sentry from "@sentry/nestjs";
@@ -28,46 +36,30 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const httpStatus =
             exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        const router = request.app._router as Router;
-        const currentRoute = router.stack
-            .filter((layer) => {
-                if (layer.route) {
-                    const path = layer.route?.path;
-                    const method = layer.route?.stack[0].method;
-                    const isMatchingPath = !!request.originalUrl.match(layer.regexp);
-                    // console.log(`${method.toUpperCase()} ${path}, ${isMatchingPath}`);
-                    return method === request.method && isMatchingPath;
-                }
-                return false;
-            })
-            .map((layer) => layer.route?.path)?.[0];
-        // console.log("currentRoute", currentRoute);
+        const currentRoute = this.getCurrentRoute(request);
 
-        Sentry.captureMessage(
-            `💥 HTTP ${httpStatus} ${request.method} ${currentRoute || request.originalUrl} ${exception.name}`,
-            {
-                level: "error",
-                contexts: {
+        Sentry.captureMessage(`💥 HTTP ${httpStatus} ${request.method} ${currentRoute} ${exception.name}`, {
+            level: "error",
+            contexts: {
+                params: request.params,
+                query: request.query,
+                route: request.route,
+                payload: request.body,
+            },
+            extra: {
+                request: {
+                    auth: request.user?.id,
+                    headers: request.headers,
+                    method: request.method,
                     params: request.params,
-                    query: request.query,
-                    route: request.route,
+                    originalUrl: request.originalUrl,
+                    path: request.path,
                     payload: request.body,
-                },
-                extra: {
-                    request: {
-                        auth: request.user?.id,
-                        headers: request.headers,
-                        method: request.method,
-                        params: request.params,
-                        originalUrl: request.originalUrl,
-                        path: request.path,
-                        payload: request.body,
-                        route: request.route,
-                        correlationId: request.correlationId,
-                    },
+                    route: request.route,
+                    correlationId: request.correlationId,
                 },
             },
-        );
+        });
     }
 
     processResponse(exception: Error | HttpException, context: HttpArgumentsHost, request: CustomRequest) {
@@ -86,13 +78,33 @@ export class AllExceptionsFilter implements ExceptionFilter {
     processLog(exception: Error | HttpException, request: CustomRequest) {
         const stack = exception instanceof Error ? exception.stack : null;
         const caller = this.getCallerClassMethod(exception);
-        let log = `Unhandled - ${request.correlationId} - ${stack}`;
+        const currentRoute = this.getCurrentRoute(request);
+        // @ts-expect-error TODO: typer exception pour les erreur de validation
+        let log = `Unhandled - ${request.correlationId} - ${currentRoute} - ${exception.response?.message} ${stack}`;
         if (exception instanceof TechnicalException && exception.description) {
-            log = `${request.correlationId} - ${exception.description} - ${stack}`;
+            log = `${request.correlationId} - ${currentRoute} -  ${exception.message} ${exception.description} - ${stack}`;
         } else if (exception instanceof FunctionalException) {
-            log = `${request.correlationId} - ${stack}`;
+            log = `${request.correlationId} - ${currentRoute} -  ${stack}`;
         }
         this.logger.error(log, caller);
+    }
+
+    private getCurrentRoute(request: CustomRequest) {
+        const router = request.app._router as Router;
+        const currentRoute = router.stack
+            .filter((layer) => {
+                if (layer.route) {
+                    const path = layer.route?.path;
+                    const method = layer.route?.stack[0].method;
+                    const isMatchingPath = !!request.originalUrl.match(layer.regexp);
+                    // console.log(`${method.toUpperCase()} ${path}, ${isMatchingPath}`);
+                    return method === request.method && isMatchingPath;
+                }
+                return false;
+            })
+            .map((layer) => layer.route?.path)?.[0];
+        // console.log("currentRoute", currentRoute);
+        return currentRoute || request.originalUrl;
     }
 
     private getCallerClassMethod = (error: Error) => {

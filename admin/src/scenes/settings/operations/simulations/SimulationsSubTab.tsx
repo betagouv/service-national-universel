@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { HiOutlinePaperClip, HiPlay } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
 
-import { formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
+import { formatDateFR, getZonedDate, Phase1Routes, TaskName, translate, translateSimulationName, translateTaskStatus } from "snu-lib";
 import { Badge, DataTable, TBadgeStatus, Tooltip } from "@snu/ds/admin";
 
 import { Phase1Service } from "@/services/phase1Service";
@@ -91,7 +91,7 @@ export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps)
             title: "Statut",
             filtrable: true,
             renderCell: (simulation) => (
-              <Tooltip id={simulation.id} title={simulation.libelle} disabled={!simulation.libelle}>
+              <Tooltip id={simulation.id} title={`${translate(simulation.erreur?.code)} ${simulation.erreur?.description || ""}`} disabled={!simulation.erreur?.code}>
                 <Badge title={translateTaskStatus(simulation.status)} status={MAPPING_STATUS_COLOR[simulation.status]} />
               </Tooltip>
             ),

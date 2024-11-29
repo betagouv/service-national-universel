@@ -13,6 +13,10 @@ export type TaskModel<T = any, U = any> = {
     endDate?: Date;
     status: TaskStatus;
     metadata?: TaskMetadata<T, U>;
+    erreur?: {
+        code?: string;
+        description?: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 };

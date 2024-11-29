@@ -4,10 +4,11 @@ export enum FunctionalExceptionCode {
     NOT_FOUND = "NOT_FOUND",
     CLASSE_STATUT_INVALIDE = "CLASSE_STATUT_INVALIDE",
     AFFECTATION_DEPARTEMENT_HORS_METROPOLE = "AFFECTATION_DEPARTEMENT_HORS_METROPOLE",
+    AFFECTATION_NOT_ENOUGH_DATA = "AFFECTATION_NOT_ENOUGH_DATA",
 }
 
 export class FunctionalException extends HttpException {
-    constructor(message: FunctionalExceptionCode) {
-        super(message, HttpStatus.UNPROCESSABLE_ENTITY);
+    constructor(message: FunctionalExceptionCode, description?: string) {
+        super(message, HttpStatus.UNPROCESSABLE_ENTITY, { description });
     }
 }

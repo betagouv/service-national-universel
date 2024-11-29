@@ -377,6 +377,8 @@ const translate = (value) => {
       return "L'objectif d'inscription de la région a été atteint !";
     case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED:
       return "Aucun objectif d'inscription défini pour le département !";
+    case "AFFECTATION_NOT_ENOUGH_DATA":
+      return "Données insuffisantes pour l'affectation";
     default:
       return value;
   }

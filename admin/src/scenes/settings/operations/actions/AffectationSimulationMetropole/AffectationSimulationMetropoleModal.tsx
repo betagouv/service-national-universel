@@ -2,7 +2,7 @@ import React from "react";
 
 import { HiOutlineLightningBolt } from "react-icons/hi";
 
-import { getDepartmentNumber, GRADES, Phase1Routes, region2department, RegionsMetropole, translate } from "snu-lib";
+import { formatDepartement, GRADES, Phase1Routes, region2department, RegionsMetropole, translate } from "snu-lib";
 import { Button, CollapsableSelectSwitcher, Modal, SectionSwitcher } from "@snu/ds/admin";
 import { useSetState } from "react-use";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,16 +18,16 @@ interface AffectationSimulationMetropoleProps {
 export default function AffectationSimulationMetropoleModal({ sessionId, onClose }: AffectationSimulationMetropoleProps) {
   const queryClient = useQueryClient();
   const [state, setState] = useSetState<{
-    departements: Record<string, string[]>;
     niveauScolaires: string[];
+    departements: Record<string, string[]>;
     etranger: boolean;
     affecterPDR: boolean;
   }>({
+    niveauScolaires: Object.values(GRADES),
     departements: RegionsMetropole.reduce((acc, region) => {
       acc[region] = region2department[region];
       return acc;
     }, {}),
-    niveauScolaires: Object.values(GRADES),
     etranger: false,
     affecterPDR: false,
   });
@@ -38,6 +38,8 @@ export default function AffectationSimulationMetropoleModal({ sessionId, onClose
         departements: Object.keys(state.departements).reduce((acc, region) => [...acc, ...state.departements[region]], []),
         niveauScolaires: state.niveauScolaires as any,
         changementDepartements: [],
+        etranger: state.etranger,
+        affecterPDR: state.affecterPDR,
       });
     },
     onSuccess: (task) => {
@@ -88,14 +90,14 @@ export default function AffectationSimulationMetropoleModal({ sessionId, onClose
                   <CollapsableSelectSwitcher
                     key={region}
                     title={region}
-                    options={region2department[region].map((department) => ({ label: `${department} (${getDepartmentNumber(department)})`, value: department }))}
+                    options={region2department[region].map((department) => ({ label: formatDepartement(department), value: department }))}
                     values={state.departements[region]}
                     onChange={(values) => setState({ departements: { ...state.departements, [region]: values } })}
                     isOpen={false}
                   />
                 ))}
+                <SectionSwitcher title="Etranger" disabled value={state.etranger} onChange={(etranger) => setState({ etranger })} />
               </div>
-              <SectionSwitcher title="Etranger" disabled value={state.etranger} onChange={(etranger) => setState({ etranger })} />
             </div>
             <div className="flex flex-col w-full gap-2.5">
               <h2 className="text-lg leading-7 font-bold m-0">Points de rassemblement</h2>

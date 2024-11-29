@@ -1,6 +1,6 @@
 import { Inject, Logger } from "@nestjs/common";
 
-import { RegionsHorsMetropole, YOUNG_STATUS, YOUNG_STATUS_PHASE1, GRADES } from "snu-lib";
+import { RegionsHorsMetropole, YOUNG_STATUS, YOUNG_STATUS_PHASE1, GRADES, department2region } from "snu-lib";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -63,7 +63,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         niveauScolaires: Array<keyof typeof GRADES>;
         changementDepartements: { origine: string; destination: string }[];
     }): Promise<SimulationAffectationHTSResult> {
-        if (departements.some((departement) => RegionsHorsMetropole.includes(departement))) {
+        if (departements.some((departement) => RegionsHorsMetropole.includes(department2region[departement]))) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_DEPARTEMENT_HORS_METROPOLE);
         }
 
@@ -75,19 +75,19 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         // Chargement des données associés à la session
         const ligneDeBusList = await this.ligneDeBusGateway.findBySessionId(sessionId);
         if (ligneDeBusList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "lignes de bus");
         }
         const sejoursList = await this.sejoursGateway.findBySessionId(sessionId);
         if (sejoursList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "sejours");
         }
         const pdrList = await this.pointDeRassemblementGateway.findBySessionId(sessionId);
         if (pdrList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "PDRs");
         }
         const centreList = await this.centresGateway.findBySessionId(sessionId);
         if (centreList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "centres");
         }
         const allJeunes = await this.jeuneGateway.findBySessionIdStatusNiveauScolairesAndDepartements(
             sessionId,
@@ -96,7 +96,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             departements,
         );
         if (allJeunes.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "jeunes");
         }
 
         // on sépare les jeunes intra dep des autres

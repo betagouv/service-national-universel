@@ -52,7 +52,7 @@ export class AdminTaskConsumer extends WorkerHost {
                 `Error processing task "${job.name}" - ${error.message} - ${error.stack}`,
                 AdminTaskConsumer.name,
             );
-            await this.adminTaskRepository.toFailed(job.data.id, error.message);
+            await this.adminTaskRepository.toFailed(job.data.id, error.message, error.options?.description);
             return ConsumerResponse.FAILURE;
         }
         this.logger.log(

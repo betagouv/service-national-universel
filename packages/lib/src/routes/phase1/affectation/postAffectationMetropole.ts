@@ -1,6 +1,7 @@
-import { SimulationAffectationHTSTaskDto } from "../../dto/affectation/SimulationAffectationHTSTaskDto";
-import { GRADES } from "../../constants/constants";
-import { BasicRoute, RouteResponseBodyV2 } from "..";
+import { BasicRoute, RouteResponseBodyV2 } from "../../..";
+
+import { GRADES } from "../../../constants/constants";
+import { SimulationAffectationHTSTaskDto } from "../../../dto/phase1";
 
 export interface PostSimulationsRoute extends BasicRoute {
   method: "POST";
@@ -10,8 +11,8 @@ export interface PostSimulationsRoute extends BasicRoute {
     departements: string[];
     niveauScolaires: Array<keyof typeof GRADES>;
     changementDepartements: { origine: string; destination: string }[];
-    etranger?: boolean;
-    affecterPDR?: boolean;
+    etranger: boolean;
+    affecterPDR: boolean;
   };
   response: RouteResponseBodyV2<SimulationAffectationHTSTaskDto>;
 }
