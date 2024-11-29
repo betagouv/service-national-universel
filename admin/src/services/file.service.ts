@@ -1,5 +1,7 @@
 import { readAndCompressImage } from "browser-image-resizer";
-import { environment } from "../config";
+import { apiv2URL, environment } from "../config";
+import { download } from "snu-lib";
+import { apiv2 } from "./apiv2";
 
 export async function resizeImage(file, config = {}) {
   if (!["image/jpeg", "image/png"].includes(file.type)) return file;
@@ -25,3 +27,13 @@ export async function resizeImage(file, config = {}) {
 
   return image;
 }
+
+export const downloadSecuredFile = async (url) => {
+  const link = getSecuredFileUrl(url);
+  const fileName = url.replace(/^.*[\\/]/, "");
+  const result = await apiv2.get<any>(link);
+  const blob = new Blob([new Uint8Array(result.data.data)], { type: result.headers["content-type"] });
+  download(blob, fileName);
+};
+
+export const getSecuredFileUrl = (key) => `${apiv2URL}/file?key=${encodeURIComponent(key)}`;

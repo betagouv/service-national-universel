@@ -38,6 +38,7 @@ export class AdminTaskConsumer extends WorkerHost {
                     );
                     results = {
                         rapportUrl: simulation.rapportFile.Location,
+                        rapportKey: simulation.rapportFile.Key,
                         selectedCost: simulation.analytics.selectedCost,
                         jeunesNouvellementAffected: simulation.analytics.jeunesNouvellementAffected,
                         jeuneAttenteAffectation: simulation.analytics.jeuneAttenteAffectation,

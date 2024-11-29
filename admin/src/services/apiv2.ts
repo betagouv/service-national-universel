@@ -55,7 +55,12 @@ class Apiv2 implements IApiV2 {
     });
 
     this.axios.interceptors.response.use(
-      (response: AxiosResponse) => response.data,
+      (response: AxiosResponse) => {
+        if (response.data.type === "Buffer") {
+          return response;
+        }
+        return response.data;
+      },
       (error: AxiosError<HttpError>) => {
         if (error.response?.status === 401) {
           if (window?.location?.pathname !== "/auth") {

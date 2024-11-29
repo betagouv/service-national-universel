@@ -16,6 +16,7 @@ export type SimulationAffectationHTSTaskResult = Pick<
     "selectedCost" | "jeunesNouvellementAffected" | "jeuneAttenteAffectation" | "jeunesDejaAffected"
 > & {
     rapportUrl: string;
+    rapportKey: string;
 };
 
 export type SimulationAffectationHTSTaskModel = TaskModel<

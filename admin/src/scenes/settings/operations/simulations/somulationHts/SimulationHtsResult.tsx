@@ -2,14 +2,14 @@ import { Tooltip } from "@snu/ds/admin";
 import React from "react";
 import { HiOutlineInformationCircle } from "react-icons/hi";
 
-import { Phase1Routes, SimulationAffectationHTSTaskDto } from "snu-lib";
+import { SimulationAffectationHTSTaskDto } from "snu-lib";
 
 const formatPourcentage = (value: number) => {
   return `${(value * 100).toFixed(1)}%`;
 };
 
 interface SimulationsHtsResultsProps {
-  simulation: Phase1Routes["GetSimulationsRoute"]["response"][0];
+  simulation: unknown;
 }
 
 export default function SimulationsHtsResults({ simulation }: SimulationsHtsResultsProps) {

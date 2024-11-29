@@ -5,6 +5,8 @@ import { AllExceptionsFilter } from "./infra/AllExceptions.filter";
 import { ClockGateway } from "./core/Clock.gateway";
 import { ClockProvider } from "./infra/Clock.provider";
 import { FileProvider } from "./infra/File.provider";
+import { FileController } from "./infra/File.controller";
+import { FileGateway } from "./core/File.gateway";
 
 @Global()
 @Module({
@@ -13,11 +15,17 @@ import { FileProvider } from "./infra/File.provider";
         AllExceptionsFilter,
         Logger,
         FileProvider,
+        // TODO: à déplacer dans le module "file"
+        {
+            provide: FileGateway,
+            useClass: FileProvider,
+        },
         {
             provide: ClockGateway,
             useClass: ClockProvider,
         },
     ],
+    controllers: [FileController],
     exports: [AllExceptionsFilter, ClockGateway],
 })
 export class SharedModule {}

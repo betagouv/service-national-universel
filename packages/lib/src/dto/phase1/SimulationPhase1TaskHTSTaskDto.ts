@@ -13,6 +13,7 @@ export interface SimulationPhase1TaskParameters {
 
 export type SimulationPhase1TaskHTSTaskResult = {
   rapportUrl: string;
+  rapportKey: string;
 };
 
 export interface SimulationPhase1TaskHTSTaskDto extends TaskDto<SimulationPhase1TaskParameters, SimulationPhase1TaskHTSTaskResult> {}

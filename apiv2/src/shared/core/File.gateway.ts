@@ -1,3 +1,4 @@
+// TODO: à déplacer dans le module "file"
 export interface FileGateway {
     readCSV<T>(
         filePath: string,
@@ -34,6 +35,10 @@ export interface FileGateway {
         Bucket: string;
         Key: string;
     }>;
+    downloadFile(
+        path: string,
+    ): Promise<{ Body: Buffer; ContentLength?: number; ContentType?: string; FileName?: string }>;
+    deleteFile(path: string): Promise<void>;
 }
 
 export const FileGateway = Symbol("FileGateway");

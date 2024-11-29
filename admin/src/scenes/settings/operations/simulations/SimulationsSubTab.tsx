@@ -6,6 +6,7 @@ import { useLocation } from "react-router-dom";
 import { formatDateFR, getZonedDate, Phase1Routes, TaskName, translate, translateSimulationName, translateTaskStatus } from "snu-lib";
 import { Badge, DataTable, TBadgeStatus, Tooltip } from "@snu/ds/admin";
 
+import { downloadSecuredFile } from "@/services/file.service";
 import { Phase1Service } from "@/services/phase1Service";
 import SimulationsHtsResults from "./somulationHts/SimulationHtsResult";
 import ActionCell from "./ActionCell";
@@ -101,9 +102,11 @@ export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps)
             title: "Simulat.",
             renderCell: (simulation) =>
               simulation.metadata?.results?.rapportUrl && (
-                <a href={simulation.metadata?.results?.rapportUrl} className="border-[1px] border-blue-600 rounded-full p-2.5" target="_blank" rel="noreferrer">
-                  <HiOutlinePaperClip size={24} />
-                </a>
+                <>
+                  <button onClick={() => downloadSecuredFile(simulation.metadata?.results?.rapportKey)} className="border-[1px] border-blue-600 rounded-full p-2.5">
+                    <HiOutlinePaperClip size={24} />
+                  </button>
+                </>
               ),
           },
           {

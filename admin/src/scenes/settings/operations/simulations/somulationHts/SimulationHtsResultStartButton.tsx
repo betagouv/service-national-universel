@@ -2,12 +2,12 @@ import React, { useMemo } from "react";
 
 import { HiOutlineLightningBolt, HiPlay } from "react-icons/hi";
 
-import { formatDepartement, getDepartmentNumber, Phase1Routes, region2department, RegionsMetropole, SimulationAffectationHTSTaskDto, translate } from "snu-lib";
+import { formatDepartement, region2department, RegionsMetropole, SimulationAffectationHTSTaskDto, translate } from "snu-lib";
 import { Button, Modal } from "@snu/ds/admin";
 import { useToggle } from "react-use";
 
 interface SimulationHtsResultStartButtonProps {
-  simulation: Phase1Routes["GetSimulationsRoute"]["response"][0];
+  simulation: unknown;
 }
 
 export default function SimulationHtsResultStartButton({ simulation }: SimulationHtsResultStartButtonProps) {

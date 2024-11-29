@@ -2,13 +2,15 @@ import { promises as fs } from "fs";
 import { parse, ParserOptionsArgs } from "@fast-csv/parse";
 import * as XLSX from "xlsx";
 import * as AWS from "aws-sdk";
-
-import { Injectable } from "@nestjs/common";
-import { FileGateway } from "@shared/core/File.gateway";
 import { ConfigService } from "@nestjs/config";
+import { Injectable } from "@nestjs/common";
 
 import { ERRORS } from "snu-lib";
+import { FileGateway } from "@shared/core/File.gateway";
 
+import { TechnicalException, TechnicalExceptionType } from "./TechnicalException";
+
+// TODO: à déplacer dans le module "file"
 @Injectable()
 export class FileProvider implements FileGateway {
     constructor(private readonly config: ConfigService) {}
@@ -54,22 +56,44 @@ export class FileProvider implements FileGateway {
         const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
         const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
 
-        return new Promise((resolve, reject) => {
-            const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
-            const params: AWS.S3.Types.PutObjectRequest = {
-                Bucket: bucket,
-                Key: path,
-                Body: file.data,
-                ContentEncoding: file.encoding || "",
-                ContentType: file.mimetype,
-                Metadata: { "Cache-Control": "max-age=31536000" },
-                ...options,
-            };
+        const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+        const params: AWS.S3.Types.PutObjectRequest = {
+            Bucket: bucket,
+            Key: path,
+            Body: file.data,
+            ContentEncoding: file.encoding || "",
+            ContentType: file.mimetype,
+            Metadata: { "Cache-Control": "max-age=31536000" },
+            ...options,
+        };
 
-            s3bucket.upload(params, function (err, data) {
-                if (err) return reject(`error in callback:${err}`);
-                resolve(data);
-            });
-        });
+        return s3bucket.upload(params).promise();
+    }
+
+    async downloadFile(
+        path: string,
+    ): Promise<{ Body: Buffer; ContentLength?: number; ContentType?: string; FileName?: string }> {
+        const bucket = this.config.getOrThrow("bucket.name");
+        const endpoint = this.config.getOrThrow("bucket.endpoint");
+        const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
+        const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
+
+        const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+        const params: AWS.S3.Types.GetObjectRequest = {
+            Bucket: bucket,
+            Key: path,
+        };
+
+        const awsResponse = await s3bucket.getObject(params).promise();
+        return {
+            Body: awsResponse.Body as Buffer,
+            ContentLength: awsResponse.ContentLength,
+            ContentType: awsResponse.ContentType,
+            FileName: path.replace(/^.*[\\/]/, ""),
+        };
+    }
+
+    deleteFile(path: string): Promise<void> {
+        throw new TechnicalException(TechnicalExceptionType.NOT_IMPLEMENTED_YET);
     }
 }
