@@ -140,6 +140,39 @@ describe("ClasseController", () => {
         expect(response.status).toBe(403);
     });
 
+    it("/POST classe/:id/referent/modifier-ou-creer should return 200 and update referent", async () => {
+        const referent = await createReferent();
+        const etablissement = await createEtablissement({ referentEtablissementIds: [referent.id] });
+
+        const createdClasse = await createClasse({
+            nom: "Classe Test",
+            statut: STATUS_CLASSE.VERIFIED,
+            etablissementId: etablissement.id,
+            referentClasseIds: [referent.id],
+        });
+        const newReferentEmail = "my_new_email@mail.com";
+        const response = await request(app.getHttpServer())
+            .post(`/classe/${createdClasse.id}/referent/modifier-ou-creer`)
+            .send({
+                email: newReferentEmail,
+                prenom: "New",
+                nom: "Referent",
+            });
+
+        const updatedClasse = await classeGateway.findById(createdClasse.id);
+        const updatedReferent = await referentGateway.findByEmail(newReferentEmail);
+        expect(response.status).toBe(201);
+        expect(response.body).toMatchObject({
+            email: newReferentEmail,
+            prenom: "New",
+            nom: "Referent",
+        });
+        expect(updatedClasse.referentClasseIds).toContain(updatedReferent.id);
+        expect(updatedReferent.email).toBe(newReferentEmail);
+        expect(updatedReferent.prenom).toBe("New");
+        expect(updatedReferent.nom).toBe("Referent");
+    });
+
     afterAll(async () => {
         await app.close();
         mongoose.disconnect();
