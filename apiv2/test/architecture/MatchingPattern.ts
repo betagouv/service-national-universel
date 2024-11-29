@@ -14,6 +14,7 @@ export enum MatchingPattern {
     ADMIN_USECASE = "src.admin..core..useCase..",
     ADMIN_INFRA = "src.admin..infra..",
     ADMIN_REPOSITORY = "src.admin..infra..repository..",
+    ADMIN_SERVICE = "src.admin..core..service..",
 
     NOTIFICATION_CORE = "src.notification.core..",
 
