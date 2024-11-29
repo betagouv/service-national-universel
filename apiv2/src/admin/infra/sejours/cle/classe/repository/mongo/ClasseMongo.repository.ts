@@ -41,8 +41,9 @@ export class ClasseRepository implements ClasseGateway {
         return ClasseMapper.toModel(retrievedClasse);
     }
 
+    // TODO : remove after testing
     async findAll(): Promise<ClasseModel[]> {
-        const classes = await this.classeMongooseEntity.find();
+        const classes = await this.classeMongooseEntity.find({}, { academy: 1, coloration: 1, name: 1 });
         return ClasseMapper.toModels(classes);
     }
 }
