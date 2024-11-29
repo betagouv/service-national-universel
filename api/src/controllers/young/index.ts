@@ -61,7 +61,7 @@ import {
   MissionType,
   ContractType,
 } from "snu-lib";
-import { getFilteredSessions } from "../../utils/cohort";
+import { getFilteredSessionsForChangementSejour } from "../../utils/cohort";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
@@ -589,7 +589,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getFilteredSessions(young, (req.headers["x-user-timezone"] || "") as string);
+    const sessions = await getFilteredSessionsForChangementSejour(young, (req.headers["x-user-timezone"] || "") as string);
 
     if (cohort !== "à venir") {
       const session = sessions.find(({ name }) => name === cohortObj.name);

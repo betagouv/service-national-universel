@@ -24,7 +24,7 @@ const {
 const { sendTemplate } = require("./../../brevo");
 const { config } = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
-const { getFilteredSessions } = require("../../utils/cohort");
+const { getFilteredSessionsForChangementSejour } = require("../../utils/cohort");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -439,7 +439,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Check inscription goals
-    const sessions = await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
+    const sessions = await getFilteredSessionsForChangementSejour(young, req.headers["x-user-timezone"] || null);
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED }); //|| session.isFull || session.goalReached
 

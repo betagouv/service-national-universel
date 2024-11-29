@@ -3,7 +3,7 @@ import express from "express";
 import Joi from "joi";
 
 import { capture } from "../sentry";
-import { getFilteredSessions } from "../utils/cohort";
+import { getFilteredSessionsForInscription } from "../utils/cohort";
 import { createContact, MAILING_LISTS } from "../brevo";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { RouteRequest, RouteResponse } from "../controllers/request";
@@ -16,7 +16,7 @@ router.post(
   requestValidatorMiddleware(PreinscriptionRoutesSchema["PostEligibility"]),
   async (req: RouteRequest<PreinscriptionRoutes["PostEligibility"]>, res: RouteResponse<PreinscriptionRoutes["PostEligibility"]>) => {
     try {
-      const cohorts = await getFilteredSessions(req.validatedBody, Number(req.headers["x-user-timezone"]) || null);
+      const cohorts = await getFilteredSessionsForInscription(req.validatedBody, Number(req.headers["x-user-timezone"]) || null);
 
       return res.json({ ok: true, data: cohorts });
     } catch (error) {

@@ -7,7 +7,7 @@ import { ERRORS, notifDepartmentChange, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from
 import { getQPV, getDensity } from "../../geo";
 import { YoungModel, CohortModel } from "../../models";
 import { serializeYoung } from "../../utils/serializer";
-import { getFilteredSessions } from "../../utils/cohort";
+import { getFilteredSessionsForChangementSejour } from "../../utils/cohort";
 import { capture } from "../../sentry";
 import { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES } from "snu-lib";
 import validator from "validator";
@@ -95,7 +95,10 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
     ) {
       // @todo eligibility is based on address, should be based on school address.
-      const availableSessions = await getFilteredSessions({ grade: young.grade, birthdateAt: young.birthdateAt, ...value }, Number(req.headers["x-user-timezone"]) || null);
+      const availableSessions = await getFilteredSessionsForChangementSejour(
+        { grade: young.grade, birthdateAt: young.birthdateAt, ...value },
+        Number(req.headers["x-user-timezone"]) || null,
+      );
 
       const cohort = value.cohort ? value.cohort : young.cohort;
       const status = value.status ? value.status : young.status;
