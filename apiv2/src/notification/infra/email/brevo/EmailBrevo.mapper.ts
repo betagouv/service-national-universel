@@ -2,6 +2,7 @@ import {
     EmailParams,
     EmailTemplate,
     InviterReferentClasseParams,
+    SupprimerClasseEngageeParams,
     VerifierClasseEmailAdminCleParams,
     VerifierClasseEmailReferentDepRegParams,
 } from "@notification/core/Notification";
@@ -20,9 +21,19 @@ export class EmailBrevoMapper {
             case EmailTemplate.INVITER_REFERENT_CLASSE_TO_CONFIRMATION: {
                 return this.mapInviterReferentClasse(template, emailParams as InviterReferentClasseParams);
             }
-            default:
-                throw new Error("Template non pris en charge");
+            case EmailTemplate.SUPPRIMER_REFERENT_CLASSE:
+                return this.mapGenericEmailToBrevo(template, emailParams);
+            case EmailTemplate.SUPPRIMER_CLASSE_ENGAGEE:
+            case EmailTemplate.NOUVELLE_CLASSE_ENGAGEE:
+                return this.mapSupprimerClasseEngagee(template, emailParams as SupprimerClasseEngageeParams);
         }
+    }
+
+    static mapGenericEmailToBrevo(template: EmailTemplate, emailParams: EmailParams): EmailProviderParams {
+        return {
+            to: emailParams.to,
+            templateId: this.mapTemplateTypeToBrevoId(template),
+        };
     }
 
     //
@@ -71,7 +82,21 @@ export class EmailBrevoMapper {
         };
     }
 
-    static mapInviterClasse;
+    static mapSupprimerClasseEngagee(
+        template: EmailTemplate,
+        supprimerClasseEngagee: SupprimerClasseEngageeParams,
+    ): EmailProviderSupprimerClasseEngagee {
+        return {
+            to: supprimerClasseEngagee.to,
+            params: {
+                class_name: supprimerClasseEngagee.classeNom,
+                class_code: supprimerClasseEngagee.classeCode,
+                cta: supprimerClasseEngagee.compteUrl,
+            },
+            templateId: this.mapTemplateTypeToBrevoId(template),
+        };
+    }
+
     // TODO : Mettre en base le mapping
     static mapTemplateTypeToBrevoId(templateType: EmailTemplate): number {
         switch (templateType) {
@@ -83,8 +108,12 @@ export class EmailBrevoMapper {
                 return 1391;
             case EmailTemplate.INVITER_REFERENT_CLASSE_TO_CONFIRMATION:
                 return 1427;
-            default:
-                return 1;
+            case EmailTemplate.SUPPRIMER_REFERENT_CLASSE:
+                return 2349;
+            case EmailTemplate.SUPPRIMER_CLASSE_ENGAGEE:
+                return 2331;
+            case EmailTemplate.NOUVELLE_CLASSE_ENGAGEE:
+                return 2350;
         }
     }
 }
@@ -112,5 +141,13 @@ export interface EmailProviderInviterReferentClasse extends EmailProviderParams 
         cta: string;
         name_school: string;
         emailEtablissement: string;
+    };
+}
+
+export interface EmailProviderSupprimerClasseEngagee extends EmailProviderParams {
+    params: {
+        class_name?: string;
+        class_code: string;
+        cta: string;
     };
 }
