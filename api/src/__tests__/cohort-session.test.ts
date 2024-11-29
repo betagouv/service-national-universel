@@ -17,6 +17,8 @@ import { createYoungHelper } from "./helpers/young";
 // cohort
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
+
+// cohortGroup
 import { createCohortGroupHelper } from "./helpers/cohortGroup";
 import getNewCohortGroupFixture from "./fixtures/cohortGroup";
 

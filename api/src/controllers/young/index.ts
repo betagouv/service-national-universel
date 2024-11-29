@@ -528,9 +528,16 @@ router.put("/accept-ri", passport.authenticate("young", { session: false, failWi
   }
 });
 
+const changeCohortValidator = Joi.object({
+  cohortId: Joi.string(),
+  cohortName: Joi.string(),
+  cohortChangeReason: Joi.string().required(),
+  cohortDetailedChangeReason: Joi.string().optional().allow(""),
+}).xor("cohortId", "cohortName");
+
 router.put("/:id/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error, value } = validateYoung(req.body);
+    const { error, value } = changeCohortValidator.validate(req.body, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -547,7 +554,6 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     const { cohort, cohortId, cohortChangeReason, cohortDetailedChangeReason } = value;
-    if (!cohortChangeReason || (!cohort && !cohortId)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     const previousYoung = { ...young.toObject() };
     const cohortObj = await CohortModel.findOne({
@@ -583,9 +589,15 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
-    const session = sessions.find(({ name }) => name === cohortObj.name);
-    if (!session && cohort !== "à venir") return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const sessions = await getFilteredSessions(young, (req.headers["x-user-timezone"] || "") as string);
+
+    if (cohort !== "à venir") {
+      const session = sessions.find(({ name }) => name === cohortObj.name);
+
+      if (!session) {
+        return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+    }
 
     young.set({
       cohort: cohortObj.name,

@@ -1,6 +1,5 @@
 import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility } from "snu-lib";
 import { CohortModel, CohortDocument, InscriptionGoalModel, YoungModel } from "../models";
-import { getCompletionObjectifs } from "../services/inscription-goal";
 
 type CohortDocumentWithPlaces = CohortDocument<{
   numberOfCandidates?: number;
@@ -19,14 +18,25 @@ type YoungInfo = Pick<
   isReInscription?: boolean;
 };
 
+type CohortQuery = {
+  status?: string;
+  cohortGroupId?: string;
+  _id?: { $ne: string };
+};
+
 // TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
 export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
-  let query: { status: string; cohortGroupId?: string; _id?: { $ne: string } } = { status: COHORT_STATUS.PUBLISHED };
+  let query: CohortQuery = { status: COHORT_STATUS.PUBLISHED };
 
-  if (young.cohortId) {
+  // En cas de changement de séjour, on propose uniquement les autres cohortes du groupe de cohorte actuel.
+  if (young.cohortId && !young.isReInscription) {
     const cohort = await CohortModel.findById(young.cohortId);
     if (!cohort) throw new Error("Cohort not found");
-    query = { ...query, cohortGroupId: cohort.cohortGroupId, _id: { $ne: young.cohortId } };
+    query = {
+      ...query,
+      cohortGroupId: cohort.cohortGroupId,
+      _id: { $ne: young.cohortId },
+    };
   }
 
   const cohorts = await CohortModel.find(query);

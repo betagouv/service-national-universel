@@ -2,7 +2,7 @@ import React from "react";
 import Danger from "../../../assets/icons/Danger";
 import { CancelButton } from "../../../components/buttons/SimpleButtons";
 import { PlainButton } from "../../phase1/components/Buttons";
-import Field from "../../../components/forms/inputs/Fileds";
+import Field from "../../../components/forms/inputs/Field";
 import ArrowLeft from "../../../assets/icons/ArrowLeft";
 import Modal from "../../../components/ui/modals/Modal";
 

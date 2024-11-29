@@ -105,7 +105,7 @@ export const changeYoungCohort = async ({ youngId, reason, message, cohortId, co
     cohortChangeReason: reason,
     cohortDetailedChangeReason: message,
     cohortId,
-    cohort: cohortName,
+    cohortName,
   });
   if (!ok) throw new Error(code);
   if (!data) throw new Error("No data");

@@ -7,7 +7,7 @@ interface Option {
 }
 
 interface SimpleSelectProps {
-  value: string;
+  value?: string;
   transformer?: (value: string) => string;
   options: Option[];
   onChange?: (value: string) => void;
@@ -42,7 +42,7 @@ const SimpleSelect: React.FC<SimpleSelectProps> = ({ value, transformer, options
   return (
     <div ref={selectOptionsRef}>
       <div className={`flex cursor-pointer items-center justify-between`} onClick={toggleSelectOptions}>
-        <div className={`text-[14px] font-normal leading-[20px] text-[#1F2937] ${value ? "" : "py-[10px]"}`}>{transformer ? transformer(value) : value}</div>
+        <div className={`text-[14px] font-normal leading-[20px] text-[#1F2937] ${value ? "" : "py-[10px]"}`}>{transformer && value ? transformer(value) : value}</div>
         <ChevronDown className="w-4 text-gray-500" />
       </div>
       {selectOptionsOpened && (
