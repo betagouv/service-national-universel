@@ -404,49 +404,45 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                 </div>
                 <div className="rounded-lg bg-gray-100 p-3">
                   <div className="flex flex-col gap-4">
-                    <div className="flex items-center">
-                      <div
-                        className="flex w-full items-center gap-4 cursor-pointer"
-                        onClick={() => {
-                          if (!isLoading && !readOnly) {
-                            onCohortChange({ ...cohort, objectifLevel: "departemental" });
-                          }
-                        }}>
-                        <input
-                          type="radio"
-                          id="departemental"
-                          name="objectifLevel"
-                          value="departemental"
-                          checked={cohort?.objectifLevel === "departemental"}
-                          disabled={isLoading || readOnly}
-                          className="accent-blue-600 disabled:cursor-not-allowed cursor-pointer"
-                        />
-                        <label htmlFor="departemental" className="m-0 text-sm text-gray-700 cursor-pointer">
-                          au niveau départemental
-                        </label>
-                      </div>
+                    <div
+                      className="flex items-center gap-4"
+                      onClick={() => {
+                        if (!isLoading && !readOnly) {
+                          onCohortChange({ ...cohort, objectifLevel: "departemental" });
+                        }
+                      }}>
+                      <input
+                        type="radio"
+                        id="departemental"
+                        name="objectifLevel"
+                        value="departemental"
+                        checked={cohort?.objectifLevel === "departemental"}
+                        disabled={isLoading || readOnly}
+                        className="h-4 w-4 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
+                      />
+                      <label htmlFor="departemental" className="m-0 text-sm text-gray-700 cursor-pointer">
+                        au niveau départemental
+                      </label>
                     </div>
-                    <div className="flex items-center">
-                      <div
-                        className="flex w-full items-center gap-4 cursor-pointer"
-                        onClick={() => {
-                          if (!isLoading && !readOnly) {
-                            onCohortChange({ ...cohort, objectifLevel: "regional" });
-                          }
-                        }}>
-                        <input
-                          type="radio"
-                          id="regional"
-                          name="objectifLevel"
-                          value="regional"
-                          checked={cohort?.objectifLevel === "regional"}
-                          disabled={isLoading || readOnly}
-                          className="accent-blue-600 disabled:cursor-not-allowed cursor-pointer"
-                        />
-                        <label htmlFor="regional" className="m-0 text-sm text-gray-700 cursor-pointer">
-                          au niveau régional
-                        </label>
-                      </div>
+                    <div
+                      className="flex gap-4 items-center"
+                      onClick={() => {
+                        if (!isLoading && !readOnly) {
+                          onCohortChange({ ...cohort, objectifLevel: "regional" });
+                        }
+                      }}>
+                      <input
+                        type="radio"
+                        id="regional"
+                        name="objectifLevel"
+                        value="regional"
+                        checked={cohort?.objectifLevel === "regional"}
+                        disabled={isLoading || readOnly}
+                        className="h-4 w-4 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
+                      />
+                      <label htmlFor="regional" className="m-0 text-sm text-gray-700 cursor-pointer">
+                        au niveau régional
+                      </label>
                     </div>
                   </div>
                 </div>
