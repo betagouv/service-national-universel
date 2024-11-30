@@ -461,6 +461,10 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     if (body.validationDate) cohort.validationDate = formatDateTimeZone(body.validationDate);
     if (body.validationDateForTerminaleGrade) cohort.validationDateForTerminaleGrade = formatDateTimeZone(body.validationDateForTerminaleGrade);
 
+    console.log(body);
+
+    console.log(cohort);
+
     await cohort.save({ fromUser: req.user });
 
     if (cohort.type === COHORT_TYPE.CLE && (oldCohort.inscriptionStartDate !== cohort.inscriptionStartDate || oldCohort.inscriptionEndDate !== cohort.inscriptionEndDate)) {

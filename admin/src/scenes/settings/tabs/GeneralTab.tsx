@@ -25,8 +25,6 @@ import { ManualInscriptionSettings } from "../phase0/ManualInscriptionSettings";
 import { Select } from "@snu/ds/admin";
 import CohortGroupSelector from "../components/CohortGroupSelector";
 
-type ObjectifLevel = "departemental" | "regional";
-
 // Define the interface for GeneralTab props
 interface GeneralTabProps {
   cohort: CohortDto;
@@ -41,16 +39,10 @@ interface GeneralTabProps {
 export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort, isLoading, onLoadingChange }: GeneralTabProps) {
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(cohort?.reInscriptionStartDate || cohort?.reInscriptionEndDate);
-  const [objectifLevel, setObjectifLevel] = useState<ObjectifLevel>(cohort?.objectifLevel || "departemental");
 
   const statusOptions = [
     { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
     { value: COHORT_STATUS.ARCHIVED, label: "Archivée" },
-  ];
-
-  const objectifOptions = [
-    { value: "departemental", label: "au niveau départemental" },
-    { value: "regional", label: "au niveau régional" },
   ];
 
   const onSubmit = async () => {
@@ -411,16 +403,52 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   </ReactTooltip>
                 </div>
                 <div className="rounded-lg bg-gray-100 p-3">
-                  <Select
-                    value={objectifOptions.find((o) => o.value === objectifLevel) || null}
-                    options={objectifOptions}
-                    onChange={(e) => {
-                      setObjectifLevel(e.value as ObjectifLevel);
-                      onCohortChange({ ...cohort, objectifLevel: e.value as ObjectifLevel });
-                    }}
-                    closeMenuOnSelect
-                    disabled={isLoading || readOnly}
-                  />
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center">
+                      <div
+                        className="flex w-full items-center gap-4 cursor-pointer"
+                        onClick={() => {
+                          if (!isLoading && !readOnly) {
+                            onCohortChange({ ...cohort, objectifLevel: "departemental" });
+                          }
+                        }}>
+                        <input
+                          type="radio"
+                          id="departemental"
+                          name="objectifLevel"
+                          value="departemental"
+                          checked={cohort?.objectifLevel === "departemental"}
+                          disabled={isLoading || readOnly}
+                          className="accent-blue-600 disabled:cursor-not-allowed cursor-pointer"
+                        />
+                        <label htmlFor="departemental" className="m-0 text-sm text-gray-700 cursor-pointer">
+                          au niveau départemental
+                        </label>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div
+                        className="flex w-full items-center gap-4 cursor-pointer"
+                        onClick={() => {
+                          if (!isLoading && !readOnly) {
+                            onCohortChange({ ...cohort, objectifLevel: "regional" });
+                          }
+                        }}>
+                        <input
+                          type="radio"
+                          id="regional"
+                          name="objectifLevel"
+                          value="regional"
+                          checked={cohort?.objectifLevel === "regional"}
+                          disabled={isLoading || readOnly}
+                          className="accent-blue-600 disabled:cursor-not-allowed cursor-pointer"
+                        />
+                        <label htmlFor="regional" className="m-0 text-sm text-gray-700 cursor-pointer">
+                          au niveau régional
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
