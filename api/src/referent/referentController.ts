@@ -558,6 +558,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
     ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // * Quelle règle mettre ici et quelle erreur retourner pour le ref dep ds le cas ou il ne peut pas valider le jeune ?
       const departement = getDepartmentForInscriptionGoal(young);
       const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
       if (completionObjectif.isAtteint) {
