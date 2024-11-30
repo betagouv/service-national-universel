@@ -385,6 +385,16 @@ export const CohortSchema = {
       description: "Ouverture ou fermeture de l'inscription manuelle pour les administrateurs CLE",
     },
   },
+
+  objectifLevel: {
+    type: String,
+    enum: ["departemental", "regional"],
+    required: true,
+    default: "departemental",
+    documentation: {
+      description: "Niveau des objectifs (départemental ou régional)",
+    },
+  },
 };
 
 const schema = new Schema(CohortSchema);
