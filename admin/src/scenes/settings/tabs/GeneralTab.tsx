@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import dayjs from "dayjs";
 
 import { isAfter } from "date-fns";
 import { BiLoaderAlt } from "react-icons/bi";
@@ -65,6 +66,15 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
       onLoadingChange(true);
       // @ts-ignore
       delete cohort.snuId;
+      // format date to be sure it is UTC in backend
+      cohort.inscriptionStartDate = dayjs(cohort.inscriptionStartDate).toDate();
+      cohort.inscriptionEndDate = dayjs(cohort.inscriptionEndDate).toDate();
+      cohort.reInscriptionStartDate = dayjs(cohort.reInscriptionStartDate).toDate();
+      cohort.reInscriptionEndDate = dayjs(cohort.reInscriptionEndDate).toDate();
+      cohort.instructionEndDate = dayjs(cohort.instructionEndDate).toDate();
+      cohort.inscriptionModificationEndDate = dayjs(cohort.inscriptionModificationEndDate).toDate();
+      cohort.pdrChoiceLimitDate = dayjs(cohort.pdrChoiceLimitDate).toDate();
+
       const { ok, code } = await api.put(`/cohort/${encodeURIComponent(cohort!.name)}`, cohort);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", code);
@@ -264,7 +274,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   label="Ouverture"
                   placeholder="Date et heure"
                   // @ts-ignore
-                  value={cohort.inscriptionStartDate}
+                  value={dayjs(cohort.inscriptionStartDate).local().toDate()}
                   error={error.inscriptionStartDate}
                   // @ts-ignore
                   onChange={(e) => onCohortChange({ ...cohort, inscriptionStartDate: e })}
@@ -277,7 +287,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   label="Fermeture"
                   placeholder="Date et heure"
                   // @ts-ignore
-                  value={cohort.inscriptionEndDate}
+                  value={dayjs(cohort.inscriptionEndDate).local().toDate()}
                   // @ts-ignore
                   onChange={(e) => onCohortChange({ ...cohort, inscriptionEndDate: e })}
                   readOnly={readOnly}
@@ -308,7 +318,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                       label="Ouverture"
                       placeholder="Date et heure"
                       // @ts-ignore
-                      value={cohort.reInscriptionStartDate || cohort.inscriptionStartDate}
+                      value={dayjs(cohort.reInscriptionStartDate).local().toDate() || dayjs(cohort.inscriptionStartDate).local().toDate()}
                       error={error.reInscriptionStartDate}
                       onChange={(e) => onCohortChange({ ...cohort, reInscriptionStartDate: e })}
                       readOnly={readOnly}
@@ -320,7 +330,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                       label="Fermeture"
                       placeholder="Date et heure"
                       // @ts-ignore
-                      value={cohort.reInscriptionEndDate || cohort.inscriptionEndDate}
+                      value={dayjs(cohort.reInscriptionEndDate).local().toDate() || dayjs(cohort.inscriptionEndDate).local().toDate()}
                       error={error.reInscriptionEndDate}
                       onChange={(e) => onCohortChange({ ...cohort, reInscriptionEndDate: e })}
                       readOnly={readOnly}
@@ -356,7 +366,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                     label="Fermeture"
                     placeholder="Date"
                     // @ts-ignore
-                    value={cohort.inscriptionModificationEndDate}
+                    value={dayjs(cohort.inscriptionModificationEndDate).local().toDate()}
                     // @ts-ignore
                     onChange={(e) => onCohortChange({ ...cohort, inscriptionModificationEndDate: e })}
                     readOnly={readOnly}
@@ -383,7 +393,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                     label="Fermeture"
                     placeholder="Date"
                     // @ts-ignore
-                    value={cohort.instructionEndDate}
+                    value={dayjs(cohort.instructionEndDate).local().toDate()}
                     // @ts-ignore
                     onChange={(e) => onCohortChange({ ...cohort, instructionEndDate: e })}
                     readOnly={readOnly}
