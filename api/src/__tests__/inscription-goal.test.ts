@@ -83,7 +83,7 @@ describe("Inscription Goal", () => {
           cohortId: inscriptionGoal.cohortId,
         }),
       );
-      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, inscriptionGoal.cohort);
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, inscriptionGoal.cohort, "departemental");
       expect(completionObjectif.department.objectif).toBe(1);
       expect(completionObjectif.region.objectif).toBe(2);
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);

@@ -54,10 +54,9 @@ export const getCompletionObjectifs = async (department: string, cohort: string,
   return {
     department: completionObjectifDepartement,
     region: completionObjectifRegion,
-    // completion des objectifs départementaux et régionaux
-    isAtteint: objectifLevel === "region" ? completionObjectifRegion.isAtteint : completionObjectifRegion.isAtteint || completionObjectifDepartement.isAtteint,
+    isAtteint: objectifLevel === "regional" ? completionObjectifRegion.isAtteint : completionObjectifRegion.isAtteint || completionObjectifDepartement.isAtteint,
     tauxRemplissage:
-      objectifLevel === "region" ? completionObjectifRegion.tauxRemplissage : Math.max(completionObjectifRegion.tauxRemplissage, completionObjectifDepartement.tauxRemplissage),
+      objectifLevel === "regional" ? completionObjectifRegion.tauxRemplissage : Math.max(completionObjectifRegion.tauxRemplissage, completionObjectifDepartement.tauxRemplissage),
     tauxLimiteRemplissage: FILLING_RATE_LIMIT,
   };
 };
