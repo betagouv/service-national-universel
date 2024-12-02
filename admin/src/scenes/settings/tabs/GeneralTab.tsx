@@ -392,61 +392,63 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   />
                 </div>
               </div>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <p className="text-gray-900 text-xs font-medium">Objectifs</p>
-                  <MdInfoOutline data-tip data-for="objectifs" className="text-gray-400 h-5 w-5 cursor-pointer" />
-                  <ReactTooltip id="objectifs" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
-                    <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                      La définition d'objectifs régionaux permet de dépasser les quotas actuels en matière de traitement de dossiers LP au niveau départemental
-                    </p>
-                  </ReactTooltip>
-                </div>
-                <div className="rounded-lg bg-gray-100 p-3">
-                  <div className="flex flex-col gap-4">
-                    <div
-                      className="flex items-center gap-4"
-                      onClick={() => {
-                        if (!isLoading && !readOnly) {
-                          onCohortChange({ ...cohort, objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL });
-                        }
-                      }}>
-                      <input
-                        type="radio"
-                        id="departemental"
-                        name="objectifLevel"
-                        value={INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL}
-                        checked={cohort?.objectifLevel === INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL}
-                        disabled={isLoading || readOnly}
-                        className="h-4 w-4 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
-                      />
-                      <label htmlFor="departemental" className="m-0 text-sm text-gray-700 cursor-pointer">
-                        au niveau départemental
-                      </label>
-                    </div>
-                    <div
-                      className="flex gap-4 items-center"
-                      onClick={() => {
-                        if (!isLoading && !readOnly) {
-                          onCohortChange({ ...cohort, objectifLevel: INSCRIPTION_GOAL_LEVELS.REGIONAL });
-                        }
-                      }}>
-                      <input
-                        type="radio"
-                        id="regional"
-                        name="objectifLevel"
-                        value={INSCRIPTION_GOAL_LEVELS.REGIONAL}
-                        checked={cohort?.objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL}
-                        disabled={isLoading || readOnly}
-                        className="h-4 w-4 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
-                      />
-                      <label htmlFor="regional" className="m-0 text-sm text-gray-700 cursor-pointer">
-                        au niveau régional
-                      </label>
+              {cohort.type !== COHORT_TYPE.CLE && (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-gray-900 text-xs font-medium">Objectifs</p>
+                    <MdInfoOutline data-tip data-for="objectifs" className="text-gray-400 h-5 w-5 cursor-pointer" />
+                    <ReactTooltip id="objectifs" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                      <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                        La définition d'objectifs régionaux permet de dépasser les quotas actuels en matière de traitement de dossiers LP au niveau départemental
+                      </p>
+                    </ReactTooltip>
+                  </div>
+                  <div className="rounded-lg bg-gray-100 p-3">
+                    <div className="flex flex-col gap-4">
+                      <div
+                        className="flex items-center gap-4"
+                        onClick={() => {
+                          if (!isLoading && !readOnly) {
+                            onCohortChange({ ...cohort, objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL });
+                          }
+                        }}>
+                        <input
+                          type="radio"
+                          id="departemental"
+                          name="objectifLevel"
+                          value={INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL}
+                          checked={cohort?.objectifLevel === INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL}
+                          disabled={isLoading || readOnly}
+                          className="h-4 w-4 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
+                        />
+                        <label htmlFor="departemental" className="m-0 text-sm text-gray-700 cursor-pointer">
+                          au niveau départemental
+                        </label>
+                      </div>
+                      <div
+                        className="flex gap-4 items-center"
+                        onClick={() => {
+                          if (!isLoading && !readOnly) {
+                            onCohortChange({ ...cohort, objectifLevel: INSCRIPTION_GOAL_LEVELS.REGIONAL });
+                          }
+                        }}>
+                        <input
+                          type="radio"
+                          id="regional"
+                          name="objectifLevel"
+                          value={INSCRIPTION_GOAL_LEVELS.REGIONAL}
+                          checked={cohort?.objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL}
+                          disabled={isLoading || readOnly}
+                          className="h-4 w-4 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
+                        />
+                        <label htmlFor="regional" className="m-0 text-sm text-gray-700 cursor-pointer">
+                          au niveau régional
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
