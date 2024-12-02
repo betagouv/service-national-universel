@@ -10,5 +10,5 @@ export type CentreModel = {
     sessionNames: string[];
     sessionIds: string[];
     listeAttente: string[];
-    statusSejour: string[];
+    statutSejour: string[];
 };

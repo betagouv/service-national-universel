@@ -21,7 +21,6 @@ export class AdminTaskConsumer extends WorkerHost {
     ) {
         super();
     }
-    // TODO call async usecase task
     async process(job: Job<TaskQueue, any, TaskName>): Promise<ConsumerResponse> {
         this.logger.log(`Processing task "${job.name}" with data ${JSON.stringify(job.data)}`, AdminTaskConsumer.name);
         let results = {};

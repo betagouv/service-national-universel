@@ -3,7 +3,7 @@ import { CreateTaskModel, TaskModel } from "./Task.model";
 export interface TaskGateway {
     create(task: CreateTaskModel): Promise<TaskModel>;
     findAll(): Promise<TaskModel[]>;
-    findByName(
+    findByNames(
         name: Array<CreateTaskModel["name"]>,
         filter?: { [key: string]: string | undefined },
         sort?: "ASC" | "DESC",

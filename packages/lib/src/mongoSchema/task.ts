@@ -9,7 +9,7 @@ export const TaskSchema = {
     required: true,
   },
 
-  libelle: {
+  description: {
     type: String,
   },
 
@@ -31,7 +31,7 @@ export const TaskSchema = {
     type: Object,
   },
 
-  erreur: {
+  error: {
     type: {
       code: {
         type: String,

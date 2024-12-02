@@ -13,7 +13,6 @@ interface SimulationHtsResultStartButtonProps {
 export default function SimulationHtsResultStartButton({ simulation }: SimulationHtsResultStartButtonProps) {
   const simulationHts = simulation as SimulationAffectationHTSTaskDto;
 
-  // const queryClient = useQueryClient();
   const [showModal, toggleModal] = useToggle(false);
 
   const regions = useMemo(
@@ -24,26 +23,6 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
       }, {}),
     [simulationHts],
   );
-
-  // const { isPending, mutate } = useMutation({
-  //   mutationFn: async () => {
-  //     return await AffectationService.postAffectationMetropole(sessionId, {
-  //       departements: Object.keys(state.departements).reduce((acc, region) => [...acc, ...state.departements[region]], []),
-  //       niveauScolaires: state.niveauScolaires as any,
-  //       changementDepartements: [],
-  //     });
-  //   },
-  //   onSuccess: (task) => {
-  //     toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
-  //     const oldTasks = queryClient.getQueryData<Phase1Routes["GetSimulationsRoute"]["response"]>(["affectation-simulations-pending"]) || [];
-  //     queryClient.setQueryData(["affectation-simulations-pending"], [...oldTasks, task]);
-  //     toggleModal(false);
-  //   },
-  //   onError: (error: any) => {
-  //     capture(error);
-  //     toastr.error("Une erreur est survenue lors de l'ajout du traitement", translate(JSON.parse(error.message).message), { timeOut: 5000 });
-  //   },
-  // });
 
   return (
     <>

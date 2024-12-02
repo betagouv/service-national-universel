@@ -8,9 +8,9 @@ import { Badge, DataTable, TBadgeStatus, Tooltip } from "@snu/ds/admin";
 
 import { downloadSecuredFile } from "@/services/file.service";
 import { Phase1Service } from "@/services/phase1Service";
-import SimulationsHtsResults from "./somulationHts/SimulationHtsResult";
+import SimulationsHtsResults from "./simulationHts/SimulationHtsResult";
 import ActionCell from "./ActionCell";
-import SimulationHtsResultStartButton from "./somulationHts/SimulationHtsResultStartButton";
+import SimulationHtsResultStartButton from "./simulationHts/SimulationHtsResultStartButton";
 
 interface SimulationsSubTabProps {
   sessionId: string;
@@ -92,7 +92,7 @@ export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps)
             title: "Statut",
             filtrable: true,
             renderCell: (simulation) => (
-              <Tooltip id={simulation.id} title={`${translate(simulation.erreur?.code)} ${simulation.erreur?.description || ""}`} disabled={!simulation.erreur?.code}>
+              <Tooltip id={simulation.id} title={`${translate(simulation.error?.code)} ${simulation.error?.description || ""}`} disabled={!simulation.error?.code}>
                 <Badge title={translateTaskStatus(simulation.status)} status={MAPPING_STATUS_COLOR[simulation.status]} />
               </Tooltip>
             ),

@@ -29,7 +29,7 @@ export class TaskRepository implements TaskGateway {
         return TaskMapper.toModel(task);
     }
 
-    async findByName(
+    async findByNames(
         names: Array<CreateTaskModel["name"]>,
         filter?: { [key: string]: string | undefined },
         sort?: "ASC" | "DESC",

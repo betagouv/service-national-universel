@@ -8,12 +8,12 @@ export type TaskMetadata<T, U> = {
 export type TaskModel<T = any, U = any> = {
     id: string;
     name: TaskName;
-    libelle?: string;
+    description?: string;
     startDate?: Date;
     endDate?: Date;
     status: TaskStatus;
     metadata?: TaskMetadata<T, U>;
-    erreur?: {
+    error?: {
         code?: string;
         description?: string;
     };

@@ -247,15 +247,17 @@ export class SimulationAffectationHTSService {
                 const posValueLigne = randomLigneDeBusIdList.indexOf(ligneDeBusIdList[jeuneAAffecterIndex]);
                 const posValueCentre = randomCentreIdList.indexOf(centreIdListParLigne[jeuneAAffecterIndex]);
 
-                const nmin = nbAffectectationARealiser.slice(0, jeuneAAffecterIndex).reduce((a, b) => a + b, 0);
+                const nbJeunesAAffecter = nbAffectectationARealiser
+                    .slice(0, jeuneAAffecterIndex)
+                    .reduce((a, b) => a + b, 0);
                 let nmax = nbAffectectationARealiser.slice(0, jeuneAAffecterIndex + 1).reduce((a, b) => a + b, 0);
 
                 // securite: Plus de jeunes que de places dans le Centre
-                while (nmax - nmin > (randomSejourList[posValueCentre].placesRestantes || 0)) {
+                while (nmax - nbJeunesAAffecter > (randomSejourList[posValueCentre].placesRestantes || 0)) {
                     nmax += -1;
                 }
 
-                const randomIndices = jeunePositionDepartementSelected.slice(nmin, nmax).map(Number);
+                const randomIndices = jeunePositionDepartementSelected.slice(nbJeunesAAffecter, nmax).map(Number);
                 const jeunesDepartementSelectedIdList = randomIndices.map(
                     (index) => jeuneIdDispoDepartementList[index],
                 );
@@ -281,8 +283,11 @@ export class SimulationAffectationHTSService {
             }
         }
 
-        if (randomSejourList.find((sejour) => sejour.placesRestantes && sejour.placesRestantes < 0)) {
-            throw new Error("Sejour negative placesLeft");
+        const sejourNegatif = randomSejourList.find((sejour) => sejour.placesRestantes && sejour.placesRestantes < 0);
+        if (sejourNegatif) {
+            throw new Error(
+                `Sejour negative placesLeft: ${sejourNegatif.id} (placesRestantes: ${sejourNegatif.placesRestantes})`,
+            );
         }
         return { randomJeuneList, randomSejourList, randomLigneDeBusList };
     }

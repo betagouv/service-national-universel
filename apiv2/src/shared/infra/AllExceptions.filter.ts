@@ -1,12 +1,4 @@
-import {
-    ArgumentsHost,
-    BadRequestException,
-    Catch,
-    ExceptionFilter,
-    HttpException,
-    HttpStatus,
-    Logger,
-} from "@nestjs/common";
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from "@nestjs/common";
 import { HttpArgumentsHost } from "@nestjs/common/interfaces";
 import { HttpAdapterHost } from "@nestjs/core";
 import * as Sentry from "@sentry/nestjs";
@@ -90,21 +82,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     private getCurrentRoute(request: CustomRequest) {
-        const router = request.app._router as Router;
-        const currentRoute = router.stack
-            .filter((layer) => {
-                if (layer.route) {
-                    const path = layer.route?.path;
-                    const method = layer.route?.stack[0].method;
-                    const isMatchingPath = !!request.originalUrl.match(layer.regexp);
-                    // console.log(`${method.toUpperCase()} ${path}, ${isMatchingPath}`);
-                    return method === request.method && isMatchingPath;
-                }
-                return false;
-            })
-            .map((layer) => layer.route?.path)?.[0];
-        // console.log("currentRoute", currentRoute);
-        return currentRoute || request.originalUrl;
+        try {
+            const router = request.app._router as Router;
+            const currentRoute = router.stack
+                .filter((layer) => {
+                    if (layer.route) {
+                        const path = layer.route?.path;
+                        const method = layer.route?.stack[0].method;
+                        const isMatchingPath = !!request.originalUrl.match(layer.regexp);
+                        return method === request.method && isMatchingPath;
+                    }
+                    return false;
+                })
+                .map((layer) => layer.route?.path)?.[0];
+            return currentRoute || request.originalUrl;
+        } catch (error) {
+            return request.originalUrl;
+        }
     }
 
     private getCallerClassMethod = (error: Error) => {

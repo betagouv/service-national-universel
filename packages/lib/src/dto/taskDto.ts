@@ -8,13 +8,13 @@ export type TaskMetadataDto<T, U> = {
 export interface TaskDto<T = object, U = object> {
   id: string;
   name: string;
+  description?: string;
   status: TaskStatus;
   metadata?: TaskMetadataDto<T, U>;
-  erreur?: {
+  error?: {
     code?: string;
     description?: string;
   };
-  libelle?: string;
   startDate?: string;
   endDate?: string;
   createdAt: string;

@@ -8,12 +8,12 @@ export class TaskMapper {
         return {
             id: taskType._id.toString(),
             name: taskType.name,
-            libelle: taskType.libelle,
+            description: taskType.description,
             startDate: taskType.startDate,
             endDate: taskType.endDate,
             status: taskType.status,
             metadata: taskType.metadata,
-            erreur: taskType.erreur,
+            error: taskType.error,
             createdAt: taskType.createdAt,
             updatedAt: taskType.updatedAt,
         };
@@ -30,12 +30,12 @@ export class TaskMapper {
         return {
             id: taskModel.id,
             name: taskModel.name,
-            libelle: taskModel.libelle,
+            description: taskModel.description,
             startDate: taskModel.startDate?.toISOString(),
             endDate: taskModel.endDate?.toISOString(),
             status: taskModel.status,
             metadata: taskModel.metadata,
-            erreur: taskModel.erreur,
+            error: taskModel.error,
             createdAt: taskModel.createdAt.toISOString(),
             updatedAt: taskModel.updatedAt.toISOString(),
         };
@@ -45,14 +45,14 @@ export class TaskMapper {
         return {
             _id: taskModel.id,
             name: taskModel.name,
-            libelle: taskModel.libelle,
+            description: taskModel.description,
             startDate: taskModel.startDate,
             endDate: taskModel.endDate,
             status: taskModel.status,
             metadata: {
                 ...taskModel.metadata,
             },
-            erreur: taskModel.erreur,
+            error: taskModel.error,
             createdAt: taskModel.createdAt,
             updatedAt: taskModel.updatedAt,
         };
@@ -61,14 +61,14 @@ export class TaskMapper {
     static toEntityCreate(taskModel: CreateTaskModel): Omit<TaskType, "_id"> {
         return {
             name: taskModel.name,
-            libelle: taskModel.libelle,
+            description: taskModel.description,
             startDate: taskModel.startDate,
             endDate: taskModel.endDate,
             status: taskModel.status,
             metadata: {
                 ...taskModel.metadata,
             },
-            erreur: taskModel.erreur,
+            error: taskModel.error,
             createdAt: new Date(),
             updatedAt: new Date(),
         };

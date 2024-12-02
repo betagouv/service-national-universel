@@ -18,7 +18,7 @@ export class CentreMapper {
             sessionNames: centreDocument.cohorts,
             sessionIds: centreDocument.cohortIds,
             listeAttente: centreDocument.waitingList,
-            statusSejour: centreDocument.sessionStatus,
+            statutSejour: centreDocument.sessionStatus,
         };
     }
 
@@ -33,7 +33,7 @@ export class CentreMapper {
             cohorts: centreModel.sessionNames,
             cohortIds: centreModel.sessionIds,
             waitingList: centreModel.listeAttente,
-            sessionStatus: centreModel.statusSejour,
+            sessionStatus: centreModel.statutSejour,
         };
     }
 }

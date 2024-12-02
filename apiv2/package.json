@@ -28,7 +28,6 @@
         "clean": "rm -fr node_modules dist .turbo"
     },
     "dependencies": {
-        "@faker-js/faker": "^8.4.1",
         "@fast-csv/parse": "^5.0.2",
         "@getbrevo/brevo": "^2.2.0",
         "@nestjs/bullmq": "^10.2.1",
@@ -54,6 +53,7 @@
         "xlsx": "^0.18.5"
     },
     "devDependencies": {
+        "@faker-js/faker": "^8.4.1",
         "@nestjs/cli": "^10.0.0",
         "@nestjs/schematics": "^10.0.0",
         "@nestjs/testing": "^10.0.0",

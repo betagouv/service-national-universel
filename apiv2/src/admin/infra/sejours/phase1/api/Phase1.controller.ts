@@ -30,7 +30,7 @@ export class Phase1Controller {
         if (status) {
             filter.status = status;
         }
-        const simulations = await this.taskGateway.findByName(name ? [name] : PHASE1_TASK_NAMES, filter, sort);
+        const simulations = await this.taskGateway.findByNames(name ? [name] : PHASE1_TASK_NAMES, filter, sort);
         return simulations.map(TaskMapper.toDto);
     }
 }
