@@ -6,7 +6,6 @@ import {
   canManageMig,
   canViewEmailHistory,
   canViewNotes,
-  INSCRIPTION_GOAL_LEVELS,
   isCle,
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -46,13 +45,12 @@ import downloadPDF from "@/utils/download-pdf";
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import { capture } from "@/sentry";
 import { signinAs } from "@/utils/signinAs";
+
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
 
 export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.INSCRIPTION, isStructure = false, applicationId = null }) {
   const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
-  const cohortYoung = cohorts.find((cohort) => cohort._id === young.cohortId);
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState(null);
   const [viewedNotes, setVieweNotes] = useState([]);
@@ -68,15 +66,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
-            if ([ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
-              if (cohortYoung?.objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL) {
-                options = [YOUNG_STATUS.WITHDRAWN];
-              } else {
-                options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
-              }
-            } else {
-              options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
-            }
+            options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
             break;
           case YOUNG_STATUS.WITHDRAWN:
             if (user.role === ROLES.ADMIN) {
