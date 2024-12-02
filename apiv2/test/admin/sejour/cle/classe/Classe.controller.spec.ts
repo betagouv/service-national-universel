@@ -46,7 +46,7 @@ describe("ClasseController", () => {
         expect(classeController).toBeDefined();
     });
 
-    it("/PUT classe/:id/verify should return 200", async () => {
+    it("/POST classe/:id/verify should return 200", async () => {
         const referent = await createReferent({ email: "mon_ref@mail.com" });
         const etablissement = await createEtablissement({ referentEtablissementIds: [referent.id] });
 
@@ -59,13 +59,13 @@ describe("ClasseController", () => {
 
         jest.spyOn(notificationGateway, "sendEmail").mockImplementation(() => Promise.resolve());
 
-        const response = await request(app.getHttpServer()).put(`/classe/${createdClasse.id}/verify`);
+        const response = await request(app.getHttpServer()).post(`/classe/${createdClasse.id}/verify`);
         const updatedClasse = await classeGateway.findById(createdClasse.id);
         expect(updatedClasse.statut).toBe(STATUS_CLASSE.VERIFIED);
         const updatedReferent = await referentGateway.findById(referent.id);
         expect(updatedReferent.invitationToken).toHaveLength(36);
         expect(updatedReferent.invitationExpires).toBeTruthy();
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(201);
         expect(response.body).toMatchObject({ statut: STATUS_CLASSE.VERIFIED });
         expect(notificationGateway.sendEmail).toHaveBeenNthCalledWith(
             1,
@@ -91,7 +91,7 @@ describe("ClasseController", () => {
         );
     });
 
-    it("/PUT classe/:id/verify should throw an error for wrong statut", async () => {
+    it("/POST classe/:id/verify should throw an error for wrong statut", async () => {
         const referent = await createReferent();
         const etablissement = await createEtablissement({ referentEtablissementIds: [referent.id] });
 
@@ -103,22 +103,22 @@ describe("ClasseController", () => {
 
         jest.spyOn(notificationGateway, "sendEmail").mockImplementation(() => Promise.resolve());
 
-        const response = await request(app.getHttpServer()).put(`/classe/${createdClasse.id}/verify`);
+        const response = await request(app.getHttpServer()).post(`/classe/${createdClasse.id}/verify`);
         const updatedClasse = await classeGateway.findById(createdClasse.id);
         expect(response.status).toBe(422);
         expect(updatedClasse.statut).toBe(STATUS_CLASSE.ASSIGNED);
     });
-    it("/PUT classe/:id/verify should throw error for unknown classe", async () => {
+    it("/POST classe/:id/verify should throw error for unknown classe", async () => {
         const classe = {
             id: "657b21cc848b66081224d90a",
             nom: "Classe Test",
         };
-        const response = await request(app.getHttpServer()).put(`/classe/${classe.id}/verify`);
+        const response = await request(app.getHttpServer()).post(`/classe/${classe.id}/verify`);
 
         expect(response.status).toBe(422);
     });
 
-    it("/PUT classe/:id/verify should throw error for unauthorized user", async () => {
+    it("/POST classe/:id/verify should throw error for unauthorized user", async () => {
         const referent = await createReferent();
         const etablissement = await createEtablissement({ referentEtablissementIds: [referent.id] });
 
@@ -135,7 +135,7 @@ describe("ClasseController", () => {
             next();
         });
 
-        const response = await request(app.getHttpServer()).put(`/classe/${createdClasse.id}/verify`);
+        const response = await request(app.getHttpServer()).post(`/classe/${createdClasse.id}/verify`);
 
         expect(response.status).toBe(403);
     });

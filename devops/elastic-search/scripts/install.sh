@@ -19,7 +19,7 @@ ls config/ingest_pipelines/*.json \
 do
     name=$(basename $filename ".json")
     echo "Upserting pipeline $name"
-    curl -w "\n" -X PUT "$ES_ENDPOINT/_ingest/pipeline/$name" -H 'Content-Type: application/json' -d @$filename
+    curl -sSw "\n" -X PUT "$ES_ENDPOINT/_ingest/pipeline/$name" -H 'Content-Type: application/json' -d @$filename
 done
 
 
@@ -35,5 +35,5 @@ ls config/index_templates/*.json \
 do
     name=$(basename $filename ".json")
     echo "Upserting index_template $name"
-    curl -w "\n" -X PUT "$ES_ENDPOINT/_index_template/$name" -H 'Content-Type: application/json' -d @$filename
+    curl -sSw "\n" -X PUT "$ES_ENDPOINT/_index_template/$name" -H 'Content-Type: application/json' -d @$filename
 done

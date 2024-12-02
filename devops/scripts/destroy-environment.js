@@ -12,22 +12,22 @@ class DestroyEnvironment {
     if (this.environmentName === "production") {
       console.log(`Prevent deletion of environment ${this.environmentName}`);
       return;
-    } else {
-      console.log(`Deleting environment ${this.environmentName}`);
     }
 
     const config = new EnvConfig(this.environmentName);
 
     const project = await this.scaleway.findProject(config.projectName());
 
-    const namespace = await this.scaleway.findOrThrow(
-      RESOURCE.ContainerNamespace,
-      {
-        project_id: project.id,
-        name: config.containerNamespace(),
-      }
-    );
-    await this.scaleway.delete(RESOURCE.ContainerNamespace, namespace.id);
+    const namespace = await this.scaleway.find(RESOURCE.ContainerNamespace, {
+      project_id: project.id,
+      name: config.containerNamespace(),
+    });
+    if (namespace) {
+      console.log(`Deleting environment ${this.environmentName}`);
+      await this.scaleway.delete(RESOURCE.ContainerNamespace, namespace.id);
+    } else {
+      console.log(`Environment ${this.environmentName} not found`);
+    }
   }
 }
 
