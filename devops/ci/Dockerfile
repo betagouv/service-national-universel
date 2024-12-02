@@ -16,8 +16,7 @@ COPY admin/package.json admin/
 # public directory required by copy:dsfr
 RUN mkdir admin/public app/public
 
-# RUN --mount=type=cache,target=/root/.npm npm ci
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY tsconfig.front.json .
 COPY turbo.json .
@@ -29,11 +28,7 @@ COPY admin/ admin/
 
 ARG ENVIRONMENT
 ARG RELEASE
-ARG SENTRY_AUTH_TOKEN
-ARG VITE_API_URL
-ARG VITE_APIV2_URL
-ARG VITE_APP_URL
-ARG VITE_ADMIN_URL
+ARG DOMAIN
 ARG VITE_SUPPORT_URL
 ARG VITE_MAINTENANCE
 ARG VITE_SENTRY_SESSION_SAMPLE_RATE
@@ -47,6 +42,14 @@ ENV VITE_ENVIRONMENT=${ENVIRONMENT}
 ENV VITE_RELEASE=${RELEASE}
 ENV ENVIRONMENT=${ENVIRONMENT}
 ENV RELEASE=${RELEASE}
+ENV API_URL=https://api.${DOMAIN}
+ENV APIV2_URL=https://api.${DOMAIN}/v2
+ENV APP_URL=https://moncompte.${DOMAIN}
+ENV ADMIN_URL=https://admin.${DOMAIN}
+ENV VITE_API_URL=${API_URL}
+ENV VITE_APIV2_URL=${APIV2_URL}
+ENV VITE_APP_URL=${APP_URL}
+ENV VITE_ADMIN_URL=${ADMIN_URL}
 
 WORKDIR /app/packages/ds
 RUN npm run build
@@ -61,10 +64,14 @@ WORKDIR /app/apiv2
 RUN npm run build
 
 WORKDIR /app/admin
-RUN npm run build
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) \
+    npm run build
 
 WORKDIR /app/app
-RUN npm run build
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) \
+    npm run build
 
 WORKDIR /app
 
