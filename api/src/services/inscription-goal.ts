@@ -48,9 +48,9 @@ export const getCompletionObjectifDepartement = async (department: string, cohor
 };
 
 // Vérification des objectifs pour un département et la région associée
-export const getCompletionObjectifs = async (department: string, cohort: string, objectifLevel: string) => {
-  const completionObjectifDepartement = await getCompletionObjectifDepartement(department, cohort);
-  const completionObjectifRegion = await getCompletionObjectifRegion(department2region[department], cohort);
+export const getCompletionObjectifs = async (department: string, cohortName: string, objectifLevel: string) => {
+  const completionObjectifDepartement = await getCompletionObjectifDepartement(department, cohortName);
+  const completionObjectifRegion = await getCompletionObjectifRegion(department2region[department], cohortName);
   return {
     department: completionObjectifDepartement,
     region: completionObjectifRegion,
