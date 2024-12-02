@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
 
-router.use("/schema-de-repartition", require("./schemaDeRepartition").default);
+router.use("/import", require("./SDRImportController").default);
 
 export default router;

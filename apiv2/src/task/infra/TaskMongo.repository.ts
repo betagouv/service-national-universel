@@ -84,7 +84,7 @@ export class TaskRepository implements TaskGateway {
     async toFailed(id: string, code?: string, description?: string): Promise<TaskModel> {
         const updatedTask = await this.taskMongooseEntity.findByIdAndUpdate(
             id,
-            { status: TaskStatus.FAILED, endDate: new Date(), erreur: { code, description } },
+            { status: TaskStatus.FAILED, endDate: new Date(), error: { code, description } },
             {
                 new: true,
             },

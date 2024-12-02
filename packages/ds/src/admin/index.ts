@@ -4,6 +4,7 @@
 import InputText from "./form/InputText";
 import InputNumber from "./form/InputNumber";
 import InputPhone from "./form/InputPhone";
+export { default as InputFile } from "./form/InputFile";
 import Label from "./form/Label";
 import Select from "./form/Select/Select";
 export { default as CollapsableSelectSwitcher } from "./form/CollapsableSelectSwitcher";

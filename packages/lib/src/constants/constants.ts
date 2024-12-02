@@ -688,6 +688,7 @@ const TEMPLATE_DESCRIPTIONS = {
 
 const MIME_TYPES = {
   EXCEL: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  CSV: "text/csv",
 } as const;
 
 const STRUCTURE_LEGAL_STATUS = {
@@ -778,8 +779,6 @@ const TYPE_CLASSE = {
   GROUP: "GROUP",
   FULL: "FULL",
 } as const;
-
-
 
 const LIMIT_DATE_ESTIMATED_SEATS = new Date("2024-08-28");
 const LIMIT_DATE_TOTAL_SEATS = new Date("2024-09-30");

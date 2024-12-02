@@ -59,8 +59,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const httpStatus =
             exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
         const message = exception instanceof HttpException ? exception.message : "Internal Server Error";
+        const description =
+            exception instanceof FunctionalException || exception instanceof TechnicalException
+                ? // @ts-expect-error TODO: typer exception la récupération de la description pour les erreurs
+                  exception.options.description
+                : undefined;
         const responseBody: HttpError = {
             message: message,
+            description,
             statusCode: httpStatus,
             correlationId: request.correlationId,
         };

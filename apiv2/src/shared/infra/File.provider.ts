@@ -15,8 +15,7 @@ import { TechnicalException, TechnicalExceptionType } from "./TechnicalException
 export class FileProvider implements FileGateway {
     constructor(private readonly config: ConfigService) {}
 
-    async readCSV<T>(filePath: string, options: ParserOptionsArgs = { headers: true }): Promise<T[]> {
-        const buffer = await fs.readFile(filePath);
+    async readCSV<T>(buffer: Buffer, options: ParserOptionsArgs = { headers: true }): Promise<T[]> {
         return new Promise((resolve, reject) => {
             const content: T[] = [];
 
@@ -34,6 +33,14 @@ export class FileProvider implements FileGateway {
             stream.write(buffer);
             stream.end();
         });
+    }
+
+    async readXLS<T>(buffer: Buffer, { sheetIndex }: { sheetIndex: number } = { sheetIndex: 0 }): Promise<T[]> {
+        const workbook = XLSX.read(buffer, { type: "buffer" });
+        const sheetName = workbook.SheetNames[sheetIndex];
+        const worksheet = workbook.Sheets[sheetName];
+
+        return await XLSX.utils.sheet_to_json<T>(worksheet);
     }
 
     async generateExcel(excelSheets: { [sheet: string]: any[] }): Promise<Buffer> {
