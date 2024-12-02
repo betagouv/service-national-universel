@@ -551,7 +551,12 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     let { __v, ...newYoung } = value;
 
     // Vérification des objectifs à la validation d'un jeune
-    if (young.source !== YOUNG_SOURCE.CLE && value.status === YOUNG_STATUS.VALIDATED && young.status !== YOUNG_STATUS.VALIDATED && !canUpdateInscriptionGoals(req.user)) {
+    if (
+      young.source !== YOUNG_SOURCE.CLE &&
+      value.status === YOUNG_STATUS.VALIDATED &&
+      young.status !== YOUNG_STATUS.VALIDATED &&
+      (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
+    ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       const departement = getDepartmentForInscriptionGoal(young);
