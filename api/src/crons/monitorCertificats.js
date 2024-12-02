@@ -39,14 +39,14 @@ async function processDomain(domain) {
   try {
     const { expiryDate, diffDays } = await checkCert(domain);
 
-    await slack.alert({
+    await slack.success({
       title: `Certificat Monitor`,
       text: `Le certificat pour ${domain} (CleverCloud) expire dans ${diffDays} jours (${expiryDate.toUTCString()}).`,
     });
 
     if (diffDays <= alertDays) {
       console.log(`Alerte : le certificat pour ${domain} (CleverCloud) expire dans ${diffDays} jours!`);
-      await slack.alert({
+      await slack.error({
         title: `Alerte Certificat SSL pour ${domain}`,
         text: `Le certificat pour ${domain} expire dans ${diffDays} jours (${expiryDate.toUTCString()}).`,
       });
