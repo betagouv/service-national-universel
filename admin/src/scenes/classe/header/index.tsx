@@ -59,6 +59,10 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
             key: "reglement",
             render: <ButtonDownloadEmptyFile key="reglement" title="Règlement intérieur (.pdf)" type={ClasseFileKeys.REGLEMENT} setIsLoading={setIsLoading} />,
           },
+          {
+            key: "sanitaire",
+            render: <ButtonDownloadEmptyFile key="sanitaire" title="Fiche sanitaire (.pdf)" type={ClasseFileKeys.SANITAIRE} setIsLoading={setIsLoading} />,
+          },
         ],
       },
     ];
