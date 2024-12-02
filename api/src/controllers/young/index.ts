@@ -553,7 +553,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const { cohort, cohortId, cohortChangeReason, cohortDetailedChangeReason } = value;
+    const { cohortName: cohort, cohortId, cohortChangeReason, cohortDetailedChangeReason } = value;
 
     const previousYoung = { ...young.toObject() };
     const cohortObj = await CohortModel.findOne({
