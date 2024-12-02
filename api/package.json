@@ -22,7 +22,7 @@
     "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "check-types": "tsc -p tsconfig.check.json --emitDeclarationOnly",
     "doc": "node ./src/utils/generate-models-documentation.js",
-    "clean": "rm -fr node_modules .turbo",
+    "clean": "rm -fr node_modules build .turbo",
     "build": "tsc -b ./tsconfig.build.json",
     "migrate-status": "tsx node_modules/.bin/migrate-mongo status",
     "migrate-create": "tsx node_modules/.bin/migrate-mongo create",

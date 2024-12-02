@@ -13,7 +13,7 @@ async function bootstrap() {
         origin: [config.getOrThrow("urls.admin"), config.getOrThrow("urls.app")],
     });
     const port = config.getOrThrow("httpServer.port");
-    if (config.getOrThrow("environment") === "production") {
+    if (config.getOrThrow("urls.apiv2").endsWith("/v2")) {
         app.setGlobalPrefix("v2");
     }
     await app.listen(port);
