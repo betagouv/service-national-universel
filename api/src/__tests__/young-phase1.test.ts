@@ -77,7 +77,7 @@ describe("Young Phase1 Controller", () => {
       await createYoungHelper(
         getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, department: young.department, region: young.region, cohort: young.cohort, cohortId: young.cohortId }),
       );
-      const { department, region, isAtteint } = await getCompletionObjectifs(young.department!, young.cohort!);
+      const { department, region, isAtteint } = await getCompletionObjectifs(young.department!, young.cohort!, "departemental");
       expect(department.objectif).toBe(1);
       expect(department.isAtteint).toBe(true);
       expect(region.objectif).toBe(1);

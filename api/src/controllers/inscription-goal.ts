@@ -104,7 +104,7 @@ router.get(
       if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const { department, cohort } = params;
-      const completionObjectif = await getCompletionObjectifs(department, cohort, "department");
+      const completionObjectif = await getCompletionObjectifs(department, cohort, "departemental");
 
       return res.status(200).json({ ok: true, data: completionObjectif.tauxRemplissage });
     } catch (error) {
@@ -127,7 +127,7 @@ router.get("/:cohort/department/:department/reached", passport.authenticate("you
     }
 
     const { department, cohort } = value;
-    const completionObjectif = await getCompletionObjectifs(department, cohort, "department");
+    const completionObjectif = await getCompletionObjectifs(department, cohort, "departemental");
 
     return res.status(200).send({ ok: true, data: completionObjectif.isAtteint });
   } catch (error) {
