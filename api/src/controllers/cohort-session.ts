@@ -11,7 +11,7 @@ import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddl
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 import { CohortsRoutesSchema } from "../cohort/cohortValidator";
-import { getAllSessions, getFilteredSessionsForCLE, getFilteredSessionsForInscription } from "../utils/cohort";
+import { getAllSessions, getFilteredSessionsForCLE, getFilteredSessionsForInscription, getFilteredSessionsForReinscription } from "../utils/cohort";
 import { isReInscriptionOpen, isInscriptionOpen } from "../cohort/cohortService";
 
 const router = express.Router();

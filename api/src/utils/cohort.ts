@@ -18,46 +18,39 @@ type YoungInfo = Pick<
   isReInscription?: boolean;
 };
 
+type CohortArgs = {
+  birthdate: Date;
+  schoolLevel: string;
+  department: string;
+  cohortToExclude?: string;
+  cohortGroupToInclude?: string;
+  cohortGroupToExclude?: string;
+};
 type CohortQuery = {
   status: string;
   "eligibility.zones": string;
   "eligibility.schoolLevels": string;
   "eligibility.bornAfter": { $lte: Date };
   "eligibility.bornBefore": { $gte: Date };
+  _id?: { $ne: string };
+  cohortGroupId?: string | { $ne: string };
 };
-
-function buildCohortQueryForInscription(birthdate: Date, schoolLevel: string, department: string): CohortQuery {
-  return {
+function buildCohortQuery({ birthdate, schoolLevel, department, cohortToExclude, cohortGroupToInclude, cohortGroupToExclude }: CohortArgs): CohortQuery {
+  let query: CohortQuery = {
     status: COHORT_STATUS.PUBLISHED,
     "eligibility.zones": department,
     "eligibility.schoolLevels": schoolLevel,
     "eligibility.bornAfter": { $lte: birthdate },
     "eligibility.bornBefore": { $gte: new Date(birthdate.getTime() - 11 * 60 * 60 * 1000) },
   };
-}
-function buildCohortQueryForChangementSejour(
-  birthdate: Date,
-  schoolLevel: string,
-  department: string,
-  cohortId: string,
-  cohortGroupId: string,
-): CohortQuery & { _id: { $ne: string }; cohortGroupId: string } {
-  return {
-    ...buildCohortQueryForInscription(birthdate, schoolLevel, department),
-    // En cas de changement de séjour, on propose uniquement les autres cohortes du groupe de cohorte actuel.
-    _id: { $ne: cohortId },
-    cohortGroupId,
-  };
-}
-function buildCohortQueryForReinscription(birthdate: Date, schoolLevel: string, department: string, cohortGroupId: string): CohortQuery & { cohortGroupId: { $ne: string } } {
-  return {
-    ...buildCohortQueryForInscription(birthdate, schoolLevel, department),
-    // En cas de réinscription, on propose uniquement les cohortes qui ne sont pas dans le groupe de cohorte actuel.
-    cohortGroupId: { $ne: cohortGroupId },
-  };
+  if (cohortToExclude) query._id = { $ne: cohortToExclude };
+  if (cohortGroupToInclude) query.cohortGroupId = cohortGroupToInclude;
+  if (cohortGroupToExclude) query.cohortGroupId = { $ne: cohortGroupToExclude };
+  return query;
 }
 
 function isInscriptionOpen(cohort: CohortType, timeZoneOffset: unknown, status?: string) {
+  // Les volontaires dont le dossier est encore en cours d'instruction peuvent encore changer de choix initial de séjour.
   if (status && (status === YOUNG_STATUS.WAITING_CORRECTION || status === YOUNG_STATUS.WAITING_VALIDATION)) {
     return cohort.getIsInstructionOpen(Number(timeZoneOffset));
   }
@@ -67,13 +60,21 @@ function isInscriptionOpen(cohort: CohortType, timeZoneOffset: unknown, status?:
 export async function getFilteredSessionsForInscription(young: YoungInfo, timeZoneOffset?: string | number | null) {
   if (!young.birthdateAt) throw new Error("Missing birthdate");
   if (!young.grade) throw new Error("Missing grade");
+  if (young.cohortId) return getFilteredSessionsForChangementSejour(young as YoungType, timeZoneOffset);
 
   const department = getDepartmentForEligibility(young);
   if (!department) throw new Error("Unable to determine department");
 
-  const query = buildCohortQueryForInscription(new Date(young.birthdateAt), young.grade, department);
+  const query = buildCohortQuery({
+    birthdate: new Date(young.birthdateAt),
+    schoolLevel: young.grade,
+    department,
+  });
+
   const cohorts = await CohortModel.find(query);
-  const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => isInscriptionOpen(session, timeZoneOffset, young.status));
+  const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
+    return isInscriptionOpen(session, timeZoneOffset, young.status);
+  });
 
   for (let session of openSessions) session.isEligible = true;
   const region = getRegionForEligibility(young);
@@ -92,9 +93,18 @@ export async function getFilteredSessionsForChangementSejour(young: YoungType, t
   const department = getDepartmentForEligibility(young);
   if (!department) throw new Error("Unable to determine department");
 
-  const query = buildCohortQueryForChangementSejour(new Date(young.birthdateAt), young.grade, department, young.cohortId, currentCohort.cohortGroupId);
+  const query = buildCohortQuery({
+    birthdate: new Date(young.birthdateAt),
+    schoolLevel: young.grade,
+    department,
+    cohortToExclude: young.cohortId,
+    cohortGroupToInclude: currentCohort.cohortGroupId,
+  });
+
   const cohorts = await CohortModel.find(query);
-  const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => isInscriptionOpen(session, timeZoneOffset, young.status));
+  const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
+    return isInscriptionOpen(session, timeZoneOffset, young.status);
+  });
 
   for (let session of openSessions) session.isEligible = true;
   const region = getRegionForEligibility(young);
@@ -113,12 +123,17 @@ export async function getFilteredSessionsForReinscription(young: YoungDto, timeZ
   const department = getDepartmentForEligibility(young);
   if (!department) throw new Error("Unable to determine department");
 
-  const query = buildCohortQueryForReinscription(new Date(young.birthdateAt), young.grade, department, currentCohort.cohortGroupId);
-  console.log("🚀 ~ getFilteredSessionsForReinscription ~ query:", query);
+  const query = buildCohortQuery({
+    birthdate: new Date(young.birthdateAt),
+    schoolLevel: young.grade,
+    department,
+    cohortGroupToExclude: currentCohort.cohortGroupId,
+  });
+
   const cohorts = await CohortModel.find(query);
-  console.log("🚀 ~ getFilteredSessionsForReinscription ~ cohorts:", cohorts);
-  const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => session.getIsReInscriptionOpen(Number(timeZoneOffset)));
-  console.log("🚀 ~ getFilteredSessionsForReinscription ~ openSessions:", openSessions);
+  const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
+    return session.getIsReInscriptionOpen(Number(timeZoneOffset));
+  });
 
   for (let session of openSessions) session.isEligible = true;
   const region = getRegionForEligibility(young);
