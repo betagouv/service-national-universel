@@ -89,7 +89,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     // update youngs infos
     if (young.status === "WAITING_LIST") {
       const departement = getDepartmentForInscriptionGoal(young);
-      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort.name, cohort.objectifLevel);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
           ok: false,
