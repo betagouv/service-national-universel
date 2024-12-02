@@ -129,7 +129,7 @@ export const ApplicationSchema = {
   contractStatus: {
     type: String,
     default: "DRAFT",
-    enum: ["DRAFT", "SENT", "VALIDATED"],
+    enum: ["DRAFT", "SENT", "VALIDATED", "ABANDON"],
     documentation: {
       description: "Statut du contrat d'engagement",
     },
