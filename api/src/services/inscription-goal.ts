@@ -1,4 +1,4 @@
-import { department2region, FUNCTIONAL_ERRORS } from "snu-lib";
+import { department2region, FUNCTIONAL_ERRORS, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 import { InscriptionGoalModel, YoungModel } from "../models";
 
 interface CompletionObjectif {
@@ -54,9 +54,12 @@ export const getCompletionObjectifs = async (department: string, cohort: string,
   return {
     department: completionObjectifDepartement,
     region: completionObjectifRegion,
-    isAtteint: objectifLevel === "regional" ? completionObjectifRegion.isAtteint : completionObjectifRegion.isAtteint || completionObjectifDepartement.isAtteint,
+    isAtteint:
+      objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL ? completionObjectifRegion.isAtteint : completionObjectifRegion.isAtteint || completionObjectifDepartement.isAtteint,
     tauxRemplissage:
-      objectifLevel === "regional" ? completionObjectifRegion.tauxRemplissage : Math.max(completionObjectifRegion.tauxRemplissage, completionObjectifDepartement.tauxRemplissage),
+      objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL
+        ? completionObjectifRegion.tauxRemplissage
+        : Math.max(completionObjectifRegion.tauxRemplissage, completionObjectifDepartement.tauxRemplissage),
     tauxLimiteRemplissage: FILLING_RATE_LIMIT,
   };
 };

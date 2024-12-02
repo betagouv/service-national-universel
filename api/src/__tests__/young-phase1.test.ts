@@ -2,7 +2,7 @@ import request from "supertest";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
-import { department2region, FUNCTIONAL_ERRORS, YOUNG_STATUS } from "snu-lib";
+import { department2region, FUNCTIONAL_ERRORS, YOUNG_STATUS, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 
 import { InscriptionGoalModel, LigneBusModel, YoungModel } from "../models";
 
@@ -77,7 +77,7 @@ describe("Young Phase1 Controller", () => {
       await createYoungHelper(
         getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, department: young.department, region: young.region, cohort: young.cohort, cohortId: young.cohortId }),
       );
-      const { department, region, isAtteint } = await getCompletionObjectifs(young.department!, young.cohort!, "departemental");
+      const { department, region, isAtteint } = await getCompletionObjectifs(young.department!, young.cohort!, INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL);
       expect(department.objectif).toBe(1);
       expect(department.isAtteint).toBe(true);
       expect(region.objectif).toBe(1);

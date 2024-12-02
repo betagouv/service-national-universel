@@ -4,7 +4,7 @@ import getAppHelper from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
 import { createInscriptionGoal } from "./helpers/inscriptionGoal";
-import { department2region, FUNCTIONAL_ERRORS, region2department, YOUNG_STATUS } from "snu-lib";
+import { department2region, FUNCTIONAL_ERRORS, INSCRIPTION_GOAL_LEVELS, region2department, YOUNG_STATUS } from "snu-lib";
 import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
 import { getCompletionObjectifs } from "../services/inscription-goal";
@@ -83,7 +83,7 @@ describe("Inscription Goal", () => {
           cohortId: inscriptionGoal.cohortId,
         }),
       );
-      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, inscriptionGoal.cohort, "departemental");
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, inscriptionGoal.cohort, INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL);
       expect(completionObjectif.department.objectif).toBe(1);
       expect(completionObjectif.region.objectif).toBe(2);
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);

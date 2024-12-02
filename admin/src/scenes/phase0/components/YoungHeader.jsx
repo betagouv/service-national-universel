@@ -6,6 +6,7 @@ import {
   canManageMig,
   canViewEmailHistory,
   canViewNotes,
+  INSCRIPTION_GOAL_LEVELS,
   isCle,
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -68,7 +69,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
             if ([ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
-              if (cohortYoung?.objectifLevel === "regional") {
+              if (cohortYoung?.objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL) {
                 options = [YOUNG_STATUS.WITHDRAWN];
               } else {
                 options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];

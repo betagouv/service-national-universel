@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { CohortsRoutes, UpdateCohortDto } from "snu-lib";
+import { CohortsRoutes, UpdateCohortDto, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 import { idSchema } from "../utils/validator";
 
 export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<UpdateCohortDto> => {
@@ -8,7 +8,7 @@ export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<Up
     dateStart: Joi.date().required(),
     dateEnd: Joi.date().required(),
     status: Joi.string().required(),
-    objectifLevel: Joi.string().valid("departemental", "regional").allow(null),
+    objectifLevel: Joi.string().valid(INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL, INSCRIPTION_GOAL_LEVELS.REGIONAL).allow(null),
     // Inscriptions (phase 0)
     inscriptionStartDate: Joi.date().required(),
     inscriptionEndDate: Joi.date().required(),

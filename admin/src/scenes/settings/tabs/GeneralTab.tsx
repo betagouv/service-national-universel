@@ -5,7 +5,7 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { MdInfoOutline } from "react-icons/md";
 import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
-import { COHORT_STATUS, COHORT_TYPE, CohortDto } from "snu-lib";
+import { COHORT_STATUS, COHORT_TYPE, CohortDto, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 
 import api from "@/services/api";
 
@@ -408,15 +408,15 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                       className="flex items-center gap-4"
                       onClick={() => {
                         if (!isLoading && !readOnly) {
-                          onCohortChange({ ...cohort, objectifLevel: "departemental" });
+                          onCohortChange({ ...cohort, objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL });
                         }
                       }}>
                       <input
                         type="radio"
                         id="departemental"
                         name="objectifLevel"
-                        value="departemental"
-                        checked={cohort?.objectifLevel === "departemental"}
+                        value={INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL}
+                        checked={cohort?.objectifLevel === INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL}
                         disabled={isLoading || readOnly}
                         className="h-4 w-4 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
                       />
@@ -428,15 +428,15 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                       className="flex gap-4 items-center"
                       onClick={() => {
                         if (!isLoading && !readOnly) {
-                          onCohortChange({ ...cohort, objectifLevel: "regional" });
+                          onCohortChange({ ...cohort, objectifLevel: INSCRIPTION_GOAL_LEVELS.REGIONAL });
                         }
                       }}>
                       <input
                         type="radio"
                         id="regional"
                         name="objectifLevel"
-                        value="regional"
-                        checked={cohort?.objectifLevel === "regional"}
+                        value={INSCRIPTION_GOAL_LEVELS.REGIONAL}
+                        checked={cohort?.objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL}
                         disabled={isLoading || readOnly}
                         className="h-4 w-4 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
                       />
