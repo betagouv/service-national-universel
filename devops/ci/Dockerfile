@@ -4,7 +4,8 @@ RUN apk add nginx supervisor
 
 WORKDIR /app
 
-COPY package*.json .
+COPY package.json .
+COPY package-lock.json .
 COPY packages/lib/package.json packages/lib/
 COPY packages/ds/package.json packages/ds/
 COPY api/package.json api/
