@@ -16,7 +16,8 @@ COPY admin/package.json admin/
 # public directory required by copy:dsfr
 RUN mkdir admin/public app/public
 
-RUN --mount=type=cache,target=/root/.npm npm ci
+# RUN --mount=type=cache,target=/root/.npm npm ci
+RUN npm ci
 
 COPY tsconfig.front.json .
 COPY turbo.json .
