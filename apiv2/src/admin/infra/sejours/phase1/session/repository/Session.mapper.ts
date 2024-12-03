@@ -269,7 +269,7 @@ export class SessionMapper {
             status: sejourModel.statut as any,
             type: sejourModel.type as any,
             cohortGroupId: sejourModel.cohortGroupId,
-            objectifLevel: sejourModel.objectifLevel || INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL,
+            objectifLevel: sejourModel.objectifLevel,
             dsnjExportDates: {
                 cohesionCenters: sejourModel.dsnjExportDates?.cohesionCenters,
                 youngsBeforeSession: sejourModel.dsnjExportDates?.youngsBeforeSession,
