@@ -26,6 +26,7 @@ import DocumentPhase1 from "../components/phase1/DocumentPhase1";
 import Phase1ConfirmationFormBlock from "../components/phase1/Phase1ConfirmationFormBlock";
 import Phase1Header from "../components/phase1/Phase1Header";
 import Phase1PresenceFormBlock from "../components/phase1/Phase1PresenceFormBlock";
+import General from "../components/phase1/General";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -89,144 +90,152 @@ export default function Phase1(props) {
             }.`}
           />
         ) : null}
-        <div className="mt-[30px] rounded bg-white shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
-          <div className="mx-8 py-4">
-            <Phase1Header user={user} young={young} setYoung={setYoung} editing={editing} setEditing={setEditing} loading={loading} setLoading={setLoading} setValues={setValues} />
-            <div className="grid grid-cols-2">
-              <Phase1ConfirmationFormBlock
-                className="col-start-1 border-r-[1px] border-gray-200 pr-11"
-                young={young}
-                setYoung={setYoung}
-                editing={editing}
-                values={values}
-                setValues={setValues}
-                setLoading={setLoading}
-              />
-              <Phase1PresenceFormBlock
-                className="col-start-2 pl-11"
-                young={young}
-                setYoung={setYoung}
-                editing={editing}
-                values={values}
-                setValues={setValues}
-                setLoading={setLoading}
-                isYoungCheckinOpen={isCheckIsOpen}
-              />
-            </div>
+        <Phase1Header user={user} young={young} setYoung={setYoung} setValues={setValues} />
+        <General
+          young={young}
+          setYoung={setYoung}
+          editing={editing}
+          setEditing={setEditing}
+          values={values}
+          setValues={setValues}
+          loading={loading}
+          setLoading={setLoading}
+          isCheckIsOpen={isCheckIsOpen}
+          user={user}
+        />
+        <div className="grid grid-cols-2">
+          <Phase1ConfirmationFormBlock
+            className="col-start-1 border-r-[1px] border-gray-200 pr-11"
+            young={young}
+            setYoung={setYoung}
+            editing={editing}
+            values={values}
+            setValues={setValues}
+            setLoading={setLoading}
+          />
+          <Phase1PresenceFormBlock
+            className="col-start-2 pl-11"
+            young={young}
+            setYoung={setYoung}
+            editing={editing}
+            values={values}
+            setValues={setValues}
+            setLoading={setLoading}
+            isYoungCheckinOpen={isCheckIsOpen}
+          />
+        </div>
 
-            {young.departSejourAt ? (
-              <div className="mt-4 flex flex-row items-center rounded bg-blue-100 px-3 py-2 text-blue-600">
-                <div className="w-1/2 font-bold">{young.departSejourMotif}</div>
-                {young.departSejourMotifComment ? (
-                  <div className="flex w-1/2 flex-row items-center justify-start gap-2">
-                    <ImQuotesLeft />
-                    <div>{young.departSejourMotifComment}</div>
-                  </div>
-                ) : null}
+        {young.departSejourAt ? (
+          <div className="mt-4 flex flex-row items-center rounded bg-blue-100 px-3 py-2 text-blue-600">
+            <div className="w-1/2 font-bold">{young.departSejourMotif}</div>
+            {young.departSejourMotifComment ? (
+              <div className="flex w-1/2 flex-row items-center justify-start gap-2">
+                <ImQuotesLeft />
+                <div>{young.departSejourMotifComment}</div>
               </div>
             ) : null}
+          </div>
+        ) : null}
 
-            {cohesionCenter ? (
-              <div className="mt-4 flex flex-row items-center justify-center gap-10">
-                <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
-                  <div className="mb-2 text-xs font-medium text-gray-900">Centre de cohésion</div>
-                  <div className="mb-4 flex w-full flex-col gap-4">
-                    <Field title="Code centre" value={cohesionCenter.code2022} externalLink={`${adminURL}/centre/${cohesionCenter?._id}?cohorte=${young.cohort}`} />
-                    <Field title="Nom" value={cohesionCenter.name} />
-                    <Field title="Code postal" value={cohesionCenter.zip} />
-                    <Field title="Ville" value={cohesionCenter.city} />
+        {cohesionCenter ? (
+          <div className="mt-4 flex flex-row items-center justify-center gap-10">
+            <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
+              <div className="mb-2 text-xs font-medium text-gray-900">Centre de cohésion</div>
+              <div className="mb-4 flex w-full flex-col gap-4">
+                <Field title="Code centre" value={cohesionCenter.code2022} externalLink={`${adminURL}/centre/${cohesionCenter?._id}?cohorte=${young.cohort}`} />
+                <Field title="Nom" value={cohesionCenter.name} />
+                <Field title="Code postal" value={cohesionCenter.zip} />
+                <Field title="Ville" value={cohesionCenter.city} />
+              </div>
+              {cohort.type !== COHORT_TYPE.CLE && isOpenForAffectation && editing && (
+                <button
+                  onClick={() => setModalAffectation({ isOpen: true })}
+                  className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
+                  <Refresh />
+                  <div>Changer l&apos;affectation</div>
+                </button>
+              )}
+            </div>
+            <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
+              <div className="mb-2 text-xs font-medium text-gray-900">Point de rassemblement</div>
+              <div className="mb-4 flex w-full flex-col gap-4 text-sm text-gray-800 ">
+                {meetingPoint ? (
+                  <div className="flex flex-col gap-4">
+                    <Field
+                      title="Adresse"
+                      value={meetingPoint?.pointDeRassemblement.address}
+                      externalLink={`${adminURL}/point-de-rassemblement/${meetingPoint?.pointDeRassemblement._id}`}
+                    />
+                    <Field
+                      title="Heure&nbsp;de&nbsp;départ"
+                      value={dayjs(getZonedDate(meetingPoint?.bus.departuredDate)).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
+                    />
+                    <Field
+                      title="Heure&nbsp;de&nbsp;retour"
+                      value={dayjs(getZonedDate(meetingPoint?.bus.returnDate)).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
+                    />
+                    <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} externalLink={`${adminURL}/ligne-de-bus/${meetingPoint?.bus._id}`} />
                   </div>
-                  {cohort.type !== COHORT_TYPE.CLE && isOpenForAffectation && editing && (
+                ) : young?.transportInfoGivenByLocal === "true" ? (
+                  <div>Les informations de transport seront transmises par email.</div>
+                ) : young?.deplacementPhase1Autonomous === "true" ? (
+                  <div>{young.firstName} se rend au centre et en revient par ses propres moyens.</div>
+                ) : young?.source === YOUNG_SOURCE.CLE ? (
+                  <>
+                    <div>Le point de rassemblement n&apos;a pas été confirmé par le référent régional.</div>
+                  </>
+                ) : editing ? (
+                  <>
+                    <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement.</div>
+                  </>
+                ) : (
+                  <>
+                    <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement. Voici le(s) point(s) de rassemblement proposé(s) :</div>
+
+                    <PDRpropose young={young} center={cohesionCenter} modalAffectations={modalAffectations} setModalAffectation={setModalAffectation}></PDRpropose>
+                  </>
+                )}
+              </div>
+              {cohort.type !== COHORT_TYPE.CLE && isOpenForAffectation && editing && (
+                <div className="flex items-center gap-3 !justify-end w-full">
+                  <button
+                    onClick={() => setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id })}
+                    className="flex cursor-pointer flex-row items-center justify-center gap-2 rounded border-[1px] border-gray-300 p-2">
+                    {meetingPoint || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true" ? (
+                      <>
+                        <Refresh />
+                        <div>Changer le PDR</div>
+                      </>
+                    ) : (
+                      <div>Choisir un PDR</div>
+                    )}
+                  </button>
+                  {young.meetingPointId && young.ligneId && (
                     <button
-                      onClick={() => setModalAffectation({ isOpen: true })}
-                      className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
+                      className="flex cursor-pointer flex-row items-center justify-center gap-2  rounded border-[1px] border-gray-300 p-2"
+                      onClick={() => setModalChangePdrSameLine({ isOpen: true })}>
                       <Refresh />
-                      <div>Changer l&apos;affectation</div>
+                      <div>Changer le PDR sur la ligne</div>
                     </button>
                   )}
                 </div>
-                <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
-                  <div className="mb-2 text-xs font-medium text-gray-900">Point de rassemblement</div>
-                  <div className="mb-4 flex w-full flex-col gap-4 text-sm text-gray-800 ">
-                    {meetingPoint ? (
-                      <div className="flex flex-col gap-4">
-                        <Field
-                          title="Adresse"
-                          value={meetingPoint?.pointDeRassemblement.address}
-                          externalLink={`${adminURL}/point-de-rassemblement/${meetingPoint?.pointDeRassemblement._id}`}
-                        />
-                        <Field
-                          title="Heure&nbsp;de&nbsp;départ"
-                          value={dayjs(getZonedDate(meetingPoint?.bus.departuredDate)).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
-                        />
-                        <Field
-                          title="Heure&nbsp;de&nbsp;retour"
-                          value={dayjs(getZonedDate(meetingPoint?.bus.returnDate)).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
-                        />
-                        <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} externalLink={`${adminURL}/ligne-de-bus/${meetingPoint?.bus._id}`} />
-                      </div>
-                    ) : young?.transportInfoGivenByLocal === "true" ? (
-                      <div>Les informations de transport seront transmises par email.</div>
-                    ) : young?.deplacementPhase1Autonomous === "true" ? (
-                      <div>{young.firstName} se rend au centre et en revient par ses propres moyens.</div>
-                    ) : young?.source === YOUNG_SOURCE.CLE ? (
-                      <>
-                        <div>Le point de rassemblement n&apos;a pas été confirmé par le référent régional.</div>
-                      </>
-                    ) : editing ? (
-                      <>
-                        <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement.</div>
-                      </>
-                    ) : (
-                      <>
-                        <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement. Voici le(s) point(s) de rassemblement proposé(s) :</div>
-
-                        <PDRpropose young={young} center={cohesionCenter} modalAffectations={modalAffectations} setModalAffectation={setModalAffectation}></PDRpropose>
-                      </>
-                    )}
-                  </div>
-                  {cohort.type !== COHORT_TYPE.CLE && isOpenForAffectation && editing && (
-                    <div className="flex items-center gap-3 !justify-end w-full">
-                      <button
-                        onClick={() => setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id })}
-                        className="flex cursor-pointer flex-row items-center justify-center gap-2 rounded border-[1px] border-gray-300 p-2">
-                        {meetingPoint || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true" ? (
-                          <>
-                            <Refresh />
-                            <div>Changer le PDR</div>
-                          </>
-                        ) : (
-                          <div>Choisir un PDR</div>
-                        )}
-                      </button>
-                      {young.meetingPointId && young.ligneId && (
-                        <button
-                          className="flex cursor-pointer flex-row items-center justify-center gap-2  rounded border-[1px] border-gray-300 p-2"
-                          onClick={() => setModalChangePdrSameLine({ isOpen: true })}>
-                          <Refresh />
-                          <div>Changer le PDR sur la ligne</div>
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="my-52 flex flex-col items-center justify-center gap-4">
-                <div className="text-base font-bold text-gray-900">Ce volontaire n&apos;est affecté à aucun centre</div>
-                {isOpenForAffectation && (
-                  <div
-                    className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white"
-                    onClick={() => {
-                      cohort.type === COHORT_TYPE.VOLONTAIRE ? setModalAffectation({ isOpen: true }) : setModalAffectationForCLE({ isOpen: true });
-                    }}>
-                    Affecter dans un centre
-                  </div>
-                )}
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="my-52 flex flex-col items-center justify-center gap-4">
+            <div className="text-base font-bold text-gray-900">Ce volontaire n&apos;est affecté à aucun centre</div>
+            {isOpenForAffectation && (
+              <div
+                className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white"
+                onClick={() => {
+                  cohort.type === COHORT_TYPE.VOLONTAIRE ? setModalAffectation({ isOpen: true }) : setModalAffectationForCLE({ isOpen: true });
+                }}>
+                Affecter dans un centre
               </div>
             )}
           </div>
-        </div>
+        )}
         {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
         young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
         young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
