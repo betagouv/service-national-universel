@@ -4,7 +4,7 @@ import getAppHelper from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
 import { createInscriptionGoal } from "./helpers/inscriptionGoal";
-import { department2region, FUNCTIONAL_ERRORS, INSCRIPTION_GOAL_LEVELS, region2department, YOUNG_STATUS } from "snu-lib";
+import { department2region, ERRORS, FUNCTIONAL_ERRORS, INSCRIPTION_GOAL_LEVELS, region2department, YOUNG_STATUS } from "snu-lib";
 import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
 import { getCompletionObjectifs } from "../services/inscription-goal";
@@ -109,13 +109,21 @@ describe("Inscription Goal", () => {
       expect(res.status).toBe(200);
       expect(res.body.data).toBe(1);
     });
-    it("should return 400 when goal does not exist", async () => {
-      const res = await request(getAppHelper()).get(`/inscription-goal/Unknow/department/Unknow`);
+    it("should return 404 when cohort does not exist", async () => {
+      const res = await request(getAppHelper()).get(`/inscription-goal/Unknown/department/Loire-Atlantique`);
+      expect(res.status).toBe(404);
+      expect(res.body.code).toBe(ERRORS.NOT_FOUND);
+    });
+
+    it("should return 400 when department does not exist for valid cohort", async () => {
+      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
+      const res = await request(getAppHelper()).get(`/inscription-goal/Test Inscription Goal/department/Unknown`);
       expect(res.status).toBe(400);
       expect(res.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
     });
     it("should return 400 when goal has max null", async () => {
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ max: 0 }));
+      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal", max: 0 }));
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(400);
       expect(res.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
