@@ -1,14 +1,13 @@
+import { capture } from "../sentry";
+import { config } from "../config";
+import slack from "../slack";
 import { fetchMissions } from "./JeVeuxAiderRepository";
-
-const { capture } = require("../sentry");
-const { config } = require("../config");
-const slack = require("../slack");
-const { synchronizeMission, cancelMission, fetchMissionsToCancel } = require("./JeVeuxAiderService");
+import { cancelMission, fetchMissionsToCancel, syncMission } from "./JeVeuxAiderService";
 
 let startTime = new Date();
 
-const sync = async () => {
-  let total;
+const run = async () => {
+  let total: number;
   let count = 0;
   let skip = 0;
 
@@ -17,10 +16,10 @@ const sync = async () => {
     if (!result.ok) throw new Error("sync with JVA missions : " + result.code);
     total = result.total;
 
-    // Do not parallelize because of shared structures and users.
+    // Do not parallelize because of shared structures and referents.
     for (const mission of result.data) {
       try {
-        await synchronizeMission(mission);
+        await syncMission(mission);
       } catch (e) {
         capture(e);
       }
@@ -60,7 +59,7 @@ exports.handler = async () => {
     throw err;
   }
   try {
-    await sync();
+    await run();
   } catch (e) {
     capture(e);
     throw e;

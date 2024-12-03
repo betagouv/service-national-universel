@@ -2,10 +2,10 @@ import { config } from "../config";
 import { addHours, addYears } from "date-fns";
 import { department2region, departmentLookUp, MISSION_DOMAINS, MISSION_STATUS, MissionType, ReferentType, ROLES, SENDINBLUE_TEMPLATES, StructureType } from "snu-lib";
 import { getTutorName } from "../services/mission";
-import { MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureModel } from "../models";
+import { MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../models";
 import { updateApplicationStatus, updateApplicationTutor } from "../services/application";
 import { sendTemplate } from "../brevo";
-import { fetchStructureById } from "./JeVeuxAiderRepository";
+import { fetchStructureById, JeVeuxAiderMission } from "./JeVeuxAiderRepository";
 
 const fromUser = { firstName: "Cron JeVeuxAiderService.js" };
 
@@ -33,8 +33,8 @@ const SnuStructureException = [
 
 export async function fetchMissionsToCancel(startTime: Date) {
   return await MissionModel.find({
-    lastSyncAt: { $lte: startTime },
     isJvaMission: "true",
+    lastSyncAt: { $lte: startTime },
     status: { $nin: [MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED] },
   });
 }
@@ -64,7 +64,7 @@ function formatStructure(jvaStructure): Partial<StructureType> {
     jvaRawData: jvaStructure,
   };
 }
-function formatResponsable(resp): Partial<ReferentType> {
+function formatResponsable(resp, structureId: string): Partial<ReferentType> {
   return {
     firstName: resp.first_name,
     lastName: resp.last_name,
@@ -72,9 +72,10 @@ function formatResponsable(resp): Partial<ReferentType> {
     phone: resp?.phone !== "null" ? resp?.phone : undefined,
     mobile: resp?.mobile !== "null" ? resp?.mobile : undefined,
     role: ROLES.RESPONSIBLE,
+    structureId,
   };
 }
-function formatMission(mission, structure, referentMission): Partial<MissionType> {
+function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument, referentMission: ReferentDocument): Partial<MissionType> {
   const startAt = new Date(mission.startAt);
   const endAt = new Date(mission.endAt);
   const [description, actions] = mission.descriptionHtml.split("Objectifs:");
@@ -92,7 +93,7 @@ function formatMission(mission, structure, referentMission): Partial<MissionType
     structureName: structure.name,
     status: MISSION_STATUS.WAITING_VALIDATION,
     tutorId: referentMission.id,
-    tutorName: getTutorName(referentMission),
+    tutorName: getTutorName({ firstName: referentMission.firstName, lastName: referentMission.lastName }),
     zip: mission.postalCode,
     address: mission.address,
     city: mission.city,
@@ -101,7 +102,7 @@ function formatMission(mission, structure, referentMission): Partial<MissionType
     country: "France",
     location: mission.location,
     isJvaMission: "true",
-    jvaMissionId: mission.clientId,
+    jvaMissionId: parseInt(mission.clientId),
     apiEngagementId: mission._id,
     jvaRawData: mission,
     lastSyncAt: new Date(),
@@ -111,60 +112,87 @@ function formatMission(mission, structure, referentMission): Partial<MissionType
   };
 }
 
-async function createStructure(mission) {
-  let jvaStructure = await fetchStructureById(mission.organizationId);
+async function createReferentIfNotExists(resp, structureId: string): Promise<ReferentDocument | null> {
+  if (await ReferentModel.exists({ email: resp.email })) return null;
+  const ref = new ReferentModel(formatResponsable(resp, structureId));
+  return await ref.save({ fromUser });
+}
 
-  //Struct without resp skip
+async function createStructure(mission: JeVeuxAiderMission): Promise<StructureDocument | undefined> {
+  let jvaStructure = await fetchStructureById(mission.organizationId);
   if (!jvaStructure?.responsables.length) return;
 
+  const structure = await StructureModel.create(formatStructure(jvaStructure));
+
   //Create responsable
-  let newResps: ReferentDocument[] = [];
-  for (const resp of jvaStructure.responsables) {
-    //Check unique email
-    const exist = await ReferentModel.exists({ email: resp.email });
-    if (exist) continue;
+  const referentPromises = jvaStructure.responsables.map((resp) => createReferentIfNotExists(resp, structure.id));
+  await Promise.all(referentPromises);
 
-    //Create referent
-    const formattedResp = formatResponsable(resp);
-    const user = await ReferentModel.create(formattedResp);
-    newResps.push(user);
-  }
-
-  //Error on referent creation
-  if (!newResps.length) return;
-
-  //Create structure
-  const infoStructure = formatStructure(jvaStructure);
-  const newStructure = await StructureModel.create(infoStructure);
-
-  //Set structureId to referent
-  for (const resp of newResps) {
-    resp.set({ structureId: newStructure.id });
-    await resp.save({ fromUser });
-  }
-  return newStructure;
+  return structure;
 }
 
-async function updateMission(missionExist: MissionDocument, infoMission): Promise<MissionDocument> {
-  const oldMissionTutorId = missionExist.tutorId;
-  delete infoMission.status;
-  delete infoMission.name;
-  delete infoMission.description;
-  delete infoMission.actions;
-  delete infoMission.frequence;
-  const left = missionExist.placesLeft + infoMission.placesTotal - missionExist.placesTotal;
-  missionExist.set({ ...infoMission, placesLeft: left });
-  await missionExist.save({ fromUser });
-  if (oldMissionTutorId !== infoMission.tutorId) {
-    await updateApplicationTutor(missionExist, fromUser);
+async function updateMission(mission: MissionDocument, updatedMission: Partial<MissionType>): Promise<MissionDocument> {
+  const oldMissionTutorId = mission.tutorId;
+  delete updatedMission.name;
+  delete updatedMission.description;
+  delete updatedMission.actions;
+  delete updatedMission.frequence;
+  const placesLeft = mission.placesLeft + updatedMission.placesTotal! - mission.placesTotal;
+  mission.set({ ...updatedMission, placesLeft, status: MISSION_STATUS.WAITING_VALIDATION });
+  await mission.save({ fromUser });
+  if (oldMissionTutorId !== updatedMission.tutorId) {
+    await updateApplicationTutor(mission, fromUser);
   }
-  return missionExist;
+  return mission;
 }
 
-async function notifyReferentsAddMission(data, referentMission) {
+export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {
+  if (JvaStructureException.includes(mission.organizationId)) return;
+
+  let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationId });
+  if (!structure) {
+    const newStructure = await createStructure(mission);
+    if (!newStructure) throw new Error("No structure created");
+    structure = newStructure;
+  }
+
+  if (SnuStructureException.includes(structure?._id.toString())) return;
+
+  //Get referent mission
+  let referent = await ReferentModel.findOne({ structureId: structure.id });
+  if (!referent) throw new Error("No referent found");
+
+  //Create or update mission
+  const infoMission = formatMission(mission, structure, referent);
+
+  const missionExist = await MissionModel.findOne({ jvaMissionId: mission.clientId });
+  if (!missionExist) {
+    const data = await MissionModel.create({ ...infoMission, placesLeft: mission.snuPlaces });
+    if (!data) throw new Error("No mission created");
+    if (referent) {
+      await notifyReferentsNewMission(data, referent);
+    }
+    return data;
+  }
+
+  const data = await updateMission(missionExist, infoMission);
+  if (!data) throw new Error("No mission updated");
+  return data;
+}
+
+export async function cancelMission(mission: MissionDocument): Promise<MissionDocument> {
+  mission.set({ status: MISSION_STATUS.CANCEL });
+  const data = await mission.save({ fromUser });
+  if (!data) throw new Error("Mission not updated");
+  await updateApplicationStatus(mission, fromUser);
+  await notifyReferentCancelMission(mission);
+  return data;
+}
+
+async function notifyReferentsNewMission(mission: MissionDocument, referentMission: ReferentDocument) {
   //Send mail to responsable department
   const referentsDepartment = await ReferentModel.find({
-    department: data.department,
+    department: mission.department,
     subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
   });
 
@@ -172,7 +200,7 @@ async function notifyReferentsAddMission(data, referentMission) {
     await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
       emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
       params: {
-        cta: `${config.ADMIN_URL}/mission/${data._id}`,
+        cta: `${config.ADMIN_URL}/mission/${mission._id}`,
       },
     });
   }
@@ -182,60 +210,17 @@ async function notifyReferentsAddMission(data, referentMission) {
     await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
       emailTo: [{ name: `${referentMission.firstName} ${referentMission.lastName}`, email: referentMission.email }],
       params: {
-        missionName: data.name,
+        missionName: mission.name,
       },
     });
   }
 }
 
-async function notifyReferentCancelMission(mission) {
+async function notifyReferentCancelMission(mission: MissionDocument) {
   const referent = await ReferentModel.findOne({ _id: mission.tutorId });
   if (!referent) return;
   await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_CANCEL, {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: {
-      missionName: mission.name,
-    },
+    params: { missionName: mission.name },
   });
-}
-
-export async function synchronizeMission(mission): Promise<MissionDocument | undefined> {
-  //stop sync for exception
-  if (JvaStructureException.includes(mission.organizationId)) return;
-
-  let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationId });
-
-  //stop sync for exception
-  if (SnuStructureException.includes(structure?._id.toString())) return;
-
-  if (!structure) {
-    const newStructure = await createStructure(mission);
-    if (!newStructure) throw new Error("No structure created");
-    structure = newStructure;
-  }
-
-  //Get referent mission
-  let referentMission = await ReferentModel.findOne({ structureId: structure.id });
-
-  //Create or update mission
-  const infoMission = formatMission(mission, structure, referentMission);
-
-  const missionExist = await MissionModel.findOne({ jvaMissionId: mission.clientId });
-
-  if (!missionExist) {
-    const data = await MissionModel.create({ ...infoMission, placesLeft: mission.snuPlaces });
-    if (!data) throw new Error("No mission created");
-    await notifyReferentsAddMission(data, referentMission);
-    return data;
-  }
-  const data = await updateMission(missionExist, infoMission);
-  if (!data) throw new Error("No mission updated");
-  return data;
-}
-
-export async function cancelMission(mission) {
-  mission.set({ status: MISSION_STATUS.CANCEL });
-  await mission.save({ fromUser });
-  await updateApplicationStatus(mission, fromUser);
-  await notifyReferentCancelMission(mission);
 }
