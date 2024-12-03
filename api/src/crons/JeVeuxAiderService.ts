@@ -6,6 +6,7 @@ import { MissionDocument, MissionModel, ReferentDocument, ReferentModel, Structu
 import { updateApplicationStatus, updateApplicationTutor } from "../services/application";
 import { sendTemplate } from "../brevo";
 import { fetchStructureById, JeVeuxAiderMission } from "./JeVeuxAiderRepository";
+import { logger } from "../logger";
 
 const fromUser = { firstName: "Cron JeVeuxAiderService.js" };
 
@@ -118,12 +119,19 @@ async function createReferentIfNotExists(resp, structureId: string): Promise<Ref
 }
 
 async function createStructure(mission: JeVeuxAiderMission): Promise<StructureDocument | undefined> {
-  let jvaStructure = await fetchStructureById(mission.organizationId);
-  if (!jvaStructure?.responsables.length) return;
+  const jvaStructure = await fetchStructureById(mission.organizationId);
+  if (!jvaStructure) {
+    return;
+  }
+  if (!jvaStructure?.responsables?.length) {
+    return;
+  }
 
   const structure = await StructureModel.create(formatStructure(jvaStructure));
+  logger.info(`Structure ${structure.id} created`);
 
   //Create responsable
+  logger.info(`Creating responsables for structure ${structure.id}`);
   const referentPromises = jvaStructure.responsables.map((resp) => createReferentIfNotExists(resp, structure.id));
   await Promise.all(referentPromises);
 
@@ -150,7 +158,12 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
 }
 
 export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {
-  if (JvaStructureException.includes(mission.organizationId)) return;
+  logger.info(`Syncing mission ${mission.clientId}: ${mission.title}`);
+
+  if (JvaStructureException.includes(mission.organizationId)) {
+    logger.info(`Structure ${mission.organizationId} is in JVA exception list, skipping mission ${mission.clientId}`);
+    return;
+  }
 
   let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationId });
   if (!structure) {
@@ -159,19 +172,23 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
     structure = newStructure;
   }
 
-  if (SnuStructureException.includes(structure?._id.toString())) return;
+  if (SnuStructureException.includes(structure?._id.toString())) {
+    logger.info(`Structure ${structure._id} is in SNU exception list, skipping mission ${mission.clientId}`);
+    return;
+  }
 
   //Get referent mission
   let referent = await ReferentModel.findOne({ structureId: structure.id });
   if (!referent) throw new Error("No referent found");
 
   //Create or update mission
-  const infoMission = formatMission(mission, structure, referent);
+  const formattedMission = formatMission(mission, structure, referent);
 
-  const missionExist = await MissionModel.findOne({ jvaMissionId: mission.clientId });
-  if (!missionExist) {
+  const oldMission = await MissionModel.findOne({ jvaMissionId: mission.clientId });
+  if (!oldMission) {
+    logger.info(`Creating mission ${mission.clientId}`);
     const data = await MissionModel.create({
-      ...infoMission,
+      ...formattedMission,
       placesLeft: mission.snuPlaces,
       status: MISSION_STATUS.WAITING_VALIDATION,
     });
@@ -182,12 +199,14 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
     return data;
   }
 
-  const data = await updateMission(missionExist, infoMission);
+  logger.info(`Updating mission ${mission.clientId}`);
+  const data = await updateMission(oldMission, formattedMission);
   if (!data) throw new Error("No mission updated");
   return data;
 }
 
 export async function cancelMission(mission: MissionDocument): Promise<MissionDocument> {
+  logger.info(`Cancelling mission ${mission.jvaMissionId}`);
   mission.set({ status: MISSION_STATUS.CANCEL });
   const data = await mission.save({ fromUser });
   if (!data) throw new Error("Mission not updated");

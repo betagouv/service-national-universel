@@ -3,6 +3,7 @@ import { config } from "../config";
 import slack from "../slack";
 import { fetchMissions } from "./JeVeuxAiderRepository";
 import { cancelMission, fetchMissionsToCancel, syncMission } from "./JeVeuxAiderService";
+import { logger } from "../logger";
 
 let startTime = new Date();
 
@@ -12,6 +13,7 @@ const run = async () => {
   let skip = 0;
 
   do {
+    logger.info(`Fetching missions from ${skip} to ${skip + 50}`);
     const result = await fetchMissions(skip);
     if (!result.ok) throw new Error("sync with JVA missions : " + result.code);
     total = result.total;
@@ -28,7 +30,9 @@ const run = async () => {
     count += result.data.length;
     skip += 50;
   } while (count < total);
+  logger.info(`Sync done`);
 
+  logger.info(`Cleaning outdated missions`);
   await cleanData();
 };
 
