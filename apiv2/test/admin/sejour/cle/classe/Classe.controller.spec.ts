@@ -139,7 +139,7 @@ describe("ClasseController", () => {
 
         expect(response.status).toBe(403);
     });
-
+    //
     it("/POST classe/:id/referent/modifier-ou-creer should return 200 and update referent", async () => {
         const referent = await createReferent();
         const etablissement = await createEtablissement({ referentEtablissementIds: [referent.id] });
