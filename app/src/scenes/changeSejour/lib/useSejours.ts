@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 export default function useSejours() {
   const { young } = useAuth();
   return useQuery({
-    queryKey: ["availableSessions"],
+    queryKey: ["availableSessions", young.cohortId],
     queryFn: () => getAvailableSessions(young),
     enabled: !!young,
   });
