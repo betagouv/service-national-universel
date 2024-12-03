@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
 
-import { canSearchStudent, ROLES, YOUNG_STATUS, YoungDto } from "snu-lib";
+import { canSearchStudent, ROLES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto } from "snu-lib";
 
 import { validateId, idSchema } from "../../utils/validator";
 import { ERRORS } from "../../utils";
@@ -52,8 +52,15 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
     const parentAllowSNUCount = getYoungsParentAllowSNU(students).length;
     const studentImageRightCount = getYoungsImageRight(students).length;
     const validatedYoungsWithSession = getValidatedYoungsWithSession(students).length;
+    const affectedStudentsCount = students.filter((s) => s.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED).length;
 
-    const result = { parentAllowSNU: parentAllowSNUCount, imageRight: studentImageRightCount, youngWithSession: validatedYoungsWithSession, total: students.length };
+    const result = {
+      parentAllowSNU: parentAllowSNUCount,
+      imageRight: studentImageRightCount,
+      youngWithSession: validatedYoungsWithSession,
+      affectedStudents: affectedStudentsCount,
+      total: students.length,
+    };
     Object.keys(statusCount).forEach((status) => {
       result[YOUNG_STATUS[status]] = statusCount[status];
     });

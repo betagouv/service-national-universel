@@ -43,4 +43,10 @@ export default () => ({
     auth: {
         jwtSecret: _env(envStr, "JWT_SECRET", "my-secret"),
     },
+    bucket: {
+        name: _env(envStr, "BUCKET_NAME", "BUCKET_NAME"),
+        endpoint: _env(envStr, "CELLAR_ENDPOINT", "CELLAR_ENDPOINT"),
+        accessKeyId: _env(envStr, "CELLAR_KEYID", "CELLAR_KEYID"),
+        secretAccessKey: _env(envStr, "CELLAR_KEYSECRET", "CELLAR_KEYSECRET"),
+    },
 });
