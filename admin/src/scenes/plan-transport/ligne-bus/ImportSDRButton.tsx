@@ -59,13 +59,12 @@ export default function ImportSDRButton({ className }: ImportSDRButtonProps) {
           <div className="scroll-y-auto overflow-y-auto max-h-[80vh]">
             <div className="flex flex-col items-center text-center gap-6 mb-8">
               <div className="flex items-center">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-50">{/* <HiOutlineLightningBolt className="w-6 h-6" /> */}</div>
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-50"></div>
               </div>
               <h1 className="font-bold text-xl m-0">Import du Schema De Répartition</h1>
             </div>
             <div className="flex items-start flex-col w-full gap-8 mb-6">
               <div className="flex flex-col w-full items-center gap-2.5">
-                {/* <h2 className="text-lg leading-7 font-bold m-0">Situations scolaires</h2> */}
                 <InputFile accept={MIME_TYPES.EXCEL} onChange={handleAddFile} error={error} loading={isPending} />
                 {file?.name ? <p className="text-sm text-gray-500">{file.name}</p> : null}
               </div>

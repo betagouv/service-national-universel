@@ -20,7 +20,7 @@ describe("ReferentielRoutesService", () => {
                 {
                     provide: FileGateway,
                     useValue: {
-                        readXLS: jest.fn().mockResolvedValue([{}]),
+                        parseXLS: jest.fn().mockResolvedValue([{}]),
                         uploadFile: jest.fn().mockResolvedValue({}),
                     },
                 },
@@ -35,7 +35,7 @@ describe("ReferentielRoutesService", () => {
 
     describe("import", () => {
         it("should not import empty file", () => {
-            jest.spyOn(fileGateway, "readXLS").mockResolvedValue([]);
+            jest.spyOn(fileGateway, "parseXLS").mockResolvedValue([]);
             expect(
                 referentielRoutesService.import({
                     fileName: "fileName",
@@ -53,7 +53,7 @@ describe("ReferentielRoutesService", () => {
             ).rejects.toThrow(FunctionalException);
         });
         it("should not import file without valid column", () => {
-            jest.spyOn(fileGateway, "readXLS").mockResolvedValue([{}]);
+            jest.spyOn(fileGateway, "parseXLS").mockResolvedValue([{}]);
             expect(
                 referentielRoutesService.import({
                     fileName: "fileName",
@@ -71,7 +71,7 @@ describe("ReferentielRoutesService", () => {
             ).rejects.toThrow(FunctionalException);
         });
         it("should not import file with valid column", async () => {
-            jest.spyOn(fileGateway, "readXLS").mockResolvedValue([
+            jest.spyOn(fileGateway, "parseXLS").mockResolvedValue([
                 {
                     "Session formule": "",
                     "Code court de Route": "",

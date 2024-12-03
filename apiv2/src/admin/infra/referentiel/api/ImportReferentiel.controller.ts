@@ -1,17 +1,35 @@
-import { Controller, Param, Post, Request, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import {
+    Controller,
+    Get,
+    Inject,
+    Param,
+    Post,
+    Query,
+    Request,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors,
+} from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 
-import { MIME_TYPES, ReferentielTaskType, ReferentielRoutes } from "snu-lib";
+import { MIME_TYPES, ReferentielTaskType, ReferentielRoutes, TaskName, TaskType, TaskStatus } from "snu-lib";
 
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
+import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
+import { TaskGateway } from "@task/core/Task.gateway";
+
+const REFERENTIEL_TASK_NAMES = [TaskName.REFERENTIEL_IMPORT];
 
 @Controller("referentiel")
 export class ImportReferentielController {
-    constructor(private readonly routeService: ReferentielRoutesService) {}
+    constructor(
+        private readonly routeService: ReferentielRoutesService,
+        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+    ) {}
 
     @Post("/import/:name")
     @UseGuards(SuperAdminGuard)
@@ -36,15 +54,40 @@ export class ImportReferentielController {
 
         switch (name) {
             case ReferentielTaskType.IMPORT_ROUTES:
-                const fichierSISnu = await this.routeService.import({
+                const importTask = await this.routeService.import({
                     fileName: file.originalname,
                     buffer: file.buffer,
                     mimetype: file.mimetype,
                     auteur,
                 });
-                return TaskMapper.toDto(fichierSISnu);
+                return TaskMapper.toDto(importTask);
             default:
                 throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
+    }
+
+    @UseGuards(AdminGuard)
+    @Get("/import")
+    async getImports(
+        @Query("name")
+        name?: TaskName.REFERENTIEL_IMPORT,
+        @Param("type")
+        type?: string,
+        @Query("status")
+        status?: TaskStatus,
+        @Query("sort")
+        sort?: "ASC" | "DESC",
+        @Query("limit")
+        limit?: number,
+    ): Promise<ReferentielRoutes["GetImports"]["response"]> {
+        const filter: any = {};
+        if (status) {
+            filter.status = status;
+        }
+        if (type) {
+            filter["metadata.parameters.type"] = type;
+        }
+        const imports = await this.taskGateway.findByNames(name ? [name] : REFERENTIEL_TASK_NAMES, filter, sort, limit);
+        return imports.map(TaskMapper.toDto);
     }
 }

@@ -15,7 +15,11 @@ import { TechnicalException, TechnicalExceptionType } from "./TechnicalException
 export class FileProvider implements FileGateway {
     constructor(private readonly config: ConfigService) {}
 
-    async readCSV<T>(buffer: Buffer, options: ParserOptionsArgs = { headers: true }): Promise<T[]> {
+    async readFile(filePath: string): Promise<Buffer> {
+        return fs.readFile(filePath);
+    }
+
+    async parseCSV<T>(buffer: Buffer, options: ParserOptionsArgs = { headers: true }): Promise<T[]> {
         return new Promise((resolve, reject) => {
             const content: T[] = [];
 
@@ -35,9 +39,9 @@ export class FileProvider implements FileGateway {
         });
     }
 
-    async readXLS<T>(buffer: Buffer, { sheetIndex }: { sheetIndex: number } = { sheetIndex: 0 }): Promise<T[]> {
+    async parseXLS<T>(buffer: Buffer, options: { sheetIndex?: number }): Promise<T[]> {
         const workbook = XLSX.read(buffer, { type: "buffer" });
-        const sheetName = workbook.SheetNames[sheetIndex];
+        const sheetName = workbook.SheetNames[options.sheetIndex || 0];
         const worksheet = workbook.Sheets[sheetName];
 
         return await XLSX.utils.sheet_to_json<T>(worksheet);
@@ -63,10 +67,16 @@ export class FileProvider implements FileGateway {
         const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
         const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
 
+        const cleanPath = path
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") //remove accents
+            .replaceAll(" ", "_") // remove spaces
+            .replace(/[^\/a-zA-Z0-9._-]/g, ""); // remove special characters
+
         const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
         const params: AWS.S3.Types.PutObjectRequest = {
             Bucket: bucket,
-            Key: path,
+            Key: cleanPath,
             Body: file.data,
             ContentEncoding: file.encoding || "",
             ContentType: file.mimetype,
@@ -92,11 +102,12 @@ export class FileProvider implements FileGateway {
         };
 
         const awsResponse = await s3bucket.getObject(params).promise();
+        const fileName = path.replace(/^.*[\\/]/, ""); // get file name from path;
         return {
             Body: awsResponse.Body as Buffer,
             ContentLength: awsResponse.ContentLength,
             ContentType: awsResponse.ContentType,
-            FileName: path.replace(/^.*[\\/]/, ""),
+            FileName: fileName,
         };
     }
 
