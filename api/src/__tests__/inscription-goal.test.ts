@@ -52,7 +52,8 @@ describe("Inscription Goal", () => {
       expect(res.body.data).toBe(0);
     });
     it("should return corresponding filling rate when young exists", async () => {
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture());
+      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal" }));
       await createYoungHelper(
         getNewYoungFixture({
           status: YOUNG_STATUS.VALIDATED,
@@ -68,7 +69,8 @@ describe("Inscription Goal", () => {
       expect(res.body.data).toBeLessThan(1);
     });
     it("should return filling at 1 when department goal is reached (not region)", async () => {
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ max: 1 }));
+      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal", max: 1 }));
       await createInscriptionGoal(
         getNewInscriptionGoalFixture({
           max: 1,
@@ -95,7 +97,10 @@ describe("Inscription Goal", () => {
     });
     it("should return filling at 1 when region goal is reached (not department)", async () => {
       const department = "Loire-Atlantique";
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ department, region: department2region[department], max: 1 }));
+      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
+      const inscriptionGoal = await createInscriptionGoal(
+        getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal", department, region: department2region[department], max: 1 }),
+      );
       // jeune dans la region mais pas dans le departement
       await createYoungHelper(
         getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, cohort: inscriptionGoal.cohort, cohortId: inscriptionGoal.cohortId }),
