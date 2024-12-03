@@ -91,7 +91,6 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
     frequence: mission.schedule,
     structureId: structure.id,
     structureName: structure.name,
-    status: MISSION_STATUS.WAITING_VALIDATION,
     tutorId: referentMission.id,
     tutorName: getTutorName({ firstName: referentMission.firstName, lastName: referentMission.lastName }),
     zip: mission.postalCode,
@@ -138,7 +137,11 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
   delete updatedMission.actions;
   delete updatedMission.frequence;
   const placesLeft = mission.placesLeft + updatedMission.placesTotal! - mission.placesTotal;
-  mission.set({ ...updatedMission, placesLeft, status: MISSION_STATUS.WAITING_VALIDATION });
+  mission.set({
+    ...updatedMission,
+    placesLeft,
+    status: MISSION_STATUS.WAITING_VALIDATION,
+  });
   await mission.save({ fromUser });
   if (oldMissionTutorId !== updatedMission.tutorId) {
     await updateApplicationTutor(mission, fromUser);
@@ -167,7 +170,11 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
 
   const missionExist = await MissionModel.findOne({ jvaMissionId: mission.clientId });
   if (!missionExist) {
-    const data = await MissionModel.create({ ...infoMission, placesLeft: mission.snuPlaces });
+    const data = await MissionModel.create({
+      ...infoMission,
+      placesLeft: mission.snuPlaces,
+      status: MISSION_STATUS.WAITING_VALIDATION,
+    });
     if (!data) throw new Error("No mission created");
     if (referent) {
       await notifyReferentsNewMission(data, referent);
@@ -190,7 +197,19 @@ export async function cancelMission(mission: MissionDocument): Promise<MissionDo
 }
 
 async function notifyReferentsNewMission(mission: MissionDocument, referentMission: ReferentDocument) {
+  //Send mail to responsable mission
+  if (referentMission) {
+    await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
+      emailTo: [{ name: `${referentMission.firstName} ${referentMission.lastName}`, email: referentMission.email }],
+      params: {
+        missionName: mission.name,
+      },
+    });
+  }
+
   //Send mail to responsable department
+  if (!mission.department) return;
+
   const referentsDepartment = await ReferentModel.find({
     department: mission.department,
     subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
@@ -201,16 +220,6 @@ async function notifyReferentsNewMission(mission: MissionDocument, referentMissi
       emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
       params: {
         cta: `${config.ADMIN_URL}/mission/${mission._id}`,
-      },
-    });
-  }
-
-  //Send mail to responsable mission
-  if (referentMission) {
-    await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
-      emailTo: [{ name: `${referentMission.firstName} ${referentMission.lastName}`, email: referentMission.email }],
-      params: {
-        missionName: mission.name,
       },
     });
   }

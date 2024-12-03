@@ -36,7 +36,8 @@ async function cleanData() {
   slack.info({ title: "sync with JVA missions", text: "I'm cleaning the outdated JVA missions !" });
   try {
     const missionsToCancel = await fetchMissionsToCancel(startTime);
-    for (const mission of missionsToCancel) await cancelMission(mission);
+    const cancelMissionPromises = missionsToCancel.map((mission) => cancelMission(mission));
+    await Promise.all(cancelMissionPromises);
     await slack.success({ title: "sync with JVA missions" });
   } catch (error) {
     capture(error);

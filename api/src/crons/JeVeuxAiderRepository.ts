@@ -28,7 +28,7 @@ export async function fetchStructureById(id: string) {
 
 export type JeVeuxAiderMission = {
   _id: string;
-  clientId: string;
+  clientId: string; // jvaMissionId
   publisherId: string;
   activity: string;
   address: string;
