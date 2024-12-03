@@ -33,7 +33,7 @@ describe("Inscription Goal", () => {
   });
   describe("GET /inscription-goal/:cohort", () => {
     it("should return all inscription-goal", async () => {
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: null, cohortId: undefined }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: undefined, cohortId: undefined }));
       const res = await request(getAppHelper()).get("/inscription-goal/2021");
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ _id: inscriptionGoal._id.toString() })]));
