@@ -3,7 +3,7 @@ import { ImQuotesLeft } from "react-icons/im";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { YOUNG_SOURCE, getZonedDate } from "snu-lib";
+import { YOUNG_SOURCE, getZonedDate, COHORT_TYPE } from "snu-lib";
 
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import dayjs from "@/utils/dayjs.utils";
@@ -12,12 +12,14 @@ import Refresh from "@/assets/icons/Refresh";
 import { adminURL } from "@/config";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { getCohortByName } from "@/services/cohort.service";
-import { YOUNG_STATUS_PHASE1, canAssignManually, translate, youngCheckinField } from "@/utils";
+import { YOUNG_STATUS_PHASE1, translate } from "@/utils";
+import Loader from "@/components/Loader";
+import { isCohortOpenForAffectation, isYoungCheckIsOpen } from "../utils";
 
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import ModalAffectations from "../components/ModalAffectation";
+import ModalAffectationsForCLE from "../components/ModalAffectationsForCLE";
 import ModalChangePDRSameLine from "../components/ModalChangePDRSameLine";
 import PDRpropose from "../components/PDRpropose";
 import DocumentPhase1 from "../components/phase1/DocumentPhase1";
@@ -32,41 +34,18 @@ export default function Phase1(props) {
   const [cohesionCenter, setCohesionCenter] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalAffectations, setModalAffectation] = useState({ isOpen: false });
+  const [modalAffectationsForCLE, setModalAffectationForCLE] = useState(false);
+
   const [modalChangePdrSameLine, setModalChangePdrSameLine] = useState({ isOpen: false });
   // new useState
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState(props.young);
-
-  const [isCohortOpenForAffectation, setIsCohortOpenForAffection] = useState(false);
-  const [cohort, setCohort] = useState();
-  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState(false);
-
-  function getDisplayCenterButton() {
-    if (young.status !== "VALIDATED" && young.status !== "WAITING_LIST") {
-      setIsCohortOpenForAffection(false);
-    } else if (cohort) {
-      setIsCohortOpenForAffection(canAssignManually(user, young, cohort));
-    } else {
-      setIsCohortOpenForAffection(false);
-    }
-  }
+  const cohort = useSelector((state) => state.Cohorts).find((c) => young?.cohortId === c._id);
+  const isCheckIsOpen = isYoungCheckIsOpen(user, cohort);
+  const isOpenForAffectation = isCohortOpenForAffectation(user, young, cohort);
 
   useEffect(() => {
-    // --- get cohort.
-    (async () => {
-      try {
-        const { data } = await getCohortByName(young.cohort);
-        setCohort(data);
-      } catch (error) {
-        capture(error);
-        const { title, message } = error;
-        toastr.error(title, message);
-        setCohort(null);
-        setIsCohortOpenForAffection(false);
-      }
-    })();
-
     if (!young?.sessionPhase1Id) return;
     (async () => {
       try {
@@ -90,26 +69,13 @@ export default function Phase1(props) {
         toastr.error("Impossible de récupérer les informations du point de rassemblement");
       }
     })();
-  }, []);
+  }, [young]);
 
-  useEffect(() => {
-    getDisplayCenterButton();
-
-    if (cohort) {
-      const field = youngCheckinField[user.role];
-      if (field) {
-        setIsYoungCheckinOpen(cohort[field] ? cohort[field] : false);
-      } else {
-        setIsYoungCheckinOpen(false);
-      }
-    } else {
-      setIsYoungCheckinOpen(false);
-    }
-  }, [cohort]);
+  if (!young) return <Loader />;
 
   return (
     <>
-      <YoungHeader young={props.young} tab="phase1" onChange={props.onChange} />
+      <YoungHeader young={young} tab="phase1" onChange={props.onChange} />
       <div className="p-[30px]">
         {meetingPoint?.bus?.delayedForth === "true" || meetingPoint?.bus?.delayedBack === "true" ? (
           <InfoMessage
@@ -144,7 +110,7 @@ export default function Phase1(props) {
                 values={values}
                 setValues={setValues}
                 setLoading={setLoading}
-                isYoungCheckinOpen={isYoungCheckinOpen}
+                isYoungCheckinOpen={isCheckIsOpen}
               />
             </div>
 
@@ -170,7 +136,7 @@ export default function Phase1(props) {
                     <Field title="Code postal" value={cohesionCenter.zip} />
                     <Field title="Ville" value={cohesionCenter.city} />
                   </div>
-                  {isCohortOpenForAffectation && editing && (
+                  {cohort.type !== COHORT_TYPE.CLE && isOpenForAffectation && editing && (
                     <button
                       onClick={() => setModalAffectation({ isOpen: true })}
                       className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
@@ -219,7 +185,7 @@ export default function Phase1(props) {
                       </>
                     )}
                   </div>
-                  {isCohortOpenForAffectation && editing && (
+                  {cohort.type !== COHORT_TYPE.CLE && isOpenForAffectation && editing && (
                     <div className="flex items-center gap-3 !justify-end w-full">
                       <button
                         onClick={() => setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id })}
@@ -248,11 +214,11 @@ export default function Phase1(props) {
             ) : (
               <div className="my-52 flex flex-col items-center justify-center gap-4">
                 <div className="text-base font-bold text-gray-900">Ce volontaire n&apos;est affecté à aucun centre</div>
-                {isCohortOpenForAffectation && (
+                {isOpenForAffectation && (
                   <div
                     className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white"
                     onClick={() => {
-                      setModalAffectation({ isOpen: true });
+                      cohort.type === COHORT_TYPE.VOLONTAIRE ? setModalAffectation({ isOpen: true }) : setModalAffectationForCLE({ isOpen: true });
                     }}>
                     Affecter dans un centre
                   </div>
@@ -290,6 +256,7 @@ export default function Phase1(props) {
         center={modalAffectations?.center}
         sessionId={modalAffectations?.sessionId}
       />
+      <ModalAffectationsForCLE isOpen={modalAffectationsForCLE} onClose={() => setModalAffectationForCLE(false)} young={young} setYoung={setYoung} />
       <ModalChangePDRSameLine isOpen={modalChangePdrSameLine?.isOpen} onCancel={() => setModalChangePdrSameLine({ isOpen: false })} young={young} cohort={cohort} />
     </>
   );
