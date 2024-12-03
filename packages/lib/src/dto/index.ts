@@ -7,3 +7,5 @@ export * from "./youngDto";
 export * from "./contractDto";
 export * from "./etablissementDto";
 export * from "./contactDto";
+export * from "./taskDto";
+export * from "./phase1";
