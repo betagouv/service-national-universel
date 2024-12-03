@@ -1,7 +1,5 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { Switch, useHistory } from "react-router-dom";
-import { permissionPhase2 } from "../../utils";
+import { Switch } from "react-router-dom";
 import MesEngagements from "./scenes/MesEngagements";
 import Home from "./scenes/Home";
 import EditEquivalence from "./scenes/MonEquivalence/EditEquivalence";
@@ -12,11 +10,6 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Index() {
   useDocumentTitle("Phase 2 - MIG");
-
-  const young = useSelector((state) => state.Auth.young);
-  const history = useHistory();
-
-  if (!young || !permissionPhase2(young)) history.push("/");
 
   return (
     <Switch>
