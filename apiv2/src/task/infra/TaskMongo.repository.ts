@@ -33,10 +33,12 @@ export class TaskRepository implements TaskGateway {
         names: Array<CreateTaskModel["name"]>,
         filter?: { [key: string]: string | undefined },
         sort?: "ASC" | "DESC",
+        limit?: number,
     ): Promise<TaskModel[]> {
         const tasks = await this.taskMongooseEntity
             .find({ name: { $in: names }, ...filter })
-            .sort({ createdAt: sort === "ASC" ? 1 : -1 });
+            .sort({ createdAt: sort === "ASC" ? 1 : -1 })
+            .limit(limit || 100);
         return tasks.map((task) => TaskMapper.toModel(task));
     }
 

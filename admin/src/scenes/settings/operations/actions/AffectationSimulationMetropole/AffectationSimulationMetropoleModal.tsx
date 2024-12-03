@@ -2,13 +2,14 @@ import React from "react";
 
 import { HiOutlineLightningBolt } from "react-icons/hi";
 
-import { formatDepartement, GRADES, Phase1Routes, region2department, RegionsMetropole, translate } from "snu-lib";
+import { formatDepartement, GRADES, Phase1Routes, ReferentielRoutes, ReferentielTaskType, region2department, RegionsMetropole, TaskName, translate } from "snu-lib";
 import { Button, CollapsableSelectSwitcher, Modal, SectionSwitcher } from "@snu/ds/admin";
 import { useSetState } from "react-use";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AffectationService } from "@/services/affectationService";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
+import { ReferentielService } from "@/services/ReferentielService";
 
 interface AffectationSimulationMetropoleProps {
   sessionId: string;
@@ -30,6 +31,11 @@ export default function AffectationSimulationMetropoleModal({ sessionId, onClose
     }, {}),
     etranger: false,
     affecterPDR: false,
+  });
+
+  const { isPending: isLoadingImports, data: routesImports } = useQuery<ReferentielRoutes["GetImports"]["response"]>({
+    queryKey: ["last-task", TaskName.REFERENTIEL_IMPORT, ReferentielTaskType.IMPORT_ROUTES],
+    queryFn: async () => ReferentielService.getImports({ name: TaskName.REFERENTIEL_IMPORT, type: ReferentielTaskType.IMPORT_ROUTES, limit: 1, order: "DESC" }),
   });
 
   const { isPending, mutate } = useMutation({
@@ -69,7 +75,7 @@ export default function AffectationSimulationMetropoleModal({ sessionId, onClose
             </div>
             <h1 className="font-bold text-xl m-0">Affectation HTS (Hors DOM TOM)</h1>
             <p className="text-lg">
-              La simulation se basera sur le schéma de répartition suivant : <b>Nom-du-Fichier.xxx</b>
+              La simulation se basera sur le schéma de répartition suivant : <b>{isLoadingImports ? "..." : routesImports?.[0]?.metadata?.parameters?.fileName || "--"}</b>
             </p>
           </div>
           <div className="flex items-start flex-col w-full gap-8">
