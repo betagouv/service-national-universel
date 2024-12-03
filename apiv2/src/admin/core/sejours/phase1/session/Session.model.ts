@@ -30,6 +30,7 @@ export type SessionModel = {
     inscriptionStartDate: Date;
     inscriptionEndDate: Date;
     instructionEndDate: Date;
+    objectifLevel: string;
     inscriptionModificationEndDate?: Date;
     reInscriptionStartDate?: Date;
     reInscriptionEndDate?: Date;
