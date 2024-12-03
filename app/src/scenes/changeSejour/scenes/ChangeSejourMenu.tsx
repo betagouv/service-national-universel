@@ -59,7 +59,7 @@ export default function ChangeSejour() {
           {isReinscriptionOpen === true && (
             <section id="reinscription">
               <h2 className="text-base font-bold text-center mt-8 md:text-2xl">S'inscrire pour 2025</h2>
-              <p className="text-sm leading-5 font-normal text-gray-700 mt-2 text-center">Mettez à jour vos informations et choisissez un séjour.</p>
+              <p className="text-sm leading-5 font-normal text-[#6B7280] mt-2 text-center">Mettez à jour vos informations et choisissez un séjour.</p>
               <div className="flex w-full mt-4">
                 <Link
                   to="/reinscription"
