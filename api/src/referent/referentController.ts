@@ -562,7 +562,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       if (isReferentDep(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate))) {
-        return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
       const departement = getDepartmentForInscriptionGoal(young);
@@ -669,7 +669,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
         const now = new Date();
         const isInstructionOpen = now < cohort.instructionEndDate;
         if (!isInstructionOpen && !isAdmin(req.user) && !isReferentReg(req.user)) {
-          return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
     }
