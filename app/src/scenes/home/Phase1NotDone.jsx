@@ -4,6 +4,7 @@ import { youngCanWithdraw, isCle } from "snu-lib";
 import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import Withdrawal from "../account/scenes/withdrawn/components/Withdrawal";
+import { Link } from "react-router-dom";
 
 export default function Phase1NotDone() {
   const young = useSelector((state) => state.Auth.young);
@@ -23,20 +24,12 @@ export default function Phase1NotDone() {
         {!isCle(young) && (
           <>
             <div className="flex w-full lg:w-fit flex-col items-stretch">
-              <button
+              <Link
                 className="mt-4 rounded-[10px] border-[1px] border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white hover:bg-white hover:!text-blue-600"
-                onClick={() => (window.location.href = "/changer-de-sejour")}>
+                to="/changer-de-sejour">
                 Choisir un nouveau séjour
-              </button>
+              </Link>
             </div>
-
-            {youngCanWithdraw(young) ? (
-              <div className="flex w-full lg:w-fit flex-col items-stretch">
-                <span className="pt-4 [&>button]:text-blue-600">
-                  <Withdrawal young={young} />
-                </span>
-              </div>
-            ) : null}
           </>
         )}
       </div>
