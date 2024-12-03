@@ -99,7 +99,7 @@ router.delete(
       }
       const exists = await CohortModel.exists({ cohortGroupId: id });
       if (exists) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
       await data.deleteOne();
       return res.json({ ok: true });
