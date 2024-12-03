@@ -24,7 +24,7 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
     // verify cohesion center
     let cohesionCenter = req.user.sessionPhase1Id ? await getCohesionCenterFromSession(req.user.sessionPhase1Id) : null;
     if (!cohesionCenter) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     // We need to get all the meetingPoints that:
