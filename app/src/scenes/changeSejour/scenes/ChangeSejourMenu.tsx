@@ -34,15 +34,17 @@ export default function ChangeSejour() {
               <h2 className="text-base font-bold mt-4 md:text-2xl">S'inscrire à un autre séjour en {getCohortYear(cohort)}</h2>
               <p className="text-sm leading-loose font-normal text-gray-500 mt-1">Séjours auxquels vous êtes éligible&nbsp;:</p>
               <div className="grid my-3 rounded-md border divide-y">
-                {sessions.map((session) => (
-                  <Link
-                    to={`/changer-de-sejour/motif?cohortid=${session._id}&cohortName=${session.name}&period=${getCohortPeriod(session)}`}
-                    key={session._id}
-                    className="flex p-3 justify-between w-full">
-                    <p className="text-sm leading-5 font-medium">{capitalizeFirstLetter(getCohortPeriod(session))}</p>
-                    <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
-                  </Link>
-                ))}
+                {sessions
+                  .sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime())
+                  .map((session) => (
+                    <Link
+                      to={`/changer-de-sejour/motif?cohortid=${session._id}&cohortName=${session.name}&period=${getCohortPeriod(session)}`}
+                      key={session._id}
+                      className="flex p-3 justify-between w-full">
+                      <p className="text-sm leading-5 font-medium">{capitalizeFirstLetter(getCohortPeriod(session))}</p>
+                      <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
+                    </Link>
+                  ))}
               </div>
               <a
                 href={supportURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}

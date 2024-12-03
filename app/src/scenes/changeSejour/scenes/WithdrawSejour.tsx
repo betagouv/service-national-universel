@@ -22,7 +22,7 @@ export default function WithdrawSejour() {
         setReason={setWithdrawnReason}
         message={withdrawnMessage}
         setMessage={setWithdrawnMessage}
-        disabled={!withdrawnReason}
+        disabled={!withdrawnReason || !withdrawnMessage}
         onSubmit={() => setOpen(true)}
         text="Confirmer le désistement"
       />
