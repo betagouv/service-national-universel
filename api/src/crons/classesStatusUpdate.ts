@@ -1,5 +1,5 @@
 import { CohortType } from "snu-lib";
-import { isCohortInscriptionClosed, isCohortInscriptionOpen } from "../cohort/cohortService";
+import { isCohortInscriptionOpen } from "../cohort/cohortService";
 import { ClasseModel, CohortModel, YoungModel } from "../models";
 import { capture } from "../sentry";
 import slack from "../slack";
@@ -50,7 +50,7 @@ const handleOpenInscription = async ({ cohort }: { cohort: CohortType }): Promis
 
 const handleClosedInscription = async ({ cohort }: { cohort: CohortType }): Promise<number> => {
   // Get inscription close date
-  const isInscriptionClosed = isCohortInscriptionClosed(cohort);
+  const isInscriptionClosed = !isCohortInscriptionOpen(cohort);
   if (isInscriptionClosed) {
     const total = await updatesClassesStatus({
       statusList: ["OPEN"],

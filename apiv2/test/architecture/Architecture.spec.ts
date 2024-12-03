@@ -95,6 +95,7 @@ describe("Architecture test", () => {
                 .resideInAnyPackage(
                     MatchingPattern.SNU_LIB,
                     MatchingPattern.NOTIFICATION_CORE,
+                    MatchingPattern.TASK_CORE,
                     MatchingPattern.SHARED_CORE,
                     MatchingPattern.ADMIN_CORE,
                     MatchingPattern.NESTJS_COMMON,

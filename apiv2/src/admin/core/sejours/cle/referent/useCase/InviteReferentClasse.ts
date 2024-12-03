@@ -5,7 +5,7 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { UseCase } from "@shared/core/UseCase";
 import { InvitationType } from "snu-lib";
-import { ReferentGateway } from "src/admin/core/iam/Referent.gateway";
+import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { ClasseGateway } from "../../classe/Classe.gateway";
 import { EtablissementGateway } from "../../etablissement/Etablissement.gateway";
 

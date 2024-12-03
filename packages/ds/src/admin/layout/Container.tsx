@@ -1,7 +1,9 @@
 import React from "react";
+import cx from "classnames";
 
 type OwnProps = {
   className?: string;
+  contentClassName?: string;
   topComponent?: React.ReactNode;
   title?: string;
   titleComponent?: React.ReactNode;
@@ -11,6 +13,7 @@ type OwnProps = {
 
 export default function Container({
   className,
+  contentClassName,
   topComponent,
   title,
   titleComponent,
@@ -19,9 +22,10 @@ export default function Container({
 }: OwnProps) {
   return (
     <section
-      className={
-        "mb-6 pt-6 pb-8 px-8 rounded-lg bg-white shadow-container " + className
-      }
+      className={cx(
+        "mb-6 pt-6 pb-8 px-8 rounded-lg bg-white shadow-container",
+        className,
+      )}
     >
       {/* Top component */}
       {topComponent && <div>{topComponent}</div>}
@@ -42,7 +46,7 @@ export default function Container({
       )}
 
       {/* Children */}
-      {children}
+      <div className={cx("flex flex-col", contentClassName)}>{children}</div>
     </section>
   );
 }
