@@ -14,8 +14,6 @@ import getNewCohortFixture from "./fixtures/cohort";
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
-
 describe("Inscription Goal", () => {
   describe("POST /inscription-goal/:cohort", () => {
     it("should post a new entry in inscription-goal", async () => {
@@ -47,6 +45,7 @@ describe("Inscription Goal", () => {
   });
   describe("GET /inscription-goal/:cohort/department/:department", () => {
     it("should return 200 when goal defined", async () => {
+      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal" }));
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(200);
