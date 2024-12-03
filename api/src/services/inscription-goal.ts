@@ -1,4 +1,4 @@
-import { department2region, FUNCTIONAL_ERRORS, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
+import { department2region, FUNCTIONAL_ERRORS, INSCRIPTION_GOAL_LEVELS, CohortType } from "snu-lib";
 import { InscriptionGoalModel, YoungModel } from "../models";
 
 interface CompletionObjectif {
@@ -48,16 +48,18 @@ export const getCompletionObjectifDepartement = async (department: string, cohor
 };
 
 // Vérification des objectifs pour un département et la région associée
-export const getCompletionObjectifs = async (department: string, cohortName: string, objectifLevel: string) => {
-  const completionObjectifDepartement = await getCompletionObjectifDepartement(department, cohortName);
-  const completionObjectifRegion = await getCompletionObjectifRegion(department2region[department], cohortName);
+export const getCompletionObjectifs = async (department: string, cohort: CohortType) => {
+  const completionObjectifDepartement = await getCompletionObjectifDepartement(department, cohort.name);
+  const completionObjectifRegion = await getCompletionObjectifRegion(department2region[department], cohort.name);
   return {
     department: completionObjectifDepartement,
     region: completionObjectifRegion,
     isAtteint:
-      objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL ? completionObjectifRegion.isAtteint : completionObjectifRegion.isAtteint || completionObjectifDepartement.isAtteint,
+      cohort.objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL
+        ? completionObjectifRegion.isAtteint
+        : completionObjectifRegion.isAtteint || completionObjectifDepartement.isAtteint,
     tauxRemplissage:
-      objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL
+      cohort.objectifLevel === INSCRIPTION_GOAL_LEVELS.REGIONAL
         ? completionObjectifRegion.tauxRemplissage
         : Math.max(completionObjectifRegion.tauxRemplissage, completionObjectifDepartement.tauxRemplissage),
     tauxLimiteRemplissage: FILLING_RATE_LIMIT,

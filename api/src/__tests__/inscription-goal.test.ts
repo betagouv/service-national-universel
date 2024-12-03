@@ -69,7 +69,7 @@ describe("Inscription Goal", () => {
       expect(res.body.data).toBeLessThan(1);
     });
     it("should return filling at 1 when department goal is reached (not region)", async () => {
-      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal", max: 1 }));
       await createInscriptionGoal(
         getNewInscriptionGoalFixture({
@@ -88,7 +88,7 @@ describe("Inscription Goal", () => {
           cohortId: inscriptionGoal.cohortId,
         }),
       );
-      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, inscriptionGoal.cohort, INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL);
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort);
       expect(completionObjectif.department.objectif).toBe(1);
       expect(completionObjectif.region.objectif).toBe(2);
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);

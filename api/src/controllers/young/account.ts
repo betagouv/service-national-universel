@@ -113,7 +113,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
       // Check if cohort goal is reached
       if (isEligible) {
-        const completionObjectif = await getCompletionObjectifs(value.department, cohortObj.name, cohortObj.objectifLevel);
+        const completionObjectif = await getCompletionObjectifs(value.department, cohortObj);
         isGoalReached = completionObjectif.isAtteint;
       }
 

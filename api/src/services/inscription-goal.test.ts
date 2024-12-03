@@ -1,5 +1,7 @@
 import { FILLING_RATE_LIMIT, getCompletionObjectifDepartement, getCompletionObjectifRegion, getCompletionObjectifs } from "./inscription-goal";
 import { YoungModel, InscriptionGoalModel } from "../models";
+import { createCohortHelper } from "../__tests__/helpers/cohort";
+import getNewCohortFixture from "../__tests__/fixtures/cohort";
 import { FUNCTIONAL_ERRORS, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 
 describe("getCompletionObjectifRegion", () => {
@@ -81,7 +83,7 @@ describe("getCompletionObjectifDepartement", () => {
 describe("getCompletionObjectifs", () => {
   it("should return regional completion when objectifLevel is 'regional'", async () => {
     const department = "Test Department";
-    const cohort = "Test Cohort";
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort" }));
     const count = 50;
     const maxRegion = 500;
 
@@ -92,7 +94,7 @@ describe("getCompletionObjectifs", () => {
     InscriptionGoalModel.findOne = jest.fn().mockResolvedValue({ max: 100 });
     InscriptionGoalModel.aggregate = jest.fn().mockResolvedValue([{ total: maxRegion }]);
 
-    const stats = await getCompletionObjectifs(department, cohort, INSCRIPTION_GOAL_LEVELS.REGIONAL);
+    const stats = await getCompletionObjectifs(department, cohort);
 
     expect(stats.isAtteint).toBe(false);
     expect(stats.tauxRemplissage).toBe(0.1); // 50/500
@@ -101,7 +103,7 @@ describe("getCompletionObjectifs", () => {
 
   it("should return departmental completion when objectifLevel is 'departemental'", async () => {
     const department = "Test Department";
-    const cohort = "Test Cohort";
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort" }));
     const count = 50;
     const maxDepartment = 100;
     const maxRegion = 500;
@@ -113,7 +115,7 @@ describe("getCompletionObjectifs", () => {
     InscriptionGoalModel.findOne = jest.fn().mockResolvedValue({ max: maxDepartment });
     InscriptionGoalModel.aggregate = jest.fn().mockResolvedValue([{ total: maxRegion }]);
 
-    const stats = await getCompletionObjectifs(department, cohort, INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL);
+    const stats = await getCompletionObjectifs(department, cohort);
 
     expect(stats.isAtteint).toBe(stats.department.isAtteint || stats.region.isAtteint);
     expect(stats.tauxRemplissage).toBe(Math.max(stats.region.tauxRemplissage, stats.department.tauxRemplissage));
@@ -122,7 +124,7 @@ describe("getCompletionObjectifs", () => {
 
   it("should consider objective reached if either regional or departmental is reached for departemental level", async () => {
     const department = "Test Department";
-    const cohort = "Test Cohort";
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort" }));
     const count = 120; // Over department max
     const maxDepartment = 100;
     const maxRegion = 500;
@@ -134,7 +136,7 @@ describe("getCompletionObjectifs", () => {
     InscriptionGoalModel.findOne = jest.fn().mockResolvedValue({ max: maxDepartment });
     InscriptionGoalModel.aggregate = jest.fn().mockResolvedValue([{ total: maxRegion }]);
 
-    const stats = await getCompletionObjectifs(department, cohort, INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL);
+    const stats = await getCompletionObjectifs(department, cohort);
 
     expect(stats.department.isAtteint).toBe(true);
     expect(stats.isAtteint).toBe(true); // Should be true because department objective is reached
@@ -143,7 +145,7 @@ describe("getCompletionObjectifs", () => {
 
   it("should only consider regional objective for regional level", async () => {
     const department = "Test Department";
-    const cohort = "Test Cohort";
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort" }));
     const count = 120; // Over department max but under region max
     const maxDepartment = 100;
     const maxRegion = 500;
@@ -155,7 +157,7 @@ describe("getCompletionObjectifs", () => {
     InscriptionGoalModel.findOne = jest.fn().mockResolvedValue({ max: maxDepartment });
     InscriptionGoalModel.aggregate = jest.fn().mockResolvedValue([{ total: maxRegion }]);
 
-    const stats = await getCompletionObjectifs(department, cohort, INSCRIPTION_GOAL_LEVELS.REGIONAL);
+    const stats = await getCompletionObjectifs(department, cohort);
 
     expect(stats.region.isAtteint).toBe(false);
     expect(stats.isAtteint).toBe(false); // Should be false because only regional matters

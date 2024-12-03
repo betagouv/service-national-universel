@@ -134,7 +134,7 @@ describe("Referent", () => {
       // ajout d'un objectif à 1
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: testName, max: 1 }));
 
-      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, testName, INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL);
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort);
       expect(completionObjectif.department.objectif).toBe(1);
       expect(completionObjectif.isAtteint).toBe(false);
 
@@ -203,7 +203,7 @@ describe("Referent", () => {
       // jeune dans la region mais pas dans le departement
       await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, cohort: cohort.name, cohortId: cohort._id }));
 
-      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort.name, INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL);
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort);
       expect(completionObjectif.department.isAtteint).toBe(false);
       expect(completionObjectif.region.isAtteint).toBe(true);
       expect(completionObjectif.isAtteint).toBe(true);

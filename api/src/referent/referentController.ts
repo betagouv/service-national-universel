@@ -566,7 +566,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
 
       const departement = getDepartmentForInscriptionGoal(young);
-      const completionObjectif = await getCompletionObjectifs(departement, cohort.name, cohort.objectifLevel);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
           ok: false,
