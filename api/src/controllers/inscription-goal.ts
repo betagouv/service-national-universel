@@ -108,7 +108,7 @@ router.get(
       const cohortObj = await CohortModel.findOne({ name: cohort });
       if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const completionObjectif = await getCompletionObjectifs(department, cohort, cohortObj.objectifLevel);
+      const completionObjectif = await getCompletionObjectifs(department, cohortObj.name, cohortObj.objectifLevel);
 
       return res.status(200).json({ ok: true, data: completionObjectif.tauxRemplissage });
     } catch (error) {
@@ -135,7 +135,7 @@ router.get("/:cohort/department/:department/reached", passport.authenticate("you
     const cohortObj = await CohortModel.findOne({ name: cohort });
     if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const completionObjectif = await getCompletionObjectifs(department, cohort, cohortObj.objectifLevel);
+    const completionObjectif = await getCompletionObjectifs(department, cohortObj.name, cohortObj.objectifLevel);
 
     return res.status(200).send({ ok: true, data: completionObjectif.isAtteint });
   } catch (error) {

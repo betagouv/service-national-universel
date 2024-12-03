@@ -8,9 +8,13 @@ import { department2region, FUNCTIONAL_ERRORS, INSCRIPTION_GOAL_LEVELS, region2d
 import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
 import { getCompletionObjectifs } from "../services/inscription-goal";
+import { createCohortHelper } from "./helpers/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
+
+await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
 
 describe("Inscription Goal", () => {
   describe("POST /inscription-goal/:cohort", () => {
@@ -29,7 +33,7 @@ describe("Inscription Goal", () => {
   });
   describe("GET /inscription-goal/:cohort", () => {
     it("should return all inscription-goal", async () => {
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: undefined, cohortId: undefined }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: null, cohortId: undefined }));
       const res = await request(getAppHelper()).get("/inscription-goal/2021");
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ _id: inscriptionGoal._id.toString() })]));
@@ -43,7 +47,7 @@ describe("Inscription Goal", () => {
   });
   describe("GET /inscription-goal/:cohort/department/:department", () => {
     it("should return 200 when goal defined", async () => {
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture());
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal" }));
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(200);
       expect(res.body.data).toBe(0);
