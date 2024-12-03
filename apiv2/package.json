@@ -28,6 +28,7 @@
         "clean": "rm -fr node_modules dist .turbo"
     },
     "dependencies": {
+        "@fast-csv/parse": "^5.0.2",
         "@getbrevo/brevo": "^2.2.0",
         "@nestjs/bullmq": "^10.2.1",
         "@nestjs/common": "^10.0.0",
@@ -36,6 +37,7 @@
         "@nestjs/jwt": "^10.2.0",
         "@nestjs/platform-express": "^10.0.0",
         "@sentry/nestjs": "^8.33.1",
+        "aws-sdk": "^2.1692.0",
         "bcrypt": "^5.1.1",
         "bullmq": "^5.17.1",
         "class-transformer": "^0.5.1",
@@ -47,9 +49,11 @@
         "reflect-metadata": "^0.2.0",
         "rxjs": "^7.8.1",
         "snu-lib": "*",
-        "uuid": "^10.0.0"
+        "uuid": "^10.0.0",
+        "xlsx": "^0.18.5"
     },
     "devDependencies": {
+        "@faker-js/faker": "^8.4.1",
         "@nestjs/cli": "^10.0.0",
         "@nestjs/schematics": "^10.0.0",
         "@nestjs/testing": "^10.0.0",

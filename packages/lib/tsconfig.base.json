@@ -21,12 +21,8 @@
     "jsx": "react",
     "target": "ES2021",
     "strictFunctionTypes": false,
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "experimentalDecorators": true
   },
-  "exclude": [
-    "**/dist/**/*",
-    "node_modules",
-    "**/node_modules/*",
-    "**/.rollup.cache/*"
-  ]
+  "exclude": ["**/dist/**/*", "node_modules", "**/node_modules/*", "**/.rollup.cache/*"]
 }

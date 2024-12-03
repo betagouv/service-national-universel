@@ -1,15 +1,24 @@
 import { TaskName, TaskStatus } from "snu-lib";
 
-export type TaskModel = {
+export type TaskMetadata<T, U> = {
+    parameters?: T;
+    results?: U;
+};
+
+export type TaskModel<T = any, U = any> = {
     id: string;
     name: TaskName;
-    libelle?: string;
-    startDate: Date;
+    description?: string;
+    startDate?: Date;
     endDate?: Date;
     status: TaskStatus;
-    metadata?: any;
+    metadata?: TaskMetadata<T, U>;
+    error?: {
+        code?: string;
+        description?: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 };
 
-export type CreateTaskModel = Omit<TaskModel, "id" | "createdAt" | "updatedAt">;
+export type CreateTaskModel<T = any, U = any> = Omit<TaskModel<T, U>, "id" | "createdAt" | "updatedAt">;

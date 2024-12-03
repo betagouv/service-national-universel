@@ -146,6 +146,8 @@ function normalizeDepartmentName(deptName) {
 
 const getDepartmentNumber = (depNum: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === normalizeDepartmentName(depNum));
 
+export const formatDepartement = (department: string) => `${department} (${getDepartmentNumber(department)})`;
+
 const getDepartmentByZip = (zip?: string) => {
   if (!zip) return;
   if (zip.length !== 5) return;
@@ -194,6 +196,24 @@ const regionList = [
 
 // Attention : Polynésie française et Nouvelle-Calédonie ne sont pas des DROMS mais des cas à part.
 const regionsListDROMS = ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Terres australes et antarctiques françaises"];
+
+export const RegionsHorsMetropole = [
+  "Mayotte",
+  "Wallis-et-Futuna",
+  "Saint-Martin",
+  "Polynésie française",
+  "La Réunion",
+  "Saint-Pierre-et-Miquelon",
+  "Guyane",
+  "Nouvelle-Calédonie",
+  "Guadeloupe",
+  "Martinique",
+  "Corse",
+  "Haute-Corse",
+  "Corse-du-Sud",
+];
+
+export const RegionsMetropole = regionList.filter((region) => !RegionsHorsMetropole.includes(region));
 
 const department2region = {
   Ain: "Auvergne-Rhône-Alpes",
