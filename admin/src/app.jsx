@@ -225,7 +225,7 @@ const Home = () => {
               <Suspense fallback={<Loader />}>
                 <Switch>
                   <RestrictedRoute path="/structure" component={Structure} />
-                  <RestrictedRoute path="/settings" component={Settings} />
+                  <RestrictedRoute path="/settings/:tab?" component={Settings} />
                   <RestrictedRoute path="/alerte" component={Alerte} />
                   <RestrictedRoute path="/profil" component={Profil} />
                   <RestrictedRoute path="/volontaire" component={renderVolontaire} />
