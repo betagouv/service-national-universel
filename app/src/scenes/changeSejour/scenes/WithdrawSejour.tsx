@@ -24,7 +24,6 @@ export default function WithdrawSejour() {
         setMessage={setWithdrawnMessage}
         disabled={!withdrawnReason || !withdrawnMessage}
         onSubmit={() => setOpen(true)}
-        text="Confirmer le désistement"
       />
       <Modal open={open} setOpen={setOpen} withdrawnReason={withdrawnReason} withdrawnMessage={withdrawnMessage} />
     </ChangeSejourContainer>
