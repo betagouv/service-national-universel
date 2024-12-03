@@ -11,6 +11,7 @@ type NavbarControlledProps = {
   active?: string;
   onTabChange?: (id: string) => void;
   button?: Array<React.ReactNode>;
+  className?: string;
 };
 
 export default function NavbarControlled({
@@ -18,10 +19,16 @@ export default function NavbarControlled({
   active,
   onTabChange,
   button,
+  className,
 }: NavbarControlledProps) {
   return (
-    <div className="flex justify-between border-b border-gray-200 mb-8">
-      <div className="flex gap-2 mt-3">
+    <div
+      className={cx(
+        "flex justify-between border-b border-gray-200 mb-8 pt-3",
+        className,
+      )}
+    >
+      <div className="flex gap-2">
         {tabs.map((tabItem, index) => (
           <div
             key={`tab-${index}`}

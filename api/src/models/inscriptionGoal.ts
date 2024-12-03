@@ -1,11 +1,8 @@
-import { config } from "../config";
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
-import mongooseElastic from "@selego/mongoose-elastic";
 
 import { InscriptionGoalSchema, InterfaceExtended } from "snu-lib";
 
-import esClient from "../es";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
 const MODELNAME = "inscriptiongoal";
@@ -35,10 +32,6 @@ schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-
-if (config.ENABLE_MONGOOSE_ELASTIC) {
-  schema.plugin(mongooseElastic(esClient), MODELNAME);
-}
 
 type InscriptionGoalType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type InscriptionGoalDocument<T = {}> = DocumentExtended<InscriptionGoalType & T>;

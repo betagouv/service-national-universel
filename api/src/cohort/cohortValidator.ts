@@ -119,7 +119,7 @@ const cohortGroupSchema = Joi.object({
   name: Joi.string().required(),
   type: Joi.string().valid("VOLONTAIRE", "CLE").required(),
   year: Joi.number().required(),
-});
+}).allow(null);
 
 export const CohortsRoutesSchema = {
   PostEligibility: PostEligibilityRouteSchema,
