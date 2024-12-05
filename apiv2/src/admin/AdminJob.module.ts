@@ -19,12 +19,14 @@ import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phas
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { FileProvider } from "@shared/infra/File.provider";
 import { FileGateway } from "@shared/core/File.gateway";
+import { TaskGateway } from "@task/core/Task.gateway";
 import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
 
 @Module({
     imports: [ClsModule.forRoot({}), ConfigModule, TaskModule, DatabaseModule],
     providers: [
         Logger,
+
         AdminTaskConsumer,
         AdminTaskRepository,
         ...jeuneMongoProviders,
@@ -37,6 +39,7 @@ import { useCaseProvider as referentielUseCaseProvider } from "./infra/referenti
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
         { provide: FileGateway, useClass: FileProvider },
+        { provide: TaskGateway, useClass: AdminTaskRepository },
         // add use case here
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
