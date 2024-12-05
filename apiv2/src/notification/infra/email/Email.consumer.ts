@@ -15,11 +15,14 @@ export class EmailConsumer extends WorkerHost {
         super();
     }
     async process(job: Job<EmailParams, any, EmailTemplate>): Promise<ConsumerResponse> {
-        this.logger.log(`Sending email template "${job.name}" to ${JSON.stringify(job.data)}`, EmailConsumer.name);
+        this.logger.log(`Sending email template "${job.name}" to ${JSON.stringify(job.data?.to)}`, EmailConsumer.name);
         return this.emailProvider
             .send(job.name, job.data)
             .then(() => {
-                this.logger.log(`Email template "${job.name}" sent to ${JSON.stringify(job.data)}`, EmailConsumer.name);
+                this.logger.log(
+                    `OK : Email template "${job.name}" sent to ${JSON.stringify(job.data?.to)}`,
+                    EmailConsumer.name,
+                );
                 return ConsumerResponse.SUCCESS;
             })
             .catch((error) => {
