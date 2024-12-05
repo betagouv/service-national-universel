@@ -12,7 +12,6 @@ export interface SimulationPhase1TaskParameters {
 }
 
 export type SimulationPhase1TaskHTSTaskResult = {
-  rapportUrl: string;
   rapportKey: string;
 };
 

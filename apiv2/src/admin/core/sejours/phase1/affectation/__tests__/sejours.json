@@ -17,7 +17,7 @@
     },
     {
         "id": "6597ea68b86afb08146f0372",
-        "placesRestantes": 17,
+        "placesRestantes": 15,
         "placesTotal": 112,
         "chefDeCentreReferentId": "6296293e5a4f05074b73a8ac",
         "centreId": "657338286e801c0816d598ec",
@@ -65,7 +65,7 @@
     },
     {
         "id": "65c4b3870e0569081d394125",
-        "placesRestantes": 9,
+        "placesRestantes": 8,
         "placesTotal": 126,
         "chefDeCentreReferentId": "647842835c060b13f911b3b7",
         "centreId": "643fbcd7ae348d19a6cefcd3",
@@ -73,7 +73,7 @@
     },
     {
         "id": "65c4b2c10e0569081d38f974",
-        "placesRestantes": 16,
+        "placesRestantes": 8,
         "placesTotal": 126,
         "chefDeCentreReferentId": "6283c36e0a432d07451670bb",
         "centreId": "6568a84d8bc29e0819ab5935",

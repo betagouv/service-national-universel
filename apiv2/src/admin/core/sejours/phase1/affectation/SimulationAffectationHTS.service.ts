@@ -1,14 +1,20 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 
-import { YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { formatDepartement, getDepartmentByNumber, getDistance, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 import { FileGateway } from "@shared/core/File.gateway";
 
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
+import { RouteXLS } from "@admin/core/referentiel/routes/ReferentielRoutesModel";
+
 import { SejourModel } from "../sejour/Sejour.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { CentreModel } from "../centre/Centre.model";
+import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 
 type JeuneRapport = Pick<
     JeuneModel,
@@ -29,11 +35,16 @@ type JeuneRapport = Pick<
     | "handicapMemeDepartment"
 >;
 
+export interface ChangementDepartement {
+    origine: string;
+    destination: string;
+}
+
 export type RapportData = {
     summary: { [key: string]: string }[];
     jeunesNouvellementAffectedList: Array<
         JeuneRapport & {
-            "Point de rassemblement (id)": string;
+            "Point de rassemblement calculé": string;
             sejourId: string;
         }
     >;
@@ -55,7 +66,11 @@ export type RapportData = {
             tauxRemplissageCentre: string;
         }
     >;
-    pdrList: Omit<PointDeRassemblementModel, "sessionIds" | "code" | "sessionNoms" | "complementAddress">[];
+    pdrList: Array<
+        Omit<PointDeRassemblementModel, "sessionIds" | "code" | "sessionNoms" | "complementAddress"> & {
+            localisation: string;
+        }
+    >;
     centreList: Array<
         Partial<CentreModel> & {
             tauxRemplissage: string;
@@ -95,14 +110,83 @@ export interface RatioRepartition {
     psh: number;
 }
 
-export type JeuneAffectationModel = JeuneModel & { pointDeRassemblementIds: string[] };
+export type JeuneAffectationModel = JeuneModel & {
+    pointDeRassemblementAffectedId?: string;
+    pointDeRassemblementIds: string[];
+    departementOrigine?: string;
+    regionOrigine?: string;
+};
 
 @Injectable()
 export class SimulationAffectationHTSService {
     constructor(
+        @Inject(PointDeRassemblementGateway) private readonly pdrGateway: PointDeRassemblementGateway,
+        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(FileGateway) private readonly fileService: FileGateway,
         private readonly logger: Logger,
     ) {}
+
+    async getChangementsDepartements(sdrImportId: string) {
+        const importTask: ReferentielImportTaskModel = await this.taskGateway.findById(sdrImportId);
+        if (!importTask.metadata?.parameters?.fileKey) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_FOUND,
+                "Fichier associé à l'import des routes introuvable",
+            );
+        }
+        const importedFile = await this.fileService.downloadFile(importTask.metadata.parameters.fileKey);
+        const parsedFile = await this.fileService.parseXLS<RouteXLS>(importedFile.Body);
+
+        const changementDepartementPdrs = parsedFile.reduce(
+            (acc, line) => {
+                const commentaire = line["Commentaire interne sur l'enregistrement"];
+                const matriculePdr = line["Code point de rassemblement initial"];
+                // ex: DEPARTEMENT 93
+                const numDepartement = commentaire?.match(/DEPARTEMENT ([0-9]{2})/)?.[1];
+                if (matriculePdr && numDepartement) {
+                    if (!acc[numDepartement]) {
+                        acc[numDepartement] = [];
+                    }
+                    if (!acc[numDepartement].includes(matriculePdr)) {
+                        acc[numDepartement].push(matriculePdr);
+                    }
+                }
+                return acc;
+            },
+            {} as Record<string, string[]>,
+        );
+
+        const changementDepartement: Array<ChangementDepartement> = [];
+        for (const numDepartement of Object.keys(changementDepartementPdrs)) {
+            const departementNom = getDepartmentByNumber(numDepartement);
+            if (!departementNom) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.NOT_FOUND,
+                    `Departement "${numDepartement}" introuvable`,
+                );
+            }
+            const matriculePdrList = changementDepartementPdrs[numDepartement];
+            const pdrList = await this.pdrGateway.findByMatricules(matriculePdrList);
+            if (pdrList.length !== matriculePdrList.length) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.NOT_FOUND,
+                    `Point de rassemblement introuvable pour les matricules ${matriculePdrList.join(",")}`,
+                );
+            }
+            const departementDestination = pdrList[0].departement;
+            if (pdrList.find((pdr) => pdr.departement !== departementDestination)) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.NOT_FOUND,
+                    `Plusieurs départements de destination trouvés pour ${numDepartement} (${matriculePdrList.join(
+                        ",",
+                    )})`,
+                );
+            }
+            changementDepartement.push({ origine: departementNom, destination: departementDestination });
+        }
+
+        return changementDepartement;
+    }
 
     computeRatioRepartition(jeunesList: JeuneModel[]): RatioRepartition {
         if (jeunesList.length === 0) {
@@ -157,7 +241,9 @@ export class SimulationAffectationHTSService {
 
         const tauxRemplissageCentres = sejourList.map((sejour) => {
             if (!sejour.placesTotal) {
-                this.logger.log(`Warning: taille centre NaN -> remplissage fixe a 1 (${sejour.id})`);
+                this.logger.warn(
+                    `Taille centre invalid (${sejour.placesTotal}) -> remplissage fixe à 100% (${sejour.id})`,
+                );
                 return 1;
             }
             return 1.0 - (sejour.placesRestantes || 0) / sejour.placesTotal;
@@ -176,6 +262,7 @@ export class SimulationAffectationHTSService {
         jeuneList: JeuneModel[],
         sejourList: SejourModel[],
         ligneDeBusList: LigneDeBusModel[],
+        pdrList: PointDeRassemblementModel[],
     ): {
         randomJeuneList: JeuneAffectationModel[];
         randomSejourList: SejourModel[];
@@ -186,7 +273,7 @@ export class SimulationAffectationHTSService {
         const randomSejourList: SejourModel[] = JSON.parse(JSON.stringify(sejourList)); // clone
         const randomLigneDeBusList: LigneDeBusModel[] = JSON.parse(JSON.stringify(ligneDeBusList)); // clone
 
-        const pointDeRassemblementParLigneDeBusId = ligneDeBusList.reduce((acc, ligneDeBus) => {
+        const pointDeRassemblementParLigneDeBusIdMap = ligneDeBusList.reduce((acc, ligneDeBus) => {
             acc[ligneDeBus.id] = ligneDeBus.pointDeRassemblementIds;
             return acc;
         }, {});
@@ -222,14 +309,14 @@ export class SimulationAffectationHTSService {
             const jeunePositionDepartementSelected = randomPositionDepartement.slice(0, nbPlacesAAffecter);
 
             // on affecte de maniere aleatoire un nombre de jeunes sur chaque ligne
-            const nbAleatoireJeunesSurLignes = this.getAffectationNombreSurLigne(
+            const nbPlacesDisponibleSurLignesApresAffectation = this.getNombreSurLigneApresAffectation(
                 placesDisponiblesParLigne,
                 nbPlacesAAffecter,
             );
 
             // on verifie si il y a toujours les places disponibles dans les centres:
             const nbAffectectationARealiser = this.verificationCentres(
-                nbAleatoireJeunesSurLignes,
+                nbPlacesDisponibleSurLignesApresAffectation,
                 placesDisponiblesParLigne,
                 ligneDeBusIdList,
                 randomLigneDeBusList,
@@ -239,25 +326,36 @@ export class SimulationAffectationHTSService {
             const randomLigneDeBusIdList = randomLigneDeBusList.map((ligne) => ligne.id);
             const randomCentreIdList = randomSejourList.map((sejour) => sejour.centreId);
 
+            // on affecte chaque jeune a un center et une ligne de bus (+ choix pdr)
             for (
                 let jeuneAAffecterIndex = 0;
                 jeuneAAffecterIndex < nbAffectectationARealiser.length;
                 jeuneAAffecterIndex++
             ) {
-                const posValueLigne = randomLigneDeBusIdList.indexOf(ligneDeBusIdList[jeuneAAffecterIndex]);
-                const posValueCentre = randomCentreIdList.indexOf(centreIdListParLigne[jeuneAAffecterIndex]);
+                const indexLigneDeBus = randomLigneDeBusIdList.indexOf(ligneDeBusIdList[jeuneAAffecterIndex]);
+                const indexCentre = randomCentreIdList.indexOf(centreIdListParLigne[jeuneAAffecterIndex]);
 
-                const nbJeunesAAffecter = nbAffectectationARealiser
+                const nbJeunesAAffecterMin = nbAffectectationARealiser
                     .slice(0, jeuneAAffecterIndex)
                     .reduce((a, b) => a + b, 0);
-                let nmax = nbAffectectationARealiser.slice(0, jeuneAAffecterIndex + 1).reduce((a, b) => a + b, 0);
+                let nbJeunesAAffecterMax = nbAffectectationARealiser
+                    .slice(0, jeuneAAffecterIndex + 1)
+                    .reduce((a, b) => a + b, 0);
 
                 // securite: Plus de jeunes que de places dans le Centre
-                while (nmax - nbJeunesAAffecter > (randomSejourList[posValueCentre].placesRestantes || 0)) {
-                    nmax += -1;
+                while (
+                    nbJeunesAAffecterMax - nbJeunesAAffecterMin >
+                    (randomSejourList[indexCentre].placesRestantes || 0)
+                ) {
+                    nbJeunesAAffecterMax += -1;
                 }
 
-                const randomIndices = jeunePositionDepartementSelected.slice(nbJeunesAAffecter, nmax).map(Number);
+                // Logger.log(
+                //     `nbJeunesAAffecterMin: ${nbJeunesAAffecterMin}, nbJeunesAAffecterMax: ${nbJeunesAAffecterMax}, place: ${randomSejourList[indexCentre].placesRestantes} (${randomSejourList[indexCentre].id})`,
+                // );
+                const randomIndices = jeunePositionDepartementSelected
+                    .slice(nbJeunesAAffecterMin, nbJeunesAAffecterMax)
+                    .map(Number);
                 const jeunesDepartementSelectedIdList = randomIndices.map(
                     (index) => jeuneIdDispoDepartementList[index],
                 );
@@ -270,16 +368,20 @@ export class SimulationAffectationHTSService {
 
                 randomJeuneSelectedIndices.forEach((index) => {
                     const ligneDeBusId = ligneDeBusIdList[jeuneAAffecterIndex];
-                    const pointDeRassemblementIds = pointDeRassemblementParLigneDeBusId[ligneDeBusId];
+                    const pointDeRassemblementIds = pointDeRassemblementParLigneDeBusIdMap[ligneDeBusId];
                     randomJeuneList[index].statusPhase1 = YOUNG_STATUS_PHASE1.AFFECTED;
                     randomJeuneList[index].ligneDeBusId = ligneDeBusId;
                     randomJeuneList[index].pointDeRassemblementIds = pointDeRassemblementIds;
                     randomJeuneList[index].centreId = centreIdListParLigne[jeuneAAffecterIndex];
+                    randomJeuneList[index].pointDeRassemblementAffectedId = this.affecterPdrJeune(
+                        randomJeuneList[index],
+                        pdrList,
+                    );
                 });
 
-                randomLigneDeBusList[posValueLigne].placesOccupeesJeunes += jeunesDepartementSelectedIdList.length;
-                randomSejourList[posValueCentre].placesRestantes =
-                    (randomSejourList[posValueCentre].placesRestantes || 0) - jeunesDepartementSelectedIdList.length;
+                randomLigneDeBusList[indexLigneDeBus].placesOccupeesJeunes += jeunesDepartementSelectedIdList.length;
+                randomSejourList[indexCentre].placesRestantes =
+                    (randomSejourList[indexCentre].placesRestantes || 0) - jeunesDepartementSelectedIdList.length;
             }
         }
 
@@ -292,6 +394,64 @@ export class SimulationAffectationHTSService {
         return { randomJeuneList, randomSejourList, randomLigneDeBusList };
     }
 
+    affecterPdrJeune(
+        jeune: Pick<
+            JeuneAffectationModel,
+            | "id"
+            | "pointDeRassemblementIds"
+            | "localisation"
+            | "handicapMemeDepartment"
+            | "deplacementPhase1Autonomous"
+            | "transportInfoGivenByLocal"
+        >,
+        pdrList: PointDeRassemblementModel[],
+    ) {
+        const pdrIds = jeune.pointDeRassemblementIds || [];
+        if (
+            pdrIds.length === 0 ||
+            jeune.handicapMemeDepartment === "true" ||
+            jeune.deplacementPhase1Autonomous === "true" ||
+            jeune.transportInfoGivenByLocal === "true"
+        ) {
+            this.logger.log(`${jeune.id} Pas de PDR à affecter (${pdrIds.length})`);
+            return undefined;
+        }
+
+        // on récupère le PDR le plus proche du jeune
+        let selectedPdrID = pdrIds.reduce(
+            (acc, pdrId) => {
+                const pdr = pdrList.find((p) => p.id === pdrId);
+                if (!jeune.localisation || !pdr?.localisation) {
+                    return acc;
+                }
+                try {
+                    const distance = getDistance(jeune.localisation, pdr.localisation);
+                    if (distance < acc.distance) {
+                        return { distance, pdrId };
+                    }
+                } catch (e) {
+                    this.logger.warn(
+                        `Invalid location for pdr ${pdrId} (${JSON.stringify(pdr.localisation)}) and young ${
+                            jeune.id
+                        } (${JSON.stringify(jeune.localisation)})`,
+                    );
+                    return acc;
+                }
+                return acc;
+            },
+            { distance: Infinity, pdrId: undefined } as { distance: number; pdrId: string | undefined },
+        ).pdrId;
+
+        // si l'on n'a pas trouve de pdr (pas de localisation), on en prend un au hasard
+        if (!selectedPdrID) {
+            this.logger.warn(`${jeune.id} utilisation d'un PDR aléatoire`);
+            const randomPdrIndex = Math.floor(Math.random() * pdrIds.length);
+            selectedPdrID = pdrIds[randomPdrIndex];
+        }
+
+        return selectedPdrID;
+    }
+
     // methode qui permet de changer l ordre des jeunes de facon aleatoire : numpy.random.shuffle utilise la methode numerique de Fisher-Yates
     // vitesse O(n)
     getPositionJeuneAleatoireParDepartement(distributionJeuneIdDepartementList: string[][]): number[][] {
@@ -302,16 +462,20 @@ export class SimulationAffectationHTSService {
         });
     }
 
+    getJeuneAffectationDepartement(jeune: JeuneModel, changementDepartements: ChangementDepartement[]) {
+        return (
+            changementDepartements.find(({ origine }) => origine === jeune.departement)?.destination ||
+            jeune.departement
+        );
+    }
+
     // Pour chaque departement, on va stocker les jeunes (id) du departement courant, les pdr qui sont dans le departement courant
     // les lignes correspondantes et les centres desservis.
     calculDistributionAffectations(
         jeunesList: JeuneModel[],
         pdrList: PointDeRassemblementModel[],
         ligneDeBusList: LigneDeBusModel[],
-        changementDepartements: { origine: string; destination: string }[],
     ): DistributionJeunesParDepartement {
-        // TODO: changementDepartements, les jeunes qui n’ont pas de PDR dans leur département partent du département indiqué dans le SDR
-
         // on recupere les departements, comme on veut boucler sur les departements, on enleve les doublons
         const departementList = [
             ...new Set([...jeunesList.map((jeune) => jeune.departement), ...pdrList.map((pdr) => pdr.departement)]),
@@ -376,71 +540,86 @@ export class SimulationAffectationHTSService {
     }
 
     // On affecte un nombre aleatoire de jeunes sur les lignes a sa disposition
-    getAffectationNombreSurLigne(placesDisponiblesParLigne: number[], nbPlacesAAffecter: number): number[] {
+    // => Modification des places disponibles pour correspondre exactement au nombre a affecter
+    getNombreSurLigneApresAffectation(placesDisponiblesParLigne: number[], nbPlacesAAffecter: number): number[] {
         const placesLignesRestantes: number[] = JSON.parse(JSON.stringify(placesDisponiblesParLigne)); // on clone le tableau
 
-        const somme = placesLignesRestantes.reduce((a, b) => a + b, 0);
+        const sommePlaceRestantes = placesLignesRestantes.reduce((a, b) => a + b, 0);
         // on verifie que le nombre de places est plus grand que celui des jeunes dispos (normalement deja verifie)
-        if (somme !== nbPlacesAAffecter) {
-            let diff = somme - nbPlacesAAffecter;
+        if (sommePlaceRestantes > nbPlacesAAffecter) {
+            let diff = sommePlaceRestantes - nbPlacesAAffecter;
             while (diff > 0) {
                 // tant que l on peut ajouter un jeune
                 const randomIndexLigne = Math.floor(Math.random() * placesLignesRestantes.length); // on selectionne aleatoirement une ligne
-                placesLignesRestantes[randomIndexLigne] -= 1; // on enleve une place sur la ligne
-                diff -= 1; // on enleve un jeune a affecter
+                if (placesLignesRestantes[randomIndexLigne] > 0) {
+                    // si il y a encore des places disponibles sur la ligne
+                    placesLignesRestantes[randomIndexLigne] -= 1; // on enleve une place sur la ligne
+                    diff -= 1; // on enleve un jeune a affecter
+                }
             }
+        } else if (nbPlacesAAffecter > sommePlaceRestantes) {
+            this.logger.warn("Il y a plus de jeunes que de places disponibles sur les lignes");
         }
         return placesLignesRestantes;
     }
 
     // Correction pour affectation des surnumeraires
     verificationCentres(
-        nbAleatoireJeunesSurLignes: number[],
+        nbPlacesDisponibleSurLignesApresAffectation: number[],
         placesDisponiblesParLigne: number[],
         distributionLigneDeBusIdDepartement: string[],
         randomLigneDeBusList: LigneDeBusModel[],
         randomSejourList: SejourModel[],
     ): number[] {
-        const nbJeunesAAffecter: number[] = JSON.parse(JSON.stringify(nbAleatoireJeunesSurLignes)); // clone
-        const placesLignes = JSON.parse(JSON.stringify(placesDisponiblesParLigne)); // clone
+        // Copie des tableaux d'entrée pour éviter de modifier les données originales
+        const nbJeunesAAffecter: number[] = JSON.parse(JSON.stringify(nbPlacesDisponibleSurLignesApresAffectation));
+        const placesLignes = JSON.parse(JSON.stringify(placesDisponiblesParLigne));
 
-        // TODO: simplifier
-        const ligneDeBusIdList = randomLigneDeBusList.map((ligne) => ligne.id);
-        const ligneDeBusIndexList = distributionLigneDeBusIdDepartement.map((id) => ligneDeBusIdList.indexOf(id));
-        const ligneDeBusList = ligneDeBusIndexList.map((index) => randomLigneDeBusList[index]);
-        const ligneCenterId = ligneDeBusList.map((ligne) => ligne.centreId);
+        // Filtrage des lignes de bus et des séjours qui correspondent aux IDs de ligne de bus spécifiés
+        const ligneDeBusList = randomLigneDeBusList.filter((ligne) =>
+            distributionLigneDeBusIdDepartement.includes(ligne.id),
+        );
+        const centreList = ligneDeBusList.map((ligne) =>
+            randomSejourList.find((sejour) => sejour.centreId === ligne.centreId),
+        );
+        // Récupération du nombre de places restantes pour chaque centre
+        const placesLeftList = centreList.map((centre) => centre?.placesRestantes || 0);
 
-        const centreIdList = randomSejourList.map((sejour) => sejour.centreId);
-        const centreIndexList = ligneCenterId.map((id) => centreIdList.indexOf(id));
-        const centreList = centreIndexList.map((index) => randomSejourList[index]);
-        const placesLeftList = centreList.map((centre) => centre.placesRestantes || 0);
-
+        // Mélange aléatoire de la liste des IDs de ligne de bus
         const randomLecture = this.randomizeArray(distributionLigneDeBusIdDepartement, true);
 
+        // Parcours de chaque ligne de bus et correction des affectations en fonction des places disponibles dans les centres
         for (let ligneIndex = 0; ligneIndex < distributionLigneDeBusIdDepartement.length; ligneIndex++) {
             const randomIndex = randomLecture[ligneIndex];
             const nbPlacesCentre = placesLeftList[randomIndex];
             const nbPlacesLigne = placesDisponiblesParLigne[randomIndex];
-            const nbPlaceDispo = Math.min(nbPlacesCentre || 0, nbPlacesLigne);
+            const nbPlaceDispo = Math.min(nbPlacesCentre || 0, nbPlacesLigne || 0);
             let diff = nbJeunesAAffecter[randomIndex] - nbPlaceDispo;
 
+            // Si le nombre de places disponibles dans le centre/bus est inférieur au nombre de places à affecter
             if (diff > 0) {
+                // Ajustement du nombre de places à affecter sur la ligne
                 nbJeunesAAffecter[randomIndex] = nbPlaceDispo;
+                // Mise à jour du nombre de places restantes dans le centre et sur la ligne
                 placesLeftList[randomIndex] += -nbJeunesAAffecter[randomIndex];
                 placesLignes[randomIndex] += -nbJeunesAAffecter[randomIndex];
 
+                // Parcours des autres lignes de bus pour tenter de réaffecter les places manquantes
                 for (
                     let ligneIndexNiveau2 = 0;
                     ligneIndexNiveau2 < distributionLigneDeBusIdDepartement.length;
                     ligneIndexNiveau2++
                 ) {
+                    // Si la ligne de bus n'est pas la même et qu'il reste des places à réaffecter
                     if (ligneIndexNiveau2 !== ligneIndex && diff > 0) {
                         const randomIndexNiveau2 = randomLecture[ligneIndexNiveau2];
                         const nbPlacesCentreNiveau2 = placesLeftList[randomIndexNiveau2];
                         const nbPlacesLigneNiveau2 = placesLignes[randomIndexNiveau2];
                         const nbPlaceDispoNiveau2 = Math.min(nbPlacesCentreNiveau2, nbPlacesLigneNiveau2);
 
+                        // Si il y a des places disponibles dans le centre et sur la ligne
                         if (nbPlaceDispoNiveau2 > 0) {
+                            // Ajustement du nombre de places à affecter sur la ligne et mise à jour du nombre de places restantes dans le centre et sur la ligne
                             nbJeunesAAffecter[randomIndexNiveau2] += Math.min(diff, nbPlaceDispoNiveau2);
                             diff += -Math.min(diff, nbPlaceDispoNiveau2);
                             placesLeftList[randomIndexNiveau2] += -Math.min(diff, nbPlaceDispoNiveau2);
@@ -449,12 +628,13 @@ export class SimulationAffectationHTSService {
                     }
                 }
             } else {
-                // code inutilisé ?
+                // Mise à jour du nombre de places restantes dans le centre et sur la ligne
                 placesLeftList[randomLecture[ligneIndex]] += -nbJeunesAAffecter[randomLecture[ligneIndex]];
                 placesLignes[randomLecture[ligneIndex]] += -nbJeunesAAffecter[randomLecture[ligneIndex]];
             }
         }
 
+        // Retourne le tableau des nombres de jeunes à affecter sur chaque ligne de bus
         return nbJeunesAAffecter;
     }
 
@@ -511,11 +691,11 @@ export class SimulationAffectationHTSService {
     // here we verify that the number of remaining seats is non-negative......
     isPlacesRestantesCoherentes(ligneDeBusList: LigneDeBusModel[], sejourList: SejourModel[]): boolean {
         if (ligneDeBusList.find((ligne) => ligne.capaciteJeunes - ligne.placesOccupeesJeunes < 0)) {
-            this.logger.log("lines placesLibres not safe !");
+            this.logger.warn("lines placesLibres not safe !");
             return false;
         }
         if (sejourList.find((sejour) => sejour.placesRestantes !== undefined && sejour.placesRestantes < 0)) {
-            this.logger.log("centre placesLeft not safe !");
+            this.logger.warn("centre placesLeft not safe !");
             return false;
         }
         return true;
@@ -543,9 +723,9 @@ export class SimulationAffectationHTSService {
         let departmentHortZone: string[] = [];
 
         let pasDeligne = 0;
-        let lignesNames = "";
+        let lignesNames: string[] = [];
         let pasDecentre = 0;
-        let centresNames = "";
+        let centresNames: string[] = [];
 
         let limite = 0;
 
@@ -601,13 +781,13 @@ export class SimulationAffectationHTSService {
                 isSansLigne = true;
                 pasDeligne += 1;
                 centreNameList.forEach((centreNom) => {
-                    centresNames += centreNom;
+                    centresNames.push(centreNom);
                 });
             } else if (busIdList.length !== 0 && centreNameList.length === 0) {
                 isSansCentre = true;
                 pasDecentre += 1;
                 busIdList.forEach((numeroLigne) => {
-                    lignesNames += numeroLigne;
+                    lignesNames.push(numeroLigne);
                 });
             } else {
                 isProblemePlace = true;
@@ -632,9 +812,10 @@ export class SimulationAffectationHTSService {
             jeunes,
             stats: [
                 "jeunes probablement hors zones : " + probHorsZone,
-                "          -> Liste des départements hors zones : " + departmentHortZone.join(", "),
-                "jeunes pas de ligne disponible pour centre(s) " + centresNames + " : " + pasDeligne,
-                "jeunes pas de centre disponible pour ligne(s) " + lignesNames + " : " + pasDecentre,
+                "          -> Liste des départements hors zones : " +
+                    departmentHortZone.map(formatDepartement).join(", "),
+                "jeunes pas de ligne disponible pour centre(s) " + centresNames.join(", ") + " : " + pasDeligne,
+                "jeunes pas de centre disponible pour ligne(s) " + lignesNames.join(", ") + " : " + pasDecentre,
                 "jeunes non affectés pour problèmes de places : " + limite,
             ],
         };
@@ -647,24 +828,30 @@ export class SimulationAffectationHTSService {
         centreList: CentreModel[],
         pdrList: PointDeRassemblementModel[],
         jeunesAvantAffectationList: JeuneModel[],
-        jeuneIntraDepartementList: JeuneModel[],
+        jeuneIntraDepartementList: JeuneAffectationModel[],
+        changementDepartements: ChangementDepartement[],
         analytics: Analytics,
     ): RapportData {
         const jeunesAffectedList = jeunesList.filter((jeune) => jeune.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED);
         const regionsConcerneeList = [...new Set(pdrList.map((pdr) => pdr.region))];
-        const sejourCentreIdList = sejourList.map((s) => s.centreId || "");
-        const sejourIdList = sejourList.map((s) => s.id);
+        const { sejourIdList, sejourCentreIdList } = sejourList.reduce(
+            (acc, sejour) => {
+                acc.sejourIdList.push(sejour.id);
+                acc.sejourCentreIdList.push(sejour.centreId || "");
+                return acc;
+            },
+            { sejourIdList: [], sejourCentreIdList: [] } as {
+                sejourIdList: string[];
+                sejourCentreIdList: string[];
+            },
+        );
 
         const pdrIdJeuneAffectedList: string[] = [];
         const jeuneSejourIdList: string[] = [];
 
         for (const jeune of jeunesAffectedList) {
-            const pdrIds = jeune.pointDeRassemblementIds || [];
-            const randomPdrIndex = Math.floor(Math.random() * pdrIds.length);
-            const selectedPdrID = pdrIds[randomPdrIndex]?.replace(/[^a-zA-Z0-9]+/g, ""); // ?
-            pdrIdJeuneAffectedList.push(selectedPdrID);
+            pdrIdJeuneAffectedList.push(jeune.pointDeRassemblementAffectedId || "");
 
-            // FIXME: index non coherent entre les deux listes ?
             sejourCentreIdList.forEach((centreId, index) => {
                 if (jeune.centreId === centreId) {
                     jeuneSejourIdList.push(sejourIdList[index]);
@@ -672,7 +859,7 @@ export class SimulationAffectationHTSService {
             });
         }
 
-        const jeunesAffectedListUpdated = jeunesAffectedList.map(this.mapJeuneRapport);
+        const jeunesAffectedListRapport = jeunesAffectedList.map(this.mapJeuneRapport);
 
         const jeunesDejaAffectedIdList = jeunesAvantAffectationList.reduce((acc: string[], jeune) => {
             if (jeune.centreId) {
@@ -684,12 +871,12 @@ export class SimulationAffectationHTSService {
             .filter((jeune) => jeunesDejaAffectedIdList.includes(jeune.id))
             .map(this.mapJeuneRapport);
 
-        const jeunesNouvellementAffectedList = jeunesAffectedListUpdated.reduce(
+        const jeunesNouvellementAffectedList = jeunesAffectedListRapport.reduce(
             (acc: RapportData["jeunesNouvellementAffectedList"], jeune, index) => {
                 if (!jeunesDejaAffectedIdList.includes(jeune.id)) {
                     acc.push({
                         ...jeune,
-                        "Point de rassemblement (id)": pdrIdJeuneAffectedList[index],
+                        "Point de rassemblement calculé": pdrIdJeuneAffectedList[index],
                         sejourId: jeuneSejourIdList[index],
                     });
                 }
@@ -807,7 +994,11 @@ export class SimulationAffectationHTSService {
             ville: pdr.ville,
             codePostal: pdr.codePostal,
             particularitesAcces: pdr.particularitesAcces,
-            geoLoc: pdr.geoLoc,
+            localisation: `${pdr.localisation?.lat} ${pdr.localisation?.lon}`,
+            ligneDeBus: ligneDeBusList
+                .filter((ligne) => ligne.pointDeRassemblementIds.includes(pdr.id))
+                .map((ligne) => ligne.numeroLigne)
+                .join(", "),
         }));
 
         const summary = [
@@ -815,6 +1006,13 @@ export class SimulationAffectationHTSService {
             "En attente d'affectation : " + jeuneAttenteAffectationList.length,
             "Taux d'erreur pour l'iteration : " + analytics.selectedCost,
             ...infoNonAffecetes.stats,
+            "Changement de département : " +
+                changementDepartements
+                    .map(
+                        ({ origine, destination }) =>
+                            `${formatDepartement(origine)} -> ${formatDepartement(destination)}`,
+                    )
+                    .join(", "),
         ].map((ligne) => ({
             "": ligne,
         }));
@@ -852,7 +1050,7 @@ export class SimulationAffectationHTSService {
         // TODO: récupération de la logique de génération du PDF
     }
 
-    mapJeuneRapport(jeune: JeuneModel) {
+    mapJeuneRapport(jeune: JeuneAffectationModel) {
         return {
             id: jeune.id,
             statusPhase1: jeune.statusPhase1,
@@ -868,7 +1066,8 @@ export class SimulationAffectationHTSService {
             status: jeune.status,
             prenom: jeune.prenom,
             nom: jeune.nom,
-            handicapMemeDepartment: ["true", "oui"].includes(jeune.handicapMemeDepartment!) ? "oui" : "non",
+            handicapMemeDepartement: ["true", "oui"].includes(jeune.handicapMemeDepartment!) ? "oui" : "non",
+            departementOrigine: jeune.departementOrigine,
         };
     }
 
@@ -880,10 +1079,14 @@ export class SimulationAffectationHTSService {
         if (regionComparison !== 0) {
             return regionComparison;
         }
+        // si c'est la même région on tri par departement
         return itemA.departement?.localeCompare(itemB.departement!) || 0;
     }
 
     formatPourcent(value: number): string {
+        if (!value && value !== 0) {
+            return "";
+        }
         return (value * 100).toFixed(2) + "%";
     }
 
