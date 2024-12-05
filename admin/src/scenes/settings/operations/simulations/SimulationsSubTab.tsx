@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { HiOutlinePaperClip, HiPlay } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
 
-import { formatDateFR, getZonedDate, Phase1Routes, TaskName, translate, translateSimulationName, translateTaskStatus } from "snu-lib";
+import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translate, translateSimulationName, translateTaskStatus } from "snu-lib";
 import { Badge, DataTable, TBadgeStatus, Tooltip } from "@snu/ds/admin";
 
 import { downloadSecuredFile } from "@/services/file.service";
@@ -13,7 +13,7 @@ import ActionCell from "./ActionCell";
 import SimulationHtsResultStartButton from "./simulationHts/SimulationHtsResultStartButton";
 
 interface SimulationsSubTabProps {
-  sessionId: string;
+  session: CohortDto;
 }
 
 const MAPPING_STATUS_COLOR: { [key: string]: TBadgeStatus } = {
@@ -23,7 +23,7 @@ const MAPPING_STATUS_COLOR: { [key: string]: TBadgeStatus } = {
   FAILED: "REFUSED",
 };
 
-export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps) {
+export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
   const { search } = useLocation();
   const currentAction = new URLSearchParams(search).get("action") || "";
 
@@ -41,7 +41,7 @@ export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps)
     data: simulations,
   } = useQuery<Phase1Routes["GetSimulationsRoute"]["response"]>({
     queryKey: ["phase-simulations", filters.action, sort],
-    queryFn: async () => Phase1Service.getSimulations(sessionId, { name: filters.action, sort }),
+    queryFn: async () => Phase1Service.getSimulations(session._id!, { name: filters.action, sort }),
   });
 
   const simulationRows = useMemo(() => {
@@ -98,10 +98,10 @@ export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps)
             ),
           },
           {
-            key: "rapportUrl",
+            key: "rapportKey",
             title: "Simulat.",
             renderCell: (simulation) =>
-              simulation.metadata?.results?.rapportUrl && (
+              simulation.metadata?.results?.rapportKey && (
                 <>
                   <button onClick={() => downloadSecuredFile(simulation.metadata?.results?.rapportKey)} className="border-[1px] border-blue-600 rounded-full p-2.5">
                     <HiOutlinePaperClip size={24} />

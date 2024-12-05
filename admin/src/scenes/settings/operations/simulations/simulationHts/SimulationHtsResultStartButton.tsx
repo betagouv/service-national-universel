@@ -3,8 +3,8 @@ import React, { useMemo } from "react";
 import { HiOutlineLightningBolt, HiPlay } from "react-icons/hi";
 
 import { formatDepartement, region2department, RegionsMetropole, SimulationAffectationHTSTaskDto, translate } from "snu-lib";
-import { Button, Modal } from "@snu/ds/admin";
-import { useToggle } from "react-use";
+import { Button, Modal, SectionSwitcher } from "@snu/ds/admin";
+import { useSetState, useToggle } from "react-use";
 
 interface SimulationHtsResultStartButtonProps {
   simulation: unknown;
@@ -13,6 +13,11 @@ interface SimulationHtsResultStartButtonProps {
 export default function SimulationHtsResultStartButton({ simulation }: SimulationHtsResultStartButtonProps) {
   const simulationHts = simulation as SimulationAffectationHTSTaskDto;
 
+  const [state, setState] = useSetState<{
+    affecterPDR: boolean;
+  }>({
+    affecterPDR: true,
+  });
   const [showModal, toggleModal] = useToggle(false);
 
   const regions = useMemo(
@@ -80,10 +85,7 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
               </div>
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Points de rassemblement</h2>
-                <div className="flex gap-2">
-                  <div className="text-gray-400">Affecter les PDR&nbsp;:</div>
-                  <div className="text-sm leading-5 font-normal">{simulationHts.metadata?.parameters?.affecterPDR ? "Oui" : "Non"}</div>
-                </div>
+                <SectionSwitcher title="Affecter les PDR" value={state.affecterPDR} onChange={(affecterPDR) => setState({ affecterPDR })} />
               </div>
             </div>
           </div>

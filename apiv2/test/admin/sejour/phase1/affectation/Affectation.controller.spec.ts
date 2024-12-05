@@ -40,93 +40,111 @@ describe("AffectationController", () => {
         expect(affectationController).toBeDefined();
     });
 
-    it("/POST affectation/:id/simulation should return 400 for invalid params", async () => {
-        const session = await createSession();
+    describe("POST /affectation/:id/simulation", () => {
+        it("should return 400 for invalid params", async () => {
+            const session = await createSession();
 
-        const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulations`);
+            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulations`);
 
-        expect(response.status).toBe(400);
-    });
-
-    it("/POST affectation/:id/simulation should return 400 for invalid niveauScolaires", async () => {
-        const session = await createSession();
-
-        const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulations`).send({
-            niveauScolaires: [],
-            departements: departmentList,
-            changementDepartements: [],
-            etranger: false,
-            affecterPDR: false,
+            expect(response.status).toBe(400);
         });
 
-        expect(response.status).toBe(400);
-    });
+        it("should return 400 for invalid niveauScolaires", async () => {
+            const session = await createSession();
 
-    it("/POST affectation/:id/simulation should return 400 for invalid departement", async () => {
-        const session = await createSession();
-
-        const response = await request(app.getHttpServer())
-            .post(`/affectation/${session.id}/simulations`)
-            .send({
-                niveauScolaires: Object.values(GRADES),
-                departements: [],
-                changementDepartements: [],
-                etranger: false,
-                affecterPDR: false,
-            });
-
-        expect(response.status).toBe(400);
-    });
-
-    it("/POST affectation/:id/simulation should return 400 for invalid departement", async () => {
-        const session = await createSession();
-
-        const response = await request(app.getHttpServer())
-            .post(`/affectation/${session.id}/simulations`)
-            .send({
-                niveauScolaires: Object.values(GRADES),
-                departements: ["nonInexistant"],
-                changementDepartements: [],
-                etranger: false,
-                affecterPDR: false,
-            });
-
-        expect(response.status).toBe(400);
-    });
-
-    it("/POST affectation/:id/simulation should return 400 for departement hors metropole", async () => {
-        const session = await createSession();
-
-        const response = await request(app.getHttpServer())
-            .post(`/affectation/${session.id}/simulations`)
-            .send({
-                niveauScolaires: Object.values(GRADES),
+            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulations`).send({
+                niveauScolaires: [],
                 departements: departmentList,
-                changementDepartements: [],
+                sdrImportId: new mongoose.Types.ObjectId().toString(),
                 etranger: false,
                 affecterPDR: false,
             });
 
-        expect(response.status).toBe(400);
-    });
+            expect(response.status).toBe(400);
+        });
 
-    it("/POST affectation/:id/simulation should return 201", async () => {
-        const session = await createSession();
+        it("should return 400 for invalid departement", async () => {
+            const session = await createSession();
 
-        const response = await request(app.getHttpServer())
-            .post(`/affectation/${session.id}/simulations`)
-            .send({
-                niveauScolaires: Object.values(GRADES),
-                departements: RegionsMetropole.flatMap((region) => region2department[region]),
-                changementDepartements: [],
-                etranger: false,
-                affecterPDR: false,
-            });
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulations`)
+                .send({
+                    niveauScolaires: Object.values(GRADES),
+                    departements: [],
+                    sdrImportId: new mongoose.Types.ObjectId().toString(),
+                    etranger: false,
+                    affecterPDR: false,
+                });
 
-        expect(response.status).toBe(201);
-        expect(response.body.name).toBe(TaskName.AFFECTATION_HTS_SIMULATION);
-        expect(response.body.status).toBe(TaskStatus.PENDING);
-        expect(response.body.metadata.parameters.sessionId).toBe(session.id);
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 400 for invalid departement", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulations`)
+                .send({
+                    niveauScolaires: Object.values(GRADES),
+                    departements: ["nonInexistant"],
+                    sdrImportId: new mongoose.Types.ObjectId().toString(),
+                    etranger: false,
+                    affecterPDR: false,
+                });
+
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 400 for departement hors metropole", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulations`)
+                .send({
+                    niveauScolaires: Object.values(GRADES),
+                    departements: departmentList,
+                    sdrImportId: new mongoose.Types.ObjectId().toString(),
+                    etranger: false,
+                    affecterPDR: false,
+                });
+
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 400 when sdrImportId is not valid", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulations`)
+                .send({
+                    niveauScolaires: Object.values(GRADES),
+                    departements: RegionsMetropole.flatMap((region) => region2department[region]),
+                    sdrImportId: "123456789",
+                    etranger: false,
+                    affecterPDR: false,
+                });
+
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 201", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulations`)
+                .send({
+                    niveauScolaires: Object.values(GRADES),
+                    departements: RegionsMetropole.flatMap((region) => region2department[region]),
+                    sdrImportId: new mongoose.Types.ObjectId().toString(),
+                    etranger: false,
+                    affecterPDR: false,
+                });
+
+            expect(response.status).toBe(201);
+            expect(response.body.name).toBe(TaskName.AFFECTATION_HTS_SIMULATION);
+            expect(response.body.status).toBe(TaskStatus.PENDING);
+            expect(response.body.metadata.parameters.sessionId).toBe(session.id);
+        });
     });
 
     afterAll(async () => {
