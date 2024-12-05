@@ -61,11 +61,14 @@ export interface Recipient {
     name?: string;
 }
 
+// TODO : ajouter les pièces jointes
 export type EmailProviderParams = {
     subject?: string;
     templateId: number;
     sender?: { name?: string; email: string };
     to: Recipient[];
+    cc?: Recipient[];
+    bcc?: Recipient[];
     replyTo?: { email: string; name?: string };
     headers?: { [key: string]: string };
     params?: { [key: string]: string };
