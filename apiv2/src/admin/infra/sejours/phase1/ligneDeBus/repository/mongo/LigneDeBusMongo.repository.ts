@@ -50,4 +50,9 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         const pointDeRassemblements = await this.pointDeRassemblementMongooseEntity.find({ cohortId: sessionId });
         return LigneDeBusMapper.toModels(pointDeRassemblements);
     }
+
+    async findBySessionNom(sessionNom: string): Promise<LigneDeBusModel[]> {
+        const pointDeRassemblements = await this.pointDeRassemblementMongooseEntity.find({ cohort: sessionNom });
+        return LigneDeBusMapper.toModels(pointDeRassemblements);
+    }
 }
