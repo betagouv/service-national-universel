@@ -6,7 +6,7 @@ import { ContactProvider } from "../Contact.provider";
 import { EmailProvider } from "../Email.provider";
 
 @Injectable()
-export class MockEmailBrevoProvider implements EmailProvider, ContactProvider {
+export class EmailBrevoMockProvider implements EmailProvider, ContactProvider {
     constructor() {}
 
     // TODO : build template, then send to mailCatcher
