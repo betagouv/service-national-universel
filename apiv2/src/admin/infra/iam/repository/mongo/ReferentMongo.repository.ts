@@ -11,6 +11,7 @@ import { ContactGateway } from "../../Contact.gateway";
 import { REFERENT_MONGOOSE_ENTITY, ReferentDocument } from "../../provider/ReferentMongo.provider";
 import { ReferentMapper } from "./Referent.mapper";
 import { ReferentType } from "snu-lib";
+import { OperationType } from "@notification/infra/email/Contact";
 
 @Injectable()
 export class ReferentRepository implements ReferentGateway {
@@ -28,6 +29,10 @@ export class ReferentRepository implements ReferentGateway {
         await this.updateEntity({
             _id: referent._id,
             deletedAt: this.clockGateway.now(),
+        });
+        await this.contactGateway.syncReferent({
+            ...ReferentMapper.toModel(referent),
+            operation: OperationType.DELETE,
         });
         return;
     }
@@ -47,7 +52,10 @@ export class ReferentRepository implements ReferentGateway {
         return await this.referentMongooseEntity
             .create(ReferentMapper.toEntityCreate(referent))
             .then((referentEntity) => {
-                this.contactGateway.syncReferent(ReferentMapper.toModel(referentEntity));
+                this.contactGateway.syncReferent({
+                    ...ReferentMapper.toModel(referentEntity),
+                    operation: OperationType.CREATE,
+                });
                 return ReferentMapper.toModel(referentEntity);
             });
     }
@@ -102,7 +110,10 @@ export class ReferentRepository implements ReferentGateway {
         //@ts-expect-error fromUser unknown
         await retrievedReferent.save({ fromUser: user });
 
-        this.contactGateway.syncReferent(ReferentMapper.toModel(retrievedReferent));
+        this.contactGateway.syncReferent({
+            ...ReferentMapper.toModel(retrievedReferent),
+            operation: OperationType.UPDATE,
+        });
 
         return retrievedReferent;
     }
