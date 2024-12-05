@@ -8,6 +8,7 @@ import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 
 import { PostSimulationsPayloadDto } from "./Affectation.validation";
+import { SimulationAffectationHTSTaskParameters } from "snu-lib/dist/dto/phase1/affectation/SimulationAffectationHTSTaskDto";
 
 @Controller("affectation")
 export class AffectationController {
@@ -28,7 +29,7 @@ export class AffectationController {
                     sessionId,
                     departements: payload.departements,
                     niveauScolaires: payload.niveauScolaires,
-                    changementDepartements: payload.changementDepartements,
+                    sdrImportId: payload.sdrImportId,
                     etranger: payload.etranger,
                     affecterPDR: payload.affecterPDR,
                     auteur: {
@@ -38,7 +39,7 @@ export class AffectationController {
                         role: request.user.role,
                         sousRole: request.user.sousRole,
                     },
-                },
+                } as SimulationAffectationHTSTaskParameters,
             },
         });
         return TaskMapper.toDto(task);

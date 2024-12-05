@@ -18,13 +18,13 @@ export type Analytics = {
 export interface SimulationAffectationHTSTaskParameters extends SimulationPhase1TaskParameters {
   departements: string[];
   niveauScolaires: Array<keyof typeof GRADES>;
-  changementDepartements: { origine: string; destination: string }[];
+  sdrImportId: string;
   etranger?: boolean;
   affecterPDR?: boolean;
 }
 
 export type SimulationAffectationHTSTaskResult = Analytics & {
-  rapportUrl: string;
+  rapportKey: string;
 };
 
 export interface SimulationAffectationHTSTaskDto extends TaskDto<SimulationAffectationHTSTaskParameters, SimulationAffectationHTSTaskResult> {}

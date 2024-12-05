@@ -4,18 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useToggle } from "react-use";
 import { HiOutlineInformationCircle, HiOutlineRefresh } from "react-icons/hi";
 
-import { Phase1Routes, TaskName, TaskStatus } from "snu-lib";
+import { CohortDto, Phase1Routes, TaskName, TaskStatus } from "snu-lib";
 import { Button, Tooltip } from "@snu/ds/admin";
 
 import { Phase1Service } from "@/services/phase1Service";
 import AffectationSimulationMetropoleModal from "./AffectationSimulationMetropoleModal";
 
 interface AffectationSimulationMetropoleProps {
-  sessionId: string;
-  sessionNom: string;
+  session: CohortDto;
 }
 
-export default function AffectationSimulationMetropole({ sessionId, sessionNom }: AffectationSimulationMetropoleProps) {
+export default function AffectationSimulationMetropole({ session }: AffectationSimulationMetropoleProps) {
   const history = useHistory();
 
   const [showModal, toggleModal] = useToggle(false);
@@ -26,7 +25,7 @@ export default function AffectationSimulationMetropole({ sessionId, sessionNom }
     data: simulationsPending,
   } = useQuery<Phase1Routes["GetSimulationsRoute"]["response"]>({
     queryKey: ["affectation-simulations-pending"],
-    queryFn: async () => Phase1Service.getSimulations(sessionId, { status: TaskStatus.PENDING, name: TaskName.AFFECTATION_HTS_SIMULATION }),
+    queryFn: async () => Phase1Service.getSimulations(session._id!, { status: TaskStatus.PENDING, name: TaskName.AFFECTATION_HTS_SIMULATION }),
     // refetchInterval: 5000,
   });
 
@@ -42,10 +41,10 @@ export default function AffectationSimulationMetropole({ sessionId, sessionNom }
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>}
       </div>
       <div className="flex gap-2">
-        <Button title="Voir les simulations" type="wired" onClick={() => history.push(`?tab=simulations&cohort=${sessionNom}&action=${TaskName.AFFECTATION_HTS_SIMULATION}`)} />
+        <Button title="Voir les simulations" type="wired" onClick={() => history.push(`?tab=simulations&cohort=${session.name}&action=${TaskName.AFFECTATION_HTS_SIMULATION}`)} />
         <Button title="Lancer une simulation" onClick={toggleModal} loading={isInProgress || isLoading} disabled={isLoading || isInProgress || !!error} />
       </div>
-      {showModal && <AffectationSimulationMetropoleModal sessionId={sessionId} onClose={toggleModal} />}
+      {showModal && <AffectationSimulationMetropoleModal session={session} onClose={toggleModal} />}
     </div>
   );
 }

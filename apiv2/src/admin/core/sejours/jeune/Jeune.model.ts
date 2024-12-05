@@ -9,12 +9,21 @@ export type JeuneModel = {
     psh?: string;
     departement?: string;
     region?: string;
+    departementScolarite?: string;
+    regionScolarite?: string;
+    paysScolarite?: string;
+    localisation?: {
+        lat?: number;
+        lon?: number;
+    };
     pointDeRassemblementId?: string;
     ligneDeBusId?: string;
     sessionId?: string;
     sessionNom?: string;
     prenom?: string;
     nom?: string;
+    deplacementPhase1Autonomous?: string;
+    transportInfoGivenByLocal?: string;
     // mandatory
     cniFiles: any;
     highSkilledActivityProofFiles: any;

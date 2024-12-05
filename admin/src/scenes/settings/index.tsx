@@ -104,7 +104,7 @@ export default function Settings() {
             id: "operations" as const,
             title: "Opérations",
             leftIcon: <HiOutlineLightningBolt size={20} className="mt-0.5" />,
-            content: <OperationsTab sessionId={cohort._id!} sessionNom={cohort.name} />,
+            content: <OperationsTab session={cohort} />,
           },
         ]
       : []),
