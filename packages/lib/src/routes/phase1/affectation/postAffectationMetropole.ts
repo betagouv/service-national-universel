@@ -10,7 +10,7 @@ export interface PostSimulationsRoute extends BasicRoute {
   payload: {
     departements: string[];
     niveauScolaires: Array<keyof typeof GRADES>;
-    changementDepartements: { origine: string; destination: string }[];
+    sdrImportId: string;
     etranger: boolean;
     affecterPDR: boolean;
   };

@@ -1,6 +1,6 @@
-import { ArrayMinSize, IsArray, IsBoolean, IsIn, IsString, MinLength } from "class-validator";
+import { ArrayMinSize, IsArray, IsBoolean, IsIn, IsMongoId } from "class-validator";
 
-import { departmentList, GRADES, region2department, RegionsMetropole } from "snu-lib";
+import { GRADES, region2department, RegionsMetropole } from "snu-lib";
 
 export class PostSimulationsPayloadDto {
     @IsArray()
@@ -13,8 +13,8 @@ export class PostSimulationsPayloadDto {
     @ArrayMinSize(1)
     niveauScolaires: Array<keyof typeof GRADES>;
 
-    @IsArray()
-    changementDepartements: { origine: string; destination: string }[];
+    @IsMongoId()
+    sdrImportId: string;
 
     @IsBoolean()
     etranger: boolean;
