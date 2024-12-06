@@ -13,5 +13,6 @@ export type UserDto = {
   sessionPhase1Id?: string;
   // young
   meetingPointId?: string;
+  cohortId?: string;
   cohort?: string;
 };

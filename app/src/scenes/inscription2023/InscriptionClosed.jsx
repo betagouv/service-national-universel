@@ -22,7 +22,6 @@ export default function InscriptionClosed({ young, isCLE }) {
       return "Inscription au séjour de cohésion";
     }
   };
-  console.log(statusTitle(isCLE), statusWording(young, isCLE));
   return (
     <DSFRLayout title={statusTitle(isCLE)}>
       <DSFRContainer title={statusWording(young, isCLE)}>

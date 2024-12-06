@@ -198,7 +198,7 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     sportInterest: faker.lorem.sentences(),
     environmentInterest: faker.lorem.sentences(),
     citizenshipInterest: faker.lorem.sentences(),
-    cohortId: new ObjectId().toString(),
+    // cohortId: new ObjectId().toString(),
     originalCohortId: new ObjectId().toString(),
     ...fields,
   };
