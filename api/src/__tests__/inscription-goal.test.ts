@@ -45,15 +45,15 @@ describe("Inscription Goal", () => {
   });
   describe("GET /inscription-goal/:cohort/department/:department", () => {
     it("should return 200 when goal defined", async () => {
-      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal 1" }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal 1" }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name }));
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(200);
       expect(res.body.data).toBe(0);
     });
     it("should return corresponding filling rate when young exists", async () => {
-      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal 2" }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal 2" }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name }));
       await createYoungHelper(
         getNewYoungFixture({
           status: YOUNG_STATUS.VALIDATED,
