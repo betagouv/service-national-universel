@@ -90,18 +90,17 @@ export const downloadYoungDocument = async ({ youngId, fileId, fileType }: Downl
 };
 
 type ChangeCohortArgs = {
-  youngId: string;
   reason: string;
   message?: string;
   cohortId?: string;
   cohortName?: string;
 };
 
-export const changeYoungCohort = async ({ youngId, reason, message, cohortId, cohortName }: ChangeCohortArgs) => {
+export const changeYoungCohort = async ({ reason, message, cohortId, cohortName }: ChangeCohortArgs) => {
   if (!cohortId && !cohortName) {
     throw new Error("cohortId or cohortName is required");
   }
-  const { ok, data, code }: ResponseType = await api.put(`/young/${youngId}/change-cohort/`, {
+  const { ok, data, code }: ResponseType = await api.put(`/young/change-cohort/`, {
     cohortChangeReason: reason,
     cohortDetailedChangeReason: message,
     cohortId,
