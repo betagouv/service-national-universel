@@ -3,6 +3,8 @@ import { apiv2URL, environment } from "../config";
 import { download } from "snu-lib";
 import { apiv2 } from "./apiv2";
 
+export const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
+
 export async function resizeImage(file, config = {}) {
   if (!["image/jpeg", "image/png"].includes(file.type)) return file;
 

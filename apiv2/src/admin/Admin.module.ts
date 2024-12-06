@@ -42,6 +42,9 @@ import { sejourMongoProviders } from "./infra/sejours/phase1/sejour/provider/Sej
 import { sessionMongoProviders } from "./infra/sejours/phase1/session/provider/SessionMongo.provider";
 import { FileGateway } from "@shared/core/File.gateway";
 import { FileProvider } from "@shared/infra/File.provider";
+import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
+import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
+import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
 
 @Module({
     imports: [
@@ -53,10 +56,18 @@ import { FileProvider } from "@shared/infra/File.provider";
         QueueModule,
         TaskModule,
     ],
-    controllers: [ClasseController, AffectationController, Phase1Controller, AuthController, AdminTaskController],
+    controllers: [
+        ClasseController,
+        AffectationController,
+        Phase1Controller,
+        ImportReferentielController,
+        AuthController,
+        AdminTaskController,
+    ],
     providers: [
         ClasseService,
         SimulationAffectationHTSService,
+        ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,
         ...referentMongoProviders,
@@ -80,6 +91,7 @@ import { FileProvider } from "@shared/infra/File.provider";
         ...cleGatewayProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
+        ...referentielUseCaseProvider,
     ],
 })
 export class AdminModule {

@@ -7,7 +7,7 @@ import { HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
-import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-lib";
+import { ROLES, canExportConvoyeur, getDepartmentNumber, isSuperAdmin, translate } from "snu-lib";
 import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -26,6 +26,7 @@ import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import ListPanel from "./modificationPanel/List";
 import Historic from "./Historic";
 import ListeDemandeModif from "./ListeDemandeModif";
+import ImportSDRButton from "./ImportSDRButton";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -181,6 +182,7 @@ export default function List() {
           />
         }
       />
+      {isSuperAdmin(user) && <ImportSDRButton className="mb-4" />}
       {hasValue && (
         <Navbar
           tab={[
