@@ -14,7 +14,7 @@ export class ReferentAuthFacade implements ReferentAuthGateway {
         @Inject(AuthProvider) private authProvider: AuthProvider,
     ) {}
     async signin(email: string, password: string): Promise<ReferentTokenModel> {
-        const referent = await this.referentGateway.findByEmail(email);
+        const referent = await this.referentGateway.findReferentPasswordByEmail(email);
         if (!referent) {
             throw new TechnicalException(TechnicalExceptionType.UNAUTORIZED, "no referent");
         }

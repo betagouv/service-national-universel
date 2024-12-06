@@ -89,13 +89,12 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
             }
         }
 
+        brevoContact.listIds = listIds;
         brevoContact.attributes = {
-            email: referent.email,
             PRENOM: referent.prenom,
             NOM: referent.nom,
             ROLE: referent.role,
             REGION: referent.region,
-            listIds: listIds,
         };
         return this.contactsApi.createContact(brevoContact);
     }

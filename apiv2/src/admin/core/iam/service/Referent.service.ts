@@ -36,13 +36,13 @@ export class ReferentService {
         );
     }
 
-    async createNewReferentAndAddToClasse(
+    async createNewReferentAndAssignToClasse(
         referent: Pick<CreateReferentModel, "email" | "prenom" | "nom">,
         classe: ClasseModel,
     ): Promise<ReferentModel> {
         const newReferent = await this.referentGateway.create({
             metadata: {},
-            region: "",
+            region: classe.region,
             invitationToken: "",
             role: ROLES.REFERENT_CLASSE,
             ...referent,

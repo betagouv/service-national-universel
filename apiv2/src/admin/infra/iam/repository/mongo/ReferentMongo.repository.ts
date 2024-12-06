@@ -30,7 +30,7 @@ export class ReferentRepository implements ReferentGateway {
             _id: referent._id,
             deletedAt: this.clockGateway.now(),
         });
-        await this.contactGateway.syncReferent({
+        this.contactGateway.syncReferent({
             ...ReferentMapper.toModel(referent),
             operation: OperationType.DELETE,
         });
@@ -49,27 +49,36 @@ export class ReferentRepository implements ReferentGateway {
             });
     }
     async create(referent: CreateReferentModel): Promise<ReferentModel> {
-        return await this.referentMongooseEntity
-            .create(ReferentMapper.toEntityCreate(referent))
-            .then((referentEntity) => {
-                this.contactGateway.syncReferent({
-                    ...ReferentMapper.toModel(referentEntity),
-                    operation: OperationType.CREATE,
-                });
-                return ReferentMapper.toModel(referentEntity);
-            });
+        const referentEntity = await this.referentMongooseEntity.create(ReferentMapper.toEntityCreate(referent));
+        const createdReferent = ReferentMapper.toModel(referentEntity);
+        await this.contactGateway.syncReferent({
+            ...createdReferent,
+            operation: OperationType.CREATE,
+        });
+        return createdReferent;
     }
     async findByIds(ids: string[]): Promise<ReferentModel[]> {
         return await this.referentMongooseEntity.find({ _id: { $in: ids } }).then((referents) => {
             return ReferentMapper.toModels(referents);
         });
     }
-    async findByEmail(email: string): Promise<ReferentPasswordModel> {
+    async findReferentPasswordByEmail(email: string): Promise<ReferentPasswordModel> {
         const referent = await this.referentMongooseEntity.findOne({ email }).select("+password");
+
         if (!referent) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
+
         return ReferentMapper.toModelWithPassword(referent);
+    }
+    async findByEmail(email: string): Promise<ReferentModel> {
+        const referent = await this.referentMongooseEntity.findOne({ email });
+
+        if (!referent) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+
+        return ReferentMapper.toModel(referent);
     }
     async findById(id: string): Promise<ReferentModel> {
         return this.referentMongooseEntity.findById(id).then((referent) => {
@@ -82,7 +91,10 @@ export class ReferentRepository implements ReferentGateway {
     async update(referent: ReferentModel): Promise<ReferentModel> {
         const referentEntity = ReferentMapper.toEntity(referent);
         const updatedReferent = await this.updateEntity(referentEntity);
-
+        this.contactGateway.syncReferent({
+            ...ReferentMapper.toModel(updatedReferent),
+            operation: OperationType.UPDATE,
+        });
         return ReferentMapper.toModel(updatedReferent);
     }
 
@@ -109,11 +121,6 @@ export class ReferentRepository implements ReferentGateway {
 
         //@ts-expect-error fromUser unknown
         await retrievedReferent.save({ fromUser: user });
-
-        this.contactGateway.syncReferent({
-            ...ReferentMapper.toModel(retrievedReferent),
-            operation: OperationType.UPDATE,
-        });
 
         return retrievedReferent;
     }

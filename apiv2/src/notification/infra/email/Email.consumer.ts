@@ -19,10 +19,6 @@ export class EmailConsumer extends WorkerHost {
         return this.emailProvider
             .send(job.name, job.data)
             .then(() => {
-                this.logger.log(
-                    `OK : Email template "${job.name}" sent to ${JSON.stringify(job.data?.to)}`,
-                    EmailConsumer.name,
-                );
                 return ConsumerResponse.SUCCESS;
             })
             .catch((error) => {

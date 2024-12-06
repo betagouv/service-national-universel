@@ -5,10 +5,14 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ReferentService } from "@admin/core/iam/service/Referent.service";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { EmailTemplate } from "@notification/core/Notification";
-import { InvitationType } from "snu-lib";
+import { InvitationType, ROLES } from "snu-lib";
 import { InviterReferentClasse } from "../../../referent/useCase/InviteReferentClasse";
 import { ClasseGateway } from "../../Classe.gateway";
 import { ClasseModel } from "../../Classe.model";
+import { ConfigService } from "aws-sdk";
+import { ConfigModule } from "@nestjs/config";
+import configuration from "@config/configuration";
+import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 describe("ModifierReferentClasse", () => {
     let service: ModifierReferentClasse;
@@ -20,6 +24,11 @@ describe("ModifierReferentClasse", () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
+            imports: [
+                ConfigModule.forRoot({
+                    load: [configuration],
+                }),
+            ],
             providers: [
                 ModifierReferentClasse,
                 {
@@ -54,7 +63,13 @@ describe("ModifierReferentClasse", () => {
                     provide: ReferentService,
                     useValue: {
                         deleteReferentAndSendEmail: jest.fn(),
-                        createNewReferentAndAddToClasse: jest.fn(),
+                        createNewReferentAndAssignToClasse: jest.fn(),
+                    },
+                },
+                {
+                    provide: ConfigService,
+                    useValue: {
+                        get: jest.fn(),
                     },
                 },
             ],
@@ -69,13 +84,13 @@ describe("ModifierReferentClasse", () => {
     });
 
     describe("execute", () => {
-        it("should update the current referent if the email is the same", async () => {
+        it("should throw an error if the new Referent is not referent_classe", async () => {
             const classeId = "classeId";
             const modifierReferentClasseModel = {
-                email: "currentReferentEmail",
+                email: "newReferentEmail@mail.com",
                 nom: "newNom",
                 prenom: "newPrenom",
-            };
+            } as ReferentModel;
             const classe: ClasseModel = {
                 id: classeId,
                 referentClasseIds: ["currentReferentId"],
@@ -84,18 +99,55 @@ describe("ModifierReferentClasse", () => {
             } as ClasseModel;
             const currentReferent: ReferentModel = {
                 id: "currentReferentId",
-                email: "currentReferentEmail",
+                email: "currentReferentEmail@mail.com",
+                nom: "currentNom",
+                prenom: "currentPrenom",
+            } as ReferentModel;
+
+            const newReferent: ReferentModel = {
+                id: "newReferentId",
+                email: "newReferentEmail@mail.com",
+                nom: "newNom",
+                prenom: "newPrenom",
+                roles: ROLES.ADMIN,
+            } as unknown as ReferentModel;
+
+            jest.spyOn(classeGateway, "findById").mockResolvedValue(classe);
+            jest.spyOn(referentGateway, "findById").mockResolvedValue(currentReferent);
+            jest.spyOn(referentGateway, "findByEmail").mockResolvedValue(newReferent);
+
+            await expect(service.execute(classeId, modifierReferentClasseModel)).rejects.toThrow(
+                FunctionalExceptionCode.ROLE_NOT_REFERENT_CLASSE,
+            );
+        });
+
+        it("should update the current referent if the email is the same", async () => {
+            const classeId = "classeId";
+            const modifierReferentClasseModel = {
+                email: "sameCurrentReferentEmail@mail.com",
+                nom: "newNom",
+                prenom: "newPrenom",
+            } as ReferentModel;
+            const classe: ClasseModel = {
+                id: classeId,
+                referentClasseIds: ["currentReferentId"],
+                uniqueKeyAndId: "classeKey",
+                nom: "classeNom",
+            } as ClasseModel;
+            const currentReferent: ReferentModel = {
+                id: "currentReferentId",
+                email: "sameCurrentReferentEmail@mail.com",
                 nom: "currentNom",
                 prenom: "currentPrenom",
             } as ReferentModel;
 
             jest.spyOn(classeGateway, "findById").mockResolvedValue(classe);
             jest.spyOn(referentGateway, "findById").mockResolvedValue(currentReferent);
-            jest.spyOn(referentGateway, "update").mockResolvedValue(currentReferent);
+            jest.spyOn(referentGateway, "update").mockResolvedValue(modifierReferentClasseModel);
 
             const result = await service.execute(classeId, modifierReferentClasseModel);
 
-            expect(result).toEqual(currentReferent);
+            expect(result).toEqual(modifierReferentClasseModel);
             expect(referentGateway.update).toHaveBeenCalledWith({
                 ...currentReferent,
                 nom: modifierReferentClasseModel.nom,
@@ -121,12 +173,14 @@ describe("ModifierReferentClasse", () => {
                 email: "currentReferentEmail",
                 nom: "currentNom",
                 prenom: "currentPrenom",
+                role: ROLES.REFERENT_CLASSE,
             } as ReferentModel;
             const newReferentOfClasse: ReferentModel = {
                 id: "newReferentId",
                 email: "newReferentEmail",
                 nom: "newNom",
                 prenom: "newPrenom",
+                role: ROLES.REFERENT_CLASSE,
             } as ReferentModel;
 
             jest.spyOn(classeGateway, "findById").mockResolvedValue(classe);
@@ -166,6 +220,7 @@ describe("ModifierReferentClasse", () => {
                 email: "currentReferentEmail",
                 nom: "currentNom",
                 prenom: "currentPrenom",
+                role: ROLES.REFERENT_CLASSE,
             } as ReferentModel;
 
             jest.spyOn(classeGateway, "findByReferentId").mockResolvedValue([]);
@@ -194,7 +249,7 @@ describe("ModifierReferentClasse", () => {
             jest.spyOn(classeGateway, "findByReferentId").mockResolvedValue([classe, classe]);
             jest.spyOn(notificationGateway, "sendEmail").mockResolvedValue();
 
-            await service["handleNewReferent"](newReferentOfClasse, classe);
+            await service["handleExistingReferentAfterAssignement"](newReferentOfClasse, classe);
 
             expect(classeGateway.findByReferentId).toHaveBeenCalledWith(newReferentOfClasse.id);
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
@@ -227,12 +282,12 @@ describe("ModifierReferentClasse", () => {
             jest.spyOn(referentGateway, "findById").mockResolvedValue(currentReferent);
             jest.spyOn(referentGateway, "findByEmail").mockRejectedValue(new Error());
             jest.spyOn(classeGateway, "findByReferentId").mockResolvedValue([classe]);
-            jest.spyOn(referentService, "createNewReferentAndAddToClasse").mockResolvedValue(currentReferent);
+            jest.spyOn(referentService, "createNewReferentAndAssignToClasse").mockResolvedValue(currentReferent);
 
             const result = await service.execute(classeId, modifierReferentClasseModel);
 
             expect(result).toEqual(currentReferent);
-            expect(referentService.createNewReferentAndAddToClasse).toHaveBeenCalledWith(
+            expect(referentService.createNewReferentAndAssignToClasse).toHaveBeenCalledWith(
                 modifierReferentClasseModel,
                 classe,
             );
