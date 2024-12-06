@@ -54,7 +54,9 @@ describe("Young Phase1 Controller", () => {
     });
 
     it("should not update young in waiting list when goal is reached", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "youngCohort", manualAffectionOpenForAdmin: true }));
+      const cohort = await createCohortHelper(
+        getNewCohortFixture({ name: "youngCohort", manualAffectionOpenForAdmin: true, objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }),
+      );
       const young = await createYoungHelper(
         getNewYoungFixture({
           status: YOUNG_STATUS.WAITING_LIST,

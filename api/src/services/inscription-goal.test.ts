@@ -145,7 +145,7 @@ describe("getCompletionObjectifs", () => {
 
   it("should only consider regional objective for regional level", async () => {
     const department = "Test Department";
-    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort" }));
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort", objectifLevel: INSCRIPTION_GOAL_LEVELS.REGIONAL }));
     const count = 120; // Over department max but under region max
     const maxDepartment = 100;
     const maxRegion = 500;
