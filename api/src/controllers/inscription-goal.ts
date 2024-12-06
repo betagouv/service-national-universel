@@ -2,10 +2,10 @@ import express from "express";
 import passport from "passport";
 import Joi from "joi";
 
-import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS, InscriptionGoalsRoutes } from "snu-lib";
+import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS, InscriptionGoalsRoutes, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 
 import { capture } from "../sentry";
-import { YoungModel, InscriptionGoalModel } from "../models";
+import { YoungModel, InscriptionGoalModel, CohortModel } from "../models";
 import { ERRORS } from "../utils";
 import { getCompletionObjectifs } from "../services/inscription-goal";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
@@ -104,7 +104,11 @@ router.get(
       if (!canViewInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const { department, cohort } = params;
-      const completionObjectif = await getCompletionObjectifs(department, cohort);
+
+      const cohortDocument = await CohortModel.findOne({ name: cohort });
+      if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const completionObjectif = await getCompletionObjectifs(department, cohortDocument);
 
       return res.status(200).json({ ok: true, data: completionObjectif.tauxRemplissage });
     } catch (error) {
@@ -127,7 +131,11 @@ router.get("/:cohort/department/:department/reached", passport.authenticate("you
     }
 
     const { department, cohort } = value;
-    const completionObjectif = await getCompletionObjectifs(department, cohort);
+
+    const cohortDocument = await CohortModel.findOne({ name: cohort });
+    if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const completionObjectif = await getCompletionObjectifs(department, cohortDocument);
 
     return res.status(200).send({ ok: true, data: completionObjectif.isAtteint });
   } catch (error) {
