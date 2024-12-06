@@ -70,12 +70,12 @@ describe("Inscription Goal", () => {
     });
     it("should return filling at 1 when department goal is reached (not region)", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal", objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal", max: 1 }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, max: 1 }));
       await createInscriptionGoal(
         getNewInscriptionGoalFixture({
           max: 1,
           cohort: inscriptionGoal.cohort,
-          department: faker.helpers.arrayElement(region2department[inscriptionGoal.region!]),
+          department: faker.helpers.arrayElement(region2department[inscriptionGoal.region!].filter((d) => d !== inscriptionGoal.department)),
           region: inscriptionGoal.region,
         }),
       );
@@ -97,7 +97,7 @@ describe("Inscription Goal", () => {
     });
     it("should return filling at 1 when region goal is reached (not department)", async () => {
       const department = "Loire-Atlantique";
-      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
+      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal", objectifLevel: INSCRIPTION_GOAL_LEVELS.REGIONAL }));
       const inscriptionGoal = await createInscriptionGoal(
         getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal", department, region: department2region[department], max: 1 }),
       );
