@@ -1,44 +1,16 @@
-import { config } from "../config";
+import { config } from "../../config";
 import { addHours, addYears } from "date-fns";
-import { department2region, departmentLookUp, MISSION_DOMAINS, MISSION_STATUS, MissionType, ReferentType, ROLES, SENDINBLUE_TEMPLATES, StructureType } from "snu-lib";
-import { getTutorName } from "../services/mission";
-import { MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../models";
-import { updateApplicationStatus, updateApplicationTutor } from "../services/application";
-import { sendTemplate } from "../brevo";
-import { fetchStructureById, JeVeuxAiderMission } from "./JeVeuxAiderRepository";
-import { logger } from "../logger";
+import { department2region, departmentLookUp, MISSION_STATUS, MissionType, ReferentType, ROLES, SENDINBLUE_TEMPLATES, StructureType } from "snu-lib";
+import { getTutorName } from "../../services/mission";
+import { MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../../models";
+import { updateApplicationStatus, updateApplicationTutor } from "../../services/application";
+import { sendTemplate } from "../../brevo";
+import { fetchMissions, fetchStructureById, JeVeuxAiderMission } from "./JVARepository";
+import { logger } from "../../logger";
+import { capture } from "../../sentry";
+import { jva2SnuDomaines, JvaStructureException, SnuStructureException } from "./JVAUtils";
 
 const fromUser = { firstName: "Cron JeVeuxAiderService.js" };
-
-const jva2SnuDomaines = {
-  education: MISSION_DOMAINS.EDUCATION,
-  environnement: MISSION_DOMAINS.ENVIRONMENT,
-  sport: MISSION_DOMAINS.SPORT,
-  sante: MISSION_DOMAINS.HEALTH,
-  "solidarite-insertion": MISSION_DOMAINS.SOLIDARITY,
-  "prevention-protection": MISSION_DOMAINS.SECURITY,
-  "culture-loisirs": MISSION_DOMAINS.CULTURE,
-  "benevolat-competences": MISSION_DOMAINS.SOLIDARITY,
-  "vivre-ensemble": MISSION_DOMAINS.CITIZENSHIP,
-};
-const JvaStructureException = [
-  "6890", //Fédération Médico-psychosociale à la Personne-Initiative
-  "14392", //Autisme espoir
-  "13419", //AUTISME ESPOIR VERS L'ÉCOLE
-];
-const SnuStructureException = [
-  "62b9f02788469607439b733a", //Fédération Médico-psychosociale à la Personne-Initiative
-  "63762279c6ccb008d446f6bc", //Autisme espoir
-  "62de85c299f28207ac826fc5", //AUTISME ESPOIR VERS L'ÉCOLE
-];
-
-export async function fetchMissionsToCancel(startTime: Date) {
-  return await MissionModel.find({
-    isJvaMission: "true",
-    lastSyncAt: { $lte: startTime },
-    status: { $nin: [MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED] },
-  });
-}
 
 function formatStructure(jvaStructure): Partial<StructureType> {
   return {
@@ -127,7 +99,8 @@ async function createStructure(mission: JeVeuxAiderMission): Promise<StructureDo
     return;
   }
 
-  const structure = await StructureModel.create(formatStructure(jvaStructure));
+  const newStructure = new StructureModel(formatStructure(jvaStructure));
+  const structure = await newStructure.save({ fromUser });
   logger.info(`Structure ${structure.id} created`);
 
   //Create responsable
@@ -157,7 +130,32 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
   return mission;
 }
 
-export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {
+export async function syncMissions() {
+  let total: number;
+  let count = 0;
+  let skip = 0;
+
+  do {
+    logger.info(`Fetching missions from ${skip} to ${skip + 50}`);
+    const result = await fetchMissions(skip);
+    if (!result.ok) throw new Error("sync with JVA missions : " + result.code);
+    total = result.total;
+
+    // Do not parallelize because of shared structures and referents.
+    for (const mission of result.data) {
+      try {
+        await syncMission(mission);
+      } catch (e) {
+        capture(e);
+      }
+    }
+
+    count += result.data.length;
+    skip += 50;
+  } while (count < total);
+}
+
+async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {
   logger.info(`Syncing mission ${mission.clientId}: ${mission.title}`);
 
   if (JvaStructureException.includes(mission.organizationId)) {
@@ -172,8 +170,8 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
     structure = newStructure;
   }
 
-  if (SnuStructureException.includes(structure?._id.toString())) {
-    logger.info(`Structure ${structure._id} is in SNU exception list, skipping mission ${mission.clientId}`);
+  if (SnuStructureException.includes(structure?.id)) {
+    logger.info(`Structure ${structure.id} is in SNU exception list, skipping mission ${mission.clientId}`);
     return;
   }
 
@@ -205,7 +203,17 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
   return data;
 }
 
-export async function cancelMission(mission: MissionDocument): Promise<MissionDocument> {
+export async function cancelOldMissions(startTime: Date) {
+  const missionsToCancel = await MissionModel.find({
+    isJvaMission: "true",
+    lastSyncAt: { $lte: startTime },
+    status: { $nin: [MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED] },
+  });
+  const cancelMissionPromises = missionsToCancel.map((mission) => cancelMission(mission));
+  await Promise.all(cancelMissionPromises);
+}
+
+async function cancelMission(mission: MissionDocument): Promise<MissionDocument> {
   logger.info(`Cancelling mission ${mission.jvaMissionId}`);
   mission.set({ status: MISSION_STATUS.CANCEL });
   const data = await mission.save({ fromUser });

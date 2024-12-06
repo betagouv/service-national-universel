@@ -1,5 +1,5 @@
-import { config } from "../config";
-import { capture } from "../sentry";
+import { config } from "../../config";
+import { capture } from "../../sentry";
 
 type Response = {
   ok: boolean;
