@@ -19,6 +19,7 @@
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
         "strict": true,
+        "resolveJsonModule": true,
         "paths": {
             "@admin/*": ["src/admin/*"],
             "@config/*": ["src/config/*"],
@@ -28,4 +29,5 @@
             "@task/*": ["src/task/*"]
         }
     }
+    // "references": [{ "path": "../packages/lib" }]
 }

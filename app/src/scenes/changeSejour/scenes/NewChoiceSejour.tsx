@@ -22,7 +22,7 @@ export default function NewChoiceSejour() {
   return (
     <ChangeSejourContainer title={`Séjour ${newCohortPeriod}`} backlink="/changer-de-sejour/">
       <p className="mt-4 mb-6 text-sm leading-5 text-gray-500 font-normal text-center">Pour quelle(s) raison(s) souhaitez-vous changer de séjour ?</p>
-      <ReasonForm reason={reason} setReason={setReason} message={message} setMessage={setMessage} disabled={!reason} onSubmit={() => setOpen(true)} />
+      <ReasonForm reason={reason} setReason={setReason} message={message} setMessage={setMessage} disabled={!reason || !message} onSubmit={() => setOpen(true)} />
       <Modal open={open} setOpen={setOpen} newCohortPeriod={newCohortPeriod} reason={reason} message={message} />
     </ChangeSejourContainer>
   );

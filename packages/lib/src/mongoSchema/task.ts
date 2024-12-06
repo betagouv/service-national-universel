@@ -9,13 +9,12 @@ export const TaskSchema = {
     required: true,
   },
 
-  libelle: {
+  description: {
     type: String,
   },
 
   startDate: {
     type: Date,
-    required: true,
   },
 
   endDate: {
@@ -30,6 +29,17 @@ export const TaskSchema = {
 
   metadata: {
     type: Object,
+  },
+
+  error: {
+    type: {
+      code: {
+        type: String,
+      },
+      description: {
+        type: String,
+      },
+    },
   },
 
   createdAt: { type: Date, default: Date.now },

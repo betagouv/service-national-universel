@@ -1,0 +1,364 @@
+[
+    {
+        "id": "6398797d3bc18708cc3981f6",
+        "region": "Occitanie",
+        "departement": "Lot",
+        "sessionNoms": [
+            "Février 2023 - C",
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "6398a12b208de508cea15907",
+        "region": "Occitanie",
+        "departement": "Gard",
+        "sessionNoms": [
+            "Février 2023 - C",
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "63987a0619bd7608d8b35dc4",
+        "region": "Occitanie",
+        "departement": "Gers",
+        "sessionNoms": [
+            "Février 2023 - C",
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "6398798c3bc18708cc398239",
+        "region": "Occitanie",
+        "departement": "Hautes-Pyrénées",
+        "sessionNoms": [
+            "Février 2023 - C",
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "639877d33bc18708cc395877",
+        "region": "Occitanie",
+        "departement": "Ariège",
+        "sessionNoms": [
+            "Février 2023 - C",
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "CLE juin 2024",
+            "Juin 2024 - 2",
+            "Juillet 2024",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "63c575bca9406608cdbecc8d",
+        "region": "Île-de-France",
+        "departement": "Val-de-Marne",
+        "sessionNoms": [
+            "Février 2023 - C",
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juin 2024 - 2",
+            "Juillet 2024",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "63c57454a9406608cdbea219",
+        "region": "Île-de-France",
+        "departement": "Yvelines",
+        "sessionNoms": [
+            "Février 2023 - C",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juin 2024 - 2",
+            "Juillet 2024",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "63c7e451342eaa08cd1e5fb7",
+        "region": "Île-de-France",
+        "departement": "Seine-et-Marne",
+        "sessionNoms": [
+            "Février 2023 - C",
+            "Juillet 2023",
+            "Juin 2023",
+            "Avril 2024 - C",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "64491b2faea9311107319d1c",
+        "region": "Île-de-France",
+        "departement": "Essonne",
+        "sessionNoms": [
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juin 2024 - 2",
+            "Juillet 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "6464c8927072a613df16bd2f",
+        "region": "Occitanie",
+        "departement": "Tarn-et-Garonne",
+        "sessionNoms": [
+            "Juin 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "64666ef180723613ed0b51b4",
+        "region": "Occitanie",
+        "departement": "Haute-Garonne",
+        "sessionNoms": [
+            "Juin 2023",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Avril 2024 - C",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "64666f6680723613ed0b530b",
+        "region": "Occitanie",
+        "departement": "Pyrénées-Orientales",
+        "sessionNoms": [
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "64666fe480723613ed0b5520",
+        "region": "Occitanie",
+        "departement": "Hérault",
+        "sessionNoms": [
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "6475c453ac685113c24a232e",
+        "region": "Île-de-France",
+        "departement": "Paris",
+        "sessionNoms": [
+            "Juin 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juin 2024 - 2",
+            "Juillet 2024",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "64948ba1191094097e6a4469",
+        "region": "Occitanie",
+        "departement": "Haute-Garonne",
+        "sessionNoms": [
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Février 2023 - C",
+            "Avril 2024 - C",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "6499b5f90a2672097e534834",
+        "region": "Île-de-France",
+        "departement": "Val-d'Oise",
+        "sessionNoms": [
+            "Juillet 2023",
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juin 2024 - 2",
+            "Juillet 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "6568aa808bc29e0819ac1353",
+        "region": "Occitanie",
+        "departement": "Aude",
+        "sessionNoms": [
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "656dfceb8bc29e0819e3b61c",
+        "region": "Occitanie",
+        "departement": "Aveyron",
+        "sessionNoms": ["Février 2024 - C", "Avril 2024 - C", "Juillet 2024", "Juin 2024 - 2", "Toussaint 2024"]
+    },
+    {
+        "id": "656dfd7c8bc29e0819e4083d",
+        "region": "Occitanie",
+        "departement": "Lozère",
+        "sessionNoms": [
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juin 2024 - 2",
+            "Juillet 2024",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "658450fe837021081a3a91b7",
+        "region": "Île-de-France",
+        "departement": "Seine-et-Marne",
+        "sessionNoms": ["Février 2024 - C", "Avril 2024 - C", "Juin 2024 - 2", "Juillet 2024", "Toussaint 2024"]
+    },
+    {
+        "id": "65a15b9600ca524e3fe6b470",
+        "region": "Île-de-France",
+        "departement": "Hauts-de-Seine",
+        "sessionNoms": [
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Juin 2024 - 2",
+            "Juillet 2024",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    },
+    {
+        "id": "65c0e291dde5c208168ca30d",
+        "region": "Île-de-France",
+        "departement": "Seine-Saint-Denis",
+        "sessionNoms": ["Février 2024 - C", "Avril 2024 - C", "Juillet 2024", "Juin 2024 - 2", "Toussaint 2024"]
+    },
+    {
+        "id": "65cf8f7c55bd6500967db194",
+        "region": "Occitanie",
+        "departement": "Tarn",
+        "sessionNoms": [
+            "Avril 2024 - C",
+            "Juillet 2024",
+            "Juin 2024 - 2",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre",
+            "2025 CLE 05 - Fevrier",
+            "2025 CLE 06 - Fevrier",
+            "2024 CLE 05"
+        ]
+    }
+]

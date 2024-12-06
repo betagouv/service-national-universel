@@ -1,4 +1,4 @@
-function download(file, fileName) {
+export function download(file, fileName) {
   // @ts-expect-error msSaveOrOpenBlob exists
   if (window.navigator.msSaveOrOpenBlob) {
     // IE11 & Edge
@@ -19,7 +19,7 @@ function download(file, fileName) {
  * @param [File]
  * @returns FormData
  **/
-function createFormDataForFileUpload(arr: any[], properties) {
+export function createFormDataForFileUpload(arr: any[], properties) {
   let files: any[] = [];
   if (Array.isArray(arr)) files = arr.filter((e) => typeof e === "object");
   else files = [arr];
@@ -39,5 +39,3 @@ function createFormDataForFileUpload(arr: any[], properties) {
   formData.append("body", JSON.stringify(allData));
   return formData;
 }
-
-export { download, createFormDataForFileUpload };

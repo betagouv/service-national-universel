@@ -19,7 +19,7 @@ export default function PrevenirSejour() {
   return (
     <ChangeSejourContainer title="Être alerté(e) pour les prochains séjours" backlink="/changer-de-sejour/no-date">
       <p className="mt-4 mb-6 text-sm leading-5 text-gray-500 text-center font-normal">Vous serez alerté(e) par e-mail lors de l'ouverture des futures inscriptions.</p>
-      <ReasonForm reason={reason} setReason={setReason} message={message} setMessage={setMessage} onSubmit={() => setOpen(true)} disabled={!reason} />
+      <ReasonForm reason={reason} setReason={setReason} message={message} setMessage={setMessage} onSubmit={() => setOpen(true)} disabled={!reason || !message} />
       <Modal open={open} setOpen={setOpen} reason={reason} message={message} />
     </ChangeSejourContainer>
   );

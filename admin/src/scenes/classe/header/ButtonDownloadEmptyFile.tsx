@@ -22,6 +22,9 @@ export default function ButtonDownloadEmptyFile({ title, type, setIsLoading }) {
       if (type === ClasseFileKeys.REGLEMENT) {
         url = `${CDN_BASE_URL}/CLE/snu-reglement-interieur.pdf`;
       }
+      if (type === ClasseFileKeys.SANITAIRE) {
+        url = `${CDN_BASE_URL}/CLE/fiche-sanitaire.pdf`;
+      }
       window.open(url, "_blank", "noreferrer");
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchargement", "");

@@ -43,24 +43,28 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
   const region = getRegionForEligibility(young);
   const department = getDepartmentForEligibility(young);
 
-  const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
-    // if the young has already a cohort, he can only apply for the cohorts of the same year
+  const sessionsOuvertes = cohorts.filter(
+    (session) =>
+      session.getIsInscriptionOpen(Number(timeZoneOffset)) ||
+      (session.getIsReInscriptionOpen(Number(timeZoneOffset)) && young.isReInscription) ||
+      (session.getIsInstructionOpen(Number(timeZoneOffset)) && ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION] as string[]).includes(young.status)),
+  );
+
+  const sessionsEligibles: CohortDocumentWithPlaces[] = sessionsOuvertes.filter((session) => {
     return (
       session.eligibility?.zones.includes(department) &&
       session.eligibility?.schoolLevels.includes(young.grade!) &&
       young.birthdateAt &&
       session.eligibility?.bornAfter <= young.birthdateAt &&
       // @ts-expect-error comparaison d'une Date avec un number...
-      session.eligibility?.bornBefore.setTime(session.eligibility?.bornBefore.getTime() + 11 * 60 * 60 * 1000) >= young.birthdateAt &&
-      (session.getIsInscriptionOpen(Number(timeZoneOffset)) ||
-        (session.getIsReInscriptionOpen(Number(timeZoneOffset)) && young.isReInscription) ||
-        (session.getIsInstructionOpen(Number(timeZoneOffset)) && ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION] as string[]).includes(young.status)))
+      session.eligibility?.bornBefore.setTime(session.eligibility?.bornBefore.getTime() + 11 * 60 * 60 * 1000) >= young.birthdateAt
     );
   });
-  for (let session of sessions) {
+
+  for (let session of sessionsEligibles) {
     session.isEligible = true;
   }
-  return getPlaces(sessions, region);
+  return getPlaces(sessionsEligibles, region);
 }
 
 export async function getAllSessions(young: YoungInfo) {

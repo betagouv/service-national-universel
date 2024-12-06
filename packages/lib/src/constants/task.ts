@@ -7,4 +7,5 @@ export enum TaskStatus {
 
 export enum TaskName {
   IMPORT_CLASSE = "IMPORT_CLASSE",
+  AFFECTATION_HTS_SIMULATION = "AFFECTATION_HTS_SIMULATION",
 }

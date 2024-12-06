@@ -545,7 +545,7 @@ const changeCohortValidator = Joi.object({
   cohortId: Joi.string(),
   cohortName: Joi.string(),
   cohortChangeReason: Joi.string().required(),
-  cohortDetailedChangeReason: Joi.string().optional().allow(""),
+  cohortDetailedChangeReason: Joi.string().required(),
 }).xor("cohortId", "cohortName");
 
 router.put("/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
@@ -913,7 +913,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
 router.put("/withdraw", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().allow(""), withdrawnReason: Joi.string().required() })
+    const { error: validationError, value } = Joi.object({ withdrawnMessage: Joi.string().required(), withdrawnReason: Joi.string().required() })
       .unknown()
       .validate(req.body, { stripUnknown: true });
     if (validationError) {

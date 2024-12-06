@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, YOUNG_STATUS, STATUS_CLASSE, FeatureFlagName, canSearchInElasticSearch, SUB_ROLES } = require("snu-lib");
+const { ROLES, YOUNG_STATUS, STATUS_CLASSE, FeatureFlagName, canSearchInElasticSearch, SUB_ROLES, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
@@ -191,7 +191,7 @@ const populateWithPdrInfo = async (classes) => {
 
 const populateWithYoungsInfo = async (classes) => {
   const classesIds = classes.map((item) => item._id);
-  const students = await allRecords("young", { bool: { must: [{ terms: { classeId: classesIds } }] } }, esClient, ["_id", "classeId", "status"]);
+  const students = await allRecords("young", { bool: { must: [{ terms: { classeId: classesIds } }] } }, esClient, ["_id", "classeId", "status", "statusPhase1"]);
 
   //count students by class
   const result = students.reduce((acc, cur) => {
@@ -204,12 +204,15 @@ const populateWithYoungsInfo = async (classes) => {
 
   //populate classes with students count
   return classes.map((item) => {
-    item.studentInProgress = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length || 0;
-    item.studentWaiting = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length || 0;
+    item.studentInProgress = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS).length || 0;
+    item.studentWaitingValidation = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length || 0;
+    item.studentWaitingCorrection = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_CORRECTION).length || 0;
     item.studentValidated = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length || 0;
     item.studentAbandoned = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length || 0;
     item.studentNotAutorized = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length || 0;
     item.studentWithdrawn = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length || 0;
+    item.studentAffected = result[item._id]?.filter((student) => student.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED).length || 0;
+    item.openFiles = item.studentValidated + item.studentInProgress + item.studentWaitingValidation + item.studentWaitingCorrection;
     return item;
   });
 };
