@@ -117,7 +117,7 @@ describe("Inscription Goal", () => {
       await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal 5" }));
       const res = await request(getAppHelper()).get(`/inscription-goal/Test Inscription Goal/department/Unknown`);
       expect(res.status).toBe(404);
-      expect(res.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
+      expect(res.body.code).toBe(ERRORS.NOT_FOUND);
     });
     it("should return 400 when goal has max null", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal 6" }));

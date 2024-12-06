@@ -123,7 +123,7 @@ describe("getCompletionObjectifs", () => {
 
   it("should consider objective reached if either regional or departmental is reached for departemental level", async () => {
     const department = "Test Department";
-    const cohort = getNewCohortFixture({ name: "Test Cohort" }) as CohortType;
+    const cohort = getNewCohortFixture({ name: "Test Cohort", objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }) as CohortType;
     const count = 120; // Over department max
     const maxDepartment = 100;
     const maxRegion = 500;
