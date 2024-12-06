@@ -866,11 +866,6 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
     await unsync(young);
 
-    young.set({ location: { lat: undefined, lon: undefined } });
-    young.set({ schoolLocation: { lat: undefined, lon: undefined } });
-    young.set({ parent1Location: { lat: undefined, lon: undefined } });
-    young.set({ parent2Location: { lat: undefined, lon: undefined } });
-    young.set({ medicosocialStructureLocation: { lat: undefined, lon: undefined } });
     young.set({ email: `${young._doc!["_id"]}@delete.com` });
     young.set({ status: YOUNG_STATUS.DELETED });
 
