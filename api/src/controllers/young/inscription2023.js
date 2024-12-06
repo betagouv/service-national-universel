@@ -24,7 +24,7 @@ const {
 const { sendTemplate } = require("./../../brevo");
 const { config } = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
-const { getFilteredSessionsForInscription } = require("../../utils/cohort");
+const { getFilteredSessionsForInscription } = require("../../cohort/cohortService");
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,

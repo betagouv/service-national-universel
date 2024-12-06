@@ -61,7 +61,7 @@ schema.virtual("isInscriptionOpen").get<SchemaExtended>(function () {
   return this.getIsInscriptionOpen();
 });
 
-schema.methods.getIsReInscriptionOpen = function (timeZoneOffset) {
+schema.methods.getIsReInscriptionOpen = function (timeZoneOffset = 0) {
   const now = getDateTimeByTimeZoneOffset(timeZoneOffset);
   const start = this.reInscriptionStartDate;
   const end = this.reInscriptionEndDate;

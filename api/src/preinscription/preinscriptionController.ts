@@ -3,7 +3,7 @@ import express from "express";
 import Joi from "joi";
 
 import { capture } from "../sentry";
-import { getFilteredSessionsForInscription } from "../utils/cohort";
+import { getFilteredSessionsForInscription } from "../cohort/cohortService";
 import { createContact, MAILING_LISTS } from "../brevo";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { RouteRequest, RouteResponse } from "../controllers/request";

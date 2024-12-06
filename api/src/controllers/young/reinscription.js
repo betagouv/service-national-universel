@@ -8,7 +8,7 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023 } = require("../../utils");
 const { canUpdateYoungStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1, hasAccessToReinscription } = require("snu-lib");
-const { getFilteredSessionsForReinscription } = require("../../utils/cohort");
+const { getFilteredSessionsForReinscription } = require("../../cohort/cohortService");
 
 /**
  * ROUTES:

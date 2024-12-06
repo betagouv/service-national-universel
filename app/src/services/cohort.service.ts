@@ -1,7 +1,7 @@
 import API from "./api";
 
 export const getAvailableSessions = async () => {
-  const { ok, data: cohorts } = await API.get("/young/change-sejour");
+  const { ok, data: cohorts } = await API.get("/young/change-cohort");
   if (!ok || cohorts === undefined) {
     throw new Error("Impossible de récupérer les séjours disponibles");
   }

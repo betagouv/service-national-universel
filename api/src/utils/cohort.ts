@@ -1,4 +1,4 @@
-import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility, CohortType, YoungDto } from "snu-lib";
+import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility } from "snu-lib";
 import { CohortModel, CohortDocument, InscriptionGoalModel, YoungModel } from "../models";
 
 type CohortDocumentWithPlaces = CohortDocument<{
@@ -18,133 +18,56 @@ type YoungInfo = Pick<
   isReInscription?: boolean;
 };
 
-type CohortArgs = {
-  birthdate: Date;
-  schoolLevel: string;
-  department: string;
-  cohortToExclude?: string;
-  cohortGroupToInclude?: string;
-  cohortGroupToExclude?: string;
-};
 type CohortQuery = {
-  status: string;
-  "eligibility.zones": string;
-  "eligibility.schoolLevels": string;
-  "eligibility.bornAfter": { $lte: Date };
-  "eligibility.bornBefore": { $gte: Date };
+  status?: string;
+  cohortGroupId?: string;
   _id?: { $ne: string };
-  cohortGroupId?: string | { $ne: string };
 };
-function buildCohortQuery({ birthdate, schoolLevel, department, cohortToExclude, cohortGroupToInclude, cohortGroupToExclude }: CohortArgs): CohortQuery {
-  let query: CohortQuery = {
-    status: COHORT_STATUS.PUBLISHED,
-    "eligibility.zones": department,
-    "eligibility.schoolLevels": schoolLevel,
-    "eligibility.bornAfter": { $lte: birthdate },
-    "eligibility.bornBefore": { $gte: new Date(birthdate.getTime() - 11 * 60 * 60 * 1000) },
-  };
-  if (cohortToExclude) query._id = { $ne: cohortToExclude };
-  if (cohortGroupToInclude) query.cohortGroupId = cohortGroupToInclude;
-  if (cohortGroupToExclude) query.cohortGroupId = { $ne: cohortGroupToExclude };
-  return query;
-}
 
-function isInscriptionOpen(cohort: CohortType, timeZoneOffset: unknown, status?: string) {
-  // Les volontaires dont le dossier est encore en cours d'instruction peuvent encore changer de choix initial de séjour.
-  if (status && (status === YOUNG_STATUS.WAITING_CORRECTION || status === YOUNG_STATUS.WAITING_VALIDATION)) {
-    return cohort.getIsInstructionOpen(Number(timeZoneOffset));
+// TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
+export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
+  let query: CohortQuery = { status: COHORT_STATUS.PUBLISHED };
+
+  // En cas de changement de séjour, on propose uniquement les autres cohortes du groupe de cohorte actuel.
+  if (young.cohortId && !young.isReInscription) {
+    const cohort = await CohortModel.findById(young.cohortId);
+    if (!cohort) throw new Error("Cohort not found");
+    query = {
+      ...query,
+      cohortGroupId: cohort.cohortGroupId,
+      _id: { $ne: young.cohortId },
+    };
   }
-  return cohort.getIsInscriptionOpen(Number(timeZoneOffset));
-}
-
-export async function getFilteredSessionsForInscription(young: YoungInfo, timeZoneOffset?: string | number | null) {
-  if (!young.birthdateAt) throw new Error("Missing birthdate");
-  if (!young.grade) throw new Error("Missing grade");
-  if (young.cohortId) return getFilteredSessionsForChangementSejour(young as YoungType, timeZoneOffset);
-
-  const department = getDepartmentForEligibility(young);
-  if (!department) throw new Error("Unable to determine department");
-
-  const query = buildCohortQuery({
-    birthdate: new Date(young.birthdateAt),
-    schoolLevel: young.grade,
-    department,
-  });
 
   const cohorts = await CohortModel.find(query);
-  const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
-    return isInscriptionOpen(session, timeZoneOffset, young.status);
-  });
-
-  for (let session of openSessions) session.isEligible = true;
   const region = getRegionForEligibility(young);
-  return getPlaces(openSessions, region);
-}
-
-export async function getFilteredSessionsForChangementSejour(young: YoungType, timeZoneOffset?: string | number | null) {
-  if (!young.birthdateAt) throw new Error("Missing birthdate");
-  if (!young.grade) throw new Error("Missing grade");
-  if (!young.cohortId) throw new Error("Missing cohortId");
-
-  const currentCohort = await CohortModel.findById(young.cohortId);
-  if (!currentCohort) throw new Error("Cohort not found");
-  if (!currentCohort.cohortGroupId) throw new Error("Cohort group ID not found");
-
   const department = getDepartmentForEligibility(young);
-  if (!department) throw new Error("Unable to determine department");
 
-  const query = buildCohortQuery({
-    birthdate: new Date(young.birthdateAt),
-    schoolLevel: young.grade,
-    department,
-    cohortToExclude: young.cohortId,
-    cohortGroupToInclude: currentCohort.cohortGroupId,
+  const sessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
+    // if the young has already a cohort, he can only apply for the cohorts of the same year
+    return (
+      session.eligibility?.zones.includes(department) &&
+      session.eligibility?.schoolLevels.includes(young.grade!) &&
+      young.birthdateAt &&
+      session.eligibility?.bornAfter <= young.birthdateAt &&
+      // @ts-expect-error comparaison d'une Date avec un number...
+      session.eligibility?.bornBefore.setTime(session.eligibility?.bornBefore.getTime() + 11 * 60 * 60 * 1000) >= young.birthdateAt &&
+      (session.getIsInscriptionOpen(Number(timeZoneOffset)) ||
+        (session.getIsReInscriptionOpen(Number(timeZoneOffset)) && young.isReInscription) ||
+        (session.getIsInstructionOpen(Number(timeZoneOffset)) && ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION] as string[]).includes(young.status)))
+    );
   });
-
-  const cohorts = await CohortModel.find(query);
-  const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
-    return isInscriptionOpen(session, timeZoneOffset, young.status);
-  });
-
-  for (let session of openSessions) session.isEligible = true;
-  const region = getRegionForEligibility(young);
-  return getPlaces(openSessions, region);
-}
-
-export async function getFilteredSessionsForReinscription(young: YoungDto, timeZoneOffset?: string | number | null) {
-  if (!young.birthdateAt) throw new Error("Missing birthdate");
-  if (!young.grade) throw new Error("Missing grade");
-  if (!young.cohortId) throw new Error("Missing cohortId");
-
-  const currentCohort = await CohortModel.findById(young.cohortId);
-  if (!currentCohort) throw new Error("Cohort not found");
-  if (!currentCohort.cohortGroupId) throw new Error("Cohort group ID not found");
-
-  const department = getDepartmentForEligibility(young);
-  if (!department) throw new Error("Unable to determine department");
-
-  const query = buildCohortQuery({
-    birthdate: new Date(young.birthdateAt),
-    schoolLevel: young.grade,
-    department,
-    cohortGroupToExclude: currentCohort.cohortGroupId,
-  });
-
-  const cohorts = await CohortModel.find(query);
-  const openSessions: CohortDocumentWithPlaces[] = cohorts.filter((session) => {
-    return session.getIsReInscriptionOpen(Number(timeZoneOffset));
-  });
-
-  for (let session of openSessions) session.isEligible = true;
-  const region = getRegionForEligibility(young);
-  return getPlaces(openSessions, region);
+  for (let session of sessions) {
+    session.isEligible = true;
+  }
+  return getPlaces(sessions, region);
 }
 
 export async function getAllSessions(young: YoungInfo) {
   const cohorts = await CohortModel.find({});
   const region = getRegionForEligibility(young);
   const sessionsWithPlaces = await getPlaces(cohorts, region);
-  const availableSessions = await getFilteredSessionsForInscription(young);
+  const availableSessions = await getFilteredSessions(young);
   for (let session of sessionsWithPlaces) {
     session.isEligible = availableSessions.some((e) => e.name === session.name);
   }

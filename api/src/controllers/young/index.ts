@@ -61,7 +61,7 @@ import {
   MissionType,
   ContractType,
 } from "snu-lib";
-import { getFilteredSessionsForChangementSejour } from "../../utils/cohort";
+import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
