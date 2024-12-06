@@ -7,6 +7,7 @@ import {
   FEATURES_NAME,
   YOUNG_STATUS,
   isFeatureEnabled,
+  permissionPhase2,
   shouldForceRedirectToInscription,
   shouldForceRedirectToReinscription,
   shouldReAcceptRI,
@@ -96,7 +97,7 @@ const Espace = () => {
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
-          <SentryRoute path="/phase2" component={Phase2} />
+          {permissionPhase2(young) && <SentryRoute path="/phase2" component={Phase2} />}
           <SentryRoute path="/phase3" component={Phase3} />
           <SentryRoute path="/autres-engagements" component={AutresEngagements} />
           <SentryRoute path="/les-programmes" component={Engagement} />
