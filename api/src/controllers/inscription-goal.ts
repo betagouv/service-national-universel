@@ -105,10 +105,10 @@ router.get(
 
       const { department, cohort } = params;
 
-      const cohortObj = await CohortModel.findOne({ name: cohort });
-      if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const cohortDocument = await CohortModel.findOne({ name: cohort });
+      if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const completionObjectif = await getCompletionObjectifs(department, cohortObj);
+      const completionObjectif = await getCompletionObjectifs(department, cohortDocument);
 
       return res.status(200).json({ ok: true, data: completionObjectif.tauxRemplissage });
     } catch (error) {
@@ -132,10 +132,10 @@ router.get("/:cohort/department/:department/reached", passport.authenticate("you
 
     const { department, cohort } = value;
 
-    const cohortObj = await CohortModel.findOne({ name: cohort });
-    if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohortDocument = await CohortModel.findOne({ name: cohort });
+    if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const completionObjectif = await getCompletionObjectifs(department, cohortObj);
+    const completionObjectif = await getCompletionObjectifs(department, cohortDocument);
 
     return res.status(200).send({ ok: true, data: completionObjectif.isAtteint });
   } catch (error) {

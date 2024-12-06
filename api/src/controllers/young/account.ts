@@ -101,11 +101,11 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       const status = value.status ? value.status : young.status;
       let isGoalReached = false;
 
-      const cohortObj = await CohortModel.findOne({ name: cohort });
-      if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const cohortDocument = await CohortModel.findOne({ name: cohort });
+      if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       // Check cohort availability
-      const isEligible = availableSessions.find((s) => s.name === cohortObj.name);
+      const isEligible = availableSessions.find((s) => s.name === cohortDocument.name);
 
       if (!isEligible && status !== YOUNG_STATUS.NOT_ELIGIBLE) {
         return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
@@ -113,7 +113,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
       // Check if cohort goal is reached
       if (isEligible) {
-        const completionObjectif = await getCompletionObjectifs(value.department, cohortObj);
+        const completionObjectif = await getCompletionObjectifs(value.department, cohortDocument);
         isGoalReached = completionObjectif.isAtteint;
       }
 

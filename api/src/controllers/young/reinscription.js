@@ -47,11 +47,11 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const cohortObj = await CohortModel.findOne({ name: value.cohort });
-    if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohortDocument = await CohortModel.findOne({ name: value.cohort });
+    if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // Check if the young has access to reinscription
-    if (!hasAccessToReinscription(young, cohortObj)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!hasAccessToReinscription(young, cohortDocument)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // complete values
     value.status = YOUNG_STATUS.REINSCRIPTION;
@@ -70,7 +70,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // Update young
     young.set({
       ...value,
-      cohortId: cohortObj._id,
+      cohortId: cohortDocument._id,
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,
