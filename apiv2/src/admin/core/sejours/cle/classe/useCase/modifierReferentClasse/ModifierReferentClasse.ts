@@ -9,10 +9,12 @@ import {
 } from "@notification/core/Notification";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { UseCase } from "@shared/core/UseCase";
-import { InvitationType } from "snu-lib";
+import { InvitationType, ROLES } from "snu-lib";
 import { InviterReferentClasse } from "../../../referent/useCase/InviteReferentClasse";
 import { ClasseGateway } from "../../Classe.gateway";
 import { ClasseModel } from "../../Classe.model";
+import { ConfigService } from "@nestjs/config";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 export type ModifierReferentClasseModel = Pick<ReferentModel, "email" | "prenom" | "nom">;
 
@@ -24,77 +26,111 @@ export class ModifierReferentClasse implements UseCase<ReferentModel> {
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         private inviterReferentClasse: InviterReferentClasse,
         private referentService: ReferentService,
+        private readonly config: ConfigService,
     ) {}
-    async execute(classeId: string, modifierReferentClasseModel: ModifierReferentClasseModel): Promise<ReferentModel> {
+
+    async execute(classeId: string, modifierReferent: ModifierReferentClasseModel): Promise<ReferentModel> {
         const classe = await this.classeGateway.findById(classeId);
-        const previousReferent = await this.referentGateway.findById(classe.referentClasseIds[0]);
-        // Mise à jour du nom et prénom du référent
-        if (previousReferent.email === modifierReferentClasseModel.email) {
-            return await this.referentGateway.update({
-                ...previousReferent,
-                nom: modifierReferentClasseModel.nom,
-                prenom: modifierReferentClasseModel.prenom,
+        const referentBeforeAssignement = await this.referentGateway.findById(classe.referentClasseIds[0]);
+
+        // Update du nom et prénom
+        if (referentBeforeAssignement.email === modifierReferent.email) {
+            return this.referentGateway.update({
+                ...referentBeforeAssignement,
+                nom: modifierReferent.nom,
+                prenom: modifierReferent.prenom,
             });
         }
 
-        try {
-            const newReferentOfClasse = await this.referentGateway.findByEmail(modifierReferentClasseModel.email);
-            await this.handlePreviousReferent(previousReferent, classe);
-            const updatedReferent = await this.handleNewReferent(
-                {
-                    ...newReferentOfClasse,
-                    nom: modifierReferentClasseModel.nom,
-                    prenom: modifierReferentClasseModel.prenom,
-                },
-                classe,
-            );
-            classe.referentClasseIds = [newReferentOfClasse.id];
+        const existingReferentToBeAssigned = await this.findExistingReferentByEmail(modifierReferent.email);
+
+        if (existingReferentToBeAssigned) {
+            if (existingReferentToBeAssigned.role !== ROLES.REFERENT_CLASSE) {
+                throw new FunctionalException(FunctionalExceptionCode.ROLE_NOT_REFERENT_CLASSE);
+            }
+            const nextReferent = {
+                ...existingReferentToBeAssigned,
+                prenom: modifierReferent.prenom,
+                nom: modifierReferent.nom,
+            };
+            // Mise à jour du lien entre la classe et le référent
+            classe.referentClasseIds = [nextReferent.id];
             await this.classeGateway.update(classe);
-            return updatedReferent;
-        } catch {
-            return await this.referentService.createNewReferentAndAddToClasse(modifierReferentClasseModel, classe);
+
+            await this.handlePreviousReferent(referentBeforeAssignement, classe);
+            return await this.handleExistingReferentAfterAssignement(nextReferent, classe);
+        }
+        const newReferent = await this.referentService.createNewReferentAndAssignToClasse(modifierReferent, classe);
+        await this.handlePreviousReferent(referentBeforeAssignement, classe);
+        return newReferent;
+    }
+
+    private async findExistingReferentByEmail(email: string): Promise<ReferentModel | null> {
+        try {
+            return await this.referentGateway.findByEmail(email);
+        } catch (e) {
+            return null;
         }
     }
 
-    private async handlePreviousReferent(previousReferent: ReferentModel, classe: ClasseModel) {
-        // const currentReferent = await this.referentGateway.findById(classe.referentClasseIds[0]);
-        const hasCurrentReferentOtherClasses = await this.classeGateway.findByReferentId(previousReferent.id);
-        if (hasCurrentReferentOtherClasses.length === 0) {
+    private async handlePreviousReferent(previousReferent: ReferentModel, classe: ClasseModel): Promise<void> {
+        const previousReferentClasses = await this.classeGateway.findByReferentId(previousReferent.id);
+        if (previousReferent.role !== ROLES.REFERENT_CLASSE) {
+            return;
+        }
+        if (previousReferentClasses.length === 0) {
             await this.referentService.deleteReferentAndSendEmail(previousReferent);
         } else {
-            await this.notificationGateway.sendEmail<SupprimerClasseEngageeParams>(
-                {
-                    to: [{ email: previousReferent.email, name: `${previousReferent.prenom} ${previousReferent.nom}` }],
-                    classeCode: classe.uniqueKeyAndId,
-                    classeNom: classe.nom,
-                    compteUrl: "", // TODO : vérifier qu'il faut envoyer l'URL du compte
-                },
-                EmailTemplate.SUPPRIMER_CLASSE_ENGAGEE,
-            );
+            await this.sendClasseRemovalNotification(previousReferent, classe);
         }
     }
 
-    private async handleNewReferent(newReferentOfClasse: ReferentModel, classe: ClasseModel) {
-        const classesOfNewReferent = await this.classeGateway.findByReferentId(newReferentOfClasse.id);
-        if (classesOfNewReferent.length > 1) {
-            // TODO : envoyer le template 2350
-            await this.notificationGateway.sendEmail<NouvelleClasseEngageeParams>(
-                {
-                    to: [
-                        {
-                            email: newReferentOfClasse.email,
-                            name: `${newReferentOfClasse.prenom} ${newReferentOfClasse.nom}`,
-                        },
-                    ],
-                    classeCode: classe.uniqueKeyAndId,
-                    classeNom: classe.nom,
-                    compteUrl: "", // TODO : vériifier qu'il faut envoyer l'URL du compte
-                },
-                EmailTemplate.NOUVELLE_CLASSE_ENGAGEE,
-            );
+    private async handleExistingReferentAfterAssignement(
+        newReferent: ReferentModel,
+        classe: ClasseModel,
+    ): Promise<ReferentModel> {
+        const referentClasses = await this.classeGateway.findByReferentId(newReferent.id);
+
+        if (referentClasses.length <= 1) {
+            await this.inviterReferentClasse.execute(newReferent.id, classe.id, InvitationType.INSCRIPTION);
         } else {
-            await this.inviterReferentClasse.execute(newReferentOfClasse.id, classe.id, InvitationType.INSCRIPTION); //template 1391
+            await this.sendNewClasseNotification(newReferent, classe);
         }
-        return await this.referentGateway.update(newReferentOfClasse);
+
+        return await this.referentGateway.update(newReferent);
+    }
+
+    private async sendClasseRemovalNotification(referent: ReferentModel, classe: ClasseModel): Promise<void> {
+        await this.notificationGateway.sendEmail<SupprimerClasseEngageeParams>(
+            {
+                to: [
+                    {
+                        email: referent.email,
+                        name: `${referent.prenom} ${referent.nom}`,
+                    },
+                ],
+                classeCode: classe.uniqueKeyAndId,
+                classeNom: classe.nom,
+                compteUrl: this.config.getOrThrow("urls.admin"),
+            },
+            EmailTemplate.SUPPRIMER_CLASSE_ENGAGEE,
+        );
+    }
+
+    private async sendNewClasseNotification(referent: ReferentModel, classe: ClasseModel): Promise<void> {
+        await this.notificationGateway.sendEmail<NouvelleClasseEngageeParams>(
+            {
+                to: [
+                    {
+                        email: referent.email,
+                        name: `${referent.prenom} ${referent.nom}`,
+                    },
+                ],
+                classeCode: classe.uniqueKeyAndId,
+                classeNom: classe.nom,
+                compteUrl: this.config.getOrThrow("urls.admin"),
+            },
+            EmailTemplate.NOUVELLE_CLASSE_ENGAGEE,
+        );
     }
 }

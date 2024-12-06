@@ -32,6 +32,7 @@ describe("ReferentService", () => {
     const mockClasse: ClasseModel = {
         id: "1",
         referentClasseIds: [],
+        region: "region1",
     } as unknown as ClasseModel;
 
     beforeEach(async () => {
@@ -94,14 +95,11 @@ describe("ReferentService", () => {
                 email: "new@example.com",
                 prenom: "New",
                 nom: "Referent",
-                metadata: {},
-                region: "",
-                invitationToken: "",
                 role: ROLES.REFERENT_CLASSE,
-            };
+            } as ReferentModel;
             (referentGateway.create as jest.Mock).mockResolvedValue(newReferent);
 
-            const createdReferent = await service.createNewReferentAndAddToClasse(
+            const createdReferent = await service.createNewReferentAndAssignToClasse(
                 {
                     email: newReferent.email,
                     prenom: newReferent.prenom,
@@ -112,7 +110,7 @@ describe("ReferentService", () => {
 
             expect(referentGateway.create).toHaveBeenCalledWith({
                 metadata: {},
-                region: "",
+                region: "region1",
                 invitationToken: "",
                 role: ROLES.REFERENT_CLASSE,
                 email: newReferent.email,
