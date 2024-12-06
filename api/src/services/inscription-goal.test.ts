@@ -83,7 +83,7 @@ describe("getCompletionObjectifDepartement", () => {
 describe("getCompletionObjectifs", () => {
   it("should return regional completion when objectifLevel is 'regional'", async () => {
     const department = "Test Department";
-    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort" }));
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort", objectifLevel: INSCRIPTION_GOAL_LEVELS.REGIONAL }));
     const count = 50;
     const maxRegion = 500;
 
@@ -103,7 +103,7 @@ describe("getCompletionObjectifs", () => {
 
   it("should return departmental completion when objectifLevel is 'departemental'", async () => {
     const department = "Test Department";
-    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort" }));
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort", objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
     const count = 50;
     const maxDepartment = 100;
     const maxRegion = 500;
