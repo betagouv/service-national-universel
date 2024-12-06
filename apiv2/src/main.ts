@@ -1,7 +1,7 @@
 import "./instrument"; // first
 
 import { ConfigService } from "@nestjs/config";
-import { ValidationPipe } from "@nestjs/common";
+import { RequestMethod, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./App.module";
 
@@ -14,7 +14,9 @@ async function bootstrap() {
     });
     const port = config.getOrThrow("httpServer.port");
     if (config.getOrThrow("environment") === "production") {
-        app.setGlobalPrefix("v2");
+        app.setGlobalPrefix("v2", {
+            exclude: [{ path: "/", method: RequestMethod.GET }],
+        });
     }
     await app.listen(port);
 }
