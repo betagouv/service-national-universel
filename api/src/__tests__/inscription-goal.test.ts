@@ -46,14 +46,14 @@ describe("Inscription Goal", () => {
   describe("GET /inscription-goal/:cohort/department/:department", () => {
     it("should return 200 when goal defined", async () => {
       await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal" }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal 1" }));
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(200);
       expect(res.body.data).toBe(0);
     });
     it("should return corresponding filling rate when young exists", async () => {
       await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal" }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal 2" }));
       await createYoungHelper(
         getNewYoungFixture({
           status: YOUNG_STATUS.VALIDATED,
@@ -69,7 +69,7 @@ describe("Inscription Goal", () => {
       expect(res.body.data).toBeLessThan(1);
     });
     it("should return filling at 1 when department goal is reached (not region)", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal", objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal 3", objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, max: 1 }));
       await createInscriptionGoal(
         getNewInscriptionGoalFixture({
@@ -97,10 +97,8 @@ describe("Inscription Goal", () => {
     });
     it("should return filling at 1 when region goal is reached (not department)", async () => {
       const department = "Loire-Atlantique";
-      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal", objectifLevel: INSCRIPTION_GOAL_LEVELS.REGIONAL }));
-      const inscriptionGoal = await createInscriptionGoal(
-        getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal", department, region: department2region[department], max: 1 }),
-      );
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal 4", objectifLevel: INSCRIPTION_GOAL_LEVELS.REGIONAL }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, department, region: department2region[department], max: 1 }));
       // jeune dans la region mais pas dans le departement
       await createYoungHelper(
         getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, cohort: inscriptionGoal.cohort, cohortId: inscriptionGoal.cohortId }),
@@ -116,14 +114,14 @@ describe("Inscription Goal", () => {
     });
 
     it("should return 400 when department does not exist for valid cohort", async () => {
-      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
+      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal 5" }));
       const res = await request(getAppHelper()).get(`/inscription-goal/Test Inscription Goal/department/Unknown`);
       expect(res.status).toBe(400);
       expect(res.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
     });
     it("should return 400 when goal has max null", async () => {
-      await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal" }));
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: "Test Inscription Goal", max: 0 }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Inscription Goal 6" }));
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, max: 0 }));
       const res = await request(getAppHelper()).get(`/inscription-goal/${inscriptionGoal.cohort}/department/${inscriptionGoal.department}`);
       expect(res.status).toBe(400);
       expect(res.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
