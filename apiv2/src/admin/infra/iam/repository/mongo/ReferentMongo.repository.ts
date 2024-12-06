@@ -28,6 +28,7 @@ export class ReferentRepository implements ReferentGateway {
         }
         await this.updateEntity({
             _id: referent._id,
+            email: `deleted-${referent.id}-${referent.email}`,
             deletedAt: this.clockGateway.now(),
         });
         this.contactGateway.syncReferent({

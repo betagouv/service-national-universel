@@ -87,4 +87,21 @@ describe("ReferentGateway", () => {
             expect(referentPatche.user).toEqual({ id: "id", firstName: "prenom", lastName: "nom" });
         });
     });
+    describe("delete", () => {
+        it("should delete a referent", async () => {
+            const createdReferent = await createReferent({
+                nom: "Referent Test",
+            });
+            jest.spyOn(cls, "get").mockImplementation(() => {});
+            await referentGateway.delete(createdReferent.id);
+            const referent = await referentMongoose.findById(createdReferent.id);
+            expect(referent).toEqual(
+                expect.objectContaining({
+                    id: createdReferent.id,
+                    deletedAt: expect.any(Date),
+                    email: `deleted-${createdReferent.id}-${createdReferent.email}`,
+                }),
+            );
+        });
+    });
 });
