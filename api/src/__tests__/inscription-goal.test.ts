@@ -75,7 +75,7 @@ describe("Inscription Goal", () => {
         getNewInscriptionGoalFixture({
           max: 1,
           cohort: inscriptionGoal.cohort,
-          department: faker.helpers.arrayElement(region2department[inscriptionGoal.region!].filter((d) => d !== inscriptionGoal.department)),
+          department: faker.helpers.arrayElement(region2department[inscriptionGoal.region!]),
           region: inscriptionGoal.region,
         }),
       );
