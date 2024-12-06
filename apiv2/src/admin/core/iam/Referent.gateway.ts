@@ -4,7 +4,8 @@ import { CreateReferentModel, ReferentModel, ReferentPasswordModel } from "./Ref
 export interface ReferentGateway {
     findAll(): Promise<ReferentModel[]>;
     findById(id: string): Promise<ReferentModel>;
-    findByEmail(email: string): Promise<ReferentPasswordModel>;
+    findByEmail(email: string): Promise<ReferentModel>;
+    findReferentPasswordByEmail(email: string): Promise<ReferentPasswordModel>;
     update(referent: ReferentModel): Promise<ReferentModel>;
     create(referent: CreateReferentModel): Promise<ReferentModel>;
     findByIds(ids: string[]): Promise<ReferentModel[]>;

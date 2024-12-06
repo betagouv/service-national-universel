@@ -20,14 +20,17 @@ export class ContactConsumer extends WorkerHost {
             switch (job.name) {
                 case ContactType.JEUNE: {
                     for (const jeune of job.data) {
-                        this.logger.log(`Synchronizing JeuneId: ${jeune.id}`);
+                        this.logger.log(`Synchronizing JeuneId: ${jeune.id}`, ContactConsumer.name);
                         await this.contactProvider.syncJeune(jeune);
                     }
                     break;
                 }
                 case ContactType.REFERENT: {
                     for (const referent of job.data) {
-                        this.logger.log(`Synchronizing ReferentId: ${referent.id} - ${referent.operation}`);
+                        this.logger.log(
+                            `Synchronizing referent: ${referent.email} - ${referent.id} - ${referent.operation}`,
+                            ContactConsumer.name,
+                        );
                         await this.contactProvider.syncReferent(referent);
                     }
                     break;
@@ -38,7 +41,6 @@ export class ContactConsumer extends WorkerHost {
             }
             return ConsumerResponse.SUCCESS;
         } catch (error: any) {
-            // console.log(error);
             this.logger.error(
                 `Error synchronizing user type ${job.name} for email ${error.email} - ${error.code} - ${error.message}`,
                 ContactConsumer.name,
