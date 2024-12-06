@@ -3,6 +3,8 @@ import { Logger } from "@nestjs/common";
 
 import { YOUNG_STATUS_PHASE1 } from "snu-lib";
 
+import { FileGateway } from "@shared/core/File.gateway";
+import { TaskGateway } from "@task/core/Task.gateway";
 import {
     DistributionJeunesParDepartement,
     JeuneAffectationModel,
@@ -13,7 +15,7 @@ import { SejourModel } from "../sejour/Sejour.model";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { CentreModel } from "../centre/Centre.model";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
-import { FileGateway } from "@shared/core/File.gateway";
+import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 
 describe("SimulationAffectationHTSService", () => {
     let simulationAffectationHTSService: SimulationAffectationHTSService;
@@ -23,11 +25,83 @@ describe("SimulationAffectationHTSService", () => {
             providers: [
                 SimulationAffectationHTSService,
                 Logger,
-                { provide: FileGateway, useValue: { generateExcel: jest.fn(), uploadFile: jest.fn() } },
+                {
+                    provide: FileGateway,
+                    useValue: {
+                        generateExcel: jest.fn(),
+                        uploadFile: jest.fn(),
+                        downloadFile: jest.fn().mockResolvedValue({ Body: null }),
+                        parseXLS: jest.fn().mockResolvedValue([
+                            {
+                                "Commentaire interne sur l'enregistrement": "DEPARTEMENT 93",
+                                "Code point de rassemblement initial": "Matricule",
+                            },
+                        ]),
+                    },
+                },
+                {
+                    provide: TaskGateway,
+                    useValue: {
+                        findById: jest.fn().mockResolvedValue({
+                            metadata: {
+                                parameters: {
+                                    fileKey: "mockedFileKey",
+                                },
+                            },
+                        }),
+                    },
+                },
+                {
+                    provide: PointDeRassemblementGateway,
+                    useValue: {
+                        findByMatricules: jest.fn().mockResolvedValue([
+                            {
+                                departement: "Paris",
+                            },
+                        ]),
+                    },
+                },
             ],
         }).compile();
 
         simulationAffectationHTSService = module.get<SimulationAffectationHTSService>(SimulationAffectationHTSService);
+    });
+
+    describe("getChangementsDepartements", () => {
+        it("should return changementDepartement array", async () => {
+            const result = await simulationAffectationHTSService.getChangementsDepartements("test-sdr-import-id");
+            expect(result).toEqual([{ origine: "Seine-Saint-Denis", destination: "Paris" }]);
+        });
+    });
+
+    describe("getJeuneAffectationDepartement", () => {
+        it("should return the destination department if the jeune.departement is in the changementDepartements array", () => {
+            const jeune = {
+                departement: "origine",
+            } as JeuneModel;
+            const changementDepartements = [{ origine: "origine", destination: "destination" }];
+
+            const result = simulationAffectationHTSService.getJeuneAffectationDepartement(
+                jeune,
+                changementDepartements,
+            );
+
+            expect(result).toEqual("destination");
+        });
+
+        it("should return the jeune.departement if the jeune.departement is not in the changementDepartements array", () => {
+            const jeune = {
+                departement: "origine",
+            } as JeuneModel;
+            const changementDepartements = [{ origine: "autre", destination: "destination" }];
+
+            const result = simulationAffectationHTSService.getJeuneAffectationDepartement(
+                jeune,
+                changementDepartements,
+            );
+
+            expect(result).toEqual("origine");
+        });
     });
 
     describe("computeRatioRepartition", () => {
@@ -99,6 +173,20 @@ describe("SimulationAffectationHTSService", () => {
                 tauxRemplissageCentres: [0.5, 0.7, 0.8],
             });
         });
+
+        it("should calculate the filling rate per center correctly (0%)", () => {
+            const sejourList = [{ centreId: "1", placesRestantes: 10, placesTotal: 10 }] as SejourModel[];
+
+            const lignesList = [{ centreId: "1", placesOccupeesJeunes: 10, capaciteJeunes: 10 }] as LigneDeBusModel[];
+
+            const result = simulationAffectationHTSService.calculTauxRemplissageParCentre(sejourList, lignesList);
+
+            expect(result).toEqual({
+                centreIdList: ["1"],
+                tauxOccupationLignesParCentreList: [[1]],
+                tauxRemplissageCentres: [0],
+            });
+        });
     });
 
     describe("affectationAleatoireDesJeunes", () => {
@@ -134,6 +222,7 @@ describe("SimulationAffectationHTSService", () => {
                     jeuneList,
                     sejourList,
                     ligneDeBusList,
+                    [],
                 );
 
             expect(randomJeuneList.filter((young) => young.statusPhase1 === "AFFECTED").length).toBeLessThanOrEqual(7);
@@ -155,6 +244,77 @@ describe("SimulationAffectationHTSService", () => {
             expect(
                 randomLigneDeBusList.find((ligne) => ligne.id === "ligne3")?.placesOccupeesJeunes,
             ).toBeLessThanOrEqual(7);
+        });
+    });
+
+    describe("affecterPdrJeune", () => {
+        it("should return undefined if no point de rassemblement ids", () => {
+            const jeune = {
+                pointDeRassemblementIds: [],
+            } as any;
+            const pdrList: PointDeRassemblementModel[] = [];
+
+            expect(simulationAffectationHTSService.affecterPdrJeune(jeune, pdrList)).toBeUndefined();
+        });
+
+        it("should return undefined if handicap is in the same department", () => {
+            const jeune = {
+                pointDeRassemblementIds: ["1"],
+                handicapMemeDepartment: "true",
+            } as JeuneAffectationModel;
+            const pdrList: PointDeRassemblementModel[] = [];
+
+            expect(simulationAffectationHTSService.affecterPdrJeune(jeune, pdrList)).toBeUndefined();
+        });
+
+        it("should return undefined if deplacementPhase1Autonomous is true", () => {
+            const jeune = {
+                pointDeRassemblementIds: ["1"],
+                deplacementPhase1Autonomous: "true",
+            } as JeuneAffectationModel;
+            const pdrList: PointDeRassemblementModel[] = [];
+
+            expect(simulationAffectationHTSService.affecterPdrJeune(jeune, pdrList)).toBeUndefined();
+        });
+
+        it("should return undefined if transportInfoGivenByLocal is true", () => {
+            const jeune = {
+                pointDeRassemblementIds: ["1"],
+                transportInfoGivenByLocal: "true",
+            } as JeuneAffectationModel;
+            const pdrList: PointDeRassemblementModel[] = [];
+
+            expect(simulationAffectationHTSService.affecterPdrJeune(jeune, pdrList)).toBeUndefined();
+        });
+
+        it("should return the closest PDR id", () => {
+            const jeune = {
+                pointDeRassemblementIds: ["1", "2"],
+                localisation: { lat: 1, lon: 1 },
+            } as JeuneAffectationModel;
+            const pdrList = [
+                { id: "1", localisation: { lat: 2, lon: 2 } },
+                { id: "2", localisation: { lat: 3, lon: 3 } },
+            ] as PointDeRassemblementModel[];
+
+            expect(simulationAffectationHTSService.affecterPdrJeune(jeune, pdrList)).toBe("1");
+        });
+
+        it("should return a random PDR id if no location data", () => {
+            const jeune = {
+                pointDeRassemblementIds: ["1", "2"],
+                localisation: undefined,
+            } as JeuneAffectationModel;
+            const pdrList = [
+                { id: "1", localisation: { lat: 2, lon: 2 } },
+                { id: "2", localisation: { lat: 3, lon: 3 } },
+            ] as PointDeRassemblementModel[];
+
+            const mockMath = Object.create(global.Math);
+            mockMath.random = () => 0.5;
+            global.Math = mockMath;
+
+            expect(simulationAffectationHTSService.affecterPdrJeune(jeune, pdrList)).toBe("2");
         });
     });
 
@@ -248,7 +408,6 @@ describe("SimulationAffectationHTSService", () => {
                 jeunesList,
                 pdrList,
                 ligneDeBusList,
-                [],
             );
 
             expect(result).toEqual({
@@ -261,42 +420,56 @@ describe("SimulationAffectationHTSService", () => {
         });
     });
 
-    describe("getAffectationNombreSurLigne", () => {
+    describe("getNombreSurLigneApresAffectation", () => {
         it("should return the same array if the sum of placesLignes equals nbPlacesAAffecter", () => {
             const placesLignes = [10, 20, 30];
             const nbPlacesAAffecter = 60;
 
             expect(
-                simulationAffectationHTSService.getAffectationNombreSurLigne(placesLignes, nbPlacesAAffecter),
+                simulationAffectationHTSService.getNombreSurLigneApresAffectation(placesLignes, nbPlacesAAffecter),
             ).toEqual(placesLignes);
+        });
+
+        it("should return the same array if the sum of placesLignes is less than nbPlacesAAffecter", () => {
+            const placesLignes = [10, 20, 30];
+            const nbPlacesAAffecter = 70;
+            const result = simulationAffectationHTSService.getNombreSurLigneApresAffectation(
+                placesLignes,
+                nbPlacesAAffecter,
+            );
+            expect(result).toEqual(placesLignes);
         });
 
         it("should return an array with the correct sum if the sum of placesLignes is greater than nbPlacesAAffecter", () => {
             const placesLignes = [10, 20, 30];
             const nbPlacesAAffecter = 50;
-            const result = simulationAffectationHTSService.getAffectationNombreSurLigne(
+            const result = simulationAffectationHTSService.getNombreSurLigneApresAffectation(
                 placesLignes,
                 nbPlacesAAffecter,
             );
-
+            expect(result[0]).toBeGreaterThanOrEqual(0);
+            expect(result[1]).toBeGreaterThanOrEqual(0);
+            expect(result[2]).toBeGreaterThanOrEqual(0);
             expect(result.reduce((a, b) => a + b, 0)).toEqual(nbPlacesAAffecter);
         });
 
-        it("should return an array with the correct sum if the sum of placesLignes is less than nbPlacesAAffecter", () => {
-            const placesLignes = [10, 20, 30];
-            const nbPlacesAAffecter = 70;
-            const result = simulationAffectationHTSService.getAffectationNombreSurLigne(
+        it("should return an array with positive placesLignes when a ligne doesn't have enough place", () => {
+            const placesLignes = [3, 17];
+            const nbPlacesAAffecter = 4;
+            const result = simulationAffectationHTSService.getNombreSurLigneApresAffectation(
                 placesLignes,
                 nbPlacesAAffecter,
             );
+            expect(result[0]).toBeGreaterThanOrEqual(0);
+            expect(result[1]).toBeGreaterThanOrEqual(0);
             const somme = result.reduce((a, b) => a + b, 0);
-            expect(somme).toEqual(60);
+            expect(somme).toEqual(4);
         });
     });
 
     describe("verificationCentres", () => {
         it("should return an array with modified values based on placesLeft and placesLigne", () => {
-            const nbAleatoireJeunesSurLignes = [20, 30, 40];
+            const nbPlacesDisponibleSurLignesApresAffectation = [20, 30, 40];
             const placesLignes = [12, 18, 25];
             const ligneDep = ["id1", "id2", "id3"];
             const ligneDeBusList = [
@@ -311,7 +484,7 @@ describe("SimulationAffectationHTSService", () => {
             ] as SejourModel[];
 
             const result = simulationAffectationHTSService.verificationCentres(
-                nbAleatoireJeunesSurLignes,
+                nbPlacesDisponibleSurLignesApresAffectation,
                 placesLignes,
                 ligneDep,
                 ligneDeBusList,
@@ -319,8 +492,44 @@ describe("SimulationAffectationHTSService", () => {
             );
 
             expect(result).toHaveLength(3);
+            expect(result[0]).toBeGreaterThan(0);
             expect(result[0]).toBeLessThanOrEqual(placesLignes[0]);
+            expect(result[1]).toBeGreaterThan(0);
             expect(result[1]).toBeLessThanOrEqual(placesLignes[1]);
+            expect(result[2]).toBeGreaterThan(0);
+            expect(result[2]).toBeLessThanOrEqual(placesLignes[2]);
+        });
+
+        it("should return an array with modified values based on placesLeft and placesLigne", () => {
+            const nbPlacesDisponibleSurLignesApresAffectation = [2, 3, 4];
+            const placesLignes = [12, 18, 25];
+            const ligneDep = ["id1", "id2", "id3"];
+            const ligneDeBusList = [
+                { id: "id1", centreId: "centerId1" },
+                { id: "id2", centreId: "centerId2" },
+                { id: "id3", centreId: "centerId3" },
+                { id: "id4", centreId: "centerId3" },
+            ] as LigneDeBusModel[];
+            const sejourList = [
+                { centreId: "centerId1", placesRestantes: 2 },
+                { centreId: "centerId2", placesRestantes: 2 },
+                { centreId: "centerId3", placesRestantes: 3 },
+            ] as SejourModel[];
+
+            const result = simulationAffectationHTSService.verificationCentres(
+                nbPlacesDisponibleSurLignesApresAffectation,
+                placesLignes,
+                ligneDep,
+                ligneDeBusList,
+                sejourList,
+            );
+
+            expect(result).toHaveLength(3);
+            expect(result[0]).toBeGreaterThan(0);
+            expect(result[0]).toBeLessThanOrEqual(placesLignes[0]);
+            expect(result[1]).toBeGreaterThan(0);
+            expect(result[1]).toBeLessThanOrEqual(placesLignes[1]);
+            expect(result[2]).toBeGreaterThan(0);
             expect(result[2]).toBeLessThanOrEqual(placesLignes[2]);
         });
     });
@@ -465,6 +674,7 @@ describe("SimulationAffectationHTSService", () => {
                 pdrList,
                 jeunesAvantAffectationList,
                 jeuneIntraDepartementList,
+                [],
                 {
                     selectedCost: 1e3,
                     tauxRepartitionCentreList: [],
@@ -488,5 +698,15 @@ describe("SimulationAffectationHTSService", () => {
             expect(result.centreList).toBeInstanceOf(Array);
             expect(result.jeuneIntraDepartementList).toBeInstanceOf(Array);
         });
+    });
+
+    it("should correctly format the percentage", () => {
+        expect(simulationAffectationHTSService.formatPourcent(0.5)).toBe("50.00%");
+        expect(simulationAffectationHTSService.formatPourcent(0.1234)).toBe("12.34%");
+        expect(simulationAffectationHTSService.formatPourcent(0)).toBe("0.00%");
+        expect(simulationAffectationHTSService.formatPourcent(1)).toBe("100.00%");
+        expect(simulationAffectationHTSService.formatPourcent(null as any)).toBe("");
+        expect(simulationAffectationHTSService.formatPourcent(undefined as any)).toBe("");
+        expect(simulationAffectationHTSService.formatPourcent(NaN)).toBe("");
     });
 });

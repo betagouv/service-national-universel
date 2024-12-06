@@ -8,7 +8,7 @@ export type PointDeRassemblementModel = {
     ville: string;
     codePostal: string;
     particularitesAcces?: string;
-    geoLoc?: { lat?: number; lon?: number };
+    localisation?: { lat?: number; lon?: number };
     region: string;
     departement: string;
     academie: string;
