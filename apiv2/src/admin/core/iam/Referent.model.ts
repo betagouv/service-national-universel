@@ -1,11 +1,12 @@
+import { Role, SousRole } from "@shared/core/Role";
 import { InvitationType } from "snu-lib";
 
 export interface ReferentModel {
     id: string;
     nom?: string;
     prenom?: string;
-    role?: string;
-    sousRole?: string;
+    role?: Role;
+    sousRole?: SousRole;
     email: string;
     departement?: string[];
     region: string;
@@ -52,3 +53,5 @@ export class ReferentMetadataModel {
     invitationType?: InvitationType;
     isFirstInvitationPending?: boolean;
 }
+
+export type CreateReferentModel = Omit<ReferentModel, "id" | "createdAt" | "updatedAt">;

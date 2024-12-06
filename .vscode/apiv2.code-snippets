@@ -1,0 +1,39 @@
+{
+	"Create Use Case": {
+		"scope": "typescript",
+		"prefix": "usecase",
+		"body": [
+			"import { Injectable } from \"@nestjs/common\";",
+			"import { UseCase } from \"@shared/core/UseCase\";",
+			"Injectable()",
+			"export class $1 implements UseCase<$2> {",
+			"constructor(){}",
+			" async execute(): Promise<$3>  {",
+			"",
+			"}",
+			"}"
+		],
+		"description": "Create an injectable Use Case"
+	},
+	"Create Service": {
+		"scope": "typescript",
+		"prefix": "service",
+		"body": [
+			"import { Injectable } from \"@nestjs/common\";",
+			"Injectable()",
+			"export class $1Service {",
+			"constructor(){}",
+			"",
+			"}"
+		],
+		"description": "Create an injectable Service"
+	},
+	"inject": {
+		"scope": "typescript",
+		"prefix": "inject",
+		"body": [
+			"@Inject($0) private readonly $0: $0,",
+		],
+		"description": "Inject a gateway, repo or provider with Symbol"
+	}
+}

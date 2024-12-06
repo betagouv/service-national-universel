@@ -1,10 +1,13 @@
 import * as brevo from "@getbrevo/brevo";
-import { Injectable, Logger } from "@nestjs/common";
+import { CreateUpdateContactModel } from "@getbrevo/brevo";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { EmailParams, EmailTemplate } from "@notification/core/Notification";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
-import { ContactProvider } from "../Contact.provider";
+import * as http from "http";
+import { ROLES } from "snu-lib";
+import { OperationType, ReferentSyncDto } from "../Contact";
+import { ContactProvider, ContactProviderError } from "../Contact.provider";
 import { EmailProvider } from "../Email.provider";
 import { EmailBrevoMapper } from "./EmailBrevo.mapper";
 
@@ -42,17 +45,58 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
         // TODO : add properties
         updateContact.attributes = {};
         // TODO : Create or update
-        this.contactsApi.updateContact(jeune.id, updateContact);
-        // OR
-        this.contactsApi.createContact(updateContact);
+        // this.contactsApi.updateContact(jeune.id, updateContact);
+        // // OR
+        // this.contactsApi.createContact(updateContact);
 
         // TODO : ajouter référents légaux
-        return ConsumerResponse.SUCCESS;
+        throw ConsumerResponse.FAILURE;
     }
 
-    async syncReferent(referent: ReferentModel): Promise<ConsumerResponse> {
-        // TODO : implement syncContact
-        return ConsumerResponse.SUCCESS;
+    async syncReferent(referent: ReferentSyncDto): Promise<ConsumerResponse> {
+        try {
+            if (referent.operation === OperationType.DELETE) {
+                await this.contactsApi.deleteContact(referent.email);
+                return ConsumerResponse.SUCCESS;
+            }
+            await this.createOrUpdateReferent(referent);
+            return ConsumerResponse.SUCCESS;
+        } catch (error: any) {
+            const exception: ContactProviderError = {
+                email: referent.email,
+                code: error.body?.code,
+                message: error.body?.message,
+            };
+            throw exception;
+        }
+    }
+
+    private async createOrUpdateReferent(referent: ReferentSyncDto): Promise<{
+        response: http.IncomingMessage;
+        body: CreateUpdateContactModel;
+    }> {
+        // On utilise le post de Brevo pour créer et mettre à jour les contacts (code http: 201 et 204)
+        const brevoContact = new brevo.CreateContact();
+        brevoContact.email = referent.email;
+        brevoContact.updateEnabled = true;
+        const listIds = [1448];
+        if (referent.role) {
+            if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(referent.role)) {
+                listIds.push(1243);
+            }
+            if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(referent.role)) {
+                listIds.push(1449);
+            }
+        }
+
+        brevoContact.listIds = listIds;
+        brevoContact.attributes = {
+            PRENOM: referent.prenom,
+            NOM: referent.nom,
+            ROLE: referent.role,
+            REGION: referent.region,
+        };
+        return this.contactsApi.createContact(brevoContact);
     }
 }
 
@@ -61,11 +105,14 @@ export interface Recipient {
     name?: string;
 }
 
+// TODO : ajouter les pièces jointes
 export type EmailProviderParams = {
     subject?: string;
     templateId: number;
     sender?: { name?: string; email: string };
     to: Recipient[];
+    cc?: Recipient[];
+    bcc?: Recipient[];
     replyTo?: { email: string; name?: string };
     headers?: { [key: string]: string };
     params?: { [key: string]: string };

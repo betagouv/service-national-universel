@@ -1,15 +1,17 @@
-import { ReferentGateway, Role, SousRole } from "@admin/core/iam/Referent.gateway";
-import { ReferentModel, ReferentPasswordModel } from "@admin/core/iam/Referent.model";
+import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
+import { CreateReferentModel, ReferentModel, ReferentPasswordModel } from "@admin/core/iam/Referent.model";
 import { Inject, Injectable } from "@nestjs/common";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
-import { ReferentType } from "snu-lib";
+import { Role, SousRole } from "@shared/core/Role";
 import { v4 as uuidv4 } from "uuid";
 import { ContactGateway } from "../../Contact.gateway";
 import { REFERENT_MONGOOSE_ENTITY, ReferentDocument } from "../../provider/ReferentMongo.provider";
 import { ReferentMapper } from "./Referent.mapper";
+import { ReferentType } from "snu-lib";
+import { OperationType } from "@notification/infra/email/Contact";
 
 @Injectable()
 export class ReferentRepository implements ReferentGateway {
@@ -19,6 +21,22 @@ export class ReferentRepository implements ReferentGateway {
         @Inject(ClockGateway) private clockGateway: ClockGateway,
         private readonly cls: ClsService,
     ) {}
+    async delete(id: string): Promise<void> {
+        const referent = await this.referentMongooseEntity.findById(id);
+        if (!referent) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        await this.updateEntity({
+            _id: referent._id,
+            email: `deleted-${referent.id}-${referent.email}`,
+            deletedAt: this.clockGateway.now(),
+        });
+        this.contactGateway.syncReferent({
+            ...ReferentMapper.toModel(referent),
+            operation: OperationType.DELETE,
+        });
+        return;
+    }
 
     async findByDepartementRoleAndSousRole(
         departement: string,
@@ -31,24 +49,37 @@ export class ReferentRepository implements ReferentGateway {
                 return ReferentMapper.toModels(referents);
             });
     }
-    async create(referent: ReferentModel): Promise<ReferentModel> {
-        return await this.referentMongooseEntity.create(ReferentMapper.toEntity(referent)).then((referentEntity) => {
-            this.contactGateway.syncReferent(ReferentMapper.toModel(referentEntity));
-            return ReferentMapper.toModel(referentEntity);
+    async create(referent: CreateReferentModel): Promise<ReferentModel> {
+        const referentEntity = await this.referentMongooseEntity.create(ReferentMapper.toEntityCreate(referent));
+        const createdReferent = ReferentMapper.toModel(referentEntity);
+        await this.contactGateway.syncReferent({
+            ...createdReferent,
+            operation: OperationType.CREATE,
         });
+        return createdReferent;
     }
     async findByIds(ids: string[]): Promise<ReferentModel[]> {
         return await this.referentMongooseEntity.find({ _id: { $in: ids } }).then((referents) => {
             return ReferentMapper.toModels(referents);
         });
     }
-    async findByEmail(email: string): Promise<ReferentPasswordModel> {
-        // return await this.referentMongooseEntity.findOne({ email });
+    async findReferentPasswordByEmail(email: string): Promise<ReferentPasswordModel> {
         const referent = await this.referentMongooseEntity.findOne({ email }).select("+password");
+
         if (!referent) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
+
         return ReferentMapper.toModelWithPassword(referent);
+    }
+    async findByEmail(email: string): Promise<ReferentModel> {
+        const referent = await this.referentMongooseEntity.findOne({ email });
+
+        if (!referent) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+
+        return ReferentMapper.toModel(referent);
     }
     async findById(id: string): Promise<ReferentModel> {
         return this.referentMongooseEntity.findById(id).then((referent) => {
@@ -61,7 +92,10 @@ export class ReferentRepository implements ReferentGateway {
     async update(referent: ReferentModel): Promise<ReferentModel> {
         const referentEntity = ReferentMapper.toEntity(referent);
         const updatedReferent = await this.updateEntity(referentEntity);
-
+        this.contactGateway.syncReferent({
+            ...ReferentMapper.toModel(updatedReferent),
+            operation: OperationType.UPDATE,
+        });
         return ReferentMapper.toModel(updatedReferent);
     }
 
@@ -88,8 +122,6 @@ export class ReferentRepository implements ReferentGateway {
 
         //@ts-expect-error fromUser unknown
         await retrievedReferent.save({ fromUser: user });
-
-        this.contactGateway.syncReferent(ReferentMapper.toModel(retrievedReferent));
 
         return retrievedReferent;
     }
