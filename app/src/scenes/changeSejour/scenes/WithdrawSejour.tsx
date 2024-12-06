@@ -8,14 +8,17 @@ import ReasonForm from "../components/ReasonForm";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import { translate } from "snu-lib";
+import { useLocation } from "react-router-dom";
 
 export default function WithdrawSejour() {
   const [withdrawnMessage, setWithdrawnMessage] = useState("");
   const [withdrawnReason, setWithdrawnReason] = useState("");
   const [open, setOpen] = useState(false);
+  const location = useLocation<{ backlink?: string }>();
+  const backlink = location.state?.backlink || "/changer-de-sejour/no-date";
 
   return (
-    <ChangeSejourContainer title="Se désister" backlink="/changer-de-sejour/no-date">
+    <ChangeSejourContainer title="Se désister" backlink={backlink}>
       <p className="mt-4 mb-6 text-sm leading-5 text-[#6B7280] font-normal">Veuillez précisez la raison de votre désistement.</p>
       <ReasonForm
         reason={withdrawnReason}

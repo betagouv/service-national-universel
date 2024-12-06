@@ -21,7 +21,6 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
 
   const filteredSteps = steps[action].filter((step) => step.parcours.includes(young.source));
   const { content, title, subTitle } = filteredSteps[step];
-  console.log(content);
   return (
     <Modal isOpen={isOpen} onClose={onCancel} className="w-full bg-white md:w-[512px]">
       <div className="flex flex-col p-6 md:items-center">
