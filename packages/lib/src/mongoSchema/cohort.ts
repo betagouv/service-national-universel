@@ -1,6 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 
-import { COHORT_STATUS, COHORT_STATUS_LIST, COHORT_TYPE, COHORT_TYPE_LIST } from "../constants/constants";
+import { COHORT_STATUS, COHORT_STATUS_LIST, COHORT_TYPE, COHORT_TYPE_LIST, INSCRIPTION_GOAL_LEVELS } from "../constants/constants";
 import { departmentLookUp } from "../region-and-departments";
 
 import { InterfaceExtended } from "..";
@@ -383,6 +383,15 @@ export const CohortSchema = {
     default: true,
     documentation: {
       description: "Ouverture ou fermeture de l'inscription manuelle pour les administrateurs CLE",
+    },
+  },
+
+  objectifLevel: {
+    type: String,
+    enum: INSCRIPTION_GOAL_LEVELS,
+    default: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL,
+    documentation: {
+      description: "Niveau des objectifs (départemental ou régional)",
     },
   },
 };

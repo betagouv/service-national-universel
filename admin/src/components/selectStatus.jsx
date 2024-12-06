@@ -47,6 +47,7 @@ const lookUpAuthorizedStatus = ({ status, role }) => {
   }
 };
 
+// ! Everything linked to Phase1 and inscription is read only here
 export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
