@@ -39,9 +39,9 @@ export class FileProvider implements FileGateway {
         });
     }
 
-    async parseXLS<T>(buffer: Buffer, options: { sheetIndex?: number }): Promise<T[]> {
+    async parseXLS<T>(buffer: Buffer, options?: { sheetIndex?: number }): Promise<T[]> {
         const workbook = XLSX.read(buffer, { type: "buffer" });
-        const sheetName = workbook.SheetNames[options.sheetIndex || 0];
+        const sheetName = workbook.SheetNames[options?.sheetIndex || 0];
         const worksheet = workbook.Sheets[sheetName];
 
         return await XLSX.utils.sheet_to_json<T>(worksheet);
