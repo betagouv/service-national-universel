@@ -146,7 +146,7 @@ router.post("/eligibilite", passport.authenticate("young", { session: false, fai
     const { error, value } = eligibiliteValidator.validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const cohorts = await getFilteredSessionsForReinscription({ ...young, ...value }, req.headers["x-user-timezone"] || null);
+    const cohorts = await getFilteredSessionsForReinscription({ ...young.toObject(), ...value }, req.headers["x-user-timezone"] || null);
     return res.json({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);

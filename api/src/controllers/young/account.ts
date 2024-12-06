@@ -7,7 +7,7 @@ import { ERRORS, notifDepartmentChange, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from
 import { getQPV, getDensity } from "../../geo";
 import { YoungModel, CohortModel } from "../../models";
 import { serializeYoung } from "../../utils/serializer";
-import { getFilteredSessionsForChangementSejour } from "../../utils/cohort";
+import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { capture } from "../../sentry";
 import { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES } from "snu-lib";
 import validator from "validator";

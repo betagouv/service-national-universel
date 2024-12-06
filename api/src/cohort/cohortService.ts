@@ -19,11 +19,8 @@ export const isInscriptionOpen = async (cohortName: string | undefined): Promise
 type ReinscriptionQuery = { type?: string; dateStart?: { $gte: Date }; cohortGroupId?: { $nin: string[] } };
 
 export const isReInscriptionOpen = async (cohortGroupId?: string): Promise<boolean> => {
-  let query: ReinscriptionQuery = {
-    type: COHORT_TYPE.VOLONTAIRE,
-    dateStart: { $gte: new Date() },
-  };
-  // On exclut les séjours appartenant à l'année du séjour actuel du volontaire.
+  let query: ReinscriptionQuery = { type: COHORT_TYPE.VOLONTAIRE };
+  // On exclut les séjours appartenant à l'année du séjour actuel du volontaire ainsi que les séjours passés.
   if (cohortGroupId) {
     const cohortGroup = await CohortGroupModel.findById(cohortGroupId);
     if (!cohortGroup) throw new Error("Cohort group not found");
@@ -129,7 +126,12 @@ export async function getFilteredSessionsForReinscription(young: YoungType, time
 
   const currentCohort = await CohortModel.findById(young.cohortId);
   if (!currentCohort) throw new Error("Cohort not found");
-  if (!currentCohort.cohortGroupId) throw new Error("Cohort group ID not found");
+
+  const currentGroup = await CohortGroupModel.findById(currentCohort.cohortGroupId);
+  if (!currentGroup) throw new Error("Cohort group not found");
+
+  const pastGroups = await CohortGroupModel.find({ year: { $lt: currentGroup.year } });
+  const cohortGroupsToExclude = [...pastGroups.map((g) => g.id), currentGroup.id];
 
   const department = getDepartmentForEligibility(young);
   if (!department) throw new Error("Unable to determine department");
@@ -138,7 +140,7 @@ export async function getFilteredSessionsForReinscription(young: YoungType, time
     birthdate: new Date(young.birthdateAt),
     schoolLevel: young.grade,
     department,
-    cohortGroupToExclude: currentCohort.cohortGroupId,
+    cohortGroupsToExclude,
   });
 
   const cohorts = await CohortModel.find(query);

@@ -6,7 +6,7 @@ type CohortArgs = {
   department: string;
   cohortToExclude?: string;
   cohortGroupToInclude?: string;
-  cohortGroupToExclude?: string;
+  cohortGroupsToExclude?: string[];
 };
 
 type CohortQuery = {
@@ -16,10 +16,10 @@ type CohortQuery = {
   "eligibility.bornAfter": { $lte: Date };
   "eligibility.bornBefore": { $gte: Date };
   _id?: { $ne: string };
-  cohortGroupId?: string | { $ne: string };
+  cohortGroupId?: string | { $nin: string[] };
 };
 
-export function buildCohortQuery({ birthdate, schoolLevel, department, cohortToExclude, cohortGroupToInclude, cohortGroupToExclude }: CohortArgs): CohortQuery {
+export function buildCohortQuery({ birthdate, schoolLevel, department, cohortToExclude, cohortGroupToInclude, cohortGroupsToExclude }: CohortArgs): CohortQuery {
   let query: CohortQuery = {
     status: COHORT_STATUS.PUBLISHED,
     "eligibility.zones": department,
@@ -29,6 +29,6 @@ export function buildCohortQuery({ birthdate, schoolLevel, department, cohortToE
   };
   if (cohortToExclude) query._id = { $ne: cohortToExclude };
   if (cohortGroupToInclude) query.cohortGroupId = cohortGroupToInclude;
-  if (cohortGroupToExclude) query.cohortGroupId = { $ne: cohortGroupToExclude };
+  if (cohortGroupsToExclude) query.cohortGroupId = { $nin: cohortGroupsToExclude };
   return query;
 }
