@@ -1,32 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { ImQuotesLeft } from "react-icons/im";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { YOUNG_SOURCE, getZonedDate, COHORT_TYPE } from "snu-lib";
-
 import ModalConfirm from "@/components/modals/ModalConfirm";
-import dayjs from "@/utils/dayjs.utils";
-import ExternalLink from "@/assets/icons/ExternalLink";
-import Refresh from "@/assets/icons/Refresh";
-import { adminURL } from "@/config";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { YOUNG_STATUS_PHASE1, translate } from "@/utils";
 import Loader from "@/components/Loader";
-import { isCohortOpenForAffectation, isYoungCheckIsOpen } from "../utils";
-
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
+
+import { isYoungCheckIsOpen } from "../utils";
 import YoungHeader from "../../phase0/components/YoungHeader";
-import ModalAffectations from "../components/ModalAffectation";
-import ModalAffectationsForCLE from "../components/ModalAffectationsForCLE";
-import ModalChangePDRSameLine from "../components/ModalChangePDRSameLine";
-import PDRpropose from "../components/PDRpropose";
 import DocumentPhase1 from "../components/phase1/DocumentPhase1";
-import Phase1ConfirmationFormBlock from "../components/phase1/Phase1ConfirmationFormBlock";
 import Phase1Header from "../components/phase1/Phase1Header";
-import Phase1PresenceFormBlock from "../components/phase1/Phase1PresenceFormBlock";
 import General from "../components/phase1/General";
+import Details from "../components/phase1/Details";
 
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
@@ -34,17 +22,10 @@ export default function Phase1(props) {
   const [young, setYoung] = useState(props.young);
   const [cohesionCenter, setCohesionCenter] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-  const [modalAffectations, setModalAffectation] = useState({ isOpen: false });
-  const [modalAffectationsForCLE, setModalAffectationForCLE] = useState(false);
-
-  const [modalChangePdrSameLine, setModalChangePdrSameLine] = useState({ isOpen: false });
   // new useState
-  const [editing, setEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [values, setValues] = useState(props.young);
   const cohort = useSelector((state) => state.Cohorts).find((c) => young?.cohortId === c._id);
   const isCheckIsOpen = isYoungCheckIsOpen(user, cohort);
-  const isOpenForAffectation = isCohortOpenForAffectation(user, young, cohort);
 
   useEffect(() => {
     if (!young?.sessionPhase1Id) return;
@@ -93,114 +74,12 @@ export default function Phase1(props) {
         <Phase1Header user={user} young={young} setYoung={setYoung} setValues={setValues} />
         <General young={young} setYoung={setYoung} values={values} setValues={setValues} isCheckIsOpen={isCheckIsOpen} user={user} />
 
-        {/* {cohesionCenter ? (
-          <div className="mt-4 flex flex-row items-center justify-center gap-10">
-            <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
-              <div className="mb-2 text-xs font-medium text-gray-900">Centre de cohésion</div>
-              <div className="mb-4 flex w-full flex-col gap-4">
-                <Field title="Code centre" value={cohesionCenter.code2022} externalLink={`${adminURL}/centre/${cohesionCenter?._id}?cohorte=${young.cohort}`} />
-                <Field title="Nom" value={cohesionCenter.name} />
-                <Field title="Code postal" value={cohesionCenter.zip} />
-                <Field title="Ville" value={cohesionCenter.city} />
-              </div>
-              {cohort.type !== COHORT_TYPE.CLE && isOpenForAffectation && editing && (
-                <button
-                  onClick={() => setModalAffectation({ isOpen: true })}
-                  className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
-                  <Refresh />
-                  <div>Changer l&apos;affectation</div>
-                </button>
-              )}
-            </div>
-            <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
-              <div className="mb-2 text-xs font-medium text-gray-900">Point de rassemblement</div>
-              <div className="mb-4 flex w-full flex-col gap-4 text-sm text-gray-800 ">
-                {meetingPoint ? (
-                  <div className="flex flex-col gap-4">
-                    <Field
-                      title="Adresse"
-                      value={meetingPoint?.pointDeRassemblement.address}
-                      externalLink={`${adminURL}/point-de-rassemblement/${meetingPoint?.pointDeRassemblement._id}`}
-                    />
-                    <Field
-                      title="Heure&nbsp;de&nbsp;départ"
-                      value={dayjs(getZonedDate(meetingPoint?.bus.departuredDate)).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.departureHour}
-                    />
-                    <Field
-                      title="Heure&nbsp;de&nbsp;retour"
-                      value={dayjs(getZonedDate(meetingPoint?.bus.returnDate)).format("dddd D MMMM YYYY") + ", " + meetingPoint?.ligneToPoint.returnHour}
-                    />
-                    <Field title="N˚&nbsp;transport" value={meetingPoint?.bus.busId} externalLink={`${adminURL}/ligne-de-bus/${meetingPoint?.bus._id}`} />
-                  </div>
-                ) : young?.transportInfoGivenByLocal === "true" ? (
-                  <div>Les informations de transport seront transmises par email.</div>
-                ) : young?.deplacementPhase1Autonomous === "true" ? (
-                  <div>{young.firstName} se rend au centre et en revient par ses propres moyens.</div>
-                ) : young?.source === YOUNG_SOURCE.CLE ? (
-                  <>
-                    <div>Le point de rassemblement n&apos;a pas été confirmé par le référent régional.</div>
-                  </>
-                ) : editing ? (
-                  <>
-                    <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement.</div>
-                  </>
-                ) : (
-                  <>
-                    <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement. Voici le(s) point(s) de rassemblement proposé(s) :</div>
+        <Details young={young} setYoung={setYoung} cohesionCenter={cohesionCenter} meetingPoint={meetingPoint} cohort={cohort} user={user} />
 
-                    <PDRpropose young={young} center={cohesionCenter} modalAffectations={modalAffectations} setModalAffectation={setModalAffectation}></PDRpropose>
-                  </>
-                )}
-              </div>
-              {cohort.type !== COHORT_TYPE.CLE && isOpenForAffectation && editing && (
-                <div className="flex items-center gap-3 !justify-end w-full">
-                  <button
-                    onClick={() => setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id })}
-                    className="flex cursor-pointer flex-row items-center justify-center gap-2 rounded border-[1px] border-gray-300 p-2">
-                    {meetingPoint || young.deplacementPhase1Autonomous === "true" || young.transportInfoGivenByLocal === "true" ? (
-                      <>
-                        <Refresh />
-                        <div>Changer le PDR</div>
-                      </>
-                    ) : (
-                      <div>Choisir un PDR</div>
-                    )}
-                  </button>
-                  {young.meetingPointId && young.ligneId && (
-                    <button
-                      className="flex cursor-pointer flex-row items-center justify-center gap-2  rounded border-[1px] border-gray-300 p-2"
-                      onClick={() => setModalChangePdrSameLine({ isOpen: true })}>
-                      <Refresh />
-                      <div>Changer le PDR sur la ligne</div>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="my-52 flex flex-col items-center justify-center gap-4">
-            <div className="text-base font-bold text-gray-900">Ce volontaire n&apos;est affecté à aucun centre</div>
-            {isOpenForAffectation && (
-              <div
-                className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white"
-                onClick={() => {
-                  cohort.type === COHORT_TYPE.VOLONTAIRE ? setModalAffectation({ isOpen: true }) : setModalAffectationForCLE({ isOpen: true });
-                }}>
-                Affecter dans un centre
-              </div>
-            )}
-          </div>
-        )} */}
         {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
         young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
         young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
-          <div className="mt-4 rounded bg-white">
-            <div className="mx-8 py-4">
-              <div className="mr-2 text-lg font-medium">Documents</div>
-              <DocumentPhase1 young={young} />
-            </div>
-          </div>
+          <DocumentPhase1 young={young} />
         ) : null}
       </div>
       <ModalConfirm
@@ -213,35 +92,6 @@ export default function Phase1(props) {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
-      {/*       <ModalAffectations
-        isOpen={modalAffectations?.isOpen}
-        onCancel={() => setModalAffectation({ isOpen: false })}
-        young={young}
-        cohort={cohort}
-        center={modalAffectations?.center}
-        sessionId={modalAffectations?.sessionId}
-      />
-      <ModalAffectationsForCLE isOpen={modalAffectationsForCLE} onClose={() => setModalAffectationForCLE(false)} young={young} setYoung={setYoung} />
-      <ModalChangePDRSameLine isOpen={modalChangePdrSameLine?.isOpen} onCancel={() => setModalChangePdrSameLine({ isOpen: false })} young={young} cohort={cohort} /> */}
     </>
   );
 }
-
-const Field = ({ title, value, externalLink }) => {
-  return (
-    <div key={title} className="flex flex-col rounded border-[1px] border-gray-300 p-2">
-      <div className="text-xs text-gray-500">{title}</div>
-
-      {externalLink ? (
-        <a target="_blank" rel="noreferrer" href={externalLink}>
-          <div className="flex flex-row items-center justify-start gap-1">
-            <div className="h-[20px] text-sm text-gray-800">{value}</div>
-            <ExternalLink className="font-bold leading-5 text-[#9CA3AF]" />
-          </div>
-        </a>
-      ) : (
-        <div className="h-[20px] text-sm text-gray-800">{value}</div>
-      )}
-    </div>
-  );
-};

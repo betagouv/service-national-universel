@@ -14,9 +14,6 @@ const Phase1PresenceFormBlock = ({ young = null, values = null, setValues, setYo
   const [isPresenceJDMModalOpen, setIsPresenceJDMModalOpen] = useState(false);
   const [isDepartureModalOpen, setIsDepartureModalOpen] = useState(false);
 
-  console.log("editing", editing);
-  console.log("isYoungCheckinOpen", isYoungCheckinOpen);
-
   const handleChangePresenceOnArrival = ({ value }) => {
     setValues((prevValue) => ({
       ...prevValue,
@@ -56,25 +53,11 @@ const Phase1PresenceFormBlock = ({ young = null, values = null, setValues, setYo
       <div className="w-full">
         <div className="flex flex-col w-full">
           <Label title="Présence" name="presence" tooltip={!isYoungCheckinOpen ? "Le pointage n'est pas ouvert" : null} tooltipIconClassName={"!text-red-900"} />
-          <div className="flex justify-between gap-4">
-            <Select
-              className="mb-3 w-full"
-              label="À l'arrivée"
-              isActive={editing && isYoungCheckinOpen}
-              readOnly={!editing || !isYoungCheckinOpen}
-              placeholder="Non renseigné"
-              options={[
-                { label: "Oui", value: "true" },
-                { label: "Non", value: "false" },
-              ]}
-              closeMenuOnSelect={true}
-              value={values?.cohesionStayPresence ? { value: values?.cohesionStayPresence, label: translate(values?.cohesionStayPresence) } : null}
-              onChange={handleChangePresenceOnArrival}
-            />
-            {COHORTS_WITH_JDM_COUNT.includes(young?.cohort) && (
+          {editing ? (
+            <div className="flex justify-between gap-4">
               <Select
-                className="mb-4 w-full"
-                label="JDM"
+                className="mb-3 w-full"
+                label="À l'arrivée"
                 isActive={editing && isYoungCheckinOpen}
                 readOnly={!editing || !isYoungCheckinOpen}
                 placeholder="Non renseigné"
@@ -83,11 +66,40 @@ const Phase1PresenceFormBlock = ({ young = null, values = null, setValues, setYo
                   { label: "Non", value: "false" },
                 ]}
                 closeMenuOnSelect={true}
-                value={values?.presenceJDM ? { value: values?.presenceJDM, label: translate(values?.presenceJDM) } : null}
-                onChange={handleOnChangePresenceJDM}
+                value={values?.cohesionStayPresence ? { value: values?.cohesionStayPresence, label: translate(values?.cohesionStayPresence) } : null}
+                onChange={handleChangePresenceOnArrival}
               />
-            )}
-          </div>
+              {COHORTS_WITH_JDM_COUNT.includes(young?.cohort) && (
+                <Select
+                  className="mb-4 w-full"
+                  label="JDM"
+                  isActive={editing && isYoungCheckinOpen}
+                  readOnly={!editing || !isYoungCheckinOpen}
+                  placeholder="Non renseigné"
+                  options={[
+                    { label: "Oui", value: "true" },
+                    { label: "Non", value: "false" },
+                  ]}
+                  closeMenuOnSelect={true}
+                  value={values?.presenceJDM ? { value: values?.presenceJDM, label: translate(values?.presenceJDM) } : null}
+                  onChange={handleOnChangePresenceJDM}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="mb-2 flex flex-col bg-gray-50 gap-1 py-[10px] px-4">
+              <p>
+                <span className="text-gray-500">À l'arrivée : </span>
+                {translate(values.cohesionStayPresence)}
+              </p>
+              {COHORTS_WITH_JDM_COUNT.includes(young?.cohort) && (
+                <p>
+                  <span className="text-gray-500">JDM : </span>
+                  {translate(values.presenceJDM)}
+                </p>
+              )}
+            </div>
+          )}
         </div>
         {values.departSejourAt && (
           <div className="mb-2 flex flex-col bg-gray-50 gap-1 py-[10px] px-4">

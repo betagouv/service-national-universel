@@ -8,7 +8,6 @@ import { ClasseService } from "@/services/classeService";
 import { YoungType, ClasseType, translate } from "snu-lib";
 import api from "@/services/api";
 import { capture } from "@/sentry";
-import Loader from "@/components/Loader";
 
 interface Props {
   isOpen: boolean;
@@ -62,8 +61,6 @@ export default function ModalAffectationsForCLE({ isOpen, onClose, young, setYou
       onClose();
     }
   };
-
-  if (!classe) return <Loader />;
 
   return isFull ? (
     <ModalConfirmation

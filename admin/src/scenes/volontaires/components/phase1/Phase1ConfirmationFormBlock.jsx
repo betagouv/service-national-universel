@@ -67,19 +67,25 @@ const Phase1ConfirmationFormBlock = ({ young = null, values = null, setValues, s
       <div className="w-full">
         <div>
           <Label title="Confirmation de la participation" name="confirmation" />
-          <Select
-            name="confirmation"
-            className="mb-3"
-            isActive={editing}
-            readOnly={!editing}
-            options={[
-              { label: "Oui", value: "true" },
-              { label: "Non", value: "false" },
-            ]}
-            closeMenuOnSelect={true}
-            value={values?.youngPhase1Agreement ? { value: values?.youngPhase1Agreement, label: translate(values?.youngPhase1Agreement) } : { value: "false", label: "Non" }}
-            onChange={handleChangeYoungAgreement}
-          />
+          {editing ? (
+            <Select
+              name="confirmation"
+              className="mb-3"
+              isActive={editing}
+              readOnly={!editing}
+              options={[
+                { label: "Oui", value: "true" },
+                { label: "Non", value: "false" },
+              ]}
+              closeMenuOnSelect={true}
+              value={values?.youngPhase1Agreement ? { value: values?.youngPhase1Agreement, label: translate(values?.youngPhase1Agreement) } : { value: "false", label: "Non" }}
+              onChange={handleChangeYoungAgreement}
+            />
+          ) : (
+            <div className="mb-2 flex flex-col bg-gray-50 gap-1 py-[10px] px-4">
+              <p>{translate(values.youngPhase1Agreement)}</p>
+            </div>
+          )}
         </div>
         <div>
           <Label
@@ -87,20 +93,26 @@ const Phase1ConfirmationFormBlock = ({ young = null, values = null, setValues, s
             name="isTravelingByPlane"
             tooltip="Indiquez “Oui” si vous avez confirmé individuellement avec le jeune son affectation à un séjour qui nécessite un voyage en avion."
           />
-          <Select
-            name="isTravelingByPlane"
-            className="mb-3"
-            placeholder={"Non renseigné"}
-            isActive={editing}
-            readOnly={!editing}
-            options={[
-              { label: "Oui", value: "true" },
-              { label: "Non", value: "false" },
-            ]}
-            closeMenuOnSelect={true}
-            value={values.isTravelingByPlane ? { value: values.isTravelingByPlane, label: translate(values.isTravelingByPlane) } : null}
-            onChange={handleChangeTravelingByPlane}
-          />
+          {editing ? (
+            <Select
+              name="isTravelingByPlane"
+              className="mb-3"
+              placeholder={"Non renseigné"}
+              isActive={editing}
+              readOnly={!editing}
+              options={[
+                { label: "Oui", value: "true" },
+                { label: "Non", value: "false" },
+              ]}
+              closeMenuOnSelect={true}
+              value={values.isTravelingByPlane ? { value: values.isTravelingByPlane, label: translate(values.isTravelingByPlane) } : null}
+              onChange={handleChangeTravelingByPlane}
+            />
+          ) : (
+            <div className="mb-2 flex flex-col bg-gray-50 gap-1 py-[10px] px-4">
+              <p>{values.isTravelingByPlane ? translate(values.isTravelingByPlane) : "Non"}</p>
+            </div>
+          )}
         </div>
       </div>
       <ModalPrimary
