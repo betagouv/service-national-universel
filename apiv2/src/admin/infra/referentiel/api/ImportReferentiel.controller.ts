@@ -12,22 +12,23 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 
-import { MIME_TYPES, ReferentielTaskType, ReferentielRoutes, TaskName, TaskType, TaskStatus } from "snu-lib";
+import { MIME_TYPES, ReferentielTaskType, TaskName, TaskType, TaskStatus, ReferentielRoutes } from "snu-lib";
 
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
-import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskGateway } from "@task/core/Task.gateway";
+import { ReferentielImportTaskService } from "@admin/core/referentiel/ReferentielImportTask.service";
+import { TaskModel } from "@task/core/Task.model";
 
 const REFERENTIEL_TASK_NAMES = [TaskName.REFERENTIEL_IMPORT];
 
 @Controller("referentiel")
 export class ImportReferentielController {
     constructor(
-        private readonly routeService: ReferentielRoutesService,
+        @Inject(ReferentielImportTaskService) private readonly referentielImportTaskService: ReferentielImportTaskService,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
     ) {}
 
@@ -40,6 +41,8 @@ export class ImportReferentielController {
         @UploadedFile() file: Express.Multer.File,
     ): Promise<ReferentielRoutes["Import"]["response"]> {
         // validate file format
+        let importTask: TaskModel;
+
         if (!file || !file.originalname || (file.mimetype !== MIME_TYPES.EXCEL && file.mimetype !== MIME_TYPES.CSV)) {
             throw new FunctionalException(FunctionalExceptionCode.INVALID_FILE_FORMAT);
         }
@@ -54,7 +57,17 @@ export class ImportReferentielController {
 
         switch (name) {
             case ReferentielTaskType.IMPORT_ROUTES:
-                const importTask = await this.routeService.import({
+                 importTask = await this.referentielImportTaskService.import({
+                    importType: name,
+                    fileName: file.originalname,
+                    buffer: file.buffer,
+                    mimetype: file.mimetype,
+                    auteur,
+                });
+                return TaskMapper.toDto(importTask);
+            case ReferentielTaskType.IMPORT_REGION_ACADEMIQUE:
+                 importTask = await this.referentielImportTaskService.import({
+                    importType: name,
                     fileName: file.originalname,
                     buffer: file.buffer,
                     mimetype: file.mimetype,

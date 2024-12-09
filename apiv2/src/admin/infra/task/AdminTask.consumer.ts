@@ -3,7 +3,7 @@ import { Logger } from "@nestjs/common";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 import { QueueName, TaskQueue } from "@shared/infra/Queue";
 import { Job } from "bullmq";
-import { ReferentielTaskType, TaskName } from "snu-lib";
+import { ReferentielImportTaskParameters, ReferentielTaskType, TaskName } from "snu-lib";
 import { AdminTaskRepository } from "./AdminTaskMongo.repository";
 import { TechnicalException, TechnicalExceptionType } from "@shared/infra/TechnicalException";
 import { SimulationAffectationHTS } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS";
@@ -11,8 +11,9 @@ import {
     SimulationAffectationHTSTaskModel,
     SimulationAffectationHTSTaskResult,
 } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
+import { ReferentielImportTaskModel } from "@admin/core/referentiel/ReferentielImportTask.model";
+import { ImportRegionsAcademiques } from "@admin/core/referentiel/regionAcademique/useCase/ImportRegionsAcademiques";
 import { ImporterRoutes } from "@admin/core/referentiel/routes/useCase/ImporterRoutes";
-import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 
 @Processor(QueueName.ADMIN_TASK)
 export class AdminTaskConsumer extends WorkerHost {
@@ -20,6 +21,7 @@ export class AdminTaskConsumer extends WorkerHost {
         private readonly logger: Logger,
         private readonly adminTaskRepository: AdminTaskRepository,
         private readonly simulationAffectationHts: SimulationAffectationHTS,
+        private readonly importRegionAcademique: ImportRegionsAcademiques,
         private readonly importerRoutes: ImporterRoutes,
     ) {
         super();
@@ -30,36 +32,17 @@ export class AdminTaskConsumer extends WorkerHost {
         try {
             const task = await this.adminTaskRepository.toInProgress(job.data.id);
             switch (job.name) {
+                case TaskName.REFERENTIEL_IMPORT:
+                    await this.dispatchReferentielTaskImport(task as ReferentielImportTaskModel);
+                    break;
                 case TaskName.IMPORT_CLASSE:
                     // TODO: call usecase
                     throw new TechnicalException(TechnicalExceptionType.NOT_IMPLEMENTED_YET);
                 case TaskName.AFFECTATION_HTS_SIMULATION:
-                    const simulationTask = task as SimulationAffectationHTSTaskModel;
-                    const simulation = await this.simulationAffectationHts.execute(
-                        simulationTask.metadata!.parameters!,
-                    );
-                    results = {
-                        rapportUrl: simulation.rapportFile.Location,
-                        rapportKey: simulation.rapportFile.Key,
-                        selectedCost: simulation.analytics.selectedCost,
-                        jeunesNouvellementAffected: simulation.analytics.jeunesNouvellementAffected,
-                        jeuneAttenteAffectation: simulation.analytics.jeuneAttenteAffectation,
-                        jeunesDejaAffected: simulation.analytics.jeunesDejaAffected,
-                    } as SimulationAffectationHTSTaskResult;
+                    results = await this.handleSimulation(task as SimulationAffectationHTSTaskModel);
                     break;
-                case TaskName.REFERENTIEL_IMPORT:
-                    const importTask = task as ReferentielImportTaskModel;
-                    // TODO: seperate switch case of type in a service
-                    if (importTask.metadata?.parameters?.type === ReferentielTaskType.IMPORT_ROUTES) {
-                        // TODO: handle import results
-                        await this.importerRoutes.execute(importTask.metadata!.parameters!);
-                    } else {
-                        throw new Error(
-                            `Task "${job.name}" of type ${importTask.metadata?.parameters?.type} not handle yet`,
-                        );
-                    }
                 default:
-                    throw new Error(`Task "${job.name}" not handle yet`);
+                    throw new Error(`Task "${job.name}" not handled yet`);
             }
         } catch (error: any) {
             this.logger.error(
@@ -76,4 +59,30 @@ export class AdminTaskConsumer extends WorkerHost {
         await this.adminTaskRepository.toSuccess(job.data.id, results);
         return ConsumerResponse.SUCCESS;
     }
+
+    private async dispatchReferentielTaskImport(task: ReferentielImportTaskModel) {
+        switch (task.metadata?.parameters?.type) {
+            case ReferentielTaskType.IMPORT_REGION_ACADEMIQUE:
+                await this.importRegionAcademique.execute(task.metadata.parameters as ReferentielImportTaskParameters);
+                break;
+            case ReferentielTaskType.IMPORT_ROUTES:
+                await this.importerRoutes.execute(task.metadata!.parameters!);
+                break;
+            default:
+                throw new Error(`Type d'import "${task.metadata?.parameters?.type}" non géré`);
+        }
+    }
+    
+    private async handleSimulation(task: SimulationAffectationHTSTaskModel) {
+        const simulation = await this.simulationAffectationHts.execute(task.metadata!.parameters!);
+        return {
+            rapportUrl: simulation.rapportFile.Location,
+            rapportKey: simulation.rapportFile.Key,
+            selectedCost: simulation.analytics.selectedCost,
+            jeunesNouvellementAffected: simulation.analytics.jeunesNouvellementAffected,
+            jeuneAttenteAffectation: simulation.analytics.jeuneAttenteAffectation,
+            jeunesDejaAffected: simulation.analytics.jeunesDejaAffected,
+        } as SimulationAffectationHTSTaskResult;
+    }
 }
+

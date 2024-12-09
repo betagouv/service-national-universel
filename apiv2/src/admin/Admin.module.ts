@@ -46,6 +46,7 @@ import { useCaseProvider as referentielUseCaseProvider } from "./infra/referenti
 import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
 import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
 
+import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 @Module({
     imports: [
         ClsModule.forRoot({}),
@@ -55,6 +56,7 @@ import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielR
         NotificationModule,
         QueueModule,
         TaskModule,
+        ReferentielModule,
     ],
     controllers: [
         ClasseController,
