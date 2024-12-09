@@ -2,6 +2,7 @@ import {
     CreateReferentModel,
     ReferentMetadataModel,
     ReferentModel,
+    ReferentModelLight,
     ReferentPasswordModel,
 } from "@admin/core/iam/Referent.model";
 import { ReferentType } from "snu-lib";
@@ -103,6 +104,15 @@ export class ReferentMapper {
         return {
             _id: referentModel.id,
             ...this.toEntityCreate(referentModel),
+        };
+    }
+
+    static toModelLight(referentDocument: ReferentDocument): ReferentModelLight {
+        return {
+            id: referentDocument._id,
+            prenom: referentDocument.firstName,
+            nom: referentDocument.lastName,
+            email: referentDocument.email,
         };
     }
 

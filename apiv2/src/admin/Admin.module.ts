@@ -43,6 +43,7 @@ import { sessionMongoProviders } from "./infra/sejours/phase1/session/provider/S
 import { FileGateway } from "@shared/core/File.gateway";
 import { FileProvider } from "@shared/infra/File.provider";
 import { serviceProvider } from "./infra/iam/service/serviceProvider";
+import { ReferentController } from "./infra/iam/api/Referent.controller";
 
 @Module({
     imports: [
@@ -54,7 +55,14 @@ import { serviceProvider } from "./infra/iam/service/serviceProvider";
         QueueModule,
         TaskModule,
     ],
-    controllers: [ClasseController, AffectationController, Phase1Controller, AuthController, AdminTaskController],
+    controllers: [
+        ClasseController,
+        AffectationController,
+        Phase1Controller,
+        AuthController,
+        AdminTaskController,
+        ReferentController,
+    ],
     providers: [
         ClasseService,
         SimulationAffectationHTSService,
