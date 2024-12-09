@@ -64,7 +64,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Check if the young can choose the given cohort
-    const sessions = await getFilteredSessionsForReinscription({ birthdateAt: young.birthdateAt, ...value }, req.headers["x-user-timezone"] || null);
+    const sessions = await getFilteredSessionsForReinscription({ ...young.toObject(), ...value }, req.headers["x-user-timezone"] || null);
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
