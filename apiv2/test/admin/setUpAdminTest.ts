@@ -46,6 +46,11 @@ import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affec
 import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { historyProvider } from "@admin/infra/history/historyProvider";
+import { referentielGatewayProviders } from "@admin/infra/referentiel/initProvider/gateway";
+import { ImportReferentielController } from "@admin/infra/referentiel/api/ImportReferentiel.controller";
+import { regionAcademiqueMongoProviders } from "@admin/infra/referentiel/regionAcademique/RegionAcademiqueMongo.provider";
+import { RegionAcademiqueImportService } from "@admin/core/referentiel/regionAcademique/ReferentielRegionAcademiqueImport.service";
+import { ReferentielImportTaskService } from "@admin/core/referentiel/ReferentielImportTask.service";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -70,12 +75,20 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             }),
             QueueModule,
         ],
-        controllers: [ClasseController, AffectationController, Phase1Controller, AuthController],
+        controllers: [
+            ClasseController,
+             AffectationController,
+              Phase1Controller,
+               AuthController,
+                ImportReferentielController
+            ],
         providers: [
             ClasseService,
             AffectationService,
             SimulationAffectationHTSService,
             ReferentielRoutesService,
+            RegionAcademiqueImportService,
+            ReferentielImportTaskService,
             ...cleGatewayProviders,
             ...sejourGatewayProviders,
             ...jeuneGatewayProviders,
@@ -101,6 +114,8 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...phase1UseCaseProviders,
             ...cleUseCaseProviders,
             ...serviceProvider,
+            ...referentielGatewayProviders,
+            ...regionAcademiqueMongoProviders,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))

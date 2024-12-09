@@ -57,6 +57,7 @@ import { ClsPluginTransactional } from "@nestjs-cls/transactional";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 
+import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 @Module({
     imports: [
         ClsModule.forRoot({
@@ -75,6 +76,7 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
         NotificationModule,
         QueueModule,
         TaskModule,
+        ReferentielModule,
     ],
     controllers: [
         ClasseController,
