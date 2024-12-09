@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { COHORT_STATUS, COHORT_TYPE } from "snu-lib";
+import { COHORT_STATUS, COHORT_TYPE, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 import { SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
@@ -28,6 +28,7 @@ export const createSession = async (session?: Partial<SessionModel>) => {
         inscriptionStartDate: faker.date.past(),
         inscriptionEndDate: faker.date.past(),
         instructionEndDate: faker.date.past(),
+        objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL,
         pdrChoiceLimitDate: faker.date.past(),
         eligibility: {
             zones: ["A", "B", "C"],
