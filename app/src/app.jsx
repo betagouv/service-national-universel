@@ -92,6 +92,7 @@ function App() {
             <Switch>
               <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
               <Redirect from={"/inscription2023"} to={"/inscription"} />
+              <Redirect from={"/phase1/changer-de-sejour"} to={"/changer-de-sejour"} />
 
               <SentryRoute path="/validate-contract/done" component={ContractDone} />
               <SentryRoute path="/validate-contract" component={Contract} />

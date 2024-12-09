@@ -1,21 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 
-export default function SimpleSelect({ value, transformer, options, onChange }) {
-  const [selectOptionsOpened, setSelectOptionsOpened] = useState(false);
+interface Option {
+  value: string;
+  label: string;
+}
 
-  const selectOptionsRef = useRef();
+interface SimpleSelectProps {
+  value?: string;
+  transformer?: (value: string) => string;
+  options: Option[];
+  onChange?: (value: string) => void;
+}
+
+const SimpleSelect: React.FC<SimpleSelectProps> = ({ value, transformer, options, onChange }) => {
+  const [selectOptionsOpened, setSelectOptionsOpened] = useState(false);
+  const selectOptionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (selectOptionsRef.current) {
-        let target = e.target;
-        while (target) {
-          if (target === selectOptionsRef.current) {
-            return;
-          }
-          target = target.parentNode;
-        }
+    function handleClickOutside(e: MouseEvent) {
+      if (selectOptionsRef.current && !selectOptionsRef.current.contains(e.target as Node)) {
         setSelectOptionsOpened(false);
       }
     }
@@ -30,15 +34,15 @@ export default function SimpleSelect({ value, transformer, options, onChange }) 
     setSelectOptionsOpened(!selectOptionsOpened);
   }
 
-  function selectOption(opt) {
+  function selectOption(opt: string) {
     setSelectOptionsOpened(false);
     onChange && onChange(opt);
   }
 
   return (
-    <div>
+    <div ref={selectOptionsRef}>
       <div className={`flex cursor-pointer items-center justify-between`} onClick={toggleSelectOptions}>
-        <div className={`text-[14px] font-normal leading-[20px] text-[#1F2937] ${value ? "" : "py-[10px]"}`}>{transformer ? transformer(value) : value}</div>
+        <div className={`text-[14px] font-normal leading-[20px] text-[#1F2937] ${value ? "" : "py-[10px]"}`}>{transformer && value ? transformer(value) : value}</div>
         <ChevronDown className="w-4 text-gray-500" />
       </div>
       {selectOptionsOpened && (
@@ -52,4 +56,6 @@ export default function SimpleSelect({ value, transformer, options, onChange }) 
       )}
     </div>
   );
-}
+};
+
+export default SimpleSelect;
