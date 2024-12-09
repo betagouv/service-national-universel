@@ -33,7 +33,7 @@ describe("ReferentAuth.facade", () => {
                 {
                     provide: ReferentGateway,
                     useValue: {
-                        findByEmail: jest.fn(),
+                        findReferentPasswordByEmail: jest.fn(),
                     },
                 },
                 {
@@ -55,7 +55,7 @@ describe("ReferentAuth.facade", () => {
     });
 
     it("should sign in successfully with correct credentials", async () => {
-        jest.spyOn(referentGateway, "findByEmail").mockResolvedValue(mockReferent as any);
+        jest.spyOn(referentGateway, "findReferentPasswordByEmail").mockResolvedValue(mockReferent as any);
         jest.spyOn(bcrypt, "compare").mockResolvedValue(true as never);
         jest.spyOn(authProvider, "forgeToken").mockResolvedValue("mockToken");
         jest.spyOn(ReferentMapper, "toModelWithoutPassword").mockReturnValue({
@@ -64,27 +64,27 @@ describe("ReferentAuth.facade", () => {
 
         const result = await referentAuthFacade.signin("test@example.com", "correctPassword");
 
-        expect(referentGateway.findByEmail).toHaveBeenCalledWith("test@example.com");
+        expect(referentGateway.findReferentPasswordByEmail).toHaveBeenCalledWith("test@example.com");
         expect(bcrypt.compare).toHaveBeenCalledWith("correctPassword", "hashedPassword");
         expect(authProvider.forgeToken).toHaveBeenCalledWith(mockReferent);
         expect(result).toEqual(mockTokenModel);
     });
 
     it("should throw UnauthorizedException with incorrect password", async () => {
-        jest.spyOn(referentGateway, "findByEmail").mockResolvedValue(mockReferent as any);
+        jest.spyOn(referentGateway, "findReferentPasswordByEmail").mockResolvedValue(mockReferent as any);
         jest.spyOn(bcrypt, "compare").mockResolvedValue(false as never);
 
         await expect(referentAuthFacade.signin("test@example.com", "wrongPassword")).rejects.toThrow(
             TechnicalException,
         );
 
-        expect(referentGateway.findByEmail).toHaveBeenCalledWith("test@example.com");
+        expect(referentGateway.findReferentPasswordByEmail).toHaveBeenCalledWith("test@example.com");
         expect(bcrypt.compare).toHaveBeenCalledWith("wrongPassword", "hashedPassword");
         expect(authProvider.forgeToken).not.toHaveBeenCalled();
     });
 
     it("should throw UnauthorizedException if referent not found", async () => {
-        jest.spyOn(referentGateway, "findByEmail").mockRejectedValue(
+        jest.spyOn(referentGateway, "findReferentPasswordByEmail").mockRejectedValue(
             new FunctionalException(FunctionalExceptionCode.NOT_FOUND),
         );
 
@@ -92,7 +92,7 @@ describe("ReferentAuth.facade", () => {
             FunctionalException,
         );
 
-        expect(referentGateway.findByEmail).toHaveBeenCalledWith("nonexistent@example.com");
+        expect(referentGateway.findReferentPasswordByEmail).toHaveBeenCalledWith("nonexistent@example.com");
         expect(bcrypt.compare).not.toHaveBeenCalled();
         expect(authProvider.forgeToken).not.toHaveBeenCalled();
     });
@@ -102,7 +102,7 @@ describe("ReferentAuth.facade", () => {
         const password = "incorrectPassword";
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        jest.spyOn(referentGateway, "findByEmail").mockResolvedValue({
+        jest.spyOn(referentGateway, "findReferentPasswordByEmail").mockResolvedValue({
             email,
             password: hashedPassword,
         } as ReferentPasswordModel);
