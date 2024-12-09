@@ -12,8 +12,7 @@ import StepNoSejour from "../preinscription/steps/stepNoSejour";
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import FutureCohort from "../inscription2023/FutureCohort";
-import { fetchReInscriptionOpen } from "../../services/reinscription.service";
-import { useQuery } from "@tanstack/react-query";
+import useReinscription from "../changeSejour/lib/useReinscription";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -40,13 +39,10 @@ const Step = () => {
 };
 
 export default function ReInscription() {
-  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useQuery({
-    queryKey: ["isReInscriptionOpen"],
-    queryFn: fetchReInscriptionOpen,
-  });
+  const { data: isReinscriptionOpen, isPending, isError } = useReinscription();
 
-  if (isReinscriptionOpenLoading) return <Loader />;
-
+  if (isPending) return <Loader />;
+  if (isError) return <div>Erreur</div>;
   if (!isReinscriptionOpen) return <FutureCohort />;
 
   return (

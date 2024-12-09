@@ -21,6 +21,27 @@ router.get("/", async (_req: RouteRequest<CohortGroupRoutes["Get"]>, res: RouteR
   }
 });
 
+router.use(authMiddleware("young"));
+
+router.get("/open", authMiddleware(["young"]), async (req: RouteRequest<CohortGroupRoutes["GetOpen"]>, res: RouteResponse<CohortGroupRoutes["GetOpen"]>) => {
+  try {
+    const cohort = await CohortModel.findById(req.user.cohortId);
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const cohortGroup = await CohortGroupModel.findById(cohort.cohortGroupId);
+    if (!cohortGroup) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const nextGroups = await CohortGroupModel.find({ year: { $gt: cohortGroup.year } }).sort({ year: 1, name: 1 });
+    const cohorts = await CohortModel.find({ cohortGroupId: { $in: nextGroups.map((g) => g.id) } });
+    const openCohorts = cohorts.filter((c) => c.isReInscriptionOpen);
+    const data = nextGroups.filter((g) => openCohorts.find((c) => c.cohortGroupId === g.id));
+    return res.json({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.use(authMiddleware("referent"));
 
 router.post(

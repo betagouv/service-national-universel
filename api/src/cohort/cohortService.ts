@@ -29,7 +29,7 @@ export const isReInscriptionOpen = async (cohortGroupId?: string): Promise<boole
     query = { ...query, cohortGroupId: { $nin: groupsToExclude } };
   }
   const cohorts = await CohortModel.find(query);
-  return cohorts.some((cohort) => cohort.getIsReInscriptionOpen());
+  return cohorts.some((cohort) => cohort.isReInscriptionOpen);
 };
 
 export const findCohortBySnuIdOrThrow = async (cohortName: string) => {
@@ -62,7 +62,7 @@ export const isCohortInscriptionClosed = (cohort: CohortType): boolean => {
 };
 
 function isCohortInscriptionOpenWithTimezone(cohort: CohortType, timeZoneOffset: unknown, status?: string) {
-  // Les volontaires dont le dossier est en cours d'instruction peuvent encore changer de choix initial de séjour.
+  // Les volontaires dont le dossier est en cours d'instruction peuvent encore changer de choix de séjour entre la clôture des inscriptions et celle de l'instruction.
   if (status && (status === YOUNG_STATUS.WAITING_CORRECTION || status === YOUNG_STATUS.WAITING_VALIDATION)) {
     return cohort.getIsInstructionOpen(Number(timeZoneOffset));
   }
@@ -80,7 +80,6 @@ type YoungInfo = Pick<
 export async function getFilteredSessionsForInscription(young: YoungInfo, timeZoneOffset?: string | number | null) {
   if (!young.birthdateAt) throw new Error("Missing birthdate");
   if (!young.grade) throw new Error("Missing grade");
-  if (young.cohortId) return getFilteredSessionsForChangementSejour(young as YoungType, timeZoneOffset);
 
   const department = getDepartmentForEligibility(young);
   if (!department) throw new Error("Unable to determine department");
@@ -96,10 +95,6 @@ export async function getFilteredSessionsForInscription(young: YoungInfo, timeZo
 }
 
 export async function getFilteredSessionsForChangementSejour(young: YoungType, timeZoneOffset?: string | number | null) {
-  if (!young.birthdateAt) throw new Error("Missing birthdate");
-  if (!young.grade) throw new Error("Missing grade");
-  if (!young.cohortId) throw new Error("Missing cohortId");
-
   const currentCohort = await CohortModel.findById(young.cohortId);
   if (!currentCohort) throw new Error("Current cohort not found");
   if (!currentCohort.cohortGroupId) throw new Error("Current cohort group ID not found");
@@ -108,11 +103,11 @@ export async function getFilteredSessionsForChangementSejour(young: YoungType, t
   if (!department) throw new Error("Unable to determine department");
 
   const query = buildCohortQuery({
-    birthdate: new Date(young.birthdateAt),
-    schoolLevel: young.grade,
+    birthdate: new Date(young.birthdateAt!),
+    schoolLevel: young.grade!,
     department,
     cohortToExclude: young.cohortId,
-    cohortGroupToInclude: currentCohort.cohortGroupId,
+    cohortGroupsToInclude: [currentCohort.cohortGroupId],
   });
 
   const cohorts = await CohortModel.find(query);
@@ -120,25 +115,21 @@ export async function getFilteredSessionsForChangementSejour(young: YoungType, t
 }
 
 export async function getFilteredSessionsForReinscription(young: YoungType, timeZoneOffset?: string | number | null) {
-  if (!young.birthdateAt) throw new Error("Missing birthdate");
-  if (!young.grade) throw new Error("Missing grade");
-  if (!young.cohortId) throw new Error("Missing cohortId");
-
   const currentCohort = await CohortModel.findById(young.cohortId);
   if (!currentCohort) throw new Error("Cohort not found");
 
   const currentGroup = await CohortGroupModel.findById(currentCohort.cohortGroupId);
   if (!currentGroup) throw new Error("Cohort group not found");
 
-  const pastGroups = await CohortGroupModel.find({ year: { $lt: currentGroup.year } });
+  const pastGroups = await CohortGroupModel.find({ year: { $lte: currentGroup.year } });
   const cohortGroupsToExclude = [...pastGroups.map((g) => g.id), currentGroup.id];
 
   const department = getDepartmentForEligibility(young);
   if (!department) throw new Error("Unable to determine department");
 
   const query = buildCohortQuery({
-    birthdate: new Date(young.birthdateAt),
-    schoolLevel: young.grade,
+    birthdate: new Date(young.birthdateAt!),
+    schoolLevel: young.grade!,
     department,
     cohortGroupsToExclude,
   });
