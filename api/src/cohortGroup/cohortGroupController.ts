@@ -26,10 +26,10 @@ router.use(authMiddleware("young"));
 router.get("/open", authMiddleware(["young"]), async (req: RouteRequest<CohortGroupRoutes["GetOpen"]>, res: RouteResponse<CohortGroupRoutes["GetOpen"]>) => {
   try {
     const cohort = await CohortModel.findById(req.user.cohortId);
-    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!cohort) throw new Error("Cohort not found");
 
     const cohortGroup = await CohortGroupModel.findById(cohort.cohortGroupId);
-    if (!cohortGroup) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!cohortGroup) throw new Error("Cohort group not found");
 
     const nextGroups = await CohortGroupModel.find({ year: { $gt: cohortGroup.year } }).sort({ year: 1, name: 1 });
     const cohorts = await CohortModel.find({ cohortGroupId: { $in: nextGroups.map((g) => g.id) } });

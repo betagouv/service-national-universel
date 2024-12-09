@@ -34,22 +34,26 @@ describe("Cohort Session Controller", () => {
   describe("POST /cohort-session/eligibility/:year", () => {
     // TODO: move auth young tests to preinscription
     it("should return 400 if young data is invalid", async () => {
-      const response = await request(getAppHelper(null, "young")).post("/cohort-session/eligibility/2023").send({ invalidData: true });
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post("/cohort-session/eligibility/2023")
+        .send({ invalidData: true });
       expect(response.status).toBe(400);
       expect(response.body.code).toBe(ERRORS.INVALID_BODY);
     });
 
     it("should return 200 if young data is valid", async () => {
-      const response = await request(getAppHelper(null, "young")).post("/cohort-session/eligibility/2023").send({
-        schoolDepartment: "",
-        department: "Department Name",
-        region: "Region Name",
-        schoolRegion: "",
-        birthdateAt: "2000-01-01",
-        grade: "Grade Name",
-        status: "Status Name",
-        zip: "",
-      });
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post("/cohort-session/eligibility/2023")
+        .send({
+          schoolDepartment: "",
+          department: "Department Name",
+          region: "Region Name",
+          schoolRegion: "",
+          birthdateAt: "2000-01-01",
+          grade: "Grade Name",
+          status: "Status Name",
+          zip: "",
+        });
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
     });
@@ -75,7 +79,9 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper(null, "young")).post("/cohort-session/eligibility/2023/").send(young);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post("/cohort-session/eligibility/2023/")
+        .send(young);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -106,7 +112,10 @@ describe("Cohort Session Controller", () => {
       );
       const timeZoneOffset = -24 * 60; // 24 hours in minutes (cf getDateTimeByTimeZoneOffset)
       // avec un header x-user-timezone
-      const response = await request(getAppHelper()).post(`/cohort-session/eligibility/2023`).set("x-user-timezone", String(timeZoneOffset)).send(young);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post(`/cohort-session/eligibility/2023`)
+        .set("x-user-timezone", String(timeZoneOffset))
+        .send(young);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -134,7 +143,9 @@ describe("Cohort Session Controller", () => {
           },
         }),
       );
-      const response = await request(getAppHelper(null, "young")).post("/cohort-session/eligibility/2023/").send(young);
+      const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+        .post("/cohort-session/eligibility/2023/")
+        .send(young);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
