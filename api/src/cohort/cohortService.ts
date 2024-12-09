@@ -69,13 +69,7 @@ function isCohortInscriptionOpenWithTimezone(cohort: CohortType, timeZoneOffset:
   return cohort.getIsInscriptionOpen(Number(timeZoneOffset));
 }
 
-type YoungInfo = Pick<
-  YoungType,
-  "cohortId" | "cohort" | "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip"
-> & {
-  _id?: YoungType["_id"];
-  isReInscription?: boolean;
-};
+type YoungInfo = Pick<YoungType, "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip">;
 
 export async function getFilteredSessionsForInscription(young: YoungInfo, timeZoneOffset?: string | number | null) {
   if (!young.birthdateAt) throw new Error("Missing birthdate");
