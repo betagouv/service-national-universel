@@ -12,15 +12,17 @@ import useReinscription from "../lib/useReinscription";
 import useSejours from "../lib/useSejours";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
+import { useLocation } from "react-router-dom";
 
 export default function ChangeSejour() {
   const { young } = useAuth();
   const cohort = getCohort(young.cohort);
   const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useReinscription();
   const { data: sessions, isPending, isError } = useSejours();
-
+  const location = useLocation<{ backlink?: string }>();
+  const backlink = location.state?.backlink || "/phase1";
   return (
-    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink="/home">
+    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink={backlink}>
       {isError ? (
         <div>Erreur</div>
       ) : isPending || isReinscriptionOpenLoading ? (
@@ -59,7 +61,7 @@ export default function ChangeSejour() {
           {isReinscriptionOpen === true && (
             <section id="reinscription">
               <h2 className="text-base font-bold text-center mt-8 md:text-2xl">S'inscrire pour 2025</h2>
-              <p className="text-sm leading-5 font-normal text-[#6B7280] mt-2 text-center">Mettez à jour vos informations et choisissez un séjour.</p>
+              <p className="text-sm leading-5 font-normal text-gray-700 mt-2 text-center">Mettez à jour vos informations et choisissez un séjour.</p>
               <div className="flex w-full mt-4">
                 <Link
                   to="/reinscription"
