@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Button } from "@snu/ds/admin";
 import DocumentSelect from "../DocumentSelect";
 import Badge from "../../../../components/Badge";
 import downloadPDF from "../../../../utils/download-pdf";
@@ -14,7 +15,8 @@ const Phase1Header = ({ setLoading, young = null, setYoung, user }) => {
   const [modalDispense, setModalDispense] = useState({ isOpen: false });
 
   const canUserDownloadConvocation = () => {
-    return young.hasMeetingInformation === "true" && ["AFFECTED", "DONE", "NOT_DONE", "EXEMPTED"].includes(young.statusPhase1);
+    return true;
+    //return young.hasMeetingInformation === "true" && ["AFFECTED", "DONE", "NOT_DONE", "EXEMPTED"].includes(young.statusPhase1);
   };
 
   const handleSendConvocationByEmail = async () => {
@@ -43,10 +45,17 @@ const Phase1Header = ({ setLoading, young = null, setYoung, user }) => {
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center justify-center gap-2">
-          <div className="text-lg font-medium leading-4">Séjour de cohésion</div>
+      <div className="mb-6 flex justify-between">
+        <div className="flex items-center gap-2">
+          <p className="text-2xl leading-7 font-bold">Séjour de cohésion</p>
           <Badge minify text={translatePhase1(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />
+        </div>
+        <div className="flex items-center gap-2">
+          {young.statusPhase1 === "NOT_DONE" && user.role === ROLES.ADMIN && (
+            <div onClick={() => setModalDispense({ isOpen: true })} className="ml-2 cursor-pointer rounded border-[1px] border-blue-700 px-2.5 py-1.5 font-medium text-blue-700">
+              Dispenser le volontaire du séjour
+            </div>
+          )}
           {canUserDownloadConvocation() && (
             <DocumentSelect
               title="Convocation"
@@ -60,12 +69,6 @@ const Phase1Header = ({ setLoading, young = null, setYoung, user }) => {
                 })
               }
             />
-          )}
-
-          {young.statusPhase1 === "NOT_DONE" && user.role === ROLES.ADMIN && (
-            <div onClick={() => setModalDispense({ isOpen: true })} className="ml-2 cursor-pointer rounded border-[1px] border-blue-700 px-2.5 py-1.5 font-medium text-blue-700">
-              Dispenser le volontaire du séjour
-            </div>
           )}
         </div>
       </div>

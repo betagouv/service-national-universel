@@ -91,53 +91,9 @@ export default function Phase1(props) {
           />
         ) : null}
         <Phase1Header user={user} young={young} setYoung={setYoung} setValues={setValues} />
-        <General
-          young={young}
-          setYoung={setYoung}
-          editing={editing}
-          setEditing={setEditing}
-          values={values}
-          setValues={setValues}
-          loading={loading}
-          setLoading={setLoading}
-          isCheckIsOpen={isCheckIsOpen}
-          user={user}
-        />
-        <div className="grid grid-cols-2">
-          <Phase1ConfirmationFormBlock
-            className="col-start-1 border-r-[1px] border-gray-200 pr-11"
-            young={young}
-            setYoung={setYoung}
-            editing={editing}
-            values={values}
-            setValues={setValues}
-            setLoading={setLoading}
-          />
-          <Phase1PresenceFormBlock
-            className="col-start-2 pl-11"
-            young={young}
-            setYoung={setYoung}
-            editing={editing}
-            values={values}
-            setValues={setValues}
-            setLoading={setLoading}
-            isYoungCheckinOpen={isCheckIsOpen}
-          />
-        </div>
+        <General young={young} setYoung={setYoung} values={values} setValues={setValues} isCheckIsOpen={isCheckIsOpen} user={user} />
 
-        {young.departSejourAt ? (
-          <div className="mt-4 flex flex-row items-center rounded bg-blue-100 px-3 py-2 text-blue-600">
-            <div className="w-1/2 font-bold">{young.departSejourMotif}</div>
-            {young.departSejourMotifComment ? (
-              <div className="flex w-1/2 flex-row items-center justify-start gap-2">
-                <ImQuotesLeft />
-                <div>{young.departSejourMotifComment}</div>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-
-        {cohesionCenter ? (
+        {/* {cohesionCenter ? (
           <div className="mt-4 flex flex-row items-center justify-center gap-10">
             <div className="mt-4 flex w-full flex-col items-start justify-start self-start">
               <div className="mb-2 text-xs font-medium text-gray-900">Centre de cohésion</div>
@@ -235,7 +191,7 @@ export default function Phase1(props) {
               </div>
             )}
           </div>
-        )}
+        )} */}
         {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
         young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
         young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
@@ -257,7 +213,7 @@ export default function Phase1(props) {
           setModal({ isOpen: false, onConfirm: null });
         }}
       />
-      <ModalAffectations
+      {/*       <ModalAffectations
         isOpen={modalAffectations?.isOpen}
         onCancel={() => setModalAffectation({ isOpen: false })}
         young={young}
@@ -266,7 +222,7 @@ export default function Phase1(props) {
         sessionId={modalAffectations?.sessionId}
       />
       <ModalAffectationsForCLE isOpen={modalAffectationsForCLE} onClose={() => setModalAffectationForCLE(false)} young={young} setYoung={setYoung} />
-      <ModalChangePDRSameLine isOpen={modalChangePdrSameLine?.isOpen} onCancel={() => setModalChangePdrSameLine({ isOpen: false })} young={young} cohort={cohort} />
+      <ModalChangePDRSameLine isOpen={modalChangePdrSameLine?.isOpen} onCancel={() => setModalChangePdrSameLine({ isOpen: false })} young={young} cohort={cohort} /> */}
     </>
   );
 }

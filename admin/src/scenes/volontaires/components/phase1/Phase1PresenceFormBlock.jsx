@@ -1,19 +1,21 @@
 import React, { useState } from "react";
-import TailwindSelect from "../../../../components/TailwindSelect";
-import SpeakerPhone from "../../../../assets/icons/SpeakerPhone";
-import BadgeCheck from "../../../../assets/icons/BadgeCheck";
-import ArrowCircleRight from "../../../../assets/icons/ArrowCircleRight";
-import Warning from "../../../../assets/icons/Warning";
-import { formatDateFR } from "../../../../utils";
-import ModalChangePresenceOnArrival from "../../../../components/modals/young/ModalChangePresenceOnArrival";
-import ModalChangePresenceJDM from "../../../../components/modals/young/ModalChangePresenceJDM";
-import ModalPointageDepart from "../../../centersV2/components/modals/ModalPointageDepart";
-import { COHORTS_WITH_JDM_COUNT } from "../../../../utils";
+import { HiOutlineCalendar } from "react-icons/hi";
 
-const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, setValues, setYoung, editing = false, setLoading, isYoungCheckinOpen }) => {
+import { Label, Select } from "@snu/ds/admin";
+import { translate } from "snu-lib";
+import { COHORTS_WITH_JDM_COUNT, formatDateFR } from "@/utils";
+
+import ModalChangePresenceOnArrival from "@/components/modals/young/ModalChangePresenceOnArrival";
+import ModalChangePresenceJDM from "@/components/modals/young/ModalChangePresenceJDM";
+import ModalPointageDepart from "../../../centersV2/components/modals/ModalPointageDepart";
+
+const Phase1PresenceFormBlock = ({ young = null, values = null, setValues, setYoung, editing = false, setLoading, isYoungCheckinOpen }) => {
   const [isPresenceOnArrivalModalOpen, setIsPresenceOnArrivalModalOpen] = useState(false);
   const [isPresenceJDMModalOpen, setIsPresenceJDMModalOpen] = useState(false);
   const [isDepartureModalOpen, setIsDepartureModalOpen] = useState(false);
+
+  console.log("editing", editing);
+  console.log("isYoungCheckinOpen", isYoungCheckinOpen);
 
   const handleChangePresenceOnArrival = ({ value }) => {
     setValues((prevValue) => ({
@@ -51,66 +53,67 @@ const Phase1PresenceFormBlock = ({ className = "", young = null, values = null, 
 
   return (
     <>
-      <div className={className}>
-        <div className="mb-2 flex items-center gap-2">
-          <p className="text-xs font-medium text-gray-900">Présence</p>
-          {!isYoungCheckinOpen && (
-            <div className="group relative">
-              <Warning className="text-red-900" />
-              <div className="absolute top-[calc(100%+5px)] left-[50%] z-10 hidden min-w-[200px] translate-x-[-50%] rounded-lg bg-gray-200 px-2 py-1 text-center text-black shadow-sm group-hover:block">
-                <div className="absolute left-[50%] top-[-5px] h-[10px] w-[10px] translate-x-[-50%] rotate-45 bg-gray-200"></div>
-                Le pointage n&apos;est pas ouvert
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="mt-2 flex w-full flex-row flex-wrap items-stretch gap-4">
-          <div className="min-w-[250px] flex-1">
-            <TailwindSelect
-              name="cohesionStayPresence"
-              label="Présence à l'arrivée"
+      <div className="w-full">
+        <div className="flex flex-col w-full">
+          <Label title="Présence" name="presence" tooltip={!isYoungCheckinOpen ? "Le pointage n'est pas ouvert" : null} tooltipIconClassName={"!text-red-900"} />
+          <div className="flex justify-between gap-4">
+            <Select
+              className="mb-3 w-full"
+              label="À l'arrivée"
+              isActive={editing && isYoungCheckinOpen}
               readOnly={!editing || !isYoungCheckinOpen}
-              className="min-w-[250px] flex-1"
-              icon={<SpeakerPhone className="text-gray-500" width={20} height={20} />}
-              setSelected={handleChangePresenceOnArrival}
-              selected={values.cohesionStayPresence || ""}
+              placeholder="Non renseigné"
               options={[
-                { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                { label: "Présent", value: "true" },
-                { label: "Absent", value: "false" },
+                { label: "Oui", value: "true" },
+                { label: "Non", value: "false" },
               ]}
+              closeMenuOnSelect={true}
+              value={values?.cohesionStayPresence ? { value: values?.cohesionStayPresence, label: translate(values?.cohesionStayPresence) } : null}
+              onChange={handleChangePresenceOnArrival}
             />
-          </div>
-          {COHORTS_WITH_JDM_COUNT.includes(young?.cohort) ? (
-            <div className="min-w-[250px] flex-1">
-              <TailwindSelect
-                name="presenceJDM"
-                label="Présence JDM"
+            {COHORTS_WITH_JDM_COUNT.includes(young?.cohort) && (
+              <Select
+                className="mb-4 w-full"
+                label="JDM"
+                isActive={editing && isYoungCheckinOpen}
                 readOnly={!editing || !isYoungCheckinOpen}
-                type="select"
-                icon={<BadgeCheck className="text-gray-500" width={20} height={20} />}
-                setSelected={handleOnChangePresenceJDM}
-                selected={values.presenceJDM || ""}
+                placeholder="Non renseigné"
                 options={[
-                  { label: "Non renseigné", value: "", disabled: true, hidden: true },
-                  { label: "Présent", value: "true" },
-                  { label: "Absent", value: "false" },
+                  { label: "Oui", value: "true" },
+                  { label: "Non", value: "false" },
                 ]}
+                closeMenuOnSelect={true}
+                value={values?.presenceJDM ? { value: values?.presenceJDM, label: translate(values?.presenceJDM) } : null}
+                onChange={handleOnChangePresenceJDM}
               />
-            </div>
-          ) : null}
-          <div className="min-w-[250px] flex-1 items-stretch">
-            <div
-              onClick={() => {
-                if (!editing || !isYoungCheckinOpen) return;
-                setIsDepartureModalOpen(true);
-              }}
-              className={` flex flex-row items-center justify-start rounded border border-gray-300 py-2 px-2.5 ${editing && "cursor-pointer"} h-full`}>
-              <ArrowCircleRight width={16} height={16} className="mx-2 mr-3 text-gray-400 group-hover:scale-105" />
-              {values?.departSejourAt ? <div>{formatDateFR(values.departSejourAt)}</div> : <div className="text-gray-500">Renseigner un départ anticipé</div>}
-            </div>
+            )}
           </div>
         </div>
+        {values.departSejourAt && (
+          <div className="mb-2 flex flex-col bg-gray-50 gap-1 py-[10px] px-4">
+            <p>
+              <span className="text-gray-500">Départ le : </span>
+              {formatDateFR(values.departSejourAt)}
+            </p>
+            <p>
+              <span className="text-gray-500">Motif : </span>
+              {young.departSejourMotif}
+            </p>
+            {young.departSejourMotifComment && (
+              <p>
+                <span className="text-gray-500">Commentaire : </span>
+                {young.departSejourMotifComment}
+              </p>
+            )}
+          </div>
+        )}
+
+        {editing && isYoungCheckinOpen && (
+          <div className="flex gap-2 justify-end cursor-pointer text-blue-600 hover:underline" onClick={() => setIsDepartureModalOpen(true)}>
+            <HiOutlineCalendar size={16} className="mt-0.5" />
+            <p>{values?.departSejourAt ? "Modifier ces informations" : "Renseigner un départ anticipé"}</p>
+          </div>
+        )}
       </div>
       <ModalChangePresenceOnArrival
         isOpen={isPresenceOnArrivalModalOpen}
