@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ReferentGateway } from "../Referent.gateway";
-import { CreateReferentModel, ReferentModel } from "../Referent.model";
+import { CreateReferentModel, ReferentModel, ReferentModelLight } from "../Referent.model";
 import { EmailTemplate, SupprimerReferentClasseParams } from "@notification/core/Notification";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ClasseModel } from "../../sejours/cle/classe/Classe.model";
@@ -8,6 +8,7 @@ import { InvitationType, ROLES } from "snu-lib";
 import { ClasseGateway } from "../../sejours/cle/classe/Classe.gateway";
 import { InviterReferentClasse } from "../../sejours/cle/referent/useCase/InviteReferentClasse";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { Role } from "@shared/core/Role";
 
 Injectable();
 export class ReferentService {
@@ -51,5 +52,9 @@ export class ReferentService {
         await this.classeGateway.update(classe);
         await this.inviterReferentClasse.execute(newReferent.id, classe.id, InvitationType.INSCRIPTION);
         return newReferent;
+    }
+
+    async findByRole(role: Role, search: string): Promise<ReferentModelLight[]> {
+        return this.referentGateway.findByRole(role, search);
     }
 }

@@ -2,6 +2,7 @@ import { GetOneClasseRoute } from "./getOne";
 import { CreateClasseRoute } from "./create";
 import { UpdateClasseRoute } from "./update";
 import { DeleteClasseRoute } from "./delete";
+import { ModifierReferentClasseRoute } from "./modifierReferent";
 
 export type ClassesRoutes = {
   // Get: GetClasseRoute;
@@ -9,4 +10,5 @@ export type ClassesRoutes = {
   GetOne: GetOneClasseRoute;
   Update: UpdateClasseRoute;
   Delete: DeleteClasseRoute;
+  ModifierReferentClasse: ModifierReferentClasseRoute;
 };

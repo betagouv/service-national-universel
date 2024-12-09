@@ -20,6 +20,7 @@ import StatsInfos from "../components/StatsInfos";
 import ModaleCohort from "../components/modaleCohort";
 import ClasseHeader from "../header/ClasseHeader";
 import { InfoBus, Rights } from "../components/types";
+import { ReferentModifier } from "../components/ReferentInfosModifierModal";
 
 export default function Details(props) {
   const [classe, setClasse] = useState(props.classe);
@@ -33,6 +34,7 @@ export default function Details(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [oldClasseCohort, setOldClasseCohort] = useState<string>();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
+  const [currentReferent, setCurrentReferent] = useState<ReferentModifier | undefined>(undefined);
 
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortState) => state.Cohorts).filter(
@@ -72,24 +74,10 @@ export default function Details(props) {
     getClasse();
   }, [id, edit, editStay, editRef]);
 
-  const checkRefInfo = () => {
-    setErrors({});
-    interface Errors {
-      refFirstName?: string;
-      refLastName?: string;
-      refEmail?: string;
-    }
-    const errors: Errors = {};
-    if (!classe?.referents?.[0].firstName) errors.refFirstName = "Ce champ est obligatoire";
-    if (!classe?.referents?.[0].lastName) errors.refLastName = "Ce champ est obligatoire";
-    if (!classe?.referents?.[0].email) errors.refEmail = "Ce champ est obligatoire";
-    if (Object.keys(errors).length > 0) {
-      setErrors(errors);
-      setIsLoading(false);
-      return;
-    }
-    sendInfoRef();
-  };
+  useEffect(() => {
+    const currentReferent = { nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email };
+    setCurrentReferent(currentReferent);
+  }, [classe.referents]);
 
   const checkInfo = () => {
     setErrors({});
@@ -149,42 +137,12 @@ export default function Details(props) {
         return setIsLoading(false);
       }
       setClasse(data);
+      setCurrentReferent({ nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email });
       handleCancel();
       toastr.success("Succès", "La classe a bien été modifié");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la classe", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const sendInfoRef = async () => {
-    try {
-      setShowModaleCohort(false);
-      setIsLoading(true);
-      const referent = {
-        firstName: classe?.referents?.[0].firstName,
-        lastName: classe?.referents?.[0].lastName,
-        email: classe?.referents?.[0].email,
-      };
-
-      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}/referent`, referent);
-
-      if (!ok) {
-        if (code === FUNCTIONAL_ERRORS.CANNOT_BE_ADDED_AS_A_REFERENT_CLASSE) {
-          toastr.error("Erreur", "Ce référent ne peut pas être ajouté comme référent de classe");
-        } else {
-          toastr.error("Oups, une erreur est survenue lors de la modification du référent", translate(code));
-        }
-        return setIsLoading(false);
-      }
-      setClasse(data);
-      handleCancel();
-      toastr.success("Succès", "Le référent a bien été modifié");
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification du référent", e);
     } finally {
       setIsLoading(false);
     }
@@ -220,17 +178,7 @@ export default function Details(props) {
       />
 
       {classe.referents?.length && (
-        <ReferentInfos
-          classe={classe}
-          setClasse={setClasse}
-          editRef={editRef}
-          setEditRef={setEditRef}
-          errors={errors}
-          rights={rights}
-          isLoading={isLoading}
-          onCancel={handleCancel}
-          onCheckInfo={checkRefInfo}
-        />
+        <ReferentInfos classe={classe} currentReferent={currentReferent} rights={rights} isLoading={isLoading} onModifierReferent={setCurrentReferent} />
       )}
 
       {(rights.showCenter || rights.showPDR) && classe?.status !== STATUS_CLASSE.WITHDRAWN && (

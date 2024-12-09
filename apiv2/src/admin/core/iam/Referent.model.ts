@@ -55,3 +55,5 @@ export class ReferentMetadataModel {
 }
 
 export type CreateReferentModel = Omit<ReferentModel, "id" | "createdAt" | "updatedAt">;
+
+export type ReferentModelLight = Pick<ReferentModel, "id" | "nom" | "prenom" | "email">;

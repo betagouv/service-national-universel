@@ -1,9 +1,14 @@
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
-import { CreateReferentModel, ReferentModel, ReferentPasswordModel } from "@admin/core/iam/Referent.model";
+import {
+    CreateReferentModel,
+    ReferentModel,
+    ReferentModelLight,
+    ReferentPasswordModel,
+} from "@admin/core/iam/Referent.model";
 import { Inject, Injectable } from "@nestjs/common";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { Model } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { Role, SousRole } from "@shared/core/Role";
 import { v4 as uuidv4 } from "uuid";
@@ -21,6 +26,7 @@ export class ReferentRepository implements ReferentGateway {
         @Inject(ClockGateway) private clockGateway: ClockGateway,
         private readonly cls: ClsService,
     ) {}
+
     async delete(id: string): Promise<void> {
         const referent = await this.referentMongooseEntity.findById(id);
         if (!referent) {
@@ -110,6 +116,20 @@ export class ReferentRepository implements ReferentGateway {
 
         const updatedReferent = await this.updateEntity({ _id: id, invitationToken, invitationExpires });
         return ReferentMapper.toModel(updatedReferent);
+    }
+
+    async findByRole(role: string, search: string): Promise<ReferentModelLight[]> {
+        const query: FilterQuery<ReferentType> = {
+            role: role,
+            $or: [
+                { firstName: { $regex: search, $options: "i" } },
+                { lastName: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+            ],
+        };
+        return this.referentMongooseEntity.find(query).then((referents) => {
+            return referents.map((referent) => ReferentMapper.toModelLight(referent));
+        });
     }
 
     private async updateEntity(referent: Partial<ReferentType> & Pick<ReferentType, "_id">): Promise<ReferentDocument> {

@@ -8,6 +8,7 @@ import { ClasseModel } from "../../../../../core/sejours/cle/classe/Classe.model
 import { ClasseService } from "../../../../../core/sejours/cle/classe/Classe.service";
 import { VerifierClasse } from "../../../../../core/sejours/cle/classe/useCase/VerifierClasse";
 import { ClasseAdminCleGuard } from "../guard/ClasseAdminCle.guard";
+import { ModifierReferentDto } from "snu-lib";
 
 @Controller("classe")
 export class ClasseController {
@@ -35,9 +36,10 @@ export class ClasseController {
     async modifierReferent(
         @Param("id") classeId: string,
         @Body() modifierReferentClasse: ModifierReferentClasseModel,
-    ): Promise<ModifierReferentClasseModel> {
+    ): Promise<ModifierReferentDto> {
         const referent = await this.modifierReferentClasse.execute(classeId, modifierReferentClasse);
         return {
+            id: referent.id,
             email: referent.email,
             prenom: referent.prenom,
             nom: referent.nom,

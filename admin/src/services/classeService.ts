@@ -19,6 +19,16 @@ const ClasseService = {
     return classe;
   },
 
+  modifierReferentClasse: async (id: ClassesRoutes["ModifierReferentClasse"]["params"]["id"], modifierReferentDto: ClassesRoutes["ModifierReferentClasse"]["payload"]) => {
+    return await buildRequest<ClassesRoutes["ModifierReferentClasse"]>({
+      path: "/classe/{id}/referent/modifier-ou-creer",
+      method: "POST",
+      params: { id },
+      payload: modifierReferentDto,
+      target: "API_V2",
+    })();
+  },
+
   mapDtoToView: (classeDto): NonNullable<ClassesRoutes["GetOne"]["response"]["data"]> => {
     return {
       _id: classeDto.id,

@@ -1,5 +1,5 @@
 import { Role, SousRole } from "@shared/core/Role";
-import { CreateReferentModel, ReferentModel, ReferentPasswordModel } from "./Referent.model";
+import { CreateReferentModel, ReferentModel, ReferentModelLight, ReferentPasswordModel } from "./Referent.model";
 
 export interface ReferentGateway {
     findAll(): Promise<ReferentModel[]>;
@@ -12,6 +12,7 @@ export interface ReferentGateway {
     findByDepartementRoleAndSousRole(departement: string, role: Role, sousRole?: SousRole): Promise<ReferentModel[]>;
     generateInvitationTokenById(id: string): Promise<ReferentModel>;
     delete(id: string): Promise<void>;
+    findByRole(role: string, search: string): Promise<ReferentModelLight[]>;
 }
 
 export const ReferentGateway = Symbol("ReferentGateway");

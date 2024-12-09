@@ -46,6 +46,7 @@ import { useCaseProvider as referentielUseCaseProvider } from "./infra/referenti
 import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
 import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
 import { serviceProvider } from "./infra/iam/service/serviceProvider";
+import { ReferentController } from "./infra/iam/api/Referent.controller";
 
 @Module({
     imports: [
@@ -64,6 +65,7 @@ import { serviceProvider } from "./infra/iam/service/serviceProvider";
         ImportReferentielController,
         AuthController,
         AdminTaskController,
+        ReferentController,
     ],
     providers: [
         ClasseService,
