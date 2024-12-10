@@ -22,6 +22,7 @@ exports.handler = async () => {
     let countNotice = 0;
 
     await cursor.eachAsync(async (young) => {
+      countNotice++;
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
