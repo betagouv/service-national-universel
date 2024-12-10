@@ -22,7 +22,15 @@ export default function NewChoiceSejour() {
   return (
     <ChangeSejourContainer title={`Séjour ${newCohortPeriod}`} backlink="/changer-de-sejour/">
       <p className="mt-4 mb-6 text-sm leading-5 text-gray-500 font-normal text-center">Pour quelle(s) raison(s) souhaitez-vous changer de séjour ?</p>
-      <ReasonForm reason={reason} setReason={setReason} message={message} setMessage={setMessage} disabled={!reason || !message} onSubmit={() => setOpen(true)} />
+      <ReasonForm
+        reason={reason}
+        setReason={setReason}
+        message={message}
+        setMessage={setMessage}
+        text="Changer de séjour"
+        disabled={!reason || !message}
+        onSubmit={() => setOpen(true)}
+      />
       <Modal open={open} setOpen={setOpen} newCohortPeriod={newCohortPeriod} reason={reason} message={message} />
     </ChangeSejourContainer>
   );
@@ -68,7 +76,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
           <p className="text-gray-500 text-sm">Ancien séjour</p>
           <p className="text-gray-900 font-medium">{oldCohortPeriod}</p>
         </div>
-        <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
+        <div className="bg-white pt-1 pb-2.5 px-4 rounded-md text-center leading-loose border-blue-600 border-2">
           <HiOutlineCheckCircle className="text-blue-600 h-5 w-5 inline-block stroke-2" />
           <p className="text-gray-500 text-sm">Nouveau séjour</p>
           <p className="text-gray-900 font-medium">{capitalizeFirstLetter(newCohortPeriod)}</p>
