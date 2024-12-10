@@ -98,7 +98,7 @@ describe("CohortGroup Routes", () => {
       const cohortGroup = await CohortGroupModel.create({ name: "Group F", type: COHORT_TYPE.VOLONTAIRE, year: 2026 });
       await CohortModel.create(getNewCohortFixture({ cohortGroupId: cohortGroup._id }));
       const response = await request(getAppHelper()).delete(`/cohort-group/${cohortGroup._id}`);
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(404);
       expect(response.body.ok).toBe(false);
     });
   });

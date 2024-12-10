@@ -442,8 +442,8 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    const cohortObj = await CohortModel.findOne({ name: value.cohort });
-    if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohortDocument = await CohortModel.findOne({ name: value.cohort });
+    if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let template = SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE;
     const emailsTo = [];
@@ -461,7 +461,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
       });
     }
 
-    young.set({ ...value, cohortId: cohortObj._id });
+    young.set({ ...value, cohortId: cohortDocument._id });
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {

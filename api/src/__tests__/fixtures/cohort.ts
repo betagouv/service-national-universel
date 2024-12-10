@@ -1,5 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
-import { COHORT_STATUS, COHORT_TYPE, CohortType } from "snu-lib";
+import { COHORT_STATUS, COHORT_TYPE, CohortType, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 
 function getNewCohortFixture(object: Partial<CohortType> = {}): Partial<CohortType> {
   return {
@@ -18,6 +18,7 @@ function getNewCohortFixture(object: Partial<CohortType> = {}): Partial<CohortTy
     inscriptionEndDate: faker.date.past(),
     instructionEndDate: faker.date.past(),
     pdrChoiceLimitDate: faker.date.past(),
+    objectifLevel: faker.helpers.arrayElement(Object.values(INSCRIPTION_GOAL_LEVELS)),
     eligibility: {
       zones: ["A", "B", "C"],
       schoolLevels: ["3eme", "4eme"],
