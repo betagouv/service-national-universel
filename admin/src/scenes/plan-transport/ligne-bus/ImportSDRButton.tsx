@@ -74,7 +74,7 @@ export default function ImportSDRButton({ className }: ImportSDRButtonProps) {
         footer={
           <div className="flex items-center justify-between gap-6">
             <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={handleClose} />
-            <Button disabled={!file || isPending} title="Lancer l'import" onClick={() => mutate()} className={"flex-1"} />
+            <Button disabled={!file || isPending} loading={isPending} title="Lancer l'import" onClick={() => mutate()} className={"flex-1"} />
           </div>
         }
       />

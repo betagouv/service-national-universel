@@ -43,7 +43,7 @@ export default function AffectationSimulationMetropole({ sessionId, sessionNom }
       </div>
       <div className="flex gap-2">
         <Button title="Voir les simulations" type="wired" onClick={() => history.push(`?tab=simulations&cohort=${sessionNom}&action=${TaskName.AFFECTATION_HTS_SIMULATION}`)} />
-        <Button title="Lancer une simulation" onClick={toggleModal} leftIcon={isInProgress && <HiOutlineRefresh />} disabled={isLoading || isInProgress || !!error} />
+        <Button title="Lancer une simulation" onClick={toggleModal} loading={isInProgress || isLoading} disabled={isLoading || isInProgress || !!error} />
       </div>
       {showModal && <AffectationSimulationMetropoleModal sessionId={sessionId} onClose={toggleModal} />}
     </div>
