@@ -5,7 +5,7 @@ import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../ut
 import Affected from "./Affected";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
-import HorsParcours from "./HorsParcours";
+import Phase1NotDone from "./Phase1NotDone";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
 import WaitingAffectation from "./waitingAffectation";
@@ -72,5 +72,5 @@ export default function Home() {
       return <WaitingAffectation />;
     }
   }
-  return <HorsParcours />;
+  return <Phase1NotDone />;
 }
