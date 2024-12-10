@@ -1,4 +1,4 @@
-import { YOUNG_SOURCE, YoungDto } from "snu-lib";
+import { YOUNG_SOURCE, YoungDto, YoungType, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 
 export function filterDataForYoungSection(data: any, section: "identite" | "parent") {
@@ -105,4 +105,10 @@ export function getCorrectionRequest(requests, field) {
   return requests.find((req) => {
     return req.field === field;
   });
+}
+
+export function getYoungStatusForBascule(youngStatus: string) {
+  if (youngStatus === YOUNG_STATUS.NOT_AUTORISED || youngStatus === YOUNG_STATUS.IN_PROGRESS || youngStatus === YOUNG_STATUS.REINSCRIPTION) {
+    return YOUNG_STATUS.IN_PROGRESS;
+  } else return YOUNG_STATUS.WAITING_VALIDATION;
 }
