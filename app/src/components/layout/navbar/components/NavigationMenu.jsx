@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, FEATURES_NAME, isFeatureEnabled } from "snu-lib";
-import { environment, supportURL } from "../../../../config";
+import { environment, knowledgebaseURL } from "../../../../config";
 import { permissionPhase1, permissionPhase2, permissionPhase3 } from "../../../../utils";
 import plausibleEvent from "@/services/plausible";
 
@@ -44,7 +44,7 @@ export default function NavigationMenu({ onClose = () => {} }) {
         <div className="m-8" />
         <MenuLinkExternal
           onClick={plausibleEvent("Compte/Besoin d'aide")}
-          href={supportURL}
+          href={knowledgebaseURL}
           icon={<HiOutlineQuestionMarkCircle className="text-lg stroke-[1.5]" />}
           text="Besoin d'aide ?"
           onClose={onClose}

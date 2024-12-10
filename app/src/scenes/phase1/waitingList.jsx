@@ -4,7 +4,7 @@ import { getCohortPeriod, youngCanChangeSession } from "snu-lib";
 import clock from "../../assets/clock.svg";
 import edit from "../../assets/editIcon.svg";
 import hero from "../../assets/hero.png";
-import { supportURL } from "../../config";
+import { knowledgebaseURL } from "../../config";
 import Container from "./components/Container";
 import Files from "./Files";
 import { getCohort } from "@/utils/cohorts";
@@ -44,7 +44,7 @@ export default function WaitingList({ young }) {
             <span className="text-gray-500">
               Une place peut se libérer dans les prochains jours : nous vous en avertirons. Vous pouvez également choisir de vous inscrire sans attendre sur un autre séjour sur
               lequel il reste de la place. Vous pouvez consulter les{" "}
-              <a className="text-indigo-600 underline hover:text-indigo-800" href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+              <a className="text-indigo-600 underline hover:text-indigo-800" href={`${knowledgebaseURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
                 articles de notre base de connaissance a propos de la Phase 1.
               </a>
             </span>
