@@ -12,15 +12,14 @@ module.exports = {
     for (const classe of classes) {
       const youngs = await YoungModel.find({ classeId: classe._id });
       logger.info(`Found ${youngs.length} youngs in class ${classe.name}...`);
+
       for (const young of youngs) {
         young.set({ status: "VALIDATED" });
         await young.save({ fromUser: { firstName: "rattrapage des jeunes CLE désistés" } });
       }
-      if (classe._id.toString() === "674583ba3216d9ba70203208") {
-        classe.set({ status: "OPEN" });
-      } else {
-        classe.set({ status: "CLOSED" });
-      }
+
+      classe.set({ status: "CLOSED" });
+
       await classe.save({ fromUser: { firstName: "rattrapage des classes désistés" } });
     }
   },
