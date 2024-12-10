@@ -3,6 +3,7 @@ import { TypeScriptProject } from "arch-unit-ts/dist/arch-unit/core/domain/TypeS
 import { Architectures } from "arch-unit-ts/dist/arch-unit/library/Architectures";
 import { classes, noClasses } from "arch-unit-ts/dist/main";
 import { MatchingPattern } from "./MatchingPattern";
+
 describe("Architecture test", () => {
     const srcProject = new TypeScriptProject(RelativePath.of("src"), "**/*.spec.ts"); // Ignore tests files
 

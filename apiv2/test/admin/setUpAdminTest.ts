@@ -40,6 +40,7 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
+import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -68,6 +69,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         providers: [
             ClasseService,
             SimulationAffectationHTSService,
+            ReferentielRoutesService,
             ...cleGatewayProviders,
             ...sejourGatewayProviders,
             ...jeuneGatewayProviders,
