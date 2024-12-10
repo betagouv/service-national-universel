@@ -1,7 +1,8 @@
 // TODO: à déplacer dans le module "file"
 export interface FileGateway {
-    readCSV<T>(
-        filePath: string,
+    readFile(filePath: string): Promise<Buffer>;
+    parseCSV<T>(
+        buffer: Buffer,
         options: {
             objectMode?: boolean;
             delimiter?: string;
@@ -22,6 +23,7 @@ export interface FileGateway {
             skipRows?: number;
         },
     ): Promise<T[]>;
+    parseXLS<T>(buffer: Buffer, options?: { sheetIndex?: number; sheetName?: string; defval?: any }): Promise<T[]>;
     generateExcel(excelSheets: { [sheet: string]: any[] }): Promise<Buffer>;
     uploadFile(
         path: string,

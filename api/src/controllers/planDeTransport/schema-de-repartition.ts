@@ -19,26 +19,37 @@
  *                                                              => Récupération du détail d'un département (les centres du départemetn avec les groupes y arrivant)
  */
 
-const mongoose = require("mongoose");
-const express = require("express");
+import mongoose, { PipelineStage } from "mongoose";
+import express from "express";
+import passport from "passport";
+import { capture } from "../../sentry";
+import { ERRORS } from "../../utils";
+import { config } from "../../config";
+import {
+  canViewSchemaDeRepartition,
+  YOUNG_STATUS,
+  region2department,
+  canCreateSchemaDeRepartition,
+  canDeleteSchemaDeRepartition,
+  canEditSchemaDeRepartition,
+  SchemaDeRepartitionType,
+} from "snu-lib";
+import { filteredRegionList } from "./commons";
+import Joi from "joi";
+import { YoungModel } from "../../models";
+import { SessionPhase1Model } from "../../models";
+import { SchemaDeRepartitionModel } from "../../models";
+import { TableDeRepartitionModel } from "../../models";
+import { PointDeRassemblementModel } from "../../models";
+import { CohortModel } from "../../models";
+import { CohesionCenterModel } from "../../models";
+import { getTransporter } from "../../utils";
+import { SENDINBLUE_TEMPLATES } from "snu-lib";
+import { sendTemplate } from "../../brevo";
+import { UserRequest } from "../request";
+import e from "express";
+
 const router = express.Router();
-const passport = require("passport");
-const { capture } = require("../../sentry");
-const { ERRORS } = require("../../utils");
-const { config } = require("../../config");
-const { canViewSchemaDeRepartition, YOUNG_STATUS, region2department, canCreateSchemaDeRepartition, canDeleteSchemaDeRepartition, canEditSchemaDeRepartition } = require("snu-lib");
-const { filteredRegionList } = require("./commons");
-const Joi = require("joi");
-const { YoungModel } = require("../../models");
-const { SessionPhase1Model } = require("../../models");
-const { SchemaDeRepartitionModel } = require("../../models");
-const { TableDeRepartitionModel } = require("../../models");
-const { PointDeRassemblementModel } = require("../../models");
-const { CohortModel } = require("../../models");
-const { CohesionCenterModel } = require("../../models");
-const { getTransporter } = require("../../utils");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { sendTemplate } = require("../../brevo");
 
 const schemaRepartitionBodySchema = Joi.object({
   cohort: Joi.string().required(),
@@ -56,7 +67,7 @@ const schemaRepartitionBodySchema = Joi.object({
 });
 
 // ------- export
-router.get("/export/:region/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/export/:region/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required(), region: Joi.string().required(), department: Joi.string().required() }).validate(req.params, {
       stripUnknown: true,
@@ -71,7 +82,7 @@ router.get("/export/:region/:department/:cohort", passport.authenticate("referen
   }
 });
 
-router.get("/export/:region/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/export/:region/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required(), region: Joi.string().required() }).validate(req.params, {
       stripUnknown: true,
@@ -86,7 +97,7 @@ router.get("/export/:region/:cohort", passport.authenticate("referent", { sessio
   }
 });
 
-router.get("/export/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/export/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, {
       stripUnknown: true,
@@ -103,7 +114,7 @@ router.get("/export/:cohort", passport.authenticate("referent", { session: false
 });
 
 async function loadSchemaGroups({ department, region, cohort }) {
-  let match = { cohort };
+  let match: any = { cohort };
   if (department) {
     match.fromDepartment = department;
   } else if (region) {
@@ -151,7 +162,7 @@ async function loadSchemaGroups({ department, region, cohort }) {
 
 // ------- get data
 
-router.get("/centers/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/centers/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- parameters & vérification
     const { error: errorParams, value: valueParams } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).validate(req.params, {
@@ -179,7 +190,7 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
     }
 
     // search centers & sessions
-    const pipeline = [
+    const pipeline: PipelineStage[] = [
       {
         $match: { cohort },
       },
@@ -232,7 +243,7 @@ router.get("/centers/:department/:cohort", passport.authenticate("referent", { s
   }
 });
 
-router.get("/pdr/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/pdr/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- parameters & vérification
     const { error: errorParams, value: valueParams } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, {
@@ -252,13 +263,13 @@ router.get("/pdr/:cohort", passport.authenticate("referent", { session: false, f
     const { offset, limit, filter } = valueQuery;
 
     // search gathering places
-    let matches = [{ cohorts: cohort }];
+    let matches: any[] = [{ cohorts: cohort }];
     if (filter && filter.length > 0) {
       const regex = new RegExp(".*" + filter + ".*", "gi");
       matches.push({ $or: [{ name: regex }, { city: regex }, { department: regex }, { region: regex }] });
     }
 
-    const pipeline = [
+    const pipeline: PipelineStage[] = [
       { $match: { $and: matches } },
       { $sort: { name: 1 } },
       {
@@ -287,7 +298,7 @@ router.get("/pdr/:cohort", passport.authenticate("referent", { session: false, f
   }
 });
 
-router.get("/pdr/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/pdr/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- parameters & vérification
     const { error: errorParams, value: valueParams } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).validate(req.params, {
@@ -297,7 +308,7 @@ router.get("/pdr/:department/:cohort", passport.authenticate("referent", { sessi
     const { department, cohort } = valueParams;
 
     // search gathering places
-    const pipeline = [{ $match: { cohorts: cohort, department } }, { $sort: { name: 1 } }];
+    const pipeline: PipelineStage[] = [{ $match: { cohorts: cohort, department } }, { $sort: { name: 1 } }];
     const data = await PointDeRassemblementModel.aggregate(pipeline).exec();
 
     // --- résultat
@@ -308,7 +319,7 @@ router.get("/pdr/:department/:cohort", passport.authenticate("referent", { sessi
   }
 });
 
-router.post("/get-group-detail", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/get-group-detail", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- parameters & vérification
     const { error: errorBody, value: group } = schemaRepartitionBodySchema.validate(req.body, { stripUnknown: true });
@@ -343,7 +354,7 @@ router.post("/get-group-detail", passport.authenticate("referent", { session: fa
   }
 });
 
-router.get("/department-detail/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/department-detail/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- parameters & vérification
     const { error: errorParams, value: valueParams } = Joi.object({ department: Joi.string().required(), cohort: Joi.string().required() }).validate(req.params, {
@@ -357,7 +368,7 @@ router.get("/department-detail/:department/:cohort", passport.authenticate("refe
     }
 
     // get centers
-    const pipeline = [
+    const pipeline: PipelineStage[] = [
       {
         $match: { cohort },
       },
@@ -435,7 +446,7 @@ router.get("/department-detail/:department/:cohort", passport.authenticate("refe
 
 // --- summaries
 
-router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -569,7 +580,7 @@ router.get("/:cohort", passport.authenticate("referent", { session: false, failW
   }
 });
 
-router.get("/:region/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:region/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required(), region: Joi.string().required() }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -586,7 +597,7 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
     const departmentsTable = await getDepartmentTableDeRepartition(cohort, region);
 
     // --- get to regions from region
-    const toRegions = await getRegionsAndDepartmentsFromRegion(cohort, region);
+    const toRegions = (await getRegionsAndDepartmentsFromRegion(cohort, region)) as Array<{ name?: string; departments: string[] }>;
 
     // --- get to departments from region
     const toDepartmentsSet = {};
@@ -713,7 +724,7 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
           name: region.name,
           centers: 0,
           capacity: 0,
-          ...toCenterSet[region.name],
+          ...toCenterSet[region.name!],
         };
       }),
       rows: filledDepartments.map((r) => {
@@ -741,7 +752,7 @@ router.get("/:region/:cohort", passport.authenticate("referent", { session: fals
   }
 });
 
-router.get("/:region/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:region/:department/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ cohort: Joi.string().required(), region: Joi.string().required(), department: Joi.string().required() }).validate(req.params, {
       stripUnknown: true,
@@ -755,19 +766,19 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
 
     // --- find to regions from departments
     const regionsResult = await TableDeRepartitionModel.find({ cohort, fromRegion: region, fromDepartment: department });
-    const toRegionsSet = {};
-    let toDepartments = [];
+    const toRegionsSet: Record<string, { name?: string; departments: string[] }> = {};
+    let toDepartments: string[] = [];
     for (const repart of regionsResult) {
-      if (!toRegionsSet[repart.toRegion]) {
-        toRegionsSet[repart.toRegion] = {
+      if (!toRegionsSet[repart.toRegion!]) {
+        toRegionsSet[repart.toRegion!] = {
           name: repart.toRegion,
           departments: [],
         };
       }
       if (repart.toDepartment) {
-        toDepartments.push(repart.toDepartment);
-        if (!toRegionsSet[repart.toRegion].departments.includes(repart.toDepartment)) {
-          toRegionsSet[repart.toRegion].departments.push(repart.toDepartment);
+        toDepartments.push(repart.toDepartment!);
+        if (!toRegionsSet[repart.toRegion!].departments.includes(repart.toDepartment)) {
+          toRegionsSet[repart.toRegion!].departments.push(repart.toDepartment);
         }
       }
     }
@@ -833,7 +844,10 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
 
     const schemas = await SchemaDeRepartitionModel.find({ cohort, fromDepartment: department }).populate({ path: "cohesionCenter" }).lean();
 
-    let groups = {
+    let groups: {
+      intra: SchemaDeRepartitionType[];
+      extra: SchemaDeRepartitionType[];
+    } = {
       intra: [],
       extra: [],
     };
@@ -865,7 +879,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
           departments: region.departments,
           centers: 0,
           capacity: 0,
-          ...toCenterSet[region.name],
+          ...toCenterSet[region.name!],
         };
       }),
       rows: [
@@ -888,7 +902,7 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
 
 // ------- CRUD
 
-router.post("", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- vérification
     const bodySchema = Joi.object({
@@ -949,7 +963,7 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- vérification
     const { error, value } = Joi.object({ id: Joi.string().required() }).validate(req.params, {
@@ -999,7 +1013,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     // --- vérification
     const { error: errorParams, value: valueParams } = Joi.object({ id: Joi.string().required() }).validate(req.params, {
@@ -1114,11 +1128,11 @@ async function getRegionsAndDepartmentsFromRegion(cohort, region) {
   const regionsResult = await TableDeRepartitionModel.find({ cohort, fromRegion: region });
   const toRegionsSet = {};
   for (const repart of regionsResult) {
-    if (toRegionsSet[repart.toRegion] === undefined) {
-      toRegionsSet[repart.toRegion] = { name: repart.toRegion, departments: [] };
+    if (toRegionsSet[repart.toRegion!] === undefined) {
+      toRegionsSet[repart.toRegion!] = { name: repart.toRegion, departments: [] };
     }
     if (repart.toDepartment) {
-      toRegionsSet[repart.toRegion].departments.push(repart.toDepartment);
+      toRegionsSet[repart.toRegion!].departments.push(repart.toDepartment);
     }
   }
   return Object.values(toRegionsSet);
@@ -1133,7 +1147,7 @@ async function getRegionTableDeRepartition(cohort) {
     }
     regions[repartition.fromRegion].regions[repartition.toRegion] = true;
 
-    let toDepartments = repartition.toDepartment ? [repartition.toDepartment] : region2department[repartition.toRegion];
+    let toDepartments = repartition.toDepartment ? [repartition.toDepartment] : region2department[repartition.toRegion!];
     for (const dep of toDepartments) {
       regions[repartition.fromRegion].departments[dep] = true;
     }
@@ -1163,14 +1177,14 @@ async function getDepartmentTableDeRepartition(cohort, region) {
   const repartitions = await TableDeRepartitionModel.find({ cohort, fromRegion: region });
   let departments = {};
   for (const repartition of repartitions) {
-    if (departments[repartition.fromDepartment] === undefined) {
-      departments[repartition.fromDepartment] = { regions: {}, departments: {} };
+    if (departments[repartition.fromDepartment!] === undefined) {
+      departments[repartition.fromDepartment!] = { regions: {}, departments: {} };
     }
-    departments[repartition.fromDepartment].regions[repartition.toRegion] = true;
+    departments[repartition.fromDepartment!].regions[repartition.toRegion] = true;
 
-    let toDepartments = repartition.toDepartment ? [repartition.toDepartment] : region2department[repartition.toRegion];
+    let toDepartments = repartition.toDepartment ? [repartition.toDepartment] : region2department[repartition.toRegion!];
     for (const dep of toDepartments) {
-      departments[repartition.fromDepartment].departments[dep] = true;
+      departments[repartition.fromDepartment!].departments[dep] = true;
     }
   }
 

@@ -19,6 +19,7 @@ import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phas
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { FileProvider } from "@shared/infra/File.provider";
 import { FileGateway } from "@shared/core/File.gateway";
+import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
 
 @Module({
     imports: [ClsModule.forRoot({}), ConfigModule, TaskModule, DatabaseModule],
@@ -39,6 +40,7 @@ import { FileGateway } from "@shared/core/File.gateway";
         // add use case here
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
+        ...referentielUseCaseProvider,
     ],
 })
 export class AdminJobModule {
