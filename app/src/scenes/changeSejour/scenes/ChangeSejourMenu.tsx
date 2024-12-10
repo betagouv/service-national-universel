@@ -21,9 +21,9 @@ export default function ChangeSejour() {
   const cohorts = useSejours();
   const location = useLocation<{ backlink?: string }>();
   const backlink = location.state?.backlink || "/phase1";
-  
+
   return (
-    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink="/home">
+    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink={backlink}>
       {groups.isError || cohorts.isError ? (
         <div>Erreur</div>
       ) : groups.isPending || cohorts.isPending ? (
