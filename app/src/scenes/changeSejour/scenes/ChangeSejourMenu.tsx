@@ -8,7 +8,7 @@ import { getCohort } from "@/utils/cohorts";
 import Loader from "@/components/Loader";
 import { supportURL } from "@/config";
 import NoSejourSection from "../components/NoSejourSection";
-import useReinscription from "../lib/useReinscription";
+import useCohortGroups from "../lib/useCohortGroups";
 import useSejours from "../lib/useSejours";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
@@ -17,36 +17,35 @@ import { useLocation } from "react-router-dom";
 export default function ChangeSejour() {
   const { young } = useAuth();
   const cohort = getCohort(young.cohort);
-  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useReinscription();
-  const { data: sessions, isPending, isError } = useSejours();
+  const groups = useCohortGroups();
+  const cohorts = useSejours();
   const location = useLocation<{ backlink?: string }>();
   const backlink = location.state?.backlink || "/phase1";
+  
   return (
-    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink={backlink}>
-      {isError ? (
+    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink="/home">
+      {groups.isError || cohorts.isError ? (
         <div>Erreur</div>
-      ) : isPending || isReinscriptionOpenLoading ? (
+      ) : groups.isPending || cohorts.isPending ? (
         <div className="mt-12">
           <Loader />
         </div>
       ) : (
         <>
-          {sessions.length > 0 && (
+          {cohorts.data.length > 0 && (
             <section id="changement-de-sejour" className="text-center">
               <h2 className="text-base font-bold mt-4 md:text-2xl">S'inscrire à un autre séjour en {getCohortYear(cohort)}</h2>
               <p className="text-sm leading-loose font-normal text-gray-500 mt-1">Séjours auxquels vous êtes éligible&nbsp;:</p>
               <div className="grid my-3 rounded-md border divide-y">
-                {sessions
-                  .sort((a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime())
-                  .map((session) => (
-                    <Link
-                      to={`/changer-de-sejour/motif?cohortid=${session._id}&cohortName=${session.name}&period=${getCohortPeriod(session)}`}
-                      key={session._id}
-                      className="flex p-3 justify-between w-full">
-                      <p className="text-sm leading-5 font-medium">{capitalizeFirstLetter(getCohortPeriod(session))}</p>
-                      <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
-                    </Link>
-                  ))}
+                {cohorts.data.map((session) => (
+                  <Link
+                    to={`/changer-de-sejour/motif?cohortid=${session._id}&cohortName=${session.name}&period=${getCohortPeriod(session)}`}
+                    key={session._id}
+                    className="flex p-3 justify-between w-full">
+                    <p className="text-sm leading-5 font-medium">{capitalizeFirstLetter(getCohortPeriod(session))}</p>
+                    <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
+                  </Link>
+                ))}
               </div>
               <a
                 href={supportURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}
@@ -58,10 +57,10 @@ export default function ChangeSejour() {
             </section>
           )}
 
-          {isReinscriptionOpen === true && (
-            <section id="reinscription">
-              <h2 className="text-base font-bold text-center mt-8 md:text-2xl">S'inscrire pour 2025</h2>
-              <p className="text-sm leading-5 font-normal text-gray-700 mt-2 text-center">Mettez à jour vos informations et choisissez un séjour.</p>
+          {groups.data.map((group) => (
+            <section id={`reinscription_${group.year}`} key={group._id}>
+              <h2 className="text-base font-bold text-center mt-8 md:text-2xl">S'inscrire pour {group.year}</h2>
+              <p className="text-sm leading-5 font-normal text-gray-500 mt-2 text-center">Mettez à jour vos informations et choisissez un séjour.</p>
               <div className="flex w-full mt-4">
                 <Link
                   to="/reinscription"
@@ -71,9 +70,9 @@ export default function ChangeSejour() {
                 </Link>
               </div>
             </section>
-          )}
+          ))}
 
-          {isReinscriptionOpen === true || sessions.length > 0 ? (
+          {groups.data.length > 0 || cohorts.data.length > 0 ? (
             <Link to="/changer-de-sejour/no-date" className="mt-8 flex p-3 justify-between rounded-md border border-gray-500 w-full">
               <p className="text-sm leading-5 font-medium">Aucune date ne me convient</p>
               <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />

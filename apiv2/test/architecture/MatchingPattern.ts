@@ -17,6 +17,7 @@ export enum MatchingPattern {
 
     NOTIFICATION_CORE = "src.notification.core..",
 
+    TASK_CORE = "..task.core..",
     SHARED_CORE = "..shared.core..",
 
     NESTJS_COMMON = "@nestjs.common",

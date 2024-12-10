@@ -38,7 +38,7 @@ const ReasonForm: React.FC<ReasonMotifSectionProps> = ({ reason, setReason, mess
         onChange={setReason}
         transformer={(v) => WITHRAWN_REASONS.find((r) => r.value === v)?.label || ""}
       />
-      <Field className="mt-4 w-full" type="textarea" name="withdrawnMessage" label="Expliquer votre choix" value={message} onChange={setMessage} />
+      <Field className="mt-4 w-full" type="textarea" name="withdrawnMessage" label="Précisez la/les raison(s) ici (obligatoire)" value={message} onChange={setMessage} />
       <button
         type="submit"
         disabled={disabled}

@@ -107,6 +107,7 @@ import {
   getDepartmentForInscriptionGoal,
   isAdmin,
   isReferentReg,
+  isReferentDep,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -118,6 +119,7 @@ import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
+import { isAfter } from "date-fns/isAfter";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = express.Router();
@@ -558,8 +560,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
     ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      if (isReferentDep(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       const departement = getDepartmentForInscriptionGoal(young);
-      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
           ok: false,
@@ -662,7 +669,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
         const now = new Date();
         const isInstructionOpen = now < cohort.instructionEndDate;
         if (!isInstructionOpen && !isAdmin(req.user) && !isReferentReg(req.user)) {
-          return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
     }

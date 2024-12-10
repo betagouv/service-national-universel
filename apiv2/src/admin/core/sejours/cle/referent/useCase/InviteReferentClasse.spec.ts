@@ -4,11 +4,11 @@ import configuration from "@config/testConfiguration";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { FUNCTIONAL_ERRORS, InvitationType } from "snu-lib";
-import { ReferentGateway } from "src/admin/core/iam/Referent.gateway";
+import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { ClasseGateway } from "../../classe/Classe.gateway";
 import { EtablissementGateway } from "../../etablissement/Etablissement.gateway";
 import { InviterReferentClasse } from "./InviteReferentClasse";
-import { ReferentModel } from "src/admin/core/iam/Referent.model";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { EtablissementModel } from "../../etablissement/Etablissement.model";
 import { ClasseModel } from "../../classe/Classe.model";
 

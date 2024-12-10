@@ -61,7 +61,7 @@ import {
   MissionType,
   ContractType,
 } from "snu-lib";
-import { getFilteredSessions } from "../../utils/cohort";
+import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
@@ -237,8 +237,8 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const cohortObj = await CohortModel.findById(value.cohortId);
-    const cohortDto: CohortDto | null = cohortObj ? (cohortObj.toObject() as CohortDto) : null;
+    const cohortDocument = await CohortModel.findById(value.cohortId);
+    const cohortDto: CohortDto | null = cohortDocument ? (cohortDocument.toObject() as CohortDto) : null;
 
     if (!canInviteYoung(req.user, cohortDto)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
@@ -279,7 +279,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 
     if (obj.source !== YOUNG_SOURCE.CLE && value.status === YOUNG_STATUS.VALIDATED) {
       const departement = getDepartmentForInscriptionGoal(obj);
-      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
           ok: false,
@@ -512,6 +512,9 @@ router.put("/accept-ri", passport.authenticate("young", { session: false, failWi
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
+    await young.save({ fromUser: req.user });
+
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
       params: {
@@ -528,6 +531,19 @@ router.put("/accept-ri", passport.authenticate("young", { session: false, failWi
   }
 });
 
+router.get("/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const young = await YoungModel.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const data = await getFilteredSessionsForChangementSejour(young, (req.headers["x-user-timezone"] || "") as string);
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 const changeCohortValidator = Joi.object({
   cohortId: Joi.string(),
   cohortName: Joi.string(),
@@ -535,7 +551,7 @@ const changeCohortValidator = Joi.object({
   cohortDetailedChangeReason: Joi.string().required(),
 }).xor("cohortId", "cohortName");
 
-router.put("/:id/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.put("/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = changeCohortValidator.validate(req.body, { stripUnknown: true });
     if (error) {
@@ -543,28 +559,22 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const { error: idError, value: id } = validateId(req.params.id);
-    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const young = await YoungModel.findById(id);
+    const young = await YoungModel.findById(req.user._id);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     if (!youngCanChangeSession(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-    const { cohortName: cohort, cohortId, cohortChangeReason, cohortDetailedChangeReason } = value;
+    const { cohortName, cohortId, cohortChangeReason, cohortDetailedChangeReason } = value;
 
     const previousYoung = { ...young.toObject() };
     const cohortObj = await CohortModel.findOne({
-      $or: [{ _id: cohortId }, { name: cohort }],
+      $or: [{ _id: cohortId }, { name: cohortName }],
     });
     if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
     const oldCohort = young.cohort;
-    if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId || young.ligneId)) {
+    if (young.cohort !== cohortName && (young.sessionPhase1Id || young.meetingPointId || young.ligneId)) {
       young.set({
         cohesionCenterId: undefined,
         sessionPhase1Id: undefined,
@@ -589,9 +599,9 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getFilteredSessions(young, (req.headers["x-user-timezone"] || "") as string);
+    const sessions = await getFilteredSessionsForChangementSejour(young, (req.headers["x-user-timezone"] || "") as string);
 
-    if (cohort !== "à venir") {
+    if (cohortName !== "à venir") {
       const session = sessions.find(({ name }) => name === cohortObj.name);
 
       if (!session) {
@@ -609,8 +619,8 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       cohesionStayMedicalFileReceived: undefined,
     });
 
-    if (cohort !== "à venir") {
-      const completionObjectif = await getCompletionObjectifs(young.department!, cohortObj.name);
+    if (cohortName !== "à venir") {
+      const completionObjectif = await getCompletionObjectifs(young.department!, cohortObj);
 
       if (completionObjectif.isAtteint && young.status === YOUNG_STATUS.VALIDATED) {
         young.set({ status: YOUNG_STATUS.WAITING_LIST });
@@ -642,7 +652,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
         params: {
           motif: cohortChangeReason,
           oldCohort,
-          cohort,
+          cohort: cohortObj.name,
           youngFirstName: young?.firstName,
           youngLastName: young?.lastName,
         },
@@ -655,7 +665,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE, {
         emailTo: emailsTo,
         params: {
-          cohort,
+          cohort: cohortObj.name,
           youngFirstName: young.firstName,
           youngName: young.lastName,
           cta: `${config.APP_URL}/change-cohort`,

@@ -36,3 +36,11 @@ export const mockTransaction = () => {
   jest.spyOn(customMongo, "withTransaction").mockImplementation(async (_, callback) => callback());
   jest.spyOn(customMongo, "endSession").mockResolvedValue(true);
 };
+
+export const clearDatabase = async () => {
+  const collections = mongoose.connection.collections;
+  for (const key in collections) {
+    const collection = collections[key];
+    await collection.deleteMany({});
+  }
+};

@@ -1,5 +1,4 @@
 import { setYoung } from "@/redux/auth/actions";
-import useAuth from "@/services/useAuth";
 import { changeYoungCohort } from "@/services/young.service";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
@@ -11,11 +10,10 @@ type ChangeCohortArgs = {
 } & ({ cohortId: string; cohortName?: never } | { cohortName: string; cohortId?: never });
 
 export default function useChangeSejour() {
-  const { young } = useAuth();
   const dispatch = useDispatch();
   return useMutation({
     mutationFn: ({ reason, message, cohortId, cohortName }: ChangeCohortArgs) => {
-      return changeYoungCohort({ youngId: young._id, reason, message, cohortId, cohortName });
+      return changeYoungCohort({ reason, message, cohortId, cohortName });
     },
     onSuccess: (data) => {
       toastr.success("Succès", "Votre séjour a bien été modifié.");
