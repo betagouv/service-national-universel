@@ -6,7 +6,6 @@ import { toastr } from "react-redux-toastr";
 import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
 import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
-import { statusClassForBadge } from "../../../classe/utils";
 
 import { capture } from "@/sentry";
 import downloadPDF from "@/utils/download-pdf";
@@ -436,7 +435,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Statut de la classe :</div>
-                  <Badge title={translateStatusClasse(classe?.status)} status={statusClassForBadge(classe?.status) as any} />
+                  <Badge title={translateStatusClasse(classe?.status)} status={classe?.status as any} />
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Statut de l'élève :</div>

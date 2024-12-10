@@ -67,11 +67,8 @@ export default function Inscriptions(props) {
 
   useEffect(() => {
     setAllPatches([...patches, ...oldYoungPatches]);
-    if (patches.length === 0 && oldYoungPatches.length === 0 && !isLoading) {
-      setIsNoYoung(true);
-    } else {
-      setIsNoYoung(false);
-    }
+    if (patches.length === 0 && oldYoungPatches.length === 0 && !isLoading) setIsNoYoung(true);
+    else setIsNoYoung(false);
   }, [patches, oldYoungPatches]);
 
   function getFilteredPatches(patches: ClasseYoungPatchesType[]) {
@@ -107,7 +104,7 @@ export default function Inscriptions(props) {
     <Page>
       <ClasseHeader classe={classe} setClasse={setClasse} isLoading={isLoading} setIsLoading={setIsLoading} studentStatus={studentStatus} page={"Inscriptions"} />
       <Container className="!px-0">
-        {allPatches.length === 0 && !isNoYoung ? (
+        {allPatches.length === 0 ? (
           <Loader />
         ) : isNoYoung ? (
           <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
