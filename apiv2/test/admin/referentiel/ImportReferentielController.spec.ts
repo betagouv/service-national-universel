@@ -6,18 +6,23 @@ import { MIME_TYPES, ReferentielTaskType, ROLES, SUB_ROLE_GOD, TaskName, TaskSta
 import { ReferentielImportTaskService } from "@admin/core/referentiel/ReferentielImportTask.service";
 import { TestingModule } from "@nestjs/testing";
 import { ImportReferentielController } from "@admin/infra/referentiel/api/ImportReferentiel.controller";
+import { FileGateway } from "@shared/core/File.gateway";
+import { TaskGateway } from "@task/core/Task.gateway";
 
 describe("ImportReferentielController", () => {
     let app: INestApplication;
     let mockedAddUserToRequestMiddleware;
     let module: TestingModule;
     let referentielImportTaskService: ReferentielImportTaskService;
+    let fileGateway: FileGateway;
+    let taskGateway: TaskGateway;
 
     beforeAll(async () => {
         const appSetup = await setupAdminTest({ newContainer: true });
         app = appSetup.app;
         module = appSetup.adminTestModule;
-
+        fileGateway = module.get<FileGateway>(FileGateway);
+        taskGateway = module.get<TaskGateway>(TaskGateway);
         referentielImportTaskService = module.get<ReferentielImportTaskService>(ReferentielImportTaskService);
         mockedAddUserToRequestMiddleware = jest.fn((req, _res, next) => {
             req.user = {
@@ -95,31 +100,100 @@ describe("ImportReferentielController", () => {
                 expect(response.body.message).toEqual("NOT_FOUND");
             });
 
+            it(`Missing columns`, async () => {
+                const testFile = require('fs')
+                .readFileSync("./test/admin/referentiel/fixtures/regions-academiques.xlsx");
+                jest.spyOn(fileGateway, "uploadFile").mockResolvedValue({
+                  Location: "test",
+                  ETag: "test",
+                  Bucket: "test",
+                  Key: "test",
+                });
+                jest.spyOn(taskGateway, "create").mockResolvedValue({
+                  id: "task-id",
+                  name: TaskName.REFERENTIEL_IMPORT,
+                  status: TaskStatus.PENDING,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                });
+                
+                const response = await request(app.getHttpServer())
+                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_REGION_ACADEMIQUE}`)
+                    .attach("file", testFile, {
+                        filename: "test.xlsx",
+                        contentType: MIME_TYPES.EXCEL,
+                    });
+
+                expect(response.statusCode).toEqual(422);
+                expect(response.body.message).toEqual("IMPORT_MISSING_COLUMN");
+            });
+
+            it(`Empty file`, async () => {
+                jest.spyOn(fileGateway, "uploadFile").mockResolvedValue({
+                  Location: "test",
+                  ETag: "test",
+                  Bucket: "test",
+                  Key: "test",
+                });
+                jest.spyOn(taskGateway, "create").mockResolvedValue({
+                  id: "task-id",
+                  name: TaskName.REFERENTIEL_IMPORT,
+                  status: TaskStatus.PENDING,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                });
+                
+                const response = await request(app.getHttpServer())
+                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_REGION_ACADEMIQUE}`)
+                    .attach("file", Buffer.from(""), {
+                        filename: "test.xlsx",
+                        contentType: MIME_TYPES.EXCEL,
+                    });
+
+                expect(response.statusCode).toEqual(422);
+                expect(response.body.message).toEqual("IMPORT_EMPTY_FILE");
+            });
         });
 
         describe("403 - Forbidden", () => {
-            it(`invalid role`, async () => { 
-                mockedAddUserToRequestMiddleware.mockImplementationOnce((req, res, next) => {
-                    req.user = {
-                        role: "admin_cle",
-                    };
-                    next();
-                });
-                const response = await request(app.getHttpServer())
-                .post("/referentiel/import/:name")
-                .attach("file", Buffer.from(""), {
-                    filename: "test.xlsx",
-                    contentType: MIME_TYPES.EXCEL
-                });
+            it(`Invalid roles`, async () => { 
+                const invalidRoles = [
+                    ROLES.VISITOR,
+                    ROLES.REFERENT_DEPARTMENT,
+                    ROLES.REFERENT_REGION,
+                    ROLES.RESPONSIBLE,
+                    ROLES.HEAD_CENTER,
+                    ROLES.SUPERVISOR,
+                    ROLES.DSNJ,
+                    ROLES.INJEP,
+                    ROLES.TRANSPORTER,
+                    ROLES.ADMINISTRATEUR_CLE,
+                    ROLES.REFERENT_CLASSE,
+                ];
 
+                for (const role of invalidRoles) {
+                    mockedAddUserToRequestMiddleware.mockImplementationOnce((req, res, next) => {
+                        req.user = {
+                            role: role,
+                        };
+                        next();
+                    });
+                    const response = await request(app.getHttpServer())
+                        .post("/referentiel/import/:name")
+                        .attach("file", Buffer.from(""), {
+                            filename: "test.xlsx",
+                            contentType: MIME_TYPES.EXCEL
+                        });
 
-                expect(response.statusCode).toEqual(403);
+                    expect(response.statusCode).toEqual(403);
+                }
             });
         });
 
         describe("201 - OK", () => {
             it(`import REGION_ACADEMIQUE`, async () => { 
-                const testFile = require('fs').readFileSync("./test/admin/referentiel/fixtures/regions-academiques.xlsx");
+                const testFile = require('fs')
+                .readFileSync("./test/admin/referentiel/fixtures/regions-academiques.xlsx");
                 jest.spyOn(referentielImportTaskService, "import").mockResolvedValue({
                     id: "task-id",
                     name: TaskName.REFERENTIEL_IMPORT,
@@ -151,12 +225,39 @@ describe("ImportReferentielController", () => {
 
                 expect(response.statusCode).toEqual(201);
             });
+
+            it(`import REGION_ACADEMIQUE - Full`, async () => { 
+                const testFile = require('fs')
+                .readFileSync("./test/admin/referentiel/fixtures/regions-academiques.xlsx");
+                jest.spyOn(fileGateway, "uploadFile").mockResolvedValue({
+                  Location: "test",
+                  ETag: "test",
+                  Bucket: "test",
+                  Key: "test",
+                });
+                jest.spyOn(taskGateway, "create").mockResolvedValue({
+                  id: "task-id",
+                  name: TaskName.REFERENTIEL_IMPORT,
+                  status: TaskStatus.PENDING,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                });
+                
+                const response = await request(app.getHttpServer())
+                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_REGION_ACADEMIQUE}`)
+                    .attach("file", testFile, {
+                        filename: "test.xlsx",
+                        contentType: MIME_TYPES.EXCEL,
+                    });
+
+                expect(response.statusCode).toEqual(201);
+            });
         });
     });
 
     describe("/GET referentiel/import", () => {
         describe("200 - OK", () => {
-            it(`get imports`, async () => { 
+            it(`Get imports`, async () => { 
                 const response = await request(app.getHttpServer())
                     .get("/referentiel/import")
                     .query({ 
@@ -173,20 +274,36 @@ describe("ImportReferentielController", () => {
         });
 
         describe("403 - Forbidden", () => {
-            it(`invalid role`, async () => { 
-                mockedAddUserToRequestMiddleware.mockImplementationOnce((req, res, next) => {
-                    req.user = {
-                        role: ROLES.VISITOR,
-                    };
-                    next();
-                });
+            it(`Invalid roles`, async () => { 
+                const invalidRoles = [
+                         ROLES.VISITOR,
+                         ROLES.REFERENT_DEPARTMENT,
+                         ROLES.REFERENT_REGION,
+                         ROLES.RESPONSIBLE,
+                         ROLES.HEAD_CENTER,
+                         ROLES.SUPERVISOR,
+                         ROLES.DSNJ,
+                         ROLES.INJEP,
+                         ROLES.TRANSPORTER,
+                         ROLES.ADMINISTRATEUR_CLE,
+                         ROLES.REFERENT_CLASSE,
+                        ];
 
-                const response = await request(app.getHttpServer())
-                    .get("/referentiel/import")
-                    .query({ name: TaskName.REFERENTIEL_IMPORT })
-                    .query({ type: "" });
+                for (const role of invalidRoles) {
+                    mockedAddUserToRequestMiddleware.mockImplementationOnce((req, res, next) => {
+                        req.user = {
+                            role: role,
+                        };
+                        next();
+                    });
 
-                expect(response.statusCode).toEqual(403);
+                    const response = await request(app.getHttpServer())
+                        .get("/referentiel/import")
+                        .query({ name: TaskName.REFERENTIEL_IMPORT })
+                        .query({ type: "" });
+
+                    expect(response.statusCode).toEqual(403);
+                }
             });
         });
     });

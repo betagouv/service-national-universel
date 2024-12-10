@@ -37,7 +37,7 @@ export class ReferentielImportTaskService {
         mimetype: string;
         auteur: ReferentielImportTaskAuthor;
     }): Promise<TaskModel> {
-        const dataToImport = await this.fileGateway.parseXLS<Record<string, string>>(buffer);
+        const dataToImport = await this.fileGateway.parseXLS<Record<string, string>>(buffer, { sheetIndex: 0 });
 
         if (dataToImport.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.IMPORT_EMPTY_FILE);
@@ -65,7 +65,7 @@ export class ReferentielImportTaskService {
                     fileLineCount: dataToImport.length,
                     auteur,
                 },
-            },
+            },  
         });
 
         return task;
