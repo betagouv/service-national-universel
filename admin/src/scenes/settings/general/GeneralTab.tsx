@@ -827,7 +827,6 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                         });
                       }}
                     />
-
                     <div className="mt-4 flex flex-col gap-3">
                       <div className="flex items-center gap-2">
                         <p className="text-xs  font-medium text-gray-900">Confirmation du point de rassemblement par les volontaires</p>
