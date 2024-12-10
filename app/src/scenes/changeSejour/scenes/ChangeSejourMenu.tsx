@@ -11,6 +11,7 @@ import NoSejourSection from "../components/NoSejourSection";
 import useCohortGroups from "../lib/useCohortGroups";
 import useSejours from "../lib/useSejours";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
+import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
 
 export default function ChangeSejour() {
   const { young } = useAuth();
@@ -38,7 +39,7 @@ export default function ChangeSejour() {
                     to={`/changer-de-sejour/motif?cohortid=${session._id}&cohortName=${session.name}&period=${getCohortPeriod(session)}`}
                     key={session._id}
                     className="flex p-3 justify-between w-full">
-                    <p className="text-sm leading-5 font-medium capitalize">{getCohortPeriod(session)}</p>
+                    <p className="text-sm leading-5 font-medium">{capitalizeFirstLetter(getCohortPeriod(session))}</p>
                     <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
                   </Link>
                 ))}

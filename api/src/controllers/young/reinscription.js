@@ -52,7 +52,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // Check if the young has access to reinscription
-    if (!hasAccessToReinscription(young, cohortDocument)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // if (!hasAccessToReinscription(young, cohortDocument)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // complete values
     value.status = YOUNG_STATUS.REINSCRIPTION;
