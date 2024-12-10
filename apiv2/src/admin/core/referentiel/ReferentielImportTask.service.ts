@@ -14,6 +14,18 @@ export const REQUIRED_COLUMN_NAMES = {
         "Zone région académique édition",
         "Région académique : Date de création",
         "Région académique : Date de dernière modification",
+    ],
+    [ReferentielTaskType.IMPORT_ROUTES]: [
+        "Session formule",
+        "Code court de Route",
+        "Commentaire interne sur l'enregistrement",
+        "Session : Code de la session",
+        "Session : Désignation de la session",
+        "Session : Date de début de la session",
+        "Session : Date de fin de la session",
+        "Route",
+        "Code point de rassemblement initial",
+        "Point de rassemblement initial"
     ]
 };
 
@@ -37,8 +49,10 @@ export class ReferentielImportTaskService {
         mimetype: string;
         auteur: ReferentielImportTaskAuthor;
     }): Promise<TaskModel> {
-        const dataToImport = await this.fileGateway.parseXLS<Record<string, string>>(buffer);
-
+        const dataToImport = await this.fileGateway.parseXLS<Record<string, string>>(buffer, {
+            defval: "",
+        });
+        
         if (dataToImport.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.IMPORT_EMPTY_FILE);
         }
@@ -65,7 +79,7 @@ export class ReferentielImportTaskService {
                     fileLineCount: dataToImport.length,
                     auteur,
                 },
-            },
+            },  
         });
 
         return task;

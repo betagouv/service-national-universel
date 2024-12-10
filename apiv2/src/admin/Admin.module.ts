@@ -58,6 +58,7 @@ import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 
 import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
+
 @Module({
     imports: [
         ClsModule.forRoot({
@@ -82,7 +83,6 @@ import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
         ClasseController,
         AffectationController,
         Phase1Controller,
-        ImportReferentielController,
         AuthController,
         AdminTaskController,
         HistoryController,
@@ -92,7 +92,6 @@ import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
         ClasseService,
         AffectationService,
         SimulationAffectationHTSService,
-        ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,
         ...referentMongoProviders,

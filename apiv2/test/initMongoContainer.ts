@@ -10,18 +10,22 @@ const testConfig = {
 };
 
 const startSharedMongodbTestContainer = async () => {
-    global.mongodbContainer = await startMongodbTestContainer();
+    //global.mongodbContainer = await startMongodbTestContainer();
 };
 
 export const getSharedConnectionString = () => {
-    return global.mongodbContainer.getConnectionString();
+    //return global.mongodbContainer.getConnectionString();
+    return "mongodb://localhost:27017/"
 };
 
 export const startMongodbTestContainer = async () => {
     console.time("StartingMongoDb");
-    const mongodbContainer = await new MongoDBContainer(testConfig.mongodb.image).start();
+   // const mongodbContainer = await new MongoDBContainer(testConfig.mongodb.image).start();
+    //return mongodbContainer;
+    const container = {getConnectionString: () => "mongodb://localhost:27017/"}
     console.timeEnd("StartingMongoDb");
-    return mongodbContainer;
+
+    return container;
 };
 
 export default startSharedMongodbTestContainer;

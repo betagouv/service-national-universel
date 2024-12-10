@@ -3,7 +3,6 @@ export type RegionAcademiqueModel = {
   code: string;
   libelle: string;
   zone: string;
-  dateCreationSI: Date;
   dateDerniereModificationSI: Date;
 };
 

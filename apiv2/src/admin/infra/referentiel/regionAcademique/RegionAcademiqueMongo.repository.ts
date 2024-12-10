@@ -1,60 +1,36 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { Model } from "mongoose";
 import { RegionAcademiqueGateway } from "@admin/core/referentiel/regionAcademique/RegionAcademique.gateway";
 import { REGION_ACADEMIQUE_MONGOOSE_ENTITY, RegionAcademiqueDocument } from "./RegionAcademiqueMongo.provider";
-import { CreateRegionAcademiqueModel, RegionAcademiqueModel } from "@admin/core/referentiel/regionAcademique/RegionAcademique.model";
+import { RegionAcademiqueModel } from "@admin/core/referentiel/regionAcademique/RegionAcademique.model";
+import { Inject } from "@nestjs/common";
+import { Model } from "mongoose";
 import { RegionAcademiqueMapper } from "./RegionAcademique.mapper";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { TechnicalException, TechnicalExceptionType } from "@shared/infra/TechnicalException";
 
-@Injectable()
-export class RegionAcademiqueRepository implements RegionAcademiqueGateway {
+export class RegionAcademiqueMongoRepository implements RegionAcademiqueGateway {
     constructor(
-        @Inject(REGION_ACADEMIQUE_MONGOOSE_ENTITY) private regionAcademiqueMongooseEntity: Model<RegionAcademiqueDocument>,
+        @Inject(REGION_ACADEMIQUE_MONGOOSE_ENTITY) private readonly regionAcademiqueMongooseEntity: Model<RegionAcademiqueDocument>,
     ) {}
-
-    async findByCode(code: string): Promise<RegionAcademiqueModel> {
-        try {
-            const regionAcademique = await this.regionAcademiqueMongooseEntity.findOne({ code }).exec();
-        
-            if (!regionAcademique) {
-                throw new FunctionalException(
-                    FunctionalExceptionCode.NOT_FOUND,
-                    `La région académique avec le code ${code} n'existe pas`,
-                );
-            }
-
-            return RegionAcademiqueMapper.toModel(regionAcademique);
-        } catch (error) {
-            if (error instanceof FunctionalException) {
-                throw error;
-            }
-            throw new TechnicalException(
-                TechnicalExceptionType.DATABASE_ERROR,
-                `Erreur lors de la recherche de la région académique ${code}`,
-            );
+    async findByCode(code: string): Promise<RegionAcademiqueModel | undefined> {
+        const regionAcademique = await this.regionAcademiqueMongooseEntity.findOne({ code });
+        if (!regionAcademique) {
+            return;
         }
+        return RegionAcademiqueMapper.toModel(regionAcademique);
     }
 
-    async insert(regionAcademique: CreateRegionAcademiqueModel): Promise<RegionAcademiqueModel> {
-        try {
-            const regionAcademiqueDocument = await this.regionAcademiqueMongooseEntity.create(regionAcademique);
+    async create(regionAcademique: RegionAcademiqueModel): Promise<RegionAcademiqueModel> {
+            const document = RegionAcademiqueMapper.toEntity(regionAcademique);
+            const regionAcademiqueDocument = await this.regionAcademiqueMongooseEntity.create(document);
             return RegionAcademiqueMapper.toModel(regionAcademiqueDocument);
-        } catch (error) {
-            console.error("Erreur d'insertion:", error);
-            throw new TechnicalException(
-                TechnicalExceptionType.DATABASE_ERROR,
-                `Erreur lors de l'insertion de la région académique ${regionAcademique.libelle}`,
-            );
-        }
     }
-    
+
     async update(regionAcademique: RegionAcademiqueModel): Promise<RegionAcademiqueModel> {
-        try {
+        const document = RegionAcademiqueMapper.toEntity(regionAcademique);
             const regionAcademiqueDocument = await this.regionAcademiqueMongooseEntity.findByIdAndUpdate(
-                regionAcademique.id,
-                regionAcademique,
-                { new: true }
+                document._id,
+                document,
+                { new: true, }
             ).exec();
 
             if (!regionAcademiqueDocument) {
@@ -64,13 +40,6 @@ export class RegionAcademiqueRepository implements RegionAcademiqueGateway {
                 );
             }
 
-            return RegionAcademiqueMapper.toModel(regionAcademiqueDocument);
-        } catch (error) {
-            console.error("Erreur de mise à jour:", error);
-            throw new TechnicalException(
-                TechnicalExceptionType.DATABASE_ERROR,
-                `Erreur lors de la mise à jour de la région académique ${regionAcademique.libelle} - ${error}`
-            );
-        }
+        return RegionAcademiqueMapper.toModel(regionAcademiqueDocument);
     }
 }

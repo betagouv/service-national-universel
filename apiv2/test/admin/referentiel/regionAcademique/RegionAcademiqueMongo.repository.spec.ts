@@ -1,30 +1,38 @@
 import mongoose, { Model } from "mongoose";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { REGION_ACADEMIQUE_MONGOOSE_ENTITY, RegionAcademiqueDocument } from "@admin/infra/referentiel/regionAcademique/RegionAcademiqueMongo.provider";
-import { INestApplication } from "@nestjs/common";
+import { REGION_ACADEMIQUE_MONGOOSE_ENTITY, RegionAcademiqueDocument, regionAcademiqueMongoProviders } from "@admin/infra/referentiel/regionAcademique/RegionAcademiqueMongo.provider";
 import { RegionAcademiqueGateway } from "@admin/core/referentiel/regionAcademique/RegionAcademique.gateway";
-import { ClsService } from "nestjs-cls";
-import { setupAdminTest } from "../../setUpAdminTest";
 import { CreateRegionAcademiqueModel, RegionAcademiqueModel } from "@admin/core/referentiel/regionAcademique/RegionAcademique.model";
+import { Test } from "@nestjs/testing";
+import { RegionAcademiqueMongoRepository } from "@admin/infra/referentiel/regionAcademique/RegionAcademiqueMongo.repository";
+import { testDatabaseProviders } from "../../../testDatabaseProvider";
+import { RegionAcademiqueMapper } from "@admin/infra/referentiel/regionAcademique/RegionAcademique.mapper";
 
-describe("RegionAcademiqueRepository", () => {
+
+
+describe("RegionAcademiqueGateway", () => {
     let regionAcademiqueGateway: RegionAcademiqueGateway;
-    let app: INestApplication;
     let regionAcademiqueMongoose: Model<RegionAcademiqueDocument>;
-    let cls: ClsService;
 
     beforeAll(async () => {
-        const appSetup = await setupAdminTest();
-        app = appSetup.app;
-        const module = appSetup.adminTestModule;
+        const module = await Test.createTestingModule({
+            imports: [],
+            providers: [
+                {
+                    provide: RegionAcademiqueGateway,
+                    useClass: RegionAcademiqueMongoRepository
+                },
+                ...regionAcademiqueMongoProviders,
+                testDatabaseProviders(false)
+            ]  
+        }).compile();
+
+
         regionAcademiqueGateway = module.get<RegionAcademiqueGateway>(RegionAcademiqueGateway);
         regionAcademiqueMongoose = module.get<Model<RegionAcademiqueDocument>>(REGION_ACADEMIQUE_MONGOOSE_ENTITY);
-        cls = module.get(ClsService);
-        await app.init();
     });
 
     afterAll(async () => {
-        await app.close();
         mongoose.disconnect();
     });
 
@@ -32,108 +40,116 @@ describe("RegionAcademiqueRepository", () => {
         await regionAcademiqueMongoose.deleteMany({});
     });
 
+    it("should be defined", () => {
+        expect(regionAcademiqueGateway).toBeDefined();
+    });
+
     describe("findByCode", () => {
         it("devrait trouver une région académique par son code", async () => {
-            // GIVEN
-            const regionAcademique: CreateRegionAcademiqueModel = {
+            const regionAcademique = new regionAcademiqueMongoose({
                 code: "BRE",
                 libelle: "BRETAGNE",
                 zone: "B",
-                dateCreationSI: new Date("2024-07-31"),
-                dateDerniereModificationSI: new Date("2024-08-05"),
-            };
-            await regionAcademiqueMongoose.create(regionAcademique);
+                date_derniere_modification_si: new Date("2024-08-05"),
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
 
-            // WHEN
+            await regionAcademique.save();
+
             const result = await regionAcademiqueGateway.findByCode("BRE");
 
-            // THEN
             expect(result).toMatchObject({
                 code: regionAcademique.code,
                 libelle: regionAcademique.libelle,
                 zone: regionAcademique.zone,
-                dateCreationSI: regionAcademique.dateCreationSI,
-                dateDerniereModificationSI: regionAcademique.dateDerniereModificationSI
+                dateDerniereModificationSI: regionAcademique.date_derniere_modification_si,
             });
         });
 
-        it("devrait lancer une erreur si la région académique n'existe pas", async () => {
-            // WHEN / THEN
-            await expect(regionAcademiqueGateway.findByCode("INVALID")).rejects.toThrow(
-                new FunctionalException(
-                    FunctionalExceptionCode.NOT_FOUND,
-                    "La région académique avec le code INVALID n'existe pas",
-                ),
-            );
+        it("should return undefined if region academique not found", async () => {
+            await expect(regionAcademiqueGateway.findByCode("INVALID")).resolves.toBeUndefined();
         });
     });
 
-    describe("insert", () => {
+    describe("create", () => {
         it("devrait insérer une nouvelle région académique", async () => {
-            // GIVEN
             const newRegionAcademique: CreateRegionAcademiqueModel = {
                 code: "PDL",
                 libelle: "PAYS DE LA LOIRE",
                 zone: "B",
-                dateCreationSI: new Date("2024-07-31"),
                 dateDerniereModificationSI: new Date("2024-08-05"),
             };
 
-            // WHEN
-            const result = await regionAcademiqueGateway.insert(newRegionAcademique);
+            const result = await regionAcademiqueGateway.create(newRegionAcademique);
 
-            // THEN
-            expect(result).toMatchObject(newRegionAcademique);
+            expect(result).toMatchObject({
+                id: expect.any(String),
+                ...newRegionAcademique
+            });
+
             const savedRegionAcademique = await regionAcademiqueMongoose.findOne({ code: "PDL" });
-            expect(savedRegionAcademique).toMatchObject(newRegionAcademique);
+            expect(savedRegionAcademique).toMatchObject({
+                code: newRegionAcademique.code,
+                libelle: newRegionAcademique.libelle,
+                zone: newRegionAcademique.zone,
+                date_derniere_modification_si: newRegionAcademique.dateDerniereModificationSI,
+                createdAt: expect.any(Date),
+                updatedAt: expect.any(Date),
+                __v: expect.any(Number),
+                _id: expect.any(mongoose.Types.ObjectId),
+            });
         });
     });
 
     describe("update", () => {
         it("devrait mettre à jour une région académique existante", async () => {
-            // GIVEN
-            const existingRegionAcademique = await regionAcademiqueMongoose.create({
+            const existingRegionAcademique = await regionAcademiqueMongoose.create(RegionAcademiqueMapper.toEntity({
+                id: new mongoose.Types.ObjectId().toString(),
                 code: "NOR",
                 libelle: "NORMANDIE",
                 zone: "B",
-                dateCreationSI: new Date("2024-07-31"),
                 dateDerniereModificationSI: new Date("2024-08-05"),
-            });
+            }));
 
             const updatedData: RegionAcademiqueModel = {
-                id: existingRegionAcademique._id.toString(),
+                id: existingRegionAcademique._id,
                 code: "NOR",
                 libelle: "NORMANDIE UPDATED",
                 zone: "A",
-                dateCreationSI: new Date("2024-07-31"),
                 dateDerniereModificationSI: new Date("2024-08-06"),
             };
 
-            // WHEN
             const result = await regionAcademiqueGateway.update(updatedData);
-
-            // THEN
-            expect(result).toMatchObject(updatedData);
+            expect(result).toEqual({
+                id: existingRegionAcademique._id.toString(),
+                code: updatedData.code,
+                libelle: updatedData.libelle,
+                zone: updatedData.zone, 
+                dateDerniereModificationSI: updatedData.dateDerniereModificationSI,
+            });
             const updatedRegionAcademique = await regionAcademiqueMongoose.findById(existingRegionAcademique._id);
             expect(updatedRegionAcademique).toMatchObject({
-                code: "NOR",
-                libelle: "NORMANDIE UPDATED",
-                zone: "A",
+                code: updatedData.code,
+                libelle: updatedData.libelle,
+                zone: updatedData.zone,
+                date_derniere_modification_si: updatedData.dateDerniereModificationSI,
+                createdAt: expect.any(Date),
+                updatedAt: expect.any(Date),
+                __v: expect.any(Number),
+                _id: expect.any(mongoose.Types.ObjectId),
             });
         });
 
         it("devrait lancer une erreur si la région académique à mettre à jour n'existe pas", async () => {
-            // GIVEN
             const nonExistentRegionAcademique: RegionAcademiqueModel = {
                 id: new mongoose.Types.ObjectId().toString(),
                 code: "XXX",
                 libelle: "INEXISTANT",
                 zone: "X",
-                dateCreationSI: new Date(),
-                dateDerniereModificationSI: new Date(),
+                dateDerniereModificationSI: new Date("2024-08-05"),
             };
 
-            // WHEN / THEN
             await expect(regionAcademiqueGateway.update(nonExistentRegionAcademique)).rejects.toThrow(
                 new FunctionalException(
                     FunctionalExceptionCode.NOT_FOUND,

@@ -163,6 +163,27 @@ const formatDateTimeZone = (date) => {
   return d;
 };
 
+  /** 
+ * Transforme une date au format incorrect en une date lisible
+ * @param date - La date à transformer au format string
+ * @returns Date - La date transformée au format Date
+ * 
+ * Exemples:
+ * - "31/07/2024" -> Date("2024-07-31")
+ * - "2024-07-31" -> Date("2024-07-31")
+ */
+const complyDate = (date) => {
+    if (date.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        const [day, month, year] = date.split('/');
+        return new Date(`${year}-${month}-${day}`);
+    }
+    return new Date(date);
+}
+
+const isValidDate = (date) => {
+  return !isNaN(complyDate(date).getTime());
+}
+
 export {
   MONTHS,
   formatDay,
@@ -184,4 +205,6 @@ export {
   formatDateForPostGre,
   isNowBetweenDates,
   formatDateTimeZone,
+  complyDate,
+  isValidDate,
 };

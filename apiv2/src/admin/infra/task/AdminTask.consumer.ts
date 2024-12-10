@@ -25,7 +25,7 @@ export class AdminTaskConsumer extends WorkerHost {
         private readonly adminTaskRepository: AdminTaskRepository,
         private readonly simulationAffectationHts: SimulationAffectationHTS,
         private readonly validerAffectationHts: ValiderAffectationHTS,
-        private readonly importRegionAcademique: ImportRegionsAcademiques,
+        private readonly importerRegionsAcademiques: ImportRegionsAcademiques,
         private readonly importerRoutes: ImporterRoutes,
     ) {
         super();
@@ -116,7 +116,7 @@ export class AdminTaskConsumer extends WorkerHost {
     private async dispatchReferentielTaskImport(task: ReferentielImportTaskModel) {
         switch (task.metadata?.parameters?.type) {
             case ReferentielTaskType.IMPORT_REGION_ACADEMIQUE:
-                await this.importRegionAcademique.execute(task.metadata.parameters as ReferentielImportTaskParameters);
+                await this.importerRegionsAcademiques.execute(task.metadata.parameters as ReferentielImportTaskParameters);
                 break;
             case ReferentielTaskType.IMPORT_ROUTES:
                 await this.importerRoutes.execute(task.metadata!.parameters!);

@@ -49,7 +49,6 @@ import { historyProvider } from "@admin/infra/history/historyProvider";
 import { referentielGatewayProviders } from "@admin/infra/referentiel/initProvider/gateway";
 import { ImportReferentielController } from "@admin/infra/referentiel/api/ImportReferentiel.controller";
 import { regionAcademiqueMongoProviders } from "@admin/infra/referentiel/regionAcademique/RegionAcademiqueMongo.provider";
-import { RegionAcademiqueImportService } from "@admin/core/referentiel/regionAcademique/ReferentielRegionAcademiqueImport.service";
 import { ReferentielImportTaskService } from "@admin/core/referentiel/ReferentielImportTask.service";
 
 export interface SetupOptions {
@@ -80,15 +79,11 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
              AffectationController,
               Phase1Controller,
                AuthController,
-                ImportReferentielController
             ],
         providers: [
             ClasseService,
             AffectationService,
             SimulationAffectationHTSService,
-            ReferentielRoutesService,
-            RegionAcademiqueImportService,
-            ReferentielImportTaskService,
             ...cleGatewayProviders,
             ...sejourGatewayProviders,
             ...jeuneGatewayProviders,
@@ -113,7 +108,6 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             { provide: TaskGateway, useClass: AdminTaskRepository },
             ...phase1UseCaseProviders,
             ...cleUseCaseProviders,
-            ...serviceProvider,
             ...referentielGatewayProviders,
             ...regionAcademiqueMongoProviders,
         ],

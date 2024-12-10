@@ -52,7 +52,8 @@
         "rxjs": "^7.8.1",
         "snu-lib": "*",
         "uuid": "^10.0.0",
-        "xlsx": "^0.18.5"
+        "xlsx": "^0.18.5",
+        "zod": "^3.24.1"
     },
     "devDependencies": {
         "@faker-js/faker": "^8.4.1",
@@ -126,6 +127,12 @@
             "<rootDir>/packages"
         ],
         "globalSetup": "./test/initMongoContainer.ts",
-        "globalTeardown": "./test/stopMongoContainer.ts"
+        "globalTeardown": "./test/stopMongoContainer.ts",
+        "globals": {
+            "maxWorkers": "70%",
+            "ts-jest": {
+                "isolatedModules": true
+            }
+        }
     }
 }

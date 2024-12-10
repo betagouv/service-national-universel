@@ -23,13 +23,6 @@ export const RegionAcademiqueSchema = {
       description: "Zone de la région académique - ex: A",
     },
   },
-  date_creation_si: {
-    type: Date,
-    required: true,
-    documentation: {
-      description: "Date de création de la région académique dans le SI-SNU",
-    },
-  },
   date_derniere_modification_si: {
     type: Date,
     required: true,

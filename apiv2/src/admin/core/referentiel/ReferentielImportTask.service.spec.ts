@@ -64,10 +64,23 @@ describe("ReferentielImportTaskService", () => {
         });
 
         it("should not import file without valid column", async () => {
-            jest.spyOn(fileGateway, "parseXLS").mockResolvedValue([{}]);
+            jest.spyOn(fileGateway, "parseXLS").mockResolvedValue([
+                {
+                    "Session formule": "",
+                    "Code court de Route": "",
+                    "Commentaire interne sur l'enregistrement": "",
+                    "Session : Code de la session": "",
+                    "Session : Désignation de la session": "",
+                    "Session : Date de début de la session": "",
+                    "Session : Date de fin de la session": "",
+                   // Route: "",
+                    "Code point de rassemblement initial": "",
+                    "Point de rassemblement initial": "",
+                }
+            ]);
             await expect(
                 referentielImportTaskService.import({
-                    importType: ReferentielTaskType.IMPORT_REGION_ACADEMIQUE,
+                    importType: ReferentielTaskType.IMPORT_ROUTES,
                     fileName: "fileName",
                     buffer: Buffer.from("test"),
                     mimetype: "mimetype",
@@ -81,6 +94,8 @@ describe("ReferentielImportTaskService", () => {
                 }),
             ).rejects.toThrow(new FunctionalException(FunctionalExceptionCode.IMPORT_MISSING_COLUMN));
         });
+
+        
 
         it("should import file with valid columns", async () => {
             jest.spyOn(fileGateway, "parseXLS").mockResolvedValue([

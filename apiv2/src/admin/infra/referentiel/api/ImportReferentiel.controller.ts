@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 
-import { MIME_TYPES, ReferentielTaskType, TaskName, TaskType, TaskStatus, ReferentielRoutes } from "snu-lib";
+import { MIME_TYPES, ReferentielTaskType, TaskName, TaskStatus, ReferentielRoutes } from "snu-lib";
 
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CustomRequest } from "@shared/infra/CustomRequest";
@@ -24,7 +24,6 @@ import { ReferentielImportTaskService } from "@admin/core/referentiel/Referentie
 import { TaskModel } from "@task/core/Task.model";
 
 const REFERENTIEL_TASK_NAMES = [TaskName.REFERENTIEL_IMPORT];
-
 @Controller("referentiel")
 export class ImportReferentielController {
     constructor(
@@ -57,16 +56,8 @@ export class ImportReferentielController {
 
         switch (name) {
             case ReferentielTaskType.IMPORT_ROUTES:
-                 importTask = await this.referentielImportTaskService.import({
-                    importType: name,
-                    fileName: file.originalname,
-                    buffer: file.buffer,
-                    mimetype: file.mimetype,
-                    auteur,
-                });
-                return TaskMapper.toDto(importTask);
             case ReferentielTaskType.IMPORT_REGION_ACADEMIQUE:
-                 importTask = await this.referentielImportTaskService.import({
+                importTask = await this.referentielImportTaskService.import({
                     importType: name,
                     fileName: file.originalname,
                     buffer: file.buffer,
