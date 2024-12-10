@@ -6,7 +6,6 @@ import api from "@/services/api";
 import ReinscriptionContextProvider, { ReinscriptionContext } from "../../context/ReinscriptionContextProvider";
 import { SentryRoute, capture } from "../../sentry";
 
-import { useSelector } from "react-redux";
 import StepEligibilite from "../preinscription/steps/stepEligibilite";
 import StepSejour from "../preinscription/steps/stepSejour";
 import StepConfirm from "../preinscription/steps/stepConfirm";
@@ -16,6 +15,9 @@ import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { hasAccessToReinscription } from "snu-lib";
 import FutureCohort from "../inscription2023/FutureCohort";
+import useAuth from "@/services/useAuth";
+import { fetchReInscriptionOpen } from "../../services/reinscription.service";
+import { useQuery } from "@tanstack/react-query";
 import { getCohort } from "@/utils/cohorts";
 
 function renderStepResponsive(step) {
@@ -43,28 +45,12 @@ const Step = () => {
 };
 
 export default function ReInscription() {
-  const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
-  const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const cohort = getCohort(young.cohort);
-
-  const fetchReInscriptionOpen = async () => {
-    try {
-      const { ok, data, code } = await api.get(`/cohort-session/isReInscriptionOpen`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      setReinscriptionOpen(data);
-      setReinscriptionOpenLoading(false);
-    } catch (e) {
-      setReinscriptionOpenLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchReInscriptionOpen();
-  }, []);
+  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useQuery({
+    queryKey: ["isReInscriptionOpen"],
+    queryFn: fetchReInscriptionOpen,
+  });
 
   if (!hasAccessToReinscription(young, cohort)) return <Redirect to="/" />;
 

@@ -1,0 +1,205 @@
+[
+    {
+        "id": "609bebb00c1cc9a888ae8fa8",
+        "nom": "CENTRE DE VACANCES INTER-ENTREPRISES ORTF",
+        "region": "Auvergne-Rhône-Alpes",
+        "departement": "Cantal",
+        "ville": "VIC-SUR-CERE",
+        "codePostal": "15800",
+        "sessionNames": [
+            "2021",
+            "Février 2022",
+            "Juin 2022",
+            "Juillet 2022",
+            "Avril 2023 - A",
+            "Juin 2023",
+            "Juillet 2023",
+            "Février 2024 - C",
+            "CLE mars 2024 1",
+            "CLE mars 2024 2",
+            "CLE mai 2024",
+            "CLE juin 2024",
+            "Avril 2024 - C",
+            "Juin 2024 - 2",
+            "Juillet 2024",
+            "Toussaint 2024",
+            "2024 CLE 06 - Novembre"
+        ]
+    },
+    {
+        "id": "609bebb80c1cc9a888ae8ff7",
+        "nom": "LYCEE AGRICOLE LA SAUSSAYE",
+        "region": "Centre-Val de Loire",
+        "departement": "Eure-et-Loir",
+        "ville": "SOURS",
+        "codePostal": "28000",
+        "sessionNames": ["2021", "Avril 2023 - B", "Avril 2024 - C", "Avril 2024 - B", "Juin 2024 - 2"]
+    },
+    {
+        "id": "609bebc80c1cc9a888ae90b2",
+        "nom": "DOMAINE DU VENTOUZET",
+        "region": "Occitanie",
+        "departement": "Lozère",
+        "ville": "SAINTE-COLOMBE DE PEYRE",
+        "codePostal": "48130",
+        "sessionNames": ["2021", "Juin 2022", "Juillet 2022", "Juin 2023", "Avril 2024 - C", "Juin 2024 - 2"]
+    },
+    {
+        "id": "63da30bc47841408c590d73f",
+        "nom": "VVF COTE D'OPALE",
+        "region": "Hauts-de-France",
+        "departement": "Pas-de-Calais",
+        "ville": "BLERIOT-PLAGE",
+        "codePostal": "62231",
+        "sessionNames": [
+            "Avril 2023 - B",
+            "Février 2024 - C",
+            "CLE mars 2024 1",
+            "Avril 2024 - C",
+            "2024 CLE 06 - Novembre"
+        ]
+    },
+    {
+        "id": "643fbcd7ae348d19a6cefcd3",
+        "nom": "VVF SUD AVEYRON",
+        "region": "Occitanie",
+        "departement": "Aveyron",
+        "ville": "BRUSQUE",
+        "codePostal": "12360",
+        "sessionNames": ["Juin 2023", "Juillet 2023", "Avril 2024 - C", "CLE juin 2024", "Juillet 2024"]
+    },
+    {
+        "id": "6446974adeaab4137a4d3957",
+        "nom": "LYCEE AGRICOLE FONLABOUR",
+        "region": "Occitanie",
+        "departement": "Tarn",
+        "ville": "ALBI",
+        "codePostal": "81000",
+        "sessionNames": ["Juillet 2023", "Avril 2024 - C", "Juillet 2024"]
+    },
+    {
+        "id": "6568a84d8bc29e0819ab5935",
+        "nom": "CAMPING LE LOMAGNOL",
+        "region": "Occitanie",
+        "departement": "Tarn-et-Garonne",
+        "ville": "BEAUMONT-DE-LOMAGNE",
+        "codePostal": "82500",
+        "sessionNames": ["Avril 2024 - C", "Juillet 2024"]
+    },
+    {
+        "id": "6568a9278bc29e0819aba013",
+        "nom": "COMPLEXE LES OUSTALOUS",
+        "region": "Occitanie",
+        "departement": "Ariège",
+        "ville": "LES CABANNES",
+        "codePostal": "09310",
+        "sessionNames": ["Avril 2024 - C", "Juin 2024 - 2", "CLE juin 2024", "Toussaint 2024"]
+    },
+    {
+        "id": "6569b8578bc29e081912f4f4",
+        "nom": "AZUREVA",
+        "region": "Grand Est",
+        "departement": "Vosges",
+        "ville": "BUSSANG",
+        "codePostal": "88540",
+        "sessionNames": [
+            "Février 2024 - C",
+            "Février 2024 - B",
+            "CLE mars 2024 1",
+            "CLE mars 2024 2",
+            "CLE juin 2024",
+            "Avril 2024 - C",
+            "Avril 2024 - B",
+            "Juillet 2024",
+            "Toussaint 2024"
+        ]
+    },
+    {
+        "id": "657334e06e801c0816d4550c",
+        "nom": "DOMAINE DE LA GRANDE GARENNE",
+        "region": "Centre-Val de Loire",
+        "departement": "Cher",
+        "ville": "NEUVY-SUR-BARANGEON",
+        "codePostal": "18330",
+        "sessionNames": [
+            "Février 2024 - C",
+            "Février 2024 - B",
+            "Juillet 2024",
+            "Avril 2024 - B",
+            "Juin 2024 - 2",
+            "Avril 2024 - C",
+            "CLE mars 2024 1",
+            "CLE mars 2024 2",
+            "CLE mai 2024",
+            "CLE juin 2024",
+            "Toussaint 2024"
+        ]
+    },
+    {
+        "id": "657338286e801c0816d598ec",
+        "nom": "CENTRE DE VACANCES DU PECHER",
+        "region": "Centre-Val de Loire",
+        "departement": "Indre",
+        "ville": "ROUSSINES",
+        "codePostal": "36170",
+        "sessionNames": [
+            "Février 2024 - C",
+            "Avril 2024 - C",
+            "Avril 2024 - B",
+            "CLE mars 2024 1",
+            "CLE mars 2024 2",
+            "CLE mai 2024",
+            "Toussaint 2024"
+        ]
+    },
+    {
+        "id": "659e6f7fe34856081968e07b",
+        "nom": "DOMAINE DU BEL AIR",
+        "region": "Grand Est",
+        "departement": "Aube",
+        "ville": "BAR-SUR-SEINE",
+        "codePostal": "10110",
+        "sessionNames": [
+            "CLE mai 2024",
+            "CLE juin 2024",
+            "Avril 2024 - C",
+            "Avril 2024 - B",
+            "Juin 2024 - 2",
+            "Juillet 2024"
+        ]
+    },
+    {
+        "id": "659fb588fc6cec0815125b75",
+        "nom": "CENTRE VVF DE FORGES-LES-EAUX",
+        "region": "Normandie",
+        "departement": "Seine-Maritime",
+        "ville": "FORGES-LES-EAUX",
+        "codePostal": "76440",
+        "sessionNames": ["CLE mars 2024 1", "Avril 2024 - C", "2024 CLE 06 - Novembre"]
+    },
+    {
+        "id": "65c4b4ee0e0569081d39bf50",
+        "nom": "VVF PAYS CATHARE",
+        "region": "Occitanie",
+        "departement": "Aude",
+        "ville": "SAISSAC",
+        "codePostal": "11310",
+        "sessionNames": ["Avril 2024 - C", "CLE juin 2024", "Juin 2024 - 2", "Juillet 2024"]
+    },
+    {
+        "id": "65c4f8c6139d970093e31712",
+        "nom": "LA MAISON DU CHATEAU",
+        "region": "Hauts-de-France",
+        "departement": "Aisne",
+        "ville": "COUCY-LE-CHATEAU-AUFFRIQUE",
+        "codePostal": "02380",
+        "sessionNames": [
+            "Avril 2024 - C",
+            "Avril 2024 - B",
+            "CLE mai 2024",
+            "CLE juin 2024",
+            "Juin 2024 - 2",
+            "Juillet 2024"
+        ]
+    }
+]

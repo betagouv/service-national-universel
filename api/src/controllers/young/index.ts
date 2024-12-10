@@ -237,8 +237,8 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const cohortObj = await CohortModel.findById(value.cohortId);
-    const cohortDto: CohortDto | null = cohortObj ? (cohortObj.toObject() as CohortDto) : null;
+    const cohortDocument = await CohortModel.findById(value.cohortId);
+    const cohortDto: CohortDto | null = cohortDocument ? (cohortDocument.toObject() as CohortDto) : null;
 
     if (!canInviteYoung(req.user, cohortDto)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
@@ -279,7 +279,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 
     if (obj.source !== YOUNG_SOURCE.CLE && value.status === YOUNG_STATUS.VALIDATED) {
       const departement = getDepartmentForInscriptionGoal(obj);
-      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
           ok: false,
@@ -553,8 +553,8 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
     const previousYoung = { ...young.toObject() };
 
-    const cohortObj = await CohortModel.findOne({ name: cohort });
-    if (!cohortObj) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohortDocument = await CohortModel.findOne({ name: cohort });
+    if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
@@ -590,7 +590,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
 
     young.set({
       cohort,
-      cohortId: cohortObj._id,
+      cohortId: cohortDocument._id,
       cohortChangeReason,
       cohortDetailedChangeReason,
       cohesionStayPresence: undefined,
@@ -598,7 +598,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     });
 
     if (cohort !== "à venir") {
-      const completionObjectif = await getCompletionObjectifs(young.department!, cohort);
+      const completionObjectif = await getCompletionObjectifs(young.department!, cohortDocument);
 
       if (completionObjectif.isAtteint && young.status === YOUNG_STATUS.VALIDATED) {
         young.set({ status: YOUNG_STATUS.WAITING_LIST });
