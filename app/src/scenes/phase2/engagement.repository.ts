@@ -2,18 +2,37 @@ import { apiURL } from "@/config";
 import API from "@/services/api";
 import * as FileSaver from "file-saver";
 
+export type Program = {
+  createdAt: string;
+  description: string;
+  descriptionDuration: string;
+  descriptionFor: string;
+  descriptionMoney: string;
+  imageString: string;
+  name: string;
+  order: number;
+  publisherName: string;
+  type: string;
+  updatedAt: string;
+  url: string;
+  urlPhaseEngagement: string;
+  visibility: string;
+  __v: number;
+  _id: string;
+};
+
 export async function fetchPrograms() {
   const res = await fetch(`${apiURL}/program/public/engagements`);
   const { ok, data, error } = await res.json();
   if (!ok) throw error;
-  return data;
+  return data as Program[];
 }
 
 export async function fetchProgram(id) {
   const res = await fetch(`${apiURL}/program/public/engagement/${id}`);
   const { ok, data, error } = await res.json();
   if (!ok) throw error;
-  return data;
+  return data as Program;
 }
 
 export async function fetchApplications(youngId) {
