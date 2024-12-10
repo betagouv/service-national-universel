@@ -39,7 +39,9 @@ export class ReferentielRoutesService {
         auteur: ReferentielImportTaskAuthor;
     }): Promise<TaskModel> {
         // parse file
-        const routesToImport = await this.fileGateway.parseXLS<Record<string, string>>(buffer);
+        const routesToImport = await this.fileGateway.parseXLS<Record<string, string>>(buffer, {
+            defval: "",
+        });
 
         // check data validity
         if (routesToImport.length === 0) {

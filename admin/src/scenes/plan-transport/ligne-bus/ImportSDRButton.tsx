@@ -29,7 +29,7 @@ export default function ImportSDRButton({ className }: ImportSDRButtonProps) {
     },
     onError: (error: HttpError) => {
       console.log(error);
-      toastr.error("Une erreur est survenue. Nous n'avons pu enregistrer le fichier.", `${translate(error.message)}: ${error.description}`);
+      toastr.error("Une erreur est survenue. Nous n'avons pu enregistrer le fichier.", `${translate(error.message)}${error.description ? `: ${error.description}` : ""}`);
     },
   });
 
@@ -74,7 +74,7 @@ export default function ImportSDRButton({ className }: ImportSDRButtonProps) {
         footer={
           <div className="flex items-center justify-between gap-6">
             <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={handleClose} />
-            <Button disabled={!file || isPending} loading={isPending} title="Lancer l'import" onClick={() => mutate()} className={"flex-1"} />
+            <Button disabled={!file || isPending} loading={isPending} title="Lancer l'import" onClick={() => mutate()} className="flex-1" />
           </div>
         }
       />

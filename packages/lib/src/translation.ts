@@ -379,8 +379,10 @@ const translate = (value) => {
       return "Aucun objectif d'inscription défini pour le département !";
     case "AFFECTATION_NOT_ENOUGH_DATA":
       return "Données insuffisantes pour l'affectation";
+    case "IMPORT_EMPTY_FILE":
+      return "Le fichier est vide on un onglet est manquant";
     case "IMPORT_MISSING_COLUMN":
-      return "Impossible d'importé ce fichier car une colonne est manquante";
+      return "Impossible d'importer ce fichier car une colonne est manquante";
     default:
       return value;
   }
