@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Loader from "@/components/Loader";
 import usePrograms from "@/scenes/phase2/scenes/usePrograms";
 import { HiExternalLink } from "react-icons/hi";
-import { Program } from "@/scenes/phase2/engagement.repository";
+import { ProgramType } from "snu-lib";
 
 export default function Engagement() {
   const { data: programs, isPending, isError } = usePrograms();
@@ -25,7 +25,7 @@ export default function Engagement() {
   );
 }
 
-function EngagementCard({ program }: { program: Program }) {
+function EngagementCard({ program }: { program: ProgramType }) {
   const imgSrc = `https://snu-bucket-prod.cellar-c2.services.clever-cloud.com/programmes-engagement/${program.imageString}`;
 
   return (
