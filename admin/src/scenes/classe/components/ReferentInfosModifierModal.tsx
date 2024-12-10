@@ -1,5 +1,5 @@
 import { ReferentService } from "@/services/referentService";
-import { debounce } from "@/utils";
+import { debouncePromise } from "@/utils";
 import { Button, InputText, Modal, Select } from "@snu/ds/admin";
 import React, { useState } from "react";
 import { ROLES } from "snu-lib";
@@ -32,7 +32,7 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
     }
   };
 
-  const handleReferentsClasseSearch = async (searchTerm: string) => {
+  const handleReferentsClasseSearch = debouncePromise(async (searchTerm: string): Promise<any> => {
     if (searchTerm?.length < 2) {
       return [];
     }
@@ -45,14 +45,11 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
         prenom: referent.prenom,
       })) || []
     );
-  };
+  }, 500);
 
   const handleValiderClick = () => {
     onValider(editedReferent);
   };
-
-  // TODO : add debouncer
-  const debouncedReferentsClasseSearch = debounce((searchTerm: string) => handleReferentsClasseSearch(searchTerm), 300);
 
   return (
     <div>
@@ -91,6 +88,7 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
             </div>
             <div>
               <Select
+                value={""}
                 placeholder="Choisir un référent existant"
                 isClearable={true}
                 onChange={handleSelectChange}

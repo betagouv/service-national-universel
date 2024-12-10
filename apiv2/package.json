@@ -22,7 +22,7 @@
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "test": "jest --runInBand --testTimeout=30000",
         "test:watch": "jest --watch",
-        "test:cov": "jest --coverage",
+        "test:cov": "jest --runInBand --coverage",
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --config ./test/jest-e2e.json",
         "clean": "rm -fr node_modules dist .turbo"
@@ -98,6 +98,11 @@
             "**/*.(t|j)s"
         ],
         "coverageDirectory": "../coverage",
+        "coveragePathIgnorePatterns": [
+            "\\.module\\.",
+            "\\.model\\.",
+            "\\.mapper\\."
+        ],
         "testEnvironment": "node",
         "moduleNameMapper": {
             "^src/(.*)$": "<rootDir>/src/$1",

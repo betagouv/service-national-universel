@@ -8,8 +8,9 @@ import { ClasseGateway } from "../../sejours/cle/classe/Classe.gateway";
 import { ClasseModel } from "../../sejours/cle/classe/Classe.model";
 import { InviterReferentClasse } from "../../sejours/cle/referent/useCase/InviteReferentClasse";
 import { ReferentGateway } from "../Referent.gateway";
-import { ReferentModel } from "../Referent.model";
+import { ReferentModel, ReferentModelLight } from "../Referent.model";
 import { ReferentService } from "./Referent.service";
+import { FunctionalException } from "@shared/core/FunctionalException";
 
 describe("ReferentService", () => {
     let service: ReferentService;
@@ -44,6 +45,7 @@ describe("ReferentService", () => {
                     useValue: {
                         delete: jest.fn(),
                         create: jest.fn(),
+                        findByRole: jest.fn(),
                     },
                 },
                 {
@@ -125,6 +127,40 @@ describe("ReferentService", () => {
                 InvitationType.INSCRIPTION,
             );
             expect(createdReferent).toEqual(newReferent);
+        });
+    });
+    describe("findByRole", () => {
+        it("should return an array of ReferentModelLight based on role and search", async () => {
+            const mockRole = ROLES.REFERENT_CLASSE;
+            const mockSearch = "John";
+            const mockReferents: ReferentModelLight[] = [
+                { id: "1", email: "john@example.com", prenom: "John", nom: "Doe" },
+                { id: "2", email: "john2@example.com", prenom: "John", nom: "Smith" },
+            ];
+            (referentGateway.findByRole as jest.Mock).mockResolvedValue(mockReferents);
+
+            const result = await service.findByRole(mockRole, mockSearch);
+
+            expect(referentGateway.findByRole).toHaveBeenCalledWith(mockRole, mockSearch);
+            expect(result).toEqual(mockReferents);
+        });
+    });
+    describe("findByEmail", () => {
+        it("should return a referent when email exists", async () => {
+            const email = "test@example.com";
+            (referentGateway.findByEmail as jest.Mock).mockResolvedValue(mockReferent);
+
+            const result = await service.findByEmail(email);
+
+            expect(referentGateway.findByEmail).toHaveBeenCalledWith(email);
+            expect(result).toEqual(mockReferent);
+        });
+
+        it("should throw an error when email does not exist", async () => {
+            const email = "nonexistent@example.com";
+            (referentGateway.findByEmail as jest.Mock).mockResolvedValue(null);
+
+            await expect(service.findByEmail(email)).rejects.toThrow(FunctionalException);
         });
     });
 });
