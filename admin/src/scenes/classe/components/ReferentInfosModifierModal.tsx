@@ -1,3 +1,4 @@
+import { PersonCircle } from "@/assets/icons/PersonCircle";
 import { ReferentService } from "@/services/referentService";
 import { debouncePromise } from "@/utils";
 import { Button, InputText, Modal, Select } from "@snu/ds/admin";
@@ -63,9 +64,9 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
     return Object.keys(newErrors).length === 0;
   };
   const handleValiderClick = () => {
-    // if (validateForm()) {
-    onValider(editedReferent);
-    // }
+    if (validateForm()) {
+      onValider(editedReferent);
+    }
   };
 
   return (
@@ -73,14 +74,20 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
       <Modal
         isOpen={isOpen}
         onClose={handleModalClose}
-        className="md:max-w-[800px]"
+        className="md:max-w-[700px]"
+        header={
+          <div className="flex flex-col items-center">
+            <PersonCircle className="mb-4" />
+            <h2 className="m-0 text-center text-xl leading-7">Modifier le référent de classe</h2>
+          </div>
+        }
         content={
-          <div className="p-8">
-            <h2 className="text-xl font-bold mb-4">Edit Referent Information</h2>
+          <div className="p-2 mt-0">
+            <h2 className="text-base font mt-0 mb-4">Modifiez les informations de ce référent de classe ...</h2>
             <div className="flex flex-col gap-4">
               <InputText
                 name="refName"
-                className="mb-3"
+                className="mb-1"
                 value={editedReferent.nom || ""}
                 label={"Nom"}
                 onChange={(e) => setEditedReferent({ ...editedReferent, nom: e.target.value })}
@@ -88,25 +95,25 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
               />
               <InputText
                 name="refPrenom"
-                className="mb-3"
+                className="mb-1"
                 value={editedReferent.prenom || ""}
-                label={"Prenom"}
+                label={"Prénom"}
                 onChange={(e) => setEditedReferent({ ...editedReferent, prenom: e.target.value })}
                 error={errors?.prenom}
               />
               <InputText
                 name="refEmail"
-                className="mb-3"
+                className="mb-4"
                 value={editedReferent.email || ""}
-                label={"Email"}
+                label={"Adresse email"}
                 onChange={(e) => setEditedReferent({ ...editedReferent, email: e.target.value })}
                 error={errors?.email}
               />
             </div>
             <div>
-              <p className="text-sm text-gray-500">... ou choisissez un autre referent de classe existant</p>
+              <p className="text-sm text-gray-500 mb-4">... ou choisissez un autre referent de classe existant</p>
             </div>
-            <div>
+            <div className="mb-1">
               <Select
                 value={""}
                 placeholder="Choisir un référent existant"

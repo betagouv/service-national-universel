@@ -1,4 +1,4 @@
-import { ModifierReferentDto } from "src/dto";
+import { ModifierReferentDto } from "../../../dto/referentDto";
 import { BasicRoute, RouteResponseBodyV2 } from "../..";
 
 export interface ModifierReferentClasseRoute extends BasicRoute {

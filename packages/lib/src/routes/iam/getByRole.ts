@@ -1,6 +1,6 @@
-import { ReferentForListDto } from "src/dto";
-import { ROLES } from "src/roles";
 import { BasicRoute, RouteResponseBodyV2 } from "..";
+import { ReferentForListDto } from "../../dto";
+import { ROLES } from "../../roles";
 
 export interface GetByRoleRoute extends BasicRoute {
   method: "GET";

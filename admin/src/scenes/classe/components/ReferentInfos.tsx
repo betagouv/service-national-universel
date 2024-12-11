@@ -4,10 +4,12 @@ import React, { useState } from "react";
 import { HiCheckCircle, HiOutlinePencil } from "react-icons/hi";
 import { MdOutlineContentCopy } from "react-icons/md";
 import { useToggle } from "react-use";
-import { ClassesRoutes } from "snu-lib";
+import { ClassesRoutes, FunctionalException, translateModifierClasse } from "snu-lib";
 import { ReferentInfosConfirmerModal } from "./ReferentInfosConfirmerModal";
 import { ReferentInfosModifierModal, ReferentModifier } from "./ReferentInfosModifierModal";
 import { Rights } from "./types";
+import { ClasseService } from "@/services/classeService";
+import { toastr } from "react-redux-toastr";
 
 interface Props {
   classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
@@ -23,7 +25,6 @@ export default function ReferentInfos({ classe, currentReferent, rights, isLoadi
   const [showModalConfirmer, toggleModalConfirmer] = useToggle(false);
   const [newReferent, setNewReferent] = useState<ReferentModifier | undefined>();
 
-  const previousReferent = { nom: classe.referents?.[0].lastName, prenom: classe.referents?.[0].firstName, email: classe.referents?.[0].email as string };
   const containerActionList = (canEdit) => {
     if (canEdit) {
       return [<Button key="change" type="modify" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={toggleModalModifier} disabled={isLoading} />];
@@ -38,9 +39,18 @@ export default function ReferentInfos({ classe, currentReferent, rights, isLoadi
     toggleModalConfirmer();
   };
 
-  const handleConfirmer = (referent: ReferentModifier) => {
+  const handleConfirmer = async () => {
+    const newReferentValidated = newReferent!;
+    try {
+      await ClasseService.modifierReferentClasse(classe._id, newReferentValidated);
+      toastr.success("Opération réussie", "Le référent a été mis à jour");
+    } catch (error) {
+      if (error instanceof FunctionalException) {
+        toastr.error("Erreur", `${translateModifierClasse(error?.message)} - Erreur : ${error?.correlationId}`);
+      }
+    }
     toggleModalConfirmer();
-    onModifierReferent(referent);
+    onModifierReferent(newReferentValidated);
   };
   return (
     <>
@@ -72,7 +82,6 @@ export default function ReferentInfos({ classe, currentReferent, rights, isLoadi
       {showModalModifier && <ReferentInfosModifierModal referent={currentReferent!} isOpen={showModalModifier} onModalClose={toggleModalModifier} onValider={handleValider} />}
       {showModalConfirmer && newReferent && (
         <ReferentInfosConfirmerModal
-          classeId={classe._id}
           previousReferent={currentReferent!}
           referent={newReferent}
           isOpen={showModalConfirmer}
