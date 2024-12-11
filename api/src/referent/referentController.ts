@@ -852,17 +852,13 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const { cohort, cohortChangeReason } = payload;
 
     let youngStatus = young.status;
-    let inscriptionStep = young.inscriptionStep2023;
-    let reinscriptionStep = young.reinscriptionStep2023;
-    if (payload.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
-      youngStatus = YOUNG_STATUS.VALIDATED;
-    }
-    if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
-      youngStatus = getYoungStatusForBasculeCLEtoHTS(young) as YoungType["status"];
-    }
+    youngStatus = getYoungStatusForBascule(young) as YoungType["status"];
     if (cohort === "à venir ") {
       youngStatus = getYoungStatusForAVenir(young) as YoungType["status"];
     }
+
+    let inscriptionStep = young.inscriptionStep2023;
+    let reinscriptionStep = young.reinscriptionStep2023;
 
     const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
@@ -1048,19 +1044,10 @@ const getYoungStatusForAVenir = (young: YoungType) => {
   }
 };
 
-const getYoungStatusForBasculeCLEtoHTS = (young: YoungType) => {
-  switch (young.status) {
-    case YOUNG_STATUS.WITHDRAWN:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    case YOUNG_STATUS.REFUSED:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    case YOUNG_STATUS.NOT_AUTORISED:
-      return YOUNG_STATUS.IN_PROGRESS;
-    case YOUNG_STATUS.VALIDATED:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    default:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-  }
+const getYoungStatusForBascule = (young: YoungType) => {
+  if (young.status === YOUNG_STATUS.NOT_AUTORISED || young.status === YOUNG_STATUS.IN_PROGRESS || young.status === YOUNG_STATUS.REINSCRIPTION) {
+    return YOUNG_STATUS.IN_PROGRESS;
+  } else return YOUNG_STATUS.WAITING_VALIDATION;
 };
 
 const getYoungSituationIfCLE = (filiere) => {

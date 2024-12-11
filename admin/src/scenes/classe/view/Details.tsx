@@ -36,7 +36,7 @@ export default function Details(props) {
 
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortState) => state.Cohorts).filter(
-    (c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort),
+    (c) => classe?.cohortId === c._id || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort),
   );
   const cohort = cohorts.find((c) => c.name === classe?.cohort);
   const rights = getRights(user, classe, cohort) as Rights;
