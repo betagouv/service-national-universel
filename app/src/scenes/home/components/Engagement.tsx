@@ -39,10 +39,10 @@ function EngagementCard({ program }: { program: ProgramType }) {
       <div className="border-x-[1px] border-b-[1px] border-gray-300 p-3 rounded-b-lg flex flex-col flex-grow">
         <p className="font-medium leading-6">{program.name}</p>
         <p className="mt-2 text-sm leading-6 text-gray-500 line-clamp-3">{program.description}</p>
-        <Link to={program.url} className="text-blue-600 text-sm mt-auto">
+        <a href={program.url} target="_blank" rel="noreferrer" className="text-blue-600 text-sm mt-auto">
           Lire plus
           <HiExternalLink className="inline-block ml-1 align-middle" />
-        </Link>
+        </a>
       </div>
     </div>
   );
