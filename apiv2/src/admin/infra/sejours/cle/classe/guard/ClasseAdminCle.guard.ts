@@ -1,7 +1,7 @@
+import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etablissement.gateway";
 import { CanActivate, ExecutionContext, Inject, Injectable } from "@nestjs/common";
 import { CustomRequest } from "@shared/infra/CustomRequest";
-import { isSuperAdmin } from "snu-lib";
-import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etablissement.gateway";
+import { ROLES, isAdmin } from "snu-lib";
 import { ClasseDepartementGuard } from "./ClasseDepartement.guard";
 import { ClasseGuardService } from "./ClasseGuard.service";
 import { ClasseRegionGuard } from "./ClasseRegion.guard";
@@ -20,11 +20,11 @@ export class ClasseAdminCleGuard implements CanActivate {
         request.classe = await this.classeGuardService.findClasse(request);
 
         // TODO : request.user mapping
-        if (isSuperAdmin({ role: request.user.role, subRole: request.user.sousRole })) {
+        if (isAdmin({ role: request.user.role })) {
             return true;
         }
 
-        if (request.user.role === "admin_cle") {
+        if (request.user.role === ROLES.ADMINISTRATEUR_CLE) {
             const etablissement = await this.etablissementGateway.findById(request.classe.etablissementId);
             if (!request.user.id) {
                 return false;
