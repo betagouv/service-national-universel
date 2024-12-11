@@ -1,11 +1,12 @@
 import React from "react";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, hasCompletedPhase1 } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, hasAccessToReinscription, hasCompletedPhase1 } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../utils/cohorts";
 import Affected from "./Affected";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
+import WaitingReinscription from "./WaitingReinscription";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
 import WaitingAffectation from "./waitingAffectation";
@@ -16,16 +17,20 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
+import AvenirCohort from "./AvenirCohort";
 import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
+import useReinscription from "../changeSejour/lib/useReinscription";
 
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
 
-  if (!young || !cohort) return <Loader />;
+  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useReinscription();
+
+  if (!young || !cohort || isReinscriptionOpenLoading) return <Loader />;
 
   // Je ne peux plus participer au SNU (exclu, refusé) :
   if (wasYoungExcluded(young)) return <Excluded />;
@@ -50,6 +55,16 @@ export default function Home() {
       return <Withdrawn />;
     }
     return <HomePhase2 />;
+  }
+
+  // Je peux me réinscrire :
+  if (isReinscriptionOpen && hasAccessToReinscription(young, cohort)) {
+    return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
+  }
+
+  // je suis sur une cohorte à venir et la réinscription n'est pas ouverte
+  if (young.cohort === "à venir") {
+    return <AvenirCohort />; //moyen de faire encore mieux niveau merge
   }
 
   // Ma phase 1 est en cours, soit en cours d'inscription, soit en plein parcours

@@ -173,15 +173,6 @@ function hasAccessToReinscription(young: YoungType, cohort: CohortType) {
   ) {
     return true;
   }
-  if (young.status === YOUNG_STATUS.ABANDONED) {
-    return true;
-  }
-  if (young.status === YOUNG_STATUS.WITHDRAWN && !(young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED || young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE)) {
-    return true;
-  }
-  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
-    return true;
-  }
 
   return false;
 }
