@@ -46,22 +46,20 @@ function Modal({ open, setOpen, withdrawnReason, withdrawnMessage }) {
   const history = useHistory();
   const [loading, setLoading] = useState(false);
 
-  const handleWithdraw = async () => {
+  const handleConfirm = async () => {
     try {
       setLoading(true);
       if (!abandonStatus.includes(young.status)) {
         const { ok, data, code } = await withdrawYoungAccount({ withdrawnMessage, withdrawnReason });
         if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
         dispatch(setYoung(data));
-        setLoading(false);
-        history.push("/");
       } else {
         const { ok, data, code } = await abandonYoungAccount({ withdrawnMessage, withdrawnReason });
         if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
         dispatch(setYoung(data));
-        setLoading(false);
-        history.push("/");
       }
+      setLoading(false);
+      history.push("/");
     } catch (error) {
       setLoading(false);
       console.error("Erreur lors du désistement :", error);
@@ -73,7 +71,7 @@ function Modal({ open, setOpen, withdrawnReason, withdrawnMessage }) {
       isOpen={open}
       setOpen={setOpen}
       title={!abandonStatus.includes(young.status) ? "Êtes-vous sûr(e) de vouloir vous désister du SNU ?" : "Êtes-vous sûr(e) de vouloir abandonner SNU ?"}
-      onConfirm={handleWithdraw}
+      onConfirm={handleConfirm}
       loading={loading}
       confirmText={!abandonStatus.includes(young.status) ? "Oui, confirmer mon désistement" : "Oui, confirmer mon abandon"}
       cancelText="Non, annuler">
