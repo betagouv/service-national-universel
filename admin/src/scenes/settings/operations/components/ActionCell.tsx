@@ -1,8 +1,8 @@
 import React from "react";
-import { formatLongDateFR, getZonedDate, Phase1Routes, translate, translateSimulationName } from "snu-lib";
+import { formatLongDateFR, getZonedDate, Phase1HTSTaskDto, translate, translateSimulationName } from "snu-lib";
 
 interface ActionCellProps {
-  simulation: Phase1Routes["GetSimulationsRoute"]["response"][0];
+  simulation: Phase1HTSTaskDto;
 }
 
 export default function ActionCell({ simulation }: ActionCellProps) {

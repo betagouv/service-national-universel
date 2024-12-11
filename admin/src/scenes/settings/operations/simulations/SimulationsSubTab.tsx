@@ -1,27 +1,22 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { HiOutlinePaperClip, HiPlay } from "react-icons/hi";
+import { HiPlay } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
 
-import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translate, translateSimulationName, translateTaskStatus } from "snu-lib";
-import { Badge, DataTable, TBadgeStatus, Tooltip } from "@snu/ds/admin";
+import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
+import { DataTable } from "@snu/ds/admin";
 
-import { downloadSecuredFile } from "@/services/file.service";
 import { Phase1Service } from "@/services/phase1Service";
-import SimulationsHtsResults from "./simulationHts/SimulationHtsResult";
-import ActionCell from "./ActionCell";
+
+import ActionCell from "../components/ActionCell";
+import StatusCell from "../components/StatusCell";
+import RapportCell from "../components/RapportCell";
+import SimulationHtsResultCell from "../components/SimulationHtsResultCell";
 import SimulationHtsResultStartButton from "./simulationHts/SimulationHtsResultStartButton";
 
 interface SimulationsSubTabProps {
   session: CohortDto;
 }
-
-const MAPPING_STATUS_COLOR: { [key: string]: TBadgeStatus } = {
-  PENDING: "none",
-  IN_PROGRESS: "IN_PROGRESS",
-  COMPLETED: "VALIDATED",
-  FAILED: "REFUSED",
-};
 
 export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
   const { search } = useLocation();
@@ -83,31 +78,20 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
             renderCell: (simulation) => <ActionCell simulation={simulation} />,
           },
           {
-            key: "fieldKey",
+            key: "metadata",
             title: "Resultats",
-            renderCell: (simulation) => <SimulationsHtsResults simulation={simulation} />,
+            renderCell: (simulation) => <SimulationHtsResultCell simulation={simulation} />,
           },
           {
             key: "statut",
             title: "Statut",
             filtrable: true,
-            renderCell: (simulation) => (
-              <Tooltip id={simulation.id} title={`${translate(simulation.error?.code)} ${simulation.error?.description || ""}`} disabled={!simulation.error?.code}>
-                <Badge title={translateTaskStatus(simulation.status)} status={MAPPING_STATUS_COLOR[simulation.status]} />
-              </Tooltip>
-            ),
+            renderCell: StatusCell,
           },
           {
             key: "rapportKey",
             title: "Simulat.",
-            renderCell: (simulation) =>
-              simulation.metadata?.results?.rapportKey && (
-                <>
-                  <button onClick={() => downloadSecuredFile(simulation.metadata?.results?.rapportKey)} className="border-[1px] border-blue-600 rounded-full p-2.5">
-                    <HiOutlinePaperClip size={24} />
-                  </button>
-                </>
-              ),
+            renderCell: RapportCell,
           },
           {
             key: "lancer",

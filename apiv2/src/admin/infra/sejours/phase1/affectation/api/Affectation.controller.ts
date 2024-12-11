@@ -1,14 +1,20 @@
 import { Body, Controller, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
 
-import { AffectationRoutes, TaskName, TaskStatus } from "snu-lib";
+import {
+    AffectationRoutes,
+    TaskName,
+    TaskStatus,
+    SimulationAffectationHTSTaskParameters,
+    ValiderAffectationHTSTaskParameters,
+} from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 
-import { PostSimulationsPayloadDto } from "./Affectation.validation";
-import { SimulationAffectationHTSTaskParameters } from "snu-lib/dist/dto/phase1/affectation/SimulationAffectationHTSTaskDto";
+import { PostSimulationsPayloadDto, PostSimulationValiderPayloadDto } from "./Affectation.validation";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 @Controller("affectation")
 export class AffectationController {
@@ -40,6 +46,40 @@ export class AffectationController {
                         sousRole: request.user.sousRole,
                     },
                 } as SimulationAffectationHTSTaskParameters,
+            },
+        });
+        return TaskMapper.toDto(task);
+    }
+
+    // /affectation/653f64aadcba81696ebdebc8/simulation/67530d18da3e76b456217397/valider
+
+    @UseGuards(AdminGuard)
+    @Post("/:sessionId/simulation/:taskId/valider")
+    async validerSimulation(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Param("taskId") taskId: string,
+        @Body() payload: PostSimulationValiderPayloadDto,
+    ): Promise<AffectationRoutes["PostSimulationsRoute"]["response"]> {
+        if (!(await this.taskGateway.findById(taskId))) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        const task = await this.taskGateway.create({
+            name: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+            status: TaskStatus.PENDING,
+            metadata: {
+                parameters: {
+                    sessionId,
+                    simulationTaskId: taskId,
+                    affecterPDR: payload.affecterPDR,
+                    auteur: {
+                        id: request.user.id,
+                        prenom: request.user.prenom,
+                        nom: request.user.nom,
+                        role: request.user.role,
+                        sousRole: request.user.sousRole,
+                    },
+                } as ValiderAffectationHTSTaskParameters,
             },
         });
         return TaskMapper.toDto(task);

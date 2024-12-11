@@ -1,1 +1,2 @@
-export type { SimulationAffectationHTSTaskDto } from "./SimulationAffectationHTSTaskDto";
+export type * from "./SimulationAffectationHTSTaskDto";
+export type * from "./ValiderAffectationHTSTaskDto";
