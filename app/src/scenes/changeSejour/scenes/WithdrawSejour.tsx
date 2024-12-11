@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { withdrawYoungAccount } from "@/services/young.service";
+import { withdrawYoungAccount, abandonYoungAccount } from "@/services/young.service";
 import { setYoung } from "../../../redux/auth/actions";
 import { useDispatch } from "react-redux";
 import ReasonForm from "../components/ReasonForm";
@@ -12,13 +12,13 @@ import { useLocation } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 
 export default function WithdrawSejour() {
+  const abandonStatus = ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION"];
   const { young } = useAuth();
   const [withdrawnMessage, setWithdrawnMessage] = useState("");
   const [withdrawnReason, setWithdrawnReason] = useState("");
   const [open, setOpen] = useState(false);
   const location = useLocation<{ backlink?: string }>();
   const backlink = location.state?.backlink || "/changer-de-sejour/no-date";
-  const abandonStatus = ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION"];
 
   return (
     <ChangeSejourContainer title={!abandonStatus.includes(young.status) ? "Se désister" : "Abandonner mon inscription"} backlink={backlink}>
@@ -40,6 +40,8 @@ export default function WithdrawSejour() {
 }
 
 function Modal({ open, setOpen, withdrawnReason, withdrawnMessage }) {
+  const abandonStatus = ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION"];
+  const { young } = useAuth();
   const dispatch = useDispatch();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
@@ -47,11 +49,19 @@ function Modal({ open, setOpen, withdrawnReason, withdrawnMessage }) {
   const handleWithdraw = async () => {
     try {
       setLoading(true);
-      const { ok, data, code } = await withdrawYoungAccount({ withdrawnMessage, withdrawnReason });
-      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
-      dispatch(setYoung(data));
-      setLoading(false);
-      history.push("/");
+      if (!abandonStatus.includes(young.status)) {
+        const { ok, data, code } = await withdrawYoungAccount({ withdrawnMessage, withdrawnReason });
+        if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+        dispatch(setYoung(data));
+        setLoading(false);
+        history.push("/");
+      } else {
+        const { ok, data, code } = await abandonYoungAccount({ withdrawnMessage, withdrawnReason });
+        if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+        dispatch(setYoung(data));
+        setLoading(false);
+        history.push("/");
+      }
     } catch (error) {
       setLoading(false);
       console.error("Erreur lors du désistement :", error);
@@ -62,10 +72,10 @@ function Modal({ open, setOpen, withdrawnReason, withdrawnMessage }) {
     <ResponsiveModal
       isOpen={open}
       setOpen={setOpen}
-      title="Êtes-vous sûr(e) de vouloir vous désister du SNU ?"
+      title={!abandonStatus.includes(young.status) ? "Êtes-vous sûr(e) de vouloir vous désister du SNU ?" : "Êtes-vous sûr(e) de vouloir abandonner SNU ?"}
       onConfirm={handleWithdraw}
       loading={loading}
-      confirmText="Oui, confirmer mon désistement"
+      confirmText={!abandonStatus.includes(young.status) ? "Oui, confirmer mon désistement" : "Oui, confirmer mon abandon"}
       cancelText="Non, annuler">
       <p className="text-center text-sm text-gray-500 p-3">Si vous changez d'avis, vous pourrez vous positionner sur un nouveau séjour.</p>
     </ResponsiveModal>
