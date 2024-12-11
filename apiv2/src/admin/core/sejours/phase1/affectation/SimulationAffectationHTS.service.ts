@@ -135,7 +135,7 @@ export class SimulationAffectationHTSService {
             );
         }
         const importedFile = await this.fileService.downloadFile(importTask.metadata.parameters.fileKey);
-        const parsedFile = await this.fileService.parseXLS<RouteXLS>(importedFile.Body);
+        const parsedFile = await this.fileService.parseXLS<RouteXLS>(importedFile.Body, { sheetName: "HTS 2025" });
 
         const changementDepartementPdrs = parsedFile.reduce(
             (acc, line) => {
