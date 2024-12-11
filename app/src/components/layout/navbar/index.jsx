@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import useDevice from "../../../hooks/useDeviceWithResize";
 import useTickets from "./useTickets";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 
 import Close from "./assets/Close";
 import Hamburger from "./assets/Hamburger";
@@ -55,7 +55,7 @@ function MobileNavbar() {
 
       <div className="flex gap-2 pr-4 justify-end">
         <a
-          href={supportURL}
+          href={knowledgebaseURL}
           target="_blank"
           rel="noopener noreferrer"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-[#344264] text-center capitalize text-[#768BAC]">

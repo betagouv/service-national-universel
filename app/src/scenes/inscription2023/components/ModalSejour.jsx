@@ -8,7 +8,7 @@ import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Alert from "../../../components/dsfr/ui/Alert";
 import Loader from "../../../components/Loader";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -98,7 +98,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
                 <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
                 <div className="text-sm text-gray-500">
                   La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-                  <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer">
+                  <a href={`${knowledgebaseURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer">
                     En savoir plus.
                   </a>
                 </div>

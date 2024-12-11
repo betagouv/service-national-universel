@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "../ui/modals/Modal";
 import { IoWarning } from "react-icons/io5";
 import ButtonLight from "../ui/buttons/ButtonLight";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 
 const ModalForm = ({ isOpen, onClose }) => {
   return (
@@ -13,7 +13,7 @@ const ModalForm = ({ isOpen, onClose }) => {
         <p>90% des demandes reçues par notre équipe trouvent leur réponse grâce à nos articles.</p>
         <p>
           Pour obtenir une réponse rapide, consultez notre{" "}
-          <a href={`${supportURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
+          <a href={`${knowledgebaseURL}/base-de-connaissance`} target="_blank" rel="noopener noreferrer">
             <span style={{ color: "blue" }}>base de connaissance</span>
           </a>
           .

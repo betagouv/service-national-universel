@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import validator from "validator";
 import Error from "../../../components/error";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -220,7 +220,7 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
-  const supportLink = `${supportURL}${
+  const supportLink = `${knowledgebaseURL}${
     isCLE ? "/base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"
   }`;
 

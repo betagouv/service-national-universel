@@ -10,7 +10,7 @@ import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 import { ID } from "../utils";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import StepUploadMobile from "../components/StepUploadMobile";
@@ -25,7 +25,7 @@ export default function StepUpload() {
   const history = useHistory();
   const dispatch = useDispatch();
   const corrections = getCorrectionsForStepUpload(young);
-  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
+  const supportLink = `${knowledgebaseURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
   const [recto, setRecto] = useState();
   const [verso, setVerso] = useState();

@@ -5,7 +5,7 @@ import { RiAttachmentFill } from "react-icons/ri";
 import plausibleEvent from "../../services/plausible";
 import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
 import { capture } from "../../sentry";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import useAuth from "@/services/useAuth";
 import { SignupButtons } from "@snu/ds/dsfr";
 
@@ -24,7 +24,7 @@ export default function Done() {
 
   return (
     <>
-      <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
+      <DSFRContainer supportLink={knowledgebaseURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <h1 className="text-3xl font-semibold leading-snug">Bienvenue {young.firstName} 🎉</h1>
         <h1 className="text-3xl font-semibold leading-snug">{isCLE ? "Votre compte élève a été créé." : "Votre compte volontaire a été créé."}</h1>
         <p className="py-2 mt-2 text-gray-600">

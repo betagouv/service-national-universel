@@ -11,7 +11,7 @@ import { FAQ } from "./components/FAQ";
 import { RiAttachmentLine } from "react-icons/ri";
 import DownloadMenu from "./components/DownloadMenu";
 import { Popover, PopoverButton } from "@headlessui/react";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import Voiture from "@/assets/Voiture";
 
 export default function HomePhase2() {
@@ -68,7 +68,7 @@ export default function HomePhase2() {
             </div>
 
             <a
-              href={`${supportURL}/base-de-connaissance/permis-et-code-de-la-route`}
+              href={`${knowledgebaseURL}/base-de-connaissance/permis-et-code-de-la-route`}
               target="_blank"
               rel="noopener noreferrer"
               className="relative mt-6 flex flex-col md:flex-row bg-white border rounded-xl p-4 gap-5 items-center">

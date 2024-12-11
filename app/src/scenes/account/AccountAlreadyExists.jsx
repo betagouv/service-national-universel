@@ -4,7 +4,7 @@ import queryString from "query-string";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import PrimaryButton from "@/components/dsfr/ui/buttons/PrimaryButton";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import AccountExistsImage from "../inscription2023/assets/error.png";
 
 const Title = ({ children }) => (
@@ -21,7 +21,7 @@ const AccountAlreadyExists = () => {
     parcours !== "CLE"
       ? [
           "Attention ! Vous avez déjà un compte.",
-          () => window.location.replace(`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`),
+          () => window.location.replace(`${knowledgebaseURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`),
           "Si un séjour de cohésion est prévu dans le cadre de votre classe engagée, vous ne pourrez pas vous inscrire également à un séjour de cohésion à titre individuel.",
           "Vous ne pouvez plus participer au séjour de cohésion avec votre classe ? Veuillez contacter directement votre référent classe.",
         ]

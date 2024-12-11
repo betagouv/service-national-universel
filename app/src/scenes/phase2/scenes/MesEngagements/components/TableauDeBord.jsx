@@ -1,7 +1,7 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
 import { Link } from "react-router-dom";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import { PHASE2_TOTAL_HOURS, APPLICATION_STATUS } from "snu-lib";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/services/useAuth";
@@ -30,7 +30,7 @@ const Tooltip = ({ className }) => (
       arrowColor="white">
       <div className="list-outside bg-white text-left text-[15px] text-[#414458]">
         Vous disposez d’un an pour débuter votre phase d’engagement et de deux ans pour la terminer.{" "}
-        <a className="!text-blue-600" href={`${supportURL}/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig`} target="_blank" rel="noreferrer">
+        <a className="!text-blue-600" href={`${knowledgebaseURL}/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig`} target="_blank" rel="noreferrer">
           En savoir plus.
         </a>
       </div>

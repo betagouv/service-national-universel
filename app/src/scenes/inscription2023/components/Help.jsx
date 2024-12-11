@@ -1,10 +1,10 @@
 import React from "react";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import humanCooperation from "../../../assets/humanCooperation.svg";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import { Container } from "@snu/ds/dsfr";
 
-export default function Help({ supportLink = supportURL }) {
+export default function Help({ supportLink = knowledgebaseURL }) {
   return (
     <button className="m-0 w-full hover:text-[#161616]" onClick={() => window.open(supportLink, "_blank")?.focus()}>
       <div className="bg-[#F9F6F2] px-4 pt-4 pb-12 text-[#161616] md:hidden">

@@ -4,7 +4,7 @@ import { formatStringDate, getCohortPeriod } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Loader from "../../../components/Loader";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 import plausibleEvent from "../../../services/plausible";
 
 export default function ModalSejourCorrection({ data, isOpen, onValidation }) {
@@ -41,7 +41,7 @@ export default function ModalSejourCorrection({ data, isOpen, onValidation }) {
                 <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
                 <div className="text-sm text-gray-500">
                   La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-                  <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline hover:underline">
+                  <a href={`${knowledgebaseURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline hover:underline">
                     En savoir plus.
                   </a>
                 </div>

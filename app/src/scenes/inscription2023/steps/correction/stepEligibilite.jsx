@@ -20,7 +20,7 @@ import api from "../../../../services/api";
 import { translate } from "../../../../utils";
 import DatePicker from "../../../../components/dsfr/forms/DatePicker";
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
@@ -217,7 +217,7 @@ export default function StepEligibilite() {
 
   return (
     <>
-      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
+      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={knowledgebaseURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="space-y-5">
           <Checkbox
             state={error.frenchNationality && "error"}

@@ -12,7 +12,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import { environment, supportURL } from "@/config";
+import { environment, knowledgebaseURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
 import { SignupButtons } from "@snu/ds/dsfr";
@@ -135,7 +135,7 @@ export default function StepConfirm() {
 
   return (
     <>
-      <DSFRContainer title="Ces informations sont-elles correctes ?" supportEvent="Phase0/aide preinscription - recap" supportLink={`${supportURL}/base-de-connaissance/${bdcURI}`}>
+      <DSFRContainer title="Ces informations sont-elles correctes ?" supportEvent="Phase0/aide preinscription - recap" supportLink={`${knowledgebaseURL}/base-de-connaissance/${bdcURI}`}>
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="my-6 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-[#161616]">Mon éligibilité</h1>

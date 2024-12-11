@@ -11,7 +11,7 @@ import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 import { getRegionForEligibility, useAddress, YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import ReactTooltip from "react-tooltip";
@@ -467,7 +467,7 @@ export default function StepCoordonnees() {
     <>
       <DSFRContainer
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
-        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
+        supportLink={`${knowledgebaseURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
         supportEvent="Phase0/aide inscription - coordonnees">
         {young.cohort === "Toussaint 2024" && (
           <div className="flex flex-col text-base w-fit rounded-md px-2 py-1 font-bold bg-[#E8EDFF] text-[#0063CB] px-4 py-2 mb-4">
@@ -667,7 +667,7 @@ export default function StepCoordonnees() {
           <Button
             className="cursor-pointer"
             iconId={fr.cx("fr-icon-information-fill")}
-            onClick={() => window.open(`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`, "_blank")?.focus()}
+            onClick={() => window.open(`${knowledgebaseURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`, "_blank")?.focus()}
             priority="tertiary no outline"
             title="Information"
           />

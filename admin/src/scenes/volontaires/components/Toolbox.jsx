@@ -7,7 +7,7 @@ import { canApplyToPhase2 } from "snu-lib";
 import Hammer from "../../../assets/icons/Hammer";
 import Screwdriver from "../../../assets/icons/Screwdriver";
 import AdjustableWrench from "../../../assets/icons/AdjustableWrench";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 
 export default function Toolbox({ young }) {
   const cohortList = useSelector((state) => state.Cohorts);
@@ -28,7 +28,7 @@ export default function Toolbox({ young }) {
               <div className="text-gray-600">Trouvez une mission existante et proposez-là au volontaire.</div>
               <a
                 className="cursor-pointer text-gray-500 underline"
-                href={`${supportURL}/base-de-connaissance/je-propose-une-mission-a-un-volontaire`}
+                href={`${knowledgebaseURL}/base-de-connaissance/je-propose-une-mission-a-un-volontaire`}
                 target="_blank"
                 rel="noopener noreferrer">
                 En savoir plus.
@@ -59,7 +59,7 @@ export default function Toolbox({ young }) {
               <div className="text-gray-600">Reconnaissez l’engagement externe du volontaire comme équivalence MIG.</div>
               <a
                 className="cursor-pointer text-gray-500 underline"
-                href={`${supportURL}/base-de-connaissance/valider-ou-declarer-une-equivalence-mig`}
+                href={`${knowledgebaseURL}/base-de-connaissance/valider-ou-declarer-une-equivalence-mig`}
                 target="_blank"
                 rel="noopener noreferrer">
                 En savoir plus.
@@ -80,7 +80,7 @@ export default function Toolbox({ young }) {
               <div className="text-gray-600">Renseignez une mission non existante pour le volontaire.</div>
               <a
                 className="cursor-pointer text-gray-500 underline"
-                href={`${supportURL}/base-de-connaissance/je-cree-une-mig-depuis-le-profil-dun-volontaire`}
+                href={`${knowledgebaseURL}/base-de-connaissance/je-cree-une-mig-depuis-le-profil-dun-volontaire`}
                 target="_blank"
                 rel="noopener noreferrer">
                 En savoir plus.

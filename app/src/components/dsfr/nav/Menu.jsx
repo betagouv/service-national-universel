@@ -3,7 +3,7 @@ import Close from "@/assets/CloseBlue.svg";
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../../../services/useAuth";
 import { HiOutlineClipboard, HiOutlineQuestionMarkCircle, HiOutlineUserCircle } from "react-icons/hi";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 
 const ModalMenu = ({ isOpen, setIsOpen }) => {
   const { isCLE, loginOrLogout, isLoggedIn } = useAuth();
@@ -36,7 +36,7 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             )
           )}
 
-          <a href={supportURL} className="flex items-center py-3 gap-2">
+          <a href={knowledgebaseURL} className="flex items-center py-3 gap-2">
             <HiOutlineQuestionMarkCircle className="text-lg" />
             Besoin d&apos;aide ?
           </a>
