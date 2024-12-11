@@ -59,6 +59,13 @@ export function hasCompletedPhase2(y) {
   return false;
 }
 
+export function isDoingPhase1(young) {
+  return (
+    [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(young.status) &&
+    [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(young.statusPhase1)
+  );
+}
+
 export function hasCompletedPhase1(y) {
   if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1)) {
     return true;

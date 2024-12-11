@@ -140,6 +140,10 @@ function hasAccessToReinscription(young: YoungType, cohort: CohortType) {
     return false;
   }
 
+  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
+    return false;
+  }
+
   if (isCle(young)) {
     if (young.frenchNationality === "false") {
       return false;

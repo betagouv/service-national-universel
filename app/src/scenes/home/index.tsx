@@ -1,18 +1,14 @@
 import React from "react";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, hasAccessToReinscription, hasCompletedPhase1 } from "../../utils";
-import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../utils/cohorts";
-import Affected from "./Affected";
+import { YOUNG_STATUS, hasAccessToReinscription, hasCompletedPhase1, isDoingPhase1 } from "../../utils";
+import { getCohort } from "../../utils/cohorts";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
 import WaitingReinscription from "./WaitingReinscription";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
-import WaitingAffectation from "./waitingAffectation";
-import WaitingCorrection from "./waitingCorrection";
-import WaitingValidation from "./waitingValidation";
-import WaitingList from "./waitingList";
+import HomePhase1 from "./HomePhase1";
 import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
@@ -72,20 +68,9 @@ export default function Home() {
   if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !isCohortInstructionOpen) {
     return <InscriptionClosedCLE />;
   }
-  // Mon inscription est en cours :
-  if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
-  if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
-  // Je suis en liste complémentaire sur une cohorte
-  if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
-  // Mon dossier est validé, je suis en attente d'affectation ou affecté
-  if (young.status === YOUNG_STATUS.VALIDATED) {
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
-      // Je suis affecté à un centre
-      return <Affected />;
-    } else {
-      // Je suis en attente d'affectation à un centre
-      return <WaitingAffectation />;
-    }
+
+  if (isDoingPhase1(young)) {
+    return <HomePhase1 />;
   }
   return <Phase1NotDone />;
 }
