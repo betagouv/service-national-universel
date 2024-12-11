@@ -1,19 +1,21 @@
-import { ReferentModelLight } from "@admin/core/iam/Referent.model";
 import { ReferentService } from "@admin/core/iam/service/Referent.service";
-import { ClasseAdminCleGuard } from "@admin/infra/sejours/cle/classe/guard/ClasseAdminCle.guard";
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, ParseEnumPipe, Query } from "@nestjs/common";
 import { Role } from "@shared/core/Role";
+import { ROLES, ReferentRoutes } from "snu-lib";
 import { AdminGuard } from "../guard/Admin.guard";
-import { ReferentForListDto, ReferentRoutes } from "snu-lib";
+import { AdminCleGuard } from "../guard/AdminCle.guard";
+import { UseAnyGuard } from "../guard/Any.guard";
+import { ReferentDepartementalGuard } from "../guard/ReferentDepartemental.guard";
+import { ReferentRegionalGuard } from "../guard/ReferentRegional.guard";
 
 @Controller("referent")
 export class ReferentController {
     constructor(private readonly referentService: ReferentService) {}
 
     @Get("/")
-    @UseGuards(AdminGuard)
+    @UseAnyGuard(AdminGuard, AdminCleGuard, ReferentDepartementalGuard, ReferentRegionalGuard)
     async findReferentsByRole(
-        @Query("role") role: Role,
+        @Query("role", new ParseEnumPipe(ROLES)) role: Role,
         @Query("search") search: string,
     ): Promise<ReferentRoutes["GetByRole"]["response"]> {
         return this.referentService.findByRole(role, search);

@@ -12,9 +12,22 @@ export type RouteResponseBodyV2<T> = T;
 
 export interface HttpError {
   message: string;
-  description?: string;
   statusCode: number;
   correlationId: string;
+  description?: string;
+}
+
+export class FunctionalException implements HttpError {
+  message: string;
+  statusCode: number;
+  correlationId: string;
+  description?: string;
+  constructor(exception: HttpError) {
+    this.message = exception.message;
+    this.statusCode = exception.statusCode;
+    this.correlationId = exception.correlationId;
+    this.description = exception.description;
+  }
 }
 
 export type { CohortsRoutes } from "./cohort";

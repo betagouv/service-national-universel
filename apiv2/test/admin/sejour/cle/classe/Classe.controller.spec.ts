@@ -71,6 +71,9 @@ describe("ClasseController", () => {
         expect(updatedReferent.invitationExpires).toBeTruthy();
         expect(response.status).toBe(201);
         expect(response.body).toMatchObject({ statut: STATUS_CLASSE.VERIFIED });
+        expect(response.body.referents).toHaveLength(1);
+        expect(response.body.referents[0].role).toBeUndefined();
+        expect(response.body.referents[0].email).toEqual(referent.email);
         expect(notificationGateway.sendEmail).toHaveBeenNthCalledWith(
             1,
             expect.objectContaining({

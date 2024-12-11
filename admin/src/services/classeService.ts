@@ -1,6 +1,7 @@
 import { ClassesRoutes } from "snu-lib";
 
 import { buildRequest } from "@/utils/buildRequest";
+import { ReferentService } from "./referentService";
 
 const ClasseService = {
   getOne: async (id: ClassesRoutes["GetOne"]["params"]["id"]) => {
@@ -46,6 +47,7 @@ const ClasseService = {
       uniqueKeyAndId: classeDto.uniqueKeyAndId,
       academy: classeDto.academie,
       referentClasseIds: classeDto.referentClasseIds,
+      referents: classeDto.referents.map((referent) => ReferentService.mapReferentToView(referent)),
       sessionId: classeDto.sessionId,
       uniqueId: classeDto.uniqueId,
       seatsTaken: classeDto.placesPrises,

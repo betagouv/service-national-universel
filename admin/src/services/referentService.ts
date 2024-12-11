@@ -1,4 +1,5 @@
 import { buildRequest } from "@/utils/buildRequest";
+import { id } from "date-fns/locale";
 import { ReferentRoutes } from "snu-lib";
 
 const ReferentService = {
@@ -9,6 +10,15 @@ const ReferentService = {
       query,
       target: "API_V2",
     })();
+  },
+
+  mapReferentToView(referent) {
+    return {
+      _id: referent.id,
+      firstName: referent.prenom,
+      lastName: referent.nom,
+      email: referent.email,
+    };
   },
 };
 

@@ -25,6 +25,7 @@ type SelectOption = {
 
 export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, onModalClose: handleModalClose, onValider }: ReferentInfosModifierProps) => {
   const [editedReferent, setEditedReferent] = useState<ReferentModifier>(currentReferent);
+  const [errors, setErrors] = useState<Omit<ReferentModifier, "id"> | undefined>();
 
   const handleSelectChange = (referent: (SelectOption & ReferentModifier) | undefined) => {
     if (referent) {
@@ -47,8 +48,24 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
     );
   }, 500);
 
+  const validateForm = () => {
+    const newErrors = {} as Omit<ReferentModifier, "id">;
+    if (!editedReferent.nom) {
+      newErrors.nom = "Le nom est obligatoire";
+    }
+    if (!editedReferent.prenom) {
+      newErrors.prenom = "Le prénom est obligatoire";
+    }
+    if (!editedReferent.email) {
+      newErrors.email = "L'email est obligatoire";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   const handleValiderClick = () => {
+    // if (validateForm()) {
     onValider(editedReferent);
+    // }
   };
 
   return (
@@ -67,6 +84,7 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
                 value={editedReferent.nom || ""}
                 label={"Nom"}
                 onChange={(e) => setEditedReferent({ ...editedReferent, nom: e.target.value })}
+                error={errors?.nom}
               />
               <InputText
                 name="refPrenom"
@@ -74,6 +92,7 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
                 value={editedReferent.prenom || ""}
                 label={"Prenom"}
                 onChange={(e) => setEditedReferent({ ...editedReferent, prenom: e.target.value })}
+                error={errors?.prenom}
               />
               <InputText
                 name="refEmail"
@@ -81,6 +100,7 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
                 value={editedReferent.email || ""}
                 label={"Email"}
                 onChange={(e) => setEditedReferent({ ...editedReferent, email: e.target.value })}
+                error={errors?.email}
               />
             </div>
             <div>

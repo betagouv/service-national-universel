@@ -1,5 +1,3 @@
-// tests/admin/core/iam/Referent.service.spec.ts
-
 import { Test, TestingModule } from "@nestjs/testing";
 import { EmailTemplate } from "@notification/core/Notification";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
@@ -46,6 +44,7 @@ describe("ReferentService", () => {
                         delete: jest.fn(),
                         create: jest.fn(),
                         findByRole: jest.fn(),
+                        findByEmail: jest.fn(),
                     },
                 },
                 {

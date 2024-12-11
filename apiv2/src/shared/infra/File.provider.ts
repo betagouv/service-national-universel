@@ -25,7 +25,6 @@ export class FileProvider implements FileGateway {
 
             const stream = parse(options)
                 .on("error", (error) => {
-                    console.log(error);
                     reject(new Error(ERRORS.CANNOT_PARSE_CSV));
                 })
                 .on("data", (row) => {

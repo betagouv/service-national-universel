@@ -23,7 +23,7 @@ export default function ReferentInfos({ classe, currentReferent, rights, isLoadi
   const [showModalConfirmer, toggleModalConfirmer] = useToggle(false);
   const [newReferent, setNewReferent] = useState<ReferentModifier | undefined>();
 
-  const referentToBeUpdated = { nom: classe.referents?.[0].lastName, prenom: classe.referents?.[0].firstName, email: classe.referents?.[0].email as string };
+  const previousReferent = { nom: classe.referents?.[0].lastName, prenom: classe.referents?.[0].firstName, email: classe.referents?.[0].email as string };
   const containerActionList = (canEdit) => {
     if (canEdit) {
       return [<Button key="change" type="modify" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={toggleModalModifier} disabled={isLoading} />];
@@ -69,11 +69,11 @@ export default function ReferentInfos({ classe, currentReferent, rights, isLoadi
           </div>
         </div>
       </Container>
-      {showModalModifier && <ReferentInfosModifierModal referent={referentToBeUpdated} isOpen={showModalModifier} onModalClose={toggleModalModifier} onValider={handleValider} />}
+      {showModalModifier && <ReferentInfosModifierModal referent={currentReferent!} isOpen={showModalModifier} onModalClose={toggleModalModifier} onValider={handleValider} />}
       {showModalConfirmer && newReferent && (
         <ReferentInfosConfirmerModal
           classeId={classe._id}
-          previousReferent={referentToBeUpdated}
+          previousReferent={currentReferent!}
           referent={newReferent}
           isOpen={showModalConfirmer}
           onModalClose={toggleModalConfirmer}
