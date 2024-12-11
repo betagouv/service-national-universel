@@ -22,7 +22,9 @@ import { CentreGateway } from "../centre/Centre.gateway";
 import { SessionGateway } from "../session/Session.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { SimulationAffectationHTSTaskParameters } from "./SimulationAffectationHTSTask.model";
+import { AffectationService } from "./Affectation.service";
 
+// TODO: déplacer dans un paramétrage dynamique
 const NB_MAX_ITERATION = 100;
 
 export type SimulationAffectationHTSResult = {
@@ -41,6 +43,8 @@ export type SimulationAffectationHTSResult = {
 
 export class SimulationAffectationHTS implements UseCase<SimulationAffectationHTSResult> {
     constructor(
+        @Inject(AffectationService)
+        private readonly affectationService: AffectationService,
         @Inject(SimulationAffectationHTSService)
         private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
@@ -63,27 +67,8 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_DEPARTEMENT_HORS_METROPOLE);
         }
 
-        const session = await this.sessionGateway.findById(sessionId);
-        if (!session) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "sessionId");
-        }
+        const { ligneDeBusList, sejoursList, pdrList } = await this.affectationService.loadAffectationData(sessionId);
 
-        // Chargement des données associés à la session
-        // TODO: utiliser cohortId (actuellement non présent en base sur les lige de bus)
-        const ligneDeBusList = await this.ligneDeBusGateway.findBySessionNom(session.nom);
-        if (ligneDeBusList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucune ligne de bus !");
-        }
-        const sejoursList = await this.sejoursGateway.findBySessionId(sessionId);
-        if (sejoursList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun sejours !");
-        }
-        // Les PDR ne sont plus rattachés à une session
-        const pdrIds = [...new Set(ligneDeBusList.flatMap((ligne) => ligne.pointDeRassemblementIds))];
-        const pdrList = await this.pointDeRassemblementGateway.findByIds(pdrIds);
-        if (pdrList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun PDRs !");
-        }
         const centreList = await this.centresGateway.findBySessionId(sessionId);
         if (centreList.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun centres !");

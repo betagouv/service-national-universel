@@ -49,6 +49,8 @@ import { HistoryController } from "./infra/history/api/History.controller";
 import { historyProvider } from "./infra/history/historyProvider";
 import { serviceProvider } from "./infra/iam/service/serviceProvider";
 import { ReferentController } from "./infra/iam/api/Referent.controller";
+import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
+import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 
 @Module({
     imports: [
@@ -72,6 +74,7 @@ import { ReferentController } from "./infra/iam/api/Referent.controller";
     ],
     providers: [
         ClasseService,
+        AffectationService,
         SimulationAffectationHTSService,
         ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
@@ -80,6 +83,7 @@ import { ReferentController } from "./infra/iam/api/Referent.controller";
         ...etablissementMongoProviders,
         ...jeuneMongoProviders,
         ...centreMongoProviders,
+        ...planDeTransportMongoProviders,
         ...ligneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
         ...sejourMongoProviders,

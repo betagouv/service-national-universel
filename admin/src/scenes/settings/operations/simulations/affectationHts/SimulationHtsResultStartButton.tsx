@@ -1,10 +1,17 @@
 import React, { useMemo } from "react";
+import { useSetState, useToggle } from "react-use";
+import { toastr } from "react-redux-toastr";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import cx from "classnames";
 import { HiOutlineLightningBolt, HiPlay } from "react-icons/hi";
 
-import { formatDepartement, region2department, RegionsMetropole, SimulationAffectationHTSTaskDto, translate } from "snu-lib";
+import { AffectationRoutes, formatDepartement, region2department, RegionsMetropole, SimulationAffectationHTSTaskDto, TaskStatus, translate } from "snu-lib";
 import { Button, Modal, SectionSwitcher } from "@snu/ds/admin";
-import { useSetState, useToggle } from "react-use";
+
+import { capture } from "@/sentry";
+import { AffectationService } from "@/services/affectationService";
+import { isBefore } from "date-fns";
 
 interface SimulationHtsResultStartButtonProps {
   simulation: unknown;
@@ -12,6 +19,7 @@ interface SimulationHtsResultStartButtonProps {
 
 export default function SimulationHtsResultStartButton({ simulation }: SimulationHtsResultStartButtonProps) {
   const simulationHts = simulation as SimulationAffectationHTSTaskDto;
+  const queryClient = useQueryClient();
 
   const [state, setState] = useSetState<{
     affecterPDR: boolean;
@@ -29,10 +37,43 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
     [simulationHts],
   );
 
+  const affectationKey = ["affectation", simulationHts.metadata!.parameters!.sessionId]; // check AffectationSimulationMetropoleModal.tsx queryKey
+  const {
+    isPending: isLoading,
+    isError,
+    data: affectationStatus,
+  } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
+    queryKey: affectationKey,
+    queryFn: async () => AffectationService.getAffectation(simulationHts.metadata!.parameters!.sessionId),
+  });
+
+  const isOutdated =
+    [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(affectationStatus?.traitement.status as TaskStatus) ||
+    (!!affectationStatus?.traitement?.lastCompletedAt && isBefore(new Date(simulationHts.createdAt), new Date(affectationStatus.traitement.lastCompletedAt)));
+
+  const isDisabled = simulationHts.status !== TaskStatus.COMPLETED || isLoading || isError || isOutdated;
+
+  const { isPending, mutate } = useMutation({
+    mutationFn: async () => {
+      return await AffectationService.postValiderAffectation(simulationHts.metadata!.parameters!.sessionId!, simulationHts.id, {
+        affecterPDR: state.affecterPDR,
+      });
+    },
+    onSuccess: () => {
+      toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
+      queryClient.invalidateQueries({ queryKey: affectationKey });
+      toggleModal(false);
+    },
+    onError: (error: any) => {
+      capture(error);
+      toastr.error("Une erreur est survenue lors de l'ajout du traitement", translate(JSON.parse(error.message).message), { timeOut: 5000 });
+    },
+  });
+
   return (
     <>
       <button onClick={toggleModal}>
-        <HiPlay className="text-blue-600" size={50} />
+        <HiPlay className={cx({ "text-gray-400": isDisabled, "text-blue-600": !isDisabled })} size={50} />
       </button>
       <Modal
         isOpen={showModal}
@@ -93,8 +134,7 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
         footer={
           <div className="flex items-center justify-between gap-6">
             <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => toggleModal(false)} />
-            {/* <Button disabled={isPending} onClick={() => mutate()} title="Confirmer" className="flex-1" /> */}
-            <Button disabled title="Lancer le traitement" className="flex-1" />
+            <Button disabled={isPending || isDisabled} loading={isPending} onClick={() => mutate()} title="Lancer le traitement" className="flex-1" />
           </div>
         }
       />

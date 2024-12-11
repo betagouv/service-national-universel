@@ -54,8 +54,9 @@ export default function AffectationSimulationMetropoleModal({ session, onClose }
     },
     onSuccess: (task) => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
-      const oldTasks = queryClient.getQueryData<Phase1Routes["GetSimulationsRoute"]["response"]>(["affectation-simulations-pending"]) || [];
-      queryClient.setQueryData(["affectation-simulations-pending"], [...oldTasks, task]);
+      const queryKey = ["affectation", session._id];
+      const oldStatus = queryClient.getQueryData<Phase1Routes["GetSimulationsRoute"]["response"]>(queryKey) || [];
+      queryClient.setQueryData(queryKey, { ...oldStatus, simulation: { status: task.status } });
       onClose();
     },
     onError: (error: any) => {
