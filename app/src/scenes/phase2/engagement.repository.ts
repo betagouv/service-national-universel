@@ -7,7 +7,7 @@ export async function fetchPrograms() {
   const res = await fetch(`${apiURL}/program/public/engagements`);
   const { ok, data, error } = await res.json();
   if (!ok) throw error;
-  return data as ProgramType[];
+  return data.sort((a, b) => a.name.localeCompare(b.name)) as ProgramType[];
 }
 
 export async function fetchProgram(id) {
