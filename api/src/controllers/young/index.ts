@@ -823,6 +823,8 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
       "_id",
       "__v",
       "birthdateAt",
+      "email",
+      "status",
       "cohort",
       "gender",
       "situation",
@@ -845,6 +847,8 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
       "zip",
       "city",
       "createdAt",
+      "lastStatusAt",
+      "deletedAt",
     ];
 
     for (const key in young.files) {
@@ -861,23 +865,24 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
       }
     }
 
+    let $set = {
+      email: `${young["_id"]}@delete.com`,
+      status: YOUNG_STATUS.DELETED,
+      lastStatusAt: new Date(),
+      deletedAt: new Date(),
+    };
+    let $unset = {};
+
     for (const key in young._doc) {
-      if (!fieldToKeep.find((val) => val === key)) {
-        young.set({ [key]: undefined });
+      if (!fieldToKeep.includes(key)) {
+        $unset[key] = "";
       }
     }
 
     await unsync(young);
 
-    young.set({ location: { lat: undefined, lon: undefined } });
-    young.set({ schoolLocation: { lat: undefined, lon: undefined } });
-    young.set({ parent1Location: { lat: undefined, lon: undefined } });
-    young.set({ parent2Location: { lat: undefined, lon: undefined } });
-    young.set({ medicosocialStructureLocation: { lat: undefined, lon: undefined } });
-    young.set({ email: `${young._doc!["_id"]}@delete.com` });
-    young.set({ status: YOUNG_STATUS.DELETED });
+    await young.updateOne({ $set, $unset });
 
-    await young.save({ fromUser: req.user });
     if (!canDeletePatchesHistory(req.user, young)) return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await patches.deletePatches({ id, model: YoungModel });
 
