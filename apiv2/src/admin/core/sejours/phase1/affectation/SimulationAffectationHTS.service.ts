@@ -1165,9 +1165,9 @@ export class SimulationAffectationHTSService {
             sessionNom: jeune.sessionNom,
             region: jeune.region,
             departement: jeune.departement,
-            pointDeRassemblementId: pdr?.matricule || jeune.pointDeRassemblementId, // TODO: matricule
-            ligneDeBusId: ligneDeBus?.numeroLigne || jeune.ligneDeBusId, // TODO: numéro ligne
-            centreId: centre?.matricule || jeune.centreId, // TODO: matricule
+            pointDeRassemblementId: pdr?.matricule || jeune.pointDeRassemblementId,
+            ligneDeBusId: ligneDeBus?.numeroLigne || jeune.ligneDeBusId,
+            centreId: centre?.matricule || jeune.centreId,
             statut: jeune.statut,
             prenom: jeune.prenom,
             nom: jeune.nom,

@@ -6,6 +6,7 @@ import { JeuneGateway } from "../../../../../core/sejours/jeune/Jeune.gateway";
 import { JeuneModel } from "../../../../../core/sejours/jeune/Jeune.model";
 import { JEUNE_MONGOOSE_ENTITY, JeuneDocument } from "../../provider/JeuneMongo.provider";
 import { JeuneMapper } from "../Jeune.mapper";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 @Injectable()
 export class JeuneRepository implements JeuneGateway {
@@ -48,14 +49,14 @@ export class JeuneRepository implements JeuneGateway {
         return JeuneMapper.toModels(jeunes);
     }
 
-    async update(jeune: JeuneModel): Promise<JeuneModel> {
+    async update(jeune: JeuneModel, updateOriginName?: string): Promise<JeuneModel> {
         const jeuneEntity = JeuneMapper.toEntity(jeune);
         const retrievedJeune = await this.jeuneMongooseEntity.findById(jeune.id);
         if (!retrievedJeune) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedJeune.set(jeuneEntity);
-        const user = this.cls.get("user");
+        const user = updateOriginName ? { firstName: updateOriginName } : this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
         await retrievedJeune.save({ fromUser: user });
@@ -65,5 +66,27 @@ export class JeuneRepository implements JeuneGateway {
     async findAll(): Promise<JeuneModel[]> {
         const jeunes = await this.jeuneMongooseEntity.find();
         return JeuneMapper.toModels(jeunes);
+    }
+
+    async findByIds(ids: string[]): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({ _id: { $in: ids } });
+        return JeuneMapper.toModels(jeunes);
+    }
+
+    async countAffectedByLigneDeBus(ligneDeBusId): Promise<number> {
+        return this.jeuneMongooseEntity.countDocuments({
+            $and: [
+                {
+                    status: YOUNG_STATUS.VALIDATED,
+                    ligneId: ligneDeBusId,
+                },
+                {
+                    $or: [
+                        { statusPhase1: { $in: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] } },
+                        { statusPhase1Tmp: { $in: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] } },
+                    ],
+                },
+            ],
+        });
     }
 }
