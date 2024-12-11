@@ -1,7 +1,20 @@
 import React from "react";
-import Select from "./Select";
+import Select from "./SimpleSelect";
 
-export default function Field({ name, label, value, className = "", type = "text", options = [], onChange = () => {}, transformer, maxLength, rows, error }) {
+interface FieldProps {
+  name: string;
+  label?: string;
+  value?: string;
+  className?: string;
+  type?: "text" | "select" | "textarea";
+  options?: Array<{ value: string; label: string }>;
+  onChange?: (value: string) => void;
+  transformer?: (value: string) => string;
+  maxLength?: number;
+  rows?: number;
+  error?: string;
+}
+const Field: React.FC<FieldProps> = ({ name, label, value, className = "", type = "text", options = [], onChange = () => {}, transformer, maxLength, rows, error }) => {
   return (
     <div className={className}>
       <div key={name} className={`relative rounded-[6px] border-[1px] border-[#D1D5DB] bg-white py-[9px] px-[13px] ${error ? "border-[#EF4444]" : "border-[#D1D5DB]"}`}>
@@ -15,4 +28,6 @@ export default function Field({ name, label, value, className = "", type = "text
       </div>
     </div>
   );
-}
+};
+
+export default Field;
