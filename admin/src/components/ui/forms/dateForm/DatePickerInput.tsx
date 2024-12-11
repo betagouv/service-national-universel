@@ -97,7 +97,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
             leaveTo="opacity-0 translate-y-1">
             <Popover.Panel className="absolute left-0 z-10 pt-2">
               <div className="flex items-stretch flex-auto rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 overflow-hidden">
-                <DatePicker mode={mode} fromYear={new Date().getFullYear() - 70} toYear={new Date().getFullYear() + 10} value={value || new Date()} onChange={handleChange} />
+                <DatePicker mode={mode} fromYear={new Date().getFullYear() - 70} toYear={new Date().getFullYear() + 16} value={value || new Date()} onChange={handleChange} />
                 {isTime && (
                   <div className="flex items-center justify-between my-[16px] px-6 border-l-[1px] border-gray-200">
                     <div className="flex items-start h-full">
