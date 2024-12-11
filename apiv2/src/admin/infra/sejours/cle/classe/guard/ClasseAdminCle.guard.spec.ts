@@ -113,7 +113,7 @@ describe("ClasseAdminCleGuard", () => {
         expect(result).toBe(true);
     });
 
-    it("should return false if classeDepartementGuard cannot activate", async () => {
+    it("should return true if classeDepartementGuard cannot activate and classeRegionGuard is true", async () => {
         const mockRequest = {
             user: { role: "other_role" },
             classe: { etablissementId: "etablissement_id" },
@@ -130,7 +130,7 @@ describe("ClasseAdminCleGuard", () => {
 
         const result = await guard.canActivate(mockContext);
 
-        expect(result).toBe(false);
+        expect(result).toBe(true);
     });
 
     it("should return false if both classeDepartementGuard and classeRegionGuard cannot activate", async () => {

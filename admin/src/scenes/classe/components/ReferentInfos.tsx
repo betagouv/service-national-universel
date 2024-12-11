@@ -1,15 +1,16 @@
+import { ClasseService } from "@/services/classeService";
 import { copyToClipboard } from "@/utils";
 import { Button, Container, InputText } from "@snu/ds/admin";
+import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { HiCheckCircle, HiOutlinePencil } from "react-icons/hi";
 import { MdOutlineContentCopy } from "react-icons/md";
+import { toastr } from "react-redux-toastr";
 import { useToggle } from "react-use";
 import { ClassesRoutes, FunctionalException, translateModifierClasse } from "snu-lib";
 import { ReferentInfosConfirmerModal } from "./ReferentInfosConfirmerModal";
 import { ReferentInfosModifierModal, ReferentModifier } from "./ReferentInfosModifierModal";
 import { Rights } from "./types";
-import { ClasseService } from "@/services/classeService";
-import { toastr } from "react-redux-toastr";
 
 interface Props {
   classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>;
@@ -39,19 +40,22 @@ export default function ReferentInfos({ classe, currentReferent, rights, isLoadi
     toggleModalConfirmer();
   };
 
-  const handleConfirmer = async () => {
-    const newReferentValidated = newReferent!;
-    try {
-      await ClasseService.modifierReferentClasse(classe._id, newReferentValidated);
+  const { isPending, mutate } = useMutation({
+    mutationFn: async () => {
+      return await ClasseService.modifierReferentClasse(classe._id, newReferent!);
+    },
+    onSuccess: (updatedReferent) => {
       toastr.success("Opération réussie", "Le référent a été mis à jour");
-    } catch (error) {
+      toggleModalConfirmer();
+      onModifierReferent(updatedReferent);
+    },
+    onError(error) {
       if (error instanceof FunctionalException) {
-        toastr.error("Erreur", `${translateModifierClasse(error?.message)} - Erreur : ${error?.correlationId}`);
+        toastr.error(translateModifierClasse(error?.message), `Erreur : ${error?.correlationId}`);
       }
-    }
-    toggleModalConfirmer();
-    onModifierReferent(newReferentValidated);
-  };
+    },
+  });
+
   return (
     <>
       <Container title="Référent de classe" actions={containerActionList(rights.canEditRef)}>
@@ -85,8 +89,9 @@ export default function ReferentInfos({ classe, currentReferent, rights, isLoadi
           previousReferent={currentReferent!}
           referent={newReferent}
           isOpen={showModalConfirmer}
+          isPending={isPending}
           onModalClose={toggleModalConfirmer}
-          onConfirmer={handleConfirmer}
+          onConfirmer={() => mutate()}
         />
       )}
     </>

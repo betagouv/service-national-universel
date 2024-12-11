@@ -35,7 +35,7 @@ export class ClasseAdminCleGuard implements CanActivate {
             );
         }
         return (
-            (await this.classeDepartementGuard.canActivate(context)) &&
+            (await this.classeDepartementGuard.canActivate(context)) ||
             (await this.classeRegionGuard.canActivate(context))
         );
     }

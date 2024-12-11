@@ -7,11 +7,12 @@ interface ReferentInfosConfirmerProps {
   previousReferent: ReferentModifier;
   referent: ReferentModifier;
   isOpen: boolean;
+  isPending: boolean;
   onModalClose: () => void;
   onConfirmer: () => void;
 }
 
-export const ReferentInfosConfirmerModal = ({ previousReferent, referent, isOpen, onModalClose, onConfirmer }: ReferentInfosConfirmerProps) => {
+export const ReferentInfosConfirmerModal = ({ previousReferent, referent, isOpen, isPending, onModalClose, onConfirmer }: ReferentInfosConfirmerProps) => {
   return (
     <div>
       <Modal
@@ -63,7 +64,7 @@ export const ReferentInfosConfirmerModal = ({ previousReferent, referent, isOpen
         footer={
           <div className="flex items-center justify-between gap-6">
             <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={onModalClose} />
-            <Button title="Confirmer" className="flex-1" onClick={onConfirmer} />
+            <Button loading={isPending} title="Confirmer" className="flex-1" onClick={onConfirmer} />
           </div>
         }
       />
