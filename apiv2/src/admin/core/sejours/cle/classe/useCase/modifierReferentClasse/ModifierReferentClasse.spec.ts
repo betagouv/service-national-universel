@@ -11,7 +11,7 @@ import { ClasseGateway } from "../../Classe.gateway";
 import { ClasseModel } from "../../Classe.model";
 import { ConfigService } from "aws-sdk";
 import { ConfigModule } from "@nestjs/config";
-import configuration from "@config/configuration";
+import configuration from "@config/testConfiguration";
 import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 describe("ModifierReferentClasse", () => {

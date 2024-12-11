@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext } from "@nestjs/common";
 import { ModuleRef, Reflector } from "@nestjs/core";
 import { Test, TestingModule } from "@nestjs/testing";
-import { AnyGuard, UseAnyGuard } from "./any.guard";
+import { AnyGuard } from "./Any.guard";
 
 describe("AnyGuard", () => {
     let guard: AnyGuard;
