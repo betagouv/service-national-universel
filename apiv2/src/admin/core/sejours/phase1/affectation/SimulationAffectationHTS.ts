@@ -19,11 +19,11 @@ import { SejourGateway } from "../sejour/Sejour.gateway";
 import { SejourModel } from "../sejour/Sejour.model";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { CentreGateway } from "../centre/Centre.gateway";
-import { JeuneModel } from "../../jeune/Jeune.model";
 import { SessionGateway } from "../session/Session.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
+import { SimulationAffectationHTSTaskParameters } from "./SimulationAffectationHTSTask.model";
 
-const NB_MAX_ITERATION = 50;
+const NB_MAX_ITERATION = 100;
 
 export type SimulationAffectationHTSResult = {
     rapportData: RapportData;
@@ -56,48 +56,54 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         sessionId,
         departements,
         niveauScolaires,
-        changementDepartements,
-    }: {
-        sessionId: string;
-        departements: string[];
-        niveauScolaires: Array<keyof typeof GRADES>;
-        changementDepartements: { origine: string; destination: string }[];
-    }): Promise<SimulationAffectationHTSResult> {
+        sdrImportId,
+        etranger,
+    }: SimulationAffectationHTSTaskParameters): Promise<SimulationAffectationHTSResult> {
         if (departements.some((departement) => RegionsHorsMetropole.includes(department2region[departement]))) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_DEPARTEMENT_HORS_METROPOLE);
         }
 
         const session = await this.sessionGateway.findById(sessionId);
         if (!session) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "sessionId");
         }
 
         // Chargement des données associés à la session
-        const ligneDeBusList = await this.ligneDeBusGateway.findBySessionId(sessionId);
+        // TODO: utiliser cohortId (actuellement non présent en base sur les lige de bus)
+        const ligneDeBusList = await this.ligneDeBusGateway.findBySessionNom(session.nom);
         if (ligneDeBusList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "lignes de bus");
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucune ligne de bus !");
         }
         const sejoursList = await this.sejoursGateway.findBySessionId(sessionId);
         if (sejoursList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "sejours");
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun sejours !");
         }
-        const pdrList = await this.pointDeRassemblementGateway.findBySessionId(sessionId);
+        // const pdrList = await this.pointDeRassemblementGateway.findBySessionId(sessionId);
+        // Les PDR ne sont plus rattachés à une session
+        const pdrIds = [...new Set(ligneDeBusList.flatMap((ligne) => ligne.pointDeRassemblementIds))];
+        const pdrList = await this.pointDeRassemblementGateway.findByIds(pdrIds);
         if (pdrList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "PDRs");
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun PDRs !");
         }
         const centreList = await this.centresGateway.findBySessionId(sessionId);
         if (centreList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "centres");
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun centres !");
         }
-        const allJeunes = await this.jeuneGateway.findBySessionIdStatusNiveauScolairesAndDepartements(
+        let allJeunes = await this.jeuneGateway.findBySessionIdStatusNiveauScolairesAndDepartements(
             sessionId,
             YOUNG_STATUS.VALIDATED,
             niveauScolaires,
             departements,
         );
-        if (allJeunes.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "jeunes");
+        if (!etranger) {
+            allJeunes = allJeunes.filter((jeune) => jeune.paysScolarite === "FRANCE");
         }
+        if (allJeunes.length === 0) {
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun jeune !");
+        }
+
+        const changementDepartements =
+            await this.simulationAffectationHTSService.getChangementsDepartements(sdrImportId);
 
         // on sépare les jeunes intra dep des autres
         const { jeunesList, jeuneIntraDepartementList } = allJeunes.reduce(
@@ -106,13 +112,24 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                     ["oui", "true"].includes(jeune.handicapMemeDepartment!) &&
                     jeune.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION
                 ) {
-                    acc.jeuneIntraDepartementList.push(jeune);
+                    acc.jeuneIntraDepartementList.push(jeune as JeuneAffectationModel);
                 } else {
-                    acc.jeunesList.push(jeune);
+                    const jeuneAaffecter = jeune as JeuneAffectationModel;
+                    const newDepartement = this.simulationAffectationHTSService.getJeuneAffectationDepartement(
+                        jeuneAaffecter,
+                        changementDepartements,
+                    );
+                    if (newDepartement && newDepartement !== jeune.departement) {
+                        jeuneAaffecter.departementOrigine = jeune.departement;
+                        jeuneAaffecter.regionOrigine = jeune.region;
+                        jeuneAaffecter.departement = newDepartement;
+                        jeuneAaffecter.region = department2region[newDepartement];
+                    }
+                    acc.jeunesList.push(jeuneAaffecter);
                 }
                 return acc;
             },
-            { jeunesList: [] as JeuneModel[], jeuneIntraDepartementList: [] as JeuneModel[] },
+            { jeunesList: [] as JeuneAffectationModel[], jeuneIntraDepartementList: [] as JeuneAffectationModel[] },
         );
 
         // On calcul les taux de repartition (garcon/fille, qpv+/qpv-, psh+/psh-)
@@ -128,7 +145,6 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             jeuneAttenteAffectationList,
             pdrList,
             ligneDeBusList,
-            changementDepartements,
         );
 
         const results: Omit<SimulationAffectationHTSResult, "rapportData" | "rapportFile"> = {
@@ -161,6 +177,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                     jeunesList,
                     sejoursList,
                     ligneDeBusList,
+                    pdrList,
                 );
 
             const tauxRepartitionCentres = this.simulationAffectationHTSService.calculTauxRepartitionParCentre(
@@ -218,6 +235,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             pdrList,
             jeunesList,
             jeuneIntraDepartementList,
+            changementDepartements,
             results.analytics,
         );
 

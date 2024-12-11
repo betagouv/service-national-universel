@@ -1,409 +1,335 @@
 [
-  {
-    "id": "65f9c8bb735e0e12a4213c18",
-    "pointDeRassemblementIds": [
-      "63c57454a9406608cdbea219"
-    ],
-    "capaciteJeunes": 60,
-    "placesOccupeesJeunes": 54,
-    "centreId": "657338286e801c0816d598ec",
-    "numeroLigne": "IDF078036",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bb735e0e1584213ba9",
-    "pointDeRassemblementIds": [
-      "63c7e451342eaa08cd1e5fb7"
-    ],
-    "capaciteJeunes": 97,
-    "placesOccupeesJeunes": 0,
-    "centreId": "6569b8578bc29e081912f4f4",
-    "numeroLigne": "IDF077088",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bb735e0e2f10213bcc",
-    "pointDeRassemblementIds": [
-      "63c57454a9406608cdbea219"
-    ],
-    "capaciteJeunes": 60,
-    "placesOccupeesJeunes": 50,
-    "centreId": "657334e06e801c0816d4550c",
-    "numeroLigne": "IDF078018",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bb735e0e4382213bf2",
-    "pointDeRassemblementIds": [
-      "63c57454a9406608cdbea219"
-    ],
-    "capaciteJeunes": 60,
-    "placesOccupeesJeunes": 46,
-    "centreId": "609bebb80c1cc9a888ae8ff7",
-    "numeroLigne": "IDF078028",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8ba735e0e67f3213b60",
-    "pointDeRassemblementIds": [
-      "6475c453ac685113c24a232e"
-    ],
-    "capaciteJeunes": 156,
-    "placesOccupeesJeunes": 137,
-    "centreId": "609bebb00c1cc9a888ae8fa8",
-    "numeroLigne": "IDF075015",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8ba735e0e8af0213b86",
-    "pointDeRassemblementIds": [
-      "63c7e451342eaa08cd1e5fb7"
-    ],
-    "capaciteJeunes": 73,
-    "placesOccupeesJeunes": 65,
-    "centreId": "659e6f7fe34856081968e07b",
-    "numeroLigne": "IDF077010",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bc735e0ec2fe213c67",
-    "pointDeRassemblementIds": [
-      "65a15b9600ca524e3fe6b470"
-    ],
-    "capaciteJeunes": 66,
-    "placesOccupeesJeunes": 60,
-    "centreId": "657334e06e801c0816d4550c",
-    "numeroLigne": "IDF092018",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bc735e0eb08a213c8a",
-    "pointDeRassemblementIds": [
-      "65a15b9600ca524e3fe6b470"
-    ],
-    "capaciteJeunes": 66,
-    "placesOccupeesJeunes": 55,
-    "centreId": "609bebb80c1cc9a888ae8ff7",
-    "numeroLigne": "IDF092028",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bb735e0e4b6b213c3e",
-    "pointDeRassemblementIds": [
-      "64491b2faea9311107319d1c"
-    ],
-    "capaciteJeunes": 154,
-    "placesOccupeesJeunes": 133,
-    "centreId": "659fb588fc6cec0815125b75",
-    "numeroLigne": "IDF091076",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bc735e0e3fda213cad",
-    "pointDeRassemblementIds": [
-      "65a15b9600ca524e3fe6b470"
-    ],
-    "capaciteJeunes": 52,
-    "placesOccupeesJeunes": 43,
-    "centreId": "657338286e801c0816d598ec",
-    "numeroLigne": "IDF092036",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bc735e0e4f40213cf3",
-    "pointDeRassemblementIds": [
-      "65c0e291dde5c208168ca30d"
-    ],
-    "capaciteJeunes": 104,
-    "placesOccupeesJeunes": 81,
-    "centreId": "63da30bc47841408c590d73f",
-    "numeroLigne": "IDF093062",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bc735e0e3d21213cd0",
-    "pointDeRassemblementIds": [
-      "65c0e291dde5c208168ca30d"
-    ],
-    "capaciteJeunes": 66,
-    "placesOccupeesJeunes": 51,
-    "centreId": "65c4f8c6139d970093e31712",
-    "numeroLigne": "IDF093002",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bd735e0e9331213d94",
-    "pointDeRassemblementIds": [
-      "6499b5f90a2672097e534834"
-    ],
-    "capaciteJeunes": 90,
-    "placesOccupeesJeunes": 80,
-    "centreId": "63da30bc47841408c590d73f",
-    "numeroLigne": "IDF095062",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bc735e0ecd8e213d16",
-    "pointDeRassemblementIds": [
-      "63c575bca9406608cdbecc8d"
-    ],
-    "capaciteJeunes": 65,
-    "placesOccupeesJeunes": 53,
-    "centreId": "659e6f7fe34856081968e07b",
-    "numeroLigne": "IDF094010",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bd735e0ef70e213d6e",
-    "pointDeRassemblementIds": [
-      "6499b5f90a2672097e534834"
-    ],
-    "capaciteJeunes": 60,
-    "placesOccupeesJeunes": 50,
-    "centreId": "65c4f8c6139d970093e31712",
-    "numeroLigne": "IDF095002",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bd735e0e65e1213dba",
-    "pointDeRassemblementIds": [
-      "639877d33bc18708cc395877"
-    ],
-    "capaciteJeunes": 15,
-    "placesOccupeesJeunes": 15,
-    "centreId": "643fbcd7ae348d19a6cefcd3",
-    "numeroLigne": "OCC009012",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bd735e0e4ba0213de6",
-    "pointDeRassemblementIds": [
-      "6568aa808bc29e0819ac1353"
-    ],
-    "capaciteJeunes": 26,
-    "placesOccupeesJeunes": 24,
-    "centreId": "6568a9278bc29e0819aba013",
-    "numeroLigne": "OCC011009",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8be735e0e0040213e75",
-    "pointDeRassemblementIds": [
-      "6398a12b208de508cea15907"
-    ],
-    "capaciteJeunes": 50,
-    "placesOccupeesJeunes": 45,
-    "centreId": "65c4b4ee0e0569081d39bf50",
-    "numeroLigne": "OCC030112",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8be735e0e55bf213e9b",
-    "pointDeRassemblementIds": [
-      "64666ef180723613ed0b51b4"
-    ],
-    "capaciteJeunes": 53,
-    "placesOccupeesJeunes": 51,
-    "centreId": "643fbcd7ae348d19a6cefcd3",
-    "numeroLigne": "OCC031012",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bd735e0e242d213d42",
-    "pointDeRassemblementIds": [
-      "63c575bca9406608cdbecc8d"
-    ],
-    "capaciteJeunes": 85,
-    "placesOccupeesJeunes": 0,
-    "centreId": "6569b8578bc29e081912f4f4",
-    "numeroLigne": "IDF094088",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bd735e0e6b1d213e03",
-    "pointDeRassemblementIds": [
-      "6568aa808bc29e0819ac1353"
-    ],
-    "capaciteJeunes": 24,
-    "placesOccupeesJeunes": 20,
-    "centreId": "6568a84d8bc29e0819ab5935",
-    "numeroLigne": "OCC011082",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8be735e0e62be213e4f",
-    "pointDeRassemblementIds": [
-      "6398a12b208de508cea15907"
-    ],
-    "capaciteJeunes": 50,
-    "placesOccupeesJeunes": 42,
-    "centreId": "6446974adeaab4137a4d3957",
-    "numeroLigne": "OCC030081",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8be735e0e3aec213ef8",
-    "pointDeRassemblementIds": [
-      "64666ef180723613ed0b51b4"
-    ],
-    "capaciteJeunes": 63,
-    "placesOccupeesJeunes": 51,
-    "centreId": "6568a84d8bc29e0819ab5935",
-    "numeroLigne": "OCC031082",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8be735e0eb31f213ec7",
-    "pointDeRassemblementIds": [
-      "64666ef180723613ed0b51b4"
-    ],
-    "capaciteJeunes": 46,
-    "placesOccupeesJeunes": 39,
-    "centreId": "6446974adeaab4137a4d3957",
-    "numeroLigne": "OCC031081",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bf735e0ee8d6213f44",
-    "pointDeRassemblementIds": [
-      "63987a0619bd7608d8b35dc4"
-    ],
-    "capaciteJeunes": 25,
-    "placesOccupeesJeunes": 14,
-    "centreId": "65c4b4ee0e0569081d39bf50",
-    "numeroLigne": "OCC032112",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8be735e0e0e84213e21",
-    "pointDeRassemblementIds": [
-      "656dfceb8bc29e0819e3b61c"
-    ],
-    "capaciteJeunes": 31,
-    "placesOccupeesJeunes": 26,
-    "centreId": "6446974adeaab4137a4d3957",
-    "numeroLigne": "OCC012081",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bf735e0ee596213f1e",
-    "pointDeRassemblementIds": [
-      "64666ef180723613ed0b51b4"
-    ],
-    "capaciteJeunes": 18,
-    "placesOccupeesJeunes": 18,
-    "centreId": "65c4b4ee0e0569081d39bf50",
-    "numeroLigne": "OCC031112",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bf735e0e70d1213f8d",
-    "pointDeRassemblementIds": [
-      "64666fe480723613ed0b5520"
-    ],
-    "capaciteJeunes": 58,
-    "placesOccupeesJeunes": 47,
-    "centreId": "643fbcd7ae348d19a6cefcd3",
-    "numeroLigne": "OCC034012",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bf735e0e2ea6213f6a",
-    "pointDeRassemblementIds": [
-      "64666fe480723613ed0b5520"
-    ],
-    "capaciteJeunes": 52,
-    "placesOccupeesJeunes": 44,
-    "centreId": "6568a9278bc29e0819aba013",
-    "numeroLigne": "OCC034009",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bf735e0e0fc8213fd7",
-    "pointDeRassemblementIds": [
-      "6398797d3bc18708cc3981f6"
-    ],
-    "capaciteJeunes": 20,
-    "placesOccupeesJeunes": 10,
-    "centreId": "65c4b4ee0e0569081d39bf50",
-    "numeroLigne": "OCC046112",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8c0735e0e7de7213ffe",
-    "pointDeRassemblementIds": [
-      "656dfd7c8bc29e0819e4083d"
-    ],
-    "capaciteJeunes": 10,
-    "placesOccupeesJeunes": 10,
-    "centreId": "65c4b4ee0e0569081d39bf50",
-    "numeroLigne": "OCC048112",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8c0735e0e7e9321401c",
-    "pointDeRassemblementIds": [
-      "6398798c3bc18708cc398239"
-    ],
-    "capaciteJeunes": 25,
-    "placesOccupeesJeunes": 22,
-    "centreId": "6568a84d8bc29e0819ab5935",
-    "numeroLigne": "OCC065082",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8bf735e0e1f9a213fb0",
-    "pointDeRassemblementIds": [
-      "64666fe480723613ed0b5520"
-    ],
-    "capaciteJeunes": 40,
-    "placesOccupeesJeunes": 36,
-    "centreId": "609bebc80c1cc9a888ae90b2",
-    "numeroLigne": "OCC034048",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8c1735e0ece30214088",
-    "pointDeRassemblementIds": [
-      "65cf8f7c55bd6500967db194"
-    ],
-    "capaciteJeunes": 40,
-    "placesOccupeesJeunes": 38,
-    "centreId": "609bebc80c1cc9a888ae90b2",
-    "numeroLigne": "OCC081048",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8c1735e0e762c214065",
-    "pointDeRassemblementIds": [
-      "64666f6680723613ed0b530b"
-    ],
-    "capaciteJeunes": 12,
-    "placesOccupeesJeunes": 9,
-    "centreId": "65c4b4ee0e0569081d39bf50",
-    "numeroLigne": "OCC066112",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8c1735e0ed8112140a2",
-    "pointDeRassemblementIds": [
-      "6464c8927072a613df16bd2f"
-    ],
-    "capaciteJeunes": 30,
-    "placesOccupeesJeunes": 29,
-    "centreId": "65c4b4ee0e0569081d39bf50",
-    "numeroLigne": "OCC082112",
-    "sessionNom": "Avril 2024 - C"
-  },
-  {
-    "id": "65f9c8c1735e0e7530214042",
-    "pointDeRassemblementIds": [
-      "64666f6680723613ed0b530b"
-    ],
-    "capaciteJeunes": 48,
-    "placesOccupeesJeunes": 31,
-    "centreId": "6568a9278bc29e0819aba013",
-    "numeroLigne": "OCC066009",
-    "sessionNom": "Avril 2024 - C"
-  }
+    {
+        "id": "65f9c8bb735e0e12a4213c18",
+        "pointDeRassemblementIds": ["63c57454a9406608cdbea219"],
+        "capaciteJeunes": 60,
+        "placesOccupeesJeunes": 54,
+        "centreId": "657338286e801c0816d598ec",
+        "numeroLigne": "IDF078036",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bb735e0e1584213ba9",
+        "pointDeRassemblementIds": ["63c7e451342eaa08cd1e5fb7"],
+        "capaciteJeunes": 97,
+        "placesOccupeesJeunes": 0,
+        "centreId": "6569b8578bc29e081912f4f4",
+        "numeroLigne": "IDF077088",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bb735e0e2f10213bcc",
+        "pointDeRassemblementIds": ["63c57454a9406608cdbea219"],
+        "capaciteJeunes": 60,
+        "placesOccupeesJeunes": 50,
+        "centreId": "657334e06e801c0816d4550c",
+        "numeroLigne": "IDF078018",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bb735e0e4382213bf2",
+        "pointDeRassemblementIds": ["63c57454a9406608cdbea219"],
+        "capaciteJeunes": 60,
+        "placesOccupeesJeunes": 46,
+        "centreId": "609bebb80c1cc9a888ae8ff7",
+        "numeroLigne": "IDF078028",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8ba735e0e67f3213b60",
+        "pointDeRassemblementIds": ["6475c453ac685113c24a232e"],
+        "capaciteJeunes": 156,
+        "placesOccupeesJeunes": 137,
+        "centreId": "609bebb00c1cc9a888ae8fa8",
+        "numeroLigne": "IDF075015",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8ba735e0e8af0213b86",
+        "pointDeRassemblementIds": ["63c7e451342eaa08cd1e5fb7"],
+        "capaciteJeunes": 73,
+        "placesOccupeesJeunes": 65,
+        "centreId": "659e6f7fe34856081968e07b",
+        "numeroLigne": "IDF077010",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bc735e0ec2fe213c67",
+        "pointDeRassemblementIds": ["65a15b9600ca524e3fe6b470"],
+        "capaciteJeunes": 66,
+        "placesOccupeesJeunes": 60,
+        "centreId": "657334e06e801c0816d4550c",
+        "numeroLigne": "IDF092018",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bc735e0eb08a213c8a",
+        "pointDeRassemblementIds": ["65a15b9600ca524e3fe6b470"],
+        "capaciteJeunes": 66,
+        "placesOccupeesJeunes": 55,
+        "centreId": "609bebb80c1cc9a888ae8ff7",
+        "numeroLigne": "IDF092028",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bb735e0e4b6b213c3e",
+        "pointDeRassemblementIds": ["64491b2faea9311107319d1c"],
+        "capaciteJeunes": 154,
+        "placesOccupeesJeunes": 133,
+        "centreId": "659fb588fc6cec0815125b75",
+        "numeroLigne": "IDF091076",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bc735e0e3fda213cad",
+        "pointDeRassemblementIds": ["65a15b9600ca524e3fe6b470"],
+        "capaciteJeunes": 52,
+        "placesOccupeesJeunes": 43,
+        "centreId": "657338286e801c0816d598ec",
+        "numeroLigne": "IDF092036",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bc735e0e4f40213cf3",
+        "pointDeRassemblementIds": ["65c0e291dde5c208168ca30d"],
+        "capaciteJeunes": 104,
+        "placesOccupeesJeunes": 81,
+        "centreId": "63da30bc47841408c590d73f",
+        "numeroLigne": "IDF093062",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bc735e0e3d21213cd0",
+        "pointDeRassemblementIds": ["65c0e291dde5c208168ca30d"],
+        "capaciteJeunes": 66,
+        "placesOccupeesJeunes": 51,
+        "centreId": "65c4f8c6139d970093e31712",
+        "numeroLigne": "IDF093002",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bd735e0e9331213d94",
+        "pointDeRassemblementIds": ["6499b5f90a2672097e534834"],
+        "capaciteJeunes": 90,
+        "placesOccupeesJeunes": 80,
+        "centreId": "63da30bc47841408c590d73f",
+        "numeroLigne": "IDF095062",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bc735e0ecd8e213d16",
+        "pointDeRassemblementIds": ["63c575bca9406608cdbecc8d"],
+        "capaciteJeunes": 65,
+        "placesOccupeesJeunes": 53,
+        "centreId": "659e6f7fe34856081968e07b",
+        "numeroLigne": "IDF094010",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bd735e0ef70e213d6e",
+        "pointDeRassemblementIds": ["6499b5f90a2672097e534834"],
+        "capaciteJeunes": 60,
+        "placesOccupeesJeunes": 50,
+        "centreId": "65c4f8c6139d970093e31712",
+        "numeroLigne": "IDF095002",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bd735e0e65e1213dba",
+        "pointDeRassemblementIds": ["639877d33bc18708cc395877"],
+        "capaciteJeunes": 15,
+        "placesOccupeesJeunes": 15,
+        "centreId": "643fbcd7ae348d19a6cefcd3",
+        "numeroLigne": "OCC009012",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bd735e0e4ba0213de6",
+        "pointDeRassemblementIds": ["6568aa808bc29e0819ac1353"],
+        "capaciteJeunes": 26,
+        "placesOccupeesJeunes": 24,
+        "centreId": "6568a9278bc29e0819aba013",
+        "numeroLigne": "OCC011009",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8be735e0e0040213e75",
+        "pointDeRassemblementIds": ["6398a12b208de508cea15907"],
+        "capaciteJeunes": 50,
+        "placesOccupeesJeunes": 45,
+        "centreId": "65c4b4ee0e0569081d39bf50",
+        "numeroLigne": "OCC030112",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8be735e0e55bf213e9b",
+        "pointDeRassemblementIds": ["64666ef180723613ed0b51b4"],
+        "capaciteJeunes": 53,
+        "placesOccupeesJeunes": 51,
+        "centreId": "643fbcd7ae348d19a6cefcd3",
+        "numeroLigne": "OCC031012",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bd735e0e242d213d42",
+        "pointDeRassemblementIds": ["63c575bca9406608cdbecc8d"],
+        "capaciteJeunes": 85,
+        "placesOccupeesJeunes": 0,
+        "centreId": "6569b8578bc29e081912f4f4",
+        "numeroLigne": "IDF094088",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bd735e0e6b1d213e03",
+        "pointDeRassemblementIds": ["6568aa808bc29e0819ac1353"],
+        "capaciteJeunes": 24,
+        "placesOccupeesJeunes": 20,
+        "centreId": "6568a84d8bc29e0819ab5935",
+        "numeroLigne": "OCC011082",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8be735e0e62be213e4f",
+        "pointDeRassemblementIds": ["6398a12b208de508cea15907"],
+        "capaciteJeunes": 50,
+        "placesOccupeesJeunes": 42,
+        "centreId": "6446974adeaab4137a4d3957",
+        "numeroLigne": "OCC030081",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8be735e0e3aec213ef8",
+        "pointDeRassemblementIds": ["64666ef180723613ed0b51b4"],
+        "capaciteJeunes": 63,
+        "placesOccupeesJeunes": 51,
+        "centreId": "6568a84d8bc29e0819ab5935",
+        "numeroLigne": "OCC031082",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8be735e0eb31f213ec7",
+        "pointDeRassemblementIds": ["64666ef180723613ed0b51b4"],
+        "capaciteJeunes": 46,
+        "placesOccupeesJeunes": 39,
+        "centreId": "6446974adeaab4137a4d3957",
+        "numeroLigne": "OCC031081",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bf735e0ee8d6213f44",
+        "pointDeRassemblementIds": ["63987a0619bd7608d8b35dc4"],
+        "capaciteJeunes": 25,
+        "placesOccupeesJeunes": 14,
+        "centreId": "65c4b4ee0e0569081d39bf50",
+        "numeroLigne": "OCC032112",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8be735e0e0e84213e21",
+        "pointDeRassemblementIds": ["656dfceb8bc29e0819e3b61c"],
+        "capaciteJeunes": 31,
+        "placesOccupeesJeunes": 26,
+        "centreId": "6446974adeaab4137a4d3957",
+        "numeroLigne": "OCC012081",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bf735e0ee596213f1e",
+        "pointDeRassemblementIds": ["64666ef180723613ed0b51b4"],
+        "capaciteJeunes": 18,
+        "placesOccupeesJeunes": 18,
+        "centreId": "65c4b4ee0e0569081d39bf50",
+        "numeroLigne": "OCC031112",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bf735e0e70d1213f8d",
+        "pointDeRassemblementIds": ["64666fe480723613ed0b5520"],
+        "capaciteJeunes": 58,
+        "placesOccupeesJeunes": 47,
+        "centreId": "643fbcd7ae348d19a6cefcd3",
+        "numeroLigne": "OCC034012",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bf735e0e2ea6213f6a",
+        "pointDeRassemblementIds": ["64666fe480723613ed0b5520"],
+        "capaciteJeunes": 52,
+        "placesOccupeesJeunes": 44,
+        "centreId": "6568a9278bc29e0819aba013",
+        "numeroLigne": "OCC034009",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bf735e0e0fc8213fd7",
+        "pointDeRassemblementIds": ["6398797d3bc18708cc3981f6"],
+        "capaciteJeunes": 20,
+        "placesOccupeesJeunes": 10,
+        "centreId": "65c4b4ee0e0569081d39bf50",
+        "numeroLigne": "OCC046112",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8c0735e0e7de7213ffe",
+        "pointDeRassemblementIds": ["656dfd7c8bc29e0819e4083d"],
+        "capaciteJeunes": 10,
+        "placesOccupeesJeunes": 10,
+        "centreId": "65c4b4ee0e0569081d39bf50",
+        "numeroLigne": "OCC048112",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8c0735e0e7e9321401c",
+        "pointDeRassemblementIds": ["6398798c3bc18708cc398239"],
+        "capaciteJeunes": 25,
+        "placesOccupeesJeunes": 22,
+        "centreId": "6568a84d8bc29e0819ab5935",
+        "numeroLigne": "OCC065082",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8bf735e0e1f9a213fb0",
+        "pointDeRassemblementIds": ["64666fe480723613ed0b5520"],
+        "capaciteJeunes": 40,
+        "placesOccupeesJeunes": 36,
+        "centreId": "609bebc80c1cc9a888ae90b2",
+        "numeroLigne": "OCC034048",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8c1735e0ece30214088",
+        "pointDeRassemblementIds": ["65cf8f7c55bd6500967db194"],
+        "capaciteJeunes": 40,
+        "placesOccupeesJeunes": 38,
+        "centreId": "609bebc80c1cc9a888ae90b2",
+        "numeroLigne": "OCC081048",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8c1735e0e762c214065",
+        "pointDeRassemblementIds": ["64666f6680723613ed0b530b"],
+        "capaciteJeunes": 12,
+        "placesOccupeesJeunes": 9,
+        "centreId": "65c4b4ee0e0569081d39bf50",
+        "numeroLigne": "OCC066112",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8c1735e0ed8112140a2",
+        "pointDeRassemblementIds": ["6464c8927072a613df16bd2f"],
+        "capaciteJeunes": 30,
+        "placesOccupeesJeunes": 29,
+        "centreId": "65c4b4ee0e0569081d39bf50",
+        "numeroLigne": "OCC082112",
+        "sessionNom": "Avril 2024 - C"
+    },
+    {
+        "id": "65f9c8c1735e0e7530214042",
+        "pointDeRassemblementIds": ["64666f6680723613ed0b530b"],
+        "capaciteJeunes": 48,
+        "placesOccupeesJeunes": 31,
+        "centreId": "6568a9278bc29e0819aba013",
+        "numeroLigne": "OCC066009",
+        "sessionNom": "Avril 2024 - C"
+    }
 ]
