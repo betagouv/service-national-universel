@@ -22,3 +22,8 @@ export class PostSimulationsPayloadDto {
     @IsBoolean()
     affecterPDR: boolean;
 }
+
+export class PostSimulationValiderPayloadDto {
+    @IsBoolean()
+    affecterPDR: boolean;
+}

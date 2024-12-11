@@ -42,7 +42,7 @@ export default function OperationsTab({ session }: OperationTabProps) {
       id: "traitements" as const,
       title: "Historique des traitements",
       leftIcon: <HiOutlineDocumentReport size={20} className="mt-0.5" />,
-      content: <TraitementsSubTab sessionId={session._id!} />,
+      content: <TraitementsSubTab session={session} />,
     },
   ];
 
