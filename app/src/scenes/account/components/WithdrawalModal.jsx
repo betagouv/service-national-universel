@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Modal from "../../../components/ui/modals/Modal";
 import Close from "../../../assets/Close";
 import Calendar from "../../../assets/icons/Calendar";
@@ -6,16 +6,8 @@ import { CancelButton } from "../../../components/buttons/SimpleButtons";
 import { Link } from "react-router-dom";
 import ChevronRight from "../../../assets/icons/ChevronRight";
 
-const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
-  const [isLoading, setIsLoading] = useState(false);
+const WithdrawalModal = ({ isOpen, onCancel, young }) => {
   const abandonStatus = ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION"];
-
-  const onCancel = () => {
-    if (isLoading) {
-      return null;
-    }
-    onCancelProps();
-  };
 
   return (
     <Modal isOpen={isOpen} onClose={onCancel} className="w-full bg-white md:w-[512px]">
