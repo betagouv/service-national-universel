@@ -1,7 +1,11 @@
 // TODO: Mettre à niveau pour de l'ecriture
 export type JeuneModel = {
     id: string;
+    statut: string;
     statutPhase1: string;
+    email: string;
+    telephone?: string;
+    dateNaissance?: Date;
     centreId?: string;
     handicapMemeDepartement?: string;
     genre?: string;
@@ -18,12 +22,30 @@ export type JeuneModel = {
     };
     pointDeRassemblementId?: string;
     ligneDeBusId?: string;
+    sejourId?: string;
+    hasPDR?: string;
     sessionId?: string;
     sessionNom?: string;
     prenom?: string;
     nom?: string;
     deplacementPhase1Autonomous?: string;
+    cohesionStayPresence?: string;
+    presenceJDM?: string;
+    departInform?: string;
+    departSejourAt?: string;
+    departSejourMotif?: string;
+    departSejourMotifComment?: string;
     transportInfoGivenByLocal?: string;
+    // Parent 1 Information
+    parent1Prenom?: string;
+    parent1Nom?: string;
+    parent1Email?: string;
+    parent1Telephone?: string;
+    // Parent 2 Information
+    parent2Prenom?: string;
+    parent2Nom?: string;
+    parent2Email?: string;
+    parent2Telephone?: string;
     // mandatory
     cniFiles: any;
     highSkilledActivityProofFiles: any;
@@ -45,8 +67,6 @@ export type JeuneModel = {
     phase2ApplicationStatus: any;
     phase2ApplicationFilesType: any;
     missionsInMail: any;
-    statut: any;
-    email: any;
     loginAttempts: any;
     token2FA: any;
     attempts2FA: any;
