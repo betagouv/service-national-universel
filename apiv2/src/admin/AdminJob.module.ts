@@ -21,6 +21,9 @@ import { FileProvider } from "@shared/infra/File.provider";
 import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
+import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
+import { ValiderAffectationHTS } from "./core/sejours/phase1/affectation/ValiderAffectationHTS";
+import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 
 @Module({
     imports: [ClsModule.forRoot({}), ConfigModule, TaskModule, DatabaseModule],
@@ -31,6 +34,7 @@ import { useCaseProvider as referentielUseCaseProvider } from "./infra/referenti
         AdminTaskRepository,
         ...jeuneMongoProviders,
         ...centreMongoProviders,
+        ...planDeTransportMongoProviders,
         ...ligneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
         ...sejourMongoProviders,
@@ -41,8 +45,10 @@ import { useCaseProvider as referentielUseCaseProvider } from "./infra/referenti
         { provide: FileGateway, useClass: FileProvider },
         { provide: TaskGateway, useClass: AdminTaskRepository },
         // add use case here
+        AffectationService,
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
+        ValiderAffectationHTS,
         ...referentielUseCaseProvider,
     ],
 })

@@ -5,7 +5,7 @@ import patchHistory from "mongoose-patch-history";
 import { LigneBusSchema, LigneBusTeamSchema, LigneBusType } from "snu-lib";
 
 export type LigneDeBusDocument = HydratedDocument<LigneBusType>;
-export const LigneDeBusName = "lignebuses";
+export const LigneDeBusName = "lignebus";
 export const LIGNEDEBUS_MONGOOSE_ENTITY = "LIGNEDEBUS_MONGOOSE_ENTITY";
 
 const LigneDeBusSchemaRef = new mongoose.Schema({

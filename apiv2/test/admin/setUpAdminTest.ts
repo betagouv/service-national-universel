@@ -41,6 +41,8 @@ import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
 import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
+import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
+import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -68,6 +70,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         controllers: [ClasseController, AffectationController, Phase1Controller, AuthController],
         providers: [
             ClasseService,
+            AffectationService,
             SimulationAffectationHTSService,
             ReferentielRoutesService,
             ...cleGatewayProviders,
@@ -78,6 +81,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...etablissementMongoProviders,
             ...jeuneMongoProviders,
             ...centreMongoProviders,
+            ...planDeTransportMongoProviders,
             ...ligneDeBusMongoProviders,
             ...pointDeRassemblementMongoProviders,
             ...sejourMongoProviders,

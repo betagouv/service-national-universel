@@ -45,6 +45,8 @@ import { FileProvider } from "@shared/infra/File.provider";
 import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
 import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
 import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
+import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
+import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 
 @Module({
     imports: [
@@ -66,6 +68,7 @@ import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielR
     ],
     providers: [
         ClasseService,
+        AffectationService,
         SimulationAffectationHTSService,
         ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
@@ -74,6 +77,7 @@ import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielR
         ...etablissementMongoProviders,
         ...jeuneMongoProviders,
         ...centreMongoProviders,
+        ...planDeTransportMongoProviders,
         ...ligneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
         ...sejourMongoProviders,
