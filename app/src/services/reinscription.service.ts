@@ -1,8 +1,9 @@
 import { apiURL } from "@/config";
 
-export async function fetchReInscriptionOpen() {
+export async function fetchReInscriptionOpen(): Promise<boolean> {
   return fetch(`${apiURL}/cohort-session/isReInscriptionOpen`, {
-    headers: { "x-user-timezone": new Date().getTimezoneOffset() },
+    credentials: "include",
+    headers: { "x-user-timezone": new Date().getTimezoneOffset().toString() },
   })
     .then((res) => res.json())
     .then((res) => {

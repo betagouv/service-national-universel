@@ -21,18 +21,14 @@ import AvenirCohort from "./AvenirCohort";
 import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
-import { fetchReInscriptionOpen } from "../../services/reinscription.service";
-import { useQuery } from "@tanstack/react-query";
+import useReinscription from "../changeSejour/lib/useReinscription";
 
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
 
-  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useQuery({
-    queryKey: ["isReInscriptionOpen"],
-    queryFn: fetchReInscriptionOpen,
-  });
+  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useReinscription();
 
   if (!young || !cohort || isReinscriptionOpenLoading) return <Loader />;
 
