@@ -1,10 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { Redirect, Switch, useParams } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 import Loader from "@/components/Loader";
-import api from "@/services/api";
 import ReinscriptionContextProvider, { ReinscriptionContext } from "../../context/ReinscriptionContextProvider";
-import { SentryRoute, capture } from "../../sentry";
+import { SentryRoute } from "../../sentry";
 
 import StepEligibilite from "../preinscription/steps/stepEligibilite";
 import StepSejour from "../preinscription/steps/stepSejour";
@@ -13,12 +11,8 @@ import StepNoSejour from "../preinscription/steps/stepNoSejour";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import { hasAccessToReinscription } from "snu-lib";
 import FutureCohort from "../inscription2023/FutureCohort";
-import useAuth from "@/services/useAuth";
-import { fetchReInscriptionOpen } from "../../services/reinscription.service";
-import { useQuery } from "@tanstack/react-query";
-import { getCohort } from "@/utils/cohorts";
+import useReinscription from "../changeSejour/lib/useReinscription";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -45,17 +39,10 @@ const Step = () => {
 };
 
 export default function ReInscription() {
-  const { young } = useAuth();
-  const cohort = getCohort(young.cohort);
-  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useQuery({
-    queryKey: ["isReInscriptionOpen"],
-    queryFn: fetchReInscriptionOpen,
-  });
+  const { data: isReinscriptionOpen, isPending, isError } = useReinscription();
 
-  if (!hasAccessToReinscription(young, cohort)) return <Redirect to="/" />;
-
-  if (isReinscriptionOpenLoading) return <Loader />;
-
+  if (isPending) return <Loader />;
+  if (isError) return <div>Erreur</div>;
   if (!isReinscriptionOpen) return <FutureCohort />;
 
   return (
