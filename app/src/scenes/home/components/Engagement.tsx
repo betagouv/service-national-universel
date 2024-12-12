@@ -10,13 +10,15 @@ export default function Engagement() {
   if (isPending) return <Loader />;
   if (isError) return <div>Erreur</div>;
   return (
-    <section id="engagements" className="max-w-6xl mx-auto p-[1rem] md:p-[0rem]">
+    <section id="engagements" className="max-w-6xl mx-auto">
       <p className="font-bold leading-loose">Découvrez d’autres formes d’engagement</p>
       <p className="mt-1 text-gray-500">Si l’engagement vous donne envie, vous trouverez des dispositifs qui pourront vous intéresser.</p>
       <div className="flex gap-6 overflow-x-auto mt-3 pb-3">
-        {programs.map((program) => {
-          return <EngagementCard key={program._id} program={program} />;
-        })}
+        {programs
+          .sort((a, b) => a.order! - b.order!)
+          .map((program) => {
+            return <EngagementCard key={program._id} program={program} />;
+          })}
       </div>
       <Link to="/public-engagements">
         <div className="w-full mt-1 text-sm border-[1px] border-gray-300 p-2 text-center rounded-md">Découvrir les possibilités d'engagement</div>
