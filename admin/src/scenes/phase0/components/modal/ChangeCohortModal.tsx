@@ -14,9 +14,6 @@ import api from "@/services/api";
 import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
 import Loader from "@/components/Loader";
 import { getClasses, searchEtablissement } from "../../utils/service";
-import { Spinner } from "reactstrap";
-import { set } from "mongoose";
-
 interface Step {
   icon?: React.ReactNode;
   title?: string;
@@ -67,7 +64,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
   const [classes, setClasses] = useState<ClasseOption[]>([]);
   const [classe, setClasse] = useState<Classe & { cohort?: string; label: string }>();
   const [modaleError, setModaleError] = useState(false);
-  console.log(modaleError);
+
   let youngStatus = young.status;
   if (young.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
     youngStatus = YOUNG_STATUS.VALIDATED;
