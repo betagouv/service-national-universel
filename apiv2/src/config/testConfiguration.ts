@@ -13,6 +13,9 @@ export default () => ({
     },
     email: {
         provider: "mock",
+        apiKey: "",
+        smtpHost: "",
+        smtpPort: 1025,
     },
     urls: {
         admin: "config.ADMIN_URL",

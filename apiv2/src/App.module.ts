@@ -1,4 +1,4 @@
-import { Logger, MiddlewareConsumer, Module } from "@nestjs/common";
+import { Logger, MiddlewareConsumer, Module, ParseEnumPipe } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { SentryModule } from "@sentry/nestjs/setup";
 import configuration from "./config/configuration";

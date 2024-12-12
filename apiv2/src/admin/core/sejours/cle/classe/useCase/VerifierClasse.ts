@@ -14,10 +14,10 @@ import { EtablissementGateway } from "../../etablissement/Etablissement.gateway"
 import { GetReferentDepToBeNotified } from "../../referent/useCase/GetReferentDepToBeNotified";
 import { InviterReferentClasse } from "../../referent/useCase/InviteReferentClasse";
 import { ClasseGateway } from "../Classe.gateway";
-import { ClasseModel } from "../Classe.model";
+import { ClasseModel, ClasseWithReferentsModel } from "../Classe.model";
 
 @Injectable()
-export class VerifierClasse implements UseCase<ClasseModel> {
+export class VerifierClasse implements UseCase<ClasseWithReferentsModel> {
     constructor(
         @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
         @Inject(EtablissementGateway)
@@ -28,7 +28,7 @@ export class VerifierClasse implements UseCase<ClasseModel> {
         private readonly inviterReferentClasse: InviterReferentClasse,
         private readonly config: ConfigService,
     ) {}
-    async execute(classeId: string): Promise<ClasseModel> {
+    async execute(classeId: string): Promise<ClasseWithReferentsModel> {
         const classe = await this.classeGateway.findById(classeId);
         if (classe.statut !== STATUS_CLASSE.CREATED) {
             throw new FunctionalException(FunctionalExceptionCode.CLASSE_STATUT_INVALIDE);
@@ -84,6 +84,14 @@ export class VerifierClasse implements UseCase<ClasseModel> {
 
         const updatedClasse = await this.classeGateway.update({ ...classe, statut: STATUS_CLASSE.VERIFIED });
 
-        return updatedClasse;
+        return {
+            ...updatedClasse,
+            referents: referentsClasse.map((referent) => ({
+                id: referent.id,
+                nom: referent.nom,
+                prenom: referent.prenom,
+                email: referent.email,
+            })),
+        };
     }
 }

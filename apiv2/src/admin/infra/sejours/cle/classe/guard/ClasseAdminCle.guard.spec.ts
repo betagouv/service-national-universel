@@ -8,6 +8,7 @@ import { ClasseAdminCleGuard } from "./ClasseAdminCle.guard";
 import { ClasseDepartementGuard } from "./ClasseDepartement.guard";
 import { ClasseGuardService } from "./ClasseGuard.service";
 import { ClasseRegionGuard } from "./ClasseRegion.guard";
+import { ROLES } from "snu-lib";
 
 describe("ClasseAdminCleGuard", () => {
     let guard: ClasseAdminCleGuard;
@@ -54,9 +55,9 @@ describe("ClasseAdminCleGuard", () => {
         expect(guard).toBeDefined();
     });
 
-    it("should return true if user is super admin", async () => {
+    it("should return true if user is admin", async () => {
         const mockRequest = {
-            user: { role: "admin", sousRole: "god" },
+            user: { role: ROLES.ADMIN },
         } as CustomRequest;
         const mockContext = {
             switchToHttp: () => ({
@@ -76,7 +77,7 @@ describe("ClasseAdminCleGuard", () => {
             coordinateurIds: ["user_id"],
         };
         const mockRequest = {
-            user: { role: "admin_cle", id: "user_id" },
+            user: { role: ROLES.ADMINISTRATEUR_CLE, id: "user_id" },
             classe: { etablissementId: "etablissement_id" },
         } as CustomRequest;
         const mockContext = {
@@ -95,7 +96,7 @@ describe("ClasseAdminCleGuard", () => {
 
     it("should return true if classeDepartementGuard and classeRegionGuard can activate", async () => {
         const mockRequest = {
-            user: { role: "other_role" },
+            user: { role: ROLES.VISITOR },
             classe: { etablissementId: "etablissement_id" },
         } as CustomRequest;
         const mockContext = {
@@ -113,9 +114,9 @@ describe("ClasseAdminCleGuard", () => {
         expect(result).toBe(true);
     });
 
-    it("should return false if classeDepartementGuard cannot activate", async () => {
+    it("should return true if classeDepartementGuard cannot activate and classeRegionGuard is true", async () => {
         const mockRequest = {
-            user: { role: "other_role" },
+            user: { role: ROLES.VISITOR },
             classe: { etablissementId: "etablissement_id" },
         } as CustomRequest;
         const mockContext = {
@@ -130,12 +131,12 @@ describe("ClasseAdminCleGuard", () => {
 
         const result = await guard.canActivate(mockContext);
 
-        expect(result).toBe(false);
+        expect(result).toBe(true);
     });
 
     it("should return false if both classeDepartementGuard and classeRegionGuard cannot activate", async () => {
         const mockRequest = {
-            user: { role: "other_role" },
+            user: { role: ROLES.VISITOR },
             classe: { etablissementId: "etablissement_id" },
         } as CustomRequest;
         const mockContext = {
