@@ -41,7 +41,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       schoolId: Joi.string().trim().allow(null, ""),
       zip: Joi.string().trim().allow(null, ""),
       cohort: Joi.string().trim().required(),
-      source: Joi.string().required(),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
