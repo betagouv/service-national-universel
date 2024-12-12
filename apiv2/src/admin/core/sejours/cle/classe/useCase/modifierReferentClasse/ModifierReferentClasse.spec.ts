@@ -64,6 +64,7 @@ describe("ModifierReferentClasse", () => {
                     useValue: {
                         deleteReferentAndSendEmail: jest.fn(),
                         createNewReferentAndAssignToClasse: jest.fn(),
+                        isReferentClasseInEtablissement: jest.fn(),
                     },
                 },
                 {
@@ -81,6 +82,8 @@ describe("ModifierReferentClasse", () => {
         notificationGateway = module.get<NotificationGateway>(NotificationGateway);
         inviterReferentClasse = module.get<InviterReferentClasse>(InviterReferentClasse);
         referentService = module.get<ReferentService>(ReferentService);
+
+        jest.spyOn(referentService, "isReferentClasseInEtablissement").mockResolvedValue(true);
     });
 
     describe("execute", () => {
@@ -109,7 +112,7 @@ describe("ModifierReferentClasse", () => {
                 email: "newReferentEmail@mail.com",
                 nom: "newNom",
                 prenom: "newPrenom",
-                roles: ROLES.ADMIN,
+                role: ROLES.ADMIN,
             } as unknown as ReferentModel;
 
             jest.spyOn(classeGateway, "findById").mockResolvedValue(classe);
@@ -118,6 +121,44 @@ describe("ModifierReferentClasse", () => {
 
             await expect(service.execute(classeId, modifierReferentClasseModel)).rejects.toThrow(
                 FunctionalExceptionCode.ROLE_NOT_REFERENT_CLASSE,
+            );
+        });
+
+        it("should throw an error if the new Referent is not in the etablissement of classe", async () => {
+            const classeId = "classeId";
+            const modifierReferentClasseModel = {
+                email: "newReferentEmail@mail.com",
+                nom: "newNom",
+                prenom: "newPrenom",
+            } as ReferentModel;
+            const classe: ClasseModel = {
+                id: classeId,
+                referentClasseIds: ["currentReferentId"],
+                uniqueKeyAndId: "classeKey",
+                nom: "classeNom",
+            } as ClasseModel;
+            const currentReferent: ReferentModel = {
+                id: "currentReferentId",
+                email: "currentReferentEmail@mail.com",
+                nom: "currentNom",
+                prenom: "currentPrenom",
+            } as ReferentModel;
+
+            const newReferent: ReferentModel = {
+                id: "newReferentId",
+                email: "newReferentEmail@mail.com",
+                nom: "newNom",
+                prenom: "newPrenom",
+                role: ROLES.REFERENT_CLASSE,
+            } as unknown as ReferentModel;
+
+            jest.spyOn(classeGateway, "findById").mockResolvedValue(classe);
+            jest.spyOn(referentGateway, "findById").mockResolvedValue(currentReferent);
+            jest.spyOn(referentGateway, "findByEmail").mockResolvedValue(newReferent);
+            jest.spyOn(referentService, "isReferentClasseInEtablissement").mockResolvedValue(false);
+
+            await expect(service.execute(classeId, modifierReferentClasseModel)).rejects.toThrow(
+                FunctionalExceptionCode.REFERENT_CLASSE_NOT_IN_ETABLISSEMENT,
             );
         });
 

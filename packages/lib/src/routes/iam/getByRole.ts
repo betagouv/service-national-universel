@@ -7,7 +7,8 @@ export interface GetByRoleRoute extends BasicRoute {
   path: "/referent";
   query: {
     role: (typeof ROLES)[keyof typeof ROLES];
-    search: string;
+    search?: string;
+    etablissementId?: string;
   };
   response: RouteResponseBodyV2<ReferentForListDto[]>;
 }

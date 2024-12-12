@@ -12,7 +12,7 @@ export interface ReferentGateway {
     findByDepartementRoleAndSousRole(departement: string, role: Role, sousRole?: SousRole): Promise<ReferentModel[]>;
     generateInvitationTokenById(id: string): Promise<ReferentModel>;
     delete(id: string): Promise<void>;
-    findByRole(role: string, search: string): Promise<ReferentModelLight[]>;
+    findByRoleAndEtablissement(role: string, etablissementId?: string, search?: string): Promise<ReferentModelLight[]>;
 }
 
 export const ReferentGateway = Symbol("ReferentGateway");

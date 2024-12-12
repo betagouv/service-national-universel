@@ -101,7 +101,15 @@
         "coveragePathIgnorePatterns": [
             "\\.module\\.",
             "\\.model\\.",
-            "\\.mapper\\."
+            "\\.mapper\\.",
+            "\\.validation\\.",
+            "/src/infra/",
+            "/src/config/",
+            "/dist/",
+            "/src/instrument.ts",
+            "/src/main.ts",
+            "/src/mainApiAndJob.ts",
+            "/src/mainJob.ts"
         ],
         "testEnvironment": "node",
         "moduleNameMapper": {

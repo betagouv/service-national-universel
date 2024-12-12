@@ -17,6 +17,7 @@ import { REFERENT_MONGOOSE_ENTITY, ReferentDocument } from "../../provider/Refer
 import { ReferentMapper } from "./Referent.mapper";
 import { ReferentType } from "snu-lib";
 import { OperationType } from "@notification/infra/email/Contact";
+import { CLASSE_MONGOOSE_ENTITY, ClasseDocument } from "../../../sejours/cle/classe/provider/ClasseMongo.provider";
 
 @Injectable()
 export class ReferentRepository implements ReferentGateway {
@@ -24,6 +25,7 @@ export class ReferentRepository implements ReferentGateway {
         @Inject(REFERENT_MONGOOSE_ENTITY) private referentMongooseEntity: Model<ReferentDocument>,
         @Inject(ContactGateway) private contactGateway: ContactGateway,
         @Inject(ClockGateway) private clockGateway: ClockGateway,
+        @Inject(CLASSE_MONGOOSE_ENTITY) private classeMongooseEntity: Model<ClasseDocument>,
         private readonly cls: ClsService,
     ) {}
 
@@ -118,15 +120,41 @@ export class ReferentRepository implements ReferentGateway {
         return ReferentMapper.toModel(updatedReferent);
     }
 
-    async findByRole(role: string, search: string): Promise<ReferentModelLight[]> {
+    async findByRoleAndEtablissement(
+        role: string,
+        etablissementId?: string,
+        search?: string,
+    ): Promise<ReferentModelLight[]> {
+        let referentIds: string[] = [];
+        if (etablissementId) {
+            const classesInEtablissement: Pick<ClasseDocument, "_id" | "referentClasseIds">[] =
+                await this.classeMongooseEntity
+                    .find(
+                        {
+                            etablissementId: etablissementId,
+                            deletedAt: { $exists: false },
+                        },
+                        { referentClasseIds: 1 },
+                    )
+                    .lean();
+            referentIds = [...new Set(classesInEtablissement.flatMap((classe) => classe.referentClasseIds))];
+        }
+
         const query: FilterQuery<ReferentType> = {
             role: role,
-            $or: [
+        };
+
+        if (etablissementId) {
+            query._id = { $in: referentIds };
+        }
+        if (search) {
+            query.$or = [
                 { firstName: { $regex: search, $options: "i" } },
                 { lastName: { $regex: search, $options: "i" } },
                 { email: { $regex: search, $options: "i" } },
-            ],
-        };
+            ];
+        }
+
         return this.referentMongooseEntity.find(query).then((referents) => {
             return referents.map((referent) => ReferentMapper.toModelLight(referent));
         });

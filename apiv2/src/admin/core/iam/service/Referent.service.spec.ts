@@ -45,6 +45,7 @@ describe("ReferentService", () => {
                         create: jest.fn(),
                         findByRole: jest.fn(),
                         findByEmail: jest.fn(),
+                        findByRoleAndEtablissement: jest.fn(),
                     },
                 },
                 {
@@ -136,11 +137,11 @@ describe("ReferentService", () => {
                 { id: "1", email: "john@example.com", prenom: "John", nom: "Doe" },
                 { id: "2", email: "john2@example.com", prenom: "John", nom: "Smith" },
             ];
-            (referentGateway.findByRole as jest.Mock).mockResolvedValue(mockReferents);
+            (referentGateway.findByRoleAndEtablissement as jest.Mock).mockResolvedValue(mockReferents);
 
-            const result = await service.findByRole(mockRole, mockSearch);
+            const result = await service.findByRoleAndEtablissement(mockRole, undefined, mockSearch);
 
-            expect(referentGateway.findByRole).toHaveBeenCalledWith(mockRole, mockSearch);
+            expect(referentGateway.findByRoleAndEtablissement).toHaveBeenCalledWith(mockRole, undefined, mockSearch);
             expect(result).toEqual(mockReferents);
         });
     });
@@ -160,6 +161,44 @@ describe("ReferentService", () => {
             (referentGateway.findByEmail as jest.Mock).mockResolvedValue(null);
 
             await expect(service.findByEmail(email)).rejects.toThrow(FunctionalException);
+        });
+    });
+
+    describe("isReferentClasseInEtablissement", () => {
+        it("should return true if the referent is in the etablissement", async () => {
+            const referentId = "1";
+            const etablissementId = "1";
+            const mockReferents: ReferentModelLight[] = [
+                { id: "1", email: "john@example.com", prenom: "John", nom: "Doe" },
+                { id: "2", email: "john2@example.com", prenom: "John", nom: "Smith" },
+            ];
+            (referentGateway.findByRoleAndEtablissement as jest.Mock).mockResolvedValue(mockReferents);
+
+            const result = await service.isReferentClasseInEtablissement(referentId, etablissementId);
+
+            expect(referentGateway.findByRoleAndEtablissement).toHaveBeenCalledWith(
+                ROLES.REFERENT_CLASSE,
+                etablissementId,
+            );
+            expect(result).toBe(true);
+        });
+
+        it("should return false if the referent is not in the etablissement", async () => {
+            const referentId = "3";
+            const etablissementId = "1";
+            const mockReferents: ReferentModelLight[] = [
+                { id: "1", email: "john@example.com", prenom: "John", nom: "Doe" },
+                { id: "2", email: "john2@example.com", prenom: "John", nom: "Smith" },
+            ];
+            (referentGateway.findByRoleAndEtablissement as jest.Mock).mockResolvedValue(mockReferents);
+
+            const result = await service.isReferentClasseInEtablissement(referentId, etablissementId);
+
+            expect(referentGateway.findByRoleAndEtablissement).toHaveBeenCalledWith(
+                ROLES.REFERENT_CLASSE,
+                etablissementId,
+            );
+            expect(result).toBe(false);
         });
     });
 });

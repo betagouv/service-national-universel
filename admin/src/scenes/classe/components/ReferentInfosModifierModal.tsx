@@ -1,12 +1,13 @@
 import { PersonCircle } from "@/assets/icons/PersonCircle";
 import { ReferentService } from "@/services/referentService";
-import { debouncePromise } from "@/utils";
 import { Button, InputText, Modal, Select } from "@snu/ds/admin";
+import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { ROLES } from "snu-lib";
 
 interface ReferentInfosModifierProps {
   referent: ReferentModifier;
+  etablissementId: string;
   isOpen: boolean;
   onModalClose: () => void;
   onValider(referent: ReferentModifier): void;
@@ -24,7 +25,7 @@ type SelectOption = {
   label: string;
 };
 
-export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, onModalClose: handleModalClose, onValider }: ReferentInfosModifierProps) => {
+export const ReferentInfosModifierModal = ({ referent: currentReferent, etablissementId, isOpen, onModalClose: handleModalClose, onValider }: ReferentInfosModifierProps) => {
   const [editedReferent, setEditedReferent] = useState<ReferentModifier>(currentReferent);
   const [errors, setErrors] = useState<Omit<ReferentModifier, "id"> | undefined>();
 
@@ -33,21 +34,20 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
       setEditedReferent({ nom: referent?.nom, prenom: referent?.prenom, email: referent?.value });
     }
   };
-
-  const handleReferentsClasseSearch = debouncePromise(async (searchTerm: string): Promise<any> => {
-    if (searchTerm?.length < 2) {
-      return [];
-    }
-    const referents = await ReferentService.getByRole({ role: ROLES.REFERENT_CLASSE, search: searchTerm });
-    return (
-      referents?.map((referent) => ({
-        value: referent.email?.toString() || "",
-        label: `${referent.email?.toString()} - ${referent.nom} ${referent.prenom}`,
-        nom: referent.nom,
-        prenom: referent.prenom,
-      })) || []
-    );
-  }, 500);
+  const { isPending, data: referentsClasse } = useQuery({
+    queryKey: ["referents-classe-in-etablissement"],
+    queryFn: async () => {
+      const referents = await ReferentService.getByRole({ role: ROLES.REFERENT_CLASSE, search: undefined, etablissementId: etablissementId });
+      return (
+        referents?.map((referent) => ({
+          value: referent.email?.toString() || "",
+          label: `${referent.email?.toString()} - ${referent.nom} ${referent.prenom}`,
+          nom: referent.nom,
+          prenom: referent.prenom,
+        })) || []
+      );
+    },
+  });
 
   const validateForm = () => {
     const newErrors = {} as Omit<ReferentModifier, "id">;
@@ -119,9 +119,8 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
                 placeholder="Choisir un référent existant"
                 isClearable={true}
                 onChange={handleSelectChange}
-                isAsync
-                noOptionsMessage="Aucun référent de classe n'a été trouvé - Ecrivez au moins deux lettres"
-                loadOptions={handleReferentsClasseSearch}
+                noOptionsMessage="Aucun référent de classe n'a été trouvé"
+                options={referentsClasse}
               />
             </div>
           </div>
@@ -129,7 +128,7 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, isOpen, 
         footer={
           <div className="flex items-center justify-between gap-6">
             <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={handleModalClose} />
-            <Button disabled={editedReferent === undefined} title="Valider" className="flex-1" onClick={handleValiderClick} />
+            <Button disabled={editedReferent === undefined} loading={isPending} title="Valider" className="flex-1" onClick={handleValiderClick} />
           </div>
         }
       />

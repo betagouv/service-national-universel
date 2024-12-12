@@ -16,8 +16,9 @@ export class ReferentController {
     @UseAnyGuard(AdminGuard, AdminCleGuard, ReferentDepartementalGuard, ReferentRegionalGuard)
     async findReferentsByRole(
         @Query("role", new ParseEnumPipe(ROLES)) role: Role,
-        @Query("search") search: string,
+        @Query("etablissementId") etablissementId?: string,
+        @Query("search") search?: string,
     ): Promise<ReferentRoutes["GetByRole"]["response"]> {
-        return this.referentService.findByRole(role, search);
+        return this.referentService.findByRoleAndEtablissement(role, etablissementId, search);
     }
 }

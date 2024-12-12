@@ -83,7 +83,15 @@ export default function ReferentInfos({ classe, currentReferent, rights, isLoadi
           </div>
         </div>
       </Container>
-      {showModalModifier && <ReferentInfosModifierModal referent={currentReferent!} isOpen={showModalModifier} onModalClose={toggleModalModifier} onValider={handleValider} />}
+      {showModalModifier && (
+        <ReferentInfosModifierModal
+          referent={currentReferent!}
+          etablissementId={classe.etablissementId}
+          isOpen={showModalModifier}
+          onModalClose={toggleModalModifier}
+          onValider={handleValider}
+        />
+      )}
       {showModalConfirmer && newReferent && (
         <ReferentInfosConfirmerModal
           previousReferent={currentReferent!}

@@ -54,7 +54,20 @@ export class ReferentService {
         return newReferent;
     }
 
-    async findByRole(role: Role, search: string): Promise<ReferentModelLight[]> {
-        return this.referentGateway.findByRole(role, search);
+    async findByRoleAndEtablissement(
+        role: Role,
+        etablissementId?: string,
+        search?: string,
+    ): Promise<ReferentModelLight[]> {
+        return this.referentGateway.findByRoleAndEtablissement(role, etablissementId, search);
+    }
+
+    async isReferentClasseInEtablissement(referentId: string, etablissementId: string): Promise<boolean> {
+        const referentsClasseInEtablissement = await this.referentGateway.findByRoleAndEtablissement(
+            ROLES.REFERENT_CLASSE,
+            etablissementId,
+        );
+
+        return referentsClasseInEtablissement.some((referent) => referent.id === referentId);
     }
 }

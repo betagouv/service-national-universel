@@ -48,6 +48,13 @@ export class ModifierReferentClasse implements UseCase<ReferentModel> {
             if (existingReferentToBeAssigned.role !== ROLES.REFERENT_CLASSE) {
                 throw new FunctionalException(FunctionalExceptionCode.ROLE_NOT_REFERENT_CLASSE);
             }
+            const isReferentClasseInEtablissement = await this.referentService.isReferentClasseInEtablissement(
+                existingReferentToBeAssigned.id,
+                classe.etablissementId,
+            );
+            if (!isReferentClasseInEtablissement) {
+                throw new FunctionalException(FunctionalExceptionCode.REFERENT_CLASSE_NOT_IN_ETABLISSEMENT);
+            }
             const nextReferent = {
                 ...existingReferentToBeAssigned,
                 prenom: modifierReferent.prenom,

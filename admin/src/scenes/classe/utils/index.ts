@@ -68,7 +68,7 @@ export function getRights(user: User, classe?: Pick<ClasseType, "status" | "scho
     canEditEstimatedSeats: canEditEstimatedSeats(user),
     canEditTotalSeats: canEditTotalSeats(user),
     canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
-    canEditRef: classe.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role),
+    canEditRef: [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role),
 
     canEditCohort: cohort ? canUpdateCohort(cohort, user) : isAdmin(user) && classe.status === STATUS_CLASSE.VERIFIED,
     canEditCenter: cohort ? canUpdateCenter(cohort, user) : false,

@@ -109,7 +109,7 @@ export class ReferentMapper {
 
     static toModelLight(referentDocument: ReferentDocument): ReferentModelLight {
         return {
-            id: referentDocument._id,
+            id: referentDocument._id.toString(),
             prenom: referentDocument.firstName,
             nom: referentDocument.lastName,
             email: referentDocument.email,
