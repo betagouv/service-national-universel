@@ -28,7 +28,7 @@ const customFactory = (config: ConfigService) => {
         return new EmailBrevoMockProvider();
     }
     if (emailProvider === "mailcatcher") {
-        return new EmailBrevoCatcherProvider(config, new Logger());
+        return new EmailBrevoCatcherProvider(config);
     }
     throw new Error("Invalid email provider");
 };

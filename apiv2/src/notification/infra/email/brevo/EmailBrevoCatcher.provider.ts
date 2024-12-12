@@ -19,10 +19,7 @@ import Mail from "nodemailer/lib/mailer";
 export class EmailBrevoCatcherProvider implements EmailProvider, ContactProvider {
     emailsApi: brevo.TransactionalEmailsApi;
 
-    constructor(
-        private readonly config: ConfigService,
-        private logger: Logger,
-    ) {
+    constructor(private readonly config: ConfigService) {
         let apiKeyConfig = this.config.getOrThrow("email.apiKey");
         this.emailsApi = new brevo.TransactionalEmailsApi();
         //@ts-ignore

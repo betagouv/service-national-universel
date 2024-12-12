@@ -121,6 +121,7 @@ export const ReferentInfosModifierModal = ({ referent: currentReferent, etabliss
                 onChange={handleSelectChange}
                 noOptionsMessage="Aucun référent de classe n'a été trouvé"
                 options={referentsClasse}
+                closeMenuOnSelect={true}
               />
             </div>
           </div>
