@@ -4,7 +4,7 @@ import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
 import { useSelector } from "react-redux";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 
 export default function Header() {
   const openedTickets = useSelector((state) => state.Tickets.open);
@@ -29,7 +29,7 @@ export default function Header() {
         </Notification>
       </NotifcationContainer>
       <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-        <a href={`${supportURL}/base-de-connaissance`} className="button" target="_blank" rel="noreferrer">
+        <a href={`${knowledgebaseURL}/base-de-connaissance`} className="button" target="_blank" rel="noreferrer">
           Base de connaissance
         </a>
       </div>

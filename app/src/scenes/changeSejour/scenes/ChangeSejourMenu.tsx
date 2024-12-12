@@ -6,7 +6,7 @@ import { getCohortPeriod, getCohortYear } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
 import { getCohort } from "@/utils/cohorts";
 import Loader from "@/components/Loader";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import NoSejourSection from "../components/NoSejourSection";
 import useCohortGroups from "../lib/useCohortGroups";
 import useSejours from "../lib/useSejours";
@@ -45,7 +45,7 @@ export default function ChangeSejour() {
                 ))}
               </div>
               <a
-                href={supportURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}
+                href={knowledgebaseURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}
                 className="text-sm leading-8 font-normal text-gray-500 mt-2 underline underline-offset-2"
                 target="_blank"
                 rel="noreferrer">
