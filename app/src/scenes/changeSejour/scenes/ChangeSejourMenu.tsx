@@ -12,15 +12,18 @@ import useCohortGroups from "../lib/useCohortGroups";
 import useSejours from "../lib/useSejours";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
+import { useLocation } from "react-router-dom";
 
 export default function ChangeSejour() {
   const { young } = useAuth();
   const cohort = getCohort(young.cohort);
   const groups = useCohortGroups();
   const cohorts = useSejours();
+  const location = useLocation<{ backlink?: string }>();
+  const backlink = location.state?.backlink || "/phase1";
 
   return (
-    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink="/home">
+    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink={backlink}>
       {groups.isError || cohorts.isError ? (
         <div>Erreur</div>
       ) : groups.isPending || cohorts.isPending ? (
