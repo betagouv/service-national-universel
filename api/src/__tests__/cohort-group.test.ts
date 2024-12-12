@@ -36,10 +36,10 @@ describe("CohortGroup Routes", () => {
   describe("GET /cohort-group/open", () => {
     it("should return a list of open cohort groups", async () => {
       const cohortGroupA = await CohortGroupModel.create({ name: "Group A", type: COHORT_TYPE.VOLONTAIRE, year: 2021 });
-      const cohortGroupB = await CohortGroupModel.create({ name: "Group B", type: COHORT_TYPE.CLE, year: 2022 });
-      const cohortGroupC = await CohortGroupModel.create({ name: "Group C", type: COHORT_TYPE.CLE, year: 2023 });
-      const cohortGroupD = await CohortGroupModel.create({ name: "Group D", type: COHORT_TYPE.CLE, year: 2024 });
-      const cohortGroupE = await CohortGroupModel.create({ name: "Group E", type: COHORT_TYPE.CLE, year: 2025 });
+      const cohortGroupB = await CohortGroupModel.create({ name: "Group B", type: COHORT_TYPE.VOLONTAIRE, year: 2022 });
+      const cohortGroupC = await CohortGroupModel.create({ name: "Group C", type: COHORT_TYPE.VOLONTAIRE, year: 2023 });
+      const cohortGroupD = await CohortGroupModel.create({ name: "Group D", type: COHORT_TYPE.VOLONTAIRE, year: 2024 });
+      const cohortGroupE = await CohortGroupModel.create({ name: "Group E", type: COHORT_TYPE.VOLONTAIRE, year: 2025 });
 
       const today = new Date();
       const tomorrow = new Date(today);

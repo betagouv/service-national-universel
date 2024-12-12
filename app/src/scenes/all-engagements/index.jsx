@@ -1,13 +1,12 @@
 import React from "react";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import { useQuery } from "@tanstack/react-query";
-import { fetchPrograms } from "../phase2/engagement.repository";
+import usePrograms from "../phase2/scenes/usePrograms";
 import Loader from "@/components/Loader";
 import EngagementCard from "../preinscription/components/EngagementCard";
 
 const Index = () => {
-  const { isPending, error, data: programs } = useQuery({ queryKey: ["program"], queryFn: fetchPrograms });
+  const { isPending, error, data: programs } = usePrograms();
 
   return (
     <DSFRLayout>

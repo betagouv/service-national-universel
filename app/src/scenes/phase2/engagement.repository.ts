@@ -1,19 +1,20 @@
 import { apiURL } from "@/config";
 import API from "@/services/api";
 import * as FileSaver from "file-saver";
+import { ProgramType } from "snu-lib";
 
 export async function fetchPrograms() {
   const res = await fetch(`${apiURL}/program/public/engagements`);
   const { ok, data, error } = await res.json();
   if (!ok) throw error;
-  return data;
+  return data.sort((a, b) => a.name.localeCompare(b.name)) as ProgramType[];
 }
 
 export async function fetchProgram(id) {
   const res = await fetch(`${apiURL}/program/public/engagement/${id}`);
   const { ok, data, error } = await res.json();
   if (!ok) throw error;
-  return data;
+  return data as ProgramType;
 }
 
 export async function fetchApplications(youngId) {

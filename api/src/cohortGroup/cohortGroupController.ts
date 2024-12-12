@@ -1,7 +1,7 @@
 import express from "express";
 import { RouteRequest, RouteResponse } from "../controllers/request";
 import { capture } from "../sentry";
-import { COHORT_TYPE_LIST, CohortGroupRoutes, ERRORS, ROLES } from "snu-lib";
+import { COHORT_TYPE, COHORT_TYPE_LIST, CohortGroupRoutes, ERRORS, ROLES } from "snu-lib";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
 import { CohortGroupModel } from "../models/cohortGroup";
 import Joi from "joi";
@@ -31,7 +31,7 @@ router.get("/open", authMiddleware(["young"]), async (req: RouteRequest<CohortGr
     const cohortGroup = await CohortGroupModel.findById(cohort.cohortGroupId);
     if (!cohortGroup) throw new Error("Cohort group not found");
 
-    const nextGroups = await CohortGroupModel.find({ year: { $gt: cohortGroup.year } }).sort({ year: 1, name: 1 });
+    const nextGroups = await CohortGroupModel.find({ type: COHORT_TYPE.VOLONTAIRE, year: { $gt: cohortGroup.year } }).sort({ year: 1, name: 1 });
     const cohorts = await CohortModel.find({ cohortGroupId: { $in: nextGroups.map((g) => g.id) } });
     const openCohorts = cohorts.filter((c) => c.isReInscriptionOpen);
     const data = nextGroups.filter((g) => openCohorts.find((c) => c.cohortGroupId === g.id));

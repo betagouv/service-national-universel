@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import EngagementCard from "./EngagementCard";
-import { toastr } from "react-redux-toastr";
-import API from "@/services/api";
+import usePrograms from "@/scenes/phase2/scenes/usePrograms";
+import Loader from "@/components/Loader";
 
 export default function EngagementPrograms() {
-  const [programs, setPrograms] = useState([]);
-
-  useEffect(() => {
-    (async () => {
-      const { data, ok } = await API.get("/program/public/engagements");
-      if (!ok) return toastr.error("Une erreur est survenue.");
-      setPrograms(data);
-    })();
-  }, []);
-
+  const { data: programs, isPending, isError } = usePrograms();
+  if (isPending) return <Loader />;
+  if (isError) return <div>Erreur lors du chargement des données.</div>;
   return (
     <>
       <h2 className="my-4 text-xl font-bold">Découvrez d’autres formes d’engagement</h2>
