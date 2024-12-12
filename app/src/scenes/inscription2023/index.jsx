@@ -19,7 +19,7 @@ import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIS
 import { YOUNG_STATUS, inscriptionCreationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
-import { supportURL } from "../../config";
+import { knowledgebaseURL } from "../../config";
 import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
@@ -41,7 +41,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
   const { step } = useParams();
   const { isCLE } = useAuth();
   const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
-  const supportLink = `${supportURL}${isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"}`;
+  const supportLink = `${knowledgebaseURL}${isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"}`;
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
 
   const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;

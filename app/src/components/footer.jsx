@@ -2,7 +2,7 @@ import React from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 
 export default function Footer() {
   return (
@@ -28,7 +28,7 @@ export default function Footer() {
             <Link to="conditions-generales-utilisation">Conditions générales d&apos;utilisation</Link>
           </li>
           <li>
-            <a href={supportURL} target="_blank" rel="noreferrer">
+            <a href={knowledgebaseURL} target="_blank" rel="noreferrer">
               Besoin d&apos;aide
             </a>
           </li>
