@@ -47,29 +47,4 @@ module.exports = {
       throw error;
     }
   },
-
-  async down(db, client) {
-    try {
-      logger.info("Migration DOWN: Suppression de parent1ValidationDate pour les jeunes concernés...");
-
-      const where = {
-        acceptRI: REGLEMENT_INTERIEUR_VERSION,
-        parent1ValidationDate: { $exists: true },
-      };
-
-      const youngs = await YoungModel.find(where);
-
-      logger.info(`Found ${youngs.length} jeunes avec parent1ValidationDate...`);
-
-      for (const young of youngs) {
-        young.set({ parent1ValidationDate: undefined });
-        await young.save({ fromUser: { firstName: "Migration acceptRI rollback" } });
-      }
-
-      logger.info("Migration DOWN terminée.");
-    } catch (error) {
-      logger.error("Erreur pendant la migration DOWN :", error);
-      throw error;
-    }
-  },
 };
