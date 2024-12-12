@@ -45,6 +45,7 @@ import { FileProvider } from "@shared/infra/File.provider";
 import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
 import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
 import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
+import { patchesMongoProviders } from "./infra/patch/patchMongo.provider";
 
 @Module({
     imports: [
@@ -80,6 +81,7 @@ import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielR
         ...sessionMongoProviders,
         ...guardProviders,
         ...taskMongoProviders,
+        ...patchesMongoProviders,
         Logger,
         SigninReferent,
         { provide: FileGateway, useClass: FileProvider },
