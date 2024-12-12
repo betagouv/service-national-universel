@@ -1,13 +1,14 @@
 import express from "express";
 import { RouteRequest, RouteResponse } from "../controllers/request";
 import { capture } from "../sentry";
-import { COHORT_TYPE, COHORT_TYPE_LIST, CohortGroupRoutes, ERRORS, ROLES } from "snu-lib";
+import { COHORT_TYPE_LIST, CohortGroupRoutes, ERRORS, ROLES, YoungType } from "snu-lib";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
 import { CohortGroupModel } from "../models/cohortGroup";
 import Joi from "joi";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { CohortModel } from "../models";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { getCohortGroupsForYoung } from "./cohortGroupService";
 
 const router = express.Router();
 
@@ -25,16 +26,10 @@ router.use(authMiddleware("young"));
 
 router.get("/open", authMiddleware(["young"]), async (req: RouteRequest<CohortGroupRoutes["GetOpen"]>, res: RouteResponse<CohortGroupRoutes["GetOpen"]>) => {
   try {
-    const cohort = await CohortModel.findById(req.user.cohortId);
-    if (!cohort) throw new Error("Cohort not found");
-
-    const cohortGroup = await CohortGroupModel.findById(cohort.cohortGroupId);
-    if (!cohortGroup) throw new Error("Cohort group not found");
-
-    const nextGroups = await CohortGroupModel.find({ type: COHORT_TYPE.VOLONTAIRE, year: { $gt: cohortGroup.year } }).sort({ year: 1, name: 1 });
-    const cohorts = await CohortModel.find({ cohortGroupId: { $in: nextGroups.map((g) => g.id) } });
+    const groups = await getCohortGroupsForYoung(req.user as unknown as YoungType);
+    const cohorts = await CohortModel.find({ cohortGroupId: { $in: groups.map((g) => g.id) } });
     const openCohorts = cohorts.filter((c) => c.isReInscriptionOpen);
-    const data = nextGroups.filter((g) => openCohorts.find((c) => c.cohortGroupId === g.id));
+    const data = groups.filter((g) => openCohorts.find((c) => c.cohortGroupId === g.id));
     return res.json({ ok: true, data });
   } catch (error) {
     capture(error);

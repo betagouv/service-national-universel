@@ -72,6 +72,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     young.set({
       ...value,
       cohortId: cohortDocument._id,
+      source: cohortDocument.type,
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,
