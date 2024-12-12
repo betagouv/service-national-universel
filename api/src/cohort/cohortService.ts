@@ -110,18 +110,14 @@ export async function getFilteredSessionsForChangementSejour(young: YoungType, t
 }
 
 export async function getFilteredSessionsForReinscription(young: YoungType, timeZoneOffset?: string | number | null) {
-  console.log("🚀 ~ getFilteredSessionsForReinscription ~ young:", young);
   const currentCohort = await CohortModel.findById(young.cohortId);
   if (!currentCohort) throw new Error("Cohort not found");
-  console.log("🚀 ~ getFilteredSessionsForReinscription ~ currentCohort:", currentCohort);
 
   const currentGroup = await CohortGroupModel.findById(currentCohort.cohortGroupId);
   if (!currentGroup) throw new Error("Cohort group not found");
-  console.log("🚀 ~ getFilteredSessionsForReinscription ~ currentGroup:", currentGroup);
 
   const groups = await getCohortGroupsForYoung(young);
   const cohortGroupsToInclude = groups.map((g) => g.id);
-  console.log("🚀 ~ getFilteredSessionsForReinscription ~ groups:", groups);
 
   const department = getDepartmentForEligibility(young);
   if (!department) throw new Error("Unable to determine department");
@@ -134,6 +130,5 @@ export async function getFilteredSessionsForReinscription(young: YoungType, time
   });
 
   const cohorts = await CohortModel.find(query);
-  console.log("🚀 ~ getFilteredSessionsForReinscription ~ cohorts:", cohorts);
   return cohorts.filter((cohort) => cohort.getIsReInscriptionOpen(Number(timeZoneOffset)));
 }
