@@ -619,6 +619,10 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       cohesionStayMedicalFileReceived: undefined,
     });
 
+    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status as any)) {
+      young.set({ status: YOUNG_STATUS.WAITING_VALIDATION });
+    }
+
     if (cohortName !== "à venir") {
       const completionObjectif = await getCompletionObjectifs(young.department!, cohortObj);
 
