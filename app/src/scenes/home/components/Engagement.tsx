@@ -19,7 +19,7 @@ export default function Engagement() {
         })}
       </div>
       <Link to="/public-engagements">
-        <div className="w-full md:w-fit mt-1 text-sm border-[1px] border-gray-300 px-6 py-2 text-center rounded-md">Découvrir les possibilités d'engagement</div>
+        <div className="w-full mt-1 text-sm border-[1px] border-gray-300 p-2 text-center rounded-md">Découvrir les possibilités d'engagement</div>
       </Link>
     </section>
   );

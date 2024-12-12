@@ -19,8 +19,9 @@ export default function HorsParcours() {
             Choisir un nouveau séjour
           </div>
         </Link>
-        <hr className="my-6" />
+        <hr className="mt-6" />
       </HomeHeader>
+      <br />
       <Engagement />
     </HomeContainer>
   );
