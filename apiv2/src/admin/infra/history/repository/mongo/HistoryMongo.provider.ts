@@ -5,27 +5,21 @@ import { ReferentName } from "../../../iam/provider/ReferentMongo.provider";
 import { JeuneName } from "../../../sejours/jeune/provider/JeuneMongo.provider";
 import { SessionName } from "../../../sejours/phase1/session/provider/SessionMongo.provider";
 import { ClasseName } from "../../../sejours/cle/classe/provider/ClasseMongo.provider";
+import { HistoryType } from "@admin/core/history/History";
 
-export type PatchDocument = HydratedDocument<PatchType>;
-export const PatchName = "patche";
-export const PATCH_MONGOOSE_ENTITY = "PATCH_MONGOOSE_ENTITY";
+export type HistoryDocument = HydratedDocument<PatchType>;
+const PatchName = "patche";
+const PATCH_MONGOOSE_ENTITY = "PATCH_MONGOOSE_ENTITY";
 
 const PatchSchemaRef = new mongoose.Schema(PatchSchema);
 
 const collectionWithPatches = [JeuneName, ReferentName, ClasseName, SessionName];
 
-export const patchesMongoProviders = collectionWithPatches.map((collectionName) => ({
+export const historyMongoProviders = collectionWithPatches.map((collectionName) => ({
     provide: `${collectionName}_${PATCH_MONGOOSE_ENTITY}`,
     useFactory: (connection: Connection) => connection.model(`${collectionName}_${PatchName}`, PatchSchemaRef),
     inject: [DATABASE_CONNECTION],
 }));
-
-export enum HistoryType {
-    JEUNE = "jeune",
-    REFERENT = "referent",
-    CLASSE = "classe",
-    SESSION = "session",
-}
 
 export const mapHistory = (history: HistoryType) => {
     switch (history) {
