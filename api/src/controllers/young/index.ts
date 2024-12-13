@@ -60,6 +60,7 @@ import {
   CohortDto,
   MissionType,
   ContractType,
+  CohortType,
 } from "snu-lib";
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
@@ -609,6 +610,8 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       }
     }
 
+    const newStatus = getStatusAfterChangementSejour(young.status, young.department!, cohortObj);
+
     young.set({
       cohort: cohortObj.name,
       originalCohort: oldCohort,
@@ -617,23 +620,8 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       cohortDetailedChangeReason,
       cohesionStayPresence: undefined,
       cohesionStayMedicalFileReceived: undefined,
+      status: newStatus,
     });
-
-    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status as any)) {
-      young.set({ status: YOUNG_STATUS.WAITING_VALIDATION });
-    }
-
-    if (cohortName !== "à venir") {
-      const completionObjectif = await getCompletionObjectifs(young.department!, cohortObj);
-
-      if (completionObjectif.isAtteint && young.status === YOUNG_STATUS.VALIDATED) {
-        young.set({ status: YOUNG_STATUS.WAITING_LIST });
-      }
-
-      if (!completionObjectif.isAtteint && young.status === YOUNG_STATUS.WAITING_LIST) {
-        young.set({ status: YOUNG_STATUS.VALIDATED });
-      }
-    }
 
     await young.save({ fromUser: req.user });
 
@@ -1229,6 +1217,18 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+async function getStatusAfterChangementSejour(currentStatus: string, department: string, cohort: CohortType) {
+  if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(currentStatus as any)) {
+    return YOUNG_STATUS.WAITING_VALIDATION;
+  }
+  if (currentStatus === YOUNG_STATUS.VALIDATED) {
+    const completionObjectif = await getCompletionObjectifs(department, cohort);
+    if (completionObjectif.isAtteint) return YOUNG_STATUS.WAITING_LIST;
+    else return YOUNG_STATUS.VALIDATED;
+  }
+  return currentStatus;
+}
 
 router.use("/:id/documents", require("./documents"));
 router.use("/:id/meeting-point", require("./meeting-point"));

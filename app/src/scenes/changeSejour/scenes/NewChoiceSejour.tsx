@@ -4,7 +4,7 @@ import useAuth from "@/services/useAuth";
 import ReasonForm from "../components/ReasonForm";
 import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
-import { getCohortPeriod } from "snu-lib";
+import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
 import useChangeSejour from "../lib/useChangeSejour";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
@@ -65,6 +65,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
       title="Êtes-vous sûr(e) de vouloir changer de séjour ?"
       onConfirm={handleChangeCohort}
       loading={sejourMutation.isPending}
+      disabled={young.status === YOUNG_STATUS.VALIDATED && !goalQuery.data}
       confirmText="Oui, confirmer ce choix"
       cancelText="Non, annuler">
       {goalQuery.isPending ? (
@@ -82,7 +83,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
             <HiOutlineCheckCircle className="text-blue-600 h-5 w-5 inline-block stroke-2" />
             <p className="text-gray-500 text-sm">Nouveau séjour</p>
             <p className="text-gray-900 font-medium">{capitalizeFirstLetter(newCohortPeriod)}</p>
-            {goalQuery.data ? (
+            {young.status === YOUNG_STATUS.VALIDATED && goalQuery.data ? (
               <>
                 <hr className="my-3"></hr>
                 <p className="text-sm leading-normal text-gray-500">
