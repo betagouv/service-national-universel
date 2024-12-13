@@ -61,7 +61,7 @@ export function hasCompletedPhase2(y) {
 
 export function isDoingPhase1(young) {
   return (
-    [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(young.status) &&
+    [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status) &&
     [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(young.statusPhase1)
   );
 }

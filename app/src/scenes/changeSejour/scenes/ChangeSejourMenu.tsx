@@ -12,12 +12,14 @@ import useCohortGroups from "../lib/useCohortGroups";
 import useSejours from "../lib/useSejours";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
+import usePermissions from "@/hooks/usePermissions";
 
 export default function ChangeSejour() {
   const { young } = useAuth();
   const cohort = getCohort(young.cohort);
   const groups = useCohortGroups();
   const cohorts = useSejours();
+  const { hasAccessToAVenir, hasAccessToDesistement } = usePermissions();
 
   return (
     <ChangeSejourContainer title="Choisir un nouveau séjour" backlink="/home">
@@ -69,14 +71,18 @@ export default function ChangeSejour() {
             </section>
           ))}
 
-          {groups.data.length > 0 || cohorts.data.length > 0 ? (
-            <Link to="/changer-de-sejour/no-date" className="mt-8 flex p-3 justify-between rounded-md border border-gray-500 w-full">
-              <p className="text-sm leading-5 font-medium">Aucune date ne me convient</p>
-              <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
-            </Link>
-          ) : (
-            <NoSejourSection />
-          )}
+          {hasAccessToAVenir || hasAccessToDesistement ? (
+            <>
+              {groups.data.length > 0 || cohorts.data.length > 0 ? (
+                <Link to="/changer-de-sejour/no-date" className="mt-8 flex p-3 justify-between rounded-md border border-gray-500 w-full">
+                  <p className="text-sm leading-5 font-medium">Aucune date ne me convient</p>
+                  <HiArrowRight className="text-blue-500 mt-0.5 mr-2" />
+                </Link>
+              ) : (
+                <NoSejourSection />
+              )}
+            </>
+          ) : null}
         </>
       )}
     </ChangeSejourContainer>
