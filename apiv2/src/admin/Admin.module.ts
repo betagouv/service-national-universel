@@ -45,9 +45,9 @@ import { FileProvider } from "@shared/infra/File.provider";
 import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
 import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
 import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
-import { patchesMongoProviders } from "./infra/patch/repository/mongo/patchMongo.provider";
-import { HistoryController } from "./infra/patch/api/Patch.controller";
-import { PatchRepository } from "./infra/patch/repository/mongo/PatchMongo.repository";
+import { patchesMongoProviders } from "./infra/history/repository/mongo/historyMongo.provider";
+import { HistoryController } from "./infra/history/api/History.controller";
+import { HistoryRepository } from "./infra/history/repository/mongo/HistoryMongo.repository";
 
 @Module({
     imports: [
@@ -85,7 +85,7 @@ import { PatchRepository } from "./infra/patch/repository/mongo/PatchMongo.repos
         ...guardProviders,
         ...taskMongoProviders,
         ...patchesMongoProviders,
-        PatchRepository,
+        HistoryRepository,
         Logger,
         SigninReferent,
         { provide: FileGateway, useClass: FileProvider },

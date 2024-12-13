@@ -13,31 +13,29 @@ export const PATCH_MONGOOSE_ENTITY = "PATCH_MONGOOSE_ENTITY";
 const PatchSchemaRef = new mongoose.Schema(PatchSchema);
 
 const collectionWithPatches = [JeuneName, ReferentName, ClasseName, SessionName];
-const providersWithPatchesNames = [JeuneName, ReferentName, ClasseName, SessionName].map(
-    (name) => `${name}_${PATCH_MONGOOSE_ENTITY}`,
-);
+
 export const patchesMongoProviders = collectionWithPatches.map((collectionName) => ({
     provide: `${collectionName}_${PATCH_MONGOOSE_ENTITY}`,
     useFactory: (connection: Connection) => connection.model(`${collectionName}_${PatchName}`, PatchSchemaRef),
     inject: [DATABASE_CONNECTION],
 }));
 
-export enum History {
+export enum HistoryType {
     JEUNE = "jeune",
     REFERENT = "referent",
     CLASSE = "classe",
     SESSION = "session",
 }
 
-export const mapHistory = (history: History) => {
+export const mapHistory = (history: HistoryType) => {
     switch (history) {
-        case History.JEUNE:
+        case HistoryType.JEUNE:
             return `${JeuneName}_${PATCH_MONGOOSE_ENTITY}`;
-        case History.REFERENT:
+        case HistoryType.REFERENT:
             return `${ReferentName}_${PATCH_MONGOOSE_ENTITY}`;
-        case History.CLASSE:
+        case HistoryType.CLASSE:
             return `${ClasseName}_${PATCH_MONGOOSE_ENTITY}`;
-        case History.SESSION:
+        case HistoryType.SESSION:
             return `${SessionName}_${PATCH_MONGOOSE_ENTITY}`;
     }
 };

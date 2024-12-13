@@ -19,7 +19,7 @@ export const PatchSchema = new mongoose.Schema({
   ops: { type: [operationSchema], required: true },
   ref: { type: mongoose.Schema.Types.ObjectId, required: true },
   modelName: { type: String, required: true },
-  user: { type: userSchema, required: true },
+  user: { type: userSchema },
   date: { type: Date, required: true },
   __v: { type: Number, default: 0 },
 });
