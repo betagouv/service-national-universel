@@ -130,9 +130,11 @@ router.put("/not-eligible", passport.authenticate("young", { session: false, fai
 });
 
 const eligibiliteValidator = Joi.object({
+  schooled: Joi.string().trim().required(),
   schoolDepartment: Joi.string().trim().allow(null, ""),
   department: Joi.string().trim().allow(null, ""),
   schoolRegion: Joi.string().trim().allow(null, ""),
+  schoolZip: Joi.string().trim().allow(null, ""),
   birthdateAt: Joi.string().trim().allow(null, ""),
   grade: Joi.string().trim().allow(null, ""),
   zip: Joi.string().trim().allow(null, ""),
@@ -146,7 +148,12 @@ router.post("/eligibilite", passport.authenticate("young", { session: false, fai
     const { error, value } = eligibiliteValidator.validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    // const updatedYoung = { ...young.toObject(), ...value };
+    // console.log("🚀 ~ router.post ~ updatedYoung:", updatedYoung);
+
     const cohorts = await getFilteredSessionsForReinscription({ ...young.toObject(), ...value }, req.headers["x-user-timezone"] || null);
+    const cohortNames = cohorts.map(({ name }) => name);
+    console.log("🚀 ~ router.post ~ cohortNames:", cohortNames);
     return res.json({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
