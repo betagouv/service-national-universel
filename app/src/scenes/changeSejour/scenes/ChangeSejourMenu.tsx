@@ -6,13 +6,14 @@ import { getCohortPeriod, getCohortYear } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
 import { getCohort } from "@/utils/cohorts";
 import Loader from "@/components/Loader";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import NoSejourSection from "../components/NoSejourSection";
 import useCohortGroups from "../lib/useCohortGroups";
 import useSejours from "../lib/useSejours";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
 import usePermissions from "@/hooks/usePermissions";
+import { useLocation } from "react-router-dom";
 
 export default function ChangeSejour() {
   const { young } = useAuth();
@@ -20,9 +21,11 @@ export default function ChangeSejour() {
   const groups = useCohortGroups();
   const cohorts = useSejours();
   const { hasAccessToAVenir, hasAccessToDesistement } = usePermissions();
+  const location = useLocation<{ backlink?: string }>();
+  const backlink = location.state?.backlink || "/phase1";
 
   return (
-    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink="/home">
+    <ChangeSejourContainer title="Choisir un nouveau séjour" backlink={backlink}>
       {groups.isError || cohorts.isError ? (
         <div>Erreur</div>
       ) : groups.isPending || cohorts.isPending ? (
@@ -47,7 +50,7 @@ export default function ChangeSejour() {
                 ))}
               </div>
               <a
-                href={supportURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}
+                href={knowledgebaseURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}
                 className="text-sm leading-8 font-normal text-gray-500 mt-2 underline underline-offset-2"
                 target="_blank"
                 rel="noreferrer">
