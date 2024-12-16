@@ -1,7 +1,7 @@
 import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility } from "snu-lib";
 import { CohortModel, CohortDocument, InscriptionGoalModel, YoungModel } from "../models";
 
-type CohortDocumentWithPlaces = CohortDocument<{
+export type CohortDocumentWithPlaces = CohortDocument<{
   numberOfCandidates?: number;
   numberOfValidated?: number;
   goal?: number;
