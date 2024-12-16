@@ -14,6 +14,7 @@ import hero from "../../assets/hero/home-not-done.png";
 import { HiArrowRight } from "react-icons/hi";
 import JDMA from "@/components/JDMA";
 import Notice from "@/components/ui/alerts/Notice";
+import usePermissions from "@/hooks/usePermissions";
 
 export default function WaitingValidation() {
   const { young, isCLE } = useAuth();
@@ -21,7 +22,7 @@ export default function WaitingValidation() {
   const cohort = getCohort(young.cohort);
   const history = useHistory();
   const dispatch = useDispatch();
-  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
+  const { canModifyInscription } = usePermissions();
 
   const goToInscription = async () => {
     try {
@@ -42,11 +43,11 @@ export default function WaitingValidation() {
     <HomeContainer>
       <HomeHeader title={title} img={hero}>
         <div className="grid grid-cols-1 gap-8">
-          <section id="changer-de-sejour" className="mt-4 border rounded-md px-4 py-3">
+          <section id="changer-de-sejour" className="mt-4 border rounded-md p-4">
             <p>
               Vous êtes positionné(e) sur le séjour <strong>{getCohortPeriod(cohort)}</strong>.
             </p>
-            {isInscriptionModificationOpenForYoungs && (
+            {canModifyInscription && (
               <Link to="/changer-de-sejour">
                 <p className="mt-2 text-sm text-blue-600">
                   Changer de séjour
