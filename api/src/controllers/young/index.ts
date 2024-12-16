@@ -869,17 +869,31 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
       "createdAt",
     ];
 
+    for (const key in young.files) {
+      if (key.length) {
+        for (const file in key as any) {
+          try {
+            if (key.includes("military")) await deleteFile(`app/young/${id}/military-preparation/${key}/${(file as any)._id}`);
+            else await deleteFile(`app/young/${id}/${key}/${(file as any)._id}`);
+            young.set({ files: { [key]: undefined } });
+          } catch (e) {
+            capture(e);
+          }
+        }
+      }
+    }
+
     for (const key in young._doc) {
       if (!fieldToKeep.find((val) => val === key)) {
         young.set({ [key]: undefined });
       }
     }
 
+    await unsync(young);
+
     young.set({ email: `${young._doc!["_id"]}@delete.com` });
     young.set({ status: YOUNG_STATUS.DELETED });
     young.set({ lastStatusAt: Date.now() });
-
-    await unsync(young);
 
     await young.save({ fromUser: req.user });
 
