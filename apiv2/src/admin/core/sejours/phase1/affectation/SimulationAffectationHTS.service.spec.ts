@@ -135,10 +135,10 @@ describe("SimulationAffectationHTSService", () => {
             ] as SejourModel[];
 
             const jeunesList = [
-                { centreId: "1", statusPhase1: "AFFECTED", genre: "male", qpv: "oui", psh: "non" },
-                { centreId: "1", statusPhase1: "AFFECTED", genre: "female", qpv: "non", psh: "oui" },
-                { centreId: "2", statusPhase1: "AFFECTED", genre: "male", qpv: "oui", psh: "oui" },
-                { centreId: "3", statusPhase1: "AFFECTED", genre: "female", qpv: "non", psh: "non" },
+                { centreId: "1", statutPhase1: "AFFECTED", genre: "male", qpv: "oui", psh: "non" },
+                { centreId: "1", statutPhase1: "AFFECTED", genre: "female", qpv: "non", psh: "oui" },
+                { centreId: "2", statutPhase1: "AFFECTED", genre: "male", qpv: "oui", psh: "oui" },
+                { centreId: "3", statutPhase1: "AFFECTED", genre: "female", qpv: "non", psh: "non" },
             ] as JeuneModel[];
 
             const result = simulationAffectationHTSService.calculTauxRepartitionParCentre(sejourList, jeunesList);
@@ -199,11 +199,11 @@ describe("SimulationAffectationHTSService", () => {
                 placesDisponiblesParLigne: [[10, 5], [7]],
             } as DistributionJeunesParDepartement;
             const jeuneList = [
-                { id: "1", statusPhase1: "NOT_AFFECTED", departement: "dep1" },
-                { id: "2", statusPhase1: "NOT_AFFECTED", departement: "dep1" },
-                { id: "3", statusPhase1: "NOT_AFFECTED", departement: "dep1" },
-                { id: "4", statusPhase1: "NOT_AFFECTED", departement: "dep2" },
-                { id: "5", statusPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "1", statutPhase1: "NOT_AFFECTED", departement: "dep1" },
+                { id: "2", statutPhase1: "NOT_AFFECTED", departement: "dep1" },
+                { id: "3", statutPhase1: "NOT_AFFECTED", departement: "dep1" },
+                { id: "4", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "5", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
             ] as JeuneModel[];
             const sejourList = [
                 { centreId: "center1", placesRestantes: 10 },
@@ -225,7 +225,7 @@ describe("SimulationAffectationHTSService", () => {
                     [],
                 );
 
-            expect(randomJeuneList.filter((young) => young.statusPhase1 === "AFFECTED").length).toBeLessThanOrEqual(7);
+            expect(randomJeuneList.filter((young) => young.statutPhase1 === "AFFECTED").length).toBeLessThanOrEqual(7);
             expect(
                 randomSejourList.find((center) => center.centreId === "center1")?.placesRestantes,
             ).toBeGreaterThanOrEqual(0);
@@ -260,7 +260,7 @@ describe("SimulationAffectationHTSService", () => {
         it("should return undefined if handicap is in the same department", () => {
             const jeune = {
                 pointDeRassemblementIds: ["1"],
-                handicapMemeDepartment: "true",
+                handicapMemeDepartement: "true",
             } as JeuneAffectationModel;
             const pdrList: PointDeRassemblementModel[] = [];
 
@@ -597,35 +597,35 @@ describe("SimulationAffectationHTSService", () => {
             const jeunesList = [
                 {
                     id: "1",
-                    statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+                    statutPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
                     department: "dep1",
                     region: "reg1",
                     cohesionCenterId: "center1",
                 },
                 {
                     id: "2",
-                    statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+                    statutPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
                     department: "dep1",
                     region: "reg1",
                     cohesionCenterId: "center1",
                 },
                 {
                     id: "3",
-                    statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+                    statutPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
                     department: "dep2",
                     region: "reg1",
                     cohesionCenterId: "center2",
                 },
                 {
                     id: "4",
-                    statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+                    statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                     departement: "dep2",
                     region: "reg2",
                     centreId: "center3",
                 },
                 {
                     id: "5",
-                    statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+                    statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                     departement: "dep2",
                     region: "reg2",
                     centreId: "center3",
