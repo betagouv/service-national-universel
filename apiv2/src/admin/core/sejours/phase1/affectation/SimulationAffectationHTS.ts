@@ -78,7 +78,6 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         if (sejoursList.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun sejours !");
         }
-        // const pdrList = await this.pointDeRassemblementGateway.findBySessionId(sessionId);
         // Les PDR ne sont plus rattachés à une session
         const pdrIds = [...new Set(ligneDeBusList.flatMap((ligne) => ligne.pointDeRassemblementIds))];
         const pdrList = await this.pointDeRassemblementGateway.findByIds(pdrIds);
@@ -109,8 +108,8 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         const { jeunesList, jeuneIntraDepartementList } = allJeunes.reduce(
             (acc, jeune) => {
                 if (
-                    ["oui", "true"].includes(jeune.handicapMemeDepartment!) &&
-                    jeune.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION
+                    ["oui", "true"].includes(jeune.handicapMemeDepartement!) &&
+                    jeune.statutPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION
                 ) {
                     acc.jeuneIntraDepartementList.push(jeune as JeuneAffectationModel);
                 } else {
@@ -137,7 +136,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
 
         // on recupere les jeunes que l on va devoir affecter
         const jeuneAttenteAffectationList = jeunesList.filter(
-            ({ statusPhase1 }) => statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+            ({ statutPhase1 }) => statutPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
         );
 
         // on sépare pour chaque departement : les jeunes / pdr / lignes de bus / centre
