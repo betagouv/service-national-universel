@@ -18,7 +18,7 @@ export default function InscriptionClosedCLE() {
           <div className="flex-1">
             <Clock />
           </div>
-          <p className="text-gray-500 text-sm">Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023-2024.</p>
+          <p className="text-gray-500 text-sm">Les inscriptions dans le cadre des classes engagées ont été clôturées.</p>
         </div>
         <hr className="my-4" />
       </div>

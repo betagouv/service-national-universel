@@ -1,12 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { Redirect, Switch, useParams } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 import Loader from "@/components/Loader";
-import api from "@/services/api";
 import ReinscriptionContextProvider, { ReinscriptionContext } from "../../context/ReinscriptionContextProvider";
-import { SentryRoute, capture } from "../../sentry";
+import { SentryRoute } from "../../sentry";
 
-import { useSelector } from "react-redux";
 import StepEligibilite from "../preinscription/steps/stepEligibilite";
 import StepSejour from "../preinscription/steps/stepSejour";
 import StepConfirm from "../preinscription/steps/stepConfirm";
@@ -14,9 +11,8 @@ import StepNoSejour from "../preinscription/steps/stepNoSejour";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import { hasAccessToReinscription } from "snu-lib";
 import FutureCohort from "../inscription2023/FutureCohort";
-import { getCohort } from "@/utils/cohorts";
+import useReinscription from "../changeSejour/lib/useReinscription";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -43,33 +39,10 @@ const Step = () => {
 };
 
 export default function ReInscription() {
-  const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
-  const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
+  const { data: isReinscriptionOpen, isPending, isError } = useReinscription();
 
-  const fetchReInscriptionOpen = async () => {
-    try {
-      const { ok, data, code } = await api.get(`/cohort-session/isReInscriptionOpen`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      setReinscriptionOpen(data);
-      setReinscriptionOpenLoading(false);
-    } catch (e) {
-      setReinscriptionOpenLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchReInscriptionOpen();
-  }, []);
-
-  if (!hasAccessToReinscription(young, cohort)) return <Redirect to="/" />;
-
-  if (isReinscriptionOpenLoading) return <Loader />;
-
+  if (isPending) return <Loader />;
+  if (isError) return <div>Erreur</div>;
   if (!isReinscriptionOpen) return <FutureCohort />;
 
   return (

@@ -20,7 +20,7 @@ import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import ProgressBar from "../components/ProgressBar";
-import { environment, supportURL } from "@/config";
+import { environment, knowledgebaseURL } from "@/config";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 import ErrorComponent from "@/components/error";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
@@ -156,7 +156,9 @@ export default function StepEligibilite() {
     setLoading(true);
 
     try {
-      const { data: sessions, message } = await api.post(`/preinscription/eligibilite`, {
+      const url = data.isReInscription ? "/young/reinscription/eligibilite" : "/preinscription/eligibilite";
+
+      const { data: sessions, message } = await api.post(url, {
         schoolDepartment: data.school?.departmentName || data.school?.department,
         department: data.department,
         schoolRegion: data.school?.region,
@@ -200,7 +202,7 @@ export default function StepEligibilite() {
               className="text-sm text-[#000091]"
               rel="noreferrer noopener"
               target="blank"
-              href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
+              href={`${knowledgebaseURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
               En savoir plus →
             </a>
           </div>
@@ -209,7 +211,7 @@ export default function StepEligibilite() {
           </div>
         </Container>
       )}
-      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
+      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${knowledgebaseURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
         <div className="space-y-5">
           {fetchError && <ErrorComponent text={fetchError.text} subText={fetchError.subText} onClose={() => setFetchError("")} />}
 

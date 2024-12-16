@@ -207,11 +207,14 @@ export interface ClasseExport extends ClasseType {
     email: string;
   }[];
   studentInProgress: number;
-  studentWaiting: number;
+  studentWaitingValidation: number;
+  studentWaitingCorrection: number;
   studentValidated: number;
   studentAbandoned: number;
   studentNotAutorized: number;
   studentWithdrawn: number;
+  studentAffected: number;
+  openFiles: number;
 }
 
 export type typeExport = "export-des-classes" | "schema-de-repartition";
@@ -233,8 +236,11 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       estimatedSeats: c.estimatedSeats,
       totalSeats: c.totalSeats,
       seatsTaken: c.seatsTaken,
+      openFiles: c.openFiles ?? 0,
       studentInProgress: c.studentInProgress ?? 0,
-      studentWaiting: c.studentWaiting ?? 0,
+      studentWaitingValidation: c.studentWaitingValidation ?? 0,
+      studentWaitingCorrection: c.studentWaitingCorrection ?? 0,
+      studentAffected: c.studentAffected ?? 0,
       studentWithdrawn: c.studentWithdrawn ?? 0,
       academy: c.academy,
       region: c.region,
@@ -278,8 +284,11 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Effectif prévisionnel",
       "Effectif ajusté",
       "Élèves validés",
+      "Dossiers ouverts",
       "Élèves en cours d'inscription",
       "Élèves en attente de validation",
+      "Élèves en attente de correction",
+      "Élèves affectés",
       "Élèves désistés",
       "Académie",
       "Région",
@@ -323,8 +332,11 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       classeRefPhone: c.referents ? c.referents[0]?.phone : "",
       classeRefEmail: c.referents ? c.referents[0]?.email : "",
       youngsVolume: c.totalSeats ?? 0,
+      openFiles: c.openFiles ?? 0,
       studentInProgress: c.studentInProgress,
-      studentWaiting: c.studentWaiting,
+      studentWaitingValidation: c.studentWaitingValidation ?? 0,
+      studentWaitingCorrection: c.studentWaitingCorrection ?? 0,
+      studentAffected: c.studentAffected ?? 0,
       studentValidated: c.studentValidated,
       studentAbandoned: c.studentAbandoned,
       studentNotAutorized: c.studentNotAutorized,
@@ -368,8 +380,11 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Prénom du référent de classe",
       "Email du référent de classe",
       "Nombre de places total",
+      "Dossiers ouverts",
       "Nombre d'élèves en cours",
-      "Nombre d'élèves en attente",
+      "Nombre d'élèves en attente de validation",
+      "Nombre d'élèves en attente de correction",
+      "Nombre d'élèves affectés",
       "Nombre d'élèves validés",
       "Nombre d'élèves abandonnés",
       "Nombre d'élèves non autorisés",

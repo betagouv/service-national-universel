@@ -1,12 +1,15 @@
 import configuration from "@config/testConfiguration";
 import { getQueueToken } from "@nestjs/bullmq";
-import { Logger } from "@nestjs/common";
+import { Logger, ValidationPipe } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
-import { QueueName } from "@shared/infra/Queue";
-import { NotificationModule } from "@notification/Notification.module";
 import { ClsModule } from "nestjs-cls";
+
+import { QueueName } from "@shared/infra/Queue";
+
+import { NotificationModule } from "@notification/Notification.module";
+import { QueueModule } from "@infra/Queue.module";
 import { SigninReferent } from "@admin/core/iam/useCase/SigninReferent";
 import { ClasseService } from "@admin/core/sejours/cle/classe/Classe.service";
 import { AuthController } from "@admin/infra/iam/api/Auth.controller";
@@ -16,11 +19,28 @@ import { referentMongoProviders } from "@admin/infra/iam/provider/ReferentMongo.
 import { ClasseController } from "@admin/infra/sejours/cle/classe/api/Classe.controller";
 import { classeMongoProviders } from "@admin/infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { etablissementMongoProviders } from "@admin/infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
-import { gatewayProviders } from "@admin/infra/sejours/cle/initProvider/gateway";
+import { gatewayProviders as cleGatewayProviders } from "@admin/infra/sejours/cle/initProvider/gateway";
+import { gatewayProviders as sejourGatewayProviders } from "@admin/infra/sejours/phase1/initProvider/gateway";
+import { gatewayProviders as jeuneGatewayProviders } from "@admin/infra/sejours/jeune/initProvider/gateway";
 import { guardProviders } from "@admin/infra/sejours/cle/initProvider/guard";
-import { useCaseProvider } from "@admin/infra/sejours/cle/initProvider/useCase";
+import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
+import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { testDatabaseProviders } from "../testDatabaseProvider";
-import { QueueModule } from "@infra/Queue.module";
+import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS.service";
+import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
+import { jeuneMongoProviders } from "@admin/infra/sejours/jeune/provider/JeuneMongo.provider";
+import { centreMongoProviders } from "@admin/infra/sejours/phase1/centre/provider/CentreMongo.provider";
+import { ligneDeBusMongoProviders } from "@admin/infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
+import { pointDeRassemblementMongoProviders } from "@admin/infra/sejours/phase1/pointDeRassemblement/provider/PointDeRassemblementMongo.provider";
+import { sejourMongoProviders } from "@admin/infra/sejours/phase1/sejour/provider/SejourMongo.provider";
+import { sessionMongoProviders } from "@admin/infra/sejours/phase1/session/provider/SessionMongo.provider";
+import { FileProvider } from "@shared/infra/File.provider";
+import { FileGateway } from "@shared/core/File.gateway";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository";
+import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
+import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
+import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -45,19 +65,33 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             }),
             QueueModule,
         ],
-        controllers: [ClasseController, AuthController],
+        controllers: [ClasseController, AffectationController, Phase1Controller, AuthController],
         providers: [
             ClasseService,
-            ...gatewayProviders,
+            SimulationAffectationHTSService,
+            ReferentielRoutesService,
+            ...cleGatewayProviders,
+            ...sejourGatewayProviders,
+            ...jeuneGatewayProviders,
             ...classeMongoProviders,
             ...referentMongoProviders,
             ...etablissementMongoProviders,
+            ...jeuneMongoProviders,
+            ...centreMongoProviders,
+            ...ligneDeBusMongoProviders,
+            ...pointDeRassemblementMongoProviders,
+            ...sejourMongoProviders,
+            ...sessionMongoProviders,
+            ...taskMongoProviders,
             testDatabaseProviders(setupOptions.newContainer),
             Logger,
             ...guardProviders,
             SigninReferent,
+            { provide: FileGateway, useClass: FileProvider },
             { provide: AuthProvider, useClass: JwtTokenService },
-            ...useCaseProvider,
+            { provide: TaskGateway, useClass: AdminTaskRepository },
+            ...phase1UseCaseProviders,
+            ...cleUseCaseProviders,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))
@@ -69,6 +103,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         .compile();
 
     const app = adminTestModule.createNestApplication({ logger: false });
+    app.useGlobalPipes(new ValidationPipe());
 
     return { app, adminTestModule };
 };

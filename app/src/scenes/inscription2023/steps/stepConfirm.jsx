@@ -168,7 +168,7 @@ export default function StepConfirm() {
   );
 }
 
-function capitalizeFirstLetter(string) {
+export function capitalizeFirstLetter(string) {
   if (string) return string.charAt(0).toUpperCase() + string.slice(1);
 }
 

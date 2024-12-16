@@ -3,7 +3,7 @@ import SNU from "@/assets/logo-snu.png";
 import useAuth from "../../../services/useAuth";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Header as DSFRHeader } from "@codegouvfr/react-dsfr/Header";
-import { appURL, supportURL } from "@/config";
+import { appURL, knowledgebaseURL } from "@/config";
 
 const Header = ({ title }) => {
   const { isCLE, isLoggedIn, loginOrLogout } = useAuth();
@@ -12,7 +12,7 @@ const Header = ({ title }) => {
   const quickAccessItems = [
     {
       linkProps: {
-        href: supportURL,
+        href: knowledgebaseURL,
         target: "_blank",
       },
       iconId: fr.cx("fr-icon-question-line") || fr.cx("fr-icon-question-fill"),

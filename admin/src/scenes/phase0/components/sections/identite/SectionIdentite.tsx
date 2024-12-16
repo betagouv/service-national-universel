@@ -71,7 +71,14 @@ export default function SectionIdentite({
   }
 
   function onLocalChange(field, value) {
-    setYoungFiltered({ ...youngFiltered, [field]: value });
+    // If field is a date, we need to format it
+    if (field === "birthdateAt") {
+      // @ts-expect-error toUtc
+      const formattedDate = dayjs(value).toUtc().toDate();
+      setYoungFiltered((prev) => ({ ...prev, [field]: formattedDate }));
+    } else {
+      setYoungFiltered((prev) => ({ ...prev, [field]: value }));
+    }
   }
 
   function onLocalAddressChange(field, value) {

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
-import { supportURL } from "../../../../../config";
+import { knowledgebaseURL } from "../../../../../config";
 import api from "../../../../../services/api";
 import { translate } from "../../../../../utils";
 import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner, getParticularitesAcces, DepartmentServiceType } from "snu-lib";
@@ -174,7 +174,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
         )}
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
           Pour toute information complémentaire, rendez-vous sur votre compte volontaire (rubrique «{" "}
-          <a className="underline" href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+          <a className="underline" href={`${knowledgebaseURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
             Besoin d&apos;aide
           </a>{" "}
           »).
