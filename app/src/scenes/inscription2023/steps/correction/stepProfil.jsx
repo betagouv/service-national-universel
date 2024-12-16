@@ -7,7 +7,7 @@ import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 import plausibleEvent from "../../../../services/plausible";
-import { getCorrectionByStep } from "../../../../utils/navigation";
+import useCorrections from "@/hooks/useCorrections";
 import Input from "../../components/Input";
 import { knowledgebaseURL } from "@/config";
 import IconFrance from "@/assets/IconFrance";
@@ -24,7 +24,7 @@ export default function StepProfil() {
   const { step } = useParams();
   const dispatch = useDispatch();
 
-  const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
+  const corrections = useCorrections(step);
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) history.push("/");
 
   const [loading, setLoading] = React.useState(false);

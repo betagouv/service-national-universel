@@ -1,4 +1,3 @@
-
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { Redirect, useHistory, useParams } from "react-router-dom";
@@ -6,7 +5,7 @@ import validator from "validator";
 import IconFrance from "../../../../assets/IconFrance";
 import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
-import { getCorrectionByStep } from "../../../../utils/navigation";
+import useCorrections from "@/hooks/useCorrections";
 import SchoolInFrance from "../../components/ShoolInFrance";
 import SchoolOutOfFrance from "../../components/ShoolOutOfFrance";
 import Input from "../../components/Input";
@@ -66,7 +65,7 @@ export default function StepEligibilite() {
   const [modal, setModal] = React.useState({ isOpen: false });
 
   const { step } = useParams();
-  const corrections = getCorrectionByStep(young, step);
+  const corrections = useCorrections(step);
   const history = useHistory();
 
   const optionsScolarite = [

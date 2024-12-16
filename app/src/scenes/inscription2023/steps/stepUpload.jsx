@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import { getCorrectionsForStepUpload } from "../../../utils/navigation";
+import useCorrections from "@/hooks/useCorrections";
 import { ID } from "../utils";
 import { knowledgebaseURL } from "@/config";
 
@@ -16,6 +16,7 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import StepUploadMobile from "../components/StepUploadMobile";
 import useDevice from "@/hooks/useDevice";
 import StepUploadDesktop from "../components/StepUploadDesktop";
+import { INSCRIPTION_STEPS } from "@/utils/navigation";
 
 export default function StepUpload() {
   const device = useDevice();
@@ -24,7 +25,7 @@ export default function StepUpload() {
   if (!category) category = young.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
-  const corrections = getCorrectionsForStepUpload(young);
+  const corrections = useCorrections(INSCRIPTION_STEPS.UPLOAD);
   const supportLink = `${knowledgebaseURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
   const [recto, setRecto] = useState();

@@ -13,7 +13,7 @@ import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { knowledgebaseURL } from "../../../config";
 import { getRegionForEligibility, useAddress, YOUNG_STATUS } from "snu-lib";
-import { getCorrectionByStep } from "../../../utils/navigation";
+import useCorrections from "@/hooks/useCorrections";
 import ReactTooltip from "react-tooltip";
 import { RiInformationFill } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -105,7 +105,7 @@ const defaultState = {
 export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
-  const [corrections, setCorrections] = useState({});
+  const corrections = useCorrections(step);
   const [situationOptions, setSituationOptions] = useState([]);
   const [birthCitySuggestionsOpen, setBirthCitySuggestionsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -207,10 +207,8 @@ export default function StepCoordonnees() {
         psc1Info: young.psc1Info || data.psc1Info,
       });
     }
-    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
-      const corrections = getCorrectionByStep(young, step);
-      if (!Object.keys(corrections).length) return history.push("/");
-      else setCorrections(corrections);
+    if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
+      return history.push("/");
     }
   }, [young]);
 
