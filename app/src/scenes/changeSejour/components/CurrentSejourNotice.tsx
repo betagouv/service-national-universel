@@ -8,12 +8,17 @@ const CurrentSejourNotice = () => {
   const { young } = useAuth();
   const cohort = getCohort(young.cohort);
   const cohortPeriod = getCohortPeriod(cohort);
+  const sejourIsDone = new Date() > new Date(cohort.endAt);
 
   const text =
     young.status === YOUNG_STATUS.WITHDRAWN ? (
       <p>Vous vous êtes désisté(e) 🥲</p>
     ) : young.status === YOUNG_STATUS.ABANDONED ? (
       <p>Vous avez abandonné votre inscription 🥲</p>
+    ) : sejourIsDone ? (
+      <p>
+        Vous étiez positionné(e) sur le séjour <strong>{cohortPeriod}</strong>.
+      </p>
     ) : (
       <p>
         Vous êtes positionné(e) sur le séjour <strong>{cohortPeriod}</strong>.

@@ -11,6 +11,7 @@ import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfir
 import { getCohort } from "@/utils/cohorts";
 import useInscriptionGoal from "../lib/useInscriptionGoal";
 import Loader from "@/components/Loader";
+import ErrorNotice from "@/components/ui/alerts/ErrorNotice";
 
 export default function NewChoiceSejour() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -70,7 +71,7 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
       {goalQuery.isPending ? (
         <Loader />
       ) : goalQuery.isError ? (
-        <p>Impossible de vérifier les cibles départementales.</p>
+        <ErrorNotice text="Impossible de vérifier les cibles départementales. Merci de réessayer plus tard." />
       ) : (
         <div className="grid gap-2 p-3 max-w-md mx-auto my-4">
           <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
