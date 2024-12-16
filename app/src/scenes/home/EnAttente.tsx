@@ -1,20 +1,22 @@
-import hero from "../../assets/hero/home-not-done.png";
 import React from "react";
 import { Link } from "react-router-dom";
+import { getCohortPeriod, YOUNG_STATUS } from "../../utils";
+import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
-import { getCohort } from "../../utils/cohorts";
-import { getCohortPeriod } from "snu-lib";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
-import Notice from "@/components/ui/alerts/Notice";
+import hero from "../../assets/hero/home-not-done.png";
 import { HiArrowRight } from "react-icons/hi";
+import JDMA from "@/components/JDMA";
 import usePermissions from "@/hooks/usePermissions";
+import CorrectionRequests from "./components/CorrectionRequests";
+import StatusNotice from "./components/StatusNotice";
 
-export default function WaitingList() {
+export default function EnAttente() {
   const { young, isCLE } = useAuth();
+  const title = `${young.firstName}, bienvenue sur votre compte ${isCLE ? "élève" : "volontaire"}`;
   const cohort = getCohort(young.cohort);
   const { canModifyInscription } = usePermissions();
-  const title = `${young.firstName}, bienvenue sur votre compte ${isCLE ? "élève" : "volontaire"}`;
 
   return (
     <HomeContainer>
@@ -34,12 +36,15 @@ export default function WaitingList() {
             )}
           </section>
 
-          <Notice>
-            <p className="font-bold">Votre inscription au SNU est bien validée. </p>
-            <p>Nous vous recontacterons dès qu’une place se libère dans les prochains jours</p>
-          </Notice>
+          <StatusNotice status={young.status} />
         </div>
       </HomeHeader>
+
+      {young.status === YOUNG_STATUS.WAITING_CORRECTION && <CorrectionRequests />}
+
+      <div className="mt-12 flex justify-end">
+        <JDMA id={3154} />
+      </div>
     </HomeContainer>
   );
 }
