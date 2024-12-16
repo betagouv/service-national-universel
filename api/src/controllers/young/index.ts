@@ -845,8 +845,6 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
       "_id",
       "__v",
       "birthdateAt",
-      "email",
-      "status",
       "cohort",
       "gender",
       "situation",
@@ -869,41 +867,21 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
       "zip",
       "city",
       "createdAt",
-      "lastStatusAt",
-      "deletedAt",
     ];
 
-    for (const key in young.files) {
-      if (key.length) {
-        for (const file in key as any) {
-          try {
-            if (key.includes("military")) await deleteFile(`app/young/${id}/military-preparation/${key}/${(file as any)._id}`);
-            else await deleteFile(`app/young/${id}/${key}/${(file as any)._id}`);
-            young.set({ files: { [key]: undefined } });
-          } catch (e) {
-            capture(e);
-          }
-        }
-      }
-    }
-
-    let $set = {
-      email: `${young["_id"]}@delete.com`,
-      status: YOUNG_STATUS.DELETED,
-      lastStatusAt: new Date(),
-      deletedAt: new Date(),
-    };
-    let $unset = {};
-
     for (const key in young._doc) {
-      if (!fieldToKeep.includes(key)) {
-        $unset[key] = "";
+      if (!fieldToKeep.find((val) => val === key)) {
+        young.set({ [key]: undefined });
       }
     }
+
+    young.set({ email: `${young._doc!["_id"]}@delete.com` });
+    young.set({ status: YOUNG_STATUS.DELETED });
+    young.set({ lastStatusAt: Date.now() });
 
     await unsync(young);
 
-    await young.updateOne({ $set, $unset });
+    await young.save({ fromUser: req.user });
 
     if (!canDeletePatchesHistory(req.user, young)) return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await patches.deletePatches({ id, model: YoungModel });
