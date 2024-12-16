@@ -271,3 +271,17 @@ export function shouldForceRedirectToEmailValidation(user) {
   const pathname = window.location.pathname;
   return isEmailValidationEnabled && shouldUserValidateEmail && pathname !== "/preinscription/email-validation";
 }
+
+export function shouldForceRedirectToReinscription(young) {
+  return young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status);
+}
+
+export function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
+  if (window.location.pathname === "/changer-de-sejour") return false;
+  return (
+    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
+    (isInscriptionModificationOpen &&
+      young.status === YOUNG_STATUS.WAITING_VALIDATION &&
+      ((young.hasStartedReinscription && young.reinscriptionStep2023 !== "DONE") || (!young.hasStartedReinscription && young.inscriptionStep2023 !== "DONE")))
+  );
+}
