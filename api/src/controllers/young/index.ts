@@ -610,7 +610,7 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       }
     }
 
-    const newStatus = getStatusAfterChangementSejour(young.status, young.department!, cohortObj);
+    const newStatus = await getStatusAfterChangementSejour(young.status, young.department!, cohortObj);
 
     young.set({
       cohort: cohortObj.name,

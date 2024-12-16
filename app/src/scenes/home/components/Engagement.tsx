@@ -12,8 +12,8 @@ export default function Engagement() {
   return (
     <section id="engagements" className="max-w-6xl mx-auto">
       <p className="font-bold leading-loose">Découvrez d’autres formes d’engagement</p>
-      <p className="mt-1 text-gray-500">Si l’engagement vous donne envie, vous trouverez des dispositifs qui pourront vous intéresser.</p>
-      <div className="flex gap-6 overflow-x-auto mt-3 pb-3">
+      <p className="text-gray-500">Si l’engagement vous donne envie, vous trouverez des dispositifs qui pourront vous intéresser.</p>
+      <div className="flex gap-6 overflow-x-auto mt-4 pb-3">
         {programs
           .sort((a, b) => a.order! - b.order!)
           .map((program) => {
