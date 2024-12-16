@@ -1,10 +1,13 @@
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getCohort } from "@/utils/cohorts";
+import { SignupButtons } from "@snu/ds/dsfr";
 import React from "react";
+import { useHistory } from "react-router-dom";
 import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
 
 export default function InscriptionClosed({ young, isCLE }) {
+  const history = useHistory();
   const statusWording = (young, isCLE) => {
     if (isCLE) {
       if ([YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
@@ -30,6 +33,7 @@ export default function InscriptionClosed({ young, isCLE }) {
         ) : (
           <p>Les inscriptions dans le cadre des classes engagées ont été clôturées.</p>
         )}
+        <SignupButtons onClickNext={() => history.push("/changer-de-sejour")} labelNext="Changer de séjour" />
       </DSFRContainer>
     </DSFRLayout>
   );
