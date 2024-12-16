@@ -9,7 +9,17 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { translate, YOUNG_STATUS } from "snu-lib";
 
+const notices = {
+  [YOUNG_STATUS.WAITING_VALIDATION]: <WaitingValidation />,
+  [YOUNG_STATUS.WAITING_CORRECTION]: <WaitingCorrection />,
+  [YOUNG_STATUS.WAITING_LIST]: <WaitingList />,
+};
+
 export default function StatusNotice({ status }: { status: string }) {
+  return notices[status] || null;
+}
+
+function WaitingValidation() {
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -28,41 +38,37 @@ export default function StatusNotice({ status }: { status: string }) {
     }
   }
 
-  if (status === YOUNG_STATUS.WAITING_VALIDATION) {
-    return (
-      <Notice>
-        <p className="font-bold">Votre dossier est en cours de traitement par l’administration.</p>
-        <p>Vous recevrez prochainement un e-mail de no_reply@snu.gouv.fr vous informant de l’avancement de votre inscription.</p>
-        <button
-          className="bg-blue-600 text-white w-full md:w-fit px-6 py-2.5 text-center rounded-md text-sm mt-3 hover:bg-blue-800 transition-colors"
-          onClick={handleGoToInscription}>
-          Consulter mon dossier d’inscription
-        </button>
-      </Notice>
-    );
-  }
+  return (
+    <Notice>
+      <p className="font-bold">Votre dossier est en cours de traitement par l’administration.</p>
+      <p>Vous recevrez prochainement un e-mail de no_reply@snu.gouv.fr vous informant de l’avancement de votre inscription.</p>
+      <button
+        className="bg-blue-600 text-white w-full md:w-fit px-6 py-2.5 text-center rounded-md text-sm mt-3 hover:bg-blue-800 transition-colors"
+        onClick={handleGoToInscription}>
+        Consulter mon dossier d’inscription
+      </button>
+    </Notice>
+  );
+}
 
-  if (status === YOUNG_STATUS.WAITING_CORRECTION) {
-    return (
-      <div className="bg-amber-50 text-amber-800 p-3 rounded-md flex gap-2">
-        <div className="flex-none">
-          <HiClock className="text-amber-400 h-5 w-5" />
-        </div>
-        <div>
-          <p className="font-semibold text-sm">Votre dossier est en attente de correction.</p>
-        </div>
+function WaitingCorrection() {
+  return (
+    <div className="bg-amber-50 text-amber-800 p-3 rounded-md flex gap-2">
+      <div className="flex-none">
+        <HiClock className="text-amber-400 h-5 w-5" />
       </div>
-    );
-  }
+      <div>
+        <p className="font-semibold text-sm">Votre dossier est en attente de correction.</p>
+      </div>
+    </div>
+  );
+}
 
-  if (status === YOUNG_STATUS.WAITING_LIST) {
-    return (
-      <Notice>
-        <p className="font-bold">Votre inscription au SNU est bien validée. </p>
-        <p>Nous vous recontacterons dès qu’une place se libère dans les prochains jours</p>
-      </Notice>
-    );
-  }
-
-  return null;
+function WaitingList() {
+  return (
+    <Notice>
+      <p className="font-bold">Votre inscription au SNU est bien validée.</p>
+      <p>Nous vous recontacterons dès qu’une place se libère dans les prochains jours</p>
+    </Notice>
+  );
 }
