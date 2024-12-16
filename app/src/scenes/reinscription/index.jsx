@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Redirect, Switch, useParams } from "react-router-dom";
+import { Link, Redirect, Switch, useParams } from "react-router-dom";
 import Loader from "@/components/Loader";
 import ReinscriptionContextProvider, { ReinscriptionContext } from "../../context/ReinscriptionContextProvider";
 import { SentryRoute } from "../../sentry";
@@ -11,8 +11,8 @@ import StepNoSejour from "../preinscription/steps/stepNoSejour";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import FutureCohort from "../inscription2023/FutureCohort";
 import useReinscription from "../changeSejour/lib/useReinscription";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -43,7 +43,7 @@ export default function ReInscription() {
 
   if (isPending) return <Loader />;
   if (isError) return <div>Erreur</div>;
-  if (!isReinscriptionOpen) return <FutureCohort />;
+  if (!isReinscriptionOpen) return <Fallback />;
 
   return (
     <ReinscriptionContextProvider>
@@ -54,5 +54,19 @@ export default function ReInscription() {
         </Switch>
       </DSFRLayout>
     </ReinscriptionContextProvider>
+  );
+}
+
+function Fallback() {
+  return (
+    <DSFRLayout title="Reinscription du volontaire">
+      <DSFRContainer title="Réinscription indisponible">
+        <p>Vous n'avez actuellement pas accès à la réinscription.</p>
+        <p>
+          Pas de panique, <Link to="/">cliquez ici pour reprendre votre parcours</Link>.
+        </p>
+        <br />
+      </DSFRContainer>
+    </DSFRLayout>
   );
 }
