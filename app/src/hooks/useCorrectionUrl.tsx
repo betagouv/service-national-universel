@@ -1,15 +1,8 @@
 import useAuth from "@/services/useAuth";
-import { WAITING_CORRECTION_LINK, WAITING_CORRECTION_LINK_CLE } from "@/utils/correctionMaps";
+import { CORRECTION_MAP_CLE, CORRECTION_MAP_HTS } from "@/utils/correctionMaps";
 
 export default function useCorrectionUrl(field: string) {
   const { isCLE } = useAuth();
-  const correctionMap = isCLE ? WAITING_CORRECTION_LINK_CLE : WAITING_CORRECTION_LINK;
-
-  const getUrlByCorrectionField = () => {
-    const correction = correctionMap.find((correction) => correction.field.includes(field));
-    if (!correction?.url) return "/";
-    return correction.url;
-  };
-
-  return getUrlByCorrectionField();
+  const correctionMap = isCLE ? CORRECTION_MAP_CLE : CORRECTION_MAP_HTS;
+  return Object.values(correctionMap).find((correction) => correction.fields.includes(field))?.url;
 }

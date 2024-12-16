@@ -1,11 +1,12 @@
-export const WAITING_CORRECTION_LINK = [
-  {
-    field: ["firstName", "lastName", "phone", "email"],
+import { CORRECTION_STEPS } from "./navigation";
+
+export const CORRECTION_MAP_HTS = {
+  [CORRECTION_STEPS.PROFIL]: {
+    fields: ["firstName", "lastName", "phone", "email"],
     url: "/inscription/correction/profil",
-    step: "profil",
   },
-  {
-    field: [
+  [CORRECTION_STEPS.ELIGIBILITE]: {
+    fields: [
       "birthdateAt",
       "schooled",
       "grade",
@@ -21,10 +22,9 @@ export const WAITING_CORRECTION_LINK = [
       "zip",
     ],
     url: "/inscription/correction/eligibilite",
-    step: "eligibilite",
   },
-  {
-    field: [
+  [CORRECTION_STEPS.REPRESENTANTS]: {
+    fields: [
       "parent1Status",
       "parent1FirstName",
       "parent1LastName",
@@ -38,10 +38,9 @@ export const WAITING_CORRECTION_LINK = [
       "parent2Phone",
     ],
     url: "/inscription/correction/representants",
-    step: "representants",
   },
-  {
-    field: [
+  [CORRECTION_STEPS.COORDONNEE]: {
+    fields: [
       "gender",
       "frenchNationality",
       "birthCountry",
@@ -77,23 +76,20 @@ export const WAITING_CORRECTION_LINK = [
       "psc1Info",
     ],
     url: "/inscription/correction/coordonnee",
-    step: "coordonnee",
   },
-  {
-    field: ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"],
+  [CORRECTION_STEPS.DOCUMENTS]: {
+    fields: ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"],
     url: "/inscription/correction/documents",
-    step: "documents",
   },
-];
+};
 
-export const WAITING_CORRECTION_LINK_CLE = [
-  {
-    field: ["firstName", "lastName", "frenchNationality", "phone", "email", "birthdateAt", "grade"],
+export const CORRECTION_MAP_CLE = {
+  [CORRECTION_STEPS.PROFIL]: {
+    fields: ["firstName", "lastName", "frenchNationality", "phone", "email", "birthdateAt", "grade"],
     url: "/inscription/correction/profil",
-    step: "profil",
   },
-  {
-    field: [
+  [CORRECTION_STEPS.REPRESENTANTS]: {
+    fields: [
       "parent1Status",
       "parent1FirstName",
       "parent1LastName",
@@ -107,10 +103,9 @@ export const WAITING_CORRECTION_LINK_CLE = [
       "parent2Phone",
     ],
     url: "/inscription/correction/representants",
-    step: "representants",
   },
-  {
-    field: [
+  [CORRECTION_STEPS.COORDONNEE]: {
+    fields: [
       "gender",
       "birthCountry",
       "birthCity",
@@ -145,6 +140,5 @@ export const WAITING_CORRECTION_LINK_CLE = [
       "psc1Info",
     ],
     url: "/inscription/correction/coordonnee",
-    step: "coordonnee",
   },
-];
+};
