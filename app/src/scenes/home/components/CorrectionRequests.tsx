@@ -5,18 +5,7 @@ import { redirectToCorrection } from "@/utils/navigation";
 import React from "react";
 import { HiExclamation, HiPencilAlt } from "react-icons/hi";
 import { Link } from "react-router-dom";
-import { translateCorrectionReason, translateField } from "snu-lib";
-
-type CorrectionType = {
-  _id: string;
-  createdAt: string;
-  field: string;
-  message: string;
-  moderatorId: string;
-  reason: string;
-  sentAt: string;
-  status: string;
-};
+import { CorrectionRequestType, translateCorrectionReason, translateField } from "snu-lib";
 
 export default function CorrectionRequests() {
   const { young } = useAuth();
@@ -32,13 +21,13 @@ export default function CorrectionRequests() {
       )}
 
       {young.correctionRequests
-        ?.filter((c: CorrectionType) => ["SENT", "REMINDED"].includes(c.status as any))
-        .map((correction: CorrectionType) => <CorrectionRequest key={correction._id} correction={correction} />)}
+        ?.filter((c: CorrectionRequestType) => ["SENT", "REMINDED"].includes(c.status as any))
+        .map((correction: CorrectionRequestType) => <CorrectionRequest key={correction._id} correction={correction} />)}
     </section>
   );
 }
 
-function CorrectionRequest({ correction }: { correction: CorrectionType }) {
+function CorrectionRequest({ correction }: { correction: CorrectionRequestType }) {
   const { young } = useAuth();
   const { canModifyInscription } = usePermissions();
   const link = redirectToCorrection(young, correction.field);
