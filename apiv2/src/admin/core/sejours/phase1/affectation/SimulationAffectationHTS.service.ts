@@ -19,7 +19,7 @@ import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRass
 type JeuneRapport = Pick<
     JeuneModel,
     | "id"
-    | "statusPhase1"
+    | "statutPhase1"
     | "genre"
     | "qpv"
     | "psh"
@@ -29,11 +29,16 @@ type JeuneRapport = Pick<
     | "pointDeRassemblementId"
     | "ligneDeBusId"
     | "centreId"
-    | "status"
+    | "statut"
     | "prenom"
     | "nom"
-    | "handicapMemeDepartment"
->;
+    | "handicapMemeDepartement"
+> & {
+    pointDeRassemblementId?: string;
+    ligneDeBusId?: string;
+    centreId?: string;
+    departementOrigine?: string;
+};
 
 export interface ChangementDepartement {
     origine: string;
@@ -115,6 +120,18 @@ export type JeuneAffectationModel = JeuneModel & {
     pointDeRassemblementIds: string[];
     departementOrigine?: string;
     regionOrigine?: string;
+};
+
+export const RAPPORT_SHEETS = {
+    RESUME: "Résumé",
+    AFFECTES: "Affectes",
+    AFFECTES_EN_AMONT: "Affectes en amont",
+    NON_AFFECTES: "Non affectés",
+    SEJOURS: "Sejours",
+    LIGNES_DE_BUS: "Lignes de bus",
+    PDR: "PDR",
+    CENTRES: "Centres",
+    INTRA_DEPARTEMENT: "intradep à affecter",
 };
 
 @Injectable()
@@ -223,7 +240,7 @@ export class SimulationAffectationHTSService {
     // ici, on calcule les taux de repartition par centre
     calculTauxRepartitionParCentre(sejourList: SejourModel[], jeunesList: JeuneModel[]): RatioRepartition[] {
         const centresIds = sejourList.map((item) => item.centreId);
-        const jeunesAffected = jeunesList.filter((jeune) => jeune.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED);
+        const jeunesAffected = jeunesList.filter((jeune) => jeune.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED);
 
         let taux: RatioRepartition[] = [];
         for (const centreId of centresIds) {
@@ -369,7 +386,7 @@ export class SimulationAffectationHTSService {
                 randomJeuneSelectedIndices.forEach((index) => {
                     const ligneDeBusId = ligneDeBusIdList[jeuneAAffecterIndex];
                     const pointDeRassemblementIds = pointDeRassemblementParLigneDeBusIdMap[ligneDeBusId];
-                    randomJeuneList[index].statusPhase1 = YOUNG_STATUS_PHASE1.AFFECTED;
+                    randomJeuneList[index].statutPhase1 = YOUNG_STATUS_PHASE1.AFFECTED;
                     randomJeuneList[index].ligneDeBusId = ligneDeBusId;
                     randomJeuneList[index].pointDeRassemblementIds = pointDeRassemblementIds;
                     randomJeuneList[index].centreId = centreIdListParLigne[jeuneAAffecterIndex];
@@ -400,7 +417,7 @@ export class SimulationAffectationHTSService {
             | "id"
             | "pointDeRassemblementIds"
             | "localisation"
-            | "handicapMemeDepartment"
+            | "handicapMemeDepartement"
             | "deplacementPhase1Autonomous"
             | "transportInfoGivenByLocal"
         >,
@@ -409,7 +426,7 @@ export class SimulationAffectationHTSService {
         const pdrIds = jeune.pointDeRassemblementIds || [];
         if (
             pdrIds.length === 0 ||
-            jeune.handicapMemeDepartment === "true" ||
+            jeune.handicapMemeDepartement === "true" ||
             jeune.deplacementPhase1Autonomous === "true" ||
             jeune.transportInfoGivenByLocal === "true"
         ) {
@@ -739,7 +756,8 @@ export class SimulationAffectationHTSService {
             let isHorsZone = false;
             let isSansLigne = false;
             let isSansCentre = false;
-            let isProblemePlace = false;
+            let isProblemePlaceCentre = false;
+            let isProblemePlaceBus = false;
 
             // on récupère les pdr du département du jeune
             const pdrSameDepartementList = pdrList.filter((pdr) => pdr.departement === departement);
@@ -790,7 +808,8 @@ export class SimulationAffectationHTSService {
                     lignesNames.push(numeroLigne);
                 });
             } else {
-                isProblemePlace = true;
+                isProblemePlaceCentre = placesCentreList.reduce((a, b) => a + b, 0) === 0;
+                isProblemePlaceBus = placesLigneList.reduce((a, b) => a + b, 0) === 0;
                 limite += 1;
             }
 
@@ -803,7 +822,8 @@ export class SimulationAffectationHTSService {
                 "Probablement hors zones (département)": isHorsZone ? "oui" : "non", // aucune ligne ni centre théorique trouvé
                 "Pas de ligne disponible": isSansLigne ? "oui" : "non", // à un centre théorique mais pas de ligne
                 "Pas de centre disponible": isSansCentre ? "oui" : "non", // à une ligne théorique mais pas de centre
-                "Problème de places": isProblemePlace ? "oui" : "non", // à une ligne et un centre théorique mais n'a pas été affecté
+                "Problème de places centre": isProblemePlaceCentre ? "oui" : "non", // à une ligne et un centre théorique mais n'a pas été affecté
+                "Problème de places bus": isProblemePlaceBus ? "oui" : "non", // à une ligne et un centre théorique mais n'a pas été affecté
                 Résumé: resumeJeune,
             };
         });
@@ -832,7 +852,7 @@ export class SimulationAffectationHTSService {
         changementDepartements: ChangementDepartement[],
         analytics: Analytics,
     ): RapportData {
-        const jeunesAffectedList = jeunesList.filter((jeune) => jeune.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED);
+        const jeunesAffectedList = jeunesList.filter((jeune) => jeune.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED);
         const regionsConcerneeList = [...new Set(pdrList.map((pdr) => pdr.region))];
         const { sejourIdList, sejourCentreIdList } = sejourList.reduce(
             (acc, sejour) => {
@@ -859,7 +879,9 @@ export class SimulationAffectationHTSService {
             });
         }
 
-        const jeunesAffectedListRapport = jeunesAffectedList.map(this.mapJeuneRapport);
+        const jeunesAffectedListRapport = jeunesAffectedList.map((jeune) =>
+            this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList),
+        );
 
         const jeunesDejaAffectedIdList = jeunesAvantAffectationList.reduce((acc: string[], jeune) => {
             if (jeune.centreId) {
@@ -869,7 +891,7 @@ export class SimulationAffectationHTSService {
         }, []);
         const jeunesDejaAffectedList = jeunesList
             .filter((jeune) => jeunesDejaAffectedIdList.includes(jeune.id))
-            .map(this.mapJeuneRapport);
+            .map((jeune) => this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList));
 
         const jeunesNouvellementAffectedList = jeunesAffectedListRapport.reduce(
             (acc: RapportData["jeunesNouvellementAffectedList"], jeune, index) => {
@@ -886,8 +908,8 @@ export class SimulationAffectationHTSService {
         );
 
         let jeuneAttenteAffectationList = jeunesList
-            .filter((jeune) => jeune.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION)
-            .map(this.mapJeuneRapport);
+            .filter((jeune) => jeune.statutPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION)
+            .map((jeune) => this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList));
 
         // On recupere les possibilites theoriques des jeunes non affectes
         const infoNonAffecetes = this.getInfoNonAffectes(
@@ -904,7 +926,9 @@ export class SimulationAffectationHTSService {
             ...infoNonAffecetes.jeunes[index],
         }));
 
-        const jeuneIntraDepartementListUpdated = jeuneIntraDepartementList.map(this.mapJeuneRapport);
+        const jeuneIntraDepartementListUpdated = jeuneIntraDepartementList.map((jeune) =>
+            this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList),
+        );
 
         const sejourListUpdated = sejourList.map((sejour) => {
             if (sejour.centreId) {
@@ -1034,15 +1058,15 @@ export class SimulationAffectationHTSService {
 
     async generateRapportExcel(rapportData: RapportData): Promise<Buffer> {
         return this.fileService.generateExcel({
-            Résumé: rapportData.summary,
-            Affectes: rapportData.jeunesNouvellementAffectedList,
-            "Affectes en amont": rapportData.jeunesDejaAffectedList,
-            "Non affectés": rapportData.jeuneAttenteAffectationList,
-            Sejours: rapportData.sejourList,
-            "Lignes de bus": rapportData.ligneDeBusList,
-            PDR: rapportData.pdrList,
-            Centres: rapportData.centreList,
-            "intradep à affecter": rapportData.jeuneIntraDepartementList,
+            [RAPPORT_SHEETS.RESUME]: rapportData.summary,
+            [RAPPORT_SHEETS.AFFECTES]: rapportData.jeunesNouvellementAffectedList,
+            [RAPPORT_SHEETS.NON_AFFECTES]: rapportData.jeuneAttenteAffectationList,
+            [RAPPORT_SHEETS.INTRA_DEPARTEMENT]: rapportData.jeuneIntraDepartementList,
+            [RAPPORT_SHEETS.AFFECTES_EN_AMONT]: rapportData.jeunesDejaAffectedList,
+            [RAPPORT_SHEETS.CENTRES]: rapportData.centreList,
+            [RAPPORT_SHEETS.LIGNES_DE_BUS]: rapportData.ligneDeBusList,
+            [RAPPORT_SHEETS.SEJOURS]: rapportData.sejourList,
+            [RAPPORT_SHEETS.PDR]: rapportData.pdrList,
         });
     }
 
@@ -1050,23 +1074,35 @@ export class SimulationAffectationHTSService {
         // TODO: récupération de la logique de génération du PDF
     }
 
-    mapJeuneRapport(jeune: JeuneAffectationModel) {
+    mapJeuneRapport(
+        jeune: JeuneAffectationModel,
+        ligneDeBusList: LigneDeBusModel[],
+        centreList: CentreModel[],
+        pdrList: PointDeRassemblementModel[],
+    ): JeuneRapport {
+        const ligneDeBus = jeune.ligneDeBusId
+            ? ligneDeBusList.find((ligneDeBus) => ligneDeBus.id === jeune.ligneDeBusId)
+            : undefined;
+        const centre = jeune.centreId ? centreList.find((centre) => centre.id === jeune.centreId) : undefined;
+        const pdr = jeune.pointDeRassemblementId
+            ? pdrList.find((pdr) => pdr.id === jeune.pointDeRassemblementId)
+            : undefined;
         return {
             id: jeune.id,
-            statusPhase1: jeune.statusPhase1,
+            statutPhase1: jeune.statutPhase1,
             genre: jeune.genre === "female" ? "fille" : "garçon",
             qpv: ["true", "oui"].includes(jeune.qpv!) ? "oui" : "non",
             psh: ["true", "oui"].includes(jeune.psh!) ? "oui" : "non",
             sessionNom: jeune.sessionNom,
             region: jeune.region,
             departement: jeune.departement,
-            pointDeRassemblementId: jeune.pointDeRassemblementId,
-            ligneDeBusId: jeune.ligneDeBusId,
-            centreId: jeune.centreId,
-            status: jeune.status,
+            pointDeRassemblementId: pdr?.matricule || jeune.pointDeRassemblementId, // TODO: matricule
+            ligneDeBusId: ligneDeBus?.numeroLigne || jeune.ligneDeBusId, // TODO: numéro ligne
+            centreId: centre?.matricule || jeune.centreId, // TODO: matricule
+            statut: jeune.statut,
             prenom: jeune.prenom,
             nom: jeune.nom,
-            handicapMemeDepartement: ["true", "oui"].includes(jeune.handicapMemeDepartment!) ? "oui" : "non",
+            handicapMemeDepartement: ["true", "oui"].includes(jeune.handicapMemeDepartement!) ? "oui" : "non",
             departementOrigine: jeune.departementOrigine,
         };
     }

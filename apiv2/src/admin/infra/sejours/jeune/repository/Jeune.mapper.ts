@@ -11,9 +11,9 @@ export class JeuneMapper {
     static toModel(jeuneDocument: JeuneDocument): JeuneModel {
         return {
             id: jeuneDocument._id.toString(),
-            statusPhase1: jeuneDocument.statusPhase1,
+            statutPhase1: jeuneDocument.statusPhase1,
             centreId: jeuneDocument.cohesionCenterId,
-            handicapMemeDepartment: jeuneDocument.handicapInSameDepartment,
+            handicapMemeDepartement: jeuneDocument.handicapInSameDepartment,
             genre: jeuneDocument.gender,
             qpv: jeuneDocument.qpv,
             psh: jeuneDocument.handicap,
@@ -52,7 +52,7 @@ export class JeuneMapper {
             phase2ApplicationStatus: jeuneDocument.phase2ApplicationStatus,
             phase2ApplicationFilesType: jeuneDocument.phase2ApplicationFilesType,
             missionsInMail: jeuneDocument.missionsInMail,
-            status: jeuneDocument.status,
+            statut: jeuneDocument.status,
             email: jeuneDocument.email,
             loginAttempts: jeuneDocument.loginAttempts,
             token2FA: jeuneDocument.token2FA,
@@ -85,9 +85,9 @@ export class JeuneMapper {
     static toEntity(jeuneModel: JeuneModel): Omit<YoungType, "metadata" | "createdAt" | "updatedAt"> {
         return {
             _id: jeuneModel.id,
-            statusPhase1: jeuneModel.statusPhase1,
+            statusPhase1: jeuneModel.statutPhase1,
             cohesionCenterId: jeuneModel.centreId,
-            handicapInSameDepartment: jeuneModel.handicapMemeDepartment,
+            handicapInSameDepartment: jeuneModel.handicapMemeDepartement,
             gender: jeuneModel.genre,
             qpv: jeuneModel.qpv,
             handicap: jeuneModel.psh,
@@ -126,7 +126,7 @@ export class JeuneMapper {
             phase2ApplicationStatus: jeuneModel.phase2ApplicationStatus,
             phase2ApplicationFilesType: jeuneModel.phase2ApplicationFilesType,
             missionsInMail: jeuneModel.missionsInMail,
-            status: jeuneModel.status,
+            status: jeuneModel.statut,
             email: jeuneModel.email,
             loginAttempts: jeuneModel.loginAttempts,
             token2FA: jeuneModel.token2FA,

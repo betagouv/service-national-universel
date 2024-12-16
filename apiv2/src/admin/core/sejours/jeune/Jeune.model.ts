@@ -1,9 +1,9 @@
 // TODO: Mettre à niveau pour de l'ecriture
 export type JeuneModel = {
     id: string;
-    statusPhase1: string;
+    statutPhase1: string;
     centreId?: string;
-    handicapMemeDepartment?: string;
+    handicapMemeDepartement?: string;
     genre?: string;
     qpv?: string;
     psh?: string;
@@ -45,7 +45,7 @@ export type JeuneModel = {
     phase2ApplicationStatus: any;
     phase2ApplicationFilesType: any;
     missionsInMail: any;
-    status: any;
+    statut: any;
     email: any;
     loginAttempts: any;
     token2FA: any;
