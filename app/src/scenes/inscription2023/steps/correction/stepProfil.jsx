@@ -9,7 +9,7 @@ import API from "../../../../services/api";
 import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
 import Input from "../../components/Input";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import IconFrance from "@/assets/IconFrance";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
@@ -117,7 +117,7 @@ export default function StepProfil() {
 
   return (
     <>
-      <DSFRContainer title="Mon profil" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
+      <DSFRContainer title="Mon profil" supportLink={knowledgebaseURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="flex flex-col">
           {isCLE && (
             <>

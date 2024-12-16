@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { IoRepeat } from "react-icons/io5";
-import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle } from "react-icons/hi";
+import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle, HiOutlineExclamation } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
-import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from "snu-lib";
+import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ERRORS } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
 import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
 
@@ -14,7 +14,6 @@ import api from "@/services/api";
 import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
 import Loader from "@/components/Loader";
 import { getClasses, searchEtablissement } from "../../utils/service";
-
 interface Step {
   icon?: React.ReactNode;
   title?: string;
@@ -64,6 +63,8 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
   }>();
   const [classes, setClasses] = useState<ClasseOption[]>([]);
   const [classe, setClasse] = useState<Classe & { cohort?: string; label: string }>();
+  const [modaleError, setModaleError] = useState(false);
+
   let youngStatus = young.status;
   if (young.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
     youngStatus = YOUNG_STATUS.VALIDATED;
@@ -265,7 +266,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                 try {
                   if (!emailMessage) return toastr.error("Veuillez indiquer un message", "");
                   setIsSaving(true);
-                  await api.put(`/referent/young/${young._id}/change-cohort`, {
+                  const { ok } = await api.put(`/referent/young/${young._id}/change-cohort`, {
                     source: YOUNG_SOURCE.VOLONTAIRE,
                     cohort: cohort?.value,
                     message: emailMessage,
@@ -274,6 +275,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                   // if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
                   // if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
                   await onChange();
+                  if (!ok) return toastr.error("Une erreur est survenue lors de la modification de la cohorte", "");
                   toastr.success("Cohorte modifiée avec succès", "");
                 } catch (error) {
                   capture(error);
@@ -459,14 +461,21 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                       fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
                     });
                   }
-                  await api.put(`/referent/young/${young._id}/change-cohort`, {
+                  const { ok, code } = await api.put(`/referent/young/${young._id}/change-cohort`, {
                     source: YOUNG_SOURCE.CLE,
                     cohort: classe?.cohort,
                     etablissementId: etablissement?._id,
                     classeId: classe?._id,
                   });
-                  await onChange();
-                  toastr.success("Cohorte modifiée avec succès", "");
+                  if (!ok) {
+                    if (code === ERRORS.OPERATION_NOT_ALLOWED) {
+                      setModaleError(true);
+                    }
+                    toastr.error("Une erreur est survenue lors de la modification de la cohorte", "");
+                  } else {
+                    await onChange();
+                    toastr.success("Cohorte modifiée avec succès", "");
+                  }
                 } catch (error) {
                   capture(error);
                   toastr.error(error.message, "");
@@ -477,6 +486,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
             },
           ],
         });
+
       // Type of cohort selection
       default:
         return setStep({
@@ -507,6 +517,32 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
   if (!step || !isOpen) return null;
 
   return (
-    <ModalConfirmation isOpen={isOpen} onClose={onClose} className="min-w-[700px] max-w-[700px]" icon={step.icon} title={step.title} text={step.content} actions={step.actions} />
+    <>
+      <ModalConfirmation isOpen={isOpen} onClose={onClose} className="min-w-[700px] max-w-[700px]" icon={step.icon} title={step.title} text={step.content} actions={step.actions} />
+      <ModalConfirmation
+        isOpen={modaleError}
+        onClose={async () => {
+          setIsSaving(true);
+          await onChange();
+          setIsSaving(false);
+          setModaleError(false);
+        }}
+        className="md:max-w-[800px]"
+        icon={
+          <div className="bg-red-100 rounded-full p-[11px]">
+            <HiOutlineExclamation className="text-red-600" size={24} />
+          </div>
+        }
+        title="Erreur !"
+        text={
+          <div className="w-2/3 mx-auto">
+            <p className="text-base leading-6 font-normal">
+              Impossible de changer la cohorte de ce volontaire pour la cohorte {classe?.cohort} car les inscriptions sur cette cohorte sont fermées.
+            </p>
+          </div>
+        }
+        actions={[{ title: "Fermer", isCancel: true, loading: isSaving }]}
+      />
+    </>
   );
 }

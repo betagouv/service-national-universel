@@ -73,7 +73,14 @@ export default function WaitingAffectation() {
                     <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
                     <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
                   </div>
-                  <Link to="account/withdrawn?desistement=1" className="text-blue-600 underline underline-offset-2" onClick={handleClick}>
+                  <Link
+                    to={{
+                      pathname: "/changer-de-sejour/se-desister",
+                      state: { backlink: "/phase1" },
+                    }}
+                    className="text-blue-600 underline underline-offset-2"
+                    onClick={handleClick}>
+                    {" "}
                     Se désister du SNU.
                   </Link>
                 </div>

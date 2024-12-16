@@ -10,7 +10,7 @@ import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
 import Check from "../components/Check";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 import plausibleEvent from "@/services/plausible";
 import { SignupButtons } from "@snu/ds/dsfr";
 
@@ -93,7 +93,7 @@ export default function Verification({ step, parentId }) {
               <p>Veuillez vérifier la validité de ces informations.</p>
               <p>En cas d’erreur, {young.firstName} peut modifier ces informations à partir de son dossier d’inscription.</p>
               <p>
-                <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="">
+                <a href={`${knowledgebaseURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="">
                   Je vois des informations incorrectes
                 </a>
               </p>
@@ -109,7 +109,7 @@ export default function Verification({ step, parentId }) {
               <Check checked={certified} onChange={(e) => setCertified(e)}>
                 <span>
                   Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez&nbsp;
-                  <a href={`${supportURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="">
+                  <a href={`${knowledgebaseURL}/base-de-connaissance/le-volontaire-a-fait-une-erreur-sur-son-dossier`} target="_blank" rel="noreferrer" className="">
                     cet article
                   </a>
                   &nbsp;avant de valider.
