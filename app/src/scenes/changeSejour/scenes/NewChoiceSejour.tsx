@@ -65,7 +65,6 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
       title="Êtes-vous sûr(e) de vouloir changer de séjour ?"
       onConfirm={handleChangeCohort}
       loading={sejourMutation.isPending}
-      disabled={goalQuery.data}
       confirmText="Oui, confirmer ce choix"
       cancelText="Non, annuler">
       {goalQuery.isPending ? (
