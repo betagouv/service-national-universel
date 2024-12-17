@@ -7,7 +7,7 @@ import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
-import { shouldForceRedirectToEmailValidation, shouldForceRedirectToInscription, shouldForceRedirectToReinscription } from "./utils/navigation";
+import { shouldForceRedirectToEmailValidation, shouldForceRedirectToInscription } from "./utils/navigation";
 
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
