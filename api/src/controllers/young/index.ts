@@ -600,17 +600,16 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getFilteredSessionsForChangementSejour(young, (req.headers["x-user-timezone"] || "") as string);
-
     if (cohortName !== "à venir") {
+      const sessions = await getFilteredSessionsForChangementSejour(young, (req.headers["x-user-timezone"] || "") as string);
       const session = sessions.find(({ name }) => name === cohortObj.name);
-
       if (!session) {
         return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
-    }
 
-    const newStatus = await getStatusAfterChangementSejour(young.status, young.department!, cohortObj);
+      const status = await getStatusAfterChangementSejour(young.status, young.department!, cohortObj);
+      young.set({ status });
+    }
 
     young.set({
       cohort: cohortObj.name,
@@ -620,7 +619,6 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       cohortDetailedChangeReason,
       cohesionStayPresence: undefined,
       cohesionStayMedicalFileReceived: undefined,
-      status: newStatus,
     });
 
     await young.save({ fromUser: req.user });
