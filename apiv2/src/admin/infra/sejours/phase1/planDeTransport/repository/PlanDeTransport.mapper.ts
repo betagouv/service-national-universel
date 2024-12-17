@@ -1,4 +1,4 @@
-import { PlanDeTransportModel } from "@admin/core/sejours/phase1/planDeTransport/PlanDeTransport.model";
+import { PlanDeTransportModel } from "@admin/core/sejours/phase1/PlanDeTransport/PlanDeTransport.model";
 import { PlanDeTransportDocument } from "../provider/PlanDeTransportMongo.provider";
 import { PlanTransportType } from "snu-lib";
 
