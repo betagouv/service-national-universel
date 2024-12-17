@@ -33,10 +33,12 @@ export class TaskRepository implements TaskGateway {
         names: Array<CreateTaskModel["name"]>,
         filter?: { [key: string]: string | undefined },
         sort?: "ASC" | "DESC",
+        limit?: number,
     ): Promise<TaskModel[]> {
         const tasks = await this.taskMongooseEntity
             .find({ name: { $in: names }, ...filter })
-            .sort({ createdAt: sort === "ASC" ? 1 : -1 });
+            .sort({ createdAt: sort === "ASC" ? 1 : -1 })
+            .limit(limit || 100);
         return tasks.map((task) => TaskMapper.toModel(task));
     }
 
@@ -84,7 +86,7 @@ export class TaskRepository implements TaskGateway {
     async toFailed(id: string, code?: string, description?: string): Promise<TaskModel> {
         const updatedTask = await this.taskMongooseEntity.findByIdAndUpdate(
             id,
-            { status: TaskStatus.FAILED, endDate: new Date(), erreur: { code, description } },
+            { status: TaskStatus.FAILED, endDate: new Date(), error: { code, description } },
             {
                 new: true,
             },

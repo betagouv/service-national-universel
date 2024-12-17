@@ -8,12 +8,13 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023 } = require("../../utils");
 const { canUpdateYoungStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1, hasAccessToReinscription } = require("snu-lib");
-const { getFilteredSessions } = require("../../utils/cohort");
+const { getFilteredSessionsForReinscription } = require("../../cohort/cohortService");
 
 /**
  * ROUTES:
  *  PUT  /reinscription                => updates young who start a reinscription process
  *  PUT  /reinscription/not-eligible   => updates to young status to not eligible
+ *  POST /reinscription/eligibilite    => returns the list of cohorts the young can choose for a reinscription
  */
 
 router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
@@ -40,7 +41,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       schoolId: Joi.string().trim().allow(null, ""),
       zip: Joi.string().trim().allow(null, ""),
       cohort: Joi.string().trim().required(),
-      source: Joi.string().required(),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -51,7 +51,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // Check if the young has access to reinscription
-    if (!hasAccessToReinscription(young, cohortDocument)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // if (!hasAccessToReinscription(young, cohortDocument)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // complete values
     value.status = YOUNG_STATUS.REINSCRIPTION;
@@ -63,7 +63,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Check if the young can choose the given cohort
-    const sessions = await getFilteredSessions({ birthdateAt: young.birthdateAt, ...value }, req.headers["x-user-timezone"] || null);
+    const sessions = await getFilteredSessionsForReinscription({ ...young.toObject(), ...value }, req.headers["x-user-timezone"] || null);
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
@@ -71,6 +71,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     young.set({
       ...value,
       cohortId: cohortDocument._id,
+      source: cohortDocument.type,
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,
@@ -122,6 +123,33 @@ router.put("/not-eligible", passport.authenticate("young", { session: false, fai
 
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+const eligibiliteValidator = Joi.object({
+  schooled: Joi.string().trim().required(),
+  schoolDepartment: Joi.string().trim().allow(null, ""),
+  department: Joi.string().trim().allow(null, ""),
+  schoolRegion: Joi.string().trim().allow(null, ""),
+  schoolZip: Joi.string().trim().allow(null, ""),
+  birthdateAt: Joi.string().trim().allow(null, ""),
+  grade: Joi.string().trim().allow(null, ""),
+  zip: Joi.string().trim().allow(null, ""),
+});
+
+router.post("/eligibilite", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungModel.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const { error, value } = eligibiliteValidator.validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const cohorts = await getFilteredSessionsForReinscription({ ...young.toObject(), ...value }, req.headers["x-user-timezone"] || null);
+    return res.json({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

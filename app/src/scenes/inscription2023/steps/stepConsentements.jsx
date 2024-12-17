@@ -5,7 +5,7 @@ import useAuth from "@/services/useAuth";
 import { getCohortPeriod, getCohortYear } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import Error from "../../../components/error";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -67,7 +67,7 @@ export default function StepConsentements() {
     <>
       <DSFRContainer
         title="Apporter mon consentement"
-        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-donne-mon-consentement" : "/base-de-connaissance/je-minscris-et-donne-mon-consentement"}`}
+        supportLink={`${knowledgebaseURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-donne-mon-consentement" : "/base-de-connaissance/je-minscris-et-donne-mon-consentement"}`}
         supportEvent="Phase0/aide inscription - consentement">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
         <div className="mt-4 flex flex-col gap-4 pb-2">

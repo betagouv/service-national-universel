@@ -7,6 +7,7 @@ export interface TaskGateway {
         name: Array<CreateTaskModel["name"]>,
         filter?: { [key: string]: string | undefined },
         sort?: "ASC" | "DESC",
+        limit?: number,
     ): Promise<TaskModel[]>;
     findById(id: string): Promise<TaskModel>;
     delete(id: string): Promise<void>;

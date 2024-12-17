@@ -3,7 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import validator from "validator";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import Input from "../../../components/dsfr/forms/input";
-import { appURL, environment, supportURL } from "../../../config";
+import { appURL, environment, knowledgebaseURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
 import { getPasswordErrorMessage } from "../../../utils";
@@ -181,7 +181,7 @@ export default function StepProfil() {
       {isCLE ? <LoginMessage /> : <ProgressBar isReinscription={false} />}
       <DSFRContainer
         title="Créez votre compte"
-        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}`}
+        supportLink={`${knowledgebaseURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}`}
         supportEvent="Phase0/aide preinscription - infos persos">
         {isCLE && (
           <>
