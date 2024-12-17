@@ -116,7 +116,7 @@ describe("Young", () => {
       //Check that the fields deleted are deleted
       for (const key in updatedYoung) {
         if (!fieldToKeep.find((val) => val === key)) {
-          if (!["updatedAt", "status", "email", "_id", "phase2ApplicationStatus", "birthdateAt"].includes(key)) expect(updatedYoung[key]).toEqual(undefined);
+          if (!["updatedAt", "status", "email", "_id", "phase2ApplicationStatus", "birthdateAt", "lastStatusAt"].includes(key)) expect(updatedYoung[key]).toEqual(undefined);
         }
       }
 

@@ -1,4 +1,10 @@
-import { ReferentMetadataModel, ReferentModel, ReferentPasswordModel } from "@admin/core/iam/Referent.model";
+import {
+    CreateReferentModel,
+    ReferentMetadataModel,
+    ReferentModel,
+    ReferentModelLight,
+    ReferentPasswordModel,
+} from "@admin/core/iam/Referent.model";
 import { ReferentType } from "snu-lib";
 import { ReferentDocument } from "../../provider/ReferentMongo.provider";
 
@@ -62,9 +68,8 @@ export class ReferentMapper {
         return referentModel;
     }
 
-    static toEntity(referentModel: ReferentModel): ReferentType {
+    static toEntityCreate(referentModel: CreateReferentModel): Omit<ReferentType, "_id"> {
         return {
-            _id: referentModel.id,
             firstName: referentModel.prenom,
             lastName: referentModel.nom,
             role: referentModel.role,
@@ -93,6 +98,21 @@ export class ReferentMapper {
             // registredAt: referentModel.registredAt,
             // nextLoginAttemptIn: referentModel.nextLoginAttemptIn,
             // forgotPasswordResetToken: referentModel.forgotPasswordResetToken,
+        };
+    }
+    static toEntity(referentModel: ReferentModel): ReferentType {
+        return {
+            _id: referentModel.id,
+            ...this.toEntityCreate(referentModel),
+        };
+    }
+
+    static toModelLight(referentDocument: ReferentDocument): ReferentModelLight {
+        return {
+            id: referentDocument._id.toString(),
+            prenom: referentDocument.firstName,
+            nom: referentDocument.lastName,
+            email: referentDocument.email,
         };
     }
 

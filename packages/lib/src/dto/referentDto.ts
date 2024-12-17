@@ -11,3 +11,12 @@ export type ReferentDto = {
   email?: string;
   emailWaitingValidation?: string;
 };
+
+export type ModifierReferentDto = {
+  id?: string;
+  email: string;
+  prenom?: string;
+  nom?: string;
+};
+
+export type ReferentForListDto = ModifierReferentDto;
