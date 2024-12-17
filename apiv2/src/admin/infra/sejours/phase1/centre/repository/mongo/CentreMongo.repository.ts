@@ -1,16 +1,18 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { Model } from "mongoose";
+import { ClientSession, Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { CENTRE_MONGOOSE_ENTITY, CentreDocument } from "../../provider/CentreMongo.provider";
 import { CentreMapper } from "../Centre.mapper";
 import { CentreModel } from "@admin/core/sejours/phase1/centre/Centre.model";
 import { CentreGateway } from "@admin/core/sejours/phase1/centre/Centre.gateway";
+import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 @Injectable()
 export class CentreRepository implements CentreGateway {
     constructor(
         @Inject(CENTRE_MONGOOSE_ENTITY) private centreMongooseEntity: Model<CentreDocument>,
+        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<ClientSession>,
         private readonly cls: ClsService,
     ) {}
 
@@ -37,7 +39,7 @@ export class CentreRepository implements CentreGateway {
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
-        await retrievedCentre.save({ fromUser: user });
+        await retrievedCentre.save({ fromUser: user, session: this.dbSessionGateway.get() });
         return CentreMapper.toModel(retrievedCentre);
     }
 

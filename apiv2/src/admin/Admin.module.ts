@@ -49,6 +49,8 @@ import { serviceProvider } from "./infra/iam/service/serviceProvider";
 import { ReferentController } from "./infra/iam/api/Referent.controller";
 import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
 import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
+import { DbSessionGateway } from "@shared/core/DbSession.gateway";
+import { MongoDbSession } from "@shared/infra/MongoDbSession";
 
 @Module({
     imports: [
@@ -75,6 +77,7 @@ import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTran
         SimulationAffectationHTSService,
         ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
+        { provide: DbSessionGateway, useClass: MongoDbSession }, // transactions
         ...classeMongoProviders,
         ...referentMongoProviders,
         ...etablissementMongoProviders,

@@ -1,17 +1,19 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { Model } from "mongoose";
+import { Model, ClientSession } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { JeuneGateway } from "../../../../../core/sejours/jeune/Jeune.gateway";
 import { JeuneModel } from "../../../../../core/sejours/jeune/Jeune.model";
 import { JEUNE_MONGOOSE_ENTITY, JeuneDocument } from "../../provider/JeuneMongo.provider";
 import { JeuneMapper } from "../Jeune.mapper";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 @Injectable()
 export class JeuneRepository implements JeuneGateway {
     constructor(
         @Inject(JEUNE_MONGOOSE_ENTITY) private jeuneMongooseEntity: Model<JeuneDocument>,
+        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<ClientSession>,
         private readonly cls: ClsService,
     ) {}
 
@@ -59,7 +61,7 @@ export class JeuneRepository implements JeuneGateway {
         const user = updateOriginName ? { firstName: updateOriginName } : this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
-        await retrievedJeune.save({ fromUser: user });
+        await retrievedJeune.save({ fromUser: user, session: this.dbSessionGateway.get() });
         return JeuneMapper.toModel(retrievedJeune);
     }
 
