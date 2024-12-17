@@ -2,18 +2,19 @@ import React, { lazy, Suspense, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { getCohort } from "./utils/cohorts";
 import API from "./services/api";
-import { ENABLE_PM, FEATURES_NAME, YOUNG_STATUS, isFeatureEnabled, permissionPhase2, shouldReAcceptRI } from "./utils";
+import { FEATURES_NAME, YOUNG_STATUS, YOUNG_STATUS_PHASE1, isFeatureEnabled, permissionPhase2, shouldReAcceptRI } from "./utils";
 import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
-import { shouldForceRedirectToEmailValidation, shouldForceRedirectToInscription, shouldForceRedirectToReinscription } from "./utils/navigation";
+import useRedirects from "./hooks/useRedirects";
 
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
 import Diagoriente from "./components/layout/navbar/components/Diagoriente";
 import ModalCGU from "./components/modals/ModalCGU";
 import ModalRI from "./components/modals/ModalRI";
+import useAuth from "./services/useAuth";
 
 const Account = lazy(() => import("./scenes/account"));
 const AutresEngagements = lazy(() => import("./scenes/phase3/home/waitingRealisation"));
@@ -36,6 +37,7 @@ const Espace = () => {
 
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
+  const { shouldForceRedirectToEmailValidation, shouldForceRedirectToReinscription, shouldForceRedirectToInscription } = useRedirects();
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
@@ -69,15 +71,15 @@ const Espace = () => {
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  if (shouldForceRedirectToEmailValidation(young)) {
+  if (shouldForceRedirectToEmailValidation) {
     return <Redirect to="/preinscription/email-validation" />;
   }
-
-  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
-
-  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
-
-  if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription" />;
+  if (shouldForceRedirectToReinscription) {
+    return <Redirect to="/reinscription" />;
+  }
+  if (shouldForceRedirectToInscription) {
+    return <Redirect to="/inscription" />;
+  }
 
   return (
     <ClassicLayout>
@@ -87,6 +89,12 @@ const Espace = () => {
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
+          <RouteWithStatusGate
+            status={[YOUNG_STATUS.VALIDATED]}
+            statusPhase1={[YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED]}
+            path="/phase1"
+            component={Phase1}
+          />
           {permissionPhase2(young) && <SentryRoute path="/phase2" component={Phase2} />}
           <SentryRoute path="/phase3" component={Phase3} />
           <SentryRoute path="/autres-engagements" component={AutresEngagements} />
@@ -97,7 +105,7 @@ const Espace = () => {
           {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
           <SentryRoute path="/changer-de-sejour" component={ChangeSejour} />
-          {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
+          <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />
           <Redirect to="/" />
         </Switch>
       </Suspense>
@@ -106,5 +114,32 @@ const Espace = () => {
     </ClassicLayout>
   );
 };
+
+type RouteWithStatusGateProps = {
+  status?: string[];
+  statusPhase1?: string[];
+  statusPhase2?: string[];
+  statusPhase3?: string[];
+  enabled?: boolean;
+  path: string;
+  component: React.ComponentType;
+};
+
+function hasAccess(young, status, statusPhase1, statusPhase2, statusPhase3) {
+  if (status?.length && !status.includes(young.status)) return false;
+  if (statusPhase1?.length && !statusPhase1.includes(young.statusPhase1)) return false;
+  if (statusPhase2?.length && !statusPhase2.includes(young.statusPhase2)) return false;
+  if (statusPhase3?.length && !statusPhase3.includes(young.statusPhase3)) return false;
+  return true;
+}
+
+function RouteWithAccessControl({ status, statusPhase1, statusPhase2, statusPhase3, enabled = true, path, component }: RouteWithStatusGateProps) {
+  const { young } = useAuth();
+  if (!enabled || !hasAccess(young, status, statusPhase1, statusPhase2, statusPhase3)) {
+    console.log("Access denied", { status, statusPhase1, statusPhase2, statusPhase3 });
+    return <Redirect to="/" />;
+  }
+  return <SentryRoute path={path} component={component} />;
+}
 
 export default Espace;

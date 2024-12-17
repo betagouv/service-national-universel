@@ -1,4 +1,3 @@
-
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { Redirect, useHistory, useParams } from "react-router-dom";
@@ -67,6 +66,7 @@ export default function StepEligibilite() {
 
   const { step } = useParams();
   const corrections = getCorrectionByStep(young, step);
+  console.log("🚀 ~ StepEligibilite ~ corrections:", corrections);
   const history = useHistory();
 
   const optionsScolarite = [
