@@ -7,10 +7,13 @@ import { ClockProvider } from "./infra/Clock.provider";
 import { FileProvider } from "./infra/File.provider";
 import { FileController } from "./infra/File.controller";
 import { FileGateway } from "./core/File.gateway";
+import { DbSessionGateway } from "./core/DbSession.gateway";
+import { MongoDbSession } from "./infra/MongoDbSession";
+import { DatabaseModule } from "@infra/Database.module";
 
 @Global()
 @Module({
-    imports: [ConfigModule],
+    imports: [DatabaseModule, ConfigModule],
     providers: [
         AllExceptionsFilter,
         Logger,
@@ -23,6 +26,11 @@ import { FileGateway } from "./core/File.gateway";
         {
             provide: ClockGateway,
             useClass: ClockProvider,
+        },
+        // transactions
+        {
+            provide: DbSessionGateway,
+            useClass: MongoDbSession,
         },
     ],
     controllers: [FileController],

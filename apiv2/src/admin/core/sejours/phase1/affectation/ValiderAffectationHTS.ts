@@ -2,6 +2,9 @@ import { Inject, Logger } from "@nestjs/common";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { FileGateway } from "@shared/core/File.gateway";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
@@ -11,9 +14,7 @@ import { SejourGateway } from "../sejour/Sejour.gateway";
 
 import { CentreGateway } from "../centre/Centre.gateway";
 import { SessionGateway } from "../session/Session.gateway";
-import { FileGateway } from "@shared/core/File.gateway";
 import { SimulationAffectationHTSTaskModel } from "./SimulationAffectationHTSTask.model";
-import { TaskGateway } from "@task/core/Task.gateway";
 import { RAPPORT_SHEETS, RapportData } from "./SimulationAffectationHTS.service";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { AffectationService } from "./Affectation.service";
@@ -48,6 +49,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
         @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<any>,
         private readonly logger: Logger,
     ) {}
     async execute({
@@ -86,6 +88,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
 
         // TODO: open transaction mongo
         try {
+            await this.dbSessionGateway.start();
             for (const jeuneRapport of simulationJeunesAAffecterList) {
                 const jeune = jeuneAAffecterList.find((jeune) => jeune.id === jeuneRapport.id)!;
                 const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === jeuneRapport.ligneDeBusId);
@@ -157,6 +160,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
 
                 rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour));
                 analytics.jeunesAffected += 1;
+                throw new Error("Transaction test");
             }
 
             this.logger.log(`Mise à jour des places dans les séjours`);
@@ -169,10 +173,12 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             for (const ligneDeBus of ligneDeBusList) {
                 await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBus, `Affectation ${session.nom}`);
             }
-            // TODO: commit transaction
+            await this.dbSessionGateway.commit();
         } catch (error) {
-            // TODO: rollback transaction
+            await this.dbSessionGateway.abort();
             throw error;
+        } finally {
+            await this.dbSessionGateway.end();
         }
 
         // création du fichier excel de rapport

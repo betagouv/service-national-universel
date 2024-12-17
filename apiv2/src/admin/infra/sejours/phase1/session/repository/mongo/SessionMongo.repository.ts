@@ -1,17 +1,19 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { Model } from "mongoose";
+import { ClientSession, Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { SESSION_MONGOOSE_ENTITY, SessionDocument } from "../../provider/SessionMongo.provider";
 
 import { SessionMapper } from "../Session.mapper";
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 import { CreateSessionModel, SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
+import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 @Injectable()
 export class SessionRepository implements SessionGateway {
     constructor(
         @Inject(SESSION_MONGOOSE_ENTITY) private sesssionMongooseEntity: Model<SessionDocument>,
+        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<ClientSession>,
         private readonly cls: ClsService,
     ) {}
 
@@ -38,7 +40,7 @@ export class SessionRepository implements SessionGateway {
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
-        await retrievedSession.save({ fromUser: user });
+        await retrievedSession.save({ fromUser: user, session: this.dbSessionGateway.get() });
         return SessionMapper.toModel(retrievedSession);
     }
 

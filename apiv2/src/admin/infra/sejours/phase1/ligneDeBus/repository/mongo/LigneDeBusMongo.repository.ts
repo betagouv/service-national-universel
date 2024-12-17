@@ -1,16 +1,18 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { Model } from "mongoose";
+import { ClientSession, Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
 import { LIGNEDEBUS_MONGOOSE_ENTITY, LigneDeBusDocument } from "../../provider/LigneDeBusMongo.provider";
 import { LigneDeBusModel } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.model";
 import { LigneDeBusMapper } from "../LigneDeBus.mapper";
+import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 @Injectable()
 export class LigneDeBusRepository implements LigneDeBusGateway {
     constructor(
         @Inject(LIGNEDEBUS_MONGOOSE_ENTITY) private ligneDeBusMongooseEntity: Model<LigneDeBusDocument>,
+        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<ClientSession>,
         private readonly cls: ClsService,
     ) {}
 
@@ -37,7 +39,7 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         const user = updateOriginName ? { firstName: updateOriginName } : this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
-        await retrievedLigneDeBus.save({ fromUser: user });
+        await retrievedLigneDeBus.save({ fromUser: user, session: this.dbSessionGateway.get() });
         return LigneDeBusMapper.toModel(retrievedLigneDeBus);
     }
 
