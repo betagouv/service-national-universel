@@ -101,8 +101,12 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun jeune !");
         }
 
-        const changementDepartements =
-            await this.simulationAffectationHTSService.getChangementsDepartements(sdrImportId);
+        const changementDepartements = await this.simulationAffectationHTSService.getChangementsDepartements(
+            sdrImportId,
+            centreList,
+            pdrList,
+            ligneDeBusList,
+        );
 
         // on sépare les jeunes intra dep des autres
         const { jeunesList, jeuneIntraDepartementList } = allJeunes.reduce(
@@ -114,16 +118,6 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                     acc.jeuneIntraDepartementList.push(jeune as JeuneAffectationModel);
                 } else {
                     const jeuneAaffecter = jeune as JeuneAffectationModel;
-                    const newDepartement = this.simulationAffectationHTSService.getJeuneAffectationDepartement(
-                        jeuneAaffecter,
-                        changementDepartements,
-                    );
-                    if (newDepartement && newDepartement !== jeune.departement) {
-                        jeuneAaffecter.departementOrigine = jeune.departement;
-                        jeuneAaffecter.regionOrigine = jeune.region;
-                        jeuneAaffecter.departement = newDepartement;
-                        jeuneAaffecter.region = department2region[newDepartement];
-                    }
                     acc.jeunesList.push(jeuneAaffecter);
                 }
                 return acc;
@@ -144,6 +138,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             jeuneAttenteAffectationList,
             pdrList,
             ligneDeBusList,
+            changementDepartements,
         );
 
         const results: Omit<SimulationAffectationHTSResult, "rapportData" | "rapportFile"> = {
