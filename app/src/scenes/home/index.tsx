@@ -1,11 +1,11 @@
 import React from "react";
+import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { YOUNG_STATUS, hasAccessToReinscription, hasCompletedPhase1, isDoingPhase1 } from "../../utils";
 import { getCohort } from "../../utils/cohorts";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
-import WaitingReinscription from "./WaitingReinscription";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
 import HomePhase1 from "./HomePhase1";
@@ -13,7 +13,6 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import AvenirCohort from "./AvenirCohort";
 import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
@@ -53,14 +52,9 @@ export default function Home() {
     return <HomePhase2 />;
   }
 
-  // Je peux me réinscrire :
+  // je suis sur une cohorte à venir et la réinscription est ouverte
   if (isReinscriptionOpen && hasAccessToReinscription(young, cohort)) {
-    return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
-  }
-
-  // je suis sur une cohorte à venir et la réinscription n'est pas ouverte
-  if (young.cohort === "à venir") {
-    return <AvenirCohort />; //moyen de faire encore mieux niveau merge
+    return <Redirect to="/reinscription" />;
   }
 
   // Ma phase 1 est en cours, soit en cours d'inscription, soit en plein parcours

@@ -73,8 +73,6 @@ const Espace = () => {
     return <Redirect to="/preinscription/email-validation" />;
   }
 
-  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
-
   const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
 
   if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription" />;
