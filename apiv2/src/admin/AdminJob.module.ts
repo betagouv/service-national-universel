@@ -24,6 +24,8 @@ import { useCaseProvider as referentielUseCaseProvider } from "./infra/referenti
 import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
 import { ValiderAffectationHTS } from "./core/sejours/phase1/affectation/ValiderAffectationHTS";
 import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
+import { DbSessionGateway } from "@shared/core/DbSession.gateway";
+import { MongoDbSession } from "@shared/infra/MongoDbSession";
 
 @Module({
     imports: [ClsModule.forRoot({}), ConfigModule, TaskModule, DatabaseModule],
@@ -43,6 +45,7 @@ import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTran
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
         { provide: FileGateway, useClass: FileProvider },
+        { provide: DbSessionGateway, useClass: MongoDbSession }, // transactions
         { provide: TaskGateway, useClass: AdminTaskRepository },
         // add use case here
         AffectationService,
