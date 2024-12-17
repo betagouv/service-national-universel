@@ -44,6 +44,8 @@ import { ReferentielRoutesService } from "@admin/core/referentiel/routes/Referen
 import { serviceProvider } from "@admin/infra/iam/service/serviceProvider";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
+import { DbSessionGateway } from "@shared/core/DbSession.gateway";
+import { MongoDbSession } from "@shared/infra/MongoDbSession";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -70,6 +72,15 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         ],
         controllers: [ClasseController, AffectationController, Phase1Controller, AuthController],
         providers: [
+            {
+                provide: DbSessionGateway,
+                useValue: {
+                    start: jest.fn(),
+                    abort: jest.fn(),
+                    commit: jest.fn(),
+                    end: jest.fn(),
+                },
+            },
             ClasseService,
             AffectationService,
             SimulationAffectationHTSService,

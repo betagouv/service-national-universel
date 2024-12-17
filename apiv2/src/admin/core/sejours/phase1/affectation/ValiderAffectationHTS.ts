@@ -8,12 +8,8 @@ import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
-import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
-import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
 
-import { CentreGateway } from "../centre/Centre.gateway";
-import { SessionGateway } from "../session/Session.gateway";
 import { SimulationAffectationHTSTaskModel } from "./SimulationAffectationHTSTask.model";
 import { RAPPORT_SHEETS, RapportData } from "./SimulationAffectationHTS.service";
 import { JeuneModel } from "../../jeune/Jeune.model";
@@ -21,7 +17,40 @@ import { AffectationService } from "./Affectation.service";
 import { SejourModel } from "../sejour/Sejour.model";
 import { ValiderAffectationHTSTaskParameters } from "./ValiderAffectationHTSTask.model";
 
-export type ValiderAffectationRapportData = Array<JeuneModel & {}>;
+export type ValiderAffectationRapportData = Array<
+    Pick<
+        JeuneModel,
+        | "id"
+        | "statut"
+        | "statutPhase1"
+        | "genre"
+        | "qpv"
+        | "psh"
+        | "email"
+        | "region"
+        | "departement"
+        | "sessionId"
+        | "sessionNom"
+        | "ligneDeBusId"
+        | "pointDeRassemblementId"
+        | "prenom"
+        | "nom"
+        | "telephone"
+        | "dateNaissance"
+        | "parent1Prenom"
+        | "parent1Nom"
+        | "parent1Email"
+        | "parent1Telephone"
+        | "parent2Prenom"
+        | "parent2Nom"
+        | "parent2Email"
+        | "parent2Telephone"
+    > & {
+        "places restantes après l'inscription (centre)": string | number;
+        "places totale (centre)": string | number;
+        error?: string;
+    }
+>;
 
 export type ValiderAffectationHTSResult = {
     rapportData: ValiderAffectationRapportData;
@@ -39,15 +68,10 @@ export type ValiderAffectationHTSResult = {
 
 export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResult> {
     constructor(
-        @Inject(AffectationService)
-        private readonly affectationService: AffectationService,
+        @Inject(AffectationService) private readonly affectationService: AffectationService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
-        @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
-        @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
-        @Inject(PointDeRassemblementGateway) private readonly pointDeRassemblementGateway: PointDeRassemblementGateway,
         @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
-        @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<any>,
         private readonly logger: Logger,
@@ -84,9 +108,8 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             jeunesAffected: 0,
             errors: 0,
         };
-        const rapportData: any[] = [];
+        const rapportData: Array<ReturnType<typeof this.formatJeuneRapport>> = [];
 
-        // TODO: open transaction mongo
         try {
             await this.dbSessionGateway.start();
             for (const jeuneRapport of simulationJeunesAAffecterList) {
@@ -160,7 +183,6 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
 
                 rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour));
                 analytics.jeunesAffected += 1;
-                throw new Error("Transaction test");
             }
 
             this.logger.log(`Mise à jour des places dans les séjours`);
@@ -202,7 +224,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         };
     }
 
-    formatJeuneRapport(jeune: JeuneModel, sejour?: SejourModel, error = "") {
+    formatJeuneRapport(jeune: JeuneModel, sejour?: SejourModel, error = ""): ValiderAffectationRapportData[0] {
         return {
             id: jeune.id,
             statut: jeune.statut,
@@ -212,7 +234,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             psh: ["true", "oui"].includes(jeune.psh!) ? "oui" : "non",
             email: jeune.email,
             region: jeune.region,
-            department: jeune.departement,
+            departement: jeune.departement,
             sessionId: sejour?.id || "",
             sessionNom: jeune.sessionNom,
             ligneDeBusId: jeune.ligneDeBusId || "",

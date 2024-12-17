@@ -1,5 +1,6 @@
 import * as request from "supertest";
 import mongoose from "mongoose";
+import { addHours } from "date-fns";
 import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 
@@ -8,6 +9,7 @@ import { departmentList, GRADES, region2department, RegionsMetropole, TaskName, 
 import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
 import { TaskGateway } from "@task/core/Task.gateway";
 
+import { createTask } from "../../../TaskHelper";
 import { setupAdminTest } from "../../../setUpAdminTest";
 import { createSession } from "../SessionHelper";
 
@@ -144,6 +146,99 @@ describe("AffectationController", () => {
             expect(response.body.name).toBe(TaskName.AFFECTATION_HTS_SIMULATION);
             expect(response.body.status).toBe(TaskStatus.PENDING);
             expect(response.body.metadata.parameters.sessionId).toBe(session.id);
+        });
+    });
+
+    describe("POST /affectation/:id/simulation/:taskId/valider", () => {
+        it("should return 400 for invalid params", async () => {
+            const session = await createSession();
+            const task = await createTask({ name: TaskName.AFFECTATION_HTS_SIMULATION });
+
+            const response = await request(app.getHttpServer()).post(
+                `/affectation/${session.id}/simulations/${task.id}/valider`,
+            );
+
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 422 for invalid task (pending)", async () => {
+            const session = await createSession();
+            const task = await createTask({
+                name: TaskName.AFFECTATION_HTS_SIMULATION,
+                metadata: {
+                    parameters: {
+                        sessionId: session.id,
+                    },
+                },
+            });
+
+            const response = await request(app.getHttpServer()).post(
+                `/affectation/${session.id}/simulations/${task.id}/valider`,
+            );
+
+            expect(response.status).toBe(422);
+        });
+
+        it("should return 422 for invalid task (outdated)", async () => {
+            const session = await createSession();
+            const simuTask = await createTask({
+                name: TaskName.AFFECTATION_HTS_SIMULATION,
+                status: TaskStatus.COMPLETED,
+                metadata: {
+                    parameters: {
+                        sessionId: session.id,
+                    },
+                },
+                createdAt: addHours(new Date(), -2),
+            });
+            // la dernière affectation reel est plus récente que la simulation
+            await createTask({
+                name: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+                status: TaskStatus.COMPLETED,
+                metadata: {
+                    parameters: {
+                        sessionId: session.id,
+                    },
+                },
+                updatedAt: addHours(new Date(), -1),
+            });
+
+            const response = await request(app.getHttpServer()).post(
+                `/affectation/${session.id}/simulations/${simuTask.id}/valider`,
+            );
+
+            expect(response.status).toBe(422);
+        });
+
+        it("should return 201 for valid task", async () => {
+            const session = await createSession();
+            const simuTask = await createTask({
+                name: TaskName.AFFECTATION_HTS_SIMULATION,
+                status: TaskStatus.COMPLETED,
+                metadata: {
+                    parameters: {
+                        sessionId: session.id,
+                    },
+                },
+                createdAt: addHours(new Date(), -1),
+            });
+            // la dernière affectation reel est plus vieille que la simulation
+            await createTask({
+                name: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+                status: TaskStatus.COMPLETED,
+                metadata: {
+                    parameters: {
+                        sessionId: session.id,
+                    },
+                },
+                updatedAt: addHours(new Date(), -2),
+            });
+
+            const response = await request(app.getHttpServer()).post(
+                `/affectation/${session.id}/simulations/${simuTask.id}/valider`,
+            );
+
+            expect(response.status).toBe(201);
         });
     });
 
