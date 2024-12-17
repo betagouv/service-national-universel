@@ -30,6 +30,8 @@ module.exports = {
         "zip",
         "city",
         "createdAt",
+        "status",
+        "email",
       ];
       for (const key in young._doc) {
         if (!fieldToKeep.find((val) => val === key)) {
