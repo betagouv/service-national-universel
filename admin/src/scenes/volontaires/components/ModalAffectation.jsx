@@ -19,7 +19,7 @@ import MeetingInfo from "./phase1/MeetingInfo";
 
 const LIST_PAGE_LIMIT = 3;
 
-export default function ModalAffectations({ isOpen, onCancel, young, center = null, sessionId = "", cohort }) {
+export default function ModalAffectations({ isOpen, onCancel, young, center, sessionId = "", cohort }) {
   const [modal, setModal] = useState({ isOpen: false, message: "", onConfirm: () => {} });
   const [session, setSession] = useState(null);
   const [step, setStep] = useState(1);
