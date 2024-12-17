@@ -155,13 +155,21 @@ export default function StepEligibilite() {
 
     setLoading(true);
 
+    function getIsSchooled(data) {
+      if (data.schooled) return String(data.schooled);
+      if (data.school?.department || data.school?.departmentName) return "true";
+      return "false";
+    }
+
     try {
       const url = data.isReInscription ? "/young/reinscription/eligibilite" : "/preinscription/eligibilite";
 
       const { data: sessions, message } = await api.post(url, {
+        schooled: getIsSchooled(data),
         schoolDepartment: data.school?.departmentName || data.school?.department,
         department: data.department,
         schoolRegion: data.school?.region,
+        schoolZip: data.school?.postCode || data.school?.postcode || data.school?.zip || data.school?.codePays,
         birthdateAt: data.birthDate,
         grade: data.scolarity,
         zip: data.zip,

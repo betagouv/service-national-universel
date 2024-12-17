@@ -1,6 +1,7 @@
-import { COHORT_TYPE, ERRORS, CohortType, getZonedDate, YoungType, getDepartmentForEligibility, YOUNG_STATUS } from "snu-lib";
+import { COHORT_TYPE, ERRORS, CohortType, getZonedDate, YoungType, getDepartmentForEligibility, YOUNG_STATUS, YOUNG_SOURCE } from "snu-lib";
 import { CohortDocument, CohortGroupModel, CohortModel } from "../models";
 import { buildCohortQuery } from "./cohortQueryBuilder";
+import { getCohortGroupsForYoung } from "../cohortGroup/cohortGroupService";
 
 const isInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
   const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
@@ -115,8 +116,8 @@ export async function getFilteredSessionsForReinscription(young: YoungType, time
   const currentGroup = await CohortGroupModel.findById(currentCohort.cohortGroupId);
   if (!currentGroup) throw new Error("Cohort group not found");
 
-  const pastGroups = await CohortGroupModel.find({ year: { $lte: currentGroup.year } });
-  const cohortGroupsToExclude = [...pastGroups.map((g) => g.id), currentGroup.id];
+  const groups = await getCohortGroupsForYoung(young);
+  const cohortGroupsToInclude = groups.map((g) => g.id);
 
   const department = getDepartmentForEligibility(young);
   if (!department) throw new Error("Unable to determine department");
@@ -125,7 +126,7 @@ export async function getFilteredSessionsForReinscription(young: YoungType, time
     birthdate: new Date(young.birthdateAt!),
     schoolLevel: young.grade!,
     department,
-    cohortGroupsToExclude,
+    cohortGroupsToInclude,
   });
 
   const cohorts = await CohortModel.find(query);

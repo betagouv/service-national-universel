@@ -9,11 +9,12 @@ type PropTypes = {
   children: React.ReactNode;
   onConfirm?: () => void;
   loading?: boolean;
+  disabled?: boolean;
   confirmText?: string;
   cancelText?: string;
 };
 
-export default function ResponsiveModal({ isOpen, setOpen, title, children, onConfirm, loading, confirmText, cancelText }: PropTypes) {
+export default function ResponsiveModal({ isOpen, setOpen, title, children, onConfirm, loading, confirmText, cancelText, disabled }: PropTypes) {
   return (
     <Dialog open={isOpen} onClose={() => setOpen(false)} className="relative z-10">
       <DialogBackdrop
@@ -42,7 +43,7 @@ export default function ResponsiveModal({ isOpen, setOpen, title, children, onCo
                 <div className="absolute bottom-0 md:relative w-full p-3 grid gap-3 bg-gray-50">
                   <button
                     onClick={onConfirm}
-                    disabled={loading}
+                    disabled={loading || disabled}
                     className="w-full text-sm bg-blue-600 border-[1px] border-blue-600 text-white p-2 rounded-md disabled:bg-gray-400 disabled:border-gray-400 hover:bg-blue-800 hover:border-blue-800 transition">
                     {loading ? "Envoi des données..." : confirmText || "Envoyer"}
                   </button>

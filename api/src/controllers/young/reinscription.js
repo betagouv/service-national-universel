@@ -41,7 +41,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       schoolId: Joi.string().trim().allow(null, ""),
       zip: Joi.string().trim().allow(null, ""),
       cohort: Joi.string().trim().required(),
-      source: Joi.string().required(),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -72,6 +71,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     young.set({
       ...value,
       cohortId: cohortDocument._id,
+      source: cohortDocument.type,
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,
@@ -130,9 +130,11 @@ router.put("/not-eligible", passport.authenticate("young", { session: false, fai
 });
 
 const eligibiliteValidator = Joi.object({
+  schooled: Joi.string().trim().required(),
   schoolDepartment: Joi.string().trim().allow(null, ""),
   department: Joi.string().trim().allow(null, ""),
   schoolRegion: Joi.string().trim().allow(null, ""),
+  schoolZip: Joi.string().trim().allow(null, ""),
   birthdateAt: Joi.string().trim().allow(null, ""),
   grade: Joi.string().trim().allow(null, ""),
   zip: Joi.string().trim().allow(null, ""),
