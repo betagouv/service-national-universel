@@ -14,7 +14,6 @@ import { RouteXLS } from "@admin/core/referentiel/routes/ReferentielRoutesModel"
 import { SejourModel } from "../sejour/Sejour.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { CentreModel } from "../centre/Centre.model";
-import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 
 type JeuneRapport = Pick<
     JeuneModel,
@@ -42,7 +41,7 @@ type JeuneRapport = Pick<
 
 export interface ChangementDepartement {
     origine: string;
-    destination: string;
+    destination: { pdrId: string; departement: string; centreId: string; ligneIdList: string[] }[];
 }
 
 export type RapportData = {
@@ -137,13 +136,17 @@ export const RAPPORT_SHEETS = {
 @Injectable()
 export class SimulationAffectationHTSService {
     constructor(
-        @Inject(PointDeRassemblementGateway) private readonly pdrGateway: PointDeRassemblementGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(FileGateway) private readonly fileService: FileGateway,
         private readonly logger: Logger,
     ) {}
 
-    async getChangementsDepartements(sdrImportId: string) {
+    async getChangementsDepartements(
+        sdrImportId: string,
+        centreList: CentreModel[],
+        pdrList: PointDeRassemblementModel[],
+        ligneDeBusList: LigneDeBusModel[],
+    ) {
         const importTask: ReferentielImportTaskModel = await this.taskGateway.findById(sdrImportId);
         if (!importTask.metadata?.parameters?.fileKey) {
             throw new FunctionalException(
@@ -155,51 +158,89 @@ export class SimulationAffectationHTSService {
         const parsedFile = await this.fileService.parseXLS<RouteXLS>(importedFile.Body, { sheetName: "HTS 2025" });
 
         const changementDepartementPdrs = parsedFile.reduce(
-            (acc, line) => {
+            (acc, line, index) => {
                 const commentaire = line["Commentaire interne sur l'enregistrement"];
-                const matriculePdr = line["Code point de rassemblement initial"];
+                const pdrMatricule = line["Code point de rassemblement initial"];
+                const centreMatricule = line["Désignation du centre"];
                 // ex: DEPARTEMENT 93
                 const numDepartement = commentaire?.match(/DEPARTEMENT ([0-9]{2})/)?.[1];
-                if (matriculePdr && numDepartement) {
-                    if (!acc[numDepartement]) {
-                        acc[numDepartement] = [];
+                if (numDepartement) {
+                    // matriculePdr && centreMatricule &&
+                    const departementNom = getDepartmentByNumber(numDepartement);
+                    if (!departementNom) {
+                        throw new FunctionalException(
+                            FunctionalExceptionCode.NOT_FOUND,
+                            `Departement "${numDepartement}" introuvable`,
+                        );
                     }
-                    if (!acc[numDepartement].includes(matriculePdr)) {
-                        acc[numDepartement].push(matriculePdr);
+                    if (!pdrMatricule) {
+                        throw new FunctionalException(
+                            FunctionalExceptionCode.NOT_FOUND,
+                            `Point de rassemblement manquant ligne ${index}`,
+                        );
                     }
+                    if (!centreMatricule) {
+                        throw new FunctionalException(
+                            FunctionalExceptionCode.NOT_FOUND,
+                            `Centre manquant ligne ${index}`,
+                        );
+                    }
+                    if (!acc[departementNom]) {
+                        acc[departementNom] = [];
+                    }
+                    acc[departementNom].push({ pdrMatricule, centreMatricule });
                 }
                 return acc;
             },
-            {} as Record<string, string[]>,
+            {} as Record<string, { pdrMatricule: string; centreMatricule: string }[]>,
         );
 
         const changementDepartement: Array<ChangementDepartement> = [];
-        for (const numDepartement of Object.keys(changementDepartementPdrs)) {
-            const departementNom = getDepartmentByNumber(numDepartement);
-            if (!departementNom) {
+        for (const departement of Object.keys(changementDepartementPdrs)) {
+            const pdrCentreLignesList = changementDepartementPdrs[departement].map((pdrCentre) => {
+                const pdr = pdrList.find((pdr) => pdr.matricule === pdrCentre.pdrMatricule);
+                if (!pdr) {
+                    this.logger.error(`Point de rassemblement introuvable pour le matricule ${pdrCentre.pdrMatricule}`);
+                    return { error: `PDR introuvable ${pdrCentre.pdrMatricule}` };
+                }
+                const centre = centreList.find((centre) => centre.matricule === pdrCentre.centreMatricule);
+                if (!centre) {
+                    this.logger.error(`Centre introuvable pour le matricule ${pdrCentre.centreMatricule}`);
+                    return { error: `Centre introuvable ${pdrCentre.centreMatricule}` };
+                }
+                const lignes = ligneDeBusList.filter(
+                    (ligne) => ligne.centreId === centre.id && ligne.pointDeRassemblementIds.includes(pdr.id),
+                );
+                if (lignes.length === 0) {
+                    this.logger.error(
+                        `Aucune ligne de bus trouvée pour le pdr ${pdr.matricule} et le centre ${centre.matricule}`,
+                    );
+                    return { error: `Aucune ligne de bus pour PDR ${pdr.matricule} et centre ${centre.matricule}` };
+                }
+                return {
+                    pdrId: pdr.id,
+                    departement: pdr.departement,
+                    centreId: centre.id,
+                    ligneIdList: lignes.map((ligne) => ligne.id),
+                };
+            });
+            const errors = pdrCentreLignesList.reduce((acc: string[], pdrCentreLigne) => {
+                if (pdrCentreLigne.error) {
+                    acc.push(pdrCentreLigne.error);
+                }
+                return acc;
+            }, []);
+            if (errors.length > 0) {
                 throw new FunctionalException(
                     FunctionalExceptionCode.NOT_FOUND,
-                    `Departement "${numDepartement}" introuvable`,
+                    `Departement ${departement}: ${errors.join(", ")}`,
                 );
             }
-            const matriculePdrList = changementDepartementPdrs[numDepartement];
-            const pdrList = await this.pdrGateway.findByMatricules(matriculePdrList);
-            if (pdrList.length !== matriculePdrList.length) {
-                throw new FunctionalException(
-                    FunctionalExceptionCode.NOT_FOUND,
-                    `Point de rassemblement introuvable pour les matricules ${matriculePdrList.join(",")}`,
-                );
-            }
-            const departementDestination = pdrList[0].departement;
-            if (pdrList.find((pdr) => pdr.departement !== departementDestination)) {
-                throw new FunctionalException(
-                    FunctionalExceptionCode.NOT_FOUND,
-                    `Plusieurs départements de destination trouvés pour ${numDepartement} (${matriculePdrList.join(
-                        ",",
-                    )})`,
-                );
-            }
-            changementDepartement.push({ origine: departementNom, destination: departementDestination });
+
+            this.logger.log(
+                `Changement de département pour ${departement}, destination: ${JSON.stringify(pdrCentreLignesList)}`,
+            );
+            changementDepartement.push({ origine: departement, destination: pdrCentreLignesList as any });
         }
 
         return changementDepartement;
@@ -479,19 +520,13 @@ export class SimulationAffectationHTSService {
         });
     }
 
-    getJeuneAffectationDepartement(jeune: JeuneModel, changementDepartements: ChangementDepartement[]) {
-        return (
-            changementDepartements.find(({ origine }) => origine === jeune.departement)?.destination ||
-            jeune.departement
-        );
-    }
-
     // Pour chaque departement, on va stocker les jeunes (id) du departement courant, les pdr qui sont dans le departement courant
     // les lignes correspondantes et les centres desservis.
     calculDistributionAffectations(
         jeunesList: JeuneModel[],
         pdrList: PointDeRassemblementModel[],
         ligneDeBusList: LigneDeBusModel[],
+        changementDepartements: ChangementDepartement[],
     ): DistributionJeunesParDepartement {
         // on recupere les departements, comme on veut boucler sur les departements, on enleve les doublons
         const departementList = [
@@ -518,6 +553,34 @@ export class SimulationAffectationHTSService {
             const centreIdList: string[] = [];
             const placesligneList: number[] = [];
 
+            // Changement de dępartement (ex: les jeunes du 93 partent avec des lignes de bus du 75)
+            const changementDepartementDestinationList =
+                changementDepartements.find((changement) => changement.origine === departement)?.destination || [];
+            for (const destination of changementDepartementDestinationList) {
+                for (const ligneId of destination.ligneIdList) {
+                    const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === ligneId)!;
+                    const nbPlacesligne = ligneDeBus.capaciteJeunes - ligneDeBus.placesOccupeesJeunes;
+                    ligneIdList.push(ligneId);
+                    centreIdList.push(destination.centreId);
+                    placesligneList.push(nbPlacesligne);
+                }
+            }
+
+            // On exclut les lignes de bus dédiées lors du changement de departement (les lignes du 75 qui prennent des jeunes du 93 ne peuvent pas prendre des jeunes du 75)
+            const changementAExclureLigneIdList = changementDepartements.reduce((acc, changement) => {
+                changement.destination.forEach((dest) => {
+                    if (dest.departement === departement) {
+                        // cas particulier, un changement indiquant 75 vers 75.
+                        for (const ligneId of dest.ligneIdList) {
+                            if (!ligneIdList.includes(ligneId)) {
+                                acc = [...new Set([...acc, ligneId])];
+                            }
+                        }
+                    }
+                });
+                return acc;
+            }, [] as string[]);
+
             // on parcourt les points de rassemblement de chaque departement
             for (let pdrId of pdrIdsListDepartement) {
                 // on parcourt les lignes de bus
@@ -526,9 +589,11 @@ export class SimulationAffectationHTSService {
                     //    les id du pdr (il peut y en avoir plusieurs)
                     //    le nombre de places restantes
                     //    l id du centre desservi par la ligne
-
-                    // on regarde si le pdr courant est dans la ligne
-                    if (ligneDeBus.pointDeRassemblementIds.includes(pdrId)) {
+                    if (
+                        !changementAExclureLigneIdList.includes(ligneDeBus.id) &&
+                        // on regarde si le pdr courant est dans la ligne
+                        ligneDeBus.pointDeRassemblementIds.includes(pdrId)
+                    ) {
                         const nbPlacesligne = ligneDeBus.capaciteJeunes - ligneDeBus.placesOccupeesJeunes;
 
                         // une ligne peut avoir plusieurs points de rassemblement dans un meme departement
@@ -1034,9 +1099,13 @@ export class SimulationAffectationHTSService {
                 changementDepartements
                     .map(
                         ({ origine, destination }) =>
-                            `${formatDepartement(origine)} -> ${formatDepartement(destination)}`,
+                            `${formatDepartement(origine)} -> ${[
+                                ...new Set(destination.map((dest) => dest.departement)),
+                            ]
+                                .map(formatDepartement)
+                                .join(",")}`,
                     )
-                    .join(", "),
+                    .join("; "),
         ].map((ligne) => ({
             "": ligne,
         }));

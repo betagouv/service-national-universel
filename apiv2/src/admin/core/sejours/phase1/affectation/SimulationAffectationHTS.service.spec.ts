@@ -6,6 +6,7 @@ import { YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
 import {
+    ChangementDepartement,
     DistributionJeunesParDepartement,
     JeuneAffectationModel,
     SimulationAffectationHTSService,
@@ -34,7 +35,8 @@ describe("SimulationAffectationHTSService", () => {
                         parseXLS: jest.fn().mockResolvedValue([
                             {
                                 "Commentaire interne sur l'enregistrement": "DEPARTEMENT 93",
-                                "Code point de rassemblement initial": "Matricule",
+                                "Code point de rassemblement initial": "matricule1",
+                                "Désignation du centre": "matricule1",
                             },
                         ]),
                     },
@@ -69,38 +71,40 @@ describe("SimulationAffectationHTSService", () => {
 
     describe("getChangementsDepartements", () => {
         it("should return changementDepartement array", async () => {
-            const result = await simulationAffectationHTSService.getChangementsDepartements("test-sdr-import-id");
-            expect(result).toEqual([{ origine: "Seine-Saint-Denis", destination: "Paris" }]);
-        });
-    });
-
-    describe("getJeuneAffectationDepartement", () => {
-        it("should return the destination department if the jeune.departement is in the changementDepartements array", () => {
-            const jeune = {
-                departement: "origine",
-            } as JeuneModel;
-            const changementDepartements = [{ origine: "origine", destination: "destination" }];
-
-            const result = simulationAffectationHTSService.getJeuneAffectationDepartement(
-                jeune,
-                changementDepartements,
+            // mock: 93 vers pdr1 et center1
+            const ligneDeBusList = [
+                { id: "ligne1", centreId: "center1", pointDeRassemblementIds: ["pdr1"] },
+                { id: "ligne2", centreId: "center2", pointDeRassemblementIds: ["pdr2"] },
+                { id: "ligne3", centreId: "center3", pointDeRassemblementIds: ["pdr3"] },
+            ] as LigneDeBusModel[];
+            const centreList = [
+                { id: "center1", matricule: "matricule1" },
+                { id: "center2", matricule: "matricule2" },
+                { id: "center3", matricule: "matricule3" },
+            ] as CentreModel[];
+            const pdrList = [
+                { id: "pdr1", matricule: "matricule1", departement: "Paris" },
+                { id: "pdr2", matricule: "matricule2", departement: "Seine" },
+            ] as PointDeRassemblementModel[];
+            const result = await simulationAffectationHTSService.getChangementsDepartements(
+                "test-sdr-import-id",
+                centreList,
+                pdrList,
+                ligneDeBusList,
             );
-
-            expect(result).toEqual("destination");
-        });
-
-        it("should return the jeune.departement if the jeune.departement is not in the changementDepartements array", () => {
-            const jeune = {
-                departement: "origine",
-            } as JeuneModel;
-            const changementDepartements = [{ origine: "autre", destination: "destination" }];
-
-            const result = simulationAffectationHTSService.getJeuneAffectationDepartement(
-                jeune,
-                changementDepartements,
-            );
-
-            expect(result).toEqual("origine");
+            expect(result).toEqual([
+                {
+                    origine: "Seine-Saint-Denis",
+                    destination: [
+                        {
+                            centreId: "center1",
+                            pdrId: "pdr1",
+                            departement: "Paris",
+                            ligneIdList: ["ligne1"],
+                        },
+                    ],
+                },
+            ]);
         });
     });
 
@@ -408,6 +412,7 @@ describe("SimulationAffectationHTSService", () => {
                 jeunesList,
                 pdrList,
                 ligneDeBusList,
+                [],
             );
 
             expect(result).toEqual({
@@ -416,6 +421,168 @@ describe("SimulationAffectationHTSService", () => {
                 ligneIdListParDepartement: [["ligne1"], ["ligne2"]],
                 placesDisponiblesParLigne: [[40], [40]],
                 jeuneIdListParDepartement: [["1"], ["2"]],
+            } as DistributionJeunesParDepartement);
+        });
+
+        it("should calculate affectations correctly with new department from sdr", () => {
+            const jeunesList = [
+                { id: "1", departement: "Paris" },
+                { id: "2", departement: "Paris" },
+                { id: "3", departement: "Paris" },
+                { id: "4", departement: "Seine-Saint-Denis" },
+                { id: "5", departement: "Seine-Saint-Denis" },
+            ] as JeuneModel[];
+
+            const pdrList = [
+                { id: "pdr1", departement: "Paris" },
+                { id: "pdr2", departement: "Paris" },
+                { id: "pdr3", departement: "Seine-Saint-Denis" },
+            ] as PointDeRassemblementModel[];
+
+            const ligneDeBusList = [
+                {
+                    id: "ligne1",
+                    pointDeRassemblementIds: ["pdr1"],
+                    capaciteJeunes: 50,
+                    placesOccupeesJeunes: 10,
+                    centreId: "center1",
+                },
+                {
+                    id: "ligne2",
+                    pointDeRassemblementIds: ["pdr1"],
+                    capaciteJeunes: 50,
+                    placesOccupeesJeunes: 10,
+                    centreId: "center1",
+                },
+                {
+                    id: "ligne3",
+                    pointDeRassemblementIds: ["pdr1"],
+                    capaciteJeunes: 50,
+                    placesOccupeesJeunes: 10,
+                    centreId: "center1",
+                },
+                {
+                    id: "ligne4",
+                    pointDeRassemblementIds: ["pdr2"],
+                    capaciteJeunes: 50,
+                    placesOccupeesJeunes: 10,
+                    centreId: "center1",
+                },
+                {
+                    id: "ligne5",
+                    pointDeRassemblementIds: ["pdr3"],
+                    capaciteJeunes: 60,
+                    placesOccupeesJeunes: 20,
+                    centreId: "center2",
+                },
+            ] as LigneDeBusModel[];
+
+            // sans changement de département
+            expect(
+                simulationAffectationHTSService.calculDistributionAffectations(jeunesList, pdrList, ligneDeBusList, []),
+            ).toEqual({
+                departementList: ["Paris", "Seine-Saint-Denis"],
+                centreIdListParLigne: [["center1", "center1", "center1", "center1"], ["center2"]],
+                ligneIdListParDepartement: [["ligne1", "ligne2", "ligne3", "ligne4"], ["ligne5"]],
+                placesDisponiblesParLigne: [[40, 40, 40, 40], [40]],
+                jeuneIdListParDepartement: [
+                    ["1", "2", "3"],
+                    ["4", "5"],
+                ],
+            } as DistributionJeunesParDepartement);
+
+            let changementsDepartement = [
+                {
+                    origine: "Seine-Saint-Denis",
+                    destination: [
+                        {
+                            pdrId: "pdr1",
+                            departement: "Paris",
+                            centreId: "center1",
+                            ligneIdList: ["ligne1"],
+                        },
+                    ],
+                },
+            ] as ChangementDepartement[];
+
+            // avec changement de département (ligne1 dédiée au 93)
+            expect(
+                simulationAffectationHTSService.calculDistributionAffectations(
+                    jeunesList,
+                    pdrList,
+                    ligneDeBusList,
+                    changementsDepartement,
+                ),
+            ).toEqual({
+                departementList: ["Paris", "Seine-Saint-Denis"],
+                centreIdListParLigne: [
+                    ["center1", "center1", "center1"],
+                    ["center1", "center2"],
+                ],
+                ligneIdListParDepartement: [
+                    ["ligne2", "ligne3", "ligne4"],
+                    ["ligne1", "ligne5"],
+                ],
+                placesDisponiblesParLigne: [
+                    [40, 40, 40],
+                    [40, 40],
+                ],
+                jeuneIdListParDepartement: [
+                    ["1", "2", "3"],
+                    ["4", "5"],
+                ],
+            } as DistributionJeunesParDepartement);
+
+            // avec changement de département (sans ligne dédiée)
+            changementsDepartement = [
+                {
+                    origine: "Seine-Saint-Denis",
+                    destination: [
+                        {
+                            pdrId: "pdr1",
+                            departement: "Paris",
+                            centreId: "center1",
+                            ligneIdList: ["ligne1"],
+                        },
+                    ],
+                },
+                {
+                    origine: "Paris",
+                    destination: [
+                        {
+                            pdrId: "pdr1",
+                            departement: "Paris",
+                            centreId: "center1",
+                            ligneIdList: ["ligne1"],
+                        },
+                    ],
+                },
+            ] as ChangementDepartement[];
+            expect(
+                simulationAffectationHTSService.calculDistributionAffectations(
+                    jeunesList,
+                    pdrList,
+                    ligneDeBusList,
+                    changementsDepartement,
+                ),
+            ).toEqual({
+                departementList: ["Paris", "Seine-Saint-Denis"],
+                centreIdListParLigne: [
+                    ["center1", "center1", "center1", "center1"],
+                    ["center1", "center2"],
+                ],
+                ligneIdListParDepartement: [
+                    ["ligne1", "ligne2", "ligne3", "ligne4"],
+                    ["ligne1", "ligne5"],
+                ],
+                placesDisponiblesParLigne: [
+                    [40, 40, 40, 40],
+                    [40, 40],
+                ],
+                jeuneIdListParDepartement: [
+                    ["1", "2", "3"],
+                    ["4", "5"],
+                ],
             } as DistributionJeunesParDepartement);
         });
     });
