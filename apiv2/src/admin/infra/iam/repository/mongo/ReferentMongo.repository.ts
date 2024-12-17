@@ -1,12 +1,15 @@
 import { ReferentGateway, Role, SousRole } from "@admin/core/iam/Referent.gateway";
-import { ReferentModel, ReferentPasswordModel } from "@admin/core/iam/Referent.model";
 import { Inject, Injectable } from "@nestjs/common";
+import { ClientSession, Model } from "mongoose";
+import { ClsService } from "nestjs-cls";
+import { v4 as uuidv4 } from "uuid";
+
+import { ReferentType } from "snu-lib";
+import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { Model } from "mongoose";
-import { ClsService } from "nestjs-cls";
-import { ReferentType } from "snu-lib";
-import { v4 as uuidv4 } from "uuid";
+import { ReferentModel, ReferentPasswordModel } from "@admin/core/iam/Referent.model";
+
 import { ContactGateway } from "../../Contact.gateway";
 import { REFERENT_MONGOOSE_ENTITY, ReferentDocument } from "../../provider/ReferentMongo.provider";
 import { ReferentMapper } from "./Referent.mapper";
@@ -17,6 +20,7 @@ export class ReferentRepository implements ReferentGateway {
         @Inject(REFERENT_MONGOOSE_ENTITY) private referentMongooseEntity: Model<ReferentDocument>,
         @Inject(ContactGateway) private contactGateway: ContactGateway,
         @Inject(ClockGateway) private clockGateway: ClockGateway,
+        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<ClientSession>,
         private readonly cls: ClsService,
     ) {}
 
@@ -87,7 +91,7 @@ export class ReferentRepository implements ReferentGateway {
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
-        await retrievedReferent.save({ fromUser: user });
+        await retrievedReferent.save({ fromUser: user, session: this.dbSessionGateway.get() });
 
         this.contactGateway.syncReferent(ReferentMapper.toModel(retrievedReferent));
 
