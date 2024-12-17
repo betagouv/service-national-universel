@@ -38,6 +38,9 @@ export class EmailBrevoMapper {
     static mapGenericEmailToBrevo(template: EmailTemplate, emailParams: EmailParams): EmailProviderParams {
         return {
             to: emailParams.to,
+            params: {
+                toName: emailParams.to[0].name,
+            },
             templateId: Number(template),
         };
     }
