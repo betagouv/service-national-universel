@@ -17,14 +17,12 @@ import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gatew
 @Injectable()
 export class AffectationService {
     constructor(
-        // @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(PlanDeTransportGateway) private readonly planDeTransportGateway: PlanDeTransportGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
         @Inject(PointDeRassemblementGateway) private readonly pointDeRassemblementGateway: PointDeRassemblementGateway,
         @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
-        // @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         private readonly logger: Logger,
     ) {}
