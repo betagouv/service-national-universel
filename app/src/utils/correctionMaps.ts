@@ -39,7 +39,7 @@ export const CORRECTION_MAP_HTS = {
     ],
     url: "/inscription/correction/representants",
   },
-  [CORRECTION_STEPS.COORDONNEE]: {
+  [CORRECTION_STEPS.COORDONNEES]: {
     fields: [
       "gender",
       "frenchNationality",
@@ -104,7 +104,7 @@ export const CORRECTION_MAP_CLE = {
     ],
     url: "/inscription/correction/representants",
   },
-  [CORRECTION_STEPS.COORDONNEE]: {
+  [CORRECTION_STEPS.COORDONNEES]: {
     fields: [
       "gender",
       "birthCountry",

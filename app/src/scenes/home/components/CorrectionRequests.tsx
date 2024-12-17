@@ -40,14 +40,14 @@ function CorrectionRequest({ correction }: { correction: CorrectionRequestType }
         <p className="font-semibold">{translateField(correction.field)}</p>
         <p>{translateCorrectionReason(correction.reason)}</p>
         <p>{correction.message}</p>
-        {canModifyInscription && (
+        {canModifyInscription && !!url ? (
           <Link to={url}>
             <p className="bg-blue-600 w-fit text-white px-2.5 py-1.5 rounded-md text-sm mt-3 hover:bg-blue-800 transition-colors">
               <HiPencilAlt className="text-white inline-block mr-1 h-4 w-4" />
               Corriger
             </p>
           </Link>
-        )}
+        ) : null}
       </div>
     </div>
   );

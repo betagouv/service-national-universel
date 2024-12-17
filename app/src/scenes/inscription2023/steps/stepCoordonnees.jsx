@@ -2,7 +2,7 @@ import Img2 from "../../../assets/infoSquared.svg";
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
 import validator from "validator";
 import { genderOptions, inFranceOrAbroadOptions, youngSchooledSituationOptions, youngActiveSituationOptions, foreignCountryOptions, hostRelationshipOptions } from "../utils";
@@ -23,6 +23,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { fr } from "@codegouvfr/react-dsfr";
 import { SignupButtons, BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import { CORRECTION_STEPS } from "@/utils/navigation";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -105,7 +106,6 @@ const defaultState = {
 export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
-  const corrections = useCorrections(step);
   const [situationOptions, setSituationOptions] = useState([]);
   const [birthCitySuggestionsOpen, setBirthCitySuggestionsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -114,7 +114,7 @@ export default function StepCoordonnees() {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
-  const { step } = useParams();
+  const corrections = useCorrections(CORRECTION_STEPS.COORDONNEES);
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
