@@ -20,9 +20,11 @@ export default function CorrectionRequests() {
         <p className="my-4 font-bold">Les corrections demandées n’ont pas été effectuées à temps.</p>
       )}
 
-      {young.correctionRequests
-        ?.filter((c: CorrectionRequestType) => ["SENT", "REMINDED"].includes(c.status as any))
-        .map((correction: CorrectionRequestType) => <CorrectionRequest key={correction._id} correction={correction} />)}
+      <div className="grid grid-cols-1 gap-2">
+        {young.correctionRequests
+          ?.filter((c: CorrectionRequestType) => ["SENT", "REMINDED"].includes(c.status as any))
+          .map((correction: CorrectionRequestType) => <CorrectionRequest key={correction._id} correction={correction} />)}
+      </div>
     </section>
   );
 }
