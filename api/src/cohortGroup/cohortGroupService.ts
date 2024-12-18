@@ -1,7 +1,10 @@
 import { COHORT_TYPE, YOUNG_SOURCE, YoungType } from "snu-lib";
 import { CohortGroupDocument, CohortGroupModel, CohortModel } from "../models";
 
-type Query = { type: string; year?: { $gte: number } | { $gt: number } };
+type Query = {
+  type: string;
+  year?: { $gte: number } | { $gt: number };
+};
 
 export async function getCohortGroupsForYoung(young: YoungType): Promise<CohortGroupDocument[]> {
   const cohort = await CohortModel.findById(young.cohortId);
@@ -10,11 +13,10 @@ export async function getCohortGroupsForYoung(young: YoungType): Promise<CohortG
   const cohortGroup = await CohortGroupModel.findById(cohort.cohortGroupId);
   if (!cohortGroup) throw new Error("Cohort group not found");
 
-  let query: Query = { type: COHORT_TYPE.VOLONTAIRE };
+  const query: Query = { type: COHORT_TYPE.VOLONTAIRE };
 
-  // On propose aux CLE désistés de se ré inscrire sur l'année en cours, mais pas aux HTS.
-  if (cohortGroup.name !== "Réserve") {
-    if (!cohortGroup.year) throw new Error("Cohort group year is missing");
+  // On propose aux CLE désistés de se réinscrire sur l'année en cours, mais pas aux HTS.
+  if (cohortGroup.year) {
     query.year = young.source === YOUNG_SOURCE.CLE ? { $gte: cohortGroup.year } : { $gt: cohortGroup.year };
   }
 

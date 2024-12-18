@@ -41,6 +41,7 @@ import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
 import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
+import { serviceProvider } from "@admin/infra/iam/service/serviceProvider";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -92,6 +93,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             { provide: TaskGateway, useClass: AdminTaskRepository },
             ...phase1UseCaseProviders,
             ...cleUseCaseProviders,
+            ...serviceProvider,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))

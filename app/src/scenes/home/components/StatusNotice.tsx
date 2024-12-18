@@ -1,4 +1,5 @@
 import Notice from "@/components/ui/alerts/Notice";
+import usePermissions from "@/hooks/usePermissions";
 import { setYoung } from "@/redux/auth/actions";
 import { capture } from "@/sentry";
 import API from "@/services/api";
@@ -22,6 +23,7 @@ export default function StatusNotice({ status }: { status: string }) {
 function WaitingValidation() {
   const history = useHistory();
   const dispatch = useDispatch();
+  const { canModifyInscription } = usePermissions();
 
   async function handleGoToInscription() {
     try {
@@ -42,11 +44,13 @@ function WaitingValidation() {
     <Notice>
       <p className="font-bold">Votre dossier est en cours de traitement par l’administration.</p>
       <p>Vous recevrez prochainement un e-mail de no_reply@snu.gouv.fr vous informant de l’avancement de votre inscription.</p>
-      <button
-        className="bg-blue-600 text-white w-full md:w-fit px-6 py-2.5 text-center rounded-md text-sm mt-3 hover:bg-blue-800 transition-colors"
-        onClick={handleGoToInscription}>
-        Consulter mon dossier d’inscription
-      </button>
+      {canModifyInscription && (
+        <button
+          className="bg-blue-600 text-white w-full md:w-fit px-6 py-2.5 text-center rounded-md text-sm mt-3 hover:bg-blue-800 transition-colors"
+          onClick={handleGoToInscription}>
+          Consulter mon dossier d’inscription
+        </button>
+      )}
     </Notice>
   );
 }

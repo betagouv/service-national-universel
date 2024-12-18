@@ -1,6 +1,7 @@
 import { ClassesRoutes } from "snu-lib";
 
 import { buildRequest } from "@/utils/buildRequest";
+import { ReferentService } from "./referentService";
 
 const ClasseService = {
   getOne: async (id: ClassesRoutes["GetOne"]["params"]["id"]) => {
@@ -17,6 +18,16 @@ const ClasseService = {
       throw new Error(code);
     }
     return classe;
+  },
+
+  modifierReferentClasse: async (id: ClassesRoutes["ModifierReferentClasse"]["params"]["id"], modifierReferentDto: ClassesRoutes["ModifierReferentClasse"]["payload"]) => {
+    return await buildRequest<ClassesRoutes["ModifierReferentClasse"]>({
+      path: "/classe/{id}/referent/modifier-ou-creer",
+      method: "POST",
+      params: { id },
+      payload: modifierReferentDto,
+      target: "API_V2",
+    })();
   },
 
   mapDtoToView: (classeDto): NonNullable<ClassesRoutes["GetOne"]["response"]["data"]> => {
@@ -36,6 +47,7 @@ const ClasseService = {
       uniqueKeyAndId: classeDto.uniqueKeyAndId,
       academy: classeDto.academie,
       referentClasseIds: classeDto.referentClasseIds,
+      referents: classeDto.referents.map((referent) => ReferentService.mapReferentToView(referent)),
       sessionId: classeDto.sessionId,
       uniqueId: classeDto.uniqueId,
       seatsTaken: classeDto.placesPrises,
