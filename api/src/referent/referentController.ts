@@ -108,6 +108,7 @@ import {
   isAdmin,
   isReferentReg,
   isReferentDep,
+  getYoungStatusForBascule,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -852,7 +853,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const { cohort, cohortChangeReason } = payload;
 
     let youngStatus = young.status;
-    youngStatus = getYoungStatusForBascule(young) as YoungType["status"];
+    youngStatus = getYoungStatusForBascule(young.status);
     if (cohort === "à venir ") {
       youngStatus = getYoungStatusForAVenir(young) as YoungType["status"];
     }
@@ -1042,12 +1043,6 @@ const getYoungStatusForAVenir = (young: YoungType) => {
     default:
       return YOUNG_STATUS.WAITING_VALIDATION;
   }
-};
-
-const getYoungStatusForBascule = (young: YoungType) => {
-  if (young.status === YOUNG_STATUS.NOT_AUTORISED || young.status === YOUNG_STATUS.IN_PROGRESS || young.status === YOUNG_STATUS.REINSCRIPTION) {
-    return YOUNG_STATUS.IN_PROGRESS;
-  } else return YOUNG_STATUS.WAITING_VALIDATION;
 };
 
 const getYoungSituationIfCLE = (filiere) => {
