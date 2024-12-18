@@ -108,6 +108,7 @@ import {
   isAdmin,
   isReferentReg,
   isReferentDep,
+  getYoungStatusForBascule,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -853,17 +854,13 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const { cohort, cohortChangeReason } = payload;
 
     let youngStatus = young.status;
-    let inscriptionStep = young.inscriptionStep2023;
-    let reinscriptionStep = young.reinscriptionStep2023;
-    if (payload.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
-      youngStatus = YOUNG_STATUS.VALIDATED;
-    }
-    if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
-      youngStatus = getYoungStatusForBasculeCLEtoHTS(young) as YoungType["status"];
-    }
+    youngStatus = getYoungStatusForBascule(young.status);
     if (cohort === "à venir ") {
       youngStatus = getYoungStatusForAVenir(young) as YoungType["status"];
     }
+
+    let inscriptionStep = young.inscriptionStep2023;
+    let reinscriptionStep = young.reinscriptionStep2023;
 
     let sessions: CohortDocumentWithPlaces[] = [];
     if (req.user.role === ROLES.ADMIN) {
@@ -873,7 +870,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     } else {
       sessions = await getFilteredSessionsForCLE();
     }
-
+    
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
@@ -1051,21 +1048,6 @@ const getYoungStatusForAVenir = (young: YoungType) => {
     case YOUNG_STATUS.WAITING_VALIDATION:
       return YOUNG_STATUS.WAITING_VALIDATION;
     case YOUNG_STATUS.WAITING_CORRECTION:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    default:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-  }
-};
-
-const getYoungStatusForBasculeCLEtoHTS = (young: YoungType) => {
-  switch (young.status) {
-    case YOUNG_STATUS.WITHDRAWN:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    case YOUNG_STATUS.REFUSED:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    case YOUNG_STATUS.NOT_AUTORISED:
-      return YOUNG_STATUS.IN_PROGRESS;
-    case YOUNG_STATUS.VALIDATED:
       return YOUNG_STATUS.WAITING_VALIDATION;
     default:
       return YOUNG_STATUS.WAITING_VALIDATION;
