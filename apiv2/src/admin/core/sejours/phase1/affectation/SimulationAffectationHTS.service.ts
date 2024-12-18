@@ -195,6 +195,7 @@ export class SimulationAffectationHTSService {
             {} as Record<string, { pdrMatricule: string; centreMatricule: string }[]>,
         );
 
+        let errors: string[] = [];
         const changementDepartement: Array<ChangementDepartement> = [];
         for (const departement of Object.keys(changementDepartementPdrs)) {
             const pdrCentreLignesList = changementDepartementPdrs[departement].map((pdrCentre) => {
@@ -224,23 +225,23 @@ export class SimulationAffectationHTSService {
                     ligneIdList: lignes.map((ligne) => ligne.id),
                 };
             });
-            const errors = pdrCentreLignesList.reduce((acc: string[], pdrCentreLigne) => {
+            const errorsDepartement = pdrCentreLignesList.reduce((acc: string[], pdrCentreLigne) => {
                 if (pdrCentreLigne.error) {
                     acc.push(pdrCentreLigne.error);
                 }
                 return acc;
             }, []);
-            if (errors.length > 0) {
-                throw new FunctionalException(
-                    FunctionalExceptionCode.NOT_FOUND,
-                    `Departement ${departement}: ${errors.join(", ")}`,
-                );
+            if (errorsDepartement.length > 0) {
+                errors = [...errors, `Departement ${departement}: ${errorsDepartement.join(", ")}`];
             }
 
             this.logger.log(
                 `Changement de département pour ${departement}, destination: ${JSON.stringify(pdrCentreLignesList)}`,
             );
             changementDepartement.push({ origine: departement, destination: pdrCentreLignesList as any });
+        }
+        if (errors.length > 0) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, errors.join("; "));
         }
 
         return changementDepartement;
