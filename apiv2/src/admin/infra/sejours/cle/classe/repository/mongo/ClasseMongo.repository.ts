@@ -1,18 +1,17 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { ClasseGateway } from "../../../../../../core/sejours/cle/classe/Classe.gateway";
 import { ClasseModel } from "../../../../../../core/sejours/cle/classe/Classe.model";
 import { CLASSE_MONGOOSE_ENTITY, ClasseDocument } from "../../provider/ClasseMongo.provider";
 import { ClasseMapper } from "../Classe.mapper";
-import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 @Injectable()
 export class ClasseRepository implements ClasseGateway {
     constructor(
         @Inject(CLASSE_MONGOOSE_ENTITY) private classeMongooseEntity: Model<ClasseDocument>,
-        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<ClientSession>,
+
         private readonly cls: ClsService,
     ) {}
 
@@ -48,7 +47,7 @@ export class ClasseRepository implements ClasseGateway {
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
-        await retrievedClasse.save({ fromUser: user, session: this.dbSessionGateway.get() });
+        await retrievedClasse.save({ fromUser: user });
         return ClasseMapper.toModel(retrievedClasse);
     }
 
