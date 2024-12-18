@@ -113,16 +113,17 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         // Traitement des jeunes
         for (const jeuneRapport of simulationJeunesAAffecterList) {
             const jeune = jeuneAAffecterList.find((jeune) => jeune.id === jeuneRapport.id)!;
-            const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === jeuneRapport.ligneDeBusId);
+            const ligneDeBus = ligneDeBusList.find((ligne) => ligne.numeroLigne === jeuneRapport.ligneDeBusId);
             const sejour = sejoursList.find((sejour) => sejour.id === jeuneRapport.sejourId);
-            const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport["Point de rassemblement calculé"]);
+            const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport["Point de rassemblement calculé"]); // TODO: utiliser le matricule
 
             // Controle de coherence
             if (!sejour) {
                 this.logger.warn(`🚩 sejour introuvable: ${jeuneRapport.sejourId} (jeune: ${jeune.id})`);
-                rapportData.push(this.formatJeuneRapport(jeune, sejour, "sejour introuvable"));
-                analytics.errors += 1;
-                continue;
+                throw new FunctionalException(
+                    FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
+                    `sejour non trouvé ${jeuneRapport.sejourId} (jeune: ${jeune.id})`,
+                );
             }
             if (!sejour.placesRestantes || sejour.placesRestantes < 0) {
                 console.error(`🚩 plus de place pour ce sejour: ${sejour.id} (jeune: ${jeune.id})`);
@@ -147,17 +148,19 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
                     this.logger.error(
                         `🚩 Ligne de bus introuvable (${jeuneRapport.ligneDeBusId}) => jeune ${jeune.id} ignored.`,
                     );
-                    rapportData.push(this.formatJeuneRapport(jeune, sejour, "ligne de bus non trouvée"));
-                    analytics.errors += 1;
-                    continue;
+                    throw new FunctionalException(
+                        FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
+                        `ligne de bus non trouvée ${jeuneRapport.ligneDeBusId} (jeune: ${jeune.id})`,
+                    );
                 }
                 if (!pdr) {
                     this.logger.error(
                         `🚩 Point de rassemblement introuvable (${jeuneRapport["Point de rassemblement calculé"]}) => jeune ${jeune.id} ignored.`,
                     );
-                    rapportData.push(this.formatJeuneRapport(jeune, sejour, "point de rassemblement non trouvé"));
-                    analytics.errors += 1;
-                    continue;
+                    throw new FunctionalException(
+                        FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
+                        `point de rassemblement non trouvé ${jeuneRapport["Point de rassemblement calculé"]} (jeune: ${jeune.id})`,
+                    );
                 }
             }
 
@@ -182,8 +185,6 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
 
             rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour));
             analytics.jeunesAffected += 1;
-
-            throw new Error("Test transaction");
         }
 
         this.logger.log(`Mise à jour des places dans les séjours`);
