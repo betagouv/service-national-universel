@@ -30,7 +30,7 @@ export const isReInscriptionOpen = async (cohortGroupId?: string): Promise<boole
     query = { ...query, cohortGroupId: { $nin: groupsToExclude } };
   }
   const cohorts = await CohortModel.find(query);
-  return cohorts.some((cohort) => cohort.isReInscriptionOpen);
+  return cohorts.some((cohort) => isCohortReinscriptionOpen(cohort, 0));
 };
 
 export const findCohortBySnuIdOrThrow = async (cohortName: string) => {
@@ -69,6 +69,10 @@ function isCohortInscriptionOpenWithTimezone(cohort: CohortType, timeZoneOffset:
   }
   return cohort.getIsInscriptionOpen(Number(timeZoneOffset));
 }
+
+export const isCohortReinscriptionOpen = (cohort: CohortType, timeZoneOffset: unknown) => {
+  return cohort.getIsReInscriptionOpen(Number(timeZoneOffset)) || cohort.getIsInscriptionOpen(Number(timeZoneOffset));
+};
 
 type YoungInfo = Pick<YoungType, "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip">;
 
@@ -130,5 +134,5 @@ export async function getFilteredSessionsForReinscription(young: YoungType, time
   });
 
   const cohorts = await CohortModel.find(query);
-  return cohorts.filter((cohort) => cohort.getIsReInscriptionOpen(Number(timeZoneOffset)));
+  return cohorts.filter((cohort) => isCohortReinscriptionOpen(cohort, timeZoneOffset));
 }
