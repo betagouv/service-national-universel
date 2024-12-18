@@ -202,6 +202,8 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 results.analytics.tauxRepartitionCentreList = tauxRepartitionCentres;
                 results.analytics.tauxRemplissageCentreList = tauxRemplissageCentres;
                 results.analytics.tauxOccupationLignesParCentreList = tauxOccupationLignesParCentreList;
+            } else {
+                this.logger.debug(`Worth simulation cost ${coutSimulation}`);
             }
         }
 
