@@ -7,8 +7,6 @@ import { ClockProvider } from "./infra/Clock.provider";
 import { FileProvider } from "./infra/File.provider";
 import { FileController } from "./infra/File.controller";
 import { FileGateway } from "./core/File.gateway";
-import { DbSessionGateway } from "./core/DbSession.gateway";
-import { MongoDbSession } from "./infra/MongoDbSession";
 import { DatabaseModule } from "@infra/Database.module";
 
 @Global()
@@ -26,11 +24,6 @@ import { DatabaseModule } from "@infra/Database.module";
         {
             provide: ClockGateway,
             useClass: ClockProvider,
-        },
-        // transactions
-        {
-            provide: DbSessionGateway,
-            useClass: MongoDbSession,
         },
     ],
     controllers: [FileController],
