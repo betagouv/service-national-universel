@@ -1,18 +1,16 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { PointDeRassemblementGateway } from "@admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.gateway";
 import { PDR_MONGOOSE_ENTITY, PointDeRassemblementDocument } from "../../provider/PointDeRassemblementMongo.provider";
 import { PointDeRassemblementModel } from "@admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.model";
 import { PointDeRassemblementMapper } from "../PointDeRassemblement.mapper";
-import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 @Injectable()
 export class PointDeRassemblementRepository implements PointDeRassemblementGateway {
     constructor(
         @Inject(PDR_MONGOOSE_ENTITY) private pointDeRassemblementMongooseEntity: Model<PointDeRassemblementDocument>,
-        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<ClientSession>,
         private readonly cls: ClsService,
     ) {}
 
@@ -51,7 +49,7 @@ export class PointDeRassemblementRepository implements PointDeRassemblementGatew
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
-        await retrievedPointDeRassemblement.save({ fromUser: user, session: this.dbSessionGateway.get() });
+        await retrievedPointDeRassemblement.save({ fromUser: user });
         return PointDeRassemblementMapper.toModel(retrievedPointDeRassemblement);
     }
 

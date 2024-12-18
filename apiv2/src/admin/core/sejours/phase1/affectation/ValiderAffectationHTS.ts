@@ -1,10 +1,10 @@
 import { Inject, Logger } from "@nestjs/common";
+import { Transactional } from "@nestjs-cls/transactional";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
@@ -73,9 +73,9 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
-        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<any>,
         private readonly logger: Logger,
     ) {}
+    @Transactional()
     async execute({
         sessionId,
         simulationTaskId,
@@ -110,97 +110,91 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         };
         const rapportData: Array<ReturnType<typeof this.formatJeuneRapport>> = [];
 
-        try {
-            await this.dbSessionGateway.start();
-            for (const jeuneRapport of simulationJeunesAAffecterList) {
-                const jeune = jeuneAAffecterList.find((jeune) => jeune.id === jeuneRapport.id)!;
-                const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === jeuneRapport.ligneDeBusId);
-                const sejour = sejoursList.find((sejour) => sejour.id === jeuneRapport.sejourId);
-                const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport["Point de rassemblement calculé"]);
+        // Traitement des jeunes
+        for (const jeuneRapport of simulationJeunesAAffecterList) {
+            const jeune = jeuneAAffecterList.find((jeune) => jeune.id === jeuneRapport.id)!;
+            const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === jeuneRapport.ligneDeBusId);
+            const sejour = sejoursList.find((sejour) => sejour.id === jeuneRapport.sejourId);
+            const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport["Point de rassemblement calculé"]);
 
-                // Controle de coherence
-                if (!sejour) {
-                    this.logger.warn(`🚩 sejour introuvable: ${jeuneRapport.sejourId} (jeune: ${jeune.id})`);
-                    rapportData.push(this.formatJeuneRapport(jeune, sejour, "sejour introuvable"));
-                    analytics.errors += 1;
-                    continue;
-                }
-                if (!sejour.placesRestantes || sejour.placesRestantes < 0) {
-                    console.error(`🚩 plus de place pour ce sejour: ${sejour.id} (jeune: ${jeune.id})`);
-                    rapportData.push(this.formatJeuneRapport(jeune, sejour, "plus de place pour ce sejour"));
-                    analytics.errors += 1;
-                    continue;
-                }
-                // session
-                if (jeune?.sessionNom !== sejour?.sessionName) {
-                    this.logger.warn(
-                        `🚩 Le jeune (${jeune?.id}) a changé de cohort depuis la simulation (sejour: ${sejour?.sessionName}, jeune: ${jeune?.sessionNom})`,
-                    );
-                    rapportData.push(
-                        this.formatJeuneRapport(jeune, sejour, "jeune ayant changé de cohorte depuis la simulation"),
-                    );
-                    analytics.errors += 1;
-                    continue;
-                }
-                // ligne de bus / PDR
-                if (affecterPDR) {
-                    if (!ligneDeBus) {
-                        this.logger.error(
-                            `🚩 Ligne de bus introuvable (${jeuneRapport.ligneDeBusId}) => jeune ${jeune.id} ignored.`,
-                        );
-                        rapportData.push(this.formatJeuneRapport(jeune, sejour, "ligne de bus non trouvée"));
-                        analytics.errors += 1;
-                        continue;
-                    }
-                    if (!pdr) {
-                        this.logger.error(
-                            `🚩 Point de rassemblement introuvable (${jeuneRapport["Point de rassemblement calculé"]}) => jeune ${jeune.id} ignored.`,
-                        );
-                        rapportData.push(this.formatJeuneRapport(jeune, sejour, "point de rassemblement non trouvé"));
-                        analytics.errors += 1;
-                        continue;
-                    }
-                }
-
-                // Affectation du jeune
-                sejour.placesRestantes = sejour.placesRestantes - 1;
-
-                const jeuneUpdated = await this.jeuneGateway.update(
-                    this.affectationService.mapAffectationJeune(jeune, sejour, {
-                        ...(affecterPDR
-                            ? {
-                                  pointDeRassemblementId: pdr!.id,
-                                  ligneDeBusId: ligneDeBus!.id,
-                                  hasPDR: "true",
-                              }
-                            : {}),
-                        transportInfoGivenByLocal: undefined, // Metropole
-                    }),
+            // Controle de coherence
+            if (!sejour) {
+                this.logger.warn(`🚩 sejour introuvable: ${jeuneRapport.sejourId} (jeune: ${jeune.id})`);
+                rapportData.push(this.formatJeuneRapport(jeune, sejour, "sejour introuvable"));
+                analytics.errors += 1;
+                continue;
+            }
+            if (!sejour.placesRestantes || sejour.placesRestantes < 0) {
+                console.error(`🚩 plus de place pour ce sejour: ${sejour.id} (jeune: ${jeune.id})`);
+                rapportData.push(this.formatJeuneRapport(jeune, sejour, "plus de place pour ce sejour"));
+                analytics.errors += 1;
+                continue;
+            }
+            // session
+            if (jeune?.sessionNom !== sejour?.sessionName) {
+                this.logger.warn(
+                    `🚩 Le jeune (${jeune?.id}) a changé de cohort depuis la simulation (sejour: ${sejour?.sessionName}, jeune: ${jeune?.sessionNom})`,
                 );
-                this.logger.log(
-                    `🚀 Jeune affecté: ${jeune.id}, centre: ${jeuneUpdated.centreId}, sejour: ${jeuneUpdated.sejourId}, ligneDeBus: ${jeuneUpdated.ligneDeBusId}, pdr: ${jeuneUpdated.pointDeRassemblementId}, ${jeuneUpdated.hasPDR}`,
+                rapportData.push(
+                    this.formatJeuneRapport(jeune, sejour, "jeune ayant changé de cohorte depuis la simulation"),
                 );
-
-                rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour));
-                analytics.jeunesAffected += 1;
+                analytics.errors += 1;
+                continue;
+            }
+            // ligne de bus / PDR
+            if (affecterPDR) {
+                if (!ligneDeBus) {
+                    this.logger.error(
+                        `🚩 Ligne de bus introuvable (${jeuneRapport.ligneDeBusId}) => jeune ${jeune.id} ignored.`,
+                    );
+                    rapportData.push(this.formatJeuneRapport(jeune, sejour, "ligne de bus non trouvée"));
+                    analytics.errors += 1;
+                    continue;
+                }
+                if (!pdr) {
+                    this.logger.error(
+                        `🚩 Point de rassemblement introuvable (${jeuneRapport["Point de rassemblement calculé"]}) => jeune ${jeune.id} ignored.`,
+                    );
+                    rapportData.push(this.formatJeuneRapport(jeune, sejour, "point de rassemblement non trouvé"));
+                    analytics.errors += 1;
+                    continue;
+                }
             }
 
-            this.logger.log(`Mise à jour des places dans les séjours`);
-            // mise à jour des placesRestantes dans les centres
-            for (const sejour of sejoursList) {
-                await this.sejoursGateway.update(sejour, `Affectation ${session.nom}`);
-            }
-            this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
-            // mise à jour des placesOccupeesJeunes dans les bus
-            for (const ligneDeBus of ligneDeBusList) {
-                await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBus, `Affectation ${session.nom}`);
-            }
-            await this.dbSessionGateway.commit();
-        } catch (error) {
-            await this.dbSessionGateway.abort();
-            throw error;
-        } finally {
-            await this.dbSessionGateway.end();
+            // Affectation du jeune
+            sejour.placesRestantes = sejour.placesRestantes - 1;
+
+            const jeuneUpdated = await this.jeuneGateway.update(
+                this.affectationService.mapAffectationJeune(jeune, sejour, {
+                    ...(affecterPDR
+                        ? {
+                              pointDeRassemblementId: pdr!.id,
+                              ligneDeBusId: ligneDeBus!.id,
+                              hasPDR: "true",
+                          }
+                        : {}),
+                    transportInfoGivenByLocal: undefined, // Metropole
+                }),
+            );
+            this.logger.log(
+                `🚀 Jeune affecté: ${jeune.id}, centre: ${jeuneUpdated.centreId}, sejour: ${jeuneUpdated.sejourId}, ligneDeBus: ${jeuneUpdated.ligneDeBusId}, pdr: ${jeuneUpdated.pointDeRassemblementId}, ${jeuneUpdated.hasPDR}`,
+            );
+
+            rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour));
+            analytics.jeunesAffected += 1;
+
+            throw new Error("Test transaction");
+        }
+
+        this.logger.log(`Mise à jour des places dans les séjours`);
+        // mise à jour des placesRestantes dans les centres
+        for (const sejour of sejoursList) {
+            await this.sejoursGateway.update(sejour, `Affectation ${session.nom}`);
+        }
+        this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
+        // mise à jour des placesOccupeesJeunes dans les bus
+        for (const ligneDeBus of ligneDeBusList) {
+            await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBus, `Affectation ${session.nom}`);
         }
 
         // création du fichier excel de rapport

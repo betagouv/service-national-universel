@@ -49,12 +49,24 @@ import { serviceProvider } from "./infra/iam/service/serviceProvider";
 import { ReferentController } from "./infra/iam/api/Referent.controller";
 import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
 import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
-import { DbSessionGateway } from "@shared/core/DbSession.gateway";
-import { MongoDbSession } from "@shared/infra/MongoDbSession";
+
+import { ClsPluginTransactional } from "@nestjs-cls/transactional";
+
+import { DATABASE_CONNECTION } from "@infra/Database.provider";
+import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 
 @Module({
     imports: [
-        ClsModule.forRoot({}),
+        ClsModule.forRoot({
+            plugins: [
+                new ClsPluginTransactional({
+                    imports: [DatabaseModule],
+                    adapter: new TransactionalAdapterMongoose({
+                        mongooseConnectionToken: DATABASE_CONNECTION,
+                    }),
+                }),
+            ],
+        }),
         ConfigModule,
         DatabaseModule,
         JwtAuthModule,
@@ -77,7 +89,6 @@ import { MongoDbSession } from "@shared/infra/MongoDbSession";
         SimulationAffectationHTSService,
         ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
-        { provide: DbSessionGateway, useClass: MongoDbSession }, // transactions
         ...classeMongoProviders,
         ...referentMongoProviders,
         ...etablissementMongoProviders,

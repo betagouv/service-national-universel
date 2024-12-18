@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 
 import { PlanDeTransportGateway } from "@admin/core/sejours/phase1/PlanDeTransport/PlanDeTransport.gateway";
@@ -8,13 +8,11 @@ import { PlanDeTransportModel } from "@admin/core/sejours/phase1/PlanDeTransport
 import { PLANDETRANSPORT_MONGOOSE_ENTITY, PlanDeTransportDocument } from "../../provider/PlanDeTransportMongo.provider";
 
 import { PlanDeTransportMapper } from "../PlanDeTransport.mapper";
-import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 @Injectable()
 export class PlanDeTransportRepository implements PlanDeTransportGateway {
     constructor(
         @Inject(PLANDETRANSPORT_MONGOOSE_ENTITY) private planDeTransportMongooseEntity: Model<PlanDeTransportDocument>,
-        @Inject(DbSessionGateway) private readonly dbSessionGateway: DbSessionGateway<ClientSession>,
         private readonly cls: ClsService,
     ) {}
 
@@ -41,7 +39,7 @@ export class PlanDeTransportRepository implements PlanDeTransportGateway {
         const user = updateOriginName ? { firstName: updateOriginName } : this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
-        await retrievedPlanDeTransport.save({ fromUser: user, session: this.dbSessionGateway.get() });
+        await retrievedPlanDeTransport.save({ fromUser: user });
         return PlanDeTransportMapper.toModel(retrievedPlanDeTransport);
     }
 

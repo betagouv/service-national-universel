@@ -24,11 +24,27 @@ import { useCaseProvider as referentielUseCaseProvider } from "./infra/referenti
 import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
 import { ValiderAffectationHTS } from "./core/sejours/phase1/affectation/ValiderAffectationHTS";
 import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
-import { DbSessionGateway } from "@shared/core/DbSession.gateway";
-import { MongoDbSession } from "@shared/infra/MongoDbSession";
+
+import { DATABASE_CONNECTION } from "@infra/Database.provider";
+import { ClsPluginTransactional } from "@nestjs-cls/transactional";
+import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 
 @Module({
-    imports: [ClsModule.forRoot({}), ConfigModule, TaskModule, DatabaseModule],
+    imports: [
+        ClsModule.forRoot({
+            plugins: [
+                new ClsPluginTransactional({
+                    imports: [DatabaseModule],
+                    adapter: new TransactionalAdapterMongoose({
+                        mongooseConnectionToken: DATABASE_CONNECTION,
+                    }),
+                }),
+            ],
+        }),
+        ConfigModule,
+        TaskModule,
+        DatabaseModule,
+    ],
     providers: [
         Logger,
 
@@ -45,7 +61,6 @@ import { MongoDbSession } from "@shared/infra/MongoDbSession";
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
         { provide: FileGateway, useClass: FileProvider },
-        { provide: DbSessionGateway, useClass: MongoDbSession }, // transactions
         { provide: TaskGateway, useClass: AdminTaskRepository },
         // add use case here
         AffectationService,
