@@ -1,11 +1,11 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Inject, Logger } from "@nestjs/common";
-import { Job } from "bullmq";
-import { ReferentModel } from "@admin/core/iam/Referent.model";
-import { ContactType } from "../Notification";
-import { QueueName } from "@shared/infra/Queue";
-import { ContactProvider } from "./Contact.provider";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
+import { QueueName } from "@shared/infra/Queue";
+import { Job } from "bullmq";
+import { ContactType } from "../Notification";
+import { ReferentSyncDto } from "./Contact";
+import { ContactProvider } from "./Contact.provider";
 
 @Processor(QueueName.CONTACT)
 export class ContactConsumer extends WorkerHost {
@@ -15,19 +15,22 @@ export class ContactConsumer extends WorkerHost {
     ) {
         super();
     }
-    async process(job: Job<ReferentModel[], any, ContactType>): Promise<ConsumerResponse> {
+    async process(job: Job<ReferentSyncDto[], any, ContactType>): Promise<ConsumerResponse> {
         try {
             switch (job.name) {
                 case ContactType.JEUNE: {
                     for (const jeune of job.data) {
-                        this.logger.log(`Synchronizing JeuneId: ${jeune.id}`);
+                        this.logger.log(`Synchronizing JeuneId: ${jeune.id}`, ContactConsumer.name);
                         await this.contactProvider.syncJeune(jeune);
                     }
                     break;
                 }
                 case ContactType.REFERENT: {
                     for (const referent of job.data) {
-                        this.logger.log(`Synchronizing ReferentId: ${referent.id}`);
+                        this.logger.log(
+                            `Synchronizing referent: ${referent.email} - ${referent.id} - ${referent.operation}`,
+                            ContactConsumer.name,
+                        );
                         await this.contactProvider.syncReferent(referent);
                     }
                     break;
@@ -39,10 +42,10 @@ export class ContactConsumer extends WorkerHost {
             return ConsumerResponse.SUCCESS;
         } catch (error: any) {
             this.logger.error(
-                `Error synchronizing user of type: "${job.name}" - ${error.message} - ${error.stack}`,
+                `Error synchronizing user type ${job.name} for email ${error.email} - ${error.code} - ${error.message}`,
                 ContactConsumer.name,
             );
-            throw error;
+            throw ConsumerResponse.FAILURE;
         }
     }
 }

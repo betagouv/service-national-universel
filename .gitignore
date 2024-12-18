@@ -7,6 +7,7 @@
 .vscode/*
 !.vscode/tasks.json
 !.vscode/settings.json
+!.vscode/*.code-snippets
 .env*
 .cache_ggshield
 Zammadwebhook.json
