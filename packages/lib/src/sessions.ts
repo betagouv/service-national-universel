@@ -126,10 +126,6 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-function shouldForceRedirectToReinscription(young) {
-  return young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status);
-}
-
 const isCohortTooOld = (cohort: CohortType) => {
   return cohort.status === COHORT_STATUS.ARCHIVED;
 };
@@ -180,15 +176,6 @@ function hasAccessToReinscription(young: YoungType, cohort: CohortType) {
   return false;
 }
 
-function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
-  return (
-    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
-    (isInscriptionModificationOpen &&
-      young.status === YOUNG_STATUS.WAITING_VALIDATION &&
-      ((young.hasStartedReinscription && young.reinscriptionStep2023 !== "DONE") || (!young.hasStartedReinscription && young.inscriptionStep2023 !== "DONE")))
-  );
-}
-
 //@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
 function canApplyToPhase2(young, cohort) {
   if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
@@ -204,8 +191,6 @@ export {
   formatCohortPeriod,
   getCohortPeriodTemp,
   inscriptionCreationOpenForYoungs,
-  shouldForceRedirectToReinscription,
-  shouldForceRedirectToInscription,
   hasAccessToReinscription,
   isCohortTooOld,
   canApplyToPhase2,

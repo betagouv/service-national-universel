@@ -9,10 +9,16 @@ export default function SejourNotice({ cohort }: { cohort: CohortType }) {
 
   return (
     <section id="changer-de-sejour" className="mt-4 border rounded-md p-4">
-      <p>
-        Vous êtes {young.status === YOUNG_STATUS.WAITING_LIST ? "inscrit(e) sur liste complémentaire pour" : "positionné(e) sur"} le séjour{" "}
-        <strong>{getCohortPeriod(cohort)}</strong>.
-      </p>
+      {young.status === YOUNG_STATUS.WAITING_LIST ? (
+        <p>
+          Vous êtes inscrit(e) sur liste complémentaire pour le séjour <strong>{getCohortPeriod(cohort)}</strong>.
+        </p>
+      ) : (
+        <p>
+          Vous êtes positionné(e) sur le séjour <strong>{getCohortPeriod(cohort)}</strong>.
+        </p>
+      )}
+
       {isHTS && (
         <Link to="/changer-de-sejour">
           <p className="mt-2 text-sm text-blue-600">

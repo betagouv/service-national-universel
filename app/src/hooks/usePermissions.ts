@@ -10,5 +10,6 @@ export default function usePermissions() {
     hasAccessToAVenir: young.source === YOUNG_SOURCE.VOLONTAIRE,
     hasAccessToDesistement: young.status !== YOUNG_STATUS.WITHDRAWN && young.status !== YOUNG_STATUS.ABANDONED,
     canModifyInscription: new Date() < new Date(cohort.inscriptionModificationEndDate),
+    hasAccessToNavigation: ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status),
   };
 }

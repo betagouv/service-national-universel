@@ -17,6 +17,7 @@ import { GoTools } from "react-icons/go";
 import MenuLinkExternal from "./MenuLinkExternal";
 import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
 import { CiPalette } from "react-icons/ci";
+import usePermissions from "@/hooks/usePermissions";
 
 // Only people who is already doing phase3 or has done phase3 has access to it.
 const hasAccessToPhase3 = (young) => {
@@ -27,13 +28,27 @@ const hasAccessToPhase3 = (young) => {
 
 export default function NavigationMenu({ onClose = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
+  const { hasAccessToNavigation } = usePermissions();
 
   return (
     <nav className="flex h-full w-full flex-col justify-between bg-[#212B44] p-[24px] transition-all md:flex-1 md:p-[8px] md:pb-[24px]">
       <ul>
         <MenuLink to="/" icon={<IconHome />} text="Accueil" onClose={onClose} />
-        <MenuLink to="/phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} onClose={onClose} />
-        <MenuLink to="/phase2" icon={<IconPhase2 />} text="Phase 2 - Engagement" enabled={permissionPhase2(young)} status={young.statusPhase2} onClose={onClose}></MenuLink>
+        <MenuLink
+          to="/phase1"
+          icon={<IconPhase1 />}
+          text="Phase 1 - Séjour"
+          enabled={hasAccessToNavigation && permissionPhase1(young)}
+          status={young.statusPhase1}
+          onClose={onClose}
+        />
+        <MenuLink
+          to="/phase2"
+          icon={<IconPhase2 />}
+          text="Phase 2 - Engagement"
+          enabled={hasAccessToNavigation && permissionPhase2(young)}
+          status={young.statusPhase2}
+          onClose={onClose}></MenuLink>
         {hasAccessToPhase3(young) && (
           <MenuGroup to="/phase3" icon={<IconPhase3 />} text="Phase 3" enabled={permissionPhase3(young)} status={young.statusPhase3} onClose={onClose}>
             <MenuLink to="/les-programmes" text="Les programmes" onClose={onClose} />
