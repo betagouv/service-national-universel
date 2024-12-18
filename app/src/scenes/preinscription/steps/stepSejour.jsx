@@ -4,7 +4,7 @@ import { Link, useHistory } from "react-router-dom";
 import { getCohortPeriod, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
@@ -24,7 +24,7 @@ export default function StepSejour() {
   return (
     <>
       <ProgressBar isReinscription={isLoggedIn} />
-      <DSFRContainer title="Choisissez la date du séjour" supportLink={supportURL + `/base-de-connaissance/${bdcURI}`} supportEvent="Phase0/aide preinscription - sejour">
+      <DSFRContainer title="Choisissez la date du séjour" supportLink={knowledgebaseURL + `/base-de-connaissance/${bdcURI}`} supportEvent="Phase0/aide preinscription - sejour">
         <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
         <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
         {scolarity === GRADES["1ereGT"] && (
@@ -38,7 +38,7 @@ export default function StepSejour() {
         <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
         <div className="text-sm text-gray-500">
           La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-          <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer">
+          <a href={`${knowledgebaseURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer">
             En savoir plus.
           </a>
         </div>
@@ -63,7 +63,7 @@ function SessionButton({ session }) {
   const eventName = `Phase0/CTA ${isLoggedIn ? "reinscription" : "preinscription"} - sejour ${session.name}`;
 
   function handleClick() {
-    setData({ ...data, cohort: session.name, source: session.type, step });
+    setData({ ...data, cohort: session.name, step });
     plausibleEvent(eventName);
     history.push(route);
   }

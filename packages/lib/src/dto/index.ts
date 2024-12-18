@@ -9,3 +9,4 @@ export * from "./etablissementDto";
 export * from "./contactDto";
 export * from "./taskDto";
 export * from "./phase1";
+export * from "./referentiel/ReferentielTaskDto";

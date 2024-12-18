@@ -5,7 +5,7 @@ import { CohortsRoutes, ROLES } from "snu-lib";
 
 import { capture } from "../sentry";
 import { ERRORS } from "../utils";
-import { YoungModel } from "../models";
+import { YoungModel, CohortModel } from "../models";
 import { RouteRequest, RouteResponse } from "./request";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../middlewares/authMiddleware";
@@ -24,7 +24,7 @@ const router = express.Router();
 
 router.post(
   "/eligibility/2023/:id?",
-  authMiddleware(["young", "referent"]),
+  authMiddleware("referent"),
   requestValidatorMiddleware({ ...CohortsRoutesSchema.PostEligibility, body: undefined }),
   async function (req: RouteRequest<CohortsRoutes["PostEligibility"]>, res: RouteResponse<CohortsRoutes["PostEligibility"]>) {
     try {
@@ -65,19 +65,28 @@ router.post(
   },
 );
 
-router.get("/isReInscriptionOpen", async (req: RouteRequest<CohortsRoutes["GetIsReincriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsReincriptionOpen"]>) => {
-  try {
-    const isOpen = await isReInscriptionOpen();
+router.get(
+  "/isReInscriptionOpen",
+  authMiddleware(["young"]),
+  async (req: RouteRequest<CohortsRoutes["GetIsReincriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsReincriptionOpen"]>) => {
+    try {
+      const user = req.user;
+      const cohort = await CohortModel.findById(user.cohortId);
+      if (!cohort) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+      const isOpen = await isReInscriptionOpen(cohort.cohortGroupId);
 
-    return res.json({
-      ok: true,
-      data: isOpen,
-    });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+      return res.json({
+        ok: true,
+        data: isOpen,
+      });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 
 router.get(
   "/isInscriptionOpen",

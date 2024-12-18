@@ -37,12 +37,13 @@ services:
       - redis
   bullboard:
     container_name: bullboard
-    image: venatum/bull-board:1.5
+    image: venatum/bull-board:latest
     restart: always
     ports:
       - 3001:3000
     environment:
       - REDIS_HOST=redis
+      - BULL_PREFIX=development
     networks:
       - redis
   env-setup:

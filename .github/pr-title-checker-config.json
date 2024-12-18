@@ -4,7 +4,7 @@
     "color": "EEEEEE"
   },
   "CHECKS": {
-    "regexp": "^(refactor|fix|feat|chore|revert)\\((?:api|admin|app|apiv2|misc|all|github|terraform|kb|lib|release)(?:, ?(?:api|admin|app|apiv2|misc|github|terraform|kb|lib))*\\): (\\d+|sentry) - .+$",
+    "regexp": "^(refactor|fix|feat|chore|revert)\\((?:api|admin|app|apiv2|misc|all|github|terraform|kb|lib|release)(?:, ?(?:api|admin|app|apiv2|misc|github|terraform|kb|lib))*\\): .+$",
     "regexpFlags": "i",
     "ignoreLabels": ["bypass title", "meta"]
   },

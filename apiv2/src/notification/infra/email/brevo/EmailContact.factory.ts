@@ -1,9 +1,10 @@
 import { ConfigService } from "@nestjs/config";
 import { EmailProvider } from "../Email.provider";
 import { EmailBrevoProvider } from "./EmailBrevo.provider";
-import { MockEmailBrevoProvider } from "./MockEmailBrevo.provider";
+import { EmailBrevoMockProvider } from "./EmailBrevoMock.provider";
 import { ContactProvider } from "../Contact.provider";
 import { Logger } from "@nestjs/common";
+import { EmailBrevoCatcherProvider } from "./EmailBrevoCatcher.provider";
 
 export const emailFactory = {
     provide: EmailProvider,
@@ -24,7 +25,10 @@ const customFactory = (config: ConfigService) => {
         return new EmailBrevoProvider(config);
     }
     if (emailProvider === "mock") {
-        return new MockEmailBrevoProvider();
+        return new EmailBrevoMockProvider();
+    }
+    if (emailProvider === "mailcatcher") {
+        return new EmailBrevoCatcherProvider(config);
     }
     throw new Error("Invalid email provider");
 };

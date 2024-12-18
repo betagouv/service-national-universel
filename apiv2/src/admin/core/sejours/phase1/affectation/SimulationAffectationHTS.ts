@@ -231,8 +231,6 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 data: fileBuffer,
                 mimetype: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             },
-            // TODO: ajouter un endpoint de lecture des fichiers
-            { ACL: "public-read" },
         );
 
         return {
