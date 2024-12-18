@@ -6,6 +6,7 @@ import { getCohort } from "../../utils/cohorts";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
+import WaitingReinscription from "./WaitingReinscription";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
 import HomePhase1 from "./HomePhase1";
@@ -52,8 +53,11 @@ export default function Home() {
     return <HomePhase2 />;
   }
 
-  // je suis sur une cohorte à venir et la réinscription est ouverte
-  if (isReinscriptionOpen && hasAccessToReinscription(young, cohort)) {
+  if (hasAccessToReinscription(young, cohort)) {
+    // TODO: DELETE
+    if (isReinscriptionOpen && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(young.status)) {
+      return <WaitingReinscription />;
+    }
     return <Redirect to="/reinscription" />;
   }
 

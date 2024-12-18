@@ -278,6 +278,7 @@ export function shouldForceRedirectToReinscription(young) {
 
 export function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
   if (window.location.pathname.includes("/changer-de-sejour")) return false;
+  if (young.cohort === "à venir") return false;
   return (
     [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
     (isInscriptionModificationOpen &&
