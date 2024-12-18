@@ -791,6 +791,7 @@ export class SimulationAffectationHTSService {
         centreList: CentreModel[],
         sejourList: SejourModel[],
         regionsConcerneeList: string[],
+        changementDepartements: ChangementDepartement[],
     ): {
         jeunes: {
             "Ligne Theorique": string;
@@ -826,10 +827,24 @@ export class SimulationAffectationHTSService {
             let isProblemePlaceBus = false;
 
             // on récupère les pdr du département du jeune
-            const pdrSameDepartementList = pdrList.filter((pdr) => pdr.departement === departement);
-            for (const pdr of pdrSameDepartementList) {
+            const pdrSameDepartementList = pdrList
+                .filter((pdr) => pdr.departement === departement)
+                .map((pdr) => pdr.id);
+            // on ajoute les PDR de changement de zone
+            const pdrOtherDepartementList = changementDepartements.reduce((acc, changement) => {
+                if (changement.origine === departement) {
+                    changement.destination.forEach((dest) => {
+                        acc = [...new Set([...acc, dest.pdrId])];
+                    });
+                }
+                return acc;
+            }, [] as string[]);
+
+            const pdrIdDepartementList = [...pdrSameDepartementList, ...pdrOtherDepartementList];
+
+            for (const pdrId of pdrIdDepartementList) {
                 // on récupère les lignes de bus associées au pdr
-                const pdrLigneList = ligneDeBusList.filter((ligne) => ligne.pointDeRassemblementIds.includes(pdr.id));
+                const pdrLigneList = ligneDeBusList.filter((ligne) => ligne.pointDeRassemblementIds.includes(pdrId));
 
                 for (const currentLigne of pdrLigneList) {
                     // on récupère les infos du bus si on ne les a pas déjà
@@ -874,8 +889,8 @@ export class SimulationAffectationHTSService {
                     lignesNames.push(numeroLigne);
                 });
             } else {
-                isProblemePlaceCentre = placesCentreList.reduce((a, b) => a + b, 0) === 0;
-                isProblemePlaceBus = placesLigneList.reduce((a, b) => a + b, 0) === 0;
+                isProblemePlaceCentre = placesCentreList.some((places) => places === 0);
+                isProblemePlaceBus = placesLigneList.some((places) => places === 0);
                 limite += 1;
             }
 
@@ -888,8 +903,8 @@ export class SimulationAffectationHTSService {
                 "Probablement hors zones (département)": isHorsZone ? "oui" : "non", // aucune ligne ni centre théorique trouvé
                 "Pas de ligne disponible": isSansLigne ? "oui" : "non", // à un centre théorique mais pas de ligne
                 "Pas de centre disponible": isSansCentre ? "oui" : "non", // à une ligne théorique mais pas de centre
+                "Problème de places ligne": isProblemePlaceBus ? "oui" : "non", // à une ligne et un centre théorique mais n'a pas été affecté
                 "Problème de places centre": isProblemePlaceCentre ? "oui" : "non", // à une ligne et un centre théorique mais n'a pas été affecté
-                "Problème de places bus": isProblemePlaceBus ? "oui" : "non", // à une ligne et un centre théorique mais n'a pas été affecté
                 Résumé: resumeJeune,
             };
         });
@@ -964,6 +979,7 @@ export class SimulationAffectationHTSService {
                 if (!jeunesDejaAffectedIdList.includes(jeune.id)) {
                     acc.push({
                         ...jeune,
+                        // TODO: utiliser le matricule
                         "Point de rassemblement calculé": pdrIdJeuneAffectedList[index],
                         sejourId: jeuneSejourIdList[index],
                     });
@@ -985,6 +1001,7 @@ export class SimulationAffectationHTSService {
             centreList,
             sejourList,
             regionsConcerneeList,
+            changementDepartements,
         );
 
         jeuneAttenteAffectationList = jeuneAttenteAffectationList.map((jeune, index) => ({
@@ -1104,7 +1121,7 @@ export class SimulationAffectationHTSService {
                                 ...new Set(destination.map((dest) => dest.departement)),
                             ]
                                 .map(formatDepartement)
-                                .join(",")}`,
+                                .join("-")}`,
                     )
                     .join("; "),
         ].map((ligne) => ({
