@@ -14,6 +14,11 @@ export class ClasseRepository implements ClasseGateway {
         private readonly cls: ClsService,
     ) {}
 
+    async findByReferentId(referentId: string): Promise<ClasseModel[]> {
+        const classes = await this.classeMongooseEntity.find({ referentClasseIds: [referentId] });
+        return ClasseMapper.toModels(classes);
+    }
+
     async create(classe: ClasseModel): Promise<ClasseModel> {
         const classeEntity = ClasseMapper.toEntity(classe);
         const createdClasse = await this.classeMongooseEntity.create(classeEntity);
@@ -24,6 +29,10 @@ export class ClasseRepository implements ClasseGateway {
         const classe = await this.classeMongooseEntity.findById(id);
         if (!classe) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        // Le modèle historique prévoit une liste de référents, mais il ne doit y en avoir qu'un
+        if (classe.referentClasseIds.length > 1) {
+            throw new FunctionalException(FunctionalExceptionCode.TOO_MANY_REFERENTS_CLASSE);
         }
         return ClasseMapper.toModel(classe);
     }
