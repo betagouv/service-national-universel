@@ -75,7 +75,10 @@ router.get(
       if (!cohort) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
-      const isOpen = await isReInscriptionOpen(cohort.cohortGroupId);
+      const isOpen = await isReInscriptionOpen({
+        cohortGroupId: cohort.cohortGroupId,
+        timeZoneOffset: req.headers["x-user-timezone"] as string,
+      });
 
       return res.json({
         ok: true,

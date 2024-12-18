@@ -9,6 +9,7 @@ import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddl
 import { CohortModel } from "../models";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { getCohortGroupsForYoung } from "./cohortGroupService";
+import { isCohortReinscriptionOpen } from "../cohort/cohortService";
 
 const router = express.Router();
 
@@ -26,9 +27,10 @@ router.use(authMiddleware("young"));
 
 router.get("/open", authMiddleware(["young"]), async (req: RouteRequest<CohortGroupRoutes["GetOpen"]>, res: RouteResponse<CohortGroupRoutes["GetOpen"]>) => {
   try {
+    const timeZoneOffset = req.headers["x-user-timezone"] as string;
     const groups = await getCohortGroupsForYoung(req.user as unknown as YoungType);
     const cohorts = await CohortModel.find({ cohortGroupId: { $in: groups.map((g) => g.id) } });
-    const openCohorts = cohorts.filter((c) => c.isReInscriptionOpen);
+    const openCohorts = cohorts.filter((c) => isCohortReinscriptionOpen(c, timeZoneOffset));
     const data = groups.filter((g) => openCohorts.find((c) => c.cohortGroupId === g.id));
     return res.json({ ok: true, data });
   } catch (error) {

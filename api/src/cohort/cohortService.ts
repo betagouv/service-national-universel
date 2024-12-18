@@ -19,7 +19,12 @@ export const isInscriptionOpen = async (cohortName: string | undefined): Promise
 
 type ReinscriptionQuery = { type?: string; dateStart?: { $gte: Date }; cohortGroupId?: { $nin: string[] } };
 
-export const isReInscriptionOpen = async (cohortGroupId?: string): Promise<boolean> => {
+type ReinscriptionArgs = {
+  cohortGroupId?: string;
+  timeZoneOffset?: string | number;
+};
+
+export const isReInscriptionOpen = async ({ cohortGroupId, timeZoneOffset }: ReinscriptionArgs): Promise<boolean> => {
   let query: ReinscriptionQuery = { type: COHORT_TYPE.VOLONTAIRE };
   // On exclut les séjours appartenant à l'année du séjour actuel du volontaire ainsi que les séjours passés.
   if (cohortGroupId) {
@@ -30,7 +35,7 @@ export const isReInscriptionOpen = async (cohortGroupId?: string): Promise<boole
     query = { ...query, cohortGroupId: { $nin: groupsToExclude } };
   }
   const cohorts = await CohortModel.find(query);
-  return cohorts.some((cohort) => isCohortReinscriptionOpen(cohort, 0));
+  return cohorts.some((cohort) => isCohortReinscriptionOpen(cohort, timeZoneOffset));
 };
 
 export const findCohortBySnuIdOrThrow = async (cohortName: string) => {
@@ -70,7 +75,7 @@ function isCohortInscriptionOpenWithTimezone(cohort: CohortType, timeZoneOffset:
   return cohort.getIsInscriptionOpen(Number(timeZoneOffset));
 }
 
-export const isCohortReinscriptionOpen = (cohort: CohortType, timeZoneOffset: unknown) => {
+export const isCohortReinscriptionOpen = (cohort: CohortType, timeZoneOffset?: string | number | null) => {
   return cohort.getIsReInscriptionOpen(Number(timeZoneOffset)) || cohort.getIsInscriptionOpen(Number(timeZoneOffset));
 };
 
