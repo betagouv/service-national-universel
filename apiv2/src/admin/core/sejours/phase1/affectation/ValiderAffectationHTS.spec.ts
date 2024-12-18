@@ -1,10 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { Logger } from "@nestjs/common";
 
-import { department2region, departmentList, GRADES, RegionsHorsMetropole } from "snu-lib";
-
-import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
-
 import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
 
@@ -25,9 +21,12 @@ import * as mockSejours from "./__tests__/sejours.json";
 import * as mockCentres from "./__tests__/centres.json";
 import { AffectationService } from "./Affectation.service";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
-import { DbSessionGateway } from "@shared/core/DbSession.gateway";
 
 const cohortName = "Avril 2024 - C";
+
+jest.mock("@nestjs-cls/transactional", () => ({
+    Transactional: () => jest.fn(),
+}));
 
 describe("SimulationAffectationHTS", () => {
     let validerAffectationHTS: ValiderAffectationHTS;
@@ -40,15 +39,6 @@ describe("SimulationAffectationHTS", () => {
                 ValiderAffectationHTS,
                 AffectationService,
                 Logger,
-                {
-                    provide: DbSessionGateway,
-                    useValue: {
-                        start: jest.fn(),
-                        abort: jest.fn(),
-                        commit: jest.fn(),
-                        end: jest.fn(),
-                    },
-                },
                 {
                     provide: FileGateway,
                     useValue: {

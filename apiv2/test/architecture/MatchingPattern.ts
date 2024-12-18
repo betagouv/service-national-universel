@@ -25,6 +25,7 @@ export enum MatchingPattern {
     NESTJS_CONFIG = "@nestjs.config",
     NESTJS_TESTING = "@nestjs.testing",
     NESTJS_BULLMQ = "@nestjs.bullmq",
+    NESTJS_TRANSACTIONAL = "@nestjs-cls.transactional",
 
     SNU_LIB = "packages",
 }
