@@ -600,14 +600,15 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getFilteredSessionsForChangementSejour(young, (req.headers["x-user-timezone"] || "") as string);
-
     if (cohortName !== "à venir") {
+      const sessions = await getFilteredSessionsForChangementSejour(young, (req.headers["x-user-timezone"] || "") as string);
       const session = sessions.find(({ name }) => name === cohortObj.name);
-
       if (!session) {
         return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
+
+      const status = await getStatusAfterChangementSejour(young.status, young.department!, cohortObj);
+      young.set({ status });
     }
 
     const newStatus = await getStatusAfterChangementSejour(young.status, young.department!, cohortObj);
@@ -883,15 +884,12 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
     await unsync(young);
 
-    young.set({ location: { lat: undefined, lon: undefined } });
-    young.set({ schoolLocation: { lat: undefined, lon: undefined } });
-    young.set({ parent1Location: { lat: undefined, lon: undefined } });
-    young.set({ parent2Location: { lat: undefined, lon: undefined } });
-    young.set({ medicosocialStructureLocation: { lat: undefined, lon: undefined } });
     young.set({ email: `${young._doc!["_id"]}@delete.com` });
     young.set({ status: YOUNG_STATUS.DELETED });
+    young.set({ lastStatusAt: Date.now() });
 
     await young.save({ fromUser: req.user });
+
     if (!canDeletePatchesHistory(req.user, young)) return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await patches.deletePatches({ id, model: YoungModel });
 

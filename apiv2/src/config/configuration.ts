@@ -31,8 +31,10 @@ export default () => ({
         queuePrefix: _env(envStr, "BROKER_QUEUE_PREFIX", environment), // TASK_QUEUE_PREFIX in v1
     },
     email: {
-        provider: _env(envStr, "EMAIL_PROVIDER", "mock"), // MAIL_TRANSPORT in v1
+        provider: _env(envStr, "EMAIL_PROVIDER", "mailcatcher"), // MAIL_TRANSPORT in v1
         apiKey: _env(envStr, "EMAIL_SERVICE_API_KEY"), // SENDINBLUEKEY in v1
+        smtpHost: _env(envStr, "SMTP_HOST", "localhost"),
+        smtpPort: _env(envInt, "SMTP_PORT", 1025),
     },
     urls: {
         admin: _env(envStr, "ADMIN_URL", "http://localhost:8082"),

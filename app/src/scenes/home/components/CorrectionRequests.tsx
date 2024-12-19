@@ -15,14 +15,16 @@ export default function CorrectionRequests() {
   return (
     <section id="corrections">
       {canModifyInscription ? (
-        <p className="my-8 font-bold">Correction(s) à apporter avant le {new Date(cohort.inscriptionModificationEndDate).toLocaleDateString("fr-FR")}&nbsp;:</p>
+        <p className="my-4 font-bold">Correction(s) à apporter avant le {new Date(cohort.inscriptionModificationEndDate).toLocaleDateString("fr-FR")}&nbsp;:</p>
       ) : (
-        <p>Les corrections demandées n’ont pas été effectuées à temps.</p>
+        <p className="my-4 font-bold">Les corrections demandées n’ont pas été effectuées à temps.</p>
       )}
 
-      {young.correctionRequests
-        ?.filter((c: CorrectionRequestType) => ["SENT", "REMINDED"].includes(c.status as any))
-        .map((correction: CorrectionRequestType) => <CorrectionRequest key={correction._id} correction={correction} />)}
+      <div className="grid grid-cols-1 gap-2">
+        {young.correctionRequests
+          ?.filter((c: CorrectionRequestType) => ["SENT", "REMINDED"].includes(c.status as any))
+          .map((correction: CorrectionRequestType) => <CorrectionRequest key={correction._id} correction={correction} />)}
+      </div>
     </section>
   );
 }

@@ -35,7 +35,7 @@ describe("Architecture test", () => {
                 .check(srcProject.allClasses());
         });
 
-        it("Repository should depend on gateway", async () => {
+        it("Repository should depend on gateway", () => {
             classes()
                 .that()
                 .resideInAPackage(MatchingPattern.INFRA)
@@ -49,7 +49,7 @@ describe("Architecture test", () => {
                 .check(srcProject.allClasses());
         });
 
-        it("Core should not have some classes named", async () => {
+        it("Core should not have some classes named", () => {
             noClasses()
                 .that()
                 .resideInAPackage(MatchingPattern.CORE)
@@ -71,15 +71,16 @@ describe("Architecture test", () => {
     });
 
     describe("Admin", () => {
-        it("Should implement an hexagonal architecture", async () => {
+        it("Should implement an hexagonal architecture", () => {
             Architectures.layeredArchitecture()
                 .consideringOnlyDependenciesInAnyPackage(MatchingPattern.ADMIN_CORE, MatchingPattern.ADMIN_INFRA)
                 .layer("useCase", MatchingPattern.ADMIN_USECASE)
                 .layer("repository", MatchingPattern.ADMIN_REPOSITORY)
                 .layer("infra", MatchingPattern.ADMIN_INFRA)
                 .layer("core", MatchingPattern.ADMIN_CORE)
+                .layer("service", MatchingPattern.ADMIN_SERVICE)
                 .whereLayer("useCase")
-                .mayOnlyBeAccessedByLayers("infra", "useCase")
+                .mayOnlyBeAccessedByLayers("infra", "useCase", "service")
                 .whereLayer("repository")
                 .mayOnlyBeAccessedByLayers("infra")
                 .whereLayer("infra")
@@ -87,7 +88,7 @@ describe("Architecture test", () => {
                 .because("Each bounded context should implement an hexagonal architecture")
                 .check(srcProject.allClasses());
         });
-        it("Should depend on specific dependencies", async () => {
+        it("Should depend on specific dependencies", () => {
             classes()
                 .that()
                 .resideInAPackage(MatchingPattern.ADMIN_CORE)
@@ -109,7 +110,7 @@ describe("Architecture test", () => {
     });
 
     describe("Shared", () => {
-        it("Should depend on specific dependencies", async () => {
+        it("Should depend on specific dependencies", () => {
             classes()
                 .that()
                 .resideInAPackage(MatchingPattern.SHARED_CORE)
@@ -122,7 +123,7 @@ describe("Architecture test", () => {
     });
 
     describe("BullMQ", () => {
-        it("Consumer should be in jobModule", async () => {
+        it("Consumer should be in jobModule", () => {
             classes()
                 .that()
                 .haveSimpleNameEndingWith(MatchingPattern.CONSUMER_SUFFIX)

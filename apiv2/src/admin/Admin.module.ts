@@ -3,7 +3,7 @@ import { DatabaseModule } from "@infra/Database.module"; // TO REMOVE ?
 import { JwtAuthModule } from "@infra/JwtAuth.module";
 // import { databaseProviders } from "@infra/Database.provider"; // TO REMOVE ?
 import { QueueModule } from "@infra/Queue.module";
-import { Logger, MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
+import { Logger, MiddlewareConsumer, Module, ParseEnumPipe, RequestMethod } from "@nestjs/common";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
@@ -45,6 +45,8 @@ import { FileProvider } from "@shared/infra/File.provider";
 import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
 import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
 import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
+import { serviceProvider } from "./infra/iam/service/serviceProvider";
+import { ReferentController } from "./infra/iam/api/Referent.controller";
 
 @Module({
     imports: [
@@ -63,6 +65,7 @@ import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielR
         ImportReferentielController,
         AuthController,
         AdminTaskController,
+        ReferentController,
     ],
     providers: [
         ClasseService,
@@ -92,6 +95,7 @@ import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielR
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
         ...referentielUseCaseProvider,
+        ...serviceProvider,
     ],
 })
 export class AdminModule {
