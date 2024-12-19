@@ -134,7 +134,7 @@ function hasAccessToReinscription(young: YoungType) {
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
-  if ([YOUNG_STATUS.REFUSED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status as any)) {
+  if ([YOUNG_STATUS.DELETED].includes(young.status as any)) {
     return false;
   }
   return young.cohort === "à venir";

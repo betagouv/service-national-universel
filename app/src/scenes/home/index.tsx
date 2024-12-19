@@ -1,7 +1,7 @@
 import React from "react";
 import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, hasAccessToReinscription, hasCompletedPhase1, isDoingPhase1 } from "../../utils";
+import { YOUNG_STATUS, hasCompletedPhase1, isDoingPhase1 } from "../../utils";
 import { getCohort } from "../../utils/cohorts";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
@@ -14,16 +14,18 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
 import useReinscription from "../changeSejour/lib/useReinscription";
 import { shouldRedirectToReinscription } from "@/utils/navigation";
+import usePermissions from "@/hooks/usePermissions";
 
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
+  const { hasAccessToReinscription } = usePermissions();
 
   const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useReinscription();
 
@@ -57,7 +59,7 @@ export default function Home() {
   if (isReinscriptionOpen && !shouldRedirectToReinscription(young)) {
     return <WaitingReinscription />;
   }
-  if (hasAccessToReinscription(young)) {
+  if (hasAccessToReinscription) {
     return <Redirect to="/reinscription" />;
   }
 

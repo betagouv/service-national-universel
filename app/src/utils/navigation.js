@@ -277,10 +277,7 @@ export function shouldForceRedirectToReinscription(young) {
 }
 
 export function shouldRedirectToReinscription(young) {
-  if ([YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
-    return false;
-  }
-  if (young.status === YOUNG_STATUS.VALIDATED && [YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+  if ([YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
     return false;
   }
   return young.cohort === "à venir";
