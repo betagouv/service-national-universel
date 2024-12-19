@@ -7,7 +7,7 @@ export const mapPointDeRassemblements = (rawPdrs: PointDeRassemblementCSV[]): Po
   return rawPdrs.map((rawPdr) => {
     const rawPdrWithoutId: PointDeRassemblementImportMapped = {
       // attention de garder le caractere spécial à la place de l'espace dans le nom de colonne
-      name: rawPdr["Point de Rassemblement : Désignation du Point de Rassemblement"],
+      name: rawPdr["Point de Rassemblement : Désignation"],
       address: rawPdr.Adresse,
       complementAddress: rawPdr["Particularités pour accès"],
       particularitesAcces: rawPdr["Particularités pour accès"],
@@ -19,9 +19,9 @@ export const mapPointDeRassemblements = (rawPdrs: PointDeRassemblementCSV[]): Po
       matricule: rawPdr["Matricule du point de rassemblement"],
       uai: rawPdr["UAI"],
       numeroOrdre: rawPdr["Numéro d'ordre"],
-      dateCreation: parseDate(rawPdr["Point de Rassemblement : Date de création"], "dd/MM/yyyy", new Date()),
+      dateCreation: parseDate(rawPdr["Point de Rassemblement : Date de création"], "dd/MM/yyyy", new Date()),
       dateDebutValidite: parseDate(rawPdr["Date  début validité de l'enregistrement"], "dd/MM/yyyy", new Date()),
-      dateDerniereModification: parseDate(rawPdr["Point de Rassemblement : Date de dernière modification"], "dd/MM/yyyy", new Date()),
+      dateDerniereModification: parseDate(rawPdr["Point de Rassemblement : Date de dernière modification"], "dd/MM/yyyy", new Date()),
       // code: rawPdr["Matricule du point de rassemblement"],
     };
     if (!rawPdrWithoutId.name) {

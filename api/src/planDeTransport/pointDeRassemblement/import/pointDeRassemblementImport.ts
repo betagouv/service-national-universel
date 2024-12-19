@@ -12,7 +12,7 @@ export interface ImportPointDeRassemblementRoute extends BasicRoute {
 
 export interface PointDeRassemblementCSV {
   "Matricule du point de rassemblement": string;
-  "Point de Rassemblement : Désignation du Point de Rassemblement": string;
+  "Point de Rassemblement : Désignation": string;
   Adresse: string;
   "Code postal": string;
   Commune: string;
@@ -24,8 +24,8 @@ export interface PointDeRassemblementCSV {
   UAI: string;
   "Numéro d'ordre": string;
   "Date  début validité de l'enregistrement": string;
-  "Point de Rassemblement : Date de création": string;
-  "Point de Rassemblement : Date de dernière modification": string;
+  "Point de Rassemblement : Date de création": string;
+  "Point de Rassemblement : Date de dernière modification": string;
 }
 
 export type PointDeRassemblementImportMapped = Pick<
