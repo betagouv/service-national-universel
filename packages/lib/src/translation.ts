@@ -1,7 +1,7 @@
 import { TaskType } from "./mongoSchema/task";
 import { FUNCTIONAL_ERRORS } from "./constants/functionalErrors";
 
-const translate = (value?: string): string => {
+const translate = (value) => {
   switch (value) {
     case "WAITING_REALISATION":
       return "En attente de réalisation";
@@ -386,7 +386,7 @@ const translate = (value?: string): string => {
     case "ERR_NETWORK":
       return "Impossible de se connecter au serveur, vérifier votre connexion internet avant d'actualiser";
     default:
-      return value ?? "";
+      return value;
   }
 };
 
