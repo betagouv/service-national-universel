@@ -1,5 +1,5 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
+import { COHORT_STATUS, YOUNG_STATUS } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format } from "date-fns";
@@ -130,14 +130,14 @@ const isCohortTooOld = (cohort: CohortType) => {
   return cohort.status === COHORT_STATUS.ARCHIVED;
 };
 
-function hasAccessToReinscription(young: YoungType, cohort: CohortType) {
+function hasAccessToReinscription(young: YoungType) {
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
 
-  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
-    return false;
-  }
+  // if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
+  //   return false;
+  // }
 
   // if (isCle(young)) {
   //   if (young.frenchNationality === "false") {
@@ -159,17 +159,11 @@ function hasAccessToReinscription(young: YoungType, cohort: CohortType) {
   //   return false;
   // }
 
-  if (isCohortTooOld(cohort)) {
-    return false;
-  }
+  // if (isCohortTooOld(cohort)) {
+  //   return false;
+  // }
 
-  if (
-    young.cohort === "à venir" &&
-    young.status !== YOUNG_STATUS.NOT_AUTORISED &&
-    young.status !== YOUNG_STATUS.REFUSED &&
-    young.status !== YOUNG_STATUS.DELETED &&
-    young.status !== YOUNG_STATUS.NOT_ELIGIBLE
-  ) {
+  if (young.cohort === "à venir" && young.status !== YOUNG_STATUS.REFUSED && young.status !== YOUNG_STATUS.DELETED && young.status !== YOUNG_STATUS.NOT_ELIGIBLE) {
     return true;
   }
 
