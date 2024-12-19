@@ -134,40 +134,10 @@ function hasAccessToReinscription(young: YoungType) {
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
-
-  // if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
-  //   return false;
-  // }
-
-  // if (isCle(young)) {
-  //   if (young.frenchNationality === "false") {
-  //     return false;
-  //   }
-
-  //   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) {
-  //     return false;
-  //   }
-
-  //   if (young.status === YOUNG_STATUS.ABANDONED || young.status === YOUNG_STATUS.WITHDRAWN) {
-  //     return true;
-  //   }
-
-  //   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
-  //     return true;
-  //   }
-
-  //   return false;
-  // }
-
-  // if (isCohortTooOld(cohort)) {
-  //   return false;
-  // }
-
-  if (young.cohort === "à venir" && young.status !== YOUNG_STATUS.REFUSED && young.status !== YOUNG_STATUS.DELETED && young.status !== YOUNG_STATUS.NOT_ELIGIBLE) {
-    return true;
+  if ([YOUNG_STATUS.REFUSED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status as any)) {
+    return false;
   }
-
-  return false;
+  return young.cohort === "à venir";
 }
 
 //@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)

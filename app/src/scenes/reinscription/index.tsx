@@ -15,8 +15,6 @@ import useReinscription from "../changeSejour/lib/useReinscription";
 import ReinscriptionClosed from "./ReinscriptionClosed";
 import useAuth from "@/services/useAuth";
 import { YOUNG_STATUS } from "snu-lib";
-import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import Done from "../preinscription/Done";
 import StepWaitingConsent from "../inscription2023/steps/stepDone";
 
 function renderStep(step: string) {

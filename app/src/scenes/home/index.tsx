@@ -14,10 +14,11 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
 import useReinscription from "../changeSejour/lib/useReinscription";
+import { shouldRedirectToReinscription } from "@/utils/navigation";
 
 export default function Home() {
   useDocumentTitle("Accueil");
@@ -53,11 +54,10 @@ export default function Home() {
     return <HomePhase2 />;
   }
 
+  if (isReinscriptionOpen && !shouldRedirectToReinscription(young)) {
+    return <WaitingReinscription />;
+  }
   if (hasAccessToReinscription(young)) {
-    // TODO: DELETE
-    if (isReinscriptionOpen && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(young.status)) {
-      return <WaitingReinscription />;
-    }
     return <Redirect to="/reinscription" />;
   }
 

@@ -1,4 +1,4 @@
-import { FEATURES_NAME, isFeatureEnabled, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { FEATURES_NAME, isFeatureEnabled, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { getCohort } from "./cohorts";
 import { environment } from "@/config";
 
@@ -274,6 +274,16 @@ export function shouldForceRedirectToEmailValidation(user) {
 
 export function shouldForceRedirectToReinscription(young) {
   return young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status);
+}
+
+export function shouldRedirectToReinscription(young) {
+  if ([YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
+    return false;
+  }
+  if (young.status === YOUNG_STATUS.VALIDATED && [YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+    return false;
+  }
+  return young.cohort === "à venir";
 }
 
 export function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
