@@ -8,7 +8,7 @@ describe("AuthController", () => {
     let app: INestApplication;
 
     beforeAll(async () => {
-        const appSetup = await setupAdminTest({ newContainer: true });
+        const appSetup = await setupAdminTest();
         app = appSetup.app;
 
         await app.init();
