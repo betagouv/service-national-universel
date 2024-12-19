@@ -28,7 +28,7 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
   });
 
   const {
-    isPending,
+    isFetching: isLoading,
     error,
     data: traitements,
   } = useQuery<Phase1Routes["GetTraitementsRoute"]["response"]>({
@@ -54,7 +54,7 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
   return (
     <div className="flex flex-col gap-8">
       <DataTable<{ id: string; data: Phase1Routes["GetTraitementsRoute"]["response"][0] }>
-        isLoading={isPending}
+        isLoading={isLoading}
         isError={!!error}
         rows={traitementRows}
         isSortable
