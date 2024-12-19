@@ -19,6 +19,11 @@ function getNewPointDeRassemblementFixture(object: Partial<PointDeRassemblementT
     },
     matricule: faker.lorem.words(),
     particularitesAcces: faker.lorem.words(),
+    uai: faker.string.alpha(8).toUpperCase(),
+    numeroOrdre: faker.number.int({ min: 4, max: 16 }).toString().padStart(3, "0"),
+    dateCreation: faker.date.past(),
+    dateDebutValidite: faker.date.past(),
+    dateDerniereModification: faker.date.past(),
     ...object,
   };
 }
