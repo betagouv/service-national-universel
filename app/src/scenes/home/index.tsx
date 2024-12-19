@@ -53,7 +53,7 @@ export default function Home() {
     return <HomePhase2 />;
   }
 
-  if (hasAccessToReinscription(young, cohort)) {
+  if (hasAccessToReinscription(young)) {
     // TODO: DELETE
     if (isReinscriptionOpen && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(young.status)) {
       return <WaitingReinscription />;
