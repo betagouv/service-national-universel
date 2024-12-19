@@ -37,6 +37,10 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
                     imports: [DatabaseModule],
                     adapter: new TransactionalAdapterMongoose({
                         mongooseConnectionToken: DATABASE_CONNECTION,
+                        defaultTxOptions: {
+                            // https://www.mongodb.com/docs/manual/core/transactions-sharded-clusters/#time-limit
+                            maxTimeMS: 1000 * 60 * 10, // 10 minutes
+                        },
                     }),
                 }),
             ],
