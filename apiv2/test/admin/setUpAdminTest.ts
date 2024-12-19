@@ -89,7 +89,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...sejourMongoProviders,
             ...sessionMongoProviders,
             ...taskMongoProviders,
-            // testDatabaseProviders(setupOptions.newContainer),
+            testDatabaseProviders(setupOptions.newContainer),
             Logger,
             ...guardProviders,
             SigninReferent,
