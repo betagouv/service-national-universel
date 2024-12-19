@@ -1,15 +1,15 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
-import mongoose from "mongoose";
+import mongoose, { Connection } from "mongoose";
 import { getSharedConnectionString, startMongodbTestContainer } from "./initMongoContainer";
 
 export const testDatabaseProviders = (newContainer: boolean) => ({
     provide: DATABASE_CONNECTION,
-    useFactory: async (): Promise<typeof mongoose> => {
+    useFactory: async (): Promise<Connection> => {
         let connectionString = getSharedConnectionString();
         if (newContainer) {
             const mongodbContainer = await startMongodbTestContainer();
             connectionString = mongodbContainer.getConnectionString();
         }
-        return mongoose.connect(connectionString, { directConnection: true });
+        return (await mongoose.connect(connectionString, { directConnection: true })).connection;
     },
 });
