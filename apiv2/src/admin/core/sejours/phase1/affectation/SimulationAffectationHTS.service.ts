@@ -33,10 +33,9 @@ type JeuneRapport = Pick<
     | "nom"
     | "handicapMemeDepartement"
 > & {
-    pointDeRassemblementId?: string;
-    ligneDeBusId?: string;
-    centreId?: string;
-    departementOrigine?: string;
+    pointDeRassemblementMatricule?: string;
+    ligneDeBusNumeroLigne?: string;
+    centreMatricule?: string;
 };
 
 export interface ChangementDepartement {
@@ -117,8 +116,6 @@ export interface RatioRepartition {
 export type JeuneAffectationModel = JeuneModel & {
     pointDeRassemblementAffectedId?: string;
     pointDeRassemblementIds: string[];
-    departementOrigine?: string;
-    regionOrigine?: string;
 };
 
 export const RAPPORT_SHEETS = {
@@ -1046,6 +1043,7 @@ export class SimulationAffectationHTSService {
                 };
                 return {
                     id: centre.id,
+                    matricule: centre.matricule,
                     nom: centre.nom,
                     region: centre.region,
                     departement: centre.departement,
@@ -1176,21 +1174,23 @@ export class SimulationAffectationHTSService {
             : undefined;
         return {
             id: jeune.id,
+            statut: jeune.statut,
             statutPhase1: jeune.statutPhase1,
+            prenom: jeune.prenom,
+            nom: jeune.nom,
             genre: jeune.genre === "female" ? "fille" : "garçon",
             qpv: ["true", "oui"].includes(jeune.qpv!) ? "oui" : "non",
             psh: ["true", "oui"].includes(jeune.psh!) ? "oui" : "non",
+            handicapMemeDepartement: ["true", "oui"].includes(jeune.handicapMemeDepartement!) ? "oui" : "non",
             sessionNom: jeune.sessionNom,
             region: jeune.region,
             departement: jeune.departement,
-            pointDeRassemblementId: pdr?.matricule || jeune.pointDeRassemblementId,
-            ligneDeBusId: ligneDeBus?.numeroLigne || jeune.ligneDeBusId,
-            centreId: centre?.matricule || jeune.centreId,
-            statut: jeune.statut,
-            prenom: jeune.prenom,
-            nom: jeune.nom,
-            handicapMemeDepartement: ["true", "oui"].includes(jeune.handicapMemeDepartement!) ? "oui" : "non",
-            departementOrigine: jeune.departementOrigine,
+            pointDeRassemblementId: jeune.pointDeRassemblementId,
+            pointDeRassemblementMatricule: pdr?.matricule,
+            ligneDeBusId: jeune.ligneDeBusId,
+            ligneDeBusNumeroLigne: ligneDeBus?.numeroLigne,
+            centreId: jeune.centreId,
+            centreMatricule: centre?.matricule,
         };
     }
 

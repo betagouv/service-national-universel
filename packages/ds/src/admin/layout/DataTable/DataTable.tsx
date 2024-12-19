@@ -1,10 +1,10 @@
 import React, { HTMLAttributes, useMemo } from "react";
 import cx from "classnames";
 import { HiFilter } from "react-icons/hi";
-import { CgSpinner } from "react-icons/cg";
 
-import SortOption from "./SortOption";
 import { Select } from "../..";
+import SortOption from "./SortOption";
+import Loader from "./Loader";
 
 export type Row<T extends string, U extends Record<T, any>> = {
   id: string;
@@ -115,10 +115,14 @@ export default function DataTable<R extends DataTableRow>({
   }, [filters, rows, columnDefs]);
 
   const isReady = (filteredRows?.length || !isLoading) && !isError;
+  const isRefreshing = isLoading && !!filteredRows.length;
   return (
     <>
       {isSortable && (
-        <div className="flex justify-items-end">
+        <div className="flex items-end justify-items-end">
+          {isRefreshing && (
+            <Loader label={loadingLabel || "Actualisation en cours...."} />
+          )}
           <SortOption sort={sort || "DESC"} onChange={onSortChange} />
         </div>
       )}
@@ -149,11 +153,8 @@ export default function DataTable<R extends DataTableRow>({
         </div>
       )}
       <div>
-        {isLoading && filteredRows.length && (
-          <div className="flex items-center gap-2 mb-2 text-gray-500">
-            <CgSpinner size={20} className="animate-spin" />
-            {loadingLabel || "Actualisation en cours...."}
-          </div>
+        {!isSortable && isRefreshing && (
+          <Loader label={loadingLabel || "Actualisation en cours...."} />
         )}
         <table className={cx("w-full table-auto ", className)}>
           <thead>
@@ -168,12 +169,8 @@ export default function DataTable<R extends DataTableRow>({
           <tbody className="divide-y divide-gray-200">
             {isLoading && !filteredRows.length && (
               <tr className="cursor-auto">
-                <td
-                  colSpan={columnDefs.length}
-                  className="flex items-center gap-2 text-gray-500 py-3 px-4"
-                >
-                  <CgSpinner size={20} className="animate-spin" />
-                  {loadingLabel || "Chargement...."}
+                <td colSpan={columnDefs.length} className="py-3 px-4">
+                  <Loader label={loadingLabel} />
                 </td>
               </tr>
             )}
