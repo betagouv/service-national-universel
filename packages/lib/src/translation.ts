@@ -1185,7 +1185,8 @@ export const translateTaskStatus = (status: TaskType["status"]) => {
 export const translateSimulationName = (name: string) => {
   switch (name) {
     case "AFFECTATION_HTS_SIMULATION":
-      return "Affectation HTS (Hors DOM TOM)";
+    case "AFFECTATION_HTS_SIMULATION_VALIDER":
+      return "Affectation HTS (Metropole, hors Corse)";
     default:
       return name;
   }

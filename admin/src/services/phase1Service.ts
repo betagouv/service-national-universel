@@ -12,6 +12,15 @@ const Phase1Service = {
       target: "API_V2",
     })();
   },
+  getTraitements: async (sessionId: string, query: Phase1Routes["GetTraitementsRoute"]["query"]) => {
+    return await buildRequest<Phase1Routes["GetTraitementsRoute"]>({
+      path: "/phase1/{sessionId}/traitements",
+      method: "GET",
+      params: { sessionId },
+      query,
+      target: "API_V2",
+    })();
+  },
 };
 
 export { Phase1Service };

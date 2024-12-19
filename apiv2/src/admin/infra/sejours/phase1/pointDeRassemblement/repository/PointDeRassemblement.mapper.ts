@@ -24,7 +24,7 @@ export class PointDeRassemblementMapper {
             ville: pdrDocument.city,
             codePostal: pdrDocument.zip,
             particularitesAcces: pdrDocument.particularitesAcces,
-            geoLoc: pdrDocument.location,
+            localisation: pdrDocument.location,
             academie: pdrDocument.academie,
         };
     }
@@ -44,7 +44,7 @@ export class PointDeRassemblementMapper {
             city: pdrModel.ville,
             zip: pdrModel.codePostal,
             particularitesAcces: pdrModel.particularitesAcces,
-            location: pdrModel.geoLoc,
+            location: pdrModel.localisation,
             academie: pdrModel.academie,
         };
     }
