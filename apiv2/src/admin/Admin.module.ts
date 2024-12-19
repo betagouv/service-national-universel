@@ -47,10 +47,26 @@ import { ImportReferentielController } from "./infra/referentiel/api/ImportRefer
 import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
 import { serviceProvider } from "./infra/iam/service/serviceProvider";
 import { ReferentController } from "./infra/iam/api/Referent.controller";
+import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
+import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
+
+import { ClsPluginTransactional } from "@nestjs-cls/transactional";
+
+import { DATABASE_CONNECTION } from "@infra/Database.provider";
+import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 
 @Module({
     imports: [
-        ClsModule.forRoot({}),
+        ClsModule.forRoot({
+            plugins: [
+                new ClsPluginTransactional({
+                    imports: [DatabaseModule],
+                    adapter: new TransactionalAdapterMongoose({
+                        mongooseConnectionToken: DATABASE_CONNECTION,
+                    }),
+                }),
+            ],
+        }),
         ConfigModule,
         DatabaseModule,
         JwtAuthModule,
@@ -69,6 +85,7 @@ import { ReferentController } from "./infra/iam/api/Referent.controller";
     ],
     providers: [
         ClasseService,
+        AffectationService,
         SimulationAffectationHTSService,
         ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
@@ -77,6 +94,7 @@ import { ReferentController } from "./infra/iam/api/Referent.controller";
         ...etablissementMongoProviders,
         ...jeuneMongoProviders,
         ...centreMongoProviders,
+        ...planDeTransportMongoProviders,
         ...ligneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
         ...sejourMongoProviders,

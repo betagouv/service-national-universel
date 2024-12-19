@@ -10,6 +10,7 @@ export class CentreMapper {
     static toModel(centreDocument: CentreDocument): CentreModel {
         return {
             id: centreDocument._id.toString(),
+            matricule: centreDocument.matricule,
             nom: centreDocument.name,
             region: centreDocument.region,
             departement: centreDocument.department,
@@ -25,6 +26,7 @@ export class CentreMapper {
     static toEntity(centreModel: CentreModel): Omit<CohesionCenterType, "createdAt" | "updatedAt"> {
         return {
             _id: centreModel.id,
+            matricule: centreModel.matricule,
             name: centreModel.nom,
             region: centreModel.region,
             department: centreModel.departement,

@@ -2,6 +2,7 @@
 export type CentreModel = {
     id: string;
     nom?: string;
+    matricule?: string;
     departement?: string;
     region?: string;
     ville?: string;

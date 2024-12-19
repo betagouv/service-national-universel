@@ -1,6 +1,6 @@
 import { GRADES } from "../../../constants/constants";
 import { TaskDto } from "../../taskDto";
-import { SimulationPhase1TaskParameters } from "../../phase1/SimulationPhase1TaskHTSTaskDto";
+import { Phase1TaskParameters } from "../Phase1HTSTaskDto";
 
 export interface RatioRepartition {
   male: number;
@@ -15,16 +15,17 @@ export type Analytics = {
   jeunesDejaAffected: number;
 };
 
-export interface SimulationAffectationHTSTaskParameters extends SimulationPhase1TaskParameters {
+export interface SimulationAffectationHTSTaskParameters extends Phase1TaskParameters {
   departements: string[];
   niveauScolaires: Array<keyof typeof GRADES>;
-  changementDepartements: { origine: string; destination: string }[];
+  sdrImportId: string;
+  sdrFileName: string;
   etranger?: boolean;
   affecterPDR?: boolean;
 }
 
 export type SimulationAffectationHTSTaskResult = Analytics & {
-  rapportUrl: string;
+  rapportKey: string;
 };
 
 export interface SimulationAffectationHTSTaskDto extends TaskDto<SimulationAffectationHTSTaskParameters, SimulationAffectationHTSTaskResult> {}

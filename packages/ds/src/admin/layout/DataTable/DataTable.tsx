@@ -2,8 +2,9 @@ import React, { HTMLAttributes, useMemo } from "react";
 import cx from "classnames";
 import { HiFilter } from "react-icons/hi";
 
-import SortOption from "./SortOption";
 import { Select } from "../..";
+import SortOption from "./SortOption";
+import Loader from "./Loader";
 
 export type Row<T extends string, U extends Record<T, any>> = {
   id: string;
@@ -113,11 +114,15 @@ export default function DataTable<R extends DataTableRow>({
     });
   }, [filters, rows, columnDefs]);
 
-  const isReady = !isLoading && !isError;
+  const isReady = (filteredRows?.length || !isLoading) && !isError;
+  const isRefreshing = isLoading && !!filteredRows.length;
   return (
     <>
       {isSortable && (
-        <div className="flex justify-items-end">
+        <div className="flex items-end justify-items-end">
+          {isRefreshing && (
+            <Loader label={loadingLabel || "Actualisation en cours...."} />
+          )}
           <SortOption sort={sort || "DESC"} onChange={onSortChange} />
         </div>
       )}
@@ -147,55 +152,63 @@ export default function DataTable<R extends DataTableRow>({
           ))}
         </div>
       )}
-      <table className={cx("w-full table-auto ", className)}>
-        <thead>
-          <tr className="text-xs leading-5 font-medium uppercase text-gray-500 bg-gray-50 cursor-auto">
-            {columnDefs.map((column) => (
-              <th key={column.key} className="py-2 px-4">
-                {column.title}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {isLoading && (
-            <tr className="cursor-auto">
-              <td colSpan={columnDefs.length} className="py-3 px-4">
-                {loadingLabel || "Chargement...."}
-              </td>
+      <div>
+        {!isSortable && isRefreshing && (
+          <Loader label={loadingLabel || "Actualisation en cours...."} />
+        )}
+        <table className={cx("w-full table-auto ", className)}>
+          <thead>
+            <tr className="text-xs leading-5 font-medium uppercase text-gray-500 bg-gray-50 cursor-auto">
+              {columnDefs.map((column) => (
+                <th key={column.key} className="py-2 px-4">
+                  {column.title}
+                </th>
+              ))}
             </tr>
-          )}
-          {isError && (
-            <tr className="cursor-auto">
-              <td colSpan={columnDefs.length} className="py-3 px-4">
-                {errorLabel ||
-                  "Une erreur est survenue lors du chargement des données..."}
-              </td>
-            </tr>
-          )}
-          {isReady && filteredRows.length === 0 && (
-            <tr className="cursor-auto">
-              <td colSpan={columnDefs.length} className="py-3 px-4">
-                {emptyLabel || "Aucun résultat"}
-              </td>
-            </tr>
-          )}
-          {isReady &&
-            filteredRows.map((row) => (
-              <tr key={row.id} className="cursor-auto">
-                {columnDefs.map((column) => (
-                  <td key={column.key} className="py-3 px-4">
-                    <div className="flex">
-                      {column.renderCell
-                        ? column.renderCell(row.data, row)
-                        : row.data[column.key]}
-                    </div>
-                  </td>
-                ))}
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {isLoading && !filteredRows.length && (
+              <tr className="cursor-auto">
+                <td colSpan={columnDefs.length} className="py-3 px-4">
+                  <Loader label={loadingLabel} />
+                </td>
               </tr>
-            ))}
-        </tbody>
-      </table>
+            )}
+            {isError && (
+              <tr className="cursor-auto">
+                <td
+                  colSpan={columnDefs.length}
+                  className="py-3 px-4 text-red-800"
+                >
+                  {errorLabel ||
+                    "Une erreur est survenue lors du chargement des données..."}
+                </td>
+              </tr>
+            )}
+            {isReady && filteredRows.length === 0 && (
+              <tr className="cursor-auto">
+                <td colSpan={columnDefs.length} className="py-3 px-4">
+                  {emptyLabel || "Aucun résultat"}
+                </td>
+              </tr>
+            )}
+            {isReady &&
+              filteredRows.map((row) => (
+                <tr key={row.id} className="cursor-auto">
+                  {columnDefs.map((column) => (
+                    <td key={column.key} className="py-3 px-4">
+                      <div className="flex">
+                        {column.renderCell
+                          ? column.renderCell(row.data, row)
+                          : row.data[column.key]}
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

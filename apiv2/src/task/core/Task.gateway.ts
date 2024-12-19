@@ -11,6 +11,7 @@ export interface TaskGateway {
     ): Promise<TaskModel[]>;
     findById(id: string): Promise<TaskModel>;
     delete(id: string): Promise<void>;
+    deleteMany(ids: string[]): Promise<void>;
     update(id: string, task: TaskModel): Promise<TaskModel>;
     toSuccess(id: string, result: object): Promise<TaskModel>;
     toInProgress(id: string): Promise<TaskModel>;

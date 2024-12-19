@@ -30,6 +30,7 @@
     "dependencies": {
         "@fast-csv/parse": "^5.0.2",
         "@getbrevo/brevo": "^2.2.0",
+        "@nestjs-cls/transactional": "^2.4.3",
         "@nestjs/bullmq": "^10.2.1",
         "@nestjs/common": "^10.0.0",
         "@nestjs/config": "^3.2.3",
@@ -43,7 +44,7 @@
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.1",
         "date-fns": "^3.6.0",
-        "mongoose": "^8.6.3",
+        "mongoose": "^8.9.1",
         "mongoose-patch-history": "^2.0.0",
         "nestjs-cls": "^4.4.1",
         "nodemailer": "^6.9.16",

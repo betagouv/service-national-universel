@@ -8,14 +8,15 @@ export interface SimulationAffectationHTSTaskParameters {
     sessionId: string;
     departements: string[];
     niveauScolaires: Array<keyof typeof GRADES>;
-    changementDepartements: { origine: string; destination: string }[];
+    sdrImportId: string;
+    etranger?: boolean;
+    affecterPDR?: boolean;
 }
 
 export type SimulationAffectationHTSTaskResult = Pick<
     SimulationAffectationHTSResult["analytics"],
     "selectedCost" | "jeunesNouvellementAffected" | "jeuneAttenteAffectation" | "jeunesDejaAffected"
 > & {
-    rapportUrl: string;
     rapportKey: string;
 };
 
