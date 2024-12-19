@@ -113,7 +113,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         // Traitement des jeunes
         for (const jeuneRapport of simulationJeunesAAffecterList) {
             const jeune = jeuneAAffecterList.find((jeune) => jeune.id === jeuneRapport.id)!;
-            const ligneDeBus = ligneDeBusList.find((ligne) => ligne.numeroLigne === jeuneRapport.ligneDeBusId);
+            const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === jeuneRapport.ligneDeBusId);
             const sejour = sejoursList.find((sejour) => sejour.id === jeuneRapport.sejourId);
             const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport["Point de rassemblement calculé"]); // TODO: utiliser le matricule
 
