@@ -611,6 +611,8 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       young.set({ status });
     }
 
+    const newStatus = await getStatusAfterChangementSejour(young.status, young.department!, cohortObj);
+
     young.set({
       cohort: cohortObj.name,
       originalCohort: oldCohort,
@@ -619,6 +621,7 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       cohortDetailedChangeReason,
       cohesionStayPresence: undefined,
       cohesionStayMedicalFileReceived: undefined,
+      status: newStatus,
     });
 
     await young.save({ fromUser: req.user });

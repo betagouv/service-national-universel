@@ -12,6 +12,7 @@ import StepNoSejour from "../preinscription/steps/stepNoSejour";
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import useReinscription from "../changeSejour/lib/useReinscription";
+import Fallback from "./components/Fallback";
 
 function renderStep(step: string) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -43,7 +44,7 @@ export default function Reinscription() {
 
   if (isPending) return <Loader />;
   if (isError) return <div>Erreur</div>;
-  if (!isReinscriptionOpen) return <Redirect to="/" />;
+  if (!isReinscriptionOpen) return <Fallback />;
 
   return (
     <ReinscriptionContextProvider>

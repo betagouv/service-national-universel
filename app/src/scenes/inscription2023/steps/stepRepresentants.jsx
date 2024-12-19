@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Redirect, useHistory, useParams } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import validator from "validator";
 import Error from "../../../components/error";
 import { knowledgebaseURL } from "../../../config";
@@ -10,9 +10,9 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import { getCorrectionByStep } from "../../../utils/navigation";
+import useCorrections from "@/hooks/corrections/useCorrections";
 import { YOUNG_STATUS, isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib";
-// import Input from "../components/Input";
+import { CORRECTION_STEPS } from "@/utils/navigation";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import useAuth from "@/services/useAuth";
@@ -34,8 +34,7 @@ export default function StepRepresentants() {
   const [errors, setErrors] = React.useState({});
   const [isParent2Visible, setIsParent2Visible] = React.useState(young?.parent2Status);
   const dispatch = useDispatch();
-  const { step } = useParams();
-  const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
+  const { correctionsMap: corrections } = useCorrections(CORRECTION_STEPS.REPRESENTANTS);
   const { isCLE } = useAuth();
 
   const [data, setData] = React.useState({
