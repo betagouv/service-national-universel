@@ -7,7 +7,7 @@ export default function usePermissions() {
   const cohort = getCohort(young.cohort);
 
   return {
-    hasAccessToAVenir: young.source === YOUNG_SOURCE.VOLONTAIRE,
+    hasAccessToAVenir: young.source === YOUNG_SOURCE.VOLONTAIRE && cohort.name !== "à venir",
     hasAccessToDesistement: young.status !== YOUNG_STATUS.WITHDRAWN && young.status !== YOUNG_STATUS.ABANDONED,
     canModifyInscription: new Date() < new Date(cohort.inscriptionModificationEndDate),
     hasAccessToNavigation: ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status),
