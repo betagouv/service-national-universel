@@ -12,10 +12,12 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { createTask } from "../../../TaskHelper";
 import { setupAdminTest } from "../../../setUpAdminTest";
 import { createSession } from "../SessionHelper";
+import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 
 describe("AffectationController", () => {
     let app: INestApplication;
     let affectationController: AffectationController;
+    let affectationService: AffectationService;
     let mockedAddUserToRequestMiddleware;
     let module: TestingModule;
     let taskGateway: TaskGateway;
@@ -35,7 +37,10 @@ describe("AffectationController", () => {
         app.use(mockedAddUserToRequestMiddleware);
 
         taskGateway = module.get<TaskGateway>(TaskGateway);
+        affectationService = module.get<AffectationService>(AffectationService);
         await app.init();
+        const tasks = await taskGateway.findAll();
+        taskGateway.deleteMany(tasks.map((task) => task.id));
     });
 
     it("should be defined", () => {
@@ -155,7 +160,7 @@ describe("AffectationController", () => {
             const task = await createTask({ name: TaskName.AFFECTATION_HTS_SIMULATION });
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulations/${task.id}/valider`,
+                `/affectation/${session.id}/simulation/${task.id}/valider`,
             );
 
             expect(response.status).toBe(400);
@@ -164,7 +169,8 @@ describe("AffectationController", () => {
         it("should return 422 for invalid task (pending)", async () => {
             const session = await createSession();
             const task = await createTask({
-                name: TaskName.AFFECTATION_HTS_SIMULATION,
+                name: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+                status: TaskStatus.PENDING,
                 metadata: {
                     parameters: {
                         sessionId: session.id,
@@ -172,9 +178,9 @@ describe("AffectationController", () => {
                 },
             });
 
-            const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulations/${task.id}/valider`,
-            );
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulation/${task.id}/valider`)
+                .send({ affecterPDR: true });
 
             expect(response.status).toBe(422);
         });
@@ -191,21 +197,16 @@ describe("AffectationController", () => {
                 },
                 createdAt: addHours(new Date(), -2),
             });
+
             // la dernière affectation reel est plus récente que la simulation
-            await createTask({
-                name: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+            jest.spyOn(affectationService, "getStatusValidation").mockResolvedValue({
                 status: TaskStatus.COMPLETED,
-                metadata: {
-                    parameters: {
-                        sessionId: session.id,
-                    },
-                },
-                updatedAt: addHours(new Date(), -1),
+                lastCompletedAt: addHours(new Date(), -1),
             });
 
-            const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulations/${simuTask.id}/valider`,
-            );
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulation/${simuTask.id}/valider`)
+                .send({ affecterPDR: true });
 
             expect(response.status).toBe(422);
         });
@@ -222,21 +223,16 @@ describe("AffectationController", () => {
                 },
                 createdAt: addHours(new Date(), -1),
             });
+
             // la dernière affectation reel est plus vieille que la simulation
-            await createTask({
-                name: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+            jest.spyOn(affectationService, "getStatusValidation").mockResolvedValue({
                 status: TaskStatus.COMPLETED,
-                metadata: {
-                    parameters: {
-                        sessionId: session.id,
-                    },
-                },
-                updatedAt: addHours(new Date(), -2),
+                lastCompletedAt: addHours(new Date(), -2),
             });
 
-            const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulations/${simuTask.id}/valider`,
-            );
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulation/${simuTask.id}/valider`)
+                .send({ affecterPDR: true });
 
             expect(response.status).toBe(201);
         });
