@@ -67,6 +67,7 @@ export type RapportData = {
             pointDeRassemblementIds: string;
             centreNom: string;
             tauxRemplissageCentre: string;
+            tauxRemplissageLigne: string;
         }
     >;
     pdrList: Array<
@@ -765,17 +766,26 @@ export class SimulationAffectationHTSService {
         const poids = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 
         // Dot product of two arrays
-        return valeurs.reduce((acc, val, index) => acc + val * poids[index], 0);
+        const cost = valeurs.reduce((acc, val, index) => acc + val * poids[index], 0);
+        return cost < 0 ? 0 : cost;
     }
 
     // here we verify that the number of remaining seats is non-negative......
     isPlacesRestantesCoherentes(ligneDeBusList: LigneDeBusModel[], sejourList: SejourModel[]): boolean {
-        if (ligneDeBusList.find((ligne) => ligne.capaciteJeunes - ligne.placesOccupeesJeunes < 0)) {
-            this.logger.warn("lines placesLibres not safe !");
+        const ligneNotSafe = ligneDeBusList.find((ligne) => ligne.capaciteJeunes - ligne.placesOccupeesJeunes < 0);
+        if (ligneNotSafe) {
+            this.logger.warn(
+                `lines placesLibres not safe ! (${ligneNotSafe.id}: ${
+                    ligneNotSafe.capaciteJeunes - ligneNotSafe.placesOccupeesJeunes
+                })`,
+            );
             return false;
         }
-        if (sejourList.find((sejour) => sejour.placesRestantes !== undefined && sejour.placesRestantes < 0)) {
-            this.logger.warn("centre placesLeft not safe !");
+        const sejourNotSafe = sejourList.find(
+            (sejour) => sejour.placesRestantes !== undefined && sejour.placesRestantes < 0,
+        );
+        if (sejourNotSafe) {
+            this.logger.warn(`centre placesLeft not safe ! (${sejourNotSafe.id}: ${sejourNotSafe.placesRestantes})`);
             return false;
         }
         return true;
@@ -1020,6 +1030,7 @@ export class SimulationAffectationHTSService {
                     chefDeCentreReferentId: sejour.chefDeCentreReferentId,
                     placesRestantes: sejour.placesRestantes,
                     placesTotal: sejour.placesTotal,
+                    tauxRemplissage: this.formatPourcent(1 - (sejour.placesRestantes || 0) / (sejour.placesTotal || 0)),
                     region: centre?.region,
                     departement: centre?.departement,
                     ville: centre?.ville,
@@ -1082,6 +1093,7 @@ export class SimulationAffectationHTSService {
                 pointDeRassemblementIds: ligne.pointDeRassemblementIds.join(", "),
                 placesOccupeesJeunes: ligne.placesOccupeesJeunes,
                 capaciteJeunes: ligne.capaciteJeunes,
+                tauxRemplissageLigne: this.formatPourcent(ligne.placesOccupeesJeunes / ligne.capaciteJeunes),
                 centreId: ligne.centreId,
                 centreNom: centreLigne?.nom,
                 tauxRemplissageCentre: this.formatPourcent(tauxRemplissageCentre),

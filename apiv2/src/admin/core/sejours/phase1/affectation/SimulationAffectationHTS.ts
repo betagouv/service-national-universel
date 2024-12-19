@@ -13,19 +13,15 @@ import {
     SimulationAffectationHTSService,
 } from "./SimulationAffectationHTS.service";
 
-import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
-import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
-import { SejourGateway } from "../sejour/Sejour.gateway";
 import { SejourModel } from "../sejour/Sejour.model";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { CentreGateway } from "../centre/Centre.gateway";
-import { SessionGateway } from "../session/Session.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { SimulationAffectationHTSTaskParameters } from "./SimulationAffectationHTSTask.model";
 import { AffectationService } from "./Affectation.service";
 
 // TODO: déplacer dans un paramétrage dynamique
-const NB_MAX_ITERATION = 100;
+const NB_MAX_ITERATION = 150;
 
 export type SimulationAffectationHTSResult = {
     rapportData: RapportData;
@@ -48,11 +44,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         @Inject(SimulationAffectationHTSService)
         private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
-        @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
-        @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
-        @Inject(PointDeRassemblementGateway) private readonly pointDeRassemblementGateway: PointDeRassemblementGateway,
-        @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
         @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
         private readonly logger: Logger,
     ) {}
@@ -108,6 +100,10 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 return acc;
             },
             { jeunesList: [] as JeuneAffectationModel[], jeuneIntraDepartementList: [] as JeuneAffectationModel[] },
+        );
+
+        this.logger.log(
+            `Jeunes a affectés : ${allJeunes.length} (jeunes: ${jeunesList.length}, intradep: ${jeuneIntraDepartementList.length})`,
         );
 
         // On calcul les taux de repartition (garcon/fille, qpv+/qpv-, psh+/psh-)
@@ -205,6 +201,13 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             } else {
                 this.logger.debug(`Worth simulation cost ${coutSimulation}`);
             }
+        }
+
+        if (results.analytics.selectedCost === 1e3) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
+                `Aucune simulation valide sur les ${NB_MAX_ITERATION} itérations`,
+            );
         }
 
         // Calcul des données pour le rapport excel

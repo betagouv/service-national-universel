@@ -1,7 +1,7 @@
 import { TaskType } from "./mongoSchema/task";
 import { FUNCTIONAL_ERRORS } from "./constants/functionalErrors";
 
-const translate = (value) => {
+const translate = (value?: string): string => {
   switch (value) {
     case "WAITING_REALISATION":
       return "En attente de réalisation";
@@ -383,8 +383,10 @@ const translate = (value) => {
       return "Le fichier est vide on un onglet est manquant";
     case "IMPORT_MISSING_COLUMN":
       return "Impossible d'importer ce fichier car une colonne est manquante";
+    case "ERR_NETWORK":
+      return "Impossible de se connecter au serveur, vérifier votre connexion internet avant d'actualiser";
     default:
-      return value;
+      return value ?? "";
   }
 };
 
