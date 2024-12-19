@@ -32,7 +32,7 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
   });
 
   const {
-    isPending,
+    isFetching: isLoading,
     error,
     data: simulations,
   } = useQuery<Phase1Routes["GetSimulationsRoute"]["response"]>({
@@ -60,7 +60,7 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
   return (
     <div className="flex flex-col gap-8">
       <DataTable<{ id: string; data: Phase1Routes["GetSimulationsRoute"]["response"][0] }>
-        isLoading={isPending}
+        isLoading={isLoading}
         isError={!!error}
         rows={simulationRows}
         isSortable

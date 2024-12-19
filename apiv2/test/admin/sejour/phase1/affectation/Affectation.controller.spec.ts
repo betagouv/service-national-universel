@@ -136,13 +136,22 @@ describe("AffectationController", () => {
 
         it("should return 201", async () => {
             const session = await createSession();
+            const sdrImportTask = await createTask({
+                name: TaskName.REFERENTIEL_IMPORT,
+                metadata: {
+                    parameters: {
+                        fileKey: "path/1-testFile.xlsx",
+                        fileName: "testFile.xlsx",
+                    },
+                },
+            });
 
             const response = await request(app.getHttpServer())
                 .post(`/affectation/${session.id}/simulations`)
                 .send({
                     niveauScolaires: Object.values(GRADES),
                     departements: RegionsMetropole.flatMap((region) => region2department[region]),
-                    sdrImportId: new mongoose.Types.ObjectId().toString(),
+                    sdrImportId: sdrImportTask.id,
                     etranger: false,
                     affecterPDR: false,
                 });

@@ -1,6 +1,7 @@
 import React, { HTMLAttributes, useMemo } from "react";
 import cx from "classnames";
 import { HiFilter } from "react-icons/hi";
+import { CgSpinner } from "react-icons/cg";
 
 import SortOption from "./SortOption";
 import { Select } from "../..";
@@ -113,7 +114,7 @@ export default function DataTable<R extends DataTableRow>({
     });
   }, [filters, rows, columnDefs]);
 
-  const isReady = !isLoading && !isError;
+  const isReady = (filteredRows?.length || !isLoading) && !isError;
   return (
     <>
       {isSortable && (
@@ -147,55 +148,70 @@ export default function DataTable<R extends DataTableRow>({
           ))}
         </div>
       )}
-      <table className={cx("w-full table-auto ", className)}>
-        <thead>
-          <tr className="text-xs leading-5 font-medium uppercase text-gray-500 bg-gray-50 cursor-auto">
-            {columnDefs.map((column) => (
-              <th key={column.key} className="py-2 px-4">
-                {column.title}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {isLoading && (
-            <tr className="cursor-auto">
-              <td colSpan={columnDefs.length} className="py-3 px-4">
-                {loadingLabel || "Chargement...."}
-              </td>
+      <div>
+        {isLoading && filteredRows.length && (
+          <div className="flex items-center gap-2 mb-2 text-gray-500">
+            <CgSpinner size={20} className="animate-spin" />
+            {loadingLabel || "Actualisation en cours...."}
+          </div>
+        )}
+        <table className={cx("w-full table-auto ", className)}>
+          <thead>
+            <tr className="text-xs leading-5 font-medium uppercase text-gray-500 bg-gray-50 cursor-auto">
+              {columnDefs.map((column) => (
+                <th key={column.key} className="py-2 px-4">
+                  {column.title}
+                </th>
+              ))}
             </tr>
-          )}
-          {isError && (
-            <tr className="cursor-auto">
-              <td colSpan={columnDefs.length} className="py-3 px-4">
-                {errorLabel ||
-                  "Une erreur est survenue lors du chargement des données..."}
-              </td>
-            </tr>
-          )}
-          {isReady && filteredRows.length === 0 && (
-            <tr className="cursor-auto">
-              <td colSpan={columnDefs.length} className="py-3 px-4">
-                {emptyLabel || "Aucun résultat"}
-              </td>
-            </tr>
-          )}
-          {isReady &&
-            filteredRows.map((row) => (
-              <tr key={row.id} className="cursor-auto">
-                {columnDefs.map((column) => (
-                  <td key={column.key} className="py-3 px-4">
-                    <div className="flex">
-                      {column.renderCell
-                        ? column.renderCell(row.data, row)
-                        : row.data[column.key]}
-                    </div>
-                  </td>
-                ))}
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {isLoading && !filteredRows.length && (
+              <tr className="cursor-auto">
+                <td
+                  colSpan={columnDefs.length}
+                  className="flex items-center gap-2 text-gray-500 py-3 px-4"
+                >
+                  <CgSpinner size={20} className="animate-spin" />
+                  {loadingLabel || "Chargement...."}
+                </td>
               </tr>
-            ))}
-        </tbody>
-      </table>
+            )}
+            {isError && (
+              <tr className="cursor-auto">
+                <td
+                  colSpan={columnDefs.length}
+                  className="py-3 px-4 text-red-800"
+                >
+                  {errorLabel ||
+                    "Une erreur est survenue lors du chargement des données..."}
+                </td>
+              </tr>
+            )}
+            {isReady && filteredRows.length === 0 && (
+              <tr className="cursor-auto">
+                <td colSpan={columnDefs.length} className="py-3 px-4">
+                  {emptyLabel || "Aucun résultat"}
+                </td>
+              </tr>
+            )}
+            {isReady &&
+              filteredRows.map((row) => (
+                <tr key={row.id} className="cursor-auto">
+                  {columnDefs.map((column) => (
+                    <td key={column.key} className="py-3 px-4">
+                      <div className="flex">
+                        {column.renderCell
+                          ? column.renderCell(row.data, row)
+                          : row.data[column.key]}
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

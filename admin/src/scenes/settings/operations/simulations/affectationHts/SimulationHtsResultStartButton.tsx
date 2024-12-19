@@ -93,12 +93,12 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
             <div className="flex items-start flex-col w-full gap-8">
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Suivi</h2>
-                <div>Affectés : {simulationHts.metadata?.results?.jeunesNouvellementAffected || "--"}</div>
-                <div>Non affectés : {simulationHts.metadata?.results?.jeuneAttenteAffectation || "--"}</div>
+                <div>Affectés : {simulationHts.metadata?.results?.jeunesNouvellementAffected ?? "--"}</div>
+                <div>Non affectés : {simulationHts.metadata?.results?.jeuneAttenteAffectation ?? "--"}</div>
               </div>
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Schéma de répartition</h2>
-                <div>Nom du fichier : Nom-du-Fichier.xxx</div>
+                <div>Nom du fichier : {simulationHts?.metadata?.parameters?.sdrFileName || "--"}</div>
               </div>
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Situations scolaires</h2>

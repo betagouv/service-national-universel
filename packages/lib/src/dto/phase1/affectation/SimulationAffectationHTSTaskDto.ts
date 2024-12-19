@@ -19,6 +19,7 @@ export interface SimulationAffectationHTSTaskParameters extends Phase1TaskParame
   departements: string[];
   niveauScolaires: Array<keyof typeof GRADES>;
   sdrImportId: string;
+  sdrFileName: string;
   etranger?: boolean;
   affecterPDR?: boolean;
 }
