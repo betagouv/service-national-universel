@@ -1,6 +1,7 @@
-import { COHORT_TYPE, ERRORS, CohortType, getZonedDate, YoungType, getDepartmentForEligibility, YOUNG_STATUS } from "snu-lib";
+import { COHORT_TYPE, ERRORS, CohortType, getZonedDate, YoungType, getDepartmentForEligibility, YOUNG_STATUS, YOUNG_SOURCE } from "snu-lib";
 import { CohortDocument, CohortGroupModel, CohortModel } from "../models";
 import { buildCohortQuery } from "./cohortQueryBuilder";
+import { getCohortGroupsForYoung } from "../cohortGroup/cohortGroupService";
 
 const isInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
   const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
@@ -18,7 +19,12 @@ export const isInscriptionOpen = async (cohortName: string | undefined): Promise
 
 type ReinscriptionQuery = { type?: string; dateStart?: { $gte: Date }; cohortGroupId?: { $nin: string[] } };
 
-export const isReInscriptionOpen = async (cohortGroupId?: string): Promise<boolean> => {
+type ReinscriptionArgs = {
+  cohortGroupId?: string;
+  timeZoneOffset?: string | number;
+};
+
+export const isReInscriptionOpen = async ({ cohortGroupId, timeZoneOffset }: ReinscriptionArgs): Promise<boolean> => {
   let query: ReinscriptionQuery = { type: COHORT_TYPE.VOLONTAIRE };
   // On exclut les séjours appartenant à l'année du séjour actuel du volontaire ainsi que les séjours passés.
   if (cohortGroupId) {
@@ -29,7 +35,7 @@ export const isReInscriptionOpen = async (cohortGroupId?: string): Promise<boole
     query = { ...query, cohortGroupId: { $nin: groupsToExclude } };
   }
   const cohorts = await CohortModel.find(query);
-  return cohorts.some((cohort) => cohort.isReInscriptionOpen);
+  return cohorts.some((cohort) => isCohortReinscriptionOpen(cohort, timeZoneOffset));
 };
 
 export const findCohortBySnuIdOrThrow = async (cohortName: string) => {
@@ -68,6 +74,10 @@ function isCohortInscriptionOpenWithTimezone(cohort: CohortType, timeZoneOffset:
   }
   return cohort.getIsInscriptionOpen(Number(timeZoneOffset));
 }
+
+export const isCohortReinscriptionOpen = (cohort: CohortType, timeZoneOffset?: string | number | null) => {
+  return cohort.getIsReInscriptionOpen(Number(timeZoneOffset)) || cohort.getIsInscriptionOpen(Number(timeZoneOffset));
+};
 
 type YoungInfo = Pick<YoungType, "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip">;
 
@@ -115,8 +125,8 @@ export async function getFilteredSessionsForReinscription(young: YoungType, time
   const currentGroup = await CohortGroupModel.findById(currentCohort.cohortGroupId);
   if (!currentGroup) throw new Error("Cohort group not found");
 
-  const pastGroups = await CohortGroupModel.find({ year: { $lte: currentGroup.year } });
-  const cohortGroupsToExclude = [...pastGroups.map((g) => g.id), currentGroup.id];
+  const groups = await getCohortGroupsForYoung(young);
+  const cohortGroupsToInclude = groups.map((g) => g.id);
 
   const department = getDepartmentForEligibility(young);
   if (!department) throw new Error("Unable to determine department");
@@ -125,9 +135,9 @@ export async function getFilteredSessionsForReinscription(young: YoungType, time
     birthdate: new Date(young.birthdateAt!),
     schoolLevel: young.grade!,
     department,
-    cohortGroupsToExclude,
+    cohortGroupsToInclude,
   });
 
   const cohorts = await CohortModel.find(query);
-  return cohorts.filter((cohort) => cohort.getIsReInscriptionOpen(Number(timeZoneOffset)));
+  return cohorts.filter((cohort) => isCohortReinscriptionOpen(cohort, timeZoneOffset));
 }

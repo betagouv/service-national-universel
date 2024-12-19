@@ -11,20 +11,20 @@ import StepNoSejour from "../preinscription/steps/stepNoSejour";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import FutureCohort from "../inscription2023/FutureCohort";
 import useReinscription from "../changeSejour/lib/useReinscription";
 
-function renderStepResponsive(step) {
+function renderStep(step: string) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
   if (step === STEPS.SEJOUR) return <StepSejour />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
   if (step === STEPS.NO_SEJOUR) return <StepNoSejour />;
+  return <Redirect to="/reinscription" />;
 }
 
 const Step = () => {
   const [data] = useContext(ReinscriptionContext);
 
-  const { step } = useParams();
+  const { step }: { step: string } = useParams();
 
   const currentStep = getStepFromUrlParam(step, STEP_LIST, true);
   if (!currentStep) return <Redirect to="/reinscription" />;
@@ -35,15 +35,15 @@ const Step = () => {
     return <Redirect to={`/reinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  return renderStepResponsive(currentStep);
+  return renderStep(currentStep);
 };
 
-export default function ReInscription() {
+export default function Reinscription() {
   const { data: isReinscriptionOpen, isPending, isError } = useReinscription();
 
   if (isPending) return <Loader />;
   if (isError) return <div>Erreur</div>;
-  if (!isReinscriptionOpen) return <FutureCohort />;
+  if (!isReinscriptionOpen) return <Redirect to="/" />;
 
   return (
     <ReinscriptionContextProvider>

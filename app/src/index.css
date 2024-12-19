@@ -113,10 +113,7 @@
 }
 
 body {
-  /* font-weight: 400; */
-  background-color: #f4f5f7;
   font-family: "Marianne", sans-serif;
-  /* position: fixed;  */
 }
 
 ul {
@@ -124,13 +121,6 @@ ul {
   position: 0;
   margin: 0;
 }
-
-/* input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-} */
-
 a:hover {
   text-decoration: none;
   color: #2563eb;
@@ -141,13 +131,3 @@ a:hover {
   padding: 0;
   border: none;
 }
-
-/* .image-input {
-  height: 100px;
-  min-width: 150px;
-  background: #f3f3f3 url("./assets/image.svg") center no-repeat;
-  background-size: 50%;
-  border: 2px solid #eee;
-  margin-top: 10px;
-  cursor: pointer;
-} */

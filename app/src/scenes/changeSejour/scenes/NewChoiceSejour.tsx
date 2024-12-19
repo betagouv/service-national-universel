@@ -4,13 +4,14 @@ import useAuth from "@/services/useAuth";
 import ReasonForm from "../components/ReasonForm";
 import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
-import { getCohortPeriod } from "snu-lib";
+import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
 import useChangeSejour from "../lib/useChangeSejour";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
 import { getCohort } from "@/utils/cohorts";
 import useInscriptionGoal from "../lib/useInscriptionGoal";
 import Loader from "@/components/Loader";
+import ErrorNotice from "@/components/ui/alerts/ErrorNotice";
 
 export default function NewChoiceSejour() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -46,9 +47,6 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
   const sejourMutation = useChangeSejour();
   const goalQuery = useInscriptionGoal(cohortName);
 
-  if (goalQuery.isPending) return <Loader />;
-  if (goalQuery.isError) return <div>Erreur</div>;
-
   const handleChangeCohort = () => {
     sejourMutation.mutate(
       { reason, message, cohortId },
@@ -70,27 +68,33 @@ function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
       loading={sejourMutation.isPending}
       confirmText="Oui, confirmer ce choix"
       cancelText="Non, annuler">
-      <div className="grid gap-2 p-3 max-w-md mx-auto my-4">
-        <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
-          <HiOutlineXCircle className="text-red-600 h-5 w-5 inline-block stroke-2" />
-          <p className="text-gray-500 text-sm">Ancien séjour</p>
-          <p className="text-gray-900 font-medium">{oldCohortPeriod}</p>
+      {goalQuery.isPending ? (
+        <Loader />
+      ) : goalQuery.isError ? (
+        <ErrorNotice text="Impossible de vérifier les cibles départementales. Merci de réessayer plus tard." />
+      ) : (
+        <div className="grid gap-2 p-3 max-w-md mx-auto my-4">
+          <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
+            <HiOutlineXCircle className="text-red-600 h-5 w-5 inline-block stroke-2" />
+            <p className="text-gray-500 text-sm">Ancien séjour</p>
+            <p className="text-gray-900 font-medium">{oldCohortPeriod}</p>
+          </div>
+          <div className="bg-white pt-1 pb-2.5 px-4 rounded-md text-center leading-loose border-blue-600 border-2">
+            <HiOutlineCheckCircle className="text-blue-600 h-5 w-5 inline-block stroke-2" />
+            <p className="text-gray-500 text-sm">Nouveau séjour</p>
+            <p className="text-gray-900 font-medium">{capitalizeFirstLetter(newCohortPeriod)}</p>
+            {goalQuery.data ? (
+              <>
+                <hr className="my-3"></hr>
+                <p className="text-sm leading-normal text-gray-500">
+                  Malheureusement il n'y a plus de place disponible actuellement pour ce séjour. <strong>Vous allez être positionné(e) sur liste complémentaire</strong> et vous
+                  serez averti(e) si des places se libèrent.
+                </p>
+              </>
+            ) : null}
+          </div>
         </div>
-        <div className="bg-white pt-1 pb-2.5 px-4 rounded-md text-center leading-loose border-blue-600 border-2">
-          <HiOutlineCheckCircle className="text-blue-600 h-5 w-5 inline-block stroke-2" />
-          <p className="text-gray-500 text-sm">Nouveau séjour</p>
-          <p className="text-gray-900 font-medium">{capitalizeFirstLetter(newCohortPeriod)}</p>
-          {goalQuery.data ? (
-            <>
-              <hr className="my-3"></hr>
-              <p className="text-sm leading-normal text-gray-500">
-                Malheureusement il n'y a plus de place disponible actuellement pour ce séjour. <strong>Vous allez être positionné(e) sur liste complémentaire</strong> et vous serez
-                averti(e) si des places se libèrent.
-              </p>
-            </>
-          ) : null}
-        </div>
-      </div>
+      )}
     </ResponsiveModal>
   );
 }

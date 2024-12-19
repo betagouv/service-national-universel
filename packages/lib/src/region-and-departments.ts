@@ -406,7 +406,7 @@ const getDepartmentForEligibility = (
   young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "schoolCountry" | "zip"> & { _id?: YoungType["_id"] },
 ) => {
   let dep;
-  const schoolDepartment = !young?.schoolCountry || young.schoolCountry === "FRANCE" ? young?.schoolDepartment : null;
+  const schoolDepartment = !young?.schoolCountry || young.schoolCountry === "FRANCE" || young.schoolCountry === "France" ? young?.schoolDepartment : null;
   if (young._id && young.schooled === "true") dep = schoolDepartment;
   if (young._id && young.schooled === "false") dep = young.department;
 

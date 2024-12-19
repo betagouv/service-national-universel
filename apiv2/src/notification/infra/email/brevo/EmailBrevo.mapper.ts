@@ -2,6 +2,7 @@ import {
     EmailParams,
     EmailTemplate,
     InviterReferentClasseParams,
+    SupprimerClasseEngageeParams,
     VerifierClasseEmailAdminCleParams,
     VerifierClasseEmailReferentDepRegParams,
 } from "@notification/core/Notification";
@@ -11,46 +12,69 @@ export class EmailBrevoMapper {
     static mapEmailParamsToBrevoByTemplate(template: EmailTemplate, emailParams: EmailParams): EmailProviderParams {
         switch (template) {
             case EmailTemplate.VERIFIER_CLASSE_EMAIL_ADMIN_CLE: {
-                return this.mapVerifierClasseAdminCleToBrevo(emailParams as VerifierClasseEmailAdminCleParams);
+                return this.mapVerifierClasseAdminCleToBrevo(
+                    template,
+                    emailParams as VerifierClasseEmailAdminCleParams,
+                );
             }
             case EmailTemplate.VERIFIER_CLASSE_EMAIL_REFERENT_DEP_REG: {
-                return this.mapVerifierClasseReferentDepRegToBrevo(emailParams as VerifierClasseEmailAdminCleParams);
+                return this.mapVerifierClasseReferentDepRegToBrevo(
+                    template,
+                    emailParams as VerifierClasseEmailAdminCleParams,
+                );
             }
             case EmailTemplate.INVITER_REFERENT_CLASSE_TO_INSCRIPTION:
             case EmailTemplate.INVITER_REFERENT_CLASSE_TO_CONFIRMATION: {
                 return this.mapInviterReferentClasse(template, emailParams as InviterReferentClasseParams);
             }
-            default:
-                throw new Error("Template non pris en charge");
+            case EmailTemplate.SUPPRIMER_REFERENT_CLASSE:
+                return this.mapGenericEmailToBrevo(template, emailParams);
+            case EmailTemplate.SUPPRIMER_CLASSE_ENGAGEE:
+            case EmailTemplate.NOUVELLE_CLASSE_ENGAGEE:
+                return this.mapSupprimerClasseEngagee(template, emailParams as SupprimerClasseEngageeParams);
         }
+    }
+
+    static mapGenericEmailToBrevo(template: EmailTemplate, emailParams: EmailParams): EmailProviderParams {
+        return {
+            to: emailParams.to,
+            params: {
+                toName: emailParams.to[0].name,
+            },
+            templateId: Number(template),
+        };
     }
 
     //
     static mapVerifierClasseAdminCleToBrevo(
+        template: EmailTemplate,
         verifierClasseParams: VerifierClasseEmailAdminCleParams,
     ): EmailProviderVerifierClasseAdminCle {
         return {
             to: verifierClasseParams.to,
             params: {
+                toName: verifierClasseParams.to[0].name,
                 class_code: verifierClasseParams.classeCode,
                 class_name: verifierClasseParams.classeNom,
                 classUrl: verifierClasseParams.classeUrl,
             },
-            templateId: this.mapTemplateTypeToBrevoId(EmailTemplate.VERIFIER_CLASSE_EMAIL_ADMIN_CLE),
+            templateId: Number(template),
         };
     }
 
     static mapVerifierClasseReferentDepRegToBrevo(
+        template: EmailTemplate,
         verifierClasseParams: VerifierClasseEmailReferentDepRegParams,
     ): EmailProviderVerifierClasseReferentDepReg {
         return {
             to: verifierClasseParams.to,
             params: {
+                toName: verifierClasseParams.to[0].name,
                 class_code: verifierClasseParams.classeCode,
                 class_name: verifierClasseParams.classeNom,
                 cta: verifierClasseParams.classeUrl,
             },
-            templateId: this.mapTemplateTypeToBrevoId(EmailTemplate.VERIFIER_CLASSE_EMAIL_REFERENT_DEP_REG),
+            templateId: Number(template),
         };
     }
 
@@ -61,36 +85,37 @@ export class EmailBrevoMapper {
         return {
             to: inviterReferent.to,
             params: {
+                toName: inviterReferent.to[0].name,
                 class_code: inviterReferent.classeCode,
                 class_name: inviterReferent.classeNom,
                 cta: inviterReferent.invitationUrl,
                 name_school: inviterReferent.etablissementNom,
                 emailEtablissement: inviterReferent.etablissementEmail,
             },
-            templateId: this.mapTemplateTypeToBrevoId(template),
+            templateId: Number(template),
         };
     }
 
-    static mapInviterClasse;
-    // TODO : Mettre en base le mapping
-    static mapTemplateTypeToBrevoId(templateType: EmailTemplate): number {
-        switch (templateType) {
-            case EmailTemplate.VERIFIER_CLASSE_EMAIL_ADMIN_CLE:
-                return 2084;
-            case EmailTemplate.VERIFIER_CLASSE_EMAIL_REFERENT_DEP_REG:
-                return 2085;
-            case EmailTemplate.INVITER_REFERENT_CLASSE_TO_INSCRIPTION:
-                return 1391;
-            case EmailTemplate.INVITER_REFERENT_CLASSE_TO_CONFIRMATION:
-                return 1427;
-            default:
-                return 1;
-        }
+    static mapSupprimerClasseEngagee(
+        template: EmailTemplate,
+        supprimerClasseEngagee: SupprimerClasseEngageeParams,
+    ): EmailProviderSupprimerClasseEngagee {
+        return {
+            to: supprimerClasseEngagee.to,
+            params: {
+                toName: supprimerClasseEngagee.to[0].name,
+                class_name: supprimerClasseEngagee.classeNom,
+                class_code: supprimerClasseEngagee.classeCode,
+                cta: supprimerClasseEngagee.compteUrl,
+            },
+            templateId: Number(template),
+        };
     }
 }
 
 export interface EmailProviderVerifierClasseAdminCle extends EmailProviderParams {
     params: {
+        toName: string;
         class_name?: string;
         class_code: string;
         classUrl: string;
@@ -99,6 +124,7 @@ export interface EmailProviderVerifierClasseAdminCle extends EmailProviderParams
 
 export interface EmailProviderVerifierClasseReferentDepReg extends EmailProviderParams {
     params: {
+        toName: string;
         class_name?: string;
         class_code: string;
         cta: string;
@@ -107,10 +133,20 @@ export interface EmailProviderVerifierClasseReferentDepReg extends EmailProvider
 
 export interface EmailProviderInviterReferentClasse extends EmailProviderParams {
     params: {
+        toName: string;
         class_name?: string;
         class_code: string;
         cta: string;
         name_school: string;
         emailEtablissement: string;
+    };
+}
+
+export interface EmailProviderSupprimerClasseEngagee extends EmailProviderParams {
+    params: {
+        toName: string;
+        class_name?: string;
+        class_code: string;
+        cta: string;
     };
 }

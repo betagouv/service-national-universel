@@ -1191,6 +1191,15 @@ export const translateSimulationName = (name: string) => {
   }
 };
 
+export const translateModifierClasse = (name: string) => {
+  switch (name) {
+    case "ROLE_NOT_REFERENT_CLASSE":
+      return "L'utilisateur n'est pas référent de classe.";
+    default:
+      return name;
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé formater les noms et adresses des centres du SI
 
