@@ -2,7 +2,7 @@ import React from "react";
 import usePermissions from "@/hooks/usePermissions";
 import useAuth from "@/services/useAuth";
 import { getCohort } from "@/utils/cohorts";
-import useCorrectionUrl from "@/hooks/useCorrectionUrl";
+import useCorrectionUrl from "@/hooks/corrections/useCorrectionUrl";
 import { HiExclamation, HiPencilAlt } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import { CorrectionRequestType, translateCorrectionReason, translateField } from "snu-lib";

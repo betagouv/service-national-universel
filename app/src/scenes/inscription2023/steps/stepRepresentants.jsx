@@ -10,7 +10,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import useCorrections from "@/hooks/useCorrections";
+import useCorrections from "@/hooks/corrections/useCorrections";
 import { YOUNG_STATUS, isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib";
 import { CORRECTION_STEPS } from "@/utils/navigation";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
@@ -34,7 +34,7 @@ export default function StepRepresentants() {
   const [errors, setErrors] = React.useState({});
   const [isParent2Visible, setIsParent2Visible] = React.useState(young?.parent2Status);
   const dispatch = useDispatch();
-  const corrections = useCorrections(CORRECTION_STEPS.REPRESENTANTS);
+  const { correctionsMap: corrections } = useCorrections(CORRECTION_STEPS.REPRESENTANTS);
   const { isCLE } = useAuth();
 
   const [data, setData] = React.useState({

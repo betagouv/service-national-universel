@@ -13,7 +13,7 @@ import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { knowledgebaseURL } from "../../../config";
 import { getRegionForEligibility, useAddress, YOUNG_STATUS } from "snu-lib";
-import useCorrections from "@/hooks/useCorrections";
+import useCorrections from "@/hooks/corrections/useCorrections";
 import ReactTooltip from "react-tooltip";
 import { RiInformationFill } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -114,7 +114,7 @@ export default function StepCoordonnees() {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
-  const corrections = useCorrections(CORRECTION_STEPS.COORDONNEES);
+  const { correctionsMap: corrections } = useCorrections(CORRECTION_STEPS.COORDONNEES);
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 

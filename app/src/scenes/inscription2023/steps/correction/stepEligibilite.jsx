@@ -5,7 +5,7 @@ import validator from "validator";
 import IconFrance from "../../../../assets/IconFrance";
 import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
-import useCorrections from "@/hooks/useCorrections";
+import useCorrections from "@/hooks/corrections/useCorrections";
 import SchoolInFrance from "../../components/ShoolInFrance";
 import SchoolOutOfFrance from "../../components/ShoolOutOfFrance";
 import Input from "../../components/Input";
@@ -65,7 +65,7 @@ export default function StepEligibilite() {
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [modal, setModal] = React.useState({ isOpen: false });
 
-  const corrections = useCorrections(CORRECTION_STEPS.ELIGIBILITE);
+  const { correctionsMap: corrections } = useCorrections(CORRECTION_STEPS.ELIGIBILITE);
   const history = useHistory();
 
   const optionsScolarite = [

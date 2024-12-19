@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import useCorrections from "@/hooks/useCorrections";
+import useCorrections from "@/hooks/corrections/useCorrections";
 import { ID } from "../utils";
 import { knowledgebaseURL } from "@/config";
 
@@ -25,7 +25,7 @@ export default function StepUpload() {
   if (!category) category = young.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
-  const corrections = useCorrections(CORRECTION_STEPS.UPLOAD);
+  const { correctionsList } = useCorrections(CORRECTION_STEPS.DOCUMENTS);
   const supportLink = `${knowledgebaseURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
   const [recto, setRecto] = useState();
@@ -152,7 +152,7 @@ export default function StepUpload() {
             setError={setError}
             loading={loading}
             setLoading={setLoading}
-            corrections={corrections}
+            corrections={correctionsList}
             category={category}
             checked={checked}
             setChecked={setChecked}
@@ -176,7 +176,7 @@ export default function StepUpload() {
             setError={setError}
             loading={loading}
             setLoading={setLoading}
-            corrections={corrections}
+            corrections={correctionsList}
             category={category}
             checked={checked}
             setChecked={setChecked}

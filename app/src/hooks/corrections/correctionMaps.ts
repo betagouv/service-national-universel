@@ -1,4 +1,4 @@
-import { CORRECTION_STEPS } from "./navigation";
+import { CORRECTION_STEPS } from "../../utils/navigation";
 
 export const CORRECTION_MAP_HTS = {
   [CORRECTION_STEPS.PROFIL]: {
