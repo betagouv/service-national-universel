@@ -77,12 +77,10 @@ export class AffectationController {
         @Body() payload: PostSimulationValiderPayloadDto,
     ): Promise<AffectationRoutes["PostSimulationsRoute"]["response"]> {
         const simulationTask = await this.taskGateway.findById(taskId);
-        if (!simulationTask) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
-        }
 
         // On verifie qu'une simulation n'a pas déjà été affecté en amont
         const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(sessionId);
+
         if (
             [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
             (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)

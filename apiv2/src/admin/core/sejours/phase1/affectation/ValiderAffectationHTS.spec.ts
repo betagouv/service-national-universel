@@ -48,7 +48,7 @@ describe("SimulationAffectationHTS", () => {
                         parseXLS: jest.fn().mockResolvedValue([
                             {
                                 id: "jeune1",
-                                ligneDeBusId: "65f9c8bb735e0e12a4213c18",
+                                ligneDeBusId: "IDF078036",
                                 sejourId: "6597e6acb86afb08146e8f86",
                                 centreId: "609bebb00c1cc9a888ae8fa8",
                                 sessionNom: "Avril 2024 - C",
@@ -69,7 +69,7 @@ describe("SimulationAffectationHTS", () => {
                         update: jest.fn().mockResolvedValue({
                             id: "jeune1",
                             sessionNom: "Avril 2024 - C",
-                            ligneDeBusId: "65f9c8bb735e0e12a4213c18",
+                            ligneDeBusId: "IDF078036",
                             sejourId: "6597e6acb86afb08146e8f86",
                             pointDeRassemblementId: "6398797d3bc18708cc3981f6",
                             hasPDR: "true",
@@ -157,7 +157,7 @@ describe("SimulationAffectationHTS", () => {
             error: "",
             genre: "garçon",
             id: "jeune1",
-            ligneDeBusId: "65f9c8bb735e0e12a4213c18",
+            ligneDeBusId: "IDF078036",
             nom: undefined,
             parent1Email: undefined,
             parent1Nom: undefined,
