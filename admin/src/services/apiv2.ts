@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { toastr } from "react-redux-toastr";
 
-import { FunctionalException, HttpError } from "snu-lib";
+import { FunctionalException, HttpError, translate } from "snu-lib";
 
 import { apiv2URL } from "@/config";
 import { capture } from "@/sentry";
@@ -81,7 +81,11 @@ class Apiv2 implements IApiV2 {
           return Promise.reject(exception);
         }
         capture(error);
-        toastr.error("Oups, une erreur est survenue", `Code d'erreur: ${error.response?.data.correlationId || error.code}`);
+        if (error.code === "ERR_NETWORK") {
+          toastr.error("Oups, une erreur est survenue", translate(error.code));
+        } else {
+          toastr.error("Oups, une erreur est survenue", `Code d'erreur: ${error.response?.data.correlationId || error.code}`);
+        }
         return Promise.reject();
       },
     );
