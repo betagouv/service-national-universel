@@ -25,12 +25,10 @@ export const importCohesionCenter = async (centerFilePath: string) => {
   for (const center of filteredCenter) {
     let processedCenter: CohesionCenterImportReport;
 
-    if (center._id) {
-      processedCenter = await processCenterWithId(center);
-    } else if (center.matricule) {
+    if (center.matricule) {
       processedCenter = await processCenterWithoutId(center);
     } else {
-      logger.warn(`importCohesionCenter() - Center ${center.name} has no matricule and no id, skipping`);
+      logger.warn(`importCohesionCenter() - Center ${center.name} has no matricule, skipping`);
       continue;
     }
 
@@ -50,26 +48,11 @@ const filterCenter = (mappedCenters: CohesionCenterImportMapped[]) => {
   });
 };
 
-export const processCenterWithId = async (center: CohesionCenterImportMapped): Promise<CohesionCenterImportReport> => {
-  const { _id, ...centerToUpdate } = center;
-  const existingCenter = await CohesionCenterModel.findById(_id);
-  if (existingCenter) {
-    return await updateCenter(centerToUpdate, existingCenter, "Id provided - Center found by Id");
-  }
-  return {
-    _id: _id,
-    matricule: "",
-    name: "",
-    action: "error",
-    comment: "Id provided - no center found by Id",
-  };
-};
-
 export const processCenterWithoutId = async (center: CohesionCenterImportMapped): Promise<CohesionCenterImportReport> => {
-  const foundCenters = await CohesionCenterModel.find({ matricule: center.matricule });
+  const foundCenters = await CohesionCenterModel.find({ matricule: center.matricule, deletedAt: { $exists: false } });
   if (foundCenters.length === 1) {
     logger.info(`processCenterWithoutId() - Center with matricule ${center.matricule} already exists`);
-    return await updateCenter(center, foundCenters[0], "No Id - Center found by matricule");
+    return await updateCenter(center, foundCenters[0], "Center found by matricule");
   } else if (foundCenters.length > 1) {
     return await processCentersByMatriculeFound(center, foundCenters);
   } else {
@@ -96,7 +79,7 @@ export const processCentersByMatriculeFound = async (center: CohesionCenterImpor
     matricule: foundCenters.map((center) => center.matricule).join("/"),
     name: foundCenters.map((center) => center.name).join("/"),
     action: "nothing",
-    comment: "No Id provided in CSV, several centers found by matricule",
+    comment: "Several centers found by matricule",
   };
 };
 

@@ -8,6 +8,7 @@ import { permissionPhase2 } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
 import useAuth from "@/services/useAuth";
 import useTickets from "../useTickets";
+import usePermissions from "@/hooks/usePermissions";
 
 export default function User() {
   const { young, isCLE } = useAuth();
@@ -74,6 +75,7 @@ function Menu({ open, menuRef, young, onClose }) {
   const history = useHistory();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { data: ticketsInfo } = useTickets();
+  const { hasAccessToNavigation } = usePermissions();
 
   async function logout() {
     try {
@@ -94,9 +96,11 @@ function Menu({ open, menuRef, young, onClose }) {
         open ? permissionPhase2(young) && "h-auto" : "h-0"
       }`}
       ref={menuRef}>
-      <Link to="/account" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
-        Mon profil
-      </Link>
+      {hasAccessToNavigation && (
+        <Link to="/account" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
+          Mon profil
+        </Link>
+      )}
       {ticketsInfo?.hasMessage === true && (
         <Link to="/echanges" onClick={onClose} className="flex items-center justify-between gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
           <p>Mes échanges</p>

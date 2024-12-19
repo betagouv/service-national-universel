@@ -36,6 +36,7 @@ export const useAuth = () => {
   const isCLEFromURL = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase() === YOUNG_SOURCE.CLE;
   const isCLEFromDB = young?.source === YOUNG_SOURCE.CLE;
   const isCLE = isCLEFromURL || isCLEFromDB;
+  const isHTS = young?.source === YOUNG_SOURCE.VOLONTAIRE;
 
   return {
     young,
@@ -44,6 +45,7 @@ export const useAuth = () => {
     isLoggedIn,
     loginOrLogout,
     isCLE,
+    isHTS,
   };
 };
 
