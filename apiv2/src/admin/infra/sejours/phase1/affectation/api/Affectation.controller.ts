@@ -16,6 +16,7 @@ import { CustomRequest } from "@shared/infra/CustomRequest";
 import { PostSimulationsPayloadDto, PostSimulationValiderPayloadDto } from "./Affectation.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
+import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 
 @Controller("affectation")
 export class AffectationController {
@@ -44,6 +45,13 @@ export class AffectationController {
         @Param("sessionId") sessionId: string,
         @Body() payload: PostSimulationsPayloadDto,
     ): Promise<AffectationRoutes["PostSimulationsRoute"]["response"]> {
+        const importTask: ReferentielImportTaskModel = await this.taskGateway.findById(payload.sdrImportId);
+        if (!importTask.metadata?.parameters?.fileKey) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_FOUND,
+                "Fichier associé à l'import des routes introuvable",
+            );
+        }
         const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_HTS_SIMULATION,
             status: TaskStatus.PENDING,
@@ -53,6 +61,7 @@ export class AffectationController {
                     departements: payload.departements,
                     niveauScolaires: payload.niveauScolaires,
                     sdrImportId: payload.sdrImportId,
+                    sdrFileName: importTask.metadata.parameters.fileName,
                     etranger: payload.etranger,
                     affecterPDR: payload.affecterPDR,
                     auteur: {
