@@ -12,6 +12,10 @@ import StepNoSejour from "../preinscription/steps/stepNoSejour";
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import useReinscription from "../changeSejour/lib/useReinscription";
+import ReinscriptionClosed from "./ReinscriptionClosed";
+import useAuth from "@/services/useAuth";
+import { YOUNG_STATUS } from "snu-lib";
+import StepWaitingConsent from "../inscription2023/steps/stepDone";
 
 function renderStep(step: string) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -40,18 +44,31 @@ const Step = () => {
 
 export default function Reinscription() {
   const { data: isReinscriptionOpen, isPending, isError } = useReinscription();
+  const { young } = useAuth();
 
-  if (isPending) return <Loader />;
-  if (isError) return <div>Erreur</div>;
-  if (!isReinscriptionOpen) return <Redirect to="/" />;
+  if (young.status === YOUNG_STATUS.NOT_AUTORISED) {
+    return (
+      <DSFRLayout title="Reinscription du volontaire">
+        <StepWaitingConsent />
+      </DSFRLayout>
+    );
+  }
 
   return (
     <ReinscriptionContextProvider>
       <DSFRLayout title="Reinscription du volontaire">
-        <Switch>
-          <SentryRoute path="/reinscription/:step" component={Step} />;
-          <SentryRoute path="/reinscription" component={Step} />;
-        </Switch>
+        {isPending ? (
+          <Loader />
+        ) : isError ? (
+          <p>Impossible de déterminer si la réinscription est ouverte.</p>
+        ) : isReinscriptionOpen ? (
+          <Switch>
+            <SentryRoute path="/reinscription/:step" component={Step} />
+            <SentryRoute path="/reinscription" component={Step} />
+          </Switch>
+        ) : (
+          <ReinscriptionClosed />
+        )}
       </DSFRLayout>
     </ReinscriptionContextProvider>
   );
