@@ -28,14 +28,14 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         }
         return LigneDeBusMapper.toModel(ligneDeBus);
     }
-    async update(ligneDeBus: LigneDeBusModel, updateOriginName: string): Promise<LigneDeBusModel> {
+    async update(ligneDeBus: LigneDeBusModel): Promise<LigneDeBusModel> {
         const ligneDeBusEntity = LigneDeBusMapper.toEntity(ligneDeBus);
         const retrievedLigneDeBus = await this.ligneDeBusMongooseEntity.findById(ligneDeBus.id);
         if (!retrievedLigneDeBus) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedLigneDeBus.set(ligneDeBusEntity);
-        const user = updateOriginName ? { firstName: updateOriginName } : this.cls.get("user");
+        const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
         await retrievedLigneDeBus.save({ fromUser: user });

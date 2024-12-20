@@ -11,9 +11,10 @@ export interface JeuneGateway {
         departements: string[],
     ): Promise<JeuneModel[]>;
     findBySessionId(sessionId: string): Promise<JeuneModel[]>;
-    update(jeune: JeuneModel, updateOriginName?: string): Promise<JeuneModel>;
+    update(jeune: JeuneModel): Promise<JeuneModel>;
+    bulkUpdate(jeunes: { original: JeuneModel; updated: JeuneModel }[]): Promise<number>;
     create(jeune: CreateJeuneModel): Promise<JeuneModel>;
-    countAffectedByLigneDeBus(ligneDeBusId: string): Promise<number>;
+    countAffectedByLigneDeBus(ligneDeBusId: string);
 }
 
 export const JeuneGateway = Symbol("JeuneGateway");

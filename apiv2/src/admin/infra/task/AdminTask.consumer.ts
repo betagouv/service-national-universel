@@ -15,6 +15,7 @@ import { ImporterRoutes } from "@admin/core/referentiel/routes/useCase/ImporterR
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 import { ValiderAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTSTask.model";
 import { ValiderAffectationHTS } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTS";
+import { ClsService } from "nestjs-cls";
 
 @Processor(QueueName.ADMIN_TASK)
 export class AdminTaskConsumer extends WorkerHost {
@@ -38,7 +39,7 @@ export class AdminTaskConsumer extends WorkerHost {
                     throw new TechnicalException(TechnicalExceptionType.NOT_IMPLEMENTED_YET);
 
                 case TaskName.AFFECTATION_HTS_SIMULATION:
-                    const simulationHtsTask = task as SimulationAffectationHTSTaskModel;
+                    const simulationHtsTask = task as SimulationAffectationHTSTaskModel; // pour l'onglet historique (patches)
                     const simulation = await this.simulationAffectationHts.execute(
                         simulationHtsTask.metadata!.parameters!,
                     );

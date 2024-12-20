@@ -124,15 +124,12 @@ export class AffectationService {
         };
     }
 
-    async syncPlaceDisponiblesLigneDeBus(
-        ligneDeBus: LigneDeBusModel,
-        updateOriginName: string,
-    ): Promise<LigneDeBusModel> {
+    async syncPlaceDisponiblesLigneDeBus(ligneDeBus: LigneDeBusModel): Promise<LigneDeBusModel> {
         const placesOccupeesJeunes = await this.jeuneGateway.countAffectedByLigneDeBus(ligneDeBus.id);
 
         if (ligneDeBus.placesOccupeesJeunes !== placesOccupeesJeunes) {
             ligneDeBus.placesOccupeesJeunes = placesOccupeesJeunes;
-            this.ligneDeBusGateway.update(ligneDeBus, updateOriginName);
+            this.ligneDeBusGateway.update(ligneDeBus);
 
             // Do the same update with planTransport
             const pdt = await this.planDeTransportGateway.findById(ligneDeBus.id);

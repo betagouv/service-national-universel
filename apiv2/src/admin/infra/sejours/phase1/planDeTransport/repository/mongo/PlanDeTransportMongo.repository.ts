@@ -29,14 +29,14 @@ export class PlanDeTransportRepository implements PlanDeTransportGateway {
         }
         return PlanDeTransportMapper.toModel(planDeTransport);
     }
-    async update(planDeTransport: PlanDeTransportModel, updateOriginName: string): Promise<PlanDeTransportModel> {
+    async update(planDeTransport: PlanDeTransportModel): Promise<PlanDeTransportModel> {
         const planDeTransportEntity = PlanDeTransportMapper.toEntity(planDeTransport);
         const retrievedPlanDeTransport = await this.planDeTransportMongooseEntity.findById(planDeTransport.id);
         if (!retrievedPlanDeTransport) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedPlanDeTransport.set(planDeTransportEntity);
-        const user = updateOriginName ? { firstName: updateOriginName } : this.cls.get("user");
+        const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
         await retrievedPlanDeTransport.save({ fromUser: user });
