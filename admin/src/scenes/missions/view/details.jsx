@@ -351,17 +351,19 @@ export default function DetailsView({ mission, setMission, getMission }) {
             </div>
             <div className="flex flex-wrap gap-14">
               <div className="flex min-w-[350px] flex-1 flex-col gap-4">
-                <p className="text-xs">
-                  Cette mission provient de <strong>JeVeuxAider.gouv.fr.</strong>{" "}
-                  <a
-                    href={`https://www.jeveuxaider.gouv.fr/missions-benevolat/${mission.jvaMissionId}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-600 underline underline-offset-2 hover:text-blue-800 hover:underline">
-                    Voir la mission sur JVA
-                    <HiExternalLink className="inline-block ml-1" />
-                  </a>
-                </p>
+                {mission.isJvaMission === "true" && (
+                  <p className="text-xs">
+                    Cette mission provient de <strong>JeVeuxAider.gouv.fr.</strong>{" "}
+                    <a
+                      href={`https://www.jeveuxaider.gouv.fr/missions-benevolat/${mission.jvaMissionId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 underline underline-offset-2 hover:text-blue-800 hover:underline">
+                      Voir la mission sur JVA
+                      <HiExternalLink className="inline-block ml-1" />
+                    </a>
+                  </p>
+                )}
                 <div>
                   <div className="mb-2 text-xs font-medium">
                     Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. Ex : « Je fais les courses de produits pour mes voisins les plus
