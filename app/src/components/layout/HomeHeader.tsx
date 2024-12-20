@@ -6,7 +6,7 @@ export default function HomeHeader({ title, img, children }: { title: React.Reac
       <div className="w-64 md:w-[26rem] flex-none md:hidden xl:block">
         <img src={img} width="auto" height="auto" className="md:px-0 mx-auto" />
       </div>
-      <div className="max-w-2xl">
+      <div className="max-w-xl">
         <h1 className="font-bold text-3xl md:text-5xl leading-10 md:leading-tight mt-2">{title}</h1>
         {children}
       </div>

@@ -2,21 +2,12 @@ import React, { lazy, Suspense, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { getCohort } from "./utils/cohorts";
 import API from "./services/api";
-import {
-  ENABLE_PM,
-  FEATURES_NAME,
-  YOUNG_STATUS,
-  isFeatureEnabled,
-  permissionPhase2,
-  shouldForceRedirectToInscription,
-  shouldForceRedirectToReinscription,
-  shouldReAcceptRI,
-} from "./utils";
+import { ENABLE_PM, FEATURES_NAME, YOUNG_STATUS, isFeatureEnabled, permissionPhase2, shouldReAcceptRI } from "./utils";
 import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
-import { shouldForceRedirectToEmailValidation } from "./utils/navigation";
+import { shouldForceRedirectToEmailValidation, shouldForceRedirectToInscription, shouldForceRedirectToReinscription } from "./utils/navigation";
 
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";

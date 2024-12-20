@@ -1,7 +1,7 @@
 import useAuth from "@/services/useAuth";
 import React from "react";
 import { Link } from "react-router-dom";
-import hero from "../../assets/hero/home-not-done.png";
+import hero from "../../assets/hero/home.png";
 import Engagement from "./components/Engagement";
 import HomeHeader from "@/components/layout/HomeHeader";
 import HomeContainer from "@/components/layout/HomeContainer";
