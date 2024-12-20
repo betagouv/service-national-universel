@@ -122,7 +122,7 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
     ...updatedMission,
     placesLeft,
   });
-  if ([MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status as any)) {
+  if ([MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED].includes(mission.status as any)) {
     mission.set({ status: MISSION_STATUS.WAITING_VALIDATION });
   }
   await mission.save({ fromUser });
