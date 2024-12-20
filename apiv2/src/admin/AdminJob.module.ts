@@ -39,7 +39,7 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
                         mongooseConnectionToken: DATABASE_CONNECTION,
                         defaultTxOptions: {
                             // https://www.mongodb.com/docs/manual/core/transactions-sharded-clusters/#time-limit
-                            maxTimeMS: 1000 * 60 * 10, // 10 minutes
+                            maxTimeMS: 1000 * 60 * 15, // 10 minutes
                         },
                     }),
                 }),
@@ -51,7 +51,6 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
     ],
     providers: [
         Logger,
-
         AdminTaskConsumer,
         AdminTaskRepository,
         ...jeuneMongoProviders,

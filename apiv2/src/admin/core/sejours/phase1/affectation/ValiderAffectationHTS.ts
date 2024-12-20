@@ -180,7 +180,11 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
                 }),
             );
             this.logger.log(
-                `🚀 Jeune affecté: ${jeune.id}, centre: ${jeuneUpdated.centreId}, sejour: ${jeuneUpdated.sejourId}, ligneDeBus: ${jeuneUpdated.ligneDeBusId}, pdr: ${jeuneUpdated.pointDeRassemblementId}, ${jeuneUpdated.hasPDR}`,
+                `🚀 Jeune affecté: ${jeune.id}, centre: ${jeuneUpdated.centreId}, sejour: ${
+                    jeuneUpdated.sejourId
+                }, ligneDeBus: ${jeuneUpdated.ligneDeBusId}, pdr: ${jeuneUpdated.pointDeRassemblementId}, ${
+                    jeuneUpdated.hasPDR
+                } (${analytics.jeunesAffected + 1}/${jeuneAAffecterList.length})`,
             );
 
             rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour));
