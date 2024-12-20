@@ -41,6 +41,9 @@ import { initDB } from "../mongo";
     case "autoValidatePhase1":
       await require("./autoValidatePhase1").handler();
       break;
+    case "missions-jva":
+      await require("./missionsJVA/JeVeuxAiderDaily").hendler();
+      break;
     default:
       console.log("No cron found for " + process.argv[2]);
   }

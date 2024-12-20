@@ -121,8 +121,10 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
   mission.set({
     ...updatedMission,
     placesLeft,
-    status: MISSION_STATUS.WAITING_VALIDATION,
   });
+  if ([MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status as any)) {
+    mission.set({ status: MISSION_STATUS.WAITING_VALIDATION });
+  }
   await mission.save({ fromUser });
   if (oldMissionTutorId !== updatedMission.tutorId) {
     await updateApplicationTutor(mission, fromUser);
