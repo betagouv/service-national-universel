@@ -31,4 +31,17 @@ export class HistoryRepository implements HistoryGateway {
         const instance = this.getInstance(history);
         return instance.find({ ref: referenceId });
     }
+
+    async bulkCreate(history: HistoryType, patches: PatchType[]): Promise<number> {
+        const instance = this.getInstance(history);
+
+        const updatePatches = await instance.bulkWrite(
+            patches.map((patch) => ({
+                insertOne: {
+                    document: patch,
+                },
+            })),
+        );
+        return updatePatches.insertedCount;
+    }
 }

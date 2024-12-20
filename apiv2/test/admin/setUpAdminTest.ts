@@ -45,6 +45,7 @@ import { serviceProvider } from "@admin/infra/iam/service/serviceProvider";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
+import { historyProvider } from "@admin/infra/history/historyProvider";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -89,6 +90,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...sejourMongoProviders,
             ...sessionMongoProviders,
             ...taskMongoProviders,
+            ...historyProvider,
             testDatabaseProviders(setupOptions.newContainer),
             Logger,
             ...guardProviders,

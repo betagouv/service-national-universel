@@ -27,14 +27,14 @@ export class SejourRepository implements SejourGateway {
         }
         return SejourMapper.toModel(sejour);
     }
-    async update(sejour: SejourModel, updateOriginName?: string): Promise<SejourModel> {
+    async update(sejour: SejourModel): Promise<SejourModel> {
         const sejourEntity = SejourMapper.toEntity(sejour);
         const retrievedSejour = await this.sejourMongooseEntity.findById(sejour.id);
         if (!retrievedSejour) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedSejour.set(sejourEntity);
-        const user = updateOriginName ? { firstName: updateOriginName } : this.cls.get("user");
+        const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
         await retrievedSejour.save({ fromUser: user });

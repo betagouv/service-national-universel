@@ -1,3 +1,4 @@
+import { ClsModule, ClsService } from "nestjs-cls";
 import { Test, TestingModule } from "@nestjs/testing";
 import { Logger } from "@nestjs/common";
 
@@ -28,13 +29,15 @@ jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
 }));
 
-describe("SimulationAffectationHTS", () => {
+describe("ValiderAffectationHTS", () => {
     let validerAffectationHTS: ValiderAffectationHTS;
+    let cls: ClsService;
 
     beforeEach(async () => {
         const mockSession = { id: "mockedSessionId", name: "mockedSessionName" };
 
         const module: TestingModule = await Test.createTestingModule({
+            imports: [ClsModule],
             providers: [
                 ValiderAffectationHTS,
                 AffectationService,
@@ -66,14 +69,7 @@ describe("SimulationAffectationHTS", () => {
                                 sessionNom: "Avril 2024 - C",
                             },
                         ]),
-                        update: jest.fn().mockResolvedValue({
-                            id: "jeune1",
-                            sessionNom: "Avril 2024 - C",
-                            ligneDeBusId: "65f9c8bb735e0e12a4213c18",
-                            sejourId: "6597e6acb86afb08146e8f86",
-                            pointDeRassemblementId: "6398797d3bc18708cc3981f6",
-                            hasPDR: "true",
-                        }),
+                        bulkUpdate: jest.fn().mockResolvedValue(1),
                         countAffectedByLigneDeBus: jest.fn().mockResolvedValue(1),
                     },
                 },
@@ -134,19 +130,22 @@ describe("SimulationAffectationHTS", () => {
                 },
             ],
         }).compile();
-
+        cls = module.get<ClsService>(ClsService);
         validerAffectationHTS = module.get<ValiderAffectationHTS>(ValiderAffectationHTS);
     });
 
     it("should simulate young affectation", async () => {
-        const result = await validerAffectationHTS.execute({
-            sessionId: cohortName,
-            simulationTaskId: "simulationTaskId",
-            affecterPDR: true,
-            dateAffectation: new Date(),
-        });
-
-        console.log(result);
+        const result = await cls.runWith(
+            // @ts-ignore
+            { user: null },
+            () =>
+                validerAffectationHTS.execute({
+                    sessionId: cohortName,
+                    simulationTaskId: "simulationTaskId",
+                    affecterPDR: true,
+                    dateAffectation: new Date(),
+                }),
+        );
 
         expect(result.analytics.errors).toEqual(0);
         expect(result.analytics.jeunesAffected).toEqual(1);
@@ -176,8 +175,8 @@ describe("SimulationAffectationHTS", () => {
             region: undefined,
             sessionId: "6597e6acb86afb08146e8f86",
             sessionNom: "Avril 2024 - C",
-            statut: undefined,
-            statutPhase1: undefined,
+            statut: "VALIDATED",
+            statutPhase1: "AFFECTED",
             telephone: undefined,
         });
     });

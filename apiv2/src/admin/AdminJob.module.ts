@@ -28,6 +28,7 @@ import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTran
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { ClsPluginTransactional } from "@nestjs-cls/transactional";
 import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
+import { historyProvider } from "./infra/history/historyProvider";
 
 @Module({
     imports: [
@@ -37,10 +38,6 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
                     imports: [DatabaseModule],
                     adapter: new TransactionalAdapterMongoose({
                         mongooseConnectionToken: DATABASE_CONNECTION,
-                        defaultTxOptions: {
-                            // https://www.mongodb.com/docs/manual/core/transactions-sharded-clusters/#time-limit
-                            maxTimeMS: 1000 * 60 * 15, // 10 minutes
-                        },
                     }),
                 }),
             ],
@@ -63,6 +60,7 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
         ...taskMongoProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
+        ...historyProvider,
         { provide: FileGateway, useClass: FileProvider },
         { provide: TaskGateway, useClass: AdminTaskRepository },
         // add use case here

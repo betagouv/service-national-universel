@@ -1,4 +1,5 @@
 import { Inject, Logger } from "@nestjs/common";
+import { ClsService } from "nestjs-cls";
 import { Transactional } from "@nestjs-cls/transactional";
 
 import { UseCase } from "@shared/core/UseCase";
@@ -73,6 +74,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        private readonly cls: ClsService,
         private readonly logger: Logger,
     ) {}
     @Transactional()
@@ -108,6 +110,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             jeunesAffected: 0,
             errors: 0,
         };
+        const updateQueries: { original: JeuneModel; updated: JeuneModel }[] = [];
         const rapportData: Array<ReturnType<typeof this.formatJeuneRapport>> = [];
 
         // Traitement des jeunes
@@ -167,18 +170,19 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             // Affectation du jeune
             sejour.placesRestantes = sejour.placesRestantes - 1;
 
-            const jeuneUpdated = await this.jeuneGateway.update(
-                this.affectationService.mapAffectationJeune(jeune, sejour, {
-                    ...(affecterPDR
-                        ? {
-                              pointDeRassemblementId: pdr!.id,
-                              ligneDeBusId: ligneDeBus!.id,
-                              hasPDR: "true",
-                          }
-                        : {}),
-                    transportInfoGivenByLocal: undefined, // Metropole
-                }),
-            );
+            const jeuneUpdated = this.affectationService.mapAffectationJeune(jeune, sejour, {
+                ...(affecterPDR
+                    ? {
+                          pointDeRassemblementId: pdr!.id,
+                          ligneDeBusId: ligneDeBus!.id,
+                          hasPDR: "true",
+                      }
+                    : {}),
+                transportInfoGivenByLocal: undefined, // Metropole
+            });
+
+            updateQueries.push({ original: jeune, updated: jeuneUpdated });
+
             this.logger.log(
                 `🚀 Jeune affecté: ${jeune.id}, centre: ${jeuneUpdated.centreId}, sejour: ${
                     jeuneUpdated.sejourId
@@ -190,17 +194,22 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour));
             analytics.jeunesAffected += 1;
         }
+        this.cls.set("user", { firstName: `Affectation ${session.nom}` });
+
+        await this.jeuneGateway.bulkUpdate(updateQueries);
 
         this.logger.log(`Mise à jour des places dans les séjours`);
         // mise à jour des placesRestantes dans les centres
         for (const sejour of sejoursList) {
-            await this.sejoursGateway.update(sejour, `Affectation ${session.nom}`);
+            await this.sejoursGateway.update(sejour);
         }
         this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
         // mise à jour des placesOccupeesJeunes dans les bus
         for (const ligneDeBus of ligneDeBusList) {
-            await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBus, `Affectation ${session.nom}`);
+            await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBus);
         }
+
+        this.cls.set("user", null);
 
         // création du fichier excel de rapport
         const fileBuffer = await this.fileGateway.generateExcel({ Affectations: rapportData });
