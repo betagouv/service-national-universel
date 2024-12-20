@@ -1,6 +1,6 @@
 import React from "react";
-import { useSelector } from "react-redux";
-
+import useAuth from "@/services/useAuth";
+import useCohort from "@/services/useCohort";
 import Done from "./scenes/done";
 import Affected from "./scenes/affected/index";
 import Cancel from "./cancel";
@@ -10,13 +10,13 @@ import WaitingList from "./waitingList";
 import { YOUNG_STATUS_PHASE1, permissionPhase1 } from "../../utils";
 import { HeroContainer, Hero } from "../../components/Content";
 import { useHistory } from "react-router-dom";
-import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default () => {
   useDocumentTitle("Phase 1 - Séjour");
 
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
+  const { cohortAssignmentAnnouncementsIsOpenForYoung } = useCohort();
   const history = useHistory();
 
   if (!young || !permissionPhase1(young)) history.push("/");
@@ -24,7 +24,7 @@ export default () => {
   const renderStep = () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) return <Done />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) {
-      if (cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+      if (cohortAssignmentAnnouncementsIsOpenForYoung) {
         return <Affected />;
       } else {
         return <WaitingAffectation young={young} />;
@@ -34,7 +34,7 @@ export default () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <NotDone />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return <WaitingAffectation young={young} />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) {
-      if (cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+      if (cohortAssignmentAnnouncementsIsOpenForYoung) {
         return <WaitingList young={young} />;
       } else {
         return <WaitingAffectation young={young} />;

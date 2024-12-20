@@ -59,7 +59,7 @@ function App() {
       const { ok, user } = await api.checkToken();
 
       if (!ok || !user) {
-        dispatch(setYoung(null));
+        dispatch(setYoung());
         return;
       }
 

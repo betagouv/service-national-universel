@@ -1,5 +1,6 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
+import useCohort from "@/services/useCohort";
 import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
@@ -13,7 +14,8 @@ import { isCohortDone } from "../../utils/cohorts";
 import InfoConvocation from "./components/modals/InfoConvocation";
 
 export default function NotDone() {
-  const young = useSelector((state) => state.Auth.young) || {};
+  const { young } = useAuth();
+  const { cohort } = useCohort();
   const history = useHistory();
   const [modalOpen, setModalOpen] = React.useState(false);
   const [center, setCenter] = React.useState(null);
@@ -51,7 +53,7 @@ export default function NotDone() {
             <b>Votre phase 1 n&apos;est donc pas validée.</b>
           </p>
           <p>Nous vous invitons à vous rapprocher de votre référent départemental pour la suite de votre parcours.</p>
-          {!isCohortDone(young.cohort, 3) && (
+          {!isCohortDone(cohort, 3) && (
             <button className="mt-8 rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500" onClick={handleClickModal}>
               Voir mes informations de convocation
             </button>
@@ -73,7 +75,7 @@ export default function NotDone() {
         <div className="thumb" />
       </Hero>
 
-      {modalOpen && !isCohortDone(young.cohort, 3) && <InfoConvocation isOpen={modalOpen} onCancel={() => setModalOpen(false)} title="Information de convocation" />}
+      {modalOpen && !isCohortDone(cohort, 3) && <InfoConvocation isOpen={modalOpen} onCancel={() => setModalOpen(false)} title="Information de convocation" />}
     </HeroContainer>
   );
 }
@@ -94,7 +96,9 @@ const Button = styled(Link)`
     font-size: 0.8rem;
   }
   display: block;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 2;
   :hover {

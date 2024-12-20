@@ -9,11 +9,11 @@ import ChangedDepartmentInfoModalContent from "./ChangedDepartmentInfoModalConte
 import ChooseCohortModalContent from "./ChooseCohortModalContent";
 import { updateYoung } from "../../../../../../services/young.service";
 import { capture } from "../../../../../../sentry";
-import { isCohortDone } from "../../../../../../utils/cohorts";
-import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod, isCle } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
+import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod, isCle, CohortType } from "snu-lib";
+import useCohort from "@/services/useCohort";
 import api from "../../../../../../services/api";
 import { setYoung } from "../../../../../../redux/auth/actions";
+import { setCohort } from "@/redux/cohort/actions";
 
 const changeAddressSteps = {
   CONFIRM: "CONFIRM",
@@ -25,18 +25,19 @@ const changeAddressSteps = {
 };
 
 const ChangeAddressModal = ({ onClose, isOpen, young }) => {
-  const currentCohort = getCohort(young?.cohort);
-  const [newCohortName, setNewCohortName] = useState();
-  const [newAddress, setNewAddress] = useState();
+  const { cohort: currentCohort, isCohortDone } = useCohort();
+  const [availableCohorts, setAvailableCohorts] = useState<CohortType[]>([]);
+  const [selectedCohortId, setSelectedCohortId] = useState<string>();
+  const newCohort = availableCohorts.find((c) => c._id === selectedCohortId);
+  const [newAddress, setNewAddress] = useState<any>();
   const [step, setStep] = useState(changeAddressSteps.CONFIRM);
   const [isLoading, setLoading] = useState(false);
-  const [availableCohorts, setAvailableCohorts] = useState([]);
 
   const dispatch = useDispatch();
 
   const onCancel = () => {
     setStep(changeAddressSteps.CONFIRM);
-    setNewCohortName(undefined);
+    setSelectedCohortId(undefined);
     setNewAddress(undefined);
     onClose();
   };
@@ -56,7 +57,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   };
 
-  const checkIfGoalIsReached = async (cohortName, address) => {
+  const checkIfGoalIsReached = async (cohortName: string, address) => {
     try {
       setLoading(true);
       const res = await api.get(`/inscription-goal/${cohortName}/department/${address.department}/reached`);
@@ -70,7 +71,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   };
 
-  const checkInscriptionGoal = async (cohortName, address) => {
+  const checkInscriptionGoal = async (cohortName: string, address) => {
     try {
       const isGoalReached = await checkIfGoalIsReached(cohortName, address);
       if (isGoalReached && young.status === YOUNG_STATUS.VALIDATED) {
@@ -105,17 +106,17 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     try {
       const data = await fetchAvailableCohorts(address);
       const isArray = Array.isArray(data);
-      let cohorts = [];
+      let cohorts: CohortType[] = [];
       // get all available cohorts except the current one
       if (isArray) {
         const isCurrentCohortAvailable = data.find((cohort) => cohort.name === young.cohort);
         if (isCurrentCohortAvailable) return checkInscriptionGoal(young.cohort, address);
-        cohorts = data.map((cohort) => cohort.name).filter((cohort) => cohort !== young.cohort);
+        cohorts = data.filter((cohort) => cohort.id !== young.cohortId);
       }
       // if no available cohort, check eligibility and add "à venir" cohort
       // @todo : this date should come from the db
       if (cohorts.length === 0 && calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18) {
-        cohorts.push("à venir");
+        cohorts.push({ name: "à venir" });
       }
       // if any available cohort, show modal to choose one
       if (cohorts.length > 0) {
@@ -131,21 +132,24 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   };
 
-  const chooseNewCohort = async (cohort) => {
-    setNewCohortName(cohort);
-    if (cohort === "à venir") {
-      updateAddress(newAddress, young.status, cohort);
+  const chooseNewCohort = async (cohort: CohortType) => {
+    setSelectedCohortId(cohort._id);
+    if (cohort.name === "à venir") {
+      updateAddress(newAddress, young.status);
     } else {
-      checkInscriptionGoal(cohort, newAddress);
+      checkInscriptionGoal(cohort.name, newAddress);
     }
   };
 
-  const updateAddress = async (address = newAddress, status = young.status, cohort = newCohortName || young.cohort) => {
+  const updateAddress = async (address = newAddress, status = young.status) => {
+    if (!newCohort) throw new Error("newCohort is required");
     try {
       setLoading(true);
-      const { title, message, data: updatedYoung } = await updateYoung("address", { ...address, status, cohort });
+      const dataToUpdate = { ...address, status, cohortId: newCohort._id, cohortName: newCohort.name };
+      const { title, message, data: updatedYoung } = await updateYoung("address", dataToUpdate);
       toastr.success(title, message);
       dispatch(setYoung(updatedYoung));
+      dispatch(setCohort(newCohort));
       setStep(changeAddressSteps.CONFIRM);
       onClose();
     } catch (error) {
@@ -157,7 +161,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   };
 
-  const cantChangeAddress = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !isCohortDone(young.cohort);
+  const cantChangeAddress = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !isCohortDone;
 
   return (
     <Modal
@@ -193,7 +197,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
             <ChooseCohortModalContent
               onCancel={onCancel}
               onConfirm={chooseNewCohort}
-              cohorts={availableCohorts.map((cohort) => ({ value: cohort, label: cohort === "à venir" ? "Séjour à venir" : `Séjour ${getCohortPeriod(getCohort(cohort))}` }))}
+              cohorts={availableCohorts.map((cohort) => ({ value: cohort._id, label: cohort.name === "à venir" ? "Séjour à venir" : `Séjour ${getCohortPeriod(cohort)}` }))}
               currentCohortPeriod={getCohortPeriod(currentCohort)}
               isLoading={isLoading}
             />

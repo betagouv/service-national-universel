@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { YOUNG_STATUS_PHASE1 } from "../../utils";
 import FileCard from "./components/FileCard";
 import MedicalFileModal from "./components/MedicalFileModal";
-import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
+import useCohort from "@/services/useCohort";
 import { CDN_BASE_URL } from "../representants-legaux/commons";
 import FileIcon from "@/assets/FileIcon";
 import ButtonExternalLinkPrimary from "@/components/ui/buttons/ButtonExternalLinkPrimary";
 import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 
-function getStatusPhase1(young) {
-  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+function getStatusPhase1(young, isAnnounced) {
+  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !isAnnounced(young.cohort)) {
     return YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
   }
   return young.statusPhase1;
@@ -17,7 +17,8 @@ function getStatusPhase1(young) {
 
 export default function DocumentsPhase1({ young }) {
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
-  const youngStatusPhase1 = getStatusPhase1(young);
+  const { cohortAssignmentAnnouncementsIsOpenForYoung } = useCohort();
+  const youngStatusPhase1 = getStatusPhase1(young, cohortAssignmentAnnouncementsIsOpenForYoung);
 
   // TODO: find a better way to implement feature flags
   if (young.status === YOUNG_STATUS.VALIDATED) {
