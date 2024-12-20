@@ -5,7 +5,7 @@ const fs = require("fs");
 const Joi = require("joi");
 const { v4: uuid } = require("uuid");
 
-const { ROLES, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { ROLES, SENDINBLUE_TEMPLATES, weekendRanges, isDateInRange } = require("snu-lib");
 
 const slack = require("../slack");
 const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } = require("../cookie-options");
@@ -223,6 +223,12 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       if (!isNotified) slack.error({ title: "Notify referent new message to SNUpport", text: JSON.stringify(response.code) });
     }
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
+
+    if (isDateInRange(new Date(), weekendRanges)) {
+      await sendTemplate(SENDINBLUE_TEMPLATES, {
+        emailTo: [{ email: req.user.email }],
+      });
+    }
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
@@ -331,6 +337,13 @@ router.post("/ticket/form", async (req, res) => {
       body: JSON.stringify(body),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
+
+    if (isDateInRange(new Date(), weekendRanges)) {
+      await sendTemplate(SENDINBLUE_TEMPLATES, {
+        emailTo: [{ email: email }],
+      });
+    }
+
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
@@ -404,6 +417,12 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
       }),
     });
     if (!response.ok) slack.error({ title: "Create message SNUpport", text: JSON.stringify(response.code) });
+
+    if (isDateInRange(new Date(), weekendRanges)) {
+      await sendTemplate(SENDINBLUE_TEMPLATES, {
+        emailTo: [{ email: req.user.email }],
+      });
+    }
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);

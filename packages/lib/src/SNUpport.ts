@@ -28,10 +28,23 @@ const totalClosedTickets = (tickets) => {
   return closedTicketsBucket?.total || 0
 };
 
+const weekendRanges = [
+  { start: new Date("2024-12-29"), end: new Date("2024-12-31") },
+  { start: new Date("2024-12-19"), end: new Date("2024-12-22") },
+
+  // Ajoutez d'autres plages si nécessaire
+];
+
+function isDateInRange(newDate, ranges) {
+  return ranges.some(({ start, end }) => newDate >= start && newDate <= end);
+}
+
 export {
   ticketStateIdByName,
   totalOpenedTickets,
   totalNewTickets,
   totalClosedTickets,
   ticketStateNameById,
+  weekendRanges,
+  isDateInRange,
 };
