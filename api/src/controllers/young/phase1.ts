@@ -20,6 +20,7 @@ import {
   getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
   DepartmentServiceType,
+  LigneBusType,
 } from "snu-lib";
 import { config } from "../../config";
 import { capture } from "../../sentry";
@@ -66,6 +67,8 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     // verification nombre de place ?
     const session = await SessionPhase1Model.findById(sessionId);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const isFull = !session.placesLeft || session.placesLeft <= 0;
+    if (isFull) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // mail only if isAssignmentAnnouncementsOpenForYoung
     const cohort = await CohortModel.findOne({ name: session.cohort });
@@ -75,13 +78,15 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
 
     const oldSession = young.sessionPhase1Id ? await SessionPhase1Model.findById(young.sessionPhase1Id) : null;
 
-    let bus = null;
+    let bus: LigneBusType | null = null;
     if (meetingPointId) {
       const meetingPoint = await PointDeRassemblementModel.findOne({ _id: meetingPointId });
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       bus = await LigneBusModel.findById(ligneId);
       if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const isFull = bus.youngCapacity - bus.youngSeatsTaken <= 0;
+      if (isFull) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const oldBus = young.ligneId ? await LigneBusModel.findById(young.ligneId) : null;

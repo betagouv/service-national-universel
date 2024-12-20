@@ -10,6 +10,7 @@ type OwnProps = {
   tooltip?: React.ReactNode;
   tooltipProps?: TooltipProps;
   tooltipClassName?: string;
+  tooltipIconClassName?: string;
 };
 
 export default function Label({
@@ -19,6 +20,7 @@ export default function Label({
   tooltip,
   tooltipProps,
   tooltipClassName,
+  tooltipIconClassName,
 }: OwnProps) {
   const tooltipId = `tooltip-${name}`;
 
@@ -35,7 +37,7 @@ export default function Label({
         <>
           <HiOutlineInformationCircle
             size={16}
-            className="ml-2 text-gray-400"
+            className={cx("ml-2 text-gray-400", tooltipIconClassName)}
             data-tip
             data-for={tooltipId}
           />

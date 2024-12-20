@@ -25,12 +25,12 @@ const DocumentSelect = ({ title, onClickMail, onClickPdf }) => {
     <div className="relative" ref={ref}>
       <div
         onClick={() => setOpen((open) => !open)}
-        className="flex cursor-pointer items-center justify-center gap-2 rounded-full border-[1px] border-blue-700 px-4 py-1 text-blue-700">
+        className="flex cursor-pointer w-fit min-w-[100px] max-w-[325px] gap-2 items-center justify-center rounded-md font-marianne px-[17px] font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 h-[38px] py-[9px] text-sm text-white bg-blue-600 hover:bg-blue-700">
         <span className="text-sm font-medium">{title}</span>
-        <BiChevronDown />
+        <BiChevronDown size={20} className="mt-0.5" />
       </div>
       <div
-        className={`absolute ${
+        className={`absolute right-1 ${
           open ? "flex" : "hidden"
         } z-10 mt-2 flex-col items-center justify-center overflow-hidden rounded-md border-[1px] border-gray-300 bg-white text-gray-700`}>
         <div
