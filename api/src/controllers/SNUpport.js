@@ -225,7 +225,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
 
     if (isDateInRange(new Date(), weekendRanges)) {
-      await sendTemplate(SENDINBLUE_TEMPLATES, {
+      await sendTemplate(SENDINBLUE_TEMPLATES.SNUPPORT_CLOSED, {
         emailTo: [{ email: req.user.email }],
       });
     }
@@ -339,7 +339,7 @@ router.post("/ticket/form", async (req, res) => {
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
 
     if (isDateInRange(new Date(), weekendRanges)) {
-      await sendTemplate(SENDINBLUE_TEMPLATES, {
+      await sendTemplate(SENDINBLUE_TEMPLATES.SNUPPORT_CLOSED, {
         emailTo: [{ email: email }],
       });
     }
@@ -419,7 +419,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
     if (!response.ok) slack.error({ title: "Create message SNUpport", text: JSON.stringify(response.code) });
 
     if (isDateInRange(new Date(), weekendRanges)) {
-      await sendTemplate(SENDINBLUE_TEMPLATES, {
+      await sendTemplate(SENDINBLUE_TEMPLATES.SNUPPORT_CLOSED, {
         emailTo: [{ email: req.user.email }],
       });
     }
