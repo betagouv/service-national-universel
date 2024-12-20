@@ -12,7 +12,7 @@ import {
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type SessionDocument = HydratedDocument<CohortType>;
-export const SessionName = "cohorts";
+export const SessionName = "cohort";
 export const SESSION_MONGOOSE_ENTITY = "SESSION_MONGOOSE_ENTITY";
 
 const SessionSchemaRef = new mongoose.Schema({

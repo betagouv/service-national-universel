@@ -1,6 +1,6 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { PatchSchema, PatchType } from "snu-lib";
+import { PatchOperationSchema, PatchSchema, PatchType, PatchUserSchema } from "snu-lib";
 import { ReferentName } from "../../../iam/provider/ReferentMongo.provider";
 import { JeuneName } from "../../../sejours/jeune/provider/JeuneMongo.provider";
 import { SessionName } from "../../../sejours/phase1/session/provider/SessionMongo.provider";
@@ -11,7 +11,17 @@ export type HistoryDocument = HydratedDocument<PatchType>;
 const PatchName = "patche";
 const PATCH_MONGOOSE_ENTITY = "PATCH_MONGOOSE_ENTITY";
 
-const PatchSchemaRef = new mongoose.Schema(PatchSchema);
+const PatchSchemaRef = new mongoose.Schema({
+    ...PatchSchema,
+    user: {
+        ...PatchSchema.user,
+        type: new mongoose.Schema(PatchUserSchema),
+    },
+    ops: {
+        ...PatchSchema.ops,
+        type: [new mongoose.Schema(PatchOperationSchema)],
+    },
+});
 
 const collectionWithPatches = [JeuneName, ReferentName, ClasseName, SessionName];
 

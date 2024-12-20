@@ -1,3 +1,4 @@
+import { fakerFR as faker } from "@faker-js/faker";
 import { INestApplication } from "@nestjs/common";
 import * as request from "supertest";
 import { setupAdminTest } from "../setUpAdminTest";
@@ -8,16 +9,16 @@ describe("AuthController", () => {
     let app: INestApplication;
 
     beforeAll(async () => {
-        const appSetup = await setupAdminTest({ newContainer: true });
+        const appSetup = await setupAdminTest();
         app = appSetup.app;
 
         await app.init();
     });
 
     it(`/POST register should throw an error 401`, async () => {
-        const referent = await createReferent({ email: "mon_ref@mail.com" });
+        const referent = await createReferent();
 
-        const signinDto = { email: "mon_ref@mail.com", password: "password" };
+        const signinDto = { email: referent.email, password: "password" };
         const response = await request(app.getHttpServer()).post("/referent/signin").send(signinDto);
         expect(response.statusCode).toEqual(401);
     });

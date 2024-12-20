@@ -6,7 +6,7 @@ import { CohesionCenterSchema, CohesionCenterType } from "snu-lib";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type CentreDocument = HydratedDocument<CohesionCenterType>;
-export const CentreName = "cohesioncenters";
+export const CentreName = "cohesioncenter";
 export const CENTRE_MONGOOSE_ENTITY = "CENTRE_MONGOOSE_ENTITY";
 
 const CentreSchemaRef = new mongoose.Schema(CohesionCenterSchema);

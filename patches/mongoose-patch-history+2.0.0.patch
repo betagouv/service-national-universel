@@ -1,5 +1,5 @@
 diff --git a/node_modules/mongoose-patch-history/lib/index.js b/node_modules/mongoose-patch-history/lib/index.js
-index 8587330..3bab347 100644
+index 8587330..fb60e6d 100644
 --- a/node_modules/mongoose-patch-history/lib/index.js
 +++ b/node_modules/mongoose-patch-history/lib/index.js
 @@ -99,13 +99,7 @@ exports.default = function (schema, opts) {
@@ -17,3 +17,12 @@ index 8587330..3bab347 100644
    }
  
    schema.pre('remove', function (next) {
+@@ -160,6 +154,8 @@ exports.default = function (schema, opts) {
+     return document.patches.create(data);
+   }
+ 
++  exports.createPatch = createPatch;
++
+   schema.pre('save', function (next) {
+     createPatch(this).then(function () {
+       return next();
