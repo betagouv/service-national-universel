@@ -2,13 +2,13 @@ import React from "react";
 import { HiOutlineInformationCircle } from "react-icons/hi";
 import useAuth from "@/services/useAuth";
 import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 
 const CurrentSejourNotice = () => {
   const { young } = useAuth();
-  const cohort = getCohort(young.cohort);
+  const { cohort } = useCohort();
   const cohortPeriod = getCohortPeriod(cohort);
-  const sejourIsDone = new Date() > new Date(cohort.endAt);
+  const sejourIsDone = new Date() > new Date(cohort.dateEnd);
 
   const text =
     young.status === YOUNG_STATUS.WITHDRAWN ? (

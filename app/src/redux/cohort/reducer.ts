@@ -1,27 +1,27 @@
-import { YoungType } from "snu-lib";
+import { CohortType } from "snu-lib";
 
 import { authActions } from "./actions";
 
 type Action = {
   type: string;
-  young?: YoungType;
+  cohort?: CohortType;
 };
 
-export type AuthState = {
+export type CohortState = {
   // TODO: use API route response
-  Auth: {
-    young: YoungType;
+  Cohort: {
+    cohort: CohortType;
   };
 };
 
 const initState = {
-  young: null,
+  cohort: null,
 };
 
 export default function reducer(state = initState, action: Action) {
   switch (action.type) {
-    case authActions.SETYOUNG:
-      return { ...state, young: action.young };
+    case authActions.SETCOHORT:
+      return { ...state, cohort: action.cohort };
     default:
       return state;
   }

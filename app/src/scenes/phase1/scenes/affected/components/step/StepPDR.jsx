@@ -6,14 +6,16 @@ dayjs.extend(utc);
 import { capture } from "../../../../../../sentry";
 import api from "../../../../../../services/api";
 import { getMeetingHour, getReturnHour, isCle } from "snu-lib";
-import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, pdrChoiceExpired, pdrChoiceLimitDate } from "../../utils/steps.utils";
+import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../../utils/steps.utils";
 import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
 import useAuth from "@/services/useAuth";
+import useCohort from "@/services/useCohort";
 
 export default function StepPDR({ data: { center, session, meetingPoint, departureDate, returnDate } }) {
   const index = 1;
   const { young } = useAuth();
+  const { pdrChoiceExpired, pdrChoiceLimitDate } = useCohort();
   const [open, setOpen] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState([]);
 
