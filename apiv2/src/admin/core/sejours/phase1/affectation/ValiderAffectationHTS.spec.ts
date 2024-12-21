@@ -150,6 +150,8 @@ describe("ValiderAffectationHTS", () => {
         expect(result.analytics.errors).toEqual(0);
         expect(result.analytics.jeunesAffected).toEqual(1);
         expect(result.rapportData[0]).toEqual({
+            centreId: "657334e06e801c0816d4550c",
+            centreNom: "",
             dateNaissance: undefined,
             departement: undefined,
             email: undefined,
@@ -157,6 +159,7 @@ describe("ValiderAffectationHTS", () => {
             genre: "garçon",
             id: "jeune1",
             ligneDeBusId: "65f9c8bb735e0e12a4213c18",
+            ligneDeBusNumeroLigne: "IDF078036",
             nom: undefined,
             parent1Email: undefined,
             parent1Nom: undefined,
@@ -169,6 +172,7 @@ describe("ValiderAffectationHTS", () => {
             "places restantes après l'inscription (centre)": 13,
             "places totale (centre)": 126,
             pointDeRassemblementId: "6398797d3bc18708cc3981f6",
+            pointDeRassemblementMatricule: "",
             prenom: undefined,
             psh: "non",
             qpv: "non",

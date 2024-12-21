@@ -141,4 +141,11 @@ export class AffectationService {
         }
         return ligneDeBus;
     }
+
+    formatPourcent(value: number): string {
+        if (!value && value !== 0) {
+            return "";
+        }
+        return (value * 100).toFixed(2) + "%";
+    }
 }

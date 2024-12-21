@@ -17,6 +17,8 @@ import { JeuneModel } from "../../jeune/Jeune.model";
 import { AffectationService } from "./Affectation.service";
 import { SejourModel } from "../sejour/Sejour.model";
 import { ValiderAffectationHTSTaskParameters } from "./ValiderAffectationHTSTask.model";
+import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
+import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
 
 export type ValiderAffectationRapportData = Array<
     Pick<
@@ -46,7 +48,11 @@ export type ValiderAffectationRapportData = Array<
         | "parent2Nom"
         | "parent2Email"
         | "parent2Telephone"
+        | "centreId"
     > & {
+        ligneDeBusNumeroLigne: string;
+        pointDeRassemblementMatricule: string;
+        centreNom: string;
         "places restantes après l'inscription (centre)": string | number;
         "places totale (centre)": string | number;
         error?: string;
@@ -110,7 +116,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             jeunesAffected: 0,
             errors: 0,
         };
-        const updateQueries: { original: JeuneModel; updated: JeuneModel }[] = [];
+        const updateQueries: JeuneModel[] = [];
         const rapportData: Array<ReturnType<typeof this.formatJeuneRapport>> = [];
 
         // Traitement des jeunes
@@ -130,7 +136,9 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             }
             if (!sejour.placesRestantes || sejour.placesRestantes < 0) {
                 console.error(`🚩 plus de place pour ce sejour: ${sejour.id} (jeune: ${jeune.id})`);
-                rapportData.push(this.formatJeuneRapport(jeune, sejour, "plus de place pour ce sejour"));
+                rapportData.push(
+                    this.formatJeuneRapport(jeune, sejour, ligneDeBus, pdr, "plus de place pour ce sejour"),
+                );
                 analytics.errors += 1;
                 continue;
             }
@@ -140,7 +148,13 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
                     `🚩 Le jeune (${jeune?.id}) a changé de cohort depuis la simulation (sejour: ${sejour?.sessionName}, jeune: ${jeune?.sessionNom})`,
                 );
                 rapportData.push(
-                    this.formatJeuneRapport(jeune, sejour, "jeune ayant changé de cohorte depuis la simulation"),
+                    this.formatJeuneRapport(
+                        jeune,
+                        sejour,
+                        ligneDeBus,
+                        pdr,
+                        "jeune ayant changé de cohorte depuis la simulation",
+                    ),
                 );
                 analytics.errors += 1;
                 continue;
@@ -181,8 +195,6 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
                 transportInfoGivenByLocal: undefined, // Metropole
             });
 
-            updateQueries.push({ original: jeune, updated: jeuneUpdated });
-
             this.logger.log(
                 `🚀 Jeune affecté: ${jeune.id}, centre: ${jeuneUpdated.centreId}, sejour: ${
                     jeuneUpdated.sejourId
@@ -191,9 +203,11 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
                 } (${analytics.jeunesAffected + 1}/${jeuneAAffecterList.length})`,
             );
 
-            rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour));
+            updateQueries.push(jeuneUpdated);
+            rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour, ligneDeBus, pdr));
             analytics.jeunesAffected += 1;
         }
+
         this.cls.set("user", { firstName: `Affectation ${session.nom}` });
 
         await this.jeuneGateway.bulkUpdate(updateQueries);
@@ -201,11 +215,13 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         this.logger.log(`Mise à jour des places dans les séjours`);
         // mise à jour des placesRestantes dans les centres
         for (const sejour of sejoursList) {
+            // TODO: bulkUpdate
             await this.sejoursGateway.update(sejour);
         }
         this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
         // mise à jour des placesOccupeesJeunes dans les bus
         for (const ligneDeBus of ligneDeBusList) {
+            // TODO: bulkUpdate
             await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBus);
         }
 
@@ -232,7 +248,13 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         };
     }
 
-    formatJeuneRapport(jeune: JeuneModel, sejour?: SejourModel, error = ""): ValiderAffectationRapportData[0] {
+    formatJeuneRapport(
+        jeune: JeuneModel,
+        sejour: SejourModel,
+        ligneDeBus?: LigneDeBusModel,
+        pdr?: PointDeRassemblementModel,
+        error = "",
+    ): ValiderAffectationRapportData[0] {
         return {
             id: jeune.id,
             statut: jeune.statut,
@@ -246,7 +268,11 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             sessionId: sejour?.id || "",
             sessionNom: jeune.sessionNom,
             ligneDeBusId: jeune.ligneDeBusId || "",
+            ligneDeBusNumeroLigne: ligneDeBus?.numeroLigne || "",
             pointDeRassemblementId: jeune.pointDeRassemblementId || "",
+            pointDeRassemblementMatricule: pdr?.matricule || "",
+            centreId: sejour?.centreId || "",
+            centreNom: sejour?.centreNom || "",
             "places restantes après l'inscription (centre)": sejour?.placesRestantes || "",
             "places totale (centre)": sejour?.placesTotal || "",
             error,

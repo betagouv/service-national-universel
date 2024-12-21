@@ -17,6 +17,7 @@ import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { CentreModel } from "../centre/Centre.model";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
 import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
+import { AffectationService } from "./Affectation.service";
 
 describe("SimulationAffectationHTSService", () => {
     let simulationAffectationHTSService: SimulationAffectationHTSService;
@@ -26,6 +27,12 @@ describe("SimulationAffectationHTSService", () => {
             providers: [
                 SimulationAffectationHTSService,
                 Logger,
+                {
+                    provide: AffectationService,
+                    useValue: {
+                        formatPourcent: jest.fn().mockReturnValue("50.00%"),
+                    },
+                },
                 {
                     provide: FileGateway,
                     useValue: {
@@ -865,15 +872,5 @@ describe("SimulationAffectationHTSService", () => {
             expect(result.centreList).toBeInstanceOf(Array);
             expect(result.jeuneIntraDepartementList).toBeInstanceOf(Array);
         });
-    });
-
-    it("should correctly format the percentage", () => {
-        expect(simulationAffectationHTSService.formatPourcent(0.5)).toBe("50.00%");
-        expect(simulationAffectationHTSService.formatPourcent(0.1234)).toBe("12.34%");
-        expect(simulationAffectationHTSService.formatPourcent(0)).toBe("0.00%");
-        expect(simulationAffectationHTSService.formatPourcent(1)).toBe("100.00%");
-        expect(simulationAffectationHTSService.formatPourcent(null as any)).toBe("");
-        expect(simulationAffectationHTSService.formatPourcent(undefined as any)).toBe("");
-        expect(simulationAffectationHTSService.formatPourcent(NaN)).toBe("");
     });
 });

@@ -66,8 +66,11 @@ export class AdminTaskConsumer extends WorkerHost {
                     // TODO: handle errors with partial results for all tasks
                     if (validationResult.analytics.jeunesAffected === 0) {
                         await this.adminTaskRepository.update(task.id, {
-                            // @ts-expect-error mise à jour uniquement des results
-                            "metadata.results": results,
+                            ...task,
+                            metadata: {
+                                ...task.metadata,
+                                results,
+                            },
                         });
                         await this.adminTaskRepository.toFailed(job.data.id, "Aucun jeune n'a été affecté");
                         return ConsumerResponse.FAILURE;

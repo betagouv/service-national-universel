@@ -67,10 +67,15 @@ export class JeuneRepository implements JeuneGateway {
         return JeuneMapper.toModel(retrievedJeune);
     }
 
-    async bulkUpdate(jeunes: { original: JeuneModel; updated: JeuneModel }[]): Promise<number> {
-        const jeunesEntity = jeunes.map((jeune) => ({
-            original: JeuneMapper.toEntity(jeune.original),
-            updated: JeuneMapper.toEntity(jeune.updated),
+    async bulkUpdate(jeunesUpdated: JeuneModel[]): Promise<number> {
+        const jeunesOriginal = await this.findByIds(jeunesUpdated.map((jeune) => jeune.id));
+        if (jeunesOriginal.length !== jeunesUpdated.length) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+
+        const jeunesEntity = jeunesUpdated.map((updated) => ({
+            original: JeuneMapper.toEntity(jeunesOriginal.find(({ id }) => updated.id === id)!),
+            updated: JeuneMapper.toEntity(updated),
         }));
 
         const user = this.cls.get("user");

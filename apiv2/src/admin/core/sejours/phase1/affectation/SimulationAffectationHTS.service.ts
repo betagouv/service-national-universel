@@ -14,6 +14,7 @@ import { RouteXLS } from "@admin/core/referentiel/routes/ReferentielRoutesModel"
 import { SejourModel } from "../sejour/Sejour.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { CentreModel } from "../centre/Centre.model";
+import { AffectationService } from "./Affectation.service";
 
 type JeuneRapport = Pick<
     JeuneModel,
@@ -134,6 +135,7 @@ export const RAPPORT_SHEETS = {
 @Injectable()
 export class SimulationAffectationHTSService {
     constructor(
+        private readonly affectationService: AffectationService,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(FileGateway) private readonly fileService: FileGateway,
         private readonly logger: Logger,
@@ -1030,7 +1032,9 @@ export class SimulationAffectationHTSService {
                     chefDeCentreReferentId: sejour.chefDeCentreReferentId,
                     placesRestantes: sejour.placesRestantes,
                     placesTotal: sejour.placesTotal,
-                    tauxRemplissage: this.formatPourcent(1 - (sejour.placesRestantes || 0) / (sejour.placesTotal || 0)),
+                    tauxRemplissage: this.affectationService.formatPourcent(
+                        1 - (sejour.placesRestantes || 0) / (sejour.placesTotal || 0),
+                    ),
                     region: centre?.region,
                     departement: centre?.departement,
                     ville: centre?.ville,
@@ -1060,11 +1064,11 @@ export class SimulationAffectationHTSService {
                     departement: centre.departement,
                     ville: centre.ville,
                     codePostal: centre.codePostal,
-                    tauxRemplissage: this.formatPourcent(stats.tauxRemplissage),
-                    tauxGarcon: this.formatPourcent(stats.tauxGarcon),
-                    tauxFille: this.formatPourcent(1 - stats.tauxGarcon),
-                    tauxQVP: this.formatPourcent(stats.tauxQVP),
-                    tauxPSH: this.formatPourcent(stats.tauxPSH),
+                    tauxRemplissage: this.affectationService.formatPourcent(stats.tauxRemplissage),
+                    tauxGarcon: this.affectationService.formatPourcent(stats.tauxGarcon),
+                    tauxFille: this.affectationService.formatPourcent(1 - stats.tauxGarcon),
+                    tauxQVP: this.affectationService.formatPourcent(stats.tauxQVP),
+                    tauxPSH: this.affectationService.formatPourcent(stats.tauxPSH),
                     ...centreSejourList.reduce((acc, sejour, index) => {
                         acc[`sejour_id_${index + 1}`] = sejour.id;
                         acc[`sejour_places-occupées_${index + 1}`] =
@@ -1093,10 +1097,12 @@ export class SimulationAffectationHTSService {
                 pointDeRassemblementIds: ligne.pointDeRassemblementIds.join(", "),
                 placesOccupeesJeunes: ligne.placesOccupeesJeunes,
                 capaciteJeunes: ligne.capaciteJeunes,
-                tauxRemplissageLigne: this.formatPourcent(ligne.placesOccupeesJeunes / ligne.capaciteJeunes),
+                tauxRemplissageLigne: this.affectationService.formatPourcent(
+                    ligne.placesOccupeesJeunes / ligne.capaciteJeunes,
+                ),
                 centreId: ligne.centreId,
                 centreNom: centreLigne?.nom,
-                tauxRemplissageCentre: this.formatPourcent(tauxRemplissageCentre),
+                tauxRemplissageCentre: this.affectationService.formatPourcent(tauxRemplissageCentre),
             } as RapportData["ligneDeBusList"][0];
         });
 
@@ -1216,13 +1222,6 @@ export class SimulationAffectationHTSService {
         }
         // si c'est la même région on tri par departement
         return itemA.departement?.localeCompare(itemB.departement!) || 0;
-    }
-
-    formatPourcent(value: number): string {
-        if (!value && value !== 0) {
-            return "";
-        }
-        return (value * 100).toFixed(2) + "%";
     }
 
     randomizeArray(array: any[], returnIndexes: boolean = false): any[] {
