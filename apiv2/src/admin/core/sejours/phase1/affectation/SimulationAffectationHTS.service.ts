@@ -374,7 +374,7 @@ export class SimulationAffectationHTSService {
             );
 
             // on verifie si il y a toujours les places disponibles dans les centres:
-            const nbAffectectationARealiser = this.verificationCentres(
+            const nbAffectectationARealiserParLigne = this.verificationCentres(
                 nbPlacesDisponibleSurLignesApresAffectation,
                 placesDisponiblesParLigne,
                 ligneDeBusIdList,
@@ -387,18 +387,18 @@ export class SimulationAffectationHTSService {
 
             // on affecte chaque jeune a un center et une ligne de bus (+ choix pdr)
             for (
-                let jeuneAAffecterIndex = 0;
-                jeuneAAffecterIndex < nbAffectectationARealiser.length;
-                jeuneAAffecterIndex++
+                let ligneAAffecterIndex = 0;
+                ligneAAffecterIndex < nbAffectectationARealiserParLigne.length;
+                ligneAAffecterIndex++
             ) {
-                const indexLigneDeBus = randomLigneDeBusIdList.indexOf(ligneDeBusIdList[jeuneAAffecterIndex]);
-                const indexCentre = randomCentreIdList.indexOf(centreIdListParLigne[jeuneAAffecterIndex]);
+                const indexLigneDeBus = randomLigneDeBusIdList.indexOf(ligneDeBusIdList[ligneAAffecterIndex]);
+                const indexCentre = randomCentreIdList.indexOf(centreIdListParLigne[ligneAAffecterIndex]);
 
-                const nbJeunesAAffecterMin = nbAffectectationARealiser
-                    .slice(0, jeuneAAffecterIndex)
+                const nbJeunesAAffecterMin = nbAffectectationARealiserParLigne
+                    .slice(0, ligneAAffecterIndex)
                     .reduce((a, b) => a + b, 0);
-                let nbJeunesAAffecterMax = nbAffectectationARealiser
-                    .slice(0, jeuneAAffecterIndex + 1)
+                let nbJeunesAAffecterMax = nbAffectectationARealiserParLigne
+                    .slice(0, ligneAAffecterIndex + 1)
                     .reduce((a, b) => a + b, 0);
 
                 // securite: Plus de jeunes que de places dans le Centre
@@ -409,9 +409,6 @@ export class SimulationAffectationHTSService {
                     nbJeunesAAffecterMax += -1;
                 }
 
-                // Logger.log(
-                //     `nbJeunesAAffecterMin: ${nbJeunesAAffecterMin}, nbJeunesAAffecterMax: ${nbJeunesAAffecterMax}, place: ${randomSejourList[indexCentre].placesRestantes} (${randomSejourList[indexCentre].id})`,
-                // );
                 const randomIndices = jeunePositionDepartementSelected
                     .slice(nbJeunesAAffecterMin, nbJeunesAAffecterMax)
                     .map(Number);
@@ -419,19 +416,18 @@ export class SimulationAffectationHTSService {
                     (index) => jeuneIdDispoDepartementList[index],
                 );
 
-                // On actualise la base de donnees
                 const randomJeuneIdList = randomJeuneList.map((jeune) => jeune.id);
                 const randomJeuneSelectedIndices = jeunesDepartementSelectedIdList.map((id) =>
                     randomJeuneIdList.indexOf(id),
                 );
 
                 randomJeuneSelectedIndices.forEach((index) => {
-                    const ligneDeBusId = ligneDeBusIdList[jeuneAAffecterIndex];
+                    const ligneDeBusId = ligneDeBusIdList[ligneAAffecterIndex];
                     const pointDeRassemblementIds = pointDeRassemblementParLigneDeBusIdMap[ligneDeBusId];
                     randomJeuneList[index].statutPhase1 = YOUNG_STATUS_PHASE1.AFFECTED;
                     randomJeuneList[index].ligneDeBusId = ligneDeBusId;
                     randomJeuneList[index].pointDeRassemblementIds = pointDeRassemblementIds;
-                    randomJeuneList[index].centreId = centreIdListParLigne[jeuneAAffecterIndex];
+                    randomJeuneList[index].centreId = centreIdListParLigne[ligneAAffecterIndex];
                     randomJeuneList[index].pointDeRassemblementAffectedId = this.affecterPdrJeune(
                         randomJeuneList[index],
                         pdrList,
@@ -441,6 +437,22 @@ export class SimulationAffectationHTSService {
                 randomLigneDeBusList[indexLigneDeBus].placesOccupeesJeunes += jeunesDepartementSelectedIdList.length;
                 randomSejourList[indexCentre].placesRestantes =
                     (randomSejourList[indexCentre].placesRestantes || 0) - jeunesDepartementSelectedIdList.length;
+
+                // actualisation des places pour les autres départements (ex: 93 qui part dans le 75)
+                const placeRestantesUpdated =
+                    randomLigneDeBusList[indexLigneDeBus].capaciteJeunes -
+                    randomLigneDeBusList[indexLigneDeBus].placesOccupeesJeunes;
+                for (let iDep = 0; iDep < distributionJeunesDepartement.departementList.length; iDep++) {
+                    if (departement !== distributionJeunesDepartement.departementList[iDep]) {
+                        const lignesOtherDep = distributionJeunesDepartement.ligneIdListParDepartement[iDep];
+                        const placesDisponiblesOtherDep = distributionJeunesDepartement.placesDisponiblesParLigne[iDep];
+                        for (let iLigne = 0; iLigne < lignesOtherDep.length; iLigne++) {
+                            if (randomLigneDeBusList[indexLigneDeBus].id === lignesOtherDep[iLigne]) {
+                                placesDisponiblesOtherDep[iLigne] = placeRestantesUpdated;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -666,7 +678,7 @@ export class SimulationAffectationHTSService {
             randomSejourList.find((sejour) => sejour.centreId === ligne.centreId),
         );
         // Récupération du nombre de places restantes pour chaque centre
-        const placesLeftList = centreList.map((centre) => centre?.placesRestantes || 0);
+        const placesCentres = centreList.map((centre) => centre?.placesRestantes || 0);
 
         // Mélange aléatoire de la liste des IDs de ligne de bus
         const randomLecture = this.randomizeArray(distributionLigneDeBusIdDepartement, true);
@@ -674,7 +686,7 @@ export class SimulationAffectationHTSService {
         // Parcours de chaque ligne de bus et correction des affectations en fonction des places disponibles dans les centres
         for (let ligneIndex = 0; ligneIndex < distributionLigneDeBusIdDepartement.length; ligneIndex++) {
             const randomIndex = randomLecture[ligneIndex];
-            const nbPlacesCentre = placesLeftList[randomIndex];
+            const nbPlacesCentre = placesCentres[randomIndex];
             const nbPlacesLigne = placesDisponiblesParLigne[randomIndex];
             const nbPlaceDispo = Math.min(nbPlacesCentre || 0, nbPlacesLigne || 0);
             let diff = nbJeunesAAffecter[randomIndex] - nbPlaceDispo;
@@ -684,7 +696,7 @@ export class SimulationAffectationHTSService {
                 // Ajustement du nombre de places à affecter sur la ligne
                 nbJeunesAAffecter[randomIndex] = nbPlaceDispo;
                 // Mise à jour du nombre de places restantes dans le centre et sur la ligne
-                placesLeftList[randomIndex] += -nbJeunesAAffecter[randomIndex];
+                placesCentres[randomIndex] += -nbJeunesAAffecter[randomIndex];
                 placesLignes[randomIndex] += -nbJeunesAAffecter[randomIndex];
 
                 // Parcours des autres lignes de bus pour tenter de réaffecter les places manquantes
@@ -696,7 +708,7 @@ export class SimulationAffectationHTSService {
                     // Si la ligne de bus n'est pas la même et qu'il reste des places à réaffecter
                     if (ligneIndexNiveau2 !== ligneIndex && diff > 0) {
                         const randomIndexNiveau2 = randomLecture[ligneIndexNiveau2];
-                        const nbPlacesCentreNiveau2 = placesLeftList[randomIndexNiveau2];
+                        const nbPlacesCentreNiveau2 = placesCentres[randomIndexNiveau2];
                         const nbPlacesLigneNiveau2 = placesLignes[randomIndexNiveau2];
                         const nbPlaceDispoNiveau2 = Math.min(nbPlacesCentreNiveau2, nbPlacesLigneNiveau2);
 
@@ -705,14 +717,14 @@ export class SimulationAffectationHTSService {
                             // Ajustement du nombre de places à affecter sur la ligne et mise à jour du nombre de places restantes dans le centre et sur la ligne
                             nbJeunesAAffecter[randomIndexNiveau2] += Math.min(diff, nbPlaceDispoNiveau2);
                             diff += -Math.min(diff, nbPlaceDispoNiveau2);
-                            placesLeftList[randomIndexNiveau2] += -Math.min(diff, nbPlaceDispoNiveau2);
+                            placesCentres[randomIndexNiveau2] += -Math.min(diff, nbPlaceDispoNiveau2);
                             placesLignes[randomIndexNiveau2] += -Math.min(diff, nbPlaceDispoNiveau2);
                         }
                     }
                 }
             } else {
                 // Mise à jour du nombre de places restantes dans le centre et sur la ligne
-                placesLeftList[randomLecture[ligneIndex]] += -nbJeunesAAffecter[randomLecture[ligneIndex]];
+                placesCentres[randomLecture[ligneIndex]] += -nbJeunesAAffecter[randomLecture[ligneIndex]];
                 placesLignes[randomLecture[ligneIndex]] += -nbJeunesAAffecter[randomLecture[ligneIndex]];
             }
         }

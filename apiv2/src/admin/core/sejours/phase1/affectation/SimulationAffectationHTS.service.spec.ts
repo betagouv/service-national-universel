@@ -222,9 +222,27 @@ describe("SimulationAffectationHTSService", () => {
                 { centreId: "center3", placesRestantes: 5 },
             ] as SejourModel[];
             const ligneDeBusList = [
-                { id: "ligne1", placesOccupeesJeunes: 0, centreId: "center1", pointDeRassemblementIds: ["meeting1"] },
-                { id: "ligne2", placesOccupeesJeunes: 0, centreId: "center2", pointDeRassemblementIds: ["meeting2"] },
-                { id: "ligne3", placesOccupeesJeunes: 0, centreId: "center3", pointDeRassemblementIds: ["meeting3"] },
+                {
+                    id: "ligne1",
+                    placesOccupeesJeunes: 0,
+                    capaciteJeunes: 10,
+                    centreId: "center1",
+                    pointDeRassemblementIds: ["meeting1"],
+                },
+                {
+                    id: "ligne2",
+                    placesOccupeesJeunes: 0,
+                    capaciteJeunes: 8,
+                    centreId: "center2",
+                    pointDeRassemblementIds: ["meeting2"],
+                },
+                {
+                    id: "ligne3",
+                    placesOccupeesJeunes: 0,
+                    capaciteJeunes: 5,
+                    centreId: "center3",
+                    pointDeRassemblementIds: ["meeting3"],
+                },
             ] as LigneDeBusModel[];
 
             const { randomJeuneList, randomSejourList, randomLigneDeBusList } =
@@ -237,6 +255,7 @@ describe("SimulationAffectationHTSService", () => {
                 );
 
             expect(randomJeuneList.filter((young) => young.statutPhase1 === "AFFECTED").length).toBeLessThanOrEqual(7);
+
             expect(
                 randomSejourList.find((center) => center.centreId === "center1")?.placesRestantes,
             ).toBeGreaterThanOrEqual(0);
@@ -246,15 +265,117 @@ describe("SimulationAffectationHTSService", () => {
             expect(
                 randomSejourList.find((center) => center.centreId === "center3")?.placesRestantes,
             ).toBeGreaterThanOrEqual(0);
+
+            const ligne1 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne1");
+            expect(ligne1!.capaciteJeunes - ligne1!.placesOccupeesJeunes).toBeGreaterThanOrEqual(0);
+            expect(ligne1?.placesOccupeesJeunes).toBeLessThanOrEqual(10);
+
+            const ligne2 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne2");
+            expect(ligne2!.capaciteJeunes - ligne2!.placesOccupeesJeunes).toBeGreaterThanOrEqual(0);
+            expect(ligne2?.placesOccupeesJeunes).toBeLessThanOrEqual(5);
+
+            const ligne3 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne3");
+            expect(ligne3!.capaciteJeunes - ligne3!.placesOccupeesJeunes).toBeGreaterThanOrEqual(0);
+            expect(ligne3?.placesOccupeesJeunes).toBeLessThanOrEqual(7);
+        });
+
+        it("should return random affected youngs, sejourList, and lignebuses with changement departement", () => {
+            const distributionJeunesDepartement = {
+                departementList: ["dep1", "dep2"],
+                jeuneIdListParDepartement: [
+                    ["1", "2", "3", "4", "5"],
+                    ["6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
+                ],
+                ligneIdListParDepartement: [
+                    ["ligne1", "ligne2"],
+                    ["ligne3", "ligne1"],
+                ],
+                centreIdListParLigne: [
+                    ["center1", "center2"],
+                    ["center3", "center1"],
+                ],
+                placesDisponiblesParLigne: [
+                    [5, 3],
+                    [6, 5],
+                ],
+            } as DistributionJeunesParDepartement;
+            const jeuneList = [
+                { id: "1", statutPhase1: "NOT_AFFECTED", departement: "dep1" },
+                { id: "2", statutPhase1: "NOT_AFFECTED", departement: "dep1" },
+                { id: "3", statutPhase1: "NOT_AFFECTED", departement: "dep1" },
+                { id: "4", statutPhase1: "NOT_AFFECTED", departement: "dep1" },
+                { id: "5", statutPhase1: "NOT_AFFECTED", departement: "dep1" },
+                { id: "6", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "7", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "8", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "9", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "10", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "11", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "12", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "13", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "14", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+                { id: "15", statutPhase1: "NOT_AFFECTED", departement: "dep2" },
+            ] as JeuneModel[];
+            const sejourList = [
+                { centreId: "center1", placesRestantes: 10 },
+                { centreId: "center2", placesRestantes: 8 },
+                { centreId: "center3", placesRestantes: 5 },
+            ] as SejourModel[];
+            const ligneDeBusList = [
+                {
+                    id: "ligne1",
+                    placesOccupeesJeunes: 0,
+                    capaciteJeunes: 5,
+                    centreId: "center1",
+                    pointDeRassemblementIds: ["meeting1"],
+                },
+                {
+                    id: "ligne2",
+                    placesOccupeesJeunes: 0,
+                    capaciteJeunes: 3,
+                    centreId: "center2",
+                    pointDeRassemblementIds: ["meeting2"],
+                },
+                {
+                    id: "ligne3",
+                    placesOccupeesJeunes: 0,
+                    capaciteJeunes: 6,
+                    centreId: "center3",
+                    pointDeRassemblementIds: ["meeting3"],
+                },
+            ] as LigneDeBusModel[];
+
+            const { randomJeuneList, randomSejourList, randomLigneDeBusList } =
+                simulationAffectationHTSService.affectationAleatoireDesJeunes(
+                    distributionJeunesDepartement,
+                    jeuneList,
+                    sejourList,
+                    ligneDeBusList,
+                    [],
+                );
+
+            expect(randomJeuneList.filter((young) => young.statutPhase1 === "AFFECTED").length).toBeLessThanOrEqual(15);
             expect(
-                randomLigneDeBusList.find((ligne) => ligne.id === "ligne1")?.placesOccupeesJeunes,
-            ).toBeLessThanOrEqual(10);
+                randomSejourList.find((center) => center.centreId === "center1")?.placesRestantes,
+            ).toBeGreaterThanOrEqual(0);
             expect(
-                randomLigneDeBusList.find((ligne) => ligne.id === "ligne2")?.placesOccupeesJeunes,
-            ).toBeLessThanOrEqual(5);
+                randomSejourList.find((center) => center.centreId === "center2")?.placesRestantes,
+            ).toBeGreaterThanOrEqual(0);
             expect(
-                randomLigneDeBusList.find((ligne) => ligne.id === "ligne3")?.placesOccupeesJeunes,
-            ).toBeLessThanOrEqual(7);
+                randomSejourList.find((center) => center.centreId === "center3")?.placesRestantes,
+            ).toBeGreaterThanOrEqual(0);
+
+            const ligne1 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne1");
+            expect(ligne1!.capaciteJeunes - ligne1!.placesOccupeesJeunes).toBeGreaterThanOrEqual(0);
+            expect(ligne1?.placesOccupeesJeunes).toBeLessThanOrEqual(5);
+
+            const ligne2 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne2");
+            expect(ligne2!.capaciteJeunes - ligne2!.placesOccupeesJeunes).toBeGreaterThanOrEqual(0);
+            expect(ligne2?.placesOccupeesJeunes).toBeLessThanOrEqual(3);
+
+            const ligne3 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne3");
+            expect(ligne3!.capaciteJeunes - ligne3!.placesOccupeesJeunes).toBeGreaterThanOrEqual(0);
+            expect(ligne3?.placesOccupeesJeunes).toBeLessThanOrEqual(6);
         });
     });
 
@@ -645,11 +766,14 @@ describe("SimulationAffectationHTSService", () => {
         it("should return an array with modified values based on placesLeft and placesLigne", () => {
             const nbPlacesDisponibleSurLignesApresAffectation = [20, 30, 40];
             const placesLignes = [12, 18, 25];
-            const ligneDep = ["id1", "id2", "id3"];
+            const ligneDep = ["ligne1", "ligne2", "ligne3"];
             const ligneDeBusList = [
-                { id: "id1", centreId: "centerId1" },
-                { id: "id2", centreId: "centerId2" },
-                { id: "id3", centreId: "centerId3" },
+                { id: "ligne1", centreId: "centerId1" },
+                { id: "ligne2", centreId: "centerId2" },
+                { id: "ligne3", centreId: "centerId3" },
+                { id: "ligne4", centreId: "centerId4" },
+                { id: "ligne5", centreId: "centerId5" },
+                { id: "ligne6", centreId: "centerId6" },
             ] as LigneDeBusModel[];
             const sejourList = [
                 { centreId: "centerId1", placesRestantes: 20 },
