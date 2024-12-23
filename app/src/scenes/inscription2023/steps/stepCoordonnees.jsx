@@ -2,7 +2,7 @@ import Img2 from "../../../assets/infoSquared.svg";
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
 import validator from "validator";
 import { genderOptions, inFranceOrAbroadOptions, youngSchooledSituationOptions, youngActiveSituationOptions, foreignCountryOptions, hostRelationshipOptions } from "../utils";
@@ -13,7 +13,7 @@ import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { knowledgebaseURL } from "../../../config";
 import { getRegionForEligibility, useAddress, YOUNG_STATUS } from "snu-lib";
-import { getCorrectionByStep } from "../../../utils/navigation";
+import useCorrections from "@/hooks/corrections/useCorrections";
 import ReactTooltip from "react-tooltip";
 import { RiInformationFill } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -23,6 +23,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { fr } from "@codegouvfr/react-dsfr";
 import { SignupButtons, BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
+import { CORRECTION_STEPS } from "@/utils/navigation";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -105,7 +106,6 @@ const defaultState = {
 export default function StepCoordonnees() {
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
-  const [corrections, setCorrections] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
   const [birthCitySuggestionsOpen, setBirthCitySuggestionsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -114,7 +114,7 @@ export default function StepCoordonnees() {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
-  const { step } = useParams();
+  const { correctionsMap: corrections } = useCorrections(CORRECTION_STEPS.COORDONNEES);
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
@@ -207,10 +207,8 @@ export default function StepCoordonnees() {
         psc1Info: young.psc1Info || data.psc1Info,
       });
     }
-    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
-      const corrections = getCorrectionByStep(young, step);
-      if (!Object.keys(corrections).length) return history.push("/");
-      else setCorrections(corrections);
+    if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
+      return history.push("/");
     }
   }, [young]);
 

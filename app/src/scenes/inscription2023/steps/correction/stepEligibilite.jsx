@@ -1,12 +1,11 @@
-
 import React from "react";
 import { toastr } from "react-redux-toastr";
-import { Redirect, useHistory, useParams } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import validator from "validator";
 import IconFrance from "../../../../assets/IconFrance";
 import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
-import { getCorrectionByStep } from "../../../../utils/navigation";
+import useCorrections from "@/hooks/corrections/useCorrections";
 import SchoolInFrance from "../../components/ShoolInFrance";
 import SchoolOutOfFrance from "../../components/ShoolOutOfFrance";
 import Input from "../../components/Input";
@@ -25,6 +24,7 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
+import { CORRECTION_STEPS } from "@/utils/navigation";
 
 export default function StepEligibilite() {
   const { young, isCLE } = useAuth();
@@ -65,8 +65,7 @@ export default function StepEligibilite() {
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [modal, setModal] = React.useState({ isOpen: false });
 
-  const { step } = useParams();
-  const corrections = getCorrectionByStep(young, step);
+  const { correctionsMap: corrections } = useCorrections(CORRECTION_STEPS.ELIGIBILITE);
   const history = useHistory();
 
   const optionsScolarite = [

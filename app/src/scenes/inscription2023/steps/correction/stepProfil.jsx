@@ -1,13 +1,13 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { isPhoneNumberWellFormated, PHONE_ZONES, translate, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
 import plausibleEvent from "../../../../services/plausible";
-import { getCorrectionByStep } from "../../../../utils/navigation";
+import useCorrections from "@/hooks/corrections/useCorrections";
 import Input from "../../components/Input";
 import { knowledgebaseURL } from "@/config";
 import IconFrance from "@/assets/IconFrance";
@@ -17,14 +17,14 @@ import DatePicker from "@/components/dsfr/forms/DatePicker";
 import useAuth from "@/services/useAuth";
 import { SignupButtons } from "@snu/ds/dsfr";
 import emojiRegex from "emoji-regex";
+import { CORRECTION_STEPS } from "@/utils/navigation";
 
 export default function StepProfil() {
   const { young, isCLE } = useAuth();
   const history = useHistory();
-  const { step } = useParams();
   const dispatch = useDispatch();
 
-  const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
+  const { correctionsMap: corrections } = useCorrections(CORRECTION_STEPS.PROFIL);
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) history.push("/");
 
   const [loading, setLoading] = React.useState(false);
