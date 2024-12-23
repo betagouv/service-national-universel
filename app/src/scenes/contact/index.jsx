@@ -19,6 +19,7 @@ import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
 import Button from "@codegouvfr/react-dsfr/Button";
 import plausibleEvent from "@/services/plausible";
+import MessageDelayed from "./components/MessageDelayed";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
@@ -62,6 +63,8 @@ export default function Contact() {
         <p className="leading-relaxed mb-10">
           Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
         </p>
+
+        <MessageDelayed />
 
         {/* Logged in users get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (

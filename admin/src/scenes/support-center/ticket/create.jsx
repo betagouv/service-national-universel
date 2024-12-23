@@ -13,6 +13,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
 import api from "../../../services/api";
+import MessageDelayed from "./MessageDelayed";
 
 export default function Create(props) {
   const { files, addFiles, deleteFile, error } = useFileUpload();
@@ -67,6 +68,7 @@ export default function Create(props) {
         <p>Vous rencontrez une difficulté, avez besoin d&apos;assistance pour réaliser une action ou avez besoin d&apos;informations supplémentaires sur la plateforme ?</p>
       </Heading>
       <Form>
+        <MessageDelayed />
         <Formik
           initialValues={{ type: null, subject: null, message: "", messageSubject: "" }}
           validateOnChange={false}
