@@ -116,7 +116,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             jeunesAffected: 0,
             errors: 0,
         };
-        const updateQueries: JeuneModel[] = [];
+        const jeunesUpdatedList: JeuneModel[] = [];
         const rapportData: Array<ReturnType<typeof this.formatJeuneRapport>> = [];
 
         // Traitement des jeunes
@@ -203,27 +203,22 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
                 } (${analytics.jeunesAffected + 1}/${jeuneAAffecterList.length})`,
             );
 
-            updateQueries.push(jeuneUpdated);
+            jeunesUpdatedList.push(jeuneUpdated);
             rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour, ligneDeBus, pdr));
             analytics.jeunesAffected += 1;
         }
 
         this.cls.set("user", { firstName: `Affectation ${session.nom}` });
 
-        await this.jeuneGateway.bulkUpdate(updateQueries);
+        await this.jeuneGateway.bulkUpdate(jeunesUpdatedList);
 
-        this.logger.log(`Mise à jour des places dans les séjours`);
         // mise à jour des placesRestantes dans les centres
-        for (const sejour of sejoursList) {
-            // TODO: bulkUpdate
-            await this.sejoursGateway.update(sejour);
-        }
-        this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
+        this.logger.log(`Mise à jour des places dans les séjours`);
+        await this.sejoursGateway.bulkUpdate(sejoursList);
+
         // mise à jour des placesOccupeesJeunes dans les bus
-        for (const ligneDeBus of ligneDeBusList) {
-            // TODO: bulkUpdate
-            await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBus);
-        }
+        this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
+        await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBusList);
 
         this.cls.set("user", null);
 

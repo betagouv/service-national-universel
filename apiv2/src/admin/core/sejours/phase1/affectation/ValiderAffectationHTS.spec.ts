@@ -97,7 +97,7 @@ describe("ValiderAffectationHTS", () => {
                     useValue: {
                         findBySessionId: jest.fn().mockResolvedValue(mockLignesBus),
                         findBySessionNom: jest.fn().mockResolvedValue(mockLignesBus),
-                        update: jest.fn(),
+                        bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },
                 {
@@ -112,7 +112,7 @@ describe("ValiderAffectationHTS", () => {
                     provide: SejourGateway,
                     useValue: {
                         findBySessionId: jest.fn().mockResolvedValue(mockSejours),
-                        update: jest.fn(),
+                        bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },
                 {
@@ -125,7 +125,8 @@ describe("ValiderAffectationHTS", () => {
                     provide: PlanDeTransportGateway,
                     useValue: {
                         findById: jest.fn().mockResolvedValue({ id: "pdt1" }),
-                        update: jest.fn(),
+                        findByIds: jest.fn().mockResolvedValue(mockLignesBus.map((ligne) => ({ id: ligne.id }))),
+                        bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },
             ],

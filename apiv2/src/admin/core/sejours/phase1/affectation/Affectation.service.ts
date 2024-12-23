@@ -13,6 +13,7 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
+import { PlanDeTransportModel } from "../PlanDeTransport/PlanDeTransport.model";
 
 @Injectable()
 export class AffectationService {
@@ -124,22 +125,32 @@ export class AffectationService {
         };
     }
 
-    async syncPlaceDisponiblesLigneDeBus(ligneDeBus: LigneDeBusModel): Promise<LigneDeBusModel> {
-        const placesOccupeesJeunes = await this.jeuneGateway.countAffectedByLigneDeBus(ligneDeBus.id);
+    async syncPlaceDisponiblesLigneDeBus(ligneDeBusList: LigneDeBusModel[]) {
+        const lignesDeBusUpdatedList: LigneDeBusModel[] = [];
+        const pdtUpdatedList: PlanDeTransportModel[] = [];
 
-        if (ligneDeBus.placesOccupeesJeunes !== placesOccupeesJeunes) {
-            ligneDeBus.placesOccupeesJeunes = placesOccupeesJeunes;
-            this.ligneDeBusGateway.update(ligneDeBus);
+        const pdtList = await this.planDeTransportGateway.findByIds(ligneDeBusList.map((ligne) => ligne.id));
 
-            // Do the same update with planTransport
-            const pdt = await this.planDeTransportGateway.findById(ligneDeBus.id);
-            pdt.placesOccupeesJeunes = placesOccupeesJeunes;
-            if (pdt.capaciteJeunes) {
-                pdt.lineFillingRate = Math.floor((placesOccupeesJeunes / pdt.capaciteJeunes) * 100);
+        for (const ligneDeBus of ligneDeBusList) {
+            const placesOccupeesJeunes = await this.jeuneGateway.countAffectedByLigneDeBus(ligneDeBus.id);
+
+            if (ligneDeBus.placesOccupeesJeunes !== placesOccupeesJeunes) {
+                ligneDeBus.placesOccupeesJeunes = placesOccupeesJeunes;
+                lignesDeBusUpdatedList.push(ligneDeBus);
+
+                // Do the same update with planTransport
+                const pdt = pdtList.find((pdt) => pdt.id === ligneDeBus.id)!;
+                pdt.placesOccupeesJeunes = placesOccupeesJeunes;
+                if (pdt.capaciteJeunes) {
+                    pdt.lineFillingRate = Math.floor((placesOccupeesJeunes / pdt.capaciteJeunes) * 100);
+                }
+
+                pdtUpdatedList.push(pdt);
             }
-            await this.planDeTransportGateway.update(pdt);
         }
-        return ligneDeBus;
+
+        await this.ligneDeBusGateway.bulkUpdate(lignesDeBusUpdatedList);
+        await this.planDeTransportGateway.bulkUpdate(pdtUpdatedList);
     }
 
     formatPourcent(value: number): string {

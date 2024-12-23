@@ -92,9 +92,7 @@ export class JeuneRepository implements JeuneGateway {
 
         await this.historyGateway.bulkCreate(
             HistoryType.JEUNE,
-            jeunesEntity.map((jeune) =>
-                HistoryMapper.toUpdateHistory(jeune.original, jeune.updated, JEUNE_PATCHHISTORY_OPTIONS, user),
-            ),
+            HistoryMapper.toUpdateHistories(jeunesEntity, JEUNE_PATCHHISTORY_OPTIONS, user),
         );
 
         return updateJeunes.modifiedCount;

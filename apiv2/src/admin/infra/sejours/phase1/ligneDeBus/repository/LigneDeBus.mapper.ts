@@ -17,7 +17,6 @@ export class LigneDeBusMapper {
             numeroLigne: ligneDeBusDocument.busId,
             sessionId: ligneDeBusDocument.cohortId,
             sessionNom: ligneDeBusDocument.cohort,
-            equipe: ligneDeBusDocument.team,
             sejourId: ligneDeBusDocument.sessionId,
             capaciteTotal: ligneDeBusDocument.totalCapacity,
             capaciteAccompagnateurs: ligneDeBusDocument.followerCapacity,
@@ -32,7 +31,7 @@ export class LigneDeBusMapper {
         };
     }
 
-    static toEntity(ligneDeBusModel: LigneDeBusModel): Omit<LigneBusType, "createdAt" | "updatedAt"> {
+    static toEntity(ligneDeBusModel: LigneDeBusModel): Omit<LigneBusType, "createdAt" | "updatedAt" | "team"> {
         return {
             _id: ligneDeBusModel.id,
             meetingPointsIds: ligneDeBusModel.pointDeRassemblementIds,
@@ -42,7 +41,6 @@ export class LigneDeBusMapper {
             busId: ligneDeBusModel.numeroLigne,
             cohort: ligneDeBusModel.sessionNom!,
             cohortId: ligneDeBusModel.sessionId,
-            team: ligneDeBusModel.equipe,
             sessionId: ligneDeBusModel.sejourId!,
             totalCapacity: ligneDeBusModel.capaciteTotal,
             followerCapacity: ligneDeBusModel.capaciteAccompagnateurs,

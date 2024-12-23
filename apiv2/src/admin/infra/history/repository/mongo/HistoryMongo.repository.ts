@@ -12,6 +12,10 @@ export class HistoryRepository implements HistoryGateway {
         @Inject(mapHistory(HistoryType.REFERENT)) private readonly referentMongooseEntity: Model<HistoryDocument>,
         @Inject(mapHistory(HistoryType.CLASSE)) private readonly classeMongooseEntity: Model<HistoryDocument>,
         @Inject(mapHistory(HistoryType.SESSION)) private readonly sessionMongooseEntity: Model<HistoryDocument>,
+        @Inject(mapHistory(HistoryType.SEJOUR)) private readonly sejourMongooseEntity: Model<HistoryDocument>,
+        @Inject(mapHistory(HistoryType.LIGNEDEBUS)) private readonly ligneDeBusMongooseEntity: Model<HistoryDocument>,
+        @Inject(mapHistory(HistoryType.PLANDETRANSPORT))
+        private readonly planDeTransportMongooseEntity: Model<HistoryDocument>,
     ) {}
 
     private getInstance(history: HistoryType) {
@@ -24,6 +28,12 @@ export class HistoryRepository implements HistoryGateway {
                 return this.classeMongooseEntity;
             case HistoryType.SESSION:
                 return this.sessionMongooseEntity;
+            case HistoryType.SEJOUR:
+                return this.sejourMongooseEntity;
+            case HistoryType.LIGNEDEBUS:
+                return this.ligneDeBusMongooseEntity;
+            case HistoryType.PLANDETRANSPORT:
+                return this.planDeTransportMongooseEntity;
         }
     }
 
@@ -35,6 +45,7 @@ export class HistoryRepository implements HistoryGateway {
     async bulkCreate(history: HistoryType, patches: PatchType[]): Promise<number> {
         const instance = this.getInstance(history);
 
+        // console.log("bulkCreate", JSON.stringify(patches, null, 2));
         const updatePatches = await instance.bulkWrite(
             patches.map((patch) => ({
                 insertOne: {

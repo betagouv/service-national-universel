@@ -29,8 +29,7 @@ SejourSchemaRef.pre("save", function (next, params) {
     next();
 });
 
-SejourSchemaRef.plugin(patchHistory, {
-    mongoose,
+export const SEJOUR_PATCHHISTORY_OPTIONS = {
     name: `${SejourName}Patches`,
     trackOriginalValue: true,
     includes: {
@@ -38,6 +37,11 @@ SejourSchemaRef.plugin(patchHistory, {
         user: { type: Object, required: false, from: "_user" },
     },
     excludes: ["/updatedAt"],
+};
+
+SejourSchemaRef.plugin(patchHistory, {
+    mongoose,
+    ...SEJOUR_PATCHHISTORY_OPTIONS,
 });
 
 export const sejourMongoProviders = [

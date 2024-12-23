@@ -2,7 +2,12 @@ import { createPatch } from "mongoose-patch-history";
 import { PatchType } from "snu-lib";
 
 export class HistoryMapper {
-    static toUpdateHistory(original: object & { _id: string }, updated: object, options: any, user: object): PatchType {
+    static toUpdateHistory(
+        original: object & { _id: string },
+        updated: object,
+        options: any,
+        user: object,
+    ): PatchType | null {
         const doc = {
             data: () => updated,
             _original: original,
@@ -14,6 +19,31 @@ export class HistoryMapper {
             },
         };
         const history = createPatch(doc, options);
+        if (!history.ref) {
+            if (history.isFulfilled) {
+                return null;
+            }
+            throw new Error(
+                "Cannot create patch for document _id !" +
+                    JSON.stringify(history) +
+                    JSON.stringify(original) +
+                    JSON.stringify(updated),
+            );
+        }
         return history;
+    }
+
+    static toUpdateHistories(
+        updates: Array<{ original: object & { _id: string }; updated: object }>,
+        options: any,
+        user: object,
+    ): PatchType[] {
+        return updates.reduce((acc, history) => {
+            const patch = HistoryMapper.toUpdateHistory(history.original, history.updated, options, user);
+            if (patch) {
+                return [...acc, patch];
+            }
+            return acc;
+        }, [] as PatchType[]);
     }
 }

@@ -14,7 +14,7 @@ export interface JeuneGateway {
     update(jeune: JeuneModel): Promise<JeuneModel>;
     bulkUpdate(jeunesUpdated: JeuneModel[]): Promise<number>;
     create(jeune: CreateJeuneModel): Promise<JeuneModel>;
-    countAffectedByLigneDeBus(ligneDeBusId: string);
+    countAffectedByLigneDeBus(ligneDeBusId: string): Promise<number>;
 }
 
 export const JeuneGateway = Symbol("JeuneGateway");

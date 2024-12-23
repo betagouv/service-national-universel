@@ -36,8 +36,7 @@ PlanDeTransportSchemaRef.pre("save", function (next, params) {
     next();
 });
 
-PlanDeTransportSchemaRef.plugin(patchHistory, {
-    mongoose,
+export const PLANDETRANSPORT_PATCHHISTORY_OPTIONS = {
     name: `${PlanDeTransportName}Patches`,
     trackOriginalValue: true,
     includes: {
@@ -45,6 +44,11 @@ PlanDeTransportSchemaRef.plugin(patchHistory, {
         user: { type: Object, required: false, from: "_user" },
     },
     excludes: ["/updatedAt"],
+};
+
+PlanDeTransportSchemaRef.plugin(patchHistory, {
+    mongoose,
+    ...PLANDETRANSPORT_PATCHHISTORY_OPTIONS,
 });
 
 export const planDeTransportMongoProviders = [
