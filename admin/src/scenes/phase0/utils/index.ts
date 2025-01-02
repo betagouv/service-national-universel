@@ -1,4 +1,4 @@
-import { YOUNG_SOURCE, YoungDto } from "snu-lib";
+import { YOUNG_SOURCE, YoungDto, YoungType, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 
 export function filterDataForYoungSection(data: any, section: "identite" | "parent") {

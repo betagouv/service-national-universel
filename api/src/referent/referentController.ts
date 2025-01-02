@@ -108,6 +108,7 @@ import {
   isAdmin,
   isReferentReg,
   isReferentDep,
+  getYoungStatusForBasculeToCLE,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -855,11 +856,15 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     let youngStatus = young.status;
     let inscriptionStep = young.inscriptionStep2023;
     let reinscriptionStep = young.reinscriptionStep2023;
-    if (payload.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
-      youngStatus = YOUNG_STATUS.VALIDATED;
+
+    if (payload.source === YOUNG_SOURCE.CLE) {
+      youngStatus = getYoungStatusForBasculeToCLE(youngStatus);
     }
-    if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
-      youngStatus = getYoungStatusForBasculeCLEtoHTS(young) as YoungType["status"];
+    if (young.source === YOUNG_SOURCE.CLE && payload.source === YOUNG_SOURCE.VOLONTAIRE) {
+      youngStatus = getYoungStatusForBasculeCLEtoHTS(youngStatus);
+    }
+    if (young.source === YOUNG_SOURCE.VOLONTAIRE && payload.source === YOUNG_SOURCE.VOLONTAIRE) {
+      youngStatus = getYoungStatusForBasculeHTStoHTS(youngStatus);
     }
     if (cohort === "à venir ") {
       youngStatus = getYoungStatusForAVenir(young) as YoungType["status"];
@@ -1057,18 +1062,19 @@ const getYoungStatusForAVenir = (young: YoungType) => {
   }
 };
 
-const getYoungStatusForBasculeCLEtoHTS = (young: YoungType) => {
-  switch (young.status) {
-    case YOUNG_STATUS.WITHDRAWN:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    case YOUNG_STATUS.REFUSED:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    case YOUNG_STATUS.NOT_AUTORISED:
-      return YOUNG_STATUS.IN_PROGRESS;
-    case YOUNG_STATUS.VALIDATED:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    default:
-      return YOUNG_STATUS.WAITING_VALIDATION;
+const getYoungStatusForBasculeCLEtoHTS = (status: string) => {
+  if (status === YOUNG_STATUS.NOT_AUTORISED) {
+    return YOUNG_STATUS.IN_PROGRESS;
+  } else {
+    return YOUNG_STATUS.WAITING_VALIDATION;
+  }
+};
+
+const getYoungStatusForBasculeHTStoHTS = (status: string) => {
+  if (status === YOUNG_STATUS.WITHDRAWN || YOUNG_STATUS.ABANDONED || YOUNG_STATUS.VALIDATED) {
+    return YOUNG_STATUS.WAITING_VALIDATION;
+  } else {
+    return status;
   }
 };
 
