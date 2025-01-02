@@ -66,11 +66,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.params.action === "export") {
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
       response = await populateWithEtablissementInfo(response);
-
-      if (req.query?.type === "export-des-classes") {
-        response = await populateWithAllReferentsInfo(response);
-        response = await populateWithYoungsInfo(response);
-      }
+      response = await populateWithYoungsInfo(response);
+      response = await populateWithAllReferentsInfo(response);
 
       if (req.query?.type === "schema-de-repartition") {
         if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -85,10 +82,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
           }
         }
 
-        response = await populateWithReferentClasseInfo(response);
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
-        response = await populateWithYoungsInfo(response);
         response = await populateWithLigneInfo(response);
       }
 
